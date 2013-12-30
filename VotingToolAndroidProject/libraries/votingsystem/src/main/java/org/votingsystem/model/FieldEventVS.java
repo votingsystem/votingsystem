@@ -4,14 +4,14 @@ package org.votingsystem.model;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class OptionVS {
+public class FieldEventVS {
 
     private Long id;
     private EventVS eventVS;
     private String content;
     private String value;
 
-    public OptionVS() {}
+    public FieldEventVS() {}
 
     /**
      * @return the content

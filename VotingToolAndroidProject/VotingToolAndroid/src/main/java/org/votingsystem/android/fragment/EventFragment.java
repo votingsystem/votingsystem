@@ -16,12 +16,11 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 
 import org.json.JSONObject;
-import org.votingsystem.android.activity.EventPagerActivity;
 import org.votingsystem.android.activity.EventStatisticsPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OptionVS;
+import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.model.EventVS;
@@ -96,7 +95,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                     return;
                 }
                 if (event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
-                    if(event.getCampos() != null && event.getCampos().size() > 0) {
+                    if(event.getFieldsEventVS() != null && event.getFieldsEventVS().size() > 0) {
                         showClaimFieldsDialog();
                         return;
                     }
@@ -247,7 +246,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
 
     private void showClaimFieldsDialog() {
         Log.d(TAG + ".showClaimFieldsDialog(...)", " - showClaimFieldsDialog");
-        if (event.getCampos() == null) {
+        if (event.getFieldsEventVS() == null) {
             Log.d(TAG + ".showClaimFieldsDialog(...)", " - claim without fields");
             return;
         }
@@ -258,10 +257,10 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         LinearLayout mFormView = (LinearLayout) mScrollView.findViewById(R.id.form);
         final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
         errorMsgTextView.setVisibility(View.GONE);
-        Set<OptionVS> campos = event.getCampos();
+        Set<FieldEventVS> campos = event.getFieldsEventVS();
 
         mapaCamposReclamacion = new HashMap<Integer, EditText>();
-        for (OptionVS campo : campos) {
+        for (FieldEventVS campo : campos) {
             addFormField(campo.getContent(), InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
                     mFormView, campo.getId().intValue());
         }
@@ -276,8 +275,8 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View onClick) {
-                Set<OptionVS> campos = event.getCampos();
-                for (OptionVS campo : campos) {
+                Set<FieldEventVS> campos = event.getFieldsEventVS();
+                for (FieldEventVS campo : campos) {
                     EditText editText = mapaCamposReclamacion.get(campo.getId().intValue());
                     String fieldValue = editText.getText().toString();
                     if ("".equals(fieldValue)) {

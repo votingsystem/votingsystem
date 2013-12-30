@@ -107,7 +107,10 @@
         <!-- The attribute "android:exported" must be set to "false" to restrict this content
             provider to its own app. Otherwise, all apps could access it. -->
         <provider android:name=".contentprovider.RepresentativeContentProvider"
-            android:exported="false" android:authorities="votingsystem.org"/>
+            android:exported="false" android:authorities="votingsystem.org.representative"/>
+
+        <provider android:name=".contentprovider.EventVSContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.eventvs"/>
 
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service is only available to this app. -->
@@ -115,5 +118,6 @@
             android:process=":sign_and_send_service"/>
         <service android:name=".service.RssService" android:process=":rss_service"/>
         <service android:name=".service.RepresentativeService"  android:exported="false"/>
+        <service android:name=".service.EventVSService"  android:exported="false"/>
     </application>
 </manifest>

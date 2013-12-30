@@ -41,7 +41,7 @@ public class ContextVS {
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
 
-    public static final String STATE_KEY                  = "state";
+    public static final String STATE_KEY                  = "STATE";
     public static final String CSR_REQUEST_ID_KEY         = "csrRequestId";
     public static final String APPLICATION_ID_KEY         = "idAplicacion";
     public static final String EVENT_KEY                  = "eventKey";
@@ -53,8 +53,6 @@ public class ContextVS {
     public static final String PROVIDER                   = "BC";
     public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
 
-    public static final String CONTENT_PROVIDER_AUTHORITY = "votingsystem.org";
-
     //Intent keys
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";
@@ -65,6 +63,8 @@ public class ContextVS {
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
+    public static final String EVENT_STATE_KEY = "EVENT_STATE";
+    public static final String EVENT_TYPE_KEY  = "EVENT_TYPE";
 
     //Actions IDs
     public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION";
@@ -72,10 +72,12 @@ public class ContextVS {
     public static final String HTTP_DATA_INITIALIZED_ACTION_ID = "HTTP_DATA_INITIALIZED_ACTION";
 
     //Loaders
+    public static final int EVENT_LIST_LOADER_ID = 0;
     public static final int REPRESENTATIVE_LOADER_ID = 1;
 
     //Pages size
-    public static final Integer REPRESENTATIVE_PAGE_SIZE = 15;
+    public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
+    public static final Integer EVENTVS_PAGE_SIZE = 20;
 
     //Notifications IDs
     public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;

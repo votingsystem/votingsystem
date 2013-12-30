@@ -130,9 +130,6 @@ public class RssService extends Service  implements Runnable {
     // then update it.
     void queryRssItems(){
         Log.d(TAG + ".queryRssItems() ", "");
-        // The cursor might have gone stale. Requery to be sure.
-        // We need to call next() after a requery to get to the
-        // first record.
         cursor = getContentResolver().query(RssContentProvider.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()){
             // Get the URL for the feed from the cursor.

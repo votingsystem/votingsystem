@@ -13,18 +13,18 @@ public class EventVSResponse {
 	
 	public static final String TAG = "EventVSResponse";
 
-    private int numEventsVSManifest;
-    private int numEventsVSManifestInSystem;
-    private int numEventsVSElection;
-    private int numEventsVSElectionInSystem;
-    private int numEventsVSClaim;
-    private int numEventsVSClaimInSystem;
-    private int numEventVSInRequest;
-    private int numEventVSInSystem;
+    private Integer numEventsVSManifest;
+    private Integer numEventsVSManifestInSystem;
+    private Integer numEventsVSElection;
+    private Integer numEventsVSElectionInSystem;
+    private Integer numEventsVSClaim;
+    private Integer numEventsVSClaimInSystem;
+    private Integer numEventVSInRequest;
+    private Integer numEventVSInSystem;
     
     private int offset;
+    private int numTotal;
     private List<EventVS> eventList;
-
 
     public void setOffset(int offset) {
             this.offset = offset;
@@ -49,6 +49,7 @@ public class EventVSResponse {
         List<EventVS> eventList = new ArrayList<EventVS>();
         JSONObject requestJSON = jsonObject.getJSONObject("eventsVS");
         JSONArray eventsArray;
+        EventVSResponse eventVSResponse = new EventVSResponse();
         if (requestJSON != null) {
         	if(requestJSON.has("manifests")) {
                 eventsArray = requestJSON.getJSONArray("manifests");
@@ -58,7 +59,7 @@ public class EventVSResponse {
                         eventVS.setTypeVS(TypeVS.MANIFEST_EVENT);
                         eventList.add(eventVS);
                     }
-                }	
+                }
         	}
         	if(requestJSON.has("claims")) {
                 eventsArray = requestJSON.getJSONArray("claims");
@@ -68,7 +69,7 @@ public class EventVSResponse {
                         eventVS.setTypeVS(TypeVS.CLAIM_EVENT);
                         eventList.add(eventVS);
                     }
-                }	
+                }
         	}
         	if(requestJSON.has("elections")) {
                 eventsArray = requestJSON.getJSONArray("elections");
@@ -78,25 +79,24 @@ public class EventVSResponse {
                         eventVS.setTypeVS(TypeVS.VOTING_EVENT);
                         eventList.add(eventVS);
                     }
-                }	
+                }
         	}
         }
-        EventVSResponse eventVSResponse = new EventVSResponse();
-        if(requestJSON.has("numEventsVSManifest"))
+        if(jsonObject.has("numEventsVSManifest"))
         	eventVSResponse.setNumEventsVSManifest(jsonObject.getInt("numEventsVSManifest"));
-        if(requestJSON.has("numEventsVSManifestInSystem"))
+        if(jsonObject.has("numEventsVSManifestInSystem"))
         	eventVSResponse.setNumEventsVSManifestInSystem(jsonObject.getInt("numEventsVSManifestInSystem"));
-        if(requestJSON.has("numEventsVSElection"))
+        if(jsonObject.has("numEventsVSElection"))
         	eventVSResponse.setNumEventsVSElection(jsonObject.getInt("numEventsVSElection"));
-        if(requestJSON.has("numEventsVSElectionInSystem"))
+        if(jsonObject.has("numEventsVSElectionInSystem"))
         	eventVSResponse.setNumEventsVSElectionInSystem(jsonObject.getInt("numEventsVSElectionInSystem"));
-        if(requestJSON.has("numEventsVSClaim"))
+        if(jsonObject.has("numEventsVSClaim"))
         	eventVSResponse.setNumEventsVSClaim(jsonObject.getInt("numEventsVSClaim"));
-        if(requestJSON.has("numEventsVSClaimInSystem"))
+        if(jsonObject.has("numEventsVSClaimInSystem"))
         	eventVSResponse.setNumEventsVSClaimInSystem(jsonObject.getInt("numEventsVSClaimInSystem"));
-        if(requestJSON.has("numEventVSInRequest"))
+        if(jsonObject.has("numEventVSInRequest"))
         	eventVSResponse.setNumEventVSInRequest(jsonObject.getInt("numEventVSInRequest"));
-        if(requestJSON.has("numEventVSInSystem"))
+        if(jsonObject.has("numEventVSInSystem"))
         	eventVSResponse.setNumEventVSInSystem(jsonObject.getInt("numEventVSInSystem"));
         if (jsonObject.has("offset")) eventVSResponse.setOffset(jsonObject.getInt("offset"));
         eventVSResponse.setEvents(eventList);
@@ -111,7 +111,7 @@ public class EventVSResponse {
         this.numEventsVSManifest = numEventsVSManifest;
     }
 
-    public int getNumEventsVSManifestInSystem() {
+    public Integer getNumEventsVSManifestInSystem() {
         return numEventsVSManifestInSystem;
     }
 
@@ -127,7 +127,7 @@ public class EventVSResponse {
         this.numEventsVSElection = numEventsVSElection;
     }
 
-    public int getNumEventsVSElectionInSystem() {
+    public Integer getNumEventsVSElectionInSystem() {
         return numEventsVSElectionInSystem;
     }
 
@@ -143,7 +143,7 @@ public class EventVSResponse {
         this.numEventsVSClaim = numEventsVSClaim;
     }
 
-    public int getNumEventsVSClaimInSystem() {
+    public Integer getNumEventsVSClaimInSystem() {
         return numEventsVSClaimInSystem;
     }
 
@@ -166,4 +166,5 @@ public class EventVSResponse {
     public void setNumEventVSInSystem(int numEventVSInSystem) {
         this.numEventVSInSystem = numEventVSInSystem;
     }
+
 }

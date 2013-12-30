@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import org.votingsystem.android.fragment.EventListFragment;
 import org.votingsystem.android.R;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
@@ -51,8 +52,8 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
                 break;
         }
         Bundle args = new Bundle();
-        args.putString(EventListFragment.EVENT_TYPE_KEY, selectedSubsystem.toString());
-        args.putString(EventListFragment.EVENT_STATE_KEY, eventState.toString());
+        args.putString(ContextVS.EVENT_TYPE_KEY, selectedSubsystem.toString());
+        args.putString(ContextVS.EVENT_STATE_KEY, eventState.toString());
         args.putString(SearchManager.QUERY, searchQuery);
         selectedFragment.setArguments(args);
         Log.d(TAG + ".getItem(...) ", "childPosition: " +  childPosition +

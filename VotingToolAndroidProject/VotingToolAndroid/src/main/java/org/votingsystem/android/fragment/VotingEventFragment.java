@@ -37,7 +37,6 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import org.votingsystem.android.activity.EventPagerActivity;
 import org.votingsystem.android.activity.EventStatisticsPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
@@ -47,13 +46,13 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.android.ui.*;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.model.OptionVS;
 import org.votingsystem.util.HttpHelper;
 
 import java.io.FileInputStream;
@@ -179,14 +178,14 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
         contentTextView.setText(Html.fromHtml(receipt.getVoto().getContent()) + "\n");
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        Set<OptionVS> fieldsEventVS = receipt.getVoto().getFieldsEventVS();
+        Set<FieldEventVS> fieldsEventVS = receipt.getVoto().getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(optionButtons == null) {
             optionButtons = new ArrayList<Button>();
             FrameLayout.LayoutParams paramsButton = new
                     FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
             paramsButton.setMargins(15, 15, 15, 15);
-            for (final OptionVS opcion:fieldsEventVS) {
+            for (final FieldEventVS opcion:fieldsEventVS) {
                 Button opcionButton = new Button(getActivity().getApplicationContext());
                 opcionButton.setText(opcion.getContent());
                 optionButtons.add(opcionButton);
@@ -249,18 +248,18 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
         contentTextView.setText(Html.fromHtml(event.getContent()));
         //contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        Set<OptionVS> fieldsEventVS = event.getFieldsEventVS();
+        Set<FieldEventVS> fieldsEventVS = event.getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(optionButtons != null) linearLayout.removeAllViews();
         optionButtons = new ArrayList<Button>();
         FrameLayout.LayoutParams paramsButton = new FrameLayout.LayoutParams(
                 LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
         paramsButton.setMargins(15, 15, 15, 15);
-        for (final OptionVS option:fieldsEventVS) {
+        for (final FieldEventVS option:fieldsEventVS) {
             Button optionButton = new Button(getActivity().getApplicationContext());
             optionButton.setText(option.getContent());
             optionButton.setOnClickListener(new Button.OnClickListener() {
-                OptionVS optionSelected = option;
+                FieldEventVS optionSelected = option;
                 public void onClick(View v) {
                     Log.d(TAG + "- optionButton - optionId: " +
                             optionSelected.getId(), "state: " +
@@ -279,7 +278,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         } else Log.d(TAG + ".setEventScreen", "Selected null option");
     }
 
-    private void processSelectedOption(OptionVS optionSelected) {
+    private void processSelectedOption(FieldEventVS optionSelected) {
         Log.d(TAG + ".processSelectedOption", "processSelectedOption");
         operation = Operation.VOTE;
         eventVS.setOptionSelected(optionSelected);

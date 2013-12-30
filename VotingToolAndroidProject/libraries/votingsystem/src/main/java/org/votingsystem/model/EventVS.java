@@ -1,7 +1,7 @@
 package org.votingsystem.model;
 
 import android.util.Log;
-import org.bouncycastle2.util.encoders.Hex;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +26,6 @@ public class EventVS {
 
     public enum Cardinality { MULTIPLE, EXCLUSIVE}
 
-
     private Long id;
     private Long eventId;
     private TypeVS typeVS;
@@ -36,14 +35,12 @@ public class EventVS {
     private String URL;
     private Integer numSignaturesCollected;
     private Integer numVotesCollected;
-    private Boolean signed;
     private ControlCenterVS controlCenter;
     private UserVS userVS;
     private AccessControlVS accessControlVS;
-    private Integer numeroComentarios = 0;
+    private Integer numComments = 0;
 
-    private Set<OptionVS> fieldsEventVS = new HashSet<OptionVS>(0);
-    private Set<OptionVS> campos = new HashSet<OptionVS>(0);
+    private Set<FieldEventVS> fieldsEventVS = new HashSet<FieldEventVS>(0);
     private Set<EventTagVS> eventTagVSes = new HashSet<EventTagVS>(0);
     private Set<CommentVS> commentVSes = new HashSet<CommentVS>(0);
 
@@ -51,27 +48,13 @@ public class EventVS {
     private Date dateFinish;
     private Date dateCreated;
     private Date lastUpdated;
-
     private String originHashCertVote;
     private String hashCertVSBase64;
     private String originHashAccessRequest;
     private String hashAccessRequestBase64;
-
     private String[] tags;
-
-    private OptionVS optionSelected;
-    private String state;
-
-    public String getContentOpcion (Long optionSelected) {
-        String resultado = null;
-        for (OptionVS opcion : fieldsEventVS) {
-            if (optionSelected.equals(opcion.getId())) {
-                resultado = opcion.getContent();
-                break;
-            }
-        }
-        return resultado;
-    }
+    private FieldEventVS optionSelected;
+    private State state;
 
     public TypeVS getTypeVS() {
         return typeVS;
@@ -95,37 +78,22 @@ public class EventVS {
         this.subject = subject;
     }
 
-    /**
-     * @return the typeEleccion
-     */
     public Cardinality getElectionType() {
         return cardinality;
     }
 
-    /**
-     * @return the dateCreated
-     */
     public Date getDateCreated() {
         return dateCreated;
     }
 
-    /**
-     * @param dateCreated the dateCreated to set
-     */
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    /**
-     * @return the lastUpdated
-     */
     public Date getLastUpdated() {
         return lastUpdated;
     }
 
-    /**
-     * @param lastUpdated the lastUpdated to set
-     */
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
@@ -134,17 +102,11 @@ public class EventVS {
         this.cardinality = cardinality;
     }
 
-    /**
-     * @return the fieldsEventVS
-     */
-    public Set<OptionVS> getFieldsEventVS() {
+    public Set<FieldEventVS> getFieldsEventVS() {
         return fieldsEventVS;
     }
 
-    /**
-     * @param fieldsEventVS the fieldsEventVS to set
-     */
-    public void getFieldsEventVSiones(Set<OptionVS> fieldsEventVS) {
+    public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
         this.fieldsEventVS = fieldsEventVS;
     }
 
@@ -164,10 +126,6 @@ public class EventVS {
         return id;
     }
 
-    public Boolean getSigned() {
-        return signed;
-    }
-
     public void setEventVSId(Long eventId) {
         this.eventId = eventId;
     }
@@ -176,36 +134,25 @@ public class EventVS {
         return eventId;
     }
 
-    /**
-     * @return the tags
-     */
-    public String[] getEtiquetas() {
+    public String[] getTags() {
         return tags;
     }
 
-    public void setEtiquetas(String[] tags) {
+    public void setTags(String[] tags) {
         if (tags.length == 0) return;
-        ArrayList<String> arrayEtiquetas = new ArrayList<String>();
+        ArrayList<String> arrayTags = new ArrayList<String>();
         for (String tag:tags) {
-            arrayEtiquetas.add(tag.toLowerCase());
+            arrayTags.add(tag.toLowerCase());
         }
-        this.tags = arrayEtiquetas.toArray(tags);
+        this.tags = arrayTags.toArray(tags);
     }
 
-    public void setOptionSelected(OptionVS optionSelected) {
+    public void setOptionSelected(FieldEventVS optionSelected) {
         this.optionSelected = optionSelected;
     }
 
-    public OptionVS getOptionSelected() {
+    public FieldEventVS getOptionSelected() {
         return optionSelected;
-    }
-
-    public void setCampos(Set<OptionVS> campos) {
-        this.fieldsEventVS = campos;
-    }
-
-    public Set<OptionVS> getCampos() {
-        return campos;
     }
 
     public void setCommentVSes(Set<CommentVS> commentVSes) {
@@ -216,12 +163,12 @@ public class EventVS {
         return commentVSes;
     }
 
-    public void setNumeroComentarios(int numeroComentarios) {
-        this.numeroComentarios = numeroComentarios;
+    public void setNumComments(int numComments) {
+        this.numComments = numComments;
     }
 
-    public int getNumeroComentarios() {
-        return numeroComentarios;
+    public int getNumComments() {
+        return numComments;
     }
 
     public ControlCenterVS getControlCenter() {
@@ -279,33 +226,6 @@ public class EventVS {
     public void setAccessControlVS(AccessControlVS accessControlVS) {
         this.accessControlVS = accessControlVS;
     }
-
-    public State getStateEnumValue () {
-        if(state == null) return null;
-        else return State.valueOf(state);
-    }
-
-    /*public void checkDates(String accessControlURL) {
-    	if(state == null) return;
-        Date fecha = DateUtils.getTodayDate();
-        State stateEnum = State.valueOf(state);
-        if(!(fecha.after(dateBegin)
-        		&& fecha.before(dateFinish))){
-        	if(stateEnum == State.ACTIVE){
-        		final String checkURL = ;
-                Runnable runnable = new Runnable() {
-                    public void run() {
-                    	try {
-							HttpHelper.getData(checkURL, null);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-                    }
-                };
-                new Thread(runnable).start();
-        	}
-        }
-    }*/
 
     public String getOriginHashCertVote() {
         return originHashCertVote;
@@ -375,6 +295,14 @@ public class EventVS {
         return basePath + id + "/statistics";
     }
 
+    public static String getURLPart(TypeVS typeVS) {
+        switch(typeVS) {
+            case CLAIM_EVENT: return "/eventVSClaim";
+            case MANIFEST_EVENT: return "/eventVSManifest";
+            case VOTING_EVENT: return "/eventVSElection";
+        }
+        return "/eventVS";
+    }
 
     public void setAccessRequestHashBase64(String hashAccessRequestBase64) {
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
@@ -397,11 +325,11 @@ public class EventVS {
         return new JSONObject(map);
     }
 
-    public void setState(String state) {
+    public void setState(State state) {
         this.state = state;
     }
 
-    public String getState() {
+    public State getState() {
         return this.state;
     }
 
@@ -433,17 +361,17 @@ public class EventVS {
             map.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
         }
         JSONObject jsonObject = new JSONObject(map);
-        if (campos != null) {
+        if (fieldsEventVS != null) {
             JSONArray jsonArray = new JSONArray();
-            for (OptionVS campo : campos) {
+            for (FieldEventVS field : fieldsEventVS) {
                 Map<String, Object> campoMap = new HashMap<String, Object>();
-                campoMap.put("id", campo.getId());
-                campoMap.put("content", campo.getContent());
-                campoMap.put("value", campo.getValue());
+                campoMap.put("id", field.getId());
+                campoMap.put("content", field.getContent());
+                campoMap.put("value", field.getValue());
                 JSONObject camposJSON = new JSONObject(campoMap);
                 jsonArray.put(camposJSON);
             }
-            jsonObject.put("campos", jsonArray);
+            jsonObject.put("fieldsEventVS", jsonArray);
         }
         return jsonObject;
     }
@@ -465,103 +393,90 @@ public class EventVS {
         return new JSONObject(map);
     }
 
-    public static EventVS parse(JSONObject eventoJSON) throws ParseException, JSONException {
+    public static EventVS parse(JSONObject jsonData) throws ParseException, JSONException {
         JSONArray jsonArray;
         JSONObject jsonObject;
         EventVS androidEventVS = new EventVS();
-        if (eventoJSON.has("URL"))
-            androidEventVS.setURL(eventoJSON.getString("URL"));
-        if (eventoJSON.has("content"))
-            androidEventVS.setContent(eventoJSON.getString("content"));
-        if (eventoJSON.has("subject"))
-            androidEventVS.setSubject(eventoJSON.getString("subject"));
-        if (eventoJSON.has("id")) {
-            androidEventVS.setId(eventoJSON.getLong("id"));
-            androidEventVS.setEventVSId(eventoJSON.getLong("id"));
+        if (jsonData.has("URL"))
+            androidEventVS.setURL(jsonData.getString("URL"));
+        if (jsonData.has("content"))
+            androidEventVS.setContent(jsonData.getString("content"));
+        if (jsonData.has("subject"))
+            androidEventVS.setSubject(jsonData.getString("subject"));
+        if (jsonData.has("id")) {
+            androidEventVS.setId(jsonData.getLong("id"));
+            androidEventVS.setEventVSId(jsonData.getLong("id"));
         }
-        if (eventoJSON.has("eventId"))
-            androidEventVS.setEventVSId(eventoJSON.getLong("eventId"));
-        if (eventoJSON.has("userVS")) {
+        if (jsonData.has("eventId"))
+            androidEventVS.setEventVSId(jsonData.getLong("eventId"));
+        if (jsonData.has("userVS")) {
             UserVS userVS = new UserVS();
-            userVS.setFullName(eventoJSON.getString("userVS"));
+            userVS.setFullName(jsonData.getString("userVS"));
             androidEventVS.setUserVS(userVS);
         }
-        if (eventoJSON.has("numSignaturesCollected"))
-            androidEventVS.setNumSignaturesCollected(eventoJSON.getInt("numSignaturesCollected"));
-        if (eventoJSON.has("numVotesCollected"))
-            androidEventVS.setNumSignaturesCollected(eventoJSON.getInt("numVotesCollected"));
-        if (eventoJSON.has("dateCreated"))
-            androidEventVS.setDateCreated(DateUtils.getDateFromString(eventoJSON.getString("dateCreated")));
-        if (eventoJSON.has("dateBegin"))
-            androidEventVS.setDateBegin(DateUtils.getDateFromString(eventoJSON.getString("dateBegin")));
-        if (eventoJSON.has("dateFinish") && !eventoJSON.isNull("dateFinish"))
-            androidEventVS.setdateFinish(DateUtils.getDateFromString(eventoJSON.getString("dateFinish")));
-        if (eventoJSON.has("accessControl") && eventoJSON.getJSONObject("accessControl") != null) {
-            jsonObject = eventoJSON.getJSONObject("accessControl");
+        if (jsonData.has("numSignaturesCollected"))
+            androidEventVS.setNumSignaturesCollected(jsonData.getInt("numSignaturesCollected"));
+        if (jsonData.has("numVotesCollected"))
+            androidEventVS.setNumSignaturesCollected(jsonData.getInt("numVotesCollected"));
+        if (jsonData.has("dateCreated"))
+            androidEventVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated")));
+        if (jsonData.has("dateBegin"))
+            androidEventVS.setDateBegin(DateUtils.getDateFromString(jsonData.getString("dateBegin")));
+        if (jsonData.has("dateFinish") && !jsonData.isNull("dateFinish"))
+            androidEventVS.setdateFinish(DateUtils.getDateFromString(jsonData.getString("dateFinish")));
+        if (jsonData.has("accessControl") && jsonData.getJSONObject("accessControl") != null) {
+            jsonObject = jsonData.getJSONObject("accessControl");
             AccessControlVS accessControlVS = new AccessControlVS();
             accessControlVS.setServerURL(jsonObject.getString("serverURL"));
             accessControlVS.setName(jsonObject.getString("name"));
             androidEventVS.setAccessControlVS(accessControlVS);
         }
-        if (eventoJSON.has("tags") && eventoJSON.getJSONArray("tags") != null) {
+        if (jsonData.has("tags") && jsonData.getJSONArray("tags") != null) {
             List<String> tags = new ArrayList<String>();
-            jsonArray = eventoJSON.getJSONArray("tags");
+            jsonArray = jsonData.getJSONArray("tags");
             for (int i = 0; i< jsonArray.length(); i++) {
                 tags.add(jsonArray.getString(i));
             }
-            androidEventVS.setEtiquetas(tags.toArray(new String[jsonArray.length()]));
+            androidEventVS.setTags(tags.toArray(new String[jsonArray.length()]));
         }
-        if (eventoJSON.has("campos")) {
-            Set<OptionVS> campos = new HashSet<OptionVS>();
-            jsonArray = eventoJSON.getJSONArray("campos");
+        if (jsonData.has("fieldsEventVS")) {
+            Set<FieldEventVS> fieldsEventVS = new HashSet<FieldEventVS>();
+            jsonArray = jsonData.getJSONArray("fieldsEventVS");
             for (int i = 0; i< jsonArray.length(); i++) {
                 jsonObject = jsonArray.getJSONObject(i);
-                OptionVS campo = new OptionVS();
-                campo.setId(jsonObject.getLong("id"));
-                campo.setContent(jsonObject.getString("content"));
-                campos.add(campo);
-            }
-            androidEventVS.setCampos(campos);
-        }
-        if (eventoJSON.has("fieldsEventVS")) {
-            Set<OptionVS> fieldsEventVS = new HashSet<OptionVS>();
-            jsonArray = eventoJSON.getJSONArray("fieldsEventVS");
-            for (int i = 0; i< jsonArray.length(); i++) {
-                jsonObject = jsonArray.getJSONObject(i);
-                OptionVS opcion = new OptionVS();
+                FieldEventVS opcion = new FieldEventVS();
                 opcion.setId(jsonObject.getLong("id"));
                 opcion.setContent(jsonObject.getString("content"));
                 fieldsEventVS.add(opcion);
             }
-            androidEventVS.setCampos(fieldsEventVS);
+            androidEventVS.setFieldsEventVS(fieldsEventVS);
         }
-        if (eventoJSON.has("controlCenter")) {
-            jsonObject = eventoJSON.getJSONObject("controlCenter");
+        if (jsonData.has("controlCenter")) {
+            jsonObject = jsonData.getJSONObject("controlCenter");
             ControlCenterVS controlCenter = new ControlCenterVS();
             if(jsonObject.has("id")) controlCenter.setId(jsonObject.getLong("id"));
             if(jsonObject.has("serverURL")) controlCenter.setServerURL(jsonObject.getString("serverURL"));
             if(jsonObject.has("name")) controlCenter.setName(jsonObject.getString("name"));
             androidEventVS.setControlCenter(controlCenter);
         }
-        if (eventoJSON.has("state")) {
-            androidEventVS.setState(eventoJSON.getString("state"));
+        if (jsonData.has("state")) {
+            androidEventVS.setState(State.valueOf(jsonData.getString("state")));
         }
-        if (eventoJSON.has("hashAccessRequestBase64")) {
-            androidEventVS.setAccessRequestHashBase64(eventoJSON.getString("hashAccessRequestBase64"));
+        if (jsonData.has("hashAccessRequestBase64")) {
+            androidEventVS.setAccessRequestHashBase64(jsonData.getString("hashAccessRequestBase64"));
         }
-        if (eventoJSON.has("originHashAccessRequest")) {
-            androidEventVS.setOriginHashAccessRequest(eventoJSON.getString("originHashAccessRequest"));
+        if (jsonData.has("originHashAccessRequest")) {
+            androidEventVS.setOriginHashAccessRequest(jsonData.getString("originHashAccessRequest"));
         }
-        if (eventoJSON.has("hashCertVSBase64")) {
-            androidEventVS.setHashCertVSBase64(eventoJSON.
-                    getString("hashCertVSBase64"));
+        if (jsonData.has("hashCertVSBase64")) {
+            androidEventVS.setHashCertVSBase64(jsonData.getString("hashCertVSBase64"));
         }
-        if (eventoJSON.has("originHashCertVote")) {
-            androidEventVS.setOriginHashCertVote(eventoJSON.getString("originHashCertVote"));
+        if (jsonData.has("originHashCertVote")) {
+            androidEventVS.setOriginHashCertVote(jsonData.getString("originHashCertVote"));
         }
-        if (eventoJSON.has("optionSelected")) {
-            jsonObject = eventoJSON.getJSONObject("optionSelected");
-            OptionVS optionSelected = new OptionVS();
+        if (jsonData.has("optionSelected")) {
+            jsonObject = jsonData.getJSONObject("optionSelected");
+            FieldEventVS optionSelected = new FieldEventVS();
             optionSelected.setId(jsonObject.getLong("id"));
             optionSelected.setContent(jsonObject.getString("content"));
             androidEventVS.setOptionSelected(optionSelected);
@@ -570,20 +485,22 @@ public class EventVS {
     }
 
     public JSONObject toJSON() throws JSONException{
-        Log.d(TAG + ".toJSON(...)", " - toJSON -");
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("subject", subject);
         jsonObject.put("content", content);
+        if(state != null) jsonObject.put("state", state.toString());
+        if(URL != null) jsonObject.put("URL", URL);
         if(dateBegin != null)
             jsonObject.put("dateBegin",DateUtils.getStringFromDate(dateBegin));
         if(dateFinish != null)
             jsonObject.put("dateFinish", DateUtils.getStringFromDate(dateFinish));
         if (typeVS != null) jsonObject.put("type", typeVS.toString());
+        if (id != null) jsonObject.put("id", eventId);
         if (eventId != null) jsonObject.put("eventId", eventId);
         if (tags != null) {
             JSONArray jsonArray = new JSONArray();
-            for (String etiqueta : tags) {
-                jsonArray.put(etiqueta);
+            for (String tag : tags) {
+                jsonArray.put(tag);
             }
             jsonObject.put("tags", jsonArray);
         }
@@ -597,26 +514,15 @@ public class EventVS {
         }
         if (fieldsEventVS != null) {
             JSONArray jsonArray = new JSONArray();
-            Map<String, Object> opcionMap = new HashMap<String, Object>();
-            for (OptionVS opcion : fieldsEventVS) {
-                opcionMap.put("id", opcion.getId());
-                opcionMap.put("content", opcion.getContent());
-                JSONObject opcionJSON = new JSONObject(opcionMap);
-                jsonArray.put(opcionJSON);
+            Map<String, Object> fieldMap = new HashMap<String, Object>();
+            for (FieldEventVS field : fieldsEventVS) {
+                fieldMap.put("id", field.getId());
+                fieldMap.put("content", field.getContent());
+                fieldMap.put("value", field.getValue());
+                JSONObject fieldJSON = new JSONObject(fieldMap);
+                jsonArray.put(fieldJSON);
             }
             jsonObject.put("fieldsEventVS", jsonArray);
-        }
-        if (campos != null) {
-            JSONArray jsonArray = new JSONArray();
-            for (OptionVS campo : campos) {
-                Map<String, Object> campoMap = new HashMap<String, Object>();
-                campoMap.put("content", campo.getContent());
-                campoMap.put("value", campo.getValue());
-                campoMap.put("id", campo.getId());
-                JSONObject camposJSON = new JSONObject(campoMap);
-                jsonArray.put(camposJSON);
-            }
-            jsonObject.put("campos", jsonArray);
         }
         if (cardinality != null) jsonObject.put("cardinality", cardinality.toString());
         if (optionSelected != null) {
@@ -632,6 +538,5 @@ public class EventVS {
         if(originHashCertVote != null) jsonObject.put("originHashCertVote", originHashCertVote);
         return jsonObject;
     }
-
 
 }

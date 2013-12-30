@@ -49,7 +49,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
             case MANIFEST_EVENT:
                 getSupportActionBar().setLogo(R.drawable.manifest_32);
                 title = getString(R.string.manifest_info_lbl) + " '"+ event.getSubject() + "'";
-                switch(event.getStateEnumValue()) {
+                switch(event.getState()) {
                     case ACTIVE:
                         subtTitle = getString(R.string.manifest_open_lbl,
                                 DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish()));
@@ -84,7 +84,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
             case CLAIM_EVENT:
                 getSupportActionBar().setLogo(R.drawable.filenew_32);
                 title = getString(R.string.claim_info_lbl) + " '"+ event.getSubject() + "'";
-                switch(event.getStateEnumValue()) {
+                switch(event.getState()) {
                     case ACTIVE:
                         subtTitle = getString(R.string.claim_open_lbl,
                                 DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish()));
@@ -118,7 +118,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
             case VOTING_EVENT:
                 getSupportActionBar().setLogo(R.drawable.poll_32);
                 title = getString(R.string.voting_info_lbl) + " '"+ event.getSubject() + "'";
-                switch(event.getStateEnumValue()) {
+                switch(event.getState()) {
                     case ACTIVE:
                         subtTitle = getString(R.string.voting_open_lbl,
                                 DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish()));

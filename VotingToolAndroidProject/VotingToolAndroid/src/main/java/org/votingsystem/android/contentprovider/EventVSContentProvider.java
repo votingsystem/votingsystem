@@ -13,52 +13,90 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
-import org.votingsystem.model.ContextVS;
 
-import java.io.File;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.EventVS;
+import org.votingsystem.model.TypeVS;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class RepresentativeContentProvider extends ContentProvider {
+public class EventVSContentProvider extends ContentProvider {
 
-    public static final String TAG = "RepresentativeContentProvider";
+    public static final String TAG = "EventVSContentProvider";
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DB_NAME = "voting_system_representatives.db";
-    private static final String TABLE_NAME = "representatives";
-    public static final String AUTHORITY = "votingsystem.org.representative";
+    private static final String DB_NAME = "voting_system_eventvs.db";
+    static final String TABLE_NAME = "eventvs";
+    public static final String AUTHORITY = "votingsystem.org.eventvs";
 
     public static final String ID_COL = "_id";
     public static final String URL_COL = "url";
-    public static final String NIF_COL = "nif";
-    public static final String NUM_REPRESENTATIONS_COL = "numRepresentations";
-    public static final String FULL_NAME_COL = "fullName";
+    public static final String TYPE_COL = "type";
+    public static final String STATE_COL = "state";
     public static final String JSON_DATA_COL = "jsonData";
-    public static final String IMAGE_COL = "image";
     public static final String TIMESTAMP_CREATED_COL = "timestampCreated";
     public static final String TIMESTAMP_UPDATED_COL = "timestampUpdated";
     public static final String DEFAULT_SORT_ORDER = ID_COL + " DESC";
 
     private SQLiteDatabase database;
 
-    private static final int ALL_ITEMS     = 1;
+    private static final int ALL_ITEMS = 1;
     private static final int SPECIFIC_ITEM = 2;
 
-    private static final String BASE_PATH = "representative";
+    private static final String BASE_PATH = "eventvs";
 
-    private static Long numTotalRepresentatives = null;
+    private static Long numTotalElectionsActive = null;
+    private static Long numTotalElectionsPending = null;
+    private static Long numTotalElectionsTerminated = null;
+
+    private static Long numTotalClaimsActive = null;
+    private static Long numTotalClaimsPending = null;
+    private static Long numTotalClaimsTerminated = null;
+
+    private static Long numTotalManifestsActive = null;
+    private static Long numTotalManifestsPending = null;
+    private static Long numTotalManifestsTerminated = null;
+
+    public static void setNumTotalClaimsActive(Long numTotal) {
+        numTotalClaimsActive = numTotal;
+    }
+    public static void setNumTotalClaimsPending(Long numTotal) {
+        numTotalClaimsPending = numTotal;
+    }
+    public static void setNumTotalClaimsTerminated(Long numTotal) {
+        numTotalClaimsTerminated = numTotal;
+    }
+    public static void setNumTotalManifestsActive(Long numTotal) {
+        numTotalManifestsActive = numTotal;
+    }
+    public static void setNumTotalManifestsPending(Long numTotal) {
+        numTotalManifestsPending = numTotal;
+    }
+    public static void setNumTotalManifestsTerminated(Long numTotal) {
+        numTotalManifestsTerminated = numTotal;
+    }
+    public static void setNumTotalElectionsActive(Long numTotal) {
+        numTotalElectionsActive = numTotal;
+    }
+    public static void setNumTotalElectionsPending(Long numTotal) {
+        numTotalElectionsPending = numTotal;
+    }
+    public static void setNumTotalElectionsTerminated(Long numTotal) {
+        numTotalElectionsTerminated = numTotal;
+    }
 
     private static final UriMatcher URI_MATCHER;
     static{
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
         URI_MATCHER.addURI(AUTHORITY, BASE_PATH, ALL_ITEMS);
-        URI_MATCHER.addURI(AUTHORITY, BASE_PATH + "/#",
-                SPECIFIC_ITEM);
+        URI_MATCHER.addURI(AUTHORITY, BASE_PATH + "/#", SPECIFIC_ITEM);
     }
 
     // Here's the public URI used to query for representative items.
+    //public static final Uri CONTENT_URI = Uri.parse( "content://" +
+    //        AUTHORITY + "/" + BASE_PATH);
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
     public static Uri getRepresentativeURI(Long representativeId) {
@@ -85,9 +123,9 @@ public class RepresentativeContentProvider extends ContentProvider {
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
-                return "vnd.android.cursor.dir/representative"; // List of items.
+                return "vnd.android.cursor.dir/eventvs"; // List of items.
             case SPECIFIC_ITEM:
-                return "vnd.android.cursor.item/representative"; // Specific item.
+                return "vnd.android.cursor.item/eventvs"; // Specific item.
             default:
                 return null;
         }
@@ -140,24 +178,42 @@ public class RepresentativeContentProvider extends ContentProvider {
         return rowCount;
     }
 
-    public static Long getNumTotalRepresentatives() {
-        return numTotalRepresentatives;
-    }
-
-    public static void setNumTotalRepresentatives(Long numTotal) {
-        numTotalRepresentatives = numTotal;
+    public static Long getNumTotal(TypeVS eventType, EventVS.State evenState) {
+        switch(eventType) {
+            case MANIFEST_EVENT:
+                switch(evenState) {
+                    case ACTIVE: return numTotalManifestsActive;
+                    case AWAITING: return numTotalManifestsPending;
+                    case TERMINATED: return numTotalManifestsTerminated;
+                    default: return -1L;
+                }
+            case CLAIM_EVENT:
+                switch(evenState) {
+                    case ACTIVE: return numTotalClaimsActive;
+                    case AWAITING: return numTotalClaimsPending;
+                    case TERMINATED: return numTotalClaimsTerminated;
+                    default: return -1L;
+                }
+            case VOTING_EVENT:
+                switch(evenState) {
+                    case ACTIVE: return numTotalElectionsActive;
+                    case AWAITING: return numTotalElectionsPending;
+                    case TERMINATED: return numTotalElectionsTerminated;
+                    default: return -1L;
+                }
+            default: return -1L;
+        }
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
+
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 ID_COL + " INTEGER PRIMARY KEY, " +
                 URL_COL + " TEXT," +
-                NIF_COL + " TEXT," +
-                NUM_REPRESENTATIONS_COL + " INTEGER DEFAULT 1, " +
-                FULL_NAME_COL + " TEXT, " +
+                TYPE_COL + " TEXT," +
+                STATE_COL + " TEXT," +
                 JSON_DATA_COL + " TEXT, " +
-                IMAGE_COL + " blob, " +
                 TIMESTAMP_UPDATED_COL + " INTEGER DEFAULT 0, " +
                 TIMESTAMP_CREATED_COL + " INTEGER DEFAULT 0);";
 

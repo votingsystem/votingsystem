@@ -17,6 +17,24 @@
         android:gravity="center_vertical|center_horizontal"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
+    <FrameLayout android:id="@+id/listContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:foreground="@drawable/shape_window_dim">
+
+    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gridview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:columnWidth="250dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="7dp"
+        android:horizontalSpacing="7dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center" />
+
+    </FrameLayout>
+
 
     <LinearLayout android:id="@+id/progressContainer"
         android:orientation="horizontal"
@@ -37,25 +55,7 @@
             android:textSize="18sp"
             android:paddingTop="4dip"
             android:singleLine="true" />
-z
     </LinearLayout>
-
-    <FrameLayout android:id="@+id/listContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/gridview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:columnWidth="250dp"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="7dp"
-        android:horizontalSpacing="7dp"
-        android:stretchMode="columnWidth"
-        android:gravity="center" />
-
-    </FrameLayout>
 
     <TextView android:id="@android:id/empty"
         android:layout_width="match_parent"

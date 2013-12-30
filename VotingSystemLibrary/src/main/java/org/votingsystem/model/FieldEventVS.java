@@ -102,7 +102,6 @@ public class FieldEventVS implements Serializable {
         this.accessControlFieldEventId = accessControlFieldEventId;
     }
 
-
     public static FieldEventVS populate (Map fieldMap) {
         FieldEventVS fieldEvent = null;
         try {

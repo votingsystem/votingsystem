@@ -67,15 +67,15 @@ class EventVSClaimService {
 			messageJSON.id = eventVS.id
 			messageJSON.dateCreated = DateUtils.getStringFromDate(eventVS.dateCreated)
 			messageJSON.type = TypeVS.CLAIM_EVENT
-			JSONArray arrayCampos = new JSONArray()
+			JSONArray fieldsArray = new JSONArray()
 			messageJSON.fieldsEventVS?.each { campoItem ->
 				def campo = new FieldEventVS(eventVS:eventVS, content:campoItem.content)
 				campo.save();
-				arrayCampos.add(new JSONObject([id:campo.id, content:campo.content]))
+				fieldsArray.add(new JSONObject([id:campo.id, content:campo.content]))
 			}
 			messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
 				name:grailsApplication.config.VotingSystem.serverName]  as JSONObject
-			messageJSON.fieldsEventVS = arrayCampos
+			messageJSON.fieldsEventVS = fieldsArray
 			
 			String fromUser = grailsApplication.config.VotingSystem.serverName
 			String toUser = signerVS.getNif()

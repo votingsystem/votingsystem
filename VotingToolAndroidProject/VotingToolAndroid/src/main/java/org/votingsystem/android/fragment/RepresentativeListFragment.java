@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -52,8 +53,8 @@ public class RepresentativeListFragment extends Fragment
     private static TextView emptyResultsView;
     private static GridView gridView;
     private AtomicBoolean progressVisible = null;
-    private View mProgressContainer;
-    private View mListContainer;
+    private View progressContainer;
+    private View listContainer;
     private RepresentativeListAdapter mAdapter = null;
     private String queryStr = null;
     private static ContextVS contextVS = null;
@@ -102,6 +103,7 @@ public class RepresentativeListFragment extends Fragment
         }
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
         setHasOptionsMenu(true);
+        progressVisible = new AtomicBoolean(false);
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID));
         //Prepare the loader. Either re-connect with an existing one or start a new one.
@@ -135,10 +137,21 @@ public class RepresentativeListFragment extends Fragment
         gridView.setOnScrollListener(this);
         emptyResultsView = (TextView) rootView.findViewById(android.R.id.empty);
         searchTextView.setVisibility(View.GONE);
-        mProgressContainer = rootView.findViewById(R.id.progressContainer);
-        mListContainer =  rootView.findViewById(R.id.listContainer);
+        progressContainer = rootView.findViewById(R.id.progressContainer);
+        listContainer =  rootView.findViewById(R.id.listContainer);
+        ((FrameLayout)listContainer).getForeground().setAlpha(0);
         rootView.setBackgroundColor(Color.WHITE);
         return rootView;
+    }
+
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState != null) {
+            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+            gridView.onRestoreInstanceState(gridState);
+            offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
+        }
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
@@ -147,27 +160,28 @@ public class RepresentativeListFragment extends Fragment
     }
 
     public void showProgressIndicator(boolean showProgress, boolean animate){
-        if (progressVisible != null && progressVisible.get() == showProgress) return;
-        if (progressVisible == null) progressVisible = new AtomicBoolean(showProgress);
+        if (progressVisible.get() == showProgress) return;
         else progressVisible.set(showProgress);
         if (progressVisible.get()) {
             if (animate) {
-                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_in));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                listContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_out));
             }
-            mProgressContainer.setVisibility(View.VISIBLE);
-            mListContainer.setVisibility(View.INVISIBLE);
+            progressContainer.setVisibility(View.VISIBLE);
+            //listContainer.setVisibility(View.INVISIBLE);
+            ((FrameLayout)listContainer).getForeground().setAlpha(100); // dim
         } else {
             if (animate) {
-                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_out));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                listContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_in));
             }
-            mProgressContainer.setVisibility(View.GONE);
-            mListContainer.setVisibility(View.VISIBLE);
+            ((FrameLayout)listContainer).getForeground().setAlpha( 0); // restore
+            progressContainer.setVisibility(View.GONE);
+            listContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -195,16 +209,6 @@ public class RepresentativeListFragment extends Fragment
         startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
                 getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
         getActivity().startService(startIntent);
-    }
-
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
-        super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null) {
-            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
-            gridView.onRestoreInstanceState(gridState);
-            offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-        }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -237,9 +241,10 @@ public class RepresentativeListFragment extends Fragment
         Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
                 " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Long representativeId = cursor.getLong(cursor.getColumnIndex(
-                RepresentativeContentProvider.ID_COL));
-        Intent intent = new Intent(getActivity().getApplicationContext(), RepresentativePagerActivity.class);
+        /*Long representativeId = cursor.getLong(cursor.getColumnIndex(
+                RepresentativeContentProvider.ID_COL));*/
+        Intent intent = new Intent(getActivity().getApplicationContext(),
+                RepresentativePagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
@@ -315,15 +320,15 @@ public class RepresentativeListFragment extends Fragment
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView representativeName = (TextView)view.findViewById(R.id.representative_name);
-                TextView delegationInfo = (TextView) view.findViewById(R.id.representative_delegations);
+                TextView delegationInfo = (TextView) view.findViewById(
+                        R.id.representative_delegations);
                 representativeName.setText(fullName);
-                delegationInfo.setText(ContextVS.getMessage("representationsMessage", String.valueOf(numRepresentations)));
+                delegationInfo.setText(ContextVS.getMessage("representationsMessage",
+                        String.valueOf(numRepresentations)));
                 ImageView imgView = (ImageView)view.findViewById(R.id.representative_icon);
                 //imgView.setImageDrawable();
             }
         }
-
     }
-
 
 }

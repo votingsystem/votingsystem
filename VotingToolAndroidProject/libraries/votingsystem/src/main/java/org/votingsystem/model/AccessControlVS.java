@@ -46,21 +46,14 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return eventVS;
     }
         
-    @Override
-    public Type getType() {
+    @Override public Type getType() {
         return Type.CONTROL_CENTER;
     }
 
-    /**
-     * @return the controlCenter
-     */
     public Set<ControlCenterVS> getControlCenters() {
         return controlCenter;
     }
 
-    /**
-     * @param controlCenter the controlCenter to set
-     */
     public void setControlCenters(Set<ControlCenterVS> controlCenter) {
         this.controlCenter = controlCenter;
     }
@@ -102,12 +95,11 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return StringUtils.checkURL(serverURL) + "/serverInfo";
     }
 
-    public String getEventVSURL (EventVS.State eventState, String groupPartURL,
-            int max, int offset) {
-        return getServerURL() + groupPartURL + "?max="+ max + "&offset=" + offset  +
+    public String getEventVSURL (EventVS.State eventState, String eventTypePartURL,
+            int max, Long offset) {
+        return getServerURL() + eventTypePartURL + "?max="+ max + "&offset=" + offset  +
                 "&eventVSState=" + eventState.toString();
     }
-
 
     public String getPublishServiceURL(TypeVS formType) {
         switch(formType) {
@@ -130,13 +122,16 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/serverInfo/certificationCenters";
     }
 
-
     public String getAccessServiceURL () {
         return getServerURL() +  "/accessRequestVS";
     }
 
     public String getTimeStampServiceURL () {
         return getServerURL() + "/timeStampVS";
+    }
+
+    public String getCheckDatesServiceURL (Long id) {
+        return getServerURL() +  "/eventVS/checkDates?id=" + id;
     }
 
     public static AccessControlVS parse(String actorVSStr) throws Exception {

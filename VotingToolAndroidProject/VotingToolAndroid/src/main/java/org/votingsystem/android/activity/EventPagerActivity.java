@@ -62,7 +62,7 @@ public class EventPagerActivity  extends ActionBarActivity {
         switch(event.getTypeVS()) {
             case MANIFEST_EVENT:
                 getSupportActionBar().setLogo(R.drawable.manifest_32);
-                switch(event.getStateEnumValue()) {
+                switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.manifest_open_lbl,
                                 DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
@@ -96,7 +96,7 @@ public class EventPagerActivity  extends ActionBarActivity {
                 break;
             case CLAIM_EVENT:
                 getSupportActionBar().setLogo(R.drawable.filenew_32);
-                switch(event.getStateEnumValue()) {
+                switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.claim_open_lbl,
                                 DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
@@ -129,7 +129,7 @@ public class EventPagerActivity  extends ActionBarActivity {
                 break;
             case VOTING_EVENT:
                 getSupportActionBar().setLogo(R.drawable.poll_32);
-                switch(event.getStateEnumValue()) {
+                switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.voting_open_lbl,
                                 DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));

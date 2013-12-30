@@ -24,7 +24,7 @@ public class ScreenUtils {
         float heightInches = heightPixels / heightDpi;
         double diagonalInches = Math.sqrt(
                 (widthInches * widthInches) + (heightInches * heightInches));
-        Log.d(TAG + "getDiagonalInches(..)", " - diagonalInches: " + diagonalInches);
+        Log.d(TAG + ".getDiagonalInches(...)", "diagonalInches: " + diagonalInches);
         return diagonalInches;
     }
 }

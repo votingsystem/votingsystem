@@ -50,22 +50,26 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int REPRESENTATIVES_GROUP_POSITION = 3;
 
     public enum GroupPosition {
-        VOTING(VOTING_GROUP_POSITION, SubSystemVS.VOTES, Arrays.asList(
+        VOTING(VOTING_GROUP_POSITION, SubSystemVS.VOTES, TypeVS.VOTING_EVENT, Arrays.asList(
                 ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        MANIFESTS(MANIFESTS_GROUP_POSITION, SubSystemVS.MANIFESTS, Arrays.asList(
+        MANIFESTS(MANIFESTS_GROUP_POSITION, SubSystemVS.MANIFESTS, TypeVS.MANIFEST_EVENT,
+                Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
+        CLAIMS(CLAIMS_GROUP_POSITION, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT, Arrays.asList(
                 ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        CLAIMS(CLAIMS_GROUP_POSITION, SubSystemVS.CLAIMS, Arrays.asList(
-                ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, SubSystemVS.REPRESENTATIVES,  Arrays.asList(
+        REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, SubSystemVS.REPRESENTATIVES,
+                TypeVS.REPRESENTATIVE, Arrays.asList(
                 ChildPosition.REPRESENTATIVE_LIST, ChildPosition.REPRESENTATIVE_OPERATION));
 
         int position;
         SubSystemVS subsystem;
         List<ChildPosition> childList;
+        TypeVS typeVS;
 
-        private GroupPosition(int position, SubSystemVS subsystem, List<ChildPosition> childList) {
+        private GroupPosition(int position, SubSystemVS subsystem, TypeVS typeVS,
+                              List<ChildPosition> childList) {
             this.position = position;
             this.subsystem = subsystem;
+            this.typeVS = typeVS;
             this.childList = childList;
         }
         public static GroupPosition valueOf(int position)  {
@@ -114,6 +118,9 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
             }
         }
 
+        public TypeVS getTypeVS() {
+            return typeVS;
+        }
     }
 
     public enum ChildPosition{OPEN, PENDING, CLOSED, REPRESENTATIVE_LIST, REPRESENTATIVE_OPERATION;}
