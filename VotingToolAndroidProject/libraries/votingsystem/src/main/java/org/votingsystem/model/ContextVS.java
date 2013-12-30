@@ -53,6 +53,8 @@ public class ContextVS {
     public static final String PROVIDER                   = "BC";
     public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
 
+    public static final String CONTENT_PROVIDER_AUTHORITY = "votingsystem.org";
+
     //Intent keys
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";

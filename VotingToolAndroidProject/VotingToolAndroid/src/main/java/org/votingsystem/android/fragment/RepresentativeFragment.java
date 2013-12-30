@@ -77,12 +77,12 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    " ========= intent.getExtras(): " + intent.getExtras());
-            String action = intent.getAction();
-            if(action.equalsIgnoreCase(ContextVS.SIGN_AND_SEND_ACTION_ID)){
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                " ========= intent.getExtras(): " + intent.getExtras());
+        String action = intent.getAction();
+        if(action.equalsIgnoreCase(ContextVS.SIGN_AND_SEND_ACTION_ID)){
 
-            }
+        }
         }
     };
 
@@ -149,7 +149,6 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         return rootView;
     }
 
-
     @Override public void onStart() {
     	Log.d(TAG + ".onStart(...) ", "onStart");
     	super.onStart();
@@ -190,7 +189,6 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
 	    		return super.onOptionsItemSelected(item);
 		}
 	}
-
 
 	private void showMessage(String caption, String message) {
 		Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);

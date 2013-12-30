@@ -46,28 +46,27 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
+        RepresentativePagerAdapter eventsPagerAdapter = new RepresentativePagerAdapter(
+                getSupportFragmentManager());
+        mViewPager.setAdapter(eventsPagerAdapter);
         cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
                 null, null, null, null);
-        cursor.moveToPosition(cursorPosition);
-        RepresentativePagerAdapter eventsPagerAdapter = new RepresentativePagerAdapter(
-                getSupportFragmentManager(), cursor.getCount());
-        mViewPager.setAdapter(eventsPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
                 cursor.moveToPosition(position);
                 updateActionBarTitle();
             }
         });
+        mViewPager.setCurrentItem(cursorPosition);
+        updateActionBarTitle();
     }
 
     private void updateActionBarTitle() {
-        if(cursor != null) {
-            getSupportActionBar().setLogo(R.drawable.system_users_22);
-            getSupportActionBar().setTitle(contextVS.getMessage("representativeLbl"));
-            String fullName = cursor.getString(cursor.getColumnIndex(
-                    RepresentativeContentProvider.FULL_NAME_COL));
-            getSupportActionBar().setSubtitle(fullName);
-        } else Log.d(TAG + ".updateActionBarTitle(...) ", "cursor null");
+        getSupportActionBar().setLogo(R.drawable.system_users_22);
+        getSupportActionBar().setTitle(contextVS.getMessage("representativeLbl"));
+        String fullName = cursor.getString(cursor.getColumnIndex(
+                RepresentativeContentProvider.FULL_NAME_COL));
+        getSupportActionBar().setSubtitle(fullName);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -84,8 +83,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
-                Intent intent = new Intent(this, NavigationDrawer.class);
-                startActivity(intent);
+                super.onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -94,17 +92,16 @@ public class RepresentativePagerActivity extends ActionBarActivity {
 
     class RepresentativePagerAdapter extends FragmentStatePagerAdapter {
 
-        private int numRepresentatives;
+        private Cursor cursor;
 
-        public RepresentativePagerAdapter(FragmentManager fm, int numRepresentatives) {
+        public RepresentativePagerAdapter(FragmentManager fm) {
             super(fm);
-            this.numRepresentatives = numRepresentatives;
+            cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
+                    null, null, null, null);
         }
 
         @Override public Fragment getItem(int i) {
             Log.d(TAG + ".RepresentativePagerAdapter.getItem(...) ", " - item: " + i);
-            Cursor cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
-                    null, null, null, null);
             cursor.moveToPosition(i);
             Long representativeId = cursor.getLong(cursor.getColumnIndex(
                     RepresentativeContentProvider.ID_COL));
@@ -112,7 +109,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         }
 
         @Override public int getCount() {
-            return numRepresentatives;
+            return cursor.getCount();
         }
 
     }

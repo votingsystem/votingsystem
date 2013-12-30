@@ -13,6 +13,8 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+import org.votingsystem.model.ContextVS;
+
 import java.io.File;
 
 /**
@@ -43,23 +45,25 @@ public class RepresentativeContentProvider extends ContentProvider {
     private static final int ALL_REPRESENTATIVES = 1;
     private static final int SPECIFIC_REPRESENTATIVES = 2;
 
-    public static final String AUTHORITY = "votingsystem.org";
-    public static final String BASE_PATH = "representative";
+    private static final String BASE_PATH = "representative";
 
     private static Long numTotalRepresentatives = null;
 
     private static final UriMatcher URI_MATCHER;
     static{
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-        URI_MATCHER.addURI(AUTHORITY, BASE_PATH, ALL_REPRESENTATIVES);
-        URI_MATCHER.addURI(AUTHORITY, BASE_PATH + "/#", SPECIFIC_REPRESENTATIVES);
+        URI_MATCHER.addURI(ContextVS.CONTENT_PROVIDER_AUTHORITY, BASE_PATH, ALL_REPRESENTATIVES);
+        URI_MATCHER.addURI(ContextVS.CONTENT_PROVIDER_AUTHORITY, BASE_PATH + "/#",
+                SPECIFIC_REPRESENTATIVES);
     }
 
     // Here's the public URI used to query for representative items.
-    public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
+    public static final Uri CONTENT_URI = Uri.parse( "content://" +
+            ContextVS.CONTENT_PROVIDER_AUTHORITY + "/" + BASE_PATH);
 
     public static Uri getRepresentativeURI(Long representativeId) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + representativeId);
+        return Uri.parse( "content://" + ContextVS.CONTENT_PROVIDER_AUTHORITY + "/" +
+                BASE_PATH + "/" + representativeId);
     }
 
     @Override public boolean onCreate() {
@@ -172,7 +176,6 @@ public class RepresentativeContentProvider extends ContentProvider {
             // standard method.
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_REPRESENTATIVES + ";");
         }
-
 
         @Override public void onCreate(SQLiteDatabase db){
             try{

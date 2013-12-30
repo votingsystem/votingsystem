@@ -234,7 +234,8 @@ public class RepresentativeListFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Clicked item: " + id);
+        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
+                " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Long representativeId = cursor.getLong(cursor.getColumnIndex(
                 RepresentativeContentProvider.ID_COL));
