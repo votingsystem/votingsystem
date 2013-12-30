@@ -267,7 +267,7 @@ body {
 }
 
 .eventVSActive {
-    border-color:#6bad74;
+    border: 1px solid #6bad74;
 }
 
 .eventVSActive .eventSubjectDiv{
@@ -279,7 +279,7 @@ body {
 }
 
 .eventVSAwaiting {
-    border-color:#fba131;
+    border: 1px solid #fba131;
 }
 
 .eventVSAwaiting .eventSubjectDiv{
@@ -291,7 +291,7 @@ body {
 }
 
 .eventVSFinished {
-    border-color:#cc1606;
+    border: 1px solid #cc1606;
 }
 
 .eventVSFinished .eventSubjectDiv{
@@ -401,7 +401,6 @@ body {
 	display:inline;
 	width:280px;
 	background-color: #f2f2f2;
-	border: 1px solid #02227a; 
 	margin: 10px 5px 5px 10px;
 	-moz-border-radius: 5px; border-radius: 5px;
 	cursor: pointer; cursor: hand; 
