@@ -50,7 +50,7 @@ public class EventStatisticsFragment extends Fragment {
         Log.d(TAG + ".onCreate(...)", " --- onCreate");
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
-        eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
+        eventIndex =  args.getInt(ContextVS.ITEM_ID_KEY);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
         contextVS.setEvent(eventVS);

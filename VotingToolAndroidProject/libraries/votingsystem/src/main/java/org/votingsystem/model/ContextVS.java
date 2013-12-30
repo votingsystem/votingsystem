@@ -61,6 +61,8 @@ public class ContextVS {
     public static final String OFFSET_KEY = "OFFSET";
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
+    public static final String ITEM_ID_KEY = "ITEM_ID";
+    public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
 
     //Actions IDs
     public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION";
@@ -71,7 +73,7 @@ public class ContextVS {
     public static final int REPRESENTATIVE_LOADER_ID = 1;
 
     //Pages size
-    public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
+    public static final Integer REPRESENTATIVE_PAGE_SIZE = 15;
 
     //Notifications IDs
     public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;

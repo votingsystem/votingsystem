@@ -89,6 +89,14 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private boolean isProgressShown;
     private ProcessSignatureTask processSignatureTask;
 
+    public static VotingEventFragment newInstance(Integer eventId) {
+        VotingEventFragment fragment = new VotingEventFragment();
+        Bundle args = new Bundle();
+        args.putInt(ContextVS.ITEM_ID_KEY, eventId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override public View onCreateView(LayoutInflater inflater,
                                        ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", "onCreate");
@@ -96,7 +104,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
         Bundle args = getArguments();
-        Integer eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
+        Integer eventIndex =  args.getInt(ContextVS.ITEM_ID_KEY);
         if(eventIndex != null) {
             eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
         } else {

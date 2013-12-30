@@ -92,10 +92,11 @@
         <activity android:name=".activity.GenericFragmentContainerActivity"
             android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
 
-        <activity android:label="@string/app_name"
-            android:name=".activity.EventPagerActivity"
+        <activity android:label="@string/app_name" android:name=".activity.EventPagerActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
 
+        <activity android:name=".activity.RepresentativePagerActivity"
+            android:theme="@style/Theme.AppCompat.Light"/>
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->
@@ -106,7 +107,7 @@
         <!-- The attribute "android:exported" must be set to "false" to restrict this content
             provider to its own app. Otherwise, all apps could access it. -->
         <provider android:name=".contentprovider.RepresentativeContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.representative"/>
+            android:exported="false" android:authorities="votingsystem.org"/>
 
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service is only available to this app. -->

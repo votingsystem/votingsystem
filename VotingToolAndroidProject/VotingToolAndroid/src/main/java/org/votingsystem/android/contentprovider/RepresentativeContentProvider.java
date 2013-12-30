@@ -43,16 +43,24 @@ public class RepresentativeContentProvider extends ContentProvider {
     private static final int ALL_REPRESENTATIVES = 1;
     private static final int SPECIFIC_REPRESENTATIVES = 2;
 
+    public static final String AUTHORITY = "votingsystem.org";
+    public static final String BASE_PATH = "representative";
+
+    private static Long numTotalRepresentatives = null;
+
     private static final UriMatcher URI_MATCHER;
     static{
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-        URI_MATCHER.addURI("votingsysten.org", "representative", ALL_REPRESENTATIVES);
-        URI_MATCHER.addURI("votingsysten.org", "representative/#", SPECIFIC_REPRESENTATIVES);
+        URI_MATCHER.addURI(AUTHORITY, BASE_PATH, ALL_REPRESENTATIVES);
+        URI_MATCHER.addURI(AUTHORITY, BASE_PATH + "/#", SPECIFIC_REPRESENTATIVES);
     }
 
-    public static final String AUTHORITY = "votingsystem.org.representative";
     // Here's the public URI used to query for representative items.
-    public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY);
+    public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
+
+    public static Uri getRepresentativeURI(Long representativeId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + representativeId);
+    }
 
     @Override public boolean onCreate() {
         //Delete previous session database
@@ -89,23 +97,14 @@ public class RepresentativeContentProvider extends ContentProvider {
         String having = null;
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
         qBuilder.setTables(TABLE_REPRESENTATIVES);
-        // If the query ends in a specific record number, we're
-        // being asked for a specific record, so set the
-        // WHERE clause in our query.
         if((URI_MATCHER.match(uri)) == SPECIFIC_REPRESENTATIVES){
-            qBuilder.appendWhere("id=" + ContentUris.parseId(uri));
+            qBuilder.appendWhere(ID_COL + "=" + ContentUris.parseId(uri));
         }
-        // Set sort order. If none specified, use default.
         if(TextUtils.isEmpty(sortOrder)) sortOrder = DEFAULT_SORT_ORDER;
-        Cursor c = qBuilder.query(database,
-                projection,
-                selection,
-                selectionArgs,
-                groupBy,
-                having,
-                sortOrder);
-        c.setNotificationUri(getContext().getContentResolver(), uri);
-        return c;
+        Cursor cursor = qBuilder.query(database, projection, selection, selectionArgs,
+                groupBy, having, sortOrder);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
     }
 
     @Override
@@ -136,6 +135,14 @@ public class RepresentativeContentProvider extends ContentProvider {
         // Notify any listeners and return the deleted row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return rowCount;
+    }
+
+    public static Long getNumTotalRepresentatives() {
+        return numTotalRepresentatives;
+    }
+
+    public static void setNumTotalRepresentatives(Long numTotal) {
+        numTotalRepresentatives = numTotal;
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {

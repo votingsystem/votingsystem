@@ -30,12 +30,10 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
-import org.votingsystem.android.activity.EventPagerActivity;
-import org.votingsystem.android.activity.GenericFragmentContainerActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContextVS;
@@ -61,26 +59,27 @@ public class RepresentativeListFragment extends Fragment
     private static ContextVS contextVS = null;
 
     private Long offset = new Long(0);
-    private Long numTotalRepresentatives = null;
     private Integer firstVisiblePosition = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if(action.equalsIgnoreCase(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID)){
-                int responseStatus = intent.getIntExtra(ContextVS.HTTP_RESPONSE_STATUS_KEY, -1);
-                Log.d(TAG + ".broadcastReceiver.onReceive(...)", "status: " + responseStatus +
-                        " - extras: " + intent.getExtras());
-                if(ResponseVS.SC_OK == responseStatus) {
-                    offset = intent.getLongExtra(ContextVS.OFFSET_KEY, 0L);
-                    numTotalRepresentatives = intent.getLongExtra(ContextVS.NUM_TOTAL_KEY, 0L);
-                    Log.d(TAG + ".broadcastReceiver.onReceive(...)", " - offset: " + offset +
-                            " - numTotal: " + numTotalRepresentatives);
-                } else showMessage(contextVS.getMessage("connErrorCaption"),
-                        intent.getStringExtra(ContextVS.HTTP_RESPONSE_DATA_KEY));
-            }
+        String action = intent.getAction();
+        if(action.equalsIgnoreCase(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID)){
+            int responseStatus = intent.getIntExtra(ContextVS.HTTP_RESPONSE_STATUS_KEY, -1);
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "status: " + responseStatus +
+                    " - extras: " + intent.getExtras());
+            if(ResponseVS.SC_OK == responseStatus) {
+                offset = intent.getLongExtra(ContextVS.OFFSET_KEY, 0L);
+                RepresentativeContentProvider.setNumTotalRepresentatives(
+                        intent.getLongExtra(ContextVS.NUM_TOTAL_KEY, 0L));
+                Log.d(TAG + ".broadcastReceiver.onReceive(...)", " - offset: " + offset +
+                    " - numTotal: " + RepresentativeContentProvider.getNumTotalRepresentatives());
+            } else showMessage(contextVS.getMessage("connErrorCaption"),
+                    intent.getStringExtra(ContextVS.HTTP_RESPONSE_DATA_KEY));
+        }
         }
     };
+
     /**
      * Perform alphabetical comparison of application entry objects.
      */
@@ -175,18 +174,18 @@ public class RepresentativeListFragment extends Fragment
     @Override public void onScrollStateChanged(AbsListView absListView, int i) { }
 
     @Override public void onScroll(AbsListView view, int firstVisibleItem,
-                                   int visibleItemCount, int totalItemCount) {
+               int visibleItemCount, int totalItemCount) {
         if (gridView.getAdapter() == null || gridView.getAdapter().getCount() == 0) return ;
         /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
-        if(loadMore && !progressVisible.get() && offset < numTotalRepresentatives &&
-                totalItemCount < numTotalRepresentatives) {
+        if(loadMore && !progressVisible.get() && offset <
+                RepresentativeContentProvider.getNumTotalRepresentatives() &&
+                totalItemCount < RepresentativeContentProvider.getNumTotalRepresentatives()) {
             Log.d(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
                     " - visibleItemCount:" + visibleItemCount + " - totalItemCount:" + totalItemCount);
             firstVisiblePosition = firstVisibleItem;
             loadHttpItems(new Long(totalItemCount));
         }
-
     }
 
     private void loadHttpItems(Long offset) {
@@ -205,14 +204,12 @@ public class RepresentativeListFragment extends Fragment
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            numTotalRepresentatives = savedInstanceState.getLong(ContextVS.NUM_TOTAL_KEY);
         }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(ContextVS.OFFSET_KEY, offset);
-        outState.putLong(ContextVS.NUM_TOTAL_KEY, numTotalRepresentatives);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
@@ -237,12 +234,12 @@ public class RepresentativeListFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Item clicked: " + id);
-        UserVS userVS = ((UserVS) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity().getApplicationContext(), EventPagerActivity.class);
-        intent.putExtra(GenericFragmentContainerActivity.REQUEST_FRAGMENT_KEY,
-                RepresentativeFragment.class.getName());
-        intent.putExtra(RepresentativeFragment.REPRESENTATIVE_ID_KEY, userVS.getId());
+        Log.d(TAG +  ".onListItemClick(...)", "Clicked item: " + id);
+        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
+        Long representativeId = cursor.getLong(cursor.getColumnIndex(
+                RepresentativeContentProvider.ID_COL));
+        Intent intent = new Intent(getActivity().getApplicationContext(), RepresentativePagerActivity.class);
+        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
 
@@ -256,7 +253,7 @@ public class RepresentativeListFragment extends Fragment
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        if(numTotalRepresentatives == null) loadHttpItems(offset);
+        if(RepresentativeContentProvider.getNumTotalRepresentatives() == null) loadHttpItems(offset);
         else {
             showProgressIndicator(false, true);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);

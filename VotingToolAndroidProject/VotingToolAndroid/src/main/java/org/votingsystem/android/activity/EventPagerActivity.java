@@ -12,6 +12,7 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventFragment;
+import org.votingsystem.android.fragment.RepresentativeFragment;
 import org.votingsystem.android.fragment.VotingEventFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -21,23 +22,25 @@ import org.votingsystem.util.DateUtils;
 import java.util.List;
 
 /**
- * Created by jgzornoza on 9/10/13.
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class EventPagerActivity  extends ActionBarActivity {
 
     public static final String TAG = "EventPagerActivity";
 
+
     private ContextVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...) ", " - onCreate ");
+        Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getBaseContext());
         if(contextVS.getEvents() == null) {
             Log.d(TAG + ".onCreate(...) ", " - Events not found in context");
             return;
         }
-        setContentView(R.layout.event_pager_activity);
+        setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(
@@ -129,7 +132,7 @@ public class EventPagerActivity  extends ActionBarActivity {
                 switch(event.getStateEnumValue()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.voting_open_lbl,
-                                        DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
+                                DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
                         break;
                     case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.voting_pending_lbl));
@@ -160,8 +163,6 @@ public class EventPagerActivity  extends ActionBarActivity {
 
     public class EventsPagerAdapter extends FragmentStatePagerAdapter {
 
-        public static final String EVENT_INDEX_KEY = "eventIndex";
-
         private List<EventVS> events = null;
 
         public EventsPagerAdapter(FragmentManager fm, List<EventVS> events) {
@@ -173,13 +174,8 @@ public class EventPagerActivity  extends ActionBarActivity {
             Log.d(TAG + ".EventsPagerAdapter.getItem(...) ", " - item: " + i);
             Fragment fragment = null;
             if (contextVS.getEvent().getTypeVS().equals(TypeVS.VOTING_EVENT)) {
-                fragment = new VotingEventFragment();
-            } else {
-                fragment = new EventFragment();
-            }
-            Bundle args = new Bundle();
-            args.putInt(EVENT_INDEX_KEY, i);
-            fragment.setArguments(args);
+                fragment = VotingEventFragment.newInstance(i);
+            } else fragment = EventFragment.newInstance(i);
             return fragment;
         }
 

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -38,6 +39,7 @@ import android.widget.TextView.OnEditorActionListener;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
+import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
@@ -71,8 +73,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  */
 public class RepresentativeFragment extends Fragment implements CertPinDialogListener {
 
-	public static final String TAG = "UserCertRequestFragment";
-    public static final String REPRESENTATIVE_ID_KEY = "REPRESENTATIVE_ID_KEY";
+	public static final String TAG = "RepresentativeFragment";
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -91,10 +92,32 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
     private FrameLayout mainLayout;
     private boolean isProgressShown;
 
+
+    public static Fragment newInstance(Long representativeId) {
+        RepresentativeFragment fragment = new RepresentativeFragment();
+        Bundle args = new Bundle();
+        args.putLong(ContextVS.ITEM_ID_KEY, representativeId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
+        Bundle arguments = getArguments();
+        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
+                " - arguments: " + arguments);
+        Long representativeId =  arguments.getLong(ContextVS.ITEM_ID_KEY);
+        Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+                RepresentativeContentProvider.getRepresentativeURI(representativeId),
+                null, null, null, null);
+
+        cursor.moveToFirst();
+        String fullName = cursor.getString(cursor.getColumnIndex(
+                RepresentativeContentProvider.FULL_NAME_COL));
+
+
+
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
 
         IntentFilter intentFilter = new IntentFilter();
@@ -104,11 +127,11 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
                 broadcastReceiver, intentFilter);
 
         View rootView = inflater.inflate(R.layout.representative_fragment, container, false);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
+        TextView repNameView = (TextView)rootView.findViewById(R.id.representative_name);
+        repNameView.setText(fullName);
         getActivity().setTitle(ContextVS.getMessage("representativeCaption"));
 
         EditText nifText = (EditText)rootView.findViewById(R.id.nif_edit);
-
 
 
         Button selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
@@ -120,11 +143,8 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
-        progressMessage.setText(R.string.loading_data_msg);
         mainLayout.getForeground().setAlpha(0);
         isProgressShown = false;
-        // if set to true savedInstanceState will be allways null
-        setRetainInstance(true);
         setHasOptionsMenu(true);
         return rootView;
     }

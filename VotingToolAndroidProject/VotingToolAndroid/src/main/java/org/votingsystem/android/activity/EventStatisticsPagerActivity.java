@@ -28,7 +28,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getBaseContext());
-        setContentView(R.layout.event_pager_activity);
+        setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(getSupportFragmentManager());

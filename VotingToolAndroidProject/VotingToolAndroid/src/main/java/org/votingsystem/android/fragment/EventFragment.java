@@ -54,15 +54,22 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
     private ContextVS contextVS;
     private Map<Integer, EditText> mapaCamposReclamacion;
     private ProcessSignatureTask processSignatureTask;
-
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
 
+    public static EventFragment newInstance(Integer eventId) {
+        EventFragment fragment = new EventFragment();
+        Bundle args = new Bundle();
+        args.putInt(ContextVS.ITEM_ID_KEY, eventId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         Bundle args = getArguments();
-        eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
+        eventIndex =  args.getInt(ContextVS.ITEM_ID_KEY);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         event = (EventVS) contextVS.getEvents().get(eventIndex);
         View rootView = inflater.inflate(R.layout.event_fragment, container, false);
@@ -324,7 +331,6 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
         builder.setTitle(caption).setMessage(message).show();
     }
-
 
     private class ProcessSignatureTask extends AsyncTask<URL, Integer, ResponseVS> {
 
