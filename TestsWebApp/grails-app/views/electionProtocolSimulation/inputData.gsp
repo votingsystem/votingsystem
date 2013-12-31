@@ -294,6 +294,7 @@ $("#requestBackup").click(function () {
 
 var electionEditorDiv = $("#electionEditorDiv")
 dateFinish    = $("#dateFinish")
+dateInit    = $("#dateInit")
 electionEditorDivButton = $("#addElectionFieldButton");
 allFields = $( [] ).add(dateFinish).add(electionEditorDiv).add(electionEditorDivButton);
 
@@ -310,7 +311,7 @@ $('#electionProtocolSinulationDataForm').submit(function(event){
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
 	        content:getEditor_electionEditorDivData(),
-	        dateBegin:dateBeginStr,
+	        dateBegin:dateInit.datepicker("getDate").format(),
 	        dateFinish:dateFinish.datepicker("getDate").format()}
 
     var electionFields = new Array();
@@ -382,17 +383,25 @@ function isValidForm() {
 		accessControlURL = "http://" + accessControlURL
 	}
 
-	if(dateFinish.datepicker("getDate") === null) {
+	if(dateInit.datepicker("getDate") === null) {
+		dateInit.addClass( "formFieldError" );
+		showErrorMsg('<g:message code="emptyFieldLbl"/>')
+		return false
+	}
+
+    if(dateFinish.datepicker("getDate") === null) {
 		dateFinish.addClass( "formFieldError" );
 		showErrorMsg('<g:message code="emptyFieldLbl"/>')
 		return false
 	}
 
-	if(dateFinish.datepicker("getDate") < new Date()) {
-		showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>')
+
+	if(dateFinish.datepicker("getDate") < dateInit.datepicker("getDate")) {
 		dateFinish.addClass("formFieldError");
+        showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>')
 		return false
 	}
+
 
 	if('' == getEditor_electionEditorDivData()) {
 		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>')

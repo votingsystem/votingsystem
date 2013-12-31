@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.AccessRequestVS
+import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
@@ -61,26 +62,28 @@ class AccessRequestVSService {
 			def hashAccessRequestBase64
 			def typeRespuesta
 			def accessRequestVS
-			def eventVSElection
+            EventVSElection eventVSElection
 			EventVSElection.withTransaction {
 				eventVSElection = EventVSElection.findById(Long.valueOf(messageJSON.eventId))
 			}
 			if (eventVSElection) {
 				if (!eventVSElection.isActive(Calendar.getInstance().getTime())) {
-					msg = messageSource.getMessage('eventVS.messageCerrado', null, locale)
-					log.error("saveRequest - EVENT CLOSED - ${msg}")
+                    if(EventVS.State.AWAITING == eventVSElection.state)
+                        msg = messageSource.getMessage('eventVSPendingMsg', null, locale)
+                    else msg = messageSource.getMessage('eventVSClosedMsg', null, locale)
+					log.error("saveRequest - EventVS NOT ACTIVE - ${msg}")
 					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 						type:TypeVS.ACCESS_REQUEST_ERROR, message:msg)
 				}
 				AccessRequestVS.withTransaction {
-					accessRequestVS = AccessRequestVS.findWhere(userVS:signerVS, eventVSElection:eventVSElection, state:TypeVS.OK)
+					accessRequestVS = AccessRequestVS.findWhere(userVS:signerVS, eventVSElection:eventVSElection,
+                            state:TypeVS.OK)
 				}
-				if (accessRequestVS){//Ha votado el usuario?
+				if (accessRequestVS){//Has previous vote???
 						msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
 						log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
-						return new ResponseVS(data:accessRequestVS,
-							type:TypeVS.ACCESS_REQUEST_ERROR, message:msg, eventVS:eventVSElection,
-							statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED)
+						return new ResponseVS(data:accessRequestVS, type:TypeVS.ACCESS_REQUEST_ERROR, message:msg,
+                                eventVS:eventVSElection, statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED)
 				} else {
 					//TimeStamp comes cert validated from filters. Check date
                     Date signatureTime = signerVS.getTimeStampToken()?.getTimeStampInfo().getGenTime()
