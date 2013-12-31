@@ -51,6 +51,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         mViewPager.setAdapter(eventsPagerAdapter);
         cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
                 null, null, null, null);
+        cursor.moveToFirst();
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
                 cursor.moveToPosition(position);
