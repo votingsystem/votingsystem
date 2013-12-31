@@ -157,7 +157,7 @@ class EventVSElectionService {
 				eventVS.save()
 			}
 		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, message:eventVS?.estado?.toString())
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, message:eventVS?.state)
 	}
 	
 	//{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","state":"CANCELLED","UUID":"..."}

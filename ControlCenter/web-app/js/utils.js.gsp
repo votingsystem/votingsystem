@@ -37,14 +37,23 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     	return result;
     }
 
+    if(eventJSON != null) {
+        this.id = eventJSON.id
+        this.dateFinish = eventJSON.dateFinish
+        this.dateBegin = eventJSON.dateBegin
+        this.userVS = eventJSON.userVS
+        this.state = eventJSON.state
+        this.subject = eventJSON.subject
+        this.checkDateURL ="${createLink( controller:'eventVSElection')}/checkDates?id=" + this.id
+        this.isActive = DateUtils.checkDate(this.dateBegin.getDate(), this.dateFinish.getDate())
+        if(EventVS.State.ACTIVE == this.state) {
+            if(!this.isActive) httpGet(this.checkDateURL)
+    	} else if(EventVS.State.AWAITING == this.state) {
+            if(this.isActive) httpGet(this.checkDateURL)
+    	}
+    }
     this.subSystem = subSystem
-    this.id = eventJSON.id
     this.dateCreated
-    this.dateFinish = eventJSON.dateFinish
-    this.dateBegin = eventJSON.dateBegin
-    this.userVS = eventJSON.userVS
-    this.state = eventJSON.state
-    this.isActive = DateUtils.checkDate(this.dateBegin.getDate(), this.dateFinish.getDate())
     this.backupAvailable
     this.type
     this.operation
@@ -63,7 +72,6 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     this.numSignatures
     this.content
     this.fieldsEventVS
-    this.subject = eventJSON.subject
     if(eventTemplate != null) {
         var subjectStr = this.subject.substring(0,50) +  ((this.subject.length > 50)? "...":"");
         this.eventHTML = eventTemplate.format(subjectStr, this.userVS, this.dateBegin,
@@ -102,6 +110,13 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
 
 }
 
+function httpGet(theUrl){
+    var xmlHttp = null;
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
 
 var DateUtils = {
 
