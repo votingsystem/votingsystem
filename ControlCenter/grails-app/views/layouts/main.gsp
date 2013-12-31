@@ -3,7 +3,7 @@
 <head>   
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title><g:message code="serverNameLabel"/></title>
-    <r:external uri="/images/ControlCenter.ico"/>
+    <r:external uri="/images/ControlCenter.png"/>
 	<r:require module="application"/>
 	<g:layoutHead/>
 	<r:layoutResources />
