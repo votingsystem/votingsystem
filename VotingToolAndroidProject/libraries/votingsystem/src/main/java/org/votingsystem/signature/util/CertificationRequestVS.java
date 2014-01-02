@@ -2,26 +2,31 @@ package org.votingsystem.signature.util;
 
 import android.util.Log;
 
+import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
-import org.bouncycastle2.openssl.PEMWriter;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import javax.mail.Header;
-import javax.security.auth.x500.X500Principal;
-import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.mail.Header;
+import javax.security.auth.x500.X500Principal;
 
 /**
 * @author jgzornoza

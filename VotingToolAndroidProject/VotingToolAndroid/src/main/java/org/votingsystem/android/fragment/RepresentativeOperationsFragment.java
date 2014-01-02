@@ -1,11 +1,14 @@
 package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,8 +23,6 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 
@@ -29,7 +30,7 @@ import org.votingsystem.model.ResponseVS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class RepresentativeOperationsFragment extends Fragment implements CertPinDialogListener {
+public class RepresentativeOperationsFragment extends Fragment {
 
 	public static final String TAG = "RepresentativeOperationsFragment";
 
@@ -40,6 +41,18 @@ public class RepresentativeOperationsFragment extends Fragment implements CertPi
     private boolean progressVisible;
     private SendDataTask sendDataTask;
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) {
+                if(sendDataTask != null) sendDataTask.cancel(true);
+                sendDataTask = new SendDataTask(pin);
+                sendDataTask.execute(contextVS.getAccessControl().getUserCSRServiceURL());
+            }
+        }
+    };
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "onCreateView");
@@ -87,10 +100,18 @@ public class RepresentativeOperationsFragment extends Fragment implements CertPi
         Log.d(TAG + ".onStop()", "onStop");
     }
 
-
     @Override public void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
         Log.d(TAG + ".onResume() ", "onResume");
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
     }
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -115,24 +136,9 @@ public class RepresentativeOperationsFragment extends Fragment implements CertPi
 	}
 
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        pinDialog.show(ft, CertPinDialog.TAG);
-    }
-
-    @Override public void setPin(final String pin) {
-        Log.d(TAG + ".setPin()", "setPin");
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.commit();
-        if(pin == null) return;
-        if(sendDataTask != null) sendDataTask.cancel(true);
-        sendDataTask = new SendDataTask(pin);
-        sendDataTask.execute(contextVS.getAccessControl().getUserCSRServiceURL());
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getFragmentManager(), CertPinDialogFragment.TAG);
     }
 
     public void showProgress(boolean shown, boolean animate) {

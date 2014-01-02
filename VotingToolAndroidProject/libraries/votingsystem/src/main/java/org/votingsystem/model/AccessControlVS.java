@@ -1,11 +1,13 @@
 package org.votingsystem.model;
 
 import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
+
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;

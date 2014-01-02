@@ -114,14 +114,12 @@
 
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service is only available to this app. -->
-        <service android:name=".service.SignAndSendService" android:exported="false"
-            android:process=":sign_and_send_service"/>
+        <service android:name=".service.SignAndSendService" android:exported="false"/>
         <service android:name=".service.RssService" android:process=":rss_service"/>
         <service android:name=".service.RepresentativeService"  android:exported="false"/>
         <service android:name=".service.UserCertRequestService"  android:exported="false"/>
         <service android:name=".service.EventVSService"  android:exported="false"/>
         <service android:name=".service.VotingAppService"  android:exported="false"/>
-
 
     </application>
 </manifest>

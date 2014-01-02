@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 
 public class ScreenUtils {

@@ -27,7 +27,7 @@
            android:layout_marginRight="30dp"
            android:layout_gravity="center"
            android:layout_weight="0.43"
-           android:drawableLeft="@drawable/cancel_22x22"
+           android:drawableLeft="@drawable/cancel_22"
            android:text="@string/cancel_vote_lbl"
            android:textStyle="bold" />
        

@@ -1,9 +1,8 @@
 package org.votingsystem.model;
 
 import android.util.Log;
+
 import org.json.JSONObject;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.TypeVS;
 
 import java.util.HashMap;
 import java.util.Map;

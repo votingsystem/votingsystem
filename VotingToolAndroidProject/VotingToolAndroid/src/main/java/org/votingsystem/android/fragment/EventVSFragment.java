@@ -1,12 +1,15 @@
 package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
@@ -29,33 +32,27 @@ import android.widget.TextView;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
-import org.votingsystem.android.callable.PDFSignedSender;
-import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.FileUtils;
 
-import java.io.FileInputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class EventVSFragment extends Fragment implements CertPinDialogListener, View.OnClickListener {
+public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = "EventVSFragment";
 
@@ -63,10 +60,10 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
     private EventVS eventVS;
     private ContextVS contextVS;
     private Map<Integer, EditText> fieldsMap;
-    private ProcessSignatureTask processSignatureTask;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean progressVisible;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
+
 
     public static EventVSFragment newInstance(String eventJSONStr) {
         EventVSFragment fragment = new EventVSFragment();
@@ -76,9 +73,57 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         return fragment;
     }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) launchSignAndSendService(pin);
+            else {
+                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                        ResponseVS.SC_ERROR);
+                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+                showMessage(responseStatusCode, caption, message);
+                if(ResponseVS.SC_OK != responseStatusCode) signAndSendButton.setEnabled(true);
+                showProgress(false, true);
+            }
+        }
+    };
+
+    private void launchSignAndSendService(String pin) {
+        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    SignAndSendService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
+                startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
+            } else {
+                startIntent.putExtra(ContextVS.URL_KEY,
+                        contextVS.getAccessControl().getEventVSClaimCollectorURL());
+                startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
+                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+                String messageSubject = getActivity().getString(R.string.signature_msg_subject)
+                        + eventVS.getSubject();
+                startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
+                JSONObject signatureContent = eventVS.getSignatureContentJSON();
+                signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
+                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
+            }
+            showProgress(true, true);
+            signAndSendButton.setEnabled(false);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         try {
@@ -120,11 +165,12 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         });
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha( 0);
-        progressVisible = false;
+        mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
+        if(savedInstanceState != null && savedInstanceState.getBoolean(
+                ContextVS.LOADING_KEY, false)) showProgress(true, true);
         return rootView;
     }
 
@@ -140,7 +186,6 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         menuInflater.inflate(R.menu.event, menu);
     }
 
-
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
@@ -154,19 +199,20 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         }
     }
 
-
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", " - onDestroy");
-        if(processSignatureTask != null) processSignatureTask.cancel(true);
     };
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+    }
 
     @Override public void onStop() {
         super.onStop();
         Log.d(TAG + ".onStop()", " - onStop");
-        if(processSignatureTask != null) processSignatureTask.cancel(true);
     }
-
 
     public void onClickSubject(View v) {
         Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
@@ -181,7 +227,8 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
     private void showCertNotFoundDialog() {
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(ContextVS.CERT_NOT_FOUND_DIALOG_ID);
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
+                ContextVS.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
@@ -189,37 +236,17 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
-
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null)  ft.remove(prev);
-        //ft.addToBackStack(null);
-        pinDialog.show(ft, CertPinDialog.TAG);
-    }
-
-    @Override public void setPin(final String pin) {
-        Log.d(TAG + ".setPin(...)", " --- setPin");
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.commit();
-        if(pin == null) {
-            Log.d(TAG + ".setPin()", "--- setPin - pin null");
-            return;
-        }
-        if(processSignatureTask != null) processSignatureTask.cancel(true);
-        processSignatureTask = new ProcessSignatureTask(pin);
-        processSignatureTask.execute();
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getFragmentManager(), CertPinDialogFragment.TAG);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible == showProgress)  return;
-        progressVisible = showProgress;
-        if (progressVisible) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if (progressVisible.get()) {
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_in));
@@ -255,7 +282,6 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
             });
         }
     }
-
 
     private void showClaimFieldsDialog() {
         Log.d(TAG + ".showClaimFieldsDialog(...)", " - showClaimFieldsDialog");
@@ -304,8 +330,6 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         });
     }
 
-
-
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
         Log.d(TAG + ".addFormField(...)", " - addFormField - field: " + label);
         TextView tvLabel = new TextView(getActivity().getApplicationContext());
@@ -325,7 +349,6 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         fieldsMap.put(id, editView);
     }
 
-
     private LinearLayout.LayoutParams getDefaultParams(boolean isLabel) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -338,82 +361,26 @@ public class EventVSFragment extends Fragment implements CertPinDialogListener, 
         return params;
     }
 
-    private void showMessage(String caption, String message) {
+    private void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "caption: " + caption + " - showMessage: " + message);
-        AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-        builder.setTitle(caption).setMessage(message).show();
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
     }
 
-    private class ProcessSignatureTask extends AsyncTask<URL, Integer, ResponseVS> {
-
-        private String pin = null;
-
-        public ProcessSignatureTask(String pin) {
-            this.pin = pin;
-        }
-
-        protected ResponseVS doInBackground(URL... urls) {
-            Log.d(TAG + ".ProcessSignatureTask.doInBackground(...)",
-                    " - doInBackground - event type: " + eventVS.getTypeVS());
-            try {
-                ResponseVS responseVS = null;
-                byte[] keyStoreBytes = null;
-                FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
-                keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-                if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
-                    PDFSignedSender PDFSignedSender = new PDFSignedSender(
-                            contextVS.getAccessControl().getEventVSManifestURL(
-                                    eventVS.getEventVSId()),
-                            contextVS.getAccessControl().getEventVSManifestCollectorURL(
-                                    eventVS.getEventVSId()),
-                            keyStoreBytes, pin.toCharArray(), null, null,
-                            getActivity().getApplicationContext());
-                    responseVS = PDFSignedSender.call();
-                } else if(eventVS.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
-                    String subject = getActivity().getString(R.string.signature_msg_subject)
-                            + eventVS.getSubject();
-                    JSONObject signatureContent = eventVS.getSignatureContentJSON();
-                    signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
-                    String serviceURL = contextVS.getAccessControl().getEventVSClaimCollectorURL();
-                    SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                            signatureContent.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                            subject,keyStoreBytes, pin.toCharArray(),
-                            contextVS.getAccessControl().getCertificate(),
-                            getActivity().getApplicationContext());
-                    responseVS = smimeSignedSender.call();
-                }
-                return responseVS;
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                return new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
-            }
-        }
-
-        protected void onPreExecute() {
-            Log.d(TAG + ".ProcessSignatureTask.onPreExecute(...)", " --- onPreExecute");
-            getActivity().getWindow().getDecorView().findViewById(
-                    android.R.id.content).invalidate();
-            showProgress(true, true);
-            signAndSendButton.setEnabled(false);
-        }
-
-        // This is called each time you call publishProgress()
-        protected void onProgressUpdate(Integer... progress) { }
-
-        protected void onPostExecute(ResponseVS response) {
-            Log.d(TAG + ".ProcessSignatureTask.onPostExecute(...)", " - onPostExecute - status:" +
-                    response.getStatusCode());
-            showProgress(false, true);
-            if(ResponseVS.SC_OK == response.getStatusCode()) {
-                Log.d(TAG + ".ProcessSignatureTask.onPostExecute(...)", "- response.getMessage():" +
-                        response.getMessage());
-                showMessage(getString(R.string.operation_ok_msg), getString(R.string.operation_ok_msg));
-            } else {
-                showMessage(getString(R.string.error_lbl), response.getMessage());
-                signAndSendButton.setEnabled(true);
-            }
-        }
-
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+        Log.d(TAG + ".onResume() ", "onResume");
     }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
+
 }
 

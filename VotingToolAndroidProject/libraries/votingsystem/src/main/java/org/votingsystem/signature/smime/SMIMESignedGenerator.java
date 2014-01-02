@@ -7,12 +7,35 @@ import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle2.cms.*;
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSSignedDataStreamGenerator;
+import org.bouncycastle2.cms.SignerInfoGenerator;
+import org.bouncycastle2.cms.SignerInformation;
+import org.bouncycastle2.cms.SignerInformationStore;
 import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.SMIMEStreamingProcessor;
 import org.bouncycastle2.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle2.util.Store;
 import org.bouncycastle2.x509.X509Store;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -22,13 +45,6 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.*;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.X509Certificate;
-import java.util.*;
 
 /**
  * general class for generating a pkcs7-signature message.

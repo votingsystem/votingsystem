@@ -18,13 +18,16 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -51,8 +54,6 @@ import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.android.ui.CancelVoteDialog;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.android.ui.VotingResultDialog;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -77,8 +78,7 @@ import java.util.Set;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
-public class VotingEventFragment extends Fragment implements CertPinDialogListener,
-        View.OnClickListener {
+public class VotingEventFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = "VotingEventFragment";
 
@@ -98,6 +98,33 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private FrameLayout mainLayout;
     private boolean progressVisible;
     private ProcessSignatureTask processSignatureTask;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) launchVoteService(pin);
+            else {
+
+            }
+        }
+    };
+
+    private void launchVoteService(String pin) {
+        X509Certificate controlCenterCert = contextVS.getCert(eventVS.getControlCenter().getServerURL());
+        if(eventVS.getControlCenter().getCertificate() == null && controlCenterCert == null) {
+            GetCertTask getCertTask = new GetCertTask(pin, eventVS.getControlCenter());
+            getCertTask.execute();
+        } else {
+            if(eventVS.getControlCenter().getCertificate() == null) {
+                eventVS.getControlCenter().setCertificate(controlCenterCert);
+            }
+            if(processSignatureTask != null) processSignatureTask.cancel(true);
+            processSignatureTask = new ProcessSignatureTask(pin);
+            processSignatureTask.execute();
+        }
+    }
 
     public static EventVSFragment newInstance(String eventJSONStr) {
         EventVSFragment fragment = new EventVSFragment();
@@ -302,7 +329,16 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
 
     @Override public void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
         Log.d(TAG + ".onResume() ", "onResume");
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
     }
 
     private void showCertNotFoundDialog() {
@@ -359,40 +395,9 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     }
 
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
-        pinDialog.show(ft, CertPinDialog.TAG);
-    }
-
-    @Override public void setPin(final String pin) {
-        Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.commit();
-        if(pin == null) {
-            Log.d(TAG + ".setPin()", "--- setPin - pin null");
-            return;
-        }
-        X509Certificate controlCenterCert = contextVS.getCert(eventVS.getControlCenter().getServerURL());
-        if(eventVS.getControlCenter().getCertificate() == null && controlCenterCert == null) {
-            GetCertTask getCertTask = new GetCertTask(pin, eventVS.getControlCenter());
-            getCertTask.execute();
-        } else {
-            if(eventVS.getControlCenter().getCertificate() == null) {
-                eventVS.getControlCenter().setCertificate(controlCenterCert);
-            }
-            if(processSignatureTask != null) processSignatureTask.cancel(true);
-            processSignatureTask = new ProcessSignatureTask(pin);
-            processSignatureTask.execute();
-        }
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getFragmentManager(), CertPinDialogFragment.TAG);
     }
 
     @Override public void onDestroy() {

@@ -18,13 +18,16 @@ package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -37,8 +40,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.fragment.CertPinDialogFragment;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -61,8 +63,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 
-public class UserCertResponseActivity extends ActionBarActivity
-	implements CertPinDialogListener {
+public class UserCertResponseActivity extends ActionBarActivity {
 	
 	public static final String TAG = "UserCertResponseActivity";
 	
@@ -78,7 +79,50 @@ public class UserCertResponseActivity extends ActionBarActivity
     private Button insertPinButton;
     private Button requestCertButton;
     private ContextVS contextVS;
-    
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) updateKeyStore(pin);
+        }
+    };
+
+    private void updateKeyStore (String pin) {
+        Log.d(TAG + ".updateKeyStore(...)", "");
+        if (csrSigned == null) {
+            setMessage(getString(R.string.cert_install_error_msg));
+        } else {
+            try {
+                FileInputStream fis = openFileInput(KEY_STORE_FILE);
+                byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+                KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
+                        keyStoreBytes, pin.toCharArray());
+                PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS,
+                        pin.toCharArray());
+                Collection<X509Certificate> certificates =
+                        CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
+                Log.d(TAG + ".updateKeyStore(...)", "certificates.size(): " + certificates.size());
+                X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
+                certificates.toArray(arrayCerts);
+                keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, pin.toCharArray(), arrayCerts);
+                keyStoreBytes = KeyStoreUtil.getBytes(keyStore, pin.toCharArray());
+                FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
+                fos.write(keyStoreBytes);
+                fos.close();
+                contextVS.setState(ContextVS.State.WITH_CERTIFICATE);
+                setMessage(getString(R.string.request_cert_result_activity_ok));
+                insertPinButton.setVisibility(View.GONE);
+                requestCertButton.setVisibility(View.GONE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showException(getString(R.string.pin_error_msg));
+            }
+        }
+        goAppButton.setVisibility(View.VISIBLE);
+    }
+
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.user_cert_response_activity);
@@ -192,46 +236,25 @@ public class UserCertResponseActivity extends ActionBarActivity
 	    		return super.onOptionsItemSelected(item);    
 		}
 	}
-	
-    private void showPinScreen(String message) {
-    	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag("pinDialog");
-	    if (prev != null) {
-	        ft.remove(prev);
-	    }
-	    ft.addToBackStack(null);
-	    pinDialog.show(ft, "pinDialog");
+
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+        Log.d(TAG + ".onResume() ", "onResume");
     }
-    
-    private boolean updateKeyStore (char[] password) {
-    	Log.d(TAG + ".updateKeyStore(...)", "");
-    	if (csrSigned == null) {
-    		Log.d(TAG + ".updateKeyStore(...)", " - csrSigned: " + csrSigned);
-    		return false;
-    	}
-    	try {
-    		FileInputStream fis = openFileInput(KEY_STORE_FILE);
-			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-			PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
-	        Collection<X509Certificate> certificates =
-                    CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
-	        Log.d(TAG + ".updateKeyStore(...)", "certificates.size(): " + certificates.size());
-	        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
-	        certificates.toArray(arrayCerts);
-	        keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, password, arrayCerts);
-	        keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password);
-	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
-	        fos.write(keyStoreBytes);
-	        fos.close();
-            contextVS.setState(ContextVS.State.WITH_CERTIFICATE);
-    		return true;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			showException(getString(R.string.pin_error_msg));
-    		return false;
-		}
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
+
+    private void showPinScreen(String message) {
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getSupportFragmentManager(), CertPinDialogFragment.TAG);
     }
     
     private void setMessage(String message) {
@@ -249,26 +272,9 @@ public class UserCertResponseActivity extends ActionBarActivity
 		.setPositiveButton(getString(R.string.ok_button), null).show();
 	}
 
-	@Override public void setPin(String pin) {
-		if(pin != null) {
-			if(updateKeyStore(pin.toCharArray())) {
-				setMessage(getString(R.string.request_cert_result_activity_ok));
-			    insertPinButton.setVisibility(View.GONE);
-			    requestCertButton.setVisibility(View.GONE);
-			} else {
-				setMessage(getString(
-						R.string.cert_install_error_msg));
-			}
-		} else {
-			setMessage(getString(R.string.cert_install_error_msg));
-		} 
-		goAppButton.setVisibility(View.VISIBLE);
-	}
-
     public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
 
         public static final String TAG = "GetDataTask";
-
 
         private ContentTypeVS contentType = null;
 
@@ -280,11 +286,13 @@ public class UserCertResponseActivity extends ActionBarActivity
             showProgressDialog(getString(R.string.connecting_caption), getString(R.string.cert_state_msg));
         }
 
-        @Override
-        protected ResponseVS doInBackground(String... urls) {
+        @Override protected ResponseVS doInBackground(String... urls) {
             Log.d(TAG + ".doInBackground", " - url: " + urls[0]);
             return  HttpHelper.getData(urls[0], contentType);
         }
+
+        // This is called each time you call publishProgress()
+        protected void onProgressUpdate(Integer... progress) { }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             Log.d(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());

@@ -1,14 +1,17 @@
 package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
@@ -32,8 +35,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.fragment.CertPinDialogFragment;
 import org.votingsystem.android.ui.ReceiptOperationsListener;
 import org.votingsystem.android.ui.ReceiptOptionsDialog;
 import org.votingsystem.model.ContentTypeVS;
@@ -58,8 +60,7 @@ import java.util.List;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
-public class VoteReceiptListActivity extends ActionBarActivity
-        implements CertPinDialogListener, ReceiptOperationsListener {
+public class VoteReceiptListActivity extends ActionBarActivity implements ReceiptOperationsListener{
 
     public static final String TAG = "VoteReceiptListActivity";
 
@@ -75,8 +76,20 @@ public class VoteReceiptListActivity extends ActionBarActivity
     private boolean progressVisible;
     private ProcessSignatureTask processSignatureTask;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) {
+                if(processSignatureTask != null) processSignatureTask.cancel(true);
+                processSignatureTask = new ProcessSignatureTask(pin);
+                processSignatureTask.execute();
+            }
+        }
+    };
+
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate ");
         setContentView(R.layout.vote_receipt_list);
@@ -127,20 +140,14 @@ public class VoteReceiptListActivity extends ActionBarActivity
         optionsDialog.show(ft, OPTIONS_DIALOG_ID);
     }
 
-
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
-        pinDialog.show(ft, "pinDialog");
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getSupportFragmentManager(), CertPinDialogFragment.TAG);
     }
 
     private void refreshReceiptList() {
-        Log.d(TAG + ".refreshReceiptList(...)", " --- refreshReceiptList");
+        Log.d(TAG + ".refreshReceiptList(...)", "refreshReceiptList");
         try {
             voteVSList = db.getVoteReceiptList();
             if(voteVSList.size() == 0)
@@ -156,10 +163,9 @@ public class VoteReceiptListActivity extends ActionBarActivity
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
-                Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
                 Intent intent = new Intent(this, NavigationDrawer.class);
                 startActivity(intent);
                 this.finish();
@@ -287,17 +293,6 @@ public class VoteReceiptListActivity extends ActionBarActivity
         builder.setTitle(caption).setMessage(message).show();
     }
 
-
-
-    @Override public void setPin(final String pin) {
-        Log.d(TAG + ".setPin()", "--- setPin - ");
-        if(pin != null) {
-            if(processSignatureTask != null) processSignatureTask.cancel(true);
-            processSignatureTask = new ProcessSignatureTask(pin);
-            processSignatureTask.execute();
-        }
-    }
-
     @Override public void cancelVote(VoteVS receipt) {
         Log.d(TAG + ".cancelVote(...)", " - cancelVote");
         operationReceipt = receipt;
@@ -332,6 +327,19 @@ public class VoteReceiptListActivity extends ActionBarActivity
         certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+        Log.d(TAG + ".onResume() ", "onResume");
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
 
     @Override public void removeReceipt(VoteVS receipt) {
         Log.d(TAG + ".removeReceipt()", " --- receipt: " + receipt.getId());

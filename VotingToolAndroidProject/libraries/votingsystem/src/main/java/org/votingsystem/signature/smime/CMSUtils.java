@@ -1,6 +1,14 @@
 package org.votingsystem.signature.smime;
 
-import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.ASN1EncodableVector;
+import org.bouncycastle2.asn1.ASN1InputStream;
+import org.bouncycastle2.asn1.ASN1Object;
+import org.bouncycastle2.asn1.ASN1Set;
+import org.bouncycastle2.asn1.BEROctetStringGenerator;
+import org.bouncycastle2.asn1.BERSet;
+import org.bouncycastle2.asn1.DEREncodable;
+import org.bouncycastle2.asn1.DERNull;
+import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle2.asn1.cms.SignerIdentifier;
@@ -19,23 +27,33 @@ import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.io.Streams;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.cert.CRLException;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.*;
-import java.security.cert.*;
-import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
 
 /**
 * @author jgzornoza

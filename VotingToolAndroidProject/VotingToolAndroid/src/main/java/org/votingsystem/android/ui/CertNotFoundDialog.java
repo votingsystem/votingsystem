@@ -20,10 +20,8 @@ public class CertNotFoundDialog  extends DialogFragment {
 	public static final String TAG = "CertNotFoundDialog";
 
     public CertNotFoundDialog() { }
-
     
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.cert_not_found_dialog, container);
         TextView msgTextView = (TextView) view.findViewById(R.id.msg);

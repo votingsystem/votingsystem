@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import android.util.Log;
+
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailValidator;

@@ -1,6 +1,5 @@
 package org.votingsystem.signature.util;
 
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.votingsystem.model.ContextVS;
 

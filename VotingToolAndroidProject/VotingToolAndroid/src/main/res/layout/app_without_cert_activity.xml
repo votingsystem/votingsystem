@@ -28,7 +28,7 @@
             android:layout_marginLeft="30dp"
             android:layout_marginRight="20dp"
             android:layout_weight="1"
-            android:drawableLeft="@drawable/cancel_22x22"
+            android:drawableLeft="@drawable/cancel_22"
             android:text="@string/cancel_lbl"
             android:textStyle="bold" />
 
@@ -39,7 +39,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="30dp"
             android:layout_weight="1"
-            android:drawableLeft="@drawable/accept_22x22"
+            android:drawableLeft="@drawable/accept_22"
             android:maxWidth="100dp"
             android:text="@string/request_lbl"
             android:textStyle="bold" />

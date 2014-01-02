@@ -1,7 +1,13 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
-import org.bouncycastle2.cms.*;
+
+import org.bouncycastle2.cms.CMSAlgorithm;
+import org.bouncycastle2.cms.KeyTransRecipientId;
+import org.bouncycastle2.cms.Recipient;
+import org.bouncycastle2.cms.RecipientId;
+import org.bouncycastle2.cms.RecipientInformation;
+import org.bouncycastle2.cms.RecipientInformationStore;
 import org.bouncycastle2.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientId;
@@ -19,6 +25,27 @@ import org.votingsystem.model.EncryptedBundleVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.KeySpec;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -32,27 +59,6 @@ import javax.mail.Header;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.KeySpec;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 /**
 * @author jgzornoza

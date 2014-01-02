@@ -1,18 +1,30 @@
 package org.votingsystem.signature.smime;
 
 import android.util.Log;
+
 import com.sun.mail.util.BASE64DecoderStream;
+
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.ASN1InputStream;
+import org.bouncycastle2.asn1.ASN1OctetString;
+import org.bouncycastle2.asn1.DEREncodable;
+import org.bouncycastle2.asn1.DERObject;
+import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.DERUTCTime;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSAttributes;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle2.cms.*;
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSProcessable;
+import org.bouncycastle2.cms.CMSSignedData;
+import org.bouncycastle2.cms.SignerInformation;
+import org.bouncycastle2.cms.SignerInformationStore;
+import org.bouncycastle2.cms.SignerInformationVerifier;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.SMIMESigned;
@@ -25,21 +37,46 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.security.cert.PKIXParameters;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import javax.activation.CommandMap;
 import javax.activation.FileDataSource;
 import javax.activation.MailcapCommandMap;
-import javax.mail.*;
+import javax.mail.Address;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedByteArrayInputStream;
-import java.io.*;
-import java.security.cert.PKIXParameters;
-import java.security.cert.X509Certificate;
-import java.util.*;
 
-import static org.votingsystem.model.ContextVS.*;
+import static org.votingsystem.model.ContextVS.DEFAULT_SIGNED_FILE_NAME;
+import static org.votingsystem.model.ContextVS.PROVIDER;
 
 
 /**

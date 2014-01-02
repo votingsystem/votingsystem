@@ -1,6 +1,7 @@
 package org.votingsystem.signature.smime;
 
 import android.util.Log;
+
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.smime.SMIMECapabilitiesAttribute;
@@ -14,13 +15,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 
-import javax.mail.Address;
-import javax.mail.Header;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -29,6 +23,14 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
+import javax.mail.Address;
+import javax.mail.Header;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 
 /**
 * @author jgzornoza

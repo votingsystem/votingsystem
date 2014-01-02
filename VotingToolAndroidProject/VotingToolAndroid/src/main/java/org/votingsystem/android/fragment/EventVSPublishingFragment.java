@@ -1,12 +1,16 @@
 package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -28,8 +32,6 @@ import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.android.ui.JavaScriptInterface;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
@@ -54,7 +56,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class EventVSPublishingFragment extends Fragment implements CertPinDialogListener {
+public class EventVSPublishingFragment extends Fragment {
 	
 	public static final String TAG = "EventVSPublishingFragment";
 
@@ -72,6 +74,19 @@ public class EventVSPublishingFragment extends Fragment implements CertPinDialog
     private boolean progressVisible;
     private PublishTask publishTask;
     private View rootView;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) {
+                if(publishTask != null) publishTask.cancel(true);
+                publishTask = new PublishTask(pin);
+                publishTask.execute();
+            }
+        }
+    };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -179,6 +194,13 @@ public class EventVSPublishingFragment extends Fragment implements CertPinDialog
 		}
 	}
 
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
+
     @Override public void onDestroy() {
         super.onDestroy();
     	Log.d(TAG + ".onDestroy()", "onDestroy");
@@ -186,12 +208,9 @@ public class EventVSPublishingFragment extends Fragment implements CertPinDialog
     }
 
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        pinDialog.show(ft, CertPinDialog.TAG);
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getFragmentManager(), CertPinDialogFragment.TAG);
     }
 
     //This is for JavaScriptInterface.java operation processing
@@ -252,18 +271,6 @@ public class EventVSPublishingFragment extends Fragment implements CertPinDialog
 		builder.setTitle(caption).setMessage(Html.fromHtml((message == null? "" : message))).show();
 	}
 
-	@Override public void setPin(String pin) {
-        Log.d(TAG + ".setPin()", "setPin");
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.commit();
-        if(pin == null) return;
-        if(publishTask != null) publishTask.cancel(true);
-        publishTask = new PublishTask(pin);
-        publishTask.execute();
-	}
-
     @Override public void onStop() {
         super.onStop();
         Log.d(TAG + ".onStop()", "onStop");
@@ -272,6 +279,8 @@ public class EventVSPublishingFragment extends Fragment implements CertPinDialog
 
     @Override public void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
         Log.d(TAG + ".onResume() ", "onResume");
     }
 

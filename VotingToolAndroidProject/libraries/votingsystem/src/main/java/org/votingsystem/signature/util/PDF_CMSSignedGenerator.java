@@ -3,10 +3,30 @@ package org.votingsystem.signature.util;
 
 import android.util.Base64;
 import android.util.Log;
-import org.bouncycastle2.asn1.*;
-import org.bouncycastle2.asn1.cms.*;
+
+import org.bouncycastle2.asn1.ASN1EncodableVector;
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.ASN1OctetString;
+import org.bouncycastle2.asn1.ASN1Set;
+import org.bouncycastle2.asn1.BERConstructedOctetString;
+import org.bouncycastle2.asn1.DERNull;
+import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.cms.AttributeTable;
+import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle2.asn1.cms.ContentInfo;
+import org.bouncycastle2.asn1.cms.SignedData;
+import org.bouncycastle2.asn1.cms.SignerInfo;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.cms.*;
+import org.bouncycastle2.cms.CMSAttributeTableGenerator;
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSProcessable;
+import org.bouncycastle2.cms.CMSProcessableByteArray;
+import org.bouncycastle2.cms.CMSSignedData;
+import org.bouncycastle2.cms.CMSSignedGenerator;
+import org.bouncycastle2.cms.DefaultSignedAttributeTableGenerator;
+import org.bouncycastle2.cms.SignerInfoGenerator;
+import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.smime.CMSUtils;
@@ -22,7 +42,12 @@ import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
 	

@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,15 +26,13 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.SignAndSendService;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContextVS;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class RepresentativeFragment extends Fragment implements CertPinDialogListener {
+public class RepresentativeFragment extends Fragment {
 
 	public static final String TAG = "RepresentativeFragment";
 
@@ -43,9 +40,41 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) launchSignAndSendService(pin);
 
         }
     };
+
+    private void launchSignAndSendService(String pin) {
+        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    SignAndSendService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            //startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            /*if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
+                startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
+            } else {
+                startIntent.putExtra(ContextVS.URL_KEY,
+                        contextVS.getAccessControl().getEventVSClaimCollectorURL());
+                startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
+                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+                String messageSubject = getActivity().getString(R.string.signature_msg_subject)
+                        + eventVS.getSubject();
+                startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
+                JSONObject signatureContent = eventVS.getSignatureContentJSON();
+                signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
+                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
+            }*/
+            showProgress(true, true);
+            //signAndSendButton.setEnabled(false);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     private ContextVS contextVS;
     private TextView progressMessage;
@@ -127,10 +156,18 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         super.onStop();
     }
 
-
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+        Log.d(TAG + ".onResume() ", "onResume");
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
     }
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -153,28 +190,10 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
 		builder.setTitle(caption).setMessage(message).show();
 	}
 
-
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        pinDialog.show(ft, CertPinDialog.TAG);
-    }
-
-    @Override public void setPin(final String pin) {
-        Log.d(TAG + ".setPin()", "setPin");
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.commit();
-        if(pin == null) return;
-        Intent signAndSendServiceIntent = new Intent(getActivity().getApplicationContext(),
-                SignAndSendService.class);
-        signAndSendServiceIntent.putExtra(ContextVS.PIN_KEY, pin);
-        getActivity().startService(signAndSendServiceIntent);
-        showProgress(true, true);
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getFragmentManager(), CertPinDialogFragment.TAG);
     }
 
     public void showProgress(boolean shown, boolean animate) {

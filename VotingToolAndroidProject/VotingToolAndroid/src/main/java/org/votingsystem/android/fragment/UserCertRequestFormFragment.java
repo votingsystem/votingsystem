@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.text.Html;
@@ -34,16 +33,12 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.service.UserCertRequestService;
-import org.votingsystem.android.ui.CertPinDialog;
-import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.NifUtils;
-
 import java.text.Normalizer;
 import java.util.UUID;
 
@@ -70,7 +65,6 @@ public class UserCertRequestFormFragment extends Fragment {
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean progressVisible = false;
-    private AlertDialog alertDialog;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -87,7 +81,7 @@ public class UserCertRequestFormFragment extends Fragment {
                     Intent resultIntent = new Intent(getActivity().getApplicationContext(),
                             UserCertResponseActivity.class);
                     startActivity(resultIntent);
-                } else showMessage(caption, message);
+                } else showMessage(responseStatusCode, caption, message);
             }
         }
     };
@@ -102,7 +96,7 @@ public class UserCertRequestFormFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateView(...)", "");
+        Log.d(TAG + ".onCreateView(...)", "progressVisible: " + progressVisible);
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
@@ -175,7 +169,6 @@ public class UserCertRequestFormFragment extends Fragment {
     @Override public void onStop() {
         super.onStop();
         Log.d(TAG + ".onStop()", "onStop");
-        if(alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
     }
 
     @Override public void onResume() {
@@ -228,22 +221,25 @@ public class UserCertRequestFormFragment extends Fragment {
       	}
     }
 
-	private void showMessage(String caption, String message) {
-		Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
-		AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-        alertDialog = builder.setTitle(caption).setMessage(message).show();
+    private void showMessage(Integer statusCode, String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + " - showMessage: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
         showProgress(false, true);
-	}
+    }
 
     private boolean validateForm () {
     	Log.d(TAG + ".validateForm", "validateForm");
         nif = NifUtils.validate(nifText.getText().toString());
     	if(nif == null) {
-    		showMessage(getString(R.string.error_lbl), getString(R.string.nif_error));
+    		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.nif_error));
     		return false;
     	}
     	if(TextUtils.isEmpty(givennameText.getText().toString())){
-    		showMessage(getString(R.string.error_lbl), getString(R.string.givenname_missing_msg));
+    		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.givenname_missing_msg));
     		return false;
     	} else {
             givenname = Normalizer.normalize(givennameText.getText().toString().toUpperCase(),
@@ -251,7 +247,8 @@ public class UserCertRequestFormFragment extends Fragment {
             givenname  = givenname.replaceAll("[^\\p{ASCII}]", "");
         }
     	if(TextUtils.isEmpty(surnameText.getText().toString())){
-    		showMessage(getString(R.string.error_lbl), getString(R.string.surname_missing_msg));
+    		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.surname_missing_msg));
     		return false;
     	} else {
             surname = Normalizer.normalize(surnameText.getText().toString().toUpperCase(),
@@ -291,12 +288,9 @@ public class UserCertRequestFormFragment extends Fragment {
     }
 
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, false, this.getClass().getName());
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        pinDialog.show(ft, CertPinDialog.TAG);
+        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+                message, false, this.getClass().getName());
+        pinDialog.show(getFragmentManager(), CertPinDialogFragment.TAG);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {

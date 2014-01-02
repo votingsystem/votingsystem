@@ -3,12 +3,17 @@ package org.votingsystem.signature.util;
 import org.bouncycastle2.openssl.PEMReader;
 import org.bouncycastle2.openssl.PEMWriter;
 
-import java.io.*;
-import java.security.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.security.Key;
+import java.security.KeyPair;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Collection;
 
 /**

@@ -1,18 +1,26 @@
 package org.votingsystem.signature.util;
 
-import android.util.Log;
 import org.bouncycastle2.asn1.ocsp.OCSPResponseStatus;
-import org.bouncycastle2.ocsp.*;
+import org.bouncycastle2.ocsp.BasicOCSPResp;
+import org.bouncycastle2.ocsp.CertificateID;
+import org.bouncycastle2.ocsp.CertificateStatus;
+import org.bouncycastle2.ocsp.OCSPReq;
+import org.bouncycastle2.ocsp.OCSPReqGenerator;
+import org.bouncycastle2.ocsp.OCSPResp;
+import org.bouncycastle2.ocsp.RevokedStatus;
+import org.bouncycastle2.ocsp.SingleResp;
+import org.bouncycastle2.ocsp.UnknownStatus;
+import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.CertificateVS;
-import java.io.*;
+
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 

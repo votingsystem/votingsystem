@@ -1,6 +1,7 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
+
 import org.bouncycastle2.asn1.ASN1Set;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cms.Attribute;
@@ -25,16 +26,35 @@ import org.bouncycastle2.x509.X509V3CertificateGenerator;
 import org.bouncycastle2.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.SubjectKeyIdentifierStructure;
 
-import javax.mail.MessagingException;
-import javax.security.auth.x500.X500Principal;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderException;
+import java.security.cert.CertPathBuilderResult;
+import java.security.cert.CertStore;
+import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509CertSelector;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;
+
+import javax.mail.MessagingException;
+import javax.security.auth.x500.X500Principal;
 
 /**
 * @author jgzornoza

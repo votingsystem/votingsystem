@@ -78,8 +78,11 @@ public class UserCertRequestService extends IntentService {
                 editor.commit();
                 contextVS.setState(State.WITH_CSR);
             }
-            sendMessage(responseVS.getStatusCode(), getString(R.string.alert_exception_caption),
-                    responseVS.getMessage(), serviceCaller);
+            String caption = null;
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                caption = getString(R.string.operation_ok_msg);
+            } else caption = getString(R.string.operation_error_msg);
+            sendMessage(responseVS.getStatusCode(), caption, responseVS.getMessage(),serviceCaller);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

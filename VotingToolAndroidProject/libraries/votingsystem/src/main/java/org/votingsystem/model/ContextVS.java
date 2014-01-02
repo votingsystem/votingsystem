@@ -2,7 +2,6 @@ package org.votingsystem.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
@@ -47,8 +46,6 @@ public class ContextVS {
     public static final String EVENT_KEY                   = "eventKey";
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
-
-
     public static final String SIGNED_FILE_NAME           = "signedFile";
     public static final String CSR_FILE_NAME              = "csr";
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
@@ -70,6 +67,7 @@ public class ContextVS {
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
     public static final String OFFSET_KEY = "OFFSET";
     public static final String CAPTION_KEY = "CAPTION";
@@ -77,6 +75,7 @@ public class ContextVS {
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
+    public static final String CONTENT_TYPE_KEY = "CONTENT_TYPE_KEY";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
     public static final String EVENT_TYPE_KEY  = "EVENT_TYPE";
