@@ -90,7 +90,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 					voteVS.getEncryptedKey());
 		}
 		byte[] jsonDataBytes = null;
-		String jsonDataStr = voteVS.toJSONString();
+		String jsonDataStr = voteVS.toJSON().toString();
 		//Log.d(TAG + ".insertVoteReceipt(...)", "===== jsonDataStr: " + jsonDataStr);
 		if(jsonDataStr != null) jsonDataBytes = jsonDataStr.getBytes();
 		values.put(KEY_COL, receiptKey);
@@ -183,7 +183,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		if(voteVS.getCancelVoteReceipt() != null)
 			values.put(CANCEL_VOTE_RECEIPT_SMIME_COL, 
 					voteVS.getCancelVoteReceipt().getBytes());
-		values.put(JSON_DATA_COL, voteVS.toJSONString());
+		values.put(JSON_DATA_COL, voteVS.toJSON().toString());
 	    values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
 		db.update(TABLE_NAME, values, ID_COL + " = ?",new String[] {String.valueOf(voteVS.getId())});
 		db.close();

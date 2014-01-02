@@ -105,7 +105,6 @@ public class EventVSGridFragment extends Fragment
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
         progressVisible = new AtomicBoolean(false);
-        getLoaderManager().initLoader(loaderId, null, this);
     };
 
     /*
@@ -160,6 +159,7 @@ public class EventVSGridFragment extends Fragment
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);

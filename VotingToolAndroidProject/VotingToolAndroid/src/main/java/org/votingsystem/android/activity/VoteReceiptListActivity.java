@@ -127,7 +127,7 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
 
 
     private void launchOptionsDialog(VoteVS receipt) {
-        String caption = receipt.getVoto().getSubject();
+        String caption = receipt.getVote().getSubject();
         String msg = getString(R.string.receipt_options_dialog_msg);
         ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
                 caption, msg, receipt, this);
@@ -246,27 +246,27 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                 TextView author = (TextView) view.findViewById(R.id.event_author);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
 
-                subject.setText(voteVS.getVoto().getSubject());
+                subject.setText(voteVS.getVote().getSubject());
                 String dateInfoStr = null;
                 ImageView imgView = (ImageView)view.findViewById(R.id.event_state_icon);
-                if(DateUtils.getTodayDate().after(voteVS.getVoto().getDateFinish())) {
+                if(DateUtils.getTodayDate().after(voteVS.getVote().getDateFinish())) {
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getContext().getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getContext().getString(R.string.inicio_lbl) + "</b>: " +
                             DateUtils.getShortSpanishStringFromDate(
-                                    voteVS.getVoto().getDateBegin()) + " - " +
+                                    voteVS.getVote().getDateBegin()) + " - " +
                             "<b>" + getContext().getString(R.string.fin_lbl) + "</b>: " +
-                            DateUtils.getShortSpanishStringFromDate(voteVS.getVoto().getDateFinish());
+                            DateUtils.getShortSpanishStringFromDate(voteVS.getVote().getDateFinish());
                 } else {
                     imgView.setImageResource(R.drawable.open);
-                    dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl,
-                            DateUtils.getElpasedTimeHoursFromNow(voteVS.getVoto().getDateFinish()))  +"</b>";
+                    dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl, DateUtils.
+                            getElpasedTimeHoursFromNow(voteVS.getVote().getDateFinish()))  +"</b>";
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
                 if(voteVS.isCanceled()) {
-                    Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - voteVS: " + voteVS.getId()
-                            + " -position: " + position + " - isCanceled");
+                    Log.d(TAG + ".ReceiptListAdapter.getView(...)", "voteVS: " + voteVS.getId()
+                            + " - position: " + position + " - isCanceled");
                     receiptState.setText(getContext().getString(R.string.vote_canceled_receipt_lbl));
                     receiptState.setVisibility(View.VISIBLE);
                 } else {
@@ -274,12 +274,10 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                             + " -position: " + position);
                     receiptState.setVisibility(View.GONE);
                 }
-
-                //Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - UserVS: " + voteVS.getVoto().getUserVS());
-                if(voteVS.getVoto().getUserVS() != null && !"".equals(
-                        voteVS.getVoto().getUserVS().getFullName())) {
+                if(voteVS.getVote().getUserVS() != null && !"".equals(
+                        voteVS.getVote().getUserVS().getFullName())) {
                     String authorStr =  "<b>" + getContext().getString(R.string.author_lbl) + "</b>: " +
-                            voteVS.getVoto().getUserVS().getFullName();
+                            voteVS.getVote().getUserVS().getFullName();
                     author.setText(Html.fromHtml(authorStr));
                 } else author.setVisibility(View.GONE);
             }
@@ -415,7 +413,7 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                 KeyFactory kf = KeyFactory.getInstance("RSA");
                 PrivateKey certPrivKey = kf.generatePrivate(keySpec);
                 operationReceipt.setCertVotePrivateKey(certPrivKey);
-                String signatureContent = operationReceipt.getVoto().getCancelVoteData();
+                String signatureContent = operationReceipt.getVote().getCancelVoteData();
                 String serviceURL =contextVS.getAccessControl().getCancelVoteServiceURL();
                 SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                         signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject,
@@ -446,11 +444,11 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 operationReceipt.setCancelVoteReceipt(responseVS.getSmimeMessage());
                 String msg = getString(R.string.cancel_vote_result_msg,
-                        operationReceipt.getVoto().getSubject());
+                        operationReceipt.getVote().getSubject());
                 try {
                     db.updateVoteReceipt(operationReceipt);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
                 refreshReceiptList();
                 showMessage(getString(R.string.msg_lbl), msg);

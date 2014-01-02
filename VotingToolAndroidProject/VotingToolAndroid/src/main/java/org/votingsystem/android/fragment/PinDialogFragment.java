@@ -70,7 +70,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateDialog(...) ", "savedInstanceState: " + savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.cert_pin_dialog, null);
+        View view = inflater.inflate(R.layout.pin_dialog_fragment, null);
         msgTextView = (TextView) view.findViewById(R.id.msg);
         userPinEditText = (EditText)view.findViewById(R.id.user_pin);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(

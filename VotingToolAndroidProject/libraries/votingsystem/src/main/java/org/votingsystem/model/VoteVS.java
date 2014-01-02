@@ -27,21 +27,21 @@ public class VoteVS {
     private int id;
     private int notificationId;
     private int statusCode = 0;
-    private String mensaje;
+    private String message;
     private String eventURL;
     private Long eventVSElectionId;
     private Long optionSelectedId;
     private TypeVS typeVS;
     private ActorVS actorVS;
     private String accessControlServerURL;
-    private boolean esValido = false;
+    private boolean isValid = false;
     private SMIMEMessageWrapper smimeMessage;
     private SMIMEMessageWrapper cancelVoteReceipt;
     private byte[] encryptedKey = null;
     private boolean isCanceled = false;
     private CertificationRequestVS certificationRequest;
     private PrivateKey certVotePrivateKey;
-    private EventVS voto;
+    private EventVS eventVS;
     private Date dateCreated;
     private Date dateUpdated;
     
@@ -55,226 +55,153 @@ public class VoteVS {
         return notificationId;
     }
     
-    public VoteVS(int statusCode,
-                  SMIMEMessageWrapper votoValidado, EventVS voto) throws Exception {
-        this.smimeMessage = votoValidado;
+    public VoteVS(int statusCode,SMIMEMessageWrapper voteReceipt, EventVS eventVS)throws Exception {
+        this.smimeMessage = voteReceipt;
         this.statusCode = statusCode;
-        this.voto = voto;
-        String receiptContent = votoValidado.getSignedContent();
+        this.eventVS = eventVS;
+        String receiptContent = voteReceipt.getSignedContent();
         JSONObject receiptContentJSON = new JSONObject(receiptContent);
         this.optionSelectedId = receiptContentJSON.getLong("optionSelectedId");
         this.eventURL = receiptContentJSON.getString("eventURL");
         if (smimeMessage.isValidSignature()) {
-            esValido = true;
+            isValid = true;
         }
-        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//voto repetido
-            esValido = false;
+        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//vote repeated
+            isValid = false;
         }
-        if (!optionSelectedId.equals(voto.getOptionSelected().getId())) {
-            esValido = false;
+        if (!optionSelectedId.equals(eventVS.getOptionSelected().getId())) {
+            isValid = false;
         }
     }
     
-    public VoteVS(int statusCode, EventVS voto) throws Exception {
+    public VoteVS(int statusCode, EventVS eventVS) throws Exception {
         this.statusCode = statusCode;
-        this.voto = voto;
+        this.eventVS = eventVS;
     }
     
-    public String toJSONString() throws JSONException {
-    	Log.d(TAG + ".toJSONString(...)", " --- voto.getAccessRequestHashBase64(): "
-    			+ voto.getAccessRequestHashBase64());
+    public JSONObject toJSON() throws JSONException {
     	JSONObject jsonObject = new JSONObject();
     	jsonObject.put("statusCode", statusCode);
-        if(voto != null) jsonObject.put("voto", voto.toJSON());
+        if(eventVS != null) jsonObject.put("vote", eventVS.toJSON());
         jsonObject.put("isCanceled", isCanceled);
-        return jsonObject.toString();
+        return jsonObject;
     }
     
     public static VoteVS parse(String jsonVoteReceipt) throws Exception {
-    	//Log.d(TAG + ".parse(...)", "- jsonVoteReceipt: '" + jsonVoteReceipt + "'");
     	if(jsonVoteReceipt == null) return null;
     	int statusCode = 0;
     	boolean isCanceled = false;
-    	EventVS voto = null;
-    	Log.d(TAG + ".parse(...)", " - parse(...)");
+    	EventVS eventVS = null;
     	JSONObject jsonObject = new JSONObject (jsonVoteReceipt);
-        if(jsonObject.has("statusCode"))
-        	statusCode = jsonObject.getInt("statusCode");
-        if(jsonObject.has("isCanceled"))
-        	isCanceled = jsonObject.getBoolean("isCanceled");
-        if(jsonObject.has("voto"))
-        	voto = EventVS.parse(jsonObject.getJSONObject("voto"));
-        VoteVS voteVS = new VoteVS(statusCode, voto);
+        if(jsonObject.has("statusCode")) statusCode = jsonObject.getInt("statusCode");
+        if(jsonObject.has("isCanceled")) isCanceled = jsonObject.getBoolean("isCanceled");
+        if(jsonObject.has("vote")) eventVS = EventVS.parse(jsonObject.getJSONObject("vote"));
+        VoteVS voteVS = new VoteVS(statusCode, eventVS);
         voteVS.setCanceled(isCanceled);
     	return voteVS;
     }
     
-    public boolean esValido () throws Exception {
-        return esValido;
-    }
-
-    public void writoToFile(File file) throws Exception {
-    	if(file == null) throw new Exception("File null");
-    	if(smimeMessage == null) throw new Exception("Receipt null");
-    	smimeMessage.writeTo(new FileOutputStream(file));
+    public boolean isValid () throws Exception {
+        return isValid;
     }
     
     public void setId(int id) {
         this.id = id;
     }
+
     public int getId() {
         return id;
     }
 
-    /**
-     * @return the eventVSElectionId
-     */
     public Long getEventVSElectionId() {
         return eventVSElectionId;
     }
 
-    /**
-     * @param eventVSElectionId the eventVSElectionId to set
-     */
     public void setEventVSElectionId(Long eventVSElectionId) {
         this.eventVSElectionId = eventVSElectionId;
     }
 
-    /**
-     * @return the optionSelectedId
-     */
     public Long getOptionSelectedId() {
         return optionSelectedId;
     }
 
-    /**
-     * @param optionSelectedId the optionSelectedId to set
-     */
     public void setOptionSelectedId(Long optionSelectedId) {
         this.optionSelectedId = optionSelectedId;
     }
 
-    /**
-     * @return the actorVS
-     */
     public ActorVS getActorVS() {
         return actorVS;
     }
 
-    /**
-     * @param actorVS the actorVS to set
-     */
     public void setActorVS(ActorVS actorVS) {
         this.actorVS = actorVS;
     }
 
-    /**
-     * @return the accessControlServerURL
-     */
-    public String getAccessControllServerURL() {
+    public String getAccessControlServerURL() {
         return accessControlServerURL;
     }
 
-    /**
-     * @param accessControlServerURL the accessControlServerURL to set
-     */
     public void setAccessControlServerURL(String accessControlServerURL) {
         this.accessControlServerURL = accessControlServerURL;
     }
 
-    /**
-     * @return the typeVS
-     */
     public TypeVS getTypeVS() {
         return typeVS;
     }
 
-    /**
-     * @param typeVS the typeVS to set
-     */
     public void setTypeVS(TypeVS typeVS) {
         this.typeVS = typeVS;
     }
 
-    /**
-     * @return the statusCode
-     */
     public int getStatusCode() {
         return statusCode;
     }
 
-    /**
-     * @param statusCode the statusCode to set
-     */
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
     }
 
-    /**
-     * @return the mensaje
-     */
-    public String getMensaje(Context context) {
-        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//voto repetido
+    public String getMessage(Context context) {
+        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//vote repeated
             return context.getString(R.string.vote_repeated_msg,
-                    voto.getSubject(), voto.getOptionSelected().getContent());
+                    eventVS.getSubject(), eventVS.getOptionSelected().getContent());
         }
-        if (!optionSelectedId.equals(voto.getOptionSelected().getId())) {
+        if (!optionSelectedId.equals(eventVS.getOptionSelected().getId())) {
             return context.getString(R.string.option_error_msg);
         }
         if (smimeMessage.isValidSignature()) {
             return context.getString(R.string.vote_ok_msg,
-                    voto.getSubject(), voto.getOptionSelected().getContent());
+                    eventVS.getSubject(), eventVS.getOptionSelected().getContent());
         }
         return null;
     }
 
-    /**
-     * @param mensaje the mensaje to set
-     */
-    public void setMensaje(String mensaje) {
-        this.mensaje = mensaje;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    /**
-     * @return the smimeMessage
-     */
     public SMIMEMessageWrapper getSmimeMessage() {
         return smimeMessage;
     }
 
-    /**
-     * @param smimeMessage the smimeMessage to set
-     */
     public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
         this.smimeMessage = smimeMessage;
     }
 
-    /**
-     * @return the eventURL
-     */
     public String getEventURL() {
         return eventURL;
     }
 
-    /**
-     * @param eventURL the eventURL to set
-     */
     public void setEventURL(String eventURL) {
         this.eventURL = eventURL;
     }
 
-    /**
-     * @return the voto
-     */
-    public EventVS getVoto() {
-        return voto;
+    public EventVS getVote() {
+        return eventVS;
     }
 
-    /**
-     * @param voto the voto to set
-     */
-    public void setVoto(EventVS voto) {
-        this.voto = voto;
+    public void setVote(EventVS eventVS) {
+        this.eventVS = eventVS;
     }
 
 	public SMIMEMessageWrapper getCancelVoteReceipt() {

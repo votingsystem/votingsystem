@@ -80,8 +80,6 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
         setHasOptionsMenu(true);
         progressVisible = new AtomicBoolean(false);
-        //Prepare the loader. Either re-connect with an existing one or start a new one.
-        getLoaderManager().initLoader(ContextVS.REPRESENTATIVE_LOADER_ID, null, this);
     };
 
     private void showMessage(String caption, String message) {
@@ -121,6 +119,8 @@ public class RepresentativeGridFragment extends Fragment
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
+        //Prepare the loader. Either re-connect with an existing one or start a new one.
+        getLoaderManager().initLoader(ContextVS.REPRESENTATIVE_LOADER_ID, null, this);
         if(savedInstanceState != null) {
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
