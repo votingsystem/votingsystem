@@ -19,8 +19,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
@@ -49,13 +51,14 @@ public class RepresentativeGridFragment extends Fragment
     private static TextView searchTextView;
     private static TextView emptyResultsView;
     private static GridView gridView;
-    private AtomicBoolean progressVisible = null;
-    private View listContainer;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);;
     private RepresentativeListAdapter mAdapter = null;
     private String queryStr = null;
     private static ContextVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
+    private View progressContainer;
+    private FrameLayout listContainer;
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -74,12 +77,11 @@ public class RepresentativeGridFragment extends Fragment
             Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
             startActivity(intent);
         }
-        if (getArguments() != null) {
-            queryStr = getArguments().getString(SearchManager.QUERY);
-        }
+        queryStr = getArguments().getString(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
         setHasOptionsMenu(true);
-        progressVisible = new AtomicBoolean(false);
+        if(savedInstanceState != null && savedInstanceState.getBoolean(
+                ContextVS.LOADING_KEY, false)) showProgress(true, true);
     };
 
     private void showMessage(String caption, String message) {
@@ -111,8 +113,11 @@ public class RepresentativeGridFragment extends Fragment
         emptyResultsView = (TextView) rootView.findViewById(android.R.id.empty);
         searchTextView.setVisibility(View.GONE);
         emptyResultsView.setVisibility(View.GONE);
-        listContainer =  rootView.findViewById(R.id.listContainer);
-        ((FrameLayout)listContainer).getForeground().setAlpha(0);
+
+        progressContainer = rootView.findViewById(R.id.progressContainer);
+
+        listContainer =  (FrameLayout)rootView.findViewById(R.id.listContainer);
+        listContainer.getForeground().setAlpha(0);
         return rootView;
     }
 
@@ -151,7 +156,7 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     private void loadHttpItems(Long offset) {
-        progressVisible.set(true);
+        showProgress(true, true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 RepresentativeService.class);
         startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
@@ -164,6 +169,7 @@ public class RepresentativeGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
@@ -209,7 +215,7 @@ public class RepresentativeGridFragment extends Fragment
                 " - firstVisiblePosition: " + firstVisiblePosition);
         if(RepresentativeContentProvider.getNumTotalRepresentatives() == null) loadHttpItems(offset);
         else {
-            progressVisible.set(false);
+            showProgress(false, true);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             firstVisiblePosition = null;
             ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
@@ -242,6 +248,47 @@ public class RepresentativeGridFragment extends Fragment
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", "onDestroy");
+    }
+
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if (progressVisible.get()) {
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
+            if (animate) {
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
+                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
+                //        this, android.R.anim.fade_out));
+            }
+            progressContainer.setVisibility(View.VISIBLE);
+            //eventContainer.setVisibility(View.INVISIBLE);
+            listContainer.getForeground().setAlpha(150); // dim
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to disable touch events on background view
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        } else {
+            if (animate) {
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
+                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
+                //        this, android.R.anim.fade_in));
+            }
+            progressContainer.setVisibility(View.GONE);
+            //eventContainer.setVisibility(View.VISIBLE);
+            listContainer.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });
+        }
     }
 
     public class RepresentativeListAdapter  extends CursorAdapter {
