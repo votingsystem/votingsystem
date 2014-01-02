@@ -10,7 +10,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.RepresentativeListFragment;
+import org.votingsystem.android.fragment.RepresentativeGridFragment;
 import org.votingsystem.android.fragment.RepresentativeOperationsFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
@@ -43,7 +43,7 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
         ChildPosition childPosition = GroupPosition.REPRESENTATIVES.getChildList().get(position);
         switch(childPosition) {
             case REPRESENTATIVE_LIST:
-                selectedFragment = new RepresentativeListFragment();
+                selectedFragment = new RepresentativeGridFragment();
                 break;
             case REPRESENTATIVE_OPERATION:
                 selectedFragment = new RepresentativeOperationsFragment();

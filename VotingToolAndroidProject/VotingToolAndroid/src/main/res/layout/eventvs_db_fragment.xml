@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/event_id_and_subject"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="23sp"
+            android:textColor="@color/event_subject"
+            android:clickable="true"
+            android:text="@string/eventVS_label" />
+
+        <TextView
+            android:id="@+id/event_stated_and_type"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textColor="@color/event_subject"
+            android:clickable="true"
+            android:text="@string/eventVS_label" />
+
+
+</LinearLayout>

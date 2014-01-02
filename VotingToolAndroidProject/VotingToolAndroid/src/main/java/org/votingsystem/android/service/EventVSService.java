@@ -22,8 +22,10 @@ import org.votingsystem.model.UserVSResponse;
 import org.votingsystem.util.HttpHelper;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import javax.mail.Provider;
 
@@ -76,7 +78,6 @@ public class EventVSService extends IntentService {
 
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
-        Log.d(TAG + ".onHandleIntent(...) ", "arguments: " + arguments);
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.EVENT_TYPE_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
@@ -137,18 +138,27 @@ public class EventVSService extends IntentService {
                                 break;
                         }
                     }
+                    List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
                     for(EventVS eventVS : response.getEvents()) {
+                        EventVS.State eventVSState = eventVS.getState();
+                        if(eventVSState == EventVS.State.CANCELLED) eventVSState =
+                                EventVS.State.TERMINATED;
                         checkDates(eventVS);
                         ContentValues values = new ContentValues(5);
                         values.put(EventVSContentProvider.ID_COL, eventVS.getId());
                         values.put(EventVSContentProvider.URL_COL, eventVS.getURL());
                         values.put(EventVSContentProvider.JSON_DATA_COL, eventVS.toJSON().toString());
                         values.put(EventVSContentProvider.TYPE_COL, eventVS.getTypeVS().toString());
-                        values.put(EventVSContentProvider.STATE_COL, eventVS.getState().toString());
-                        Uri uri = getContentResolver().insert(
-                                EventVSContentProvider.CONTENT_URI, values);
-                        Log.d(TAG + ".loadURLData(...)", "inserted event: " + uri.toString());
+                        values.put(EventVSContentProvider.STATE_COL, eventVSState.toString());
+                        contentValuesList.add(values);
                     }
+                    if(!contentValuesList.isEmpty()) {
+                        int numRowsCreated = getContentResolver().bulkInsert(
+                                EventVSContentProvider.CONTENT_URI, contentValuesList.toArray(
+                                new ContentValues[contentValuesList.size()]));
+                        Log.d(TAG + ".onHandleIntent(...)", "inserted: " + numRowsCreated + " rows" +
+                            " - eventType: " + eventTypeStr + " - eventState: " + eventState);
+                    } else Log.d(TAG + ".onHandleIntent(...)", "Response empty");
                     sendMessage(responseVS.getStatusCode(), responseVS.getMessage(),
                             Long.valueOf(response.getOffset()), eventTypeStr, eventStateStr);
                 } catch (ParseException e) {

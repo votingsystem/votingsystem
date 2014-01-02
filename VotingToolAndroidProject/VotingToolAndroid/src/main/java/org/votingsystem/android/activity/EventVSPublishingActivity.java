@@ -4,16 +4,16 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.EventPublishingFragment;
+import org.votingsystem.android.fragment.EventVSPublishingFragment;
 import org.votingsystem.model.OperationVS;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class EventPublishingActivity extends ActionBarActivity {
+public class EventVSPublishingActivity extends ActionBarActivity {
 
-    public static final String TAG = "EventPublishingActivity";
+    public static final String TAG = "EventVSPublishingActivity";
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,22 +24,22 @@ public class EventPublishingActivity extends ActionBarActivity {
         if (savedInstanceState != null) {
             return;
         }
-        EventPublishingFragment publishFragment = new EventPublishingFragment();
+        EventVSPublishingFragment publishFragment = new EventVSPublishingFragment();
         publishFragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
-                publishFragment, EventPublishingFragment.TAG).commit();
+                publishFragment, EventVSPublishingFragment.TAG).commit();
     }
 
     public void processOperation(OperationVS operationVS) {
-        EventPublishingFragment fragment = (EventPublishingFragment)getSupportFragmentManager().
-                findFragmentByTag(EventPublishingFragment.TAG);
+        EventVSPublishingFragment fragment = (EventVSPublishingFragment)getSupportFragmentManager().
+                findFragmentByTag(EventVSPublishingFragment.TAG);
         if (fragment != null) fragment.processOperation(operationVS);
 
     }
 
     /*@Override public void onBackPressed() {
-        EventPublishingFragment fragment = (EventPublishingFragment)getSupportFragmentManager().
-                findFragmentByTag(EventPublishingFragment.TAG);
+        EventVSPublishingFragment fragment = (EventVSPublishingFragment)getSupportFragmentManager().
+                findFragmentByTag(EventVSPublishingFragment.TAG);
         if (fragment != null) fragment.onBackPressed();
         else  super.onBackPressed();
     }*/

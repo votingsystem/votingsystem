@@ -27,14 +27,14 @@
             </intent-filter>
 
            	<intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.20"/>
+		       	<data android:scheme="http" android:host="192.168.1.7"/>
 	       	    <data android:path="/ControlCenter/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
 		    <intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.20"/>
+		       	<data android:scheme="http" android:host="192.168.1.7"/>
 	       	    <data android:path="/AccessControl/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
@@ -76,23 +76,23 @@
 
         <activity android:name=".activity.UserCertRequestActivity"
             android:noHistory="true" android:theme="@style/Theme.AppCompat.Light"/>
+
+        <activity android:name=".activity.AppWithoutCertActivity"
+            android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
         
         <activity android:name=".activity.UserCertResponseActivity" android:noHistory="true"
             android:theme="@style/Theme.AppCompat.Light"/>
         
-        <activity android:name=".activity.EventPublishingActivity" android:label="@string/app_name"
+        <activity android:name=".activity.EventVSPublishingActivity" android:label="@string/app_name"
             android:screenOrientation="landscape" android:theme="@style/Theme.AppCompat.Light"/>
 
-        <activity android:name=".activity.EventStatisticsPagerActivity"
+        <activity android:name=".activity.EventVSStatisticsPagerActivity"
             android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
 
         <activity android:name=".activity.VoteReceiptListActivity"
             android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
 
-        <activity android:name=".activity.GenericFragmentContainerActivity"
-            android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
-
-        <activity android:label="@string/app_name" android:name=".activity.EventPagerActivity"
+        <activity android:label="@string/app_name" android:name=".activity.EventVSPagerActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
 
         <activity android:name=".activity.RepresentativePagerActivity"
@@ -119,5 +119,7 @@
         <service android:name=".service.RssService" android:process=":rss_service"/>
         <service android:name=".service.RepresentativeService"  android:exported="false"/>
         <service android:name=".service.EventVSService"  android:exported="false"/>
+        <service android:name=".service.VotingAppService"  android:exported="false"/>
+
     </application>
 </manifest>

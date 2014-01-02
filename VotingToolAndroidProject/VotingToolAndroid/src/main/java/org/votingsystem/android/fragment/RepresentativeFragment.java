@@ -90,7 +90,7 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean isProgressShown;
+    private boolean progressVisible;
 
 
     public static Fragment newInstance(Long representativeId) {
@@ -104,10 +104,9 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle arguments = getArguments();
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
-                " - arguments: " + arguments);
-        Long representativeId =  arguments.getLong(ContextVS.ITEM_ID_KEY);
+                " - arguments: " + getArguments());
+        Long representativeId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
         Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
                 RepresentativeContentProvider.getRepresentativeURI(representativeId),
                 null, null, null, null);
@@ -115,9 +114,6 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         cursor.moveToFirst();
         String fullName = cursor.getString(cursor.getColumnIndex(
                 RepresentativeContentProvider.FULL_NAME_COL));
-
-
-
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
 
         IntentFilter intentFilter = new IntentFilter();
@@ -144,7 +140,7 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         progressContainer = rootView.findViewById(R.id.progressContainer);
         progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
         mainLayout.getForeground().setAlpha(0);
-        isProgressShown = false;
+        progressVisible = false;
         setHasOptionsMenu(true);
         return rootView;
     }
@@ -221,8 +217,8 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
     }
 
     public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown) return;
-        isProgressShown = shown;
+        if (progressVisible == shown) return;
+        progressVisible = shown;
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(

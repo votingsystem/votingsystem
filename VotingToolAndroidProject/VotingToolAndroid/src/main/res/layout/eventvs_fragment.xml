@@ -27,7 +27,6 @@
                 android:clickable="true"
                 android:text="@string/eventVS_label" />
 
-
             <View
                 android:layout_width="fill_parent"
                 android:layout_height="1dp"

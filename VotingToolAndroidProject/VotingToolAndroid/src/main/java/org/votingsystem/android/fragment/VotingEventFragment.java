@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -37,10 +38,12 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import org.votingsystem.android.activity.EventStatisticsPagerActivity;
+import org.json.JSONObject;
+import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
+import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -76,8 +79,8 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private Operation operation = Operation.VOTE;
     private EventVS eventVS;
     private VoteVS receipt;
-    private List<Button> optionButtons = null;
-    private byte[] keyStoreBytes = null;
+    private List<Button> optionButtons;
+    private byte[] keyStoreBytes;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
     private ContextVS contextVS;
@@ -85,42 +88,38 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private View rootView;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean isProgressShown;
+    private boolean progressVisible;
     private ProcessSignatureTask processSignatureTask;
 
-    public static VotingEventFragment newInstance(Integer eventId) {
-        VotingEventFragment fragment = new VotingEventFragment();
+    public static EventVSFragment newInstance(String eventJSONStr) {
+        EventVSFragment fragment = new EventVSFragment();
         Bundle args = new Bundle();
-        args.putInt(ContextVS.ITEM_ID_KEY, eventId);
+        args.putString(ContextVS.EVENTVS_KEY, eventJSONStr);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override public View onCreateView(LayoutInflater inflater,
-                                       ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...)", "onCreate");
+               ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-        rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
-        Bundle args = getArguments();
-        Integer eventIndex =  args.getInt(ContextVS.ITEM_ID_KEY);
-        if(eventIndex != null) {
-            eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
-        } else {
-            String eventStr = args.getString(ContextVS.EVENT_KEY);
-            try {
-                eventVS = EventVS.parse(eventStr);
-            } catch(Exception ex) {
-                ex.printStackTrace();
+        try {
+            if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
+                eventVS = EventVS.parse(new JSONObject(getArguments().getString(
+                        ContextVS.EVENTVS_KEY)));
             }
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
+        rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
         saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
         cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
         setEventScreen(eventVS);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
-        isProgressShown = false;
+        progressVisible = false;
         setHasOptionsMenu(true);
         Button cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
         cancelVoteButton.setOnClickListener(this);
@@ -154,7 +153,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventStatisticsPagerActivity.class);
+                        EventVSStatisticsPagerActivity.class);
                 startActivity(intent);
                 return true;
             default:
@@ -401,10 +400,10 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     }
 
     public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown) {
+        if (progressVisible == shown) {
             return;
         }
-        isProgressShown = shown;
+        progressVisible = shown;
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
@@ -545,8 +544,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                                 Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
                             }
                         }
-                        contextVS.getEvent().setOptionSelected(null);
-                        setEventScreen(contextVS.getEvent());
+                        setEventScreen(eventVS);
                         CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
                                 getString(R.string.msg_lbl), msg, receipt);
                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();

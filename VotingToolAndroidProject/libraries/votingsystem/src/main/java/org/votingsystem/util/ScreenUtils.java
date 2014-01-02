@@ -17,14 +17,13 @@ public class ScreenUtils {
         //float scaleFactor = metrics.density;
         //float widthDp = widthPixels / scaleFactor;
         //float heightDp = heightPixels / scaleFactor;
-
         float widthDpi = metrics.xdpi;
         float heightDpi = metrics.ydpi;
         float widthInches = widthPixels / widthDpi;
         float heightInches = heightPixels / heightDpi;
-        double diagonalInches = Math.sqrt(
-                (widthInches * widthInches) + (heightInches * heightInches));
-        Log.d(TAG + ".getDiagonalInches(...)", "diagonalInches: " + diagonalInches);
+        double diagonalInches = Math.sqrt((widthInches * widthInches) +
+                (heightInches * heightInches));
         return diagonalInches;
     }
+
 }

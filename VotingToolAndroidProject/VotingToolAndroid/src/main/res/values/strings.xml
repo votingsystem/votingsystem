@@ -34,6 +34,7 @@
     <string name="menuSync">Sincronizar</string>
 
     <string name="processing_lbl">Procesando</string>
+    <string name="initializing_app_lbl">Preparando aplicación</string>
     <string name="publish_voting_caption">Publicando votación</string>
     <string name="publish_claim_caption">Publicando reclamación</string>
     <string name="publish_manifest_caption">Publicando manifiesto</string>
@@ -110,6 +111,7 @@
     <string name="alert_exception_caption">Excepción!</string>
     <string name="cancel_back_msg">Pulsar \'atrás\' para cancelar</string>
     <string name="connecting_caption">Conectando...</string>
+    <string name="getting_representatives_lbl">Obteniendo representantes...</string>
     <string name="cert_state_msg">Comprobando el estado de la solicitud de certificado</string>
     <string name="cert_downloaded_msg">El certificado de usuario está disponible</string>
     
@@ -245,5 +247,7 @@
     <string name="new_representative_button">Darse de alta como representante</string>
     <string name="cancel_representative_button">Darse de baja como representante</string>
     <string name="edit_representative_button">Editar datos del representante</string>
+
+    <string name="signature_msg_subject">[Firma]-</string>
 
 </resources>

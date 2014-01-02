@@ -19,7 +19,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.GenericFragmentContainerActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.model.ContextVS;
 

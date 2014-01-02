@@ -1,6 +1,5 @@
 package org.votingsystem.android.activity;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,16 +12,8 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
-import org.votingsystem.android.fragment.EventFragment;
 import org.votingsystem.android.fragment.RepresentativeFragment;
-import org.votingsystem.android.fragment.VotingEventFragment;
-import org.votingsystem.android.ui.PagerAdapterVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.DateUtils;
-
-import java.util.List;
 
 /**
  * @author jgzornoza

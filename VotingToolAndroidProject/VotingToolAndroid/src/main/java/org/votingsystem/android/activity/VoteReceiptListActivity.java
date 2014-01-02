@@ -61,7 +61,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
     private ContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean isProgressShown;
+    private boolean progressVisible;
     private ProcessSignatureTask processSignatureTask;
 
     @Override
@@ -98,7 +98,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
         mainLayout = (FrameLayout) findViewById( R.id.mainLayout);
         progressContainer = findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha( 0);
-        isProgressShown = false;
+        progressVisible = false;
     }
 
 
@@ -197,7 +197,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
         private final LayoutInflater mInflater;
 
         public ReceiptListAdapter(Context context) {
-            super(context, R.layout.row_evento);
+            super(context, R.layout.row_eventvs);
             mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
@@ -344,10 +344,10 @@ public class VoteReceiptListActivity extends ActionBarActivity
     }
 
     public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown) {
+        if (progressVisible == shown) {
             return;
         }
-        isProgressShown = shown;
+        progressVisible = shown;
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(

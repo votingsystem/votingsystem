@@ -17,6 +17,7 @@
 package org.votingsystem.android.fragment;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -27,15 +28,17 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
-import org.votingsystem.android.activity.EventPagerActivity;
+import org.json.JSONObject;
+import org.votingsystem.android.activity.EventVSPagerActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 
 
-public class EventStatisticsFragment extends Fragment {
+public class EventVSStatisticsFragment extends Fragment {
 	
-	public static final String TAG = "EventStatisticsFragment";
+	public static final String TAG = "EventVSStatisticsFragment";
 
     private int eventIndex;
     private View rootView;
@@ -43,41 +46,43 @@ public class EventStatisticsFragment extends Fragment {
     private ContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean isProgressShown;
+    private boolean progressVisible;
+
+    public static EventVSStatisticsFragment newInstance(Long eventId) {
+        EventVSStatisticsFragment fragment = new EventVSStatisticsFragment();
+        Bundle args = new Bundle();
+        args.putLong(ContextVS.ITEM_ID_KEY, eventId);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...)", " --- onCreate");
-        super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
-        eventIndex =  args.getInt(ContextVS.ITEM_ID_KEY);
+        Log.d(TAG + ".onCreate(...)", "onCreate");
+        Long eventId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-        eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
-        contextVS.setEvent(eventVS);
-        rootView = inflater.inflate(R.layout.event_statistics_fragment, container, false);
+        Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+                EventVSContentProvider.getEventURI(eventId), null, null, null, null);
+        cursor.moveToFirst();
+        String eventJSONData = cursor.getString(cursor.getColumnIndex(
+                EventVSContentProvider.JSON_DATA_COL));
+        Log.d(TAG + ".bindView(...)", "cursor.getPosition(): "  + cursor.getPosition() +
+                " - eventJSONData: " + eventJSONData);
+        try {
+            eventVS = EventVS.parse(new JSONObject(eventJSONData));
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        rootView = inflater.inflate(R.layout.eventvs_statistics_fragment, container, false);
         String eventStatisticsURL = eventVS.getURLStatistics();
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha( 0);
-        isProgressShown = false;
+        progressVisible = false;
         setHasOptionsMenu(true);
         showProgress(true, true);
         loadUrl(eventStatisticsURL);
         return rootView;
-    }
-
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                contextVS.setEvent(eventVS);
-                Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventPagerActivity.class);
-                startActivity(intent);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override public void onDestroy() {
@@ -86,10 +91,10 @@ public class EventStatisticsFragment extends Fragment {
     };
 
     public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown || getActivity() == null) {
+        if (progressVisible == shown || getActivity() == null) {
             return;
         }
-        isProgressShown = shown;
+        progressVisible = shown;
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(

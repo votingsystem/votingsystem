@@ -52,9 +52,9 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class EventPublishingFragment extends Fragment implements CertPinDialogListener {
+public class EventVSPublishingFragment extends Fragment implements CertPinDialogListener {
 	
-	public static final String TAG = "EventPublishingFragment";
+	public static final String TAG = "EventVSPublishingFragment";
 
 	public static final String EDITOR_SESSION_KEY = "editorSessionKey";
     public static final String FORM_TYPE_KEY = "formTypeKey";
@@ -67,19 +67,19 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean isProgressShown;
+    private boolean progressVisible;
     private PublishTask publishTask;
     private View rootView;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        rootView = inflater.inflate(R.layout.event_publishing_fragment, container, false);
+        rootView = inflater.inflate(R.layout.eventvs_publishing_fragment, container, false);
         mainLayout = (FrameLayout) rootView.findViewById( R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
         mainLayout.getForeground().setAlpha(0);
-        isProgressShown = false;
+        progressVisible = false;
         loadForm();
         // if set to true savedInstanceState will be allways null
         //setRetainInstance(true);
@@ -274,8 +274,8 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
     }
 
     public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown) return;
-        isProgressShown = shown;
+        if (progressVisible == shown) return;
+        progressVisible = shown;
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(

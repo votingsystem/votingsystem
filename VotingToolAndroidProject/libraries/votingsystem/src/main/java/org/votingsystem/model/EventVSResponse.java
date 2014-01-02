@@ -44,7 +44,6 @@ public class EventVSResponse {
 	}
     
 	public static EventVSResponse parse(String requestStr) throws ParseException, JSONException {
-    	Log.d(TAG + ".parse(...)", "parse(...)");
     	JSONObject jsonObject = new JSONObject (requestStr);
         List<EventVS> eventList = new ArrayList<EventVS>();
         JSONObject requestJSON = jsonObject.getJSONObject("eventsVS");

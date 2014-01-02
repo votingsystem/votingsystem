@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import org.votingsystem.android.fragment.EventListFragment;
+import org.votingsystem.android.fragment.EventVSGridFragment;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -25,7 +25,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
 
     public static final String TAG = "EventNavigationPagerAdapter";
 
-    private GroupPosition selectedSubsystem = GroupPosition.VOTING;
+    private GroupPosition selectedGroup = GroupPosition.VOTING;
     private ChildPosition selectedChild = GroupPosition.VOTING.getChildList().get(0);
 
     private String searchQuery = null;
@@ -38,8 +38,8 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
 
     @Override public Fragment getItem(int position) {
         EventVS.State eventState = null;
-        Fragment selectedFragment = new EventListFragment();
-        ChildPosition childPosition = selectedSubsystem.getChildList().get(position);
+        Fragment selectedFragment = new EventVSGridFragment();
+        ChildPosition childPosition = selectedGroup.getChildList().get(position);
         switch(childPosition) {
             case OPEN:
                 eventState = EventVS.State.ACTIVE;
@@ -52,17 +52,35 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
                 break;
         }
         Bundle args = new Bundle();
-        args.putString(ContextVS.EVENT_TYPE_KEY, selectedSubsystem.toString());
+        args.putString(ContextVS.EVENT_TYPE_KEY, selectedGroup.toString());
         args.putString(ContextVS.EVENT_STATE_KEY, eventState.toString());
         args.putString(SearchManager.QUERY, searchQuery);
         selectedFragment.setArguments(args);
         Log.d(TAG + ".getItem(...) ", "childPosition: " +  childPosition +
-                " - selectedSubsystem:" + selectedSubsystem + " - args: " + args);
+                " - selectedGroup:" + selectedGroup + " - args: " + args);
         return selectedFragment;
     }
 
+    /*@Override public int getItemPosition(Object item) {
+        Log.d(TAG + ".getItemPosition(...) ", "");
+        EventVSGridFragment eventListFragment = (EventVSGridFragment)item;
+        int position = POSITION_NONE;
+        switch(eventListFragment.getState()) {
+            case ACTIVE: position = 0;
+                break;
+            case AWAITING: position = 1;
+                break;
+            case TERMINATED: position = 2;
+                break;
+        }
+        Log.d(TAG + ".getItemPosition(...) ", "groupPosition: " + eventListFragment.
+                getGroupPosition() + " - State:" + eventListFragment.getState() +
+                " - position: " + position);
+        return position;
+    }*/
+
     public String getSelectedChildDescription(Context context) {
-        switch(selectedSubsystem) {
+        switch(selectedGroup) {
             case CLAIMS:
                 switch(selectedChild) {
                     case OPEN:
@@ -102,7 +120,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
     }
 
     public String getSelectedGroupDescription(Context context) {
-        return selectedSubsystem.getDescription(context);
+        return selectedGroup.getDescription(context);
     }
 
     public void setSearchQuery(String searchQuery) {
@@ -111,29 +129,29 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
 
     public void selectItem(int groupPosition, int childPosition) {
         GroupPosition newSelectedSubsystem = GroupPosition.valueOf(groupPosition);
-        if(newSelectedSubsystem != selectedSubsystem) {
-            Log.d(TAG + ".selectItem(...) ", "from: " + selectedSubsystem + " - to: " +
+        if(newSelectedSubsystem != selectedGroup) {
+            Log.d(TAG + ".selectItem(...) ", "from: " + selectedGroup + " - to: " +
                     newSelectedSubsystem);
-            selectedSubsystem = newSelectedSubsystem;
+            selectedGroup = newSelectedSubsystem;
             viewPager.setAdapter(this);
         }
-        selectedChild = selectedSubsystem.getChildList().get(childPosition);
+        selectedChild = selectedGroup.getChildList().get(childPosition);
     }
 
     public void updateChildPosition(int childPosition) {
-        selectedChild = selectedSubsystem.getChildList().get(childPosition);
+        selectedChild = selectedGroup.getChildList().get(childPosition);
     }
 
     public int getSelectedChildPosition() {
-        return selectedSubsystem.getChildList().indexOf(selectedChild);
+        return selectedGroup.getChildList().indexOf(selectedChild);
     }
 
     public int getSelectedGroupPosition() {
-        return selectedSubsystem.getPosition();
+        return selectedGroup.getPosition();
     }
 
     public Drawable getLogo(Context context) {
-        switch (selectedSubsystem) {
+        switch (selectedGroup) {
             case CLAIMS: return context.getResources().getDrawable(R.drawable.filenew_22);
             case MANIFESTS: return context.getResources().getDrawable(R.drawable.manifest_22);
             case VOTING: return context.getResources().getDrawable(R.drawable.poll_22);
@@ -145,12 +163,12 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
     }
 
     @Override public int getCount() {
-        switch(selectedSubsystem) {
+        switch(selectedGroup) {
             case CLAIMS: return GroupPosition.CLAIMS.getChildList().size();
             case MANIFESTS: return GroupPosition.MANIFESTS.getChildList().size();
             case VOTING:return GroupPosition.VOTING.getChildList().size();
             default:
-                Log.d(TAG + ".getCount(...)", " system without pages: " + selectedSubsystem);
+                Log.d(TAG + ".getCount(...)", " system without pages: " + selectedGroup);
                 return 0;
         }
     }

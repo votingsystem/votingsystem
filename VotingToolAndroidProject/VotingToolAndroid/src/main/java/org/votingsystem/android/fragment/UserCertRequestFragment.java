@@ -80,7 +80,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean isProgressShown;
+    private boolean progressVisible;
     private SendDataTask sendDataTask;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -137,7 +137,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
         progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
         progressMessage.setText(R.string.loading_data_msg);
         mainLayout.getForeground().setAlpha(0);
-        isProgressShown = false;
+        progressVisible = false;
         // if set to true savedInstanceState will be allways null
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -279,8 +279,8 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
     }
 
     public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown) return;
-        isProgressShown = shown;
+        if (progressVisible == shown) return;
+        progressVisible = shown;
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(

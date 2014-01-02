@@ -20,7 +20,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
-import org.votingsystem.android.activity.EventPublishingActivity;
+import org.votingsystem.android.activity.EventVSPublishingActivity;
 import org.votingsystem.model.OperationVS;
 
 
@@ -38,7 +38,7 @@ public class JavaScriptInterface {
 		Log.d(TAG + ".setVotingWebAppMessage(...)", " --- appMessage: " + appMessage);
     	try {
 			OperationVS operationVS = OperationVS.parse(appMessage);
-            ((EventPublishingActivity)hostActivity).processOperation(operationVS);
+            ((EventVSPublishingActivity)hostActivity).processOperation(operationVS);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

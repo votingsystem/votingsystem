@@ -56,15 +56,22 @@ public class ContextVS {
     //Intent keys
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";
+    public static final String URI_DATA_KEY = "URI_DATA";
+    public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
+    public static final String SERVICE_CALLER_KEY = "SERVICE_CALLER";
     public static final String HTTP_RESPONSE_DATA_KEY = "HTTP_RESPONSE_DATA";
     public static final String HTTP_RESPONSE_STATUS_KEY = "HTTP_RESPONSE_STATUS";
     public static final String OFFSET_KEY = "OFFSET";
+    public static final String CAPTION_KEY = "CAPTION";
+    public static final String MESSAGE_KEY = "MESSAGE";
+    public static final String LOADING_KEY = "LOADING_KEY";
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
     public static final String EVENT_TYPE_KEY  = "EVENT_TYPE";
+    public static final String EVENTVS_KEY  = "EVENTVS";
 
     //Actions IDs
     public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION";
@@ -72,11 +79,15 @@ public class ContextVS {
     public static final String HTTP_DATA_INITIALIZED_ACTION_ID = "HTTP_DATA_INITIALIZED_ACTION";
 
     //Loaders
-    public static final int EVENT_LIST_LOADER_ID = 0;
+    public static final int EVENT_LIST_LOADER1_ID = 0;
+    public static final int VOTING_EVENT_ACTIVE_LIST_LOADER_ID = 2;
+    public static final int VOTING_EVENT_PENDING_LIST_LOADER_ID = 3;
+    public static final int VOTING_EVENT_TERMINATED_LIST_LOADER_ID = 4;
     public static final int REPRESENTATIVE_LOADER_ID = 1;
 
     //Pages size
-    public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
+    //public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
+    public static final Integer REPRESENTATIVE_PAGE_SIZE = 20;
     public static final Integer EVENTVS_PAGE_SIZE = 20;
 
     //Notifications IDs
@@ -104,14 +115,10 @@ public class ContextVS {
     public static final String TIMESTAMP_USU_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
     public static final String TIMESTAMP_VOTE_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
 
-    public static final String ASUNTO_MENSAJE_FIRMA_DOCUMENTO = "[Firma]-";
     public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
-
     public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
 
     private State state = State.WITHOUT_CSR;
-    private EventVS eventVSSeleccionado;
-    private ArrayList<EventVS> eventsSelectedList;
 
     private AccessControlVS accessControlVS;
     private UserVS userVS;
@@ -148,26 +155,6 @@ public class ContextVS {
         return INSTANCE;
     }
 
-    public void setEvent(EventVS event) {
-        Log.d(TAG + ".setEvent(...)", "- eventId: " + event.getId() + " - type: " + event.getTypeVS());
-        this.eventVSSeleccionado = event;
-    }
-
-    public List<EventVS> getEvents() {
-        return eventsSelectedList;
-    }
-
-    public void setEventList(List<EventVS> events) {
-        Log.d(TAG + ".setEventList(...)", " --- setEventList - events.size(): " + events.size());
-        eventsSelectedList = new ArrayList<EventVS>();
-        if(events != null) {
-            for(EventVS event: events) {
-                ((EventVS)event).setAccessControlVS(accessControlVS);
-                eventsSelectedList.add(event);
-            }
-        }
-    }
-
     public static String getMessage(String key, Object... arguments) {
         try {
             String pattern = resourceBundle.getString(key);
@@ -196,14 +183,6 @@ public class ContextVS {
 
     public String getHostID() {
         return android.os.Build.ID;
-    }
-
-    public int getEventIndex(EventVS event) {
-        return eventsSelectedList.indexOf(event);
-    }
-
-    public EventVS getEvent() {
-        return eventVSSeleccionado;
     }
 
     public Future<ResponseVS> submit(Callable<ResponseVS> callable) {

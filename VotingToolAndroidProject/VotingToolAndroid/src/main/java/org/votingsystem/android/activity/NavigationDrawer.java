@@ -18,14 +18,10 @@ package org.votingsystem.android.activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.*;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -39,7 +35,7 @@ import android.view.View;
 import android.widget.ExpandableListView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.EventPublishingFragment;
+import org.votingsystem.android.fragment.EventVSPublishingFragment;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
@@ -173,9 +169,9 @@ public class NavigationDrawer extends ActionBarActivity {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(GROUP_POSITION_KEY,
-                ((PagerAdapterVS)mViewPager.getAdapter()).getSelectedGroupPosition());
+                ((PagerAdapterVS) mViewPager.getAdapter()).getSelectedGroupPosition());
         outState.putInt(CHILD_POSITION_KEY,
-                ((PagerAdapterVS)mViewPager.getAdapter()).getSelectedChildPosition());
+                ((PagerAdapterVS) mViewPager.getAdapter()).getSelectedChildPosition());
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState:" + outState);
     }
 
@@ -190,7 +186,6 @@ public class NavigationDrawer extends ActionBarActivity {
         mDrawerLayout.closeDrawer(expListView);
         NavigatorDrawerOptionsAdapter.GroupPosition selectedSubsystem =
                 NavigatorDrawerOptionsAdapter.GroupPosition.valueOf(groupPosition);
-
         switch(selectedSubsystem) {
             case VOTING:
             case MANIFESTS:
@@ -231,6 +226,9 @@ public class NavigationDrawer extends ActionBarActivity {
             return true;
         }
         switch (item.getItemId()) {
+            case R.id.reload:
+                ((FragmentStatePagerAdapter)mViewPager.getAdapter()).notifyDataSetChanged();
+                return false;
             case R.id.search_item:
                 onSearchRequested();
                 return true;
@@ -282,18 +280,18 @@ public class NavigationDrawer extends ActionBarActivity {
                 .setTitle(R.string.publish_document_lbl).setIcon(R.drawable.view_detailed_32)
                 .setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(NavigationDrawer.this, EventPublishingActivity.class);
+                        Intent intent = new Intent(NavigationDrawer.this, EventVSPublishingActivity.class);
                         switch (which) {
                             case 0:
-                                intent.putExtra(EventPublishingFragment.FORM_TYPE_KEY,
+                                intent.putExtra(EventVSPublishingFragment.FORM_TYPE_KEY,
                                         TypeVS.VOTING_PUBLISHING.toString());
                                 break;
                             case 1:
-                                intent.putExtra(EventPublishingFragment.FORM_TYPE_KEY,
+                                intent.putExtra(EventVSPublishingFragment.FORM_TYPE_KEY,
                                         TypeVS.MANIFEST_PUBLISHING.toString());
                                 break;
                             case 2:
-                                intent.putExtra(EventPublishingFragment.FORM_TYPE_KEY,
+                                intent.putExtra(EventVSPublishingFragment.FORM_TYPE_KEY,
                                         TypeVS.CLAIM_PUBLISHING.toString());
                                 break;
                         }

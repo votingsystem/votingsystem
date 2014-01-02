@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -44,21 +45,19 @@ import java.text.Collator;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class RepresentativeListFragment extends Fragment
+public class RepresentativeGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
-    public static final String TAG = "RepresentativeListFragment";
+    public static final String TAG = "RepresentativeGridFragment";
 
     private static TextView searchTextView;
     private static TextView emptyResultsView;
     private static GridView gridView;
     private AtomicBoolean progressVisible = null;
-    private View progressContainer;
     private View listContainer;
     private RepresentativeListAdapter mAdapter = null;
     private String queryStr = null;
     private static ContextVS contextVS = null;
-
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
 
@@ -119,14 +118,14 @@ public class RepresentativeListFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-        View rootView = inflater.inflate(R.layout.representative_list_fragment, container, false);
-        searchTextView = (TextView) rootView.findViewById(R.id.search_query);
+        View rootView = inflater.inflate(R.layout.representative_grid_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         mAdapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(mAdapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
-                return onLongListItemClick(v,pos,id);
+            @Override
+            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+                return onLongListItemClick(v, pos, id);
             }
         });
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -135,12 +134,12 @@ public class RepresentativeListFragment extends Fragment
             }
         });
         gridView.setOnScrollListener(this);
+        searchTextView = (TextView) rootView.findViewById(R.id.search_query);
         emptyResultsView = (TextView) rootView.findViewById(android.R.id.empty);
         searchTextView.setVisibility(View.GONE);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
+        emptyResultsView.setVisibility(View.GONE);
         listContainer =  rootView.findViewById(R.id.listContainer);
         ((FrameLayout)listContainer).getForeground().setAlpha(0);
-        rootView.setBackgroundColor(Color.WHITE);
         return rootView;
     }
 
@@ -157,32 +156,6 @@ public class RepresentativeListFragment extends Fragment
     protected boolean onLongListItemClick(View v, int pos, long id) {
         Log.i(TAG, ".onLongListItemClick - id: " + id);
         return true;
-    }
-
-    public void showProgressIndicator(boolean showProgress, boolean animate){
-        if (progressVisible.get() == showProgress) return;
-        else progressVisible.set(showProgress);
-        if (progressVisible.get()) {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                listContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //listContainer.setVisibility(View.INVISIBLE);
-            ((FrameLayout)listContainer).getForeground().setAlpha(100); // dim
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                listContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-            }
-            ((FrameLayout)listContainer).getForeground().setAlpha( 0); // restore
-            progressContainer.setVisibility(View.GONE);
-            listContainer.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override public void onScrollStateChanged(AbsListView absListView, int i) { }
@@ -203,7 +176,7 @@ public class RepresentativeListFragment extends Fragment
     }
 
     private void loadHttpItems(Long offset) {
-        showProgressIndicator(true, true);
+        progressVisible.set(true);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 RepresentativeService.class);
         startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
@@ -229,7 +202,7 @@ public class RepresentativeListFragment extends Fragment
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
             case R.id.reload:
-                Log.d(TAG +  ".onOptionsItemSelected(..)", "Reloading EventListFragment");
+                Log.d(TAG +  ".onOptionsItemSelected(..)", "Reloading EventVSGridFragment");
                 getLoaderManager().restartLoader(ContextVS.REPRESENTATIVE_LOADER_ID, null, this);
                 return true;
             default:
@@ -261,7 +234,7 @@ public class RepresentativeListFragment extends Fragment
                 " - firstVisiblePosition: " + firstVisiblePosition);
         if(RepresentativeContentProvider.getNumTotalRepresentatives() == null) loadHttpItems(offset);
         else {
-            showProgressIndicator(false, true);
+            progressVisible.set(false);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             firstVisiblePosition = null;
             ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);

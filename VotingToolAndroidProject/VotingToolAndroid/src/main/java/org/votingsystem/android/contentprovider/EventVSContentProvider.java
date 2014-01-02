@@ -99,8 +99,8 @@ public class EventVSContentProvider extends ContentProvider {
     //        AUTHORITY + "/" + BASE_PATH);
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getRepresentativeURI(Long representativeId) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + representativeId);
+    public static Uri getEventURI(Long eventId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + eventId);
     }
 
     @Override public boolean onCreate() {

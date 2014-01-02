@@ -407,6 +407,8 @@ public class EventVS {
             androidEventVS.setId(jsonData.getLong("id"));
             androidEventVS.setEventVSId(jsonData.getLong("id"));
         }
+        if(jsonData.has("typeVS"))  androidEventVS.setTypeVS(TypeVS.valueOf(
+                jsonData.getString("typeVS")));
         if (jsonData.has("eventId"))
             androidEventVS.setEventVSId(jsonData.getLong("eventId"));
         if (jsonData.has("userVS")) {
@@ -494,7 +496,7 @@ public class EventVS {
             jsonObject.put("dateBegin",DateUtils.getStringFromDate(dateBegin));
         if(dateFinish != null)
             jsonObject.put("dateFinish", DateUtils.getStringFromDate(dateFinish));
-        if (typeVS != null) jsonObject.put("type", typeVS.toString());
+        if (typeVS != null) jsonObject.put("typeVS", typeVS.toString());
         if (id != null) jsonObject.put("id", eventId);
         if (eventId != null) jsonObject.put("eventId", eventId);
         if (tags != null) {
@@ -504,6 +506,7 @@ public class EventVS {
             }
             jsonObject.put("tags", jsonArray);
         }
+        if(userVS != null) jsonObject.put("userVS", userVS.getFullName());
         if (controlCenter != null) {
             Map<String, Object> controlCenterMap = new HashMap<String, Object>();
             controlCenterMap.put("id", controlCenter.getId());

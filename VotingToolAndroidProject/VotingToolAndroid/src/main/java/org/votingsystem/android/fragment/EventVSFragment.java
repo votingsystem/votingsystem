@@ -3,6 +3,7 @@ package org.votingsystem.android.fragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,8 +17,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 
 import org.json.JSONObject;
-import org.votingsystem.android.activity.EventStatisticsPagerActivity;
+import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.FieldEventVS;
@@ -43,59 +45,62 @@ import static org.votingsystem.model.ContextVS.*;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class EventFragment extends Fragment implements CertPinDialogListener, View.OnClickListener {
+public class EventVSFragment extends Fragment implements CertPinDialogListener, View.OnClickListener {
 
-    public static final String TAG = "EventFragment";
+    public static final String TAG = "EventVSFragment";
 
-    private Button firmarEnviarButton;
-    private EventVS event = null;
-    private int eventIndex;
+    private Button signAndSendButton;
+    private EventVS eventVS;
     private ContextVS contextVS;
-    private Map<Integer, EditText> mapaCamposReclamacion;
+    private Map<Integer, EditText> fieldsMap;
     private ProcessSignatureTask processSignatureTask;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean isProgressShown;
+    private boolean progressVisible;
 
-    public static EventFragment newInstance(Integer eventId) {
-        EventFragment fragment = new EventFragment();
+    public static EventVSFragment newInstance(String eventJSONStr) {
+        EventVSFragment fragment = new EventVSFragment();
         Bundle args = new Bundle();
-        args.putInt(ContextVS.ITEM_ID_KEY, eventId);
+        args.putString(ContextVS.EVENTVS_KEY, eventJSONStr);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
-        Bundle args = getArguments();
-        eventIndex =  args.getInt(ContextVS.ITEM_ID_KEY);
+            Bundle savedInstanceState) {
+        Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-        event = (EventVS) contextVS.getEvents().get(eventIndex);
-        View rootView = inflater.inflate(R.layout.event_fragment, container, false);
+        try {
+            if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
+                eventVS = EventVS.parse(new JSONObject(getArguments().getString(
+                        ContextVS.EVENTVS_KEY)));
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        View rootView = inflater.inflate(R.layout.eventvs_fragment, container, false);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
-        String subject = event.getSubject();
+        String subject = eventVS.getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         subjectTextView.setText(subject);
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
 
-        contentTextView.setText(Html.fromHtml(event.getContent()));
+        contentTextView.setText(Html.fromHtml(eventVS.getContent()));
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        firmarEnviarButton = (Button) rootView.findViewById(R.id.sign_and_send_button);
-        if (!event.isActive()) {
-            Log.d(TAG + ".onCreate(..)", " - Event closed");
-            firmarEnviarButton.setEnabled(false);
-        }
-        firmarEnviarButton.setOnClickListener(new Button.OnClickListener() {
+        signAndSendButton = (Button) rootView.findViewById(R.id.sign_and_send_button);
+        if (!eventVS.isActive()) signAndSendButton.setEnabled(false);
+        signAndSendButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                Log.d(TAG + "- firmarEnviarButton -", " - state: " + contextVS.getState().toString());
+                Log.d(TAG + "- signAndSendButton -", " - state: " + contextVS.getState().toString());
                 if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
-                    Log.d(TAG + "-firmarEnviarButton-", " - showCertNotFoundDialog");
+                    Log.d(TAG + "-signAndSendButton-", " - showCertNotFoundDialog");
                     showCertNotFoundDialog();
                     return;
                 }
-                if (event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
-                    if(event.getFieldsEventVS() != null && event.getFieldsEventVS().size() > 0) {
+                if (eventVS.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
+                    if(eventVS.getFieldsEventVS() != null && eventVS.getFieldsEventVS().size() > 0) {
                         showClaimFieldsDialog();
                         return;
                     }
@@ -106,7 +111,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha( 0);
-        isProgressShown = false;
+        progressVisible = false;
         setHasOptionsMenu(true);
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
@@ -131,7 +136,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventStatisticsPagerActivity.class);
+                        EventVSStatisticsPagerActivity.class);
                 startActivity(intent);
                 return true;
             default:
@@ -155,10 +160,10 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
 
     public void onClickSubject(View v) {
         Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
-        if(event != null && event.getSubject() != null &&
-                event.getSubject().length() > MAX_SUBJECT_SIZE) {
+        if(eventVS != null && eventVS.getSubject() != null &&
+                eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
             AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-            builder.setTitle(event.getSubject());
+            builder.setTitle(eventVS.getSubject());
             builder.show();
         }
     }
@@ -201,29 +206,10 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         processSignatureTask.execute();
     }
 
-    public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown) {
-            return;
-        }
-        isProgressShown = shown;
-        if (!shown) {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha( 0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        } else {
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible == showProgress)  return;
+        progressVisible = showProgress;
+        if (progressVisible) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_in));
@@ -240,13 +226,30 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                     return true;
                 }
             });
+        } else {
+            if (animate) {
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
+                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
+                //        this, android.R.anim.fade_in));
+            }
+            progressContainer.setVisibility(View.GONE);
+            //eventContainer.setVisibility(View.VISIBLE);
+            mainLayout.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });
         }
     }
 
 
     private void showClaimFieldsDialog() {
         Log.d(TAG + ".showClaimFieldsDialog(...)", " - showClaimFieldsDialog");
-        if (event.getFieldsEventVS() == null) {
+        if (eventVS.getFieldsEventVS() == null) {
             Log.d(TAG + ".showClaimFieldsDialog(...)", " - claim without fields");
             return;
         }
@@ -257,9 +260,9 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         LinearLayout mFormView = (LinearLayout) mScrollView.findViewById(R.id.form);
         final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
         errorMsgTextView.setVisibility(View.GONE);
-        Set<FieldEventVS> campos = event.getFieldsEventVS();
+        Set<FieldEventVS> campos = eventVS.getFieldsEventVS();
 
-        mapaCamposReclamacion = new HashMap<Integer, EditText>();
+        fieldsMap = new HashMap<Integer, EditText>();
         for (FieldEventVS campo : campos) {
             addFormField(campo.getContent(), InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
                     mFormView, campo.getId().intValue());
@@ -275,9 +278,9 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View onClick) {
-                Set<FieldEventVS> campos = event.getFieldsEventVS();
+                Set<FieldEventVS> campos = eventVS.getFieldsEventVS();
                 for (FieldEventVS campo : campos) {
-                    EditText editText = mapaCamposReclamacion.get(campo.getId().intValue());
+                    EditText editText = fieldsMap.get(campo.getId().intValue());
                     String fieldValue = editText.getText().toString();
                     if ("".equals(fieldValue)) {
                         errorMsgTextView.setVisibility(View.VISIBLE);
@@ -309,7 +312,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         mFormView.addView(tvLabel);
         mFormView.addView(editView);
 
-        mapaCamposReclamacion.put(id, editView);
+        fieldsMap.put(id, editView);
     }
 
 
@@ -341,22 +344,25 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
 
         protected ResponseVS doInBackground(URL... urls) {
             Log.d(TAG + ".ProcessSignatureTask.doInBackground(...)",
-                    " - doInBackground - event type: " + event.getTypeVS());
+                    " - doInBackground - event type: " + eventVS.getTypeVS());
             try {
                 ResponseVS responseVS = null;
                 byte[] keyStoreBytes = null;
                 FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
                 keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-                if(event.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
+                if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
                     PDFSignedSender PDFSignedSender = new PDFSignedSender(
-                            contextVS.getAccessControl().getEventVSManifestURL(event.getEventVSId()),
-                            contextVS.getAccessControl().getEventVSManifestCollectorURL(event.getEventVSId()),
+                            contextVS.getAccessControl().getEventVSManifestURL(
+                                    eventVS.getEventVSId()),
+                            contextVS.getAccessControl().getEventVSManifestCollectorURL(
+                                    eventVS.getEventVSId()),
                             keyStoreBytes, pin.toCharArray(), null, null,
                             getActivity().getApplicationContext());
                     responseVS = PDFSignedSender.call();
-                } else if(event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
-                    String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getSubject();
-                    JSONObject signatureContent = event.getSignatureContentJSON();
+                } else if(eventVS.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
+                    String subject = getActivity().getString(R.string.signature_msg_subject)
+                            + eventVS.getSubject();
+                    JSONObject signatureContent = eventVS.getSignatureContentJSON();
                     signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
                     String serviceURL = contextVS.getAccessControl().getEventVSClaimCollectorURL();
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
@@ -378,7 +384,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
             getActivity().getWindow().getDecorView().findViewById(
                     android.R.id.content).invalidate();
             showProgress(true, true);
-            firmarEnviarButton.setEnabled(false);
+            signAndSendButton.setEnabled(false);
         }
 
         // This is called each time you call publishProgress()
@@ -394,7 +400,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                 showMessage(getString(R.string.operation_ok_msg), getString(R.string.operation_ok_msg));
             } else {
                 showMessage(getString(R.string.error_lbl), response.getMessage());
-                firmarEnviarButton.setEnabled(true);
+                signAndSendButton.setEnabled(true);
             }
         }
 
