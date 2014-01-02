@@ -14,10 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.VoteVS;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -2,15 +2,16 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.util.HttpHelper;
 
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;

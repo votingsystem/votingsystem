@@ -1,29 +1,21 @@
 package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.TelephonyManager;
-import android.text.Html;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -33,34 +25,11 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
-import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.NifUtils;
-
-import java.io.FileOutputStream;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.text.Normalizer;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
-import static org.votingsystem.model.ContextVS.KEY_SIZE;
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
-import static org.votingsystem.model.ContextVS.PROVIDER;
-import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
-import static org.votingsystem.model.ContextVS.SIG_NAME;
-import static org.votingsystem.model.ContextVS.State;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -72,12 +41,9 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                " ========= intent.getExtras(): " + intent.getExtras());
-        String action = intent.getAction();
-        if(action.equalsIgnoreCase(ContextVS.SIGN_AND_SEND_ACTION_ID)){
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
 
-        }
         }
     };
 
@@ -112,7 +78,7 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
 
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ContextVS.SIGN_AND_SEND_ACTION_ID);
+
 
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, intentFilter);

@@ -9,23 +9,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
-import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.ContextVS;
 
 public class CertNotFoundDialog  extends DialogFragment {
 
 	public static final String TAG = "CertNotFoundDialog";
-	
-	public static final int MAX_MSG_LENGTH = 400;
 
-
-
-    public CertNotFoundDialog() {
-        // Empty constructor required for DialogFragment
-    }
+    public CertNotFoundDialog() { }
 
     
     @Override

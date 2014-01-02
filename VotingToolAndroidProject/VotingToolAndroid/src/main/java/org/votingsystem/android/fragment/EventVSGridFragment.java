@@ -15,19 +15,30 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.*;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import org.json.JSONObject;
+import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSPagerActivity;
 import org.votingsystem.android.activity.MainActivity;
-import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.service.EventVSService;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
-import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
+
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -94,9 +105,6 @@ public class EventVSGridFragment extends Fragment
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
         progressVisible = new AtomicBoolean(false);
-        //LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-        //        broadcastReceiver, new IntentFilter(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID));
-        //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(loaderId, null, this);
     };
 

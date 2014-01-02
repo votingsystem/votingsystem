@@ -5,12 +5,13 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 

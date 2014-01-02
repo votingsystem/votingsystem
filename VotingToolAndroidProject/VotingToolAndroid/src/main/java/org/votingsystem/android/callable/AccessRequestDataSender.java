@@ -3,22 +3,26 @@ package org.votingsystem.android.callable;
 import android.content.Context;
 import android.util.Log;
 
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.HttpHelper;
 
-import javax.mail.Header;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.model.ContextVS.*;
+import javax.mail.Header;
+
+import static org.votingsystem.model.ContextVS.KEY_SIZE;
+import static org.votingsystem.model.ContextVS.PROVIDER;
+import static org.votingsystem.model.ContextVS.SIG_NAME;
+import static org.votingsystem.model.ContextVS.VOTE_SIGN_MECHANISM;
 
 /**
 * @author jgzornoza

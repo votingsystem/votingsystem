@@ -18,22 +18,21 @@ package org.votingsystem.android.ui;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.TypeVS;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author jgzornoza

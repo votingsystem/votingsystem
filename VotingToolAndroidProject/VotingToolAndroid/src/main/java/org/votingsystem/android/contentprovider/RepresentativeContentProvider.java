@@ -13,9 +13,6 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
-import org.votingsystem.model.ContextVS;
-
-import java.io.File;
 
 /**
  * @author jgzornoza

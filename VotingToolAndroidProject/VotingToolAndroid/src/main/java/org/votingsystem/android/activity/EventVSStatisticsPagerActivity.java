@@ -15,7 +15,6 @@ import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.fragment.EventVSStatisticsFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
 /**

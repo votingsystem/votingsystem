@@ -1,7 +1,6 @@
 package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 import org.votingsystem.android.R;
-import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 

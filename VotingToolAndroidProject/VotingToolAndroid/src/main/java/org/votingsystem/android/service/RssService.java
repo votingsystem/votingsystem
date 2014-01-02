@@ -20,7 +20,12 @@ import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
+
+import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.contentprovider.RssContentProvider;
+import org.votingsystem.model.ContextVS;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,9 +36,6 @@ import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.votingsystem.android.contentprovider.RssContentProvider;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.android.R;
 
 /**
  * from https://android.googlesource.com/platform/development/+/master/samples/RSSReader/

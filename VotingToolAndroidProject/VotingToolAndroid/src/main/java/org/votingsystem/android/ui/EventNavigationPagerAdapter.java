@@ -9,12 +9,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import org.votingsystem.android.fragment.EventVSGridFragment;
+
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EventVS;
+import org.votingsystem.android.fragment.EventVSGridFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.EventVS;
 
 /**
  * @author jgzornoza

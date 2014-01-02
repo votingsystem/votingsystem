@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 

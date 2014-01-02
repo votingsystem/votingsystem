@@ -18,17 +18,18 @@ package org.votingsystem.android.contentprovider;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
-import android.content.UriMatcher;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.content.ContentValues;
 import android.text.TextUtils;
 import android.util.Log;
+
 import java.io.File;
 
 // Content Provider for RSS feed information. Each row describes a single

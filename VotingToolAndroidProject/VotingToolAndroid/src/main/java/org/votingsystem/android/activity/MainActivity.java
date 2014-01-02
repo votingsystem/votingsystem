@@ -19,25 +19,23 @@ package org.votingsystem.android.activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.VotingAppService;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.StringUtils;
+
 import java.io.IOException;
 import java.util.Properties;
+
 import static org.votingsystem.model.ContextVS.SERVER_URL_EXTRA_PROP_NAME;
 
 //import org.eclipse.jetty.websocket.WebSocket;
@@ -118,7 +116,7 @@ public class MainActivity extends FragmentActivity {
             startIntent.putExtra(ContextVS.URI_DATA_KEY, msg);
         }
         startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
-        startIntent.putExtra(ContextVS.SERVICE_CALLER_KEY, this.getClass().getName());
+        startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
         startService(startIntent);
     }
 

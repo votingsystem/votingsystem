@@ -19,9 +19,10 @@ package org.votingsystem.android.ui;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
-import android.content.res.Configuration;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -30,7 +31,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
+import org.votingsystem.model.ContextVS;
 
 public class CertPinDialog extends DialogFragment implements OnKeyListener {
 
@@ -47,15 +50,29 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
     private static CertPinDialogListener listener;
     private static String firstPin = null;
     private Boolean withPasswordConfirm = null;
+    private String dialogCaller = null;
 
     public static CertPinDialog newInstance(String msg, 
     		CertPinDialogListener dialogListener, boolean isWithPasswordConfirm) {
+        Log.d(TAG + ".onCreateView(...) ", "==========================");
     	CertPinDialog dialog = new CertPinDialog();
         Bundle args = new Bundle();
         args.putString(MESSAGE_KEY, msg);
         args.putBoolean(PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
         dialog.setArguments(args);
         listener = dialogListener;
+        return dialog;
+    }
+
+
+    public static CertPinDialog newInstance(String msg, boolean isWithPasswordConfirm,
+            String caller) {
+        CertPinDialog dialog = new CertPinDialog();
+        Bundle args = new Bundle();
+        args.putString(MESSAGE_KEY, msg);
+        args.putString(ContextVS.CALLER_KEY, caller);
+        args.putBoolean(PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
+        dialog.setArguments(args);
         return dialog;
     }
 
@@ -74,6 +91,7 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
         	msgTextView.setText(getArguments().getString(MESSAGE_KEY));
         }
         withPasswordConfirm = getArguments().getBoolean(PASSWORD_CONFIRM_KEY);
+        dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
         getDialog().setOnKeyListener(this);
         setRetainInstance(true);
         /*int width = getResources().getDimensionPixelSize(R.dimen.cert_pin_dialog_width);
@@ -105,12 +123,15 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
         		getCurrentFocus().getWindowToken(), 0);
         //onDestroyView();
         getDialog().dismiss();
-        listener.setPin(pin);
+        if(listener != null) listener.setPin(pin);
+        else if(dialogCaller != null) {
+            Intent intent = new Intent(dialogCaller);
+            intent.putExtra(ContextVS.PIN_KEY, pin);
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        }
     }
 
-
-	@Override
-	public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+	@Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 		//OnKey is fire twice: the first time for key down, and the second time for key up, 
 		//so you have to filter:
 		if (event.getAction()!=KeyEvent.ACTION_DOWN)

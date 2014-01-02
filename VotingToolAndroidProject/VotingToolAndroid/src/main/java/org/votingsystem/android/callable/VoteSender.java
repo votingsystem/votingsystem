@@ -18,20 +18,21 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.VoteVS;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
+import org.votingsystem.util.HttpHelper;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;

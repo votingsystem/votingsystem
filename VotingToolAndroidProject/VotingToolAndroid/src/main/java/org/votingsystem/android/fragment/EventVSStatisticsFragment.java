@@ -16,12 +16,14 @@
 
 package org.votingsystem.android.fragment;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -29,7 +31,6 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import org.json.JSONObject;
-import org.votingsystem.android.activity.EventVSPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContextVS;

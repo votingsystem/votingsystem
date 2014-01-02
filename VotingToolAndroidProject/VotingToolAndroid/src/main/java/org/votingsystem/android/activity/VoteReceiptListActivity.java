@@ -12,10 +12,21 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.*;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
@@ -27,8 +38,8 @@ import org.votingsystem.android.ui.ReceiptOperationsListener;
 import org.votingsystem.android.ui.ReceiptOptionsDialog;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.DateUtils;
@@ -44,8 +55,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 public class VoteReceiptListActivity extends ActionBarActivity
         implements CertPinDialogListener, ReceiptOperationsListener {

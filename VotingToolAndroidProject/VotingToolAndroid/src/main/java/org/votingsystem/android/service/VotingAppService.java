@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.EventVSPublishingActivity;
@@ -24,7 +25,9 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
+
 import java.util.UUID;
+
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 
 /**

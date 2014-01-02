@@ -23,28 +23,30 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import org.votingsystem.android.ui.JavaScriptInterface;
-import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.ui.JavaScriptInterface;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
+
 import java.io.FileInputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.UUID;
+
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 

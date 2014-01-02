@@ -2,14 +2,15 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -31,45 +32,36 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import org.votingsystem.android.activity.NavigationDrawer;
+
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.FragmentContainerActivity;
+import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
+import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.NifUtils;
-import java.io.FileOutputStream;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
+
 import java.text.Normalizer;
-import java.util.Date;
 import java.util.UUID;
-import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
-import static org.votingsystem.model.ContextVS.KEY_SIZE;
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
-import static org.votingsystem.model.ContextVS.PROVIDER;
-import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
-import static org.votingsystem.model.ContextVS.SIG_NAME;
-import static org.votingsystem.model.ContextVS.State;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class UserCertRequestFormFragment extends Fragment implements CertPinDialogListener {
+public class UserCertRequestFormFragment extends Fragment {
 
 	public static final String TAG = "UserCertRequestFormFragment";
 
+    private String givenname = null;
+    private String surname = null;
     private String email = null;
+    private String nif = null;
     private String phone = null;
     private String deviceId = null;
-    private CertificationRequestVS certificationRequest;
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
@@ -77,13 +69,40 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean progressVisible;
+    private boolean progressVisible = false;
     private AlertDialog alertDialog;
-    private SendDataTask sendDataTask;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            if(pin != null) launchUserCertRequestService(pin);
+            else {
+                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                        ResponseVS.SC_ERROR);
+                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+                if(ResponseVS.SC_OK == responseStatusCode) {
+                    Intent resultIntent = new Intent(getActivity().getApplicationContext(),
+                            UserCertResponseActivity.class);
+                    startActivity(resultIntent);
+                } else showMessage(caption, message);
+            }
+        }
+    };
+
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
+        // if set to true savedInstanceState will be allways null
+        setRetainInstance(true);
+        setHasOptionsMenu(true);
+    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreateView(...)", "onCreateView");
+        Log.d(TAG + ".onCreateView(...)", "");
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
@@ -115,11 +134,10 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
 
         nifText.setOnKeyListener(new OnKeyListener() {
             // android:imeOptions="actionDone" doesn't work
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
+            @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
                 //Log.d(TAG + ".onKey(...)", " - keyCode: " + keyCode);
                 if (event != null && keyCode == KeyEvent.KEYCODE_ENTER) {
-                    processNif();
+                    submitForm();
                     return true;
                 } else return false;
             }
@@ -127,7 +145,7 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
         Button requestButton = (Button) rootView.findViewById(R.id.request_button);
         requestButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                processNif();
+                submitForm();
             }
         });
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
@@ -135,10 +153,7 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
         progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
         progressMessage.setText(R.string.loading_data_msg);
         mainLayout.getForeground().setAlpha(0);
-        progressVisible = false;
-        // if set to true savedInstanceState will be allways null
-        setRetainInstance(true);
-        setHasOptionsMenu(true);
+        if(progressVisible) showProgress(true, true);
         return rootView;
     }
 
@@ -160,15 +175,24 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
     @Override public void onStop() {
         super.onStop();
         Log.d(TAG + ".onStop()", "onStop");
+        if(alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
     }
-
 
     @Override public void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
         Log.d(TAG + ".onResume() ", "onResume");
     }
 
-	@Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
@@ -182,36 +206,23 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
 		}
 	}
 
-    private void processNif() {
+    private void submitForm() {
     	InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(nifText.getWindowToken(), 0);
       	if (validateForm ()) {
-    		String givenName = Normalizer.normalize(
-    				givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
-    		givenName  = givenName.replaceAll("[^\\p{ASCII}]", "");
-    		String surname = Normalizer.normalize(
-    				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
-    		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
     		String nif = NifUtils.validate(nifText.getText().toString().toUpperCase());
 
 			AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-    		builder.setTitle(getString(R.string.
-    				request_certificate_form_lbl));
-    		builder.setMessage(Html.fromHtml(
-    				getString(R.string.cert_data_confirm_msg, givenName, surname, nif)));
-    		builder.setPositiveButton(getString(
-    				R.string.continue_label), new DialogInterface.OnClickListener() {
-    		            public void onClick(DialogInterface dialog, int whichButton) {
-    		              	showPinScreen(getString(
-    		              			R.string.keyguard_password_enter_first_pin_code));
-    		            }
-    					});
-    		builder.setNegativeButton(getString(
-    				R.string.cancel_button), null);
-    		//builder.show();
-    		Dialog dialog = builder.create();
-            dialog.show();
+            Dialog dialog = builder.setTitle(getString(R.string.request_certificate_form_lbl)).
+                    setMessage(Html.fromHtml(getString(R.string.cert_data_confirm_msg, givenname,
+                    surname, nif))).setPositiveButton(getString(
+                    R.string.continue_label), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    showPinScreen(getString(
+                            R.string.keyguard_password_enter_first_pin_code));
+                }
+            }).setNegativeButton(getString(R.string.cancel_button), null).show();
     		TextView textView = ((TextView) dialog.findViewById(android.R.id.message));
             textView.setGravity(Gravity.CENTER);
       	}
@@ -221,22 +232,32 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
 		Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
 		AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
         alertDialog = builder.setTitle(caption).setMessage(message).show();
+        showProgress(false, true);
 	}
 
     private boolean validateForm () {
     	Log.d(TAG + ".validateForm", "validateForm");
-    	if(NifUtils.validate(nifText.getText().toString()) == null) {
+        nif = NifUtils.validate(nifText.getText().toString());
+    	if(nif == null) {
     		showMessage(getString(R.string.error_lbl), getString(R.string.nif_error));
     		return false;
     	}
     	if(TextUtils.isEmpty(givennameText.getText().toString())){
     		showMessage(getString(R.string.error_lbl), getString(R.string.givenname_missing_msg));
     		return false;
-    	}
+    	} else {
+            givenname = Normalizer.normalize(givennameText.getText().toString().toUpperCase(),
+                    Normalizer.Form.NFD);
+            givenname  = givenname.replaceAll("[^\\p{ASCII}]", "");
+        }
     	if(TextUtils.isEmpty(surnameText.getText().toString())){
     		showMessage(getString(R.string.error_lbl), getString(R.string.surname_missing_msg));
     		return false;
-    	}
+    	} else {
+            surname = Normalizer.normalize(surnameText.getText().toString().toUpperCase(),
+                    Normalizer.Form.NFD);
+            surname = surname.replaceAll("[^\\p{ASCII}]", "");
+        }
     	TelephonyManager telephonyManager = (TelephonyManager)getActivity().getSystemService(
                 Context.TELEPHONY_SERVICE);
     	phone = telephonyManager.getLine1Number();
@@ -253,9 +274,24 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
     	return true;
     }
 
+    private void launchUserCertRequestService(String pin) {
+        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                UserCertRequestService.class);
+        startIntent.putExtra(ContextVS.PIN_KEY, pin);
+        startIntent.putExtra(ContextVS.DEVICE_ID_KEY, deviceId);
+        startIntent.putExtra(ContextVS.PHONE_KEY, phone);
+        startIntent.putExtra(ContextVS.NAME_KEY, givenname);
+        startIntent.putExtra(ContextVS.SURNAME_KEY, surname);
+        startIntent.putExtra(ContextVS.NIF_KEY, nif);
+        startIntent.putExtra(ContextVS.EMAIL_KEY, email);
+        startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+        getActivity().startService(startIntent);
+        showProgress(true, true);
+    }
 
     private void showPinScreen(String message) {
-        CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
+        CertPinDialog pinDialog = CertPinDialog.newInstance(message, false, this.getClass().getName());
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
         if (prev != null) ft.remove(prev);
@@ -263,122 +299,32 @@ public class UserCertRequestFormFragment extends Fragment implements CertPinDial
         pinDialog.show(ft, CertPinDialog.TAG);
     }
 
-    @Override public void setPin(final String pin) {
-        Log.d(TAG + ".setPin()", "setPin");
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.commit();
-        if(pin == null) return;
-        if(sendDataTask != null) sendDataTask.cancel(true);
-        sendDataTask = new SendDataTask(pin);
-        sendDataTask.execute(contextVS.getAccessControl().getUserCSRServiceURL());
-    }
-
-    public void showProgress(boolean shown, boolean animate) {
-        if (progressVisible == shown) return;
-        progressVisible = shown;
-        if (!shown) {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha( 0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {return false;}
-            });
-        } else {
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible == showProgress) return;
+        progressVisible = showProgress;
+        if (progressVisible) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
             }
             progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
             mainLayout.getForeground().setAlpha(150); // dim
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to disable touch events on background view
                 @Override public boolean onTouch(View v, MotionEvent event) { return true; }
             });
+        } else {
+            if (animate) {
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
+            }
+            progressContainer.setVisibility(View.GONE);
+            mainLayout.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {return false;}
+            });
         }
     }
 
-    public class SendDataTask extends AsyncTask<String, Void, ResponseVS> {
-
-        private String password;
-
-        public SendDataTask(String password) {
-            this.password = password;
-        }
-
-        protected void onPreExecute() {
-            Log.d(TAG + ".SendDataTask.onPreExecute(...)", "onPreExecute");
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            showProgress(true, true);
-        }
-
-
-        @Override protected ResponseVS doInBackground(String... urls) {
-            Log.d(TAG + ".SendDataTask.doInBackground(...)", "url:" + urls[0]);
-            byte[] csrBytes = null;
-            try {
-                String givenName = Normalizer.normalize(
-                        givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
-                givenName  = givenName.replaceAll("[^\\p{ASCII}]", "");
-                String surname = Normalizer.normalize(
-                        surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
-                surname  = surname.replaceAll("[^\\p{ASCII}]", "");
-                String nif = NifUtils.validate(nifText.getText().toString().toUpperCase());
-                certificationRequest = CertificationRequestVS.getUserRequest(KEY_SIZE, SIG_NAME,
-                        SIGNATURE_ALGORITHM, PROVIDER, nif, email, phone, deviceId, givenName, surname);
-                csrBytes = certificationRequest.getCsrPEM();
-                KeyStore keyStore = KeyStore.getInstance("PKCS12");
-                keyStore.load(null, null);
-                X509Certificate[] dummyCerts = CertUtil.generateCertificate(
-                        certificationRequest.getKeyPair(), new Date(System.currentTimeMillis()),
-                        new Date(System.currentTimeMillis()), "CN=Dummy" + USER_CERT_ALIAS);
-                keyStore.setKeyEntry(USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
-                        password.toCharArray(), dummyCerts);
-
-                byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
-                FileOutputStream fos = getActivity().openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
-                fos.write(keyStoreBytes);
-                fos.close();
-                return HttpHelper.sendData(csrBytes, null, urls[0]);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            }
-        }
-
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + ".SendDataTask.onPostExecute", "statusCode: " + responseVS.getStatusCode());
-            //showProgress(false, true);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SharedPreferences settings = getActivity().getApplicationContext().
-                        getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
-                        Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                Long requestId = Long.valueOf(responseVS.getMessage());
-                editor.putLong(CSR_REQUEST_ID_KEY, requestId);
-                editor.commit();
-                contextVS.setState(State.WITH_CSR);
-                Intent intent = new Intent(getActivity().getApplicationContext(),
-                        UserCertResponseActivity.class);
-                startActivity(intent);
-            } else {
-                AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.alert_exception_caption).setMessage(
-                        responseVS.getMessage()).setPositiveButton("OK", null).show();
-            }
-        }
-
-
-    }
 }

@@ -18,8 +18,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContextVS;

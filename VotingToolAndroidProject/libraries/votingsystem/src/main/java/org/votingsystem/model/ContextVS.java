@@ -60,14 +60,19 @@ public class ContextVS {
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";
+    public static final String NIF_KEY = "NIF";
+    public static final String EMAIL_KEY = "EMAIL_KEY";
+    public static final String SURNAME_KEY = "SURNAME_KEY";
+    public static final String PHONE_KEY = "PHONE_KEY";
+    public static final String DEVICE_ID_KEY = "DEVICE_ID_KEY";
+    public static final String NAME_KEY = "NAME_KEY";
     public static final String URI_DATA_KEY = "URI_DATA";
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
-    public static final String SERVICE_CALLER_KEY = "SERVICE_CALLER";
-    public static final String HTTP_RESPONSE_DATA_KEY = "HTTP_RESPONSE_DATA";
-    public static final String HTTP_RESPONSE_STATUS_KEY = "HTTP_RESPONSE_STATUS";
+    public static final String CALLER_KEY = "CALLER_KEY";
+    public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
     public static final String OFFSET_KEY = "OFFSET";
     public static final String CAPTION_KEY = "CAPTION";
-    public static final String MESSAGE_KEY = "MESSAGE";
     public static final String LOADING_KEY = "LOADING_KEY";
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
@@ -76,11 +81,6 @@ public class ContextVS {
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
     public static final String EVENT_TYPE_KEY  = "EVENT_TYPE";
     public static final String EVENTVS_KEY  = "EVENTVS";
-
-    //Actions IDs
-    public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION";
-    public static final String PIN_ACTION_ID = "PIN_ACTION_ID";
-    public static final String HTTP_DATA_INITIALIZED_ACTION_ID = "HTTP_DATA_INITIALIZED_ACTION";
 
     //Loaders
     public static final int EVENT_LIST_LOADER1_ID = 0;
@@ -114,7 +114,7 @@ public class ContextVS {
     //public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA256WithRSA";
     public static final String USER_CERT_ALIAS = "CertificadoUsuario";
-    public static final String KEY_STORE_FILE = "keyStoreFile.p12";
+    public static final String KEY_STORE_FILE = "keyStoreVS.p12";
 
     public static final String TIMESTAMP_USU_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
     public static final String TIMESTAMP_VOTE_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256

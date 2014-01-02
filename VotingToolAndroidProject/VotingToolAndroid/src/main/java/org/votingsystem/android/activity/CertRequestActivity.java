@@ -25,6 +25,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.model.ContextVS;
@@ -36,9 +37,10 @@ public class CertRequestActivity extends FragmentActivity {
     ContextVS contextVS;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getApplicationContext());
+        Log.d(TAG + ".onCreate(...)", "contextVS.getState(): " + contextVS.getState() +
+                "savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.app_without_cert_activity);
         Button cancelButton = (Button) findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(new View.OnClickListener() {

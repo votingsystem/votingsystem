@@ -3,22 +3,18 @@ package org.votingsystem.android.service;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
-import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.EventVSResponse;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.UserVSResponse;
 import org.votingsystem.util.HttpHelper;
 
 import java.text.ParseException;
@@ -26,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import javax.mail.Provider;
 
 /**
  * @author jgzornoza
@@ -58,22 +52,6 @@ public class EventVSService extends IntentService {
             }
         }
         if(runnable != null) new Thread(runnable).start();
-    }
-
-    private void sendMessage(Integer statusCode, String message, Long offset,
-            String eventType, String state) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - offset: " +
-                offset  + " - eventType: " + eventType +
-                " - state: " + state);
-        Intent intent = new Intent(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID);
-        if(statusCode != null)
-            intent.putExtra(ContextVS.HTTP_RESPONSE_STATUS_KEY, statusCode.intValue());
-        if(message != null)
-            intent.putExtra(ContextVS.HTTP_RESPONSE_DATA_KEY, statusCode.intValue());
-        if(offset != null) intent.putExtra(ContextVS.OFFSET_KEY, offset);
-        if(state != null) intent.putExtra(ContextVS.STATE_KEY, state);
-        if(eventType != null) intent.putExtra(ContextVS.EVENT_TYPE_KEY, eventType);
-        LocalBroadcastManager.getInstance(EventVSService.this).sendBroadcast(intent);
     }
 
     @Override protected void onHandleIntent(Intent intent) {
@@ -159,15 +137,12 @@ public class EventVSService extends IntentService {
                         Log.d(TAG + ".onHandleIntent(...)", "inserted: " + numRowsCreated + " rows" +
                             " - eventType: " + eventTypeStr + " - eventState: " + eventState);
                     } else Log.d(TAG + ".onHandleIntent(...)", "Response empty");
-                    sendMessage(responseVS.getStatusCode(), responseVS.getMessage(),
-                            Long.valueOf(response.getOffset()), eventTypeStr, eventStateStr);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            } else sendMessage(responseVS.getStatusCode(), responseVS.getMessage(), null,
-                    eventTypeStr, eventStateStr);
+            }
         }
     }
 

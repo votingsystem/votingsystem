@@ -18,18 +18,18 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
+import org.votingsystem.util.HttpHelper;
 
-import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -38,8 +38,8 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 public class SMIMESignedSender implements Callable<ResponseVS> {
 

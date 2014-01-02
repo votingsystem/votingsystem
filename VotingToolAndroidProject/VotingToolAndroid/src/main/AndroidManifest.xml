@@ -77,7 +77,7 @@
         <activity android:name=".activity.FragmentContainerActivity"
             android:noHistory="true" android:theme="@style/Theme.AppCompat.Light"/>
 
-        <activity android:name=".activity.CertRequestActivity"
+        <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
             android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
         
         <activity android:name=".activity.UserCertResponseActivity" android:noHistory="true"
@@ -118,8 +118,10 @@
             android:process=":sign_and_send_service"/>
         <service android:name=".service.RssService" android:process=":rss_service"/>
         <service android:name=".service.RepresentativeService"  android:exported="false"/>
+        <service android:name=".service.UserCertRequestService"  android:exported="false"/>
         <service android:name=".service.EventVSService"  android:exported="false"/>
         <service android:name=".service.VotingAppService"  android:exported="false"/>
+
 
     </application>
 </manifest>

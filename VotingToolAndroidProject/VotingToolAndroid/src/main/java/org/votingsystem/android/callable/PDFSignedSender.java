@@ -2,8 +2,18 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
+
 import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.*;
+import com.itextpdf.text.pdf.PdfDate;
+import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfPKCS7;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfSignature;
+import com.itextpdf.text.pdf.PdfSignatureAppearance;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -19,18 +29,16 @@ import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignedDataGenerator;
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.PDF_CMSSignedGenerator;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
 
-import javax.mail.Header;
-import javax.mail.internet.MimeBodyPart;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
@@ -38,8 +46,15 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.Callable;
+
+import javax.mail.Header;
+import javax.mail.internet.MimeBodyPart;
 
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 

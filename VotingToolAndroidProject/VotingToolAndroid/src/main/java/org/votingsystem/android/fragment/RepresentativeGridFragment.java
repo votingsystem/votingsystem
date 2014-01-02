@@ -22,10 +22,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
@@ -33,14 +31,16 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import org.votingsystem.android.activity.MainActivity;
+
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,25 +60,6 @@ public class RepresentativeGridFragment extends Fragment
     private static ContextVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        if(action.equalsIgnoreCase(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID)){
-            int responseStatus = intent.getIntExtra(ContextVS.HTTP_RESPONSE_STATUS_KEY, -1);
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "status: " + responseStatus +
-                    " - extras: " + intent.getExtras());
-            if(ResponseVS.SC_OK == responseStatus) {
-                offset = intent.getLongExtra(ContextVS.OFFSET_KEY, 0L);
-                RepresentativeContentProvider.setNumTotalRepresentatives(
-                        intent.getLongExtra(ContextVS.NUM_TOTAL_KEY, 0L));
-                Log.d(TAG + ".broadcastReceiver.onReceive(...)", " - offset: " + offset +
-                    " - numTotal: " + RepresentativeContentProvider.getNumTotalRepresentatives());
-            } else showMessage(contextVS.getMessage("connErrorCaption"),
-                    intent.getStringExtra(ContextVS.HTTP_RESPONSE_DATA_KEY));
-        }
-        }
-    };
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -103,8 +84,6 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
         setHasOptionsMenu(true);
         progressVisible = new AtomicBoolean(false);
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID));
         //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(ContextVS.REPRESENTATIVE_LOADER_ID, null, this);
     };
@@ -267,8 +246,6 @@ public class RepresentativeGridFragment extends Fragment
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", "onDestroy");
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
     }
 
     public class RepresentativeListAdapter  extends CursorAdapter {

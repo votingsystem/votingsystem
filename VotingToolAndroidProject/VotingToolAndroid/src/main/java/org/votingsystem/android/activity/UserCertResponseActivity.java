@@ -34,17 +34,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
@@ -52,7 +54,10 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import static org.votingsystem.model.ContextVS.*;
+import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
+import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 
 public class UserCertResponseActivity extends ActionBarActivity
@@ -74,11 +79,11 @@ public class UserCertResponseActivity extends ActionBarActivity
     private ContextVS contextVS;
     
     @Override protected void onCreate(Bundle savedInstanceState) {
-        
     	super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreate(...) ", "onCreate");
         setContentView(R.layout.user_cert_response_activity);
         contextVS = ContextVS.getInstance(getBaseContext());
+        Log.d(TAG + ".onCreate(...) ", "state: " + contextVS.getState() +
+                " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         goAppButton = (Button) findViewById(R.id.go_app_button);
@@ -119,14 +124,14 @@ public class UserCertResponseActivity extends ActionBarActivity
         });
         if(savedInstanceState != null) 
         	isCertStateChecked = savedInstanceState.getBoolean(CERT_CHECKED, false);
-        Log.d(TAG + ".onCreate() ", " --- savedInstanceState: " + isCertStateChecked);	
+        Log.d(TAG + ".onCreate() ", "isCertStateChecked: " + isCertStateChecked);
         checkCertState();
     }
     
     private void checkCertState () {
   	  	switch(contextVS.getState()) {
 	    	case WITHOUT_CSR:
-	    		Intent intent = new Intent(getBaseContext(), UserCertRequestFormFragment.class);
+	    		Intent intent = new Intent(getBaseContext(), CertRequestActivity.class);
 	    		startActivity(intent);
 	    		break;
 	    	case WITH_CSR:
@@ -134,7 +139,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	        	SharedPreferences settings = getSharedPreferences(
                         VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
-	        	Log.d(TAG + ".checkCertState() ", "- csrRequestId: " + csrRequestId);
+	        	Log.d(TAG + ".checkCertState() ", "csrRequestId: " + csrRequestId);
                 GetDataTask getDataTask = new GetDataTask(null);
                 getDataTask.execute(contextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
   	  	}
@@ -151,12 +156,11 @@ public class UserCertResponseActivity extends ActionBarActivity
         progressDialog.show();
     }
 
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		Log.d(TAG + ".onSaveInstanceState(...) ", " ------ onSaveInstanceState -------");
-		savedInstanceState.putBoolean(CERT_CHECKED, isCertStateChecked);
-		savedInstanceState.putString(CSR_SIGNED, csrSigned);
-		savedInstanceState.putString(SCREEN_MESSAGE, screenMessage);
+	@Override public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(CERT_CHECKED, isCertStateChecked);
+        outState.putString(CSR_SIGNED, csrSigned);
+        outState.putString(SCREEN_MESSAGE, screenMessage);
+        Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
 	}
 	
 	private void setCertStateChecked(boolean isChecked) {
@@ -167,9 +171,8 @@ public class UserCertResponseActivity extends ActionBarActivity
 		this.csrSigned = csrSigned;
 	}
     
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {		
-		Log.d(TAG + ".onRestoreInstanceState(...) ", " ------ onRestoreInstanceState -------");
+	@Override public void onRestoreInstanceState(Bundle savedInstanceState) {
+		Log.d(TAG + ".onRestoreInstanceState(...) ", "savedInstanceState: " + savedInstanceState);
 		setMessage(savedInstanceState.getString(SCREEN_MESSAGE));
 		csrSigned = savedInstanceState.getString(CSR_SIGNED);
 		isCertStateChecked = savedInstanceState.getBoolean(CERT_CHECKED, false);
@@ -181,7 +184,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	}
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
-		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:  
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
@@ -249,8 +252,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 		.setPositiveButton(getString(R.string.ok_button), null).show();
 	}
 
-	@Override
-	public void setPin(String pin) {
+	@Override public void setPin(String pin) {
 		if(pin != null) {
 			if(updateKeyStore(pin.toCharArray())) {
 				setMessage(getString(R.string.request_cert_result_activity_ok));

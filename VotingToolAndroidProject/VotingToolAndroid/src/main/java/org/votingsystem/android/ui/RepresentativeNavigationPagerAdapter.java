@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
 import org.votingsystem.android.fragment.RepresentativeOperationsFragment;
