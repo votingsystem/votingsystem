@@ -2,38 +2,17 @@ package org.votingsystem.android.service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Bundle;
-import android.database.Cursor;
-import android.content.ContentResolver;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
 import android.util.Log;
-
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.model.ContextVS;
-
-import java.io.BufferedReader;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.lang.StringBuilder;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.util.GregorianCalendar;
-import java.text.SimpleDateFormat;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.text.ParseException;
 
 /**
  * @author jgzornoza

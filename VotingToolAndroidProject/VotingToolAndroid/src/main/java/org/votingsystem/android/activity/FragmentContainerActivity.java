@@ -17,20 +17,24 @@
 package org.votingsystem.android.activity;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.UserCertRequestFragment;
+import org.votingsystem.model.ContextVS;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class UserCertRequestActivity  extends ActionBarActivity {
+public class FragmentContainerActivity extends ActionBarActivity {
 
-	public static final String TAG = "UserCertRequestActivity";
+	public static final String TAG = "FragmentContainerActivity";
 
     @Override public void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
+                " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.generic_fragment_container_activity);
@@ -39,10 +43,16 @@ public class UserCertRequestActivity  extends ActionBarActivity {
         if (savedInstanceState != null) {
             return;
         }
-        UserCertRequestFragment requestFragment = new UserCertRequestFragment();
-        requestFragment.setArguments(getIntent().getExtras());
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, requestFragment).commit();
+        String fragmentClass = getIntent().getStringExtra(ContextVS.FRAGMENT_KEY);
+        try {
+            Class clazz = Class.forName(fragmentClass);
+            Fragment fragment = (Fragment)clazz.newInstance();
+            fragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, fragment).commit();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }

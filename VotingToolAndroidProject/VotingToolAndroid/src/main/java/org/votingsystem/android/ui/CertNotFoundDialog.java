@@ -10,7 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.UserCertRequestActivity;
+import org.votingsystem.android.activity.CertRequestActivity;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.ContextVS;
 
@@ -49,7 +50,7 @@ public class CertNotFoundDialog  extends DialogFragment {
           	  			break;
           	  		case WITHOUT_CSR:
           	  			intent = new Intent(getActivity().getApplicationContext(),
-                                UserCertRequestActivity.class);
+                                CertRequestActivity.class);
           	  			break;
           	  	}
           	  	if(intent != null) startActivity(intent);

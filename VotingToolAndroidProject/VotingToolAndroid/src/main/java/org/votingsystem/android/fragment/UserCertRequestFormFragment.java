@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
@@ -44,14 +43,12 @@ import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.NifUtils;
-
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
 import java.util.Date;
 import java.util.UUID;
-
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
@@ -65,9 +62,9 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class UserCertRequestFragment extends Fragment implements CertPinDialogListener {
+public class UserCertRequestFormFragment extends Fragment implements CertPinDialogListener {
 
-	public static final String TAG = "UserCertRequestFragment";
+	public static final String TAG = "UserCertRequestFormFragment";
 
     private String email = null;
     private String phone = null;
@@ -81,6 +78,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean progressVisible;
+    private AlertDialog alertDialog;
     private SendDataTask sendDataTask;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -153,7 +151,6 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", "onDestroy");
-        setRetainInstance(true);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -223,7 +220,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
 	private void showMessage(String caption, String message) {
 		Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
 		AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-		builder.setTitle(caption).setMessage(message).show();
+        alertDialog = builder.setTitle(caption).setMessage(message).show();
 	}
 
     private boolean validateForm () {
@@ -364,8 +361,9 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
             Log.d(TAG + ".SendDataTask.onPostExecute", "statusCode: " + responseVS.getStatusCode());
             //showProgress(false, true);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(
-                        getActivity().getApplicationContext());
+                SharedPreferences settings = getActivity().getApplicationContext().
+                        getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+                        Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 editor.putLong(CSR_REQUEST_ID_KEY, requestId);

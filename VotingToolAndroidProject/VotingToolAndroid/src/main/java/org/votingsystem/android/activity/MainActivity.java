@@ -50,6 +50,7 @@ public class MainActivity extends FragmentActivity {
     private ContextVS contextVS;
     private ProgressDialog progressDialog = null;
     private String accessControlURL = null;
+    private AlertDialog alertDialog;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
@@ -90,6 +91,10 @@ public class MainActivity extends FragmentActivity {
         String message = getIntent().getStringExtra(ContextVS.MESSAGE_KEY);
         if(caption != null && message != null) showMessage(caption, message);
         else if(uriData != null || contextVS.getAccessControl() == null) runAppService(uriData);
+        else if(contextVS.getAccessControl() != null) {
+            Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
+            startActivity(intent);
+        }
         //WebsocketLoader websocketLoader = new WebsocketLoader();
         //websocketLoader.execute("ws://192.168.1.20:8080/SistemaVotacionTest/websocket/service");
     }
@@ -129,6 +134,10 @@ public class MainActivity extends FragmentActivity {
         switch (item.getItemId()) {
             case R.id.reload:
                 if(contextVS.getAccessControl() == null) runAppService(null);
+                else {
+                    Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
+                    startActivity(intent);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -153,7 +162,8 @@ public class MainActivity extends FragmentActivity {
     private void showMessage(String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
         AlertDialog.Builder builder= new AlertDialog.Builder(this);
-        builder.setTitle(caption).setMessage(message).show();
+        builder.setTitle(caption).setMessage(message);
+        alertDialog = builder.setTitle(caption).setMessage(message).show();
     }
 
     @Override protected void onStop() {
@@ -165,6 +175,7 @@ public class MainActivity extends FragmentActivity {
         super.onDestroy();
     	Log.d(TAG + ".onDestroy()", "onDestroy");
         if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
     };
 
     /*public class WebsocketLoader extends AsyncTask<String, String, ResponseVS> {

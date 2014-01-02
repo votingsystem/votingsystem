@@ -19,6 +19,8 @@ import java.util.Set;
 public class AccessControlVS extends ActorVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
+
+    public static final String TAG = "AccessControlVS";
     
     private EventVS eventVS;
     private Set<ControlCenterVS> controlCenter;
@@ -168,8 +170,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
                             getString("certChainPEM").getBytes());
             actorVS.setCertChain(certChain);
             X509Certificate serverCert = certChain.iterator().next();
-            Log.d(TAG + ".getActorConIP(..) ", " - actorVS Cert: "
-                    + serverCert.getSubjectDN().toString());
+            Log.d(TAG + ".parse(..) ", "actorVS cert: " + serverCert.getSubjectDN().toString());
             actorVS.setCertificate(serverCert);
         }
         if (actorVSJSON.has("timeStampCertPEM")) {

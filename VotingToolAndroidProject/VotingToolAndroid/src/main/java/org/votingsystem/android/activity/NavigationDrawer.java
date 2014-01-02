@@ -233,31 +233,7 @@ public class NavigationDrawer extends ActionBarActivity {
                 onSearchRequested();
                 return true;
             case R.id.get_cert:
-                switch(contextVS.getState()) {
-                    case WITHOUT_CSR:
-                        startActivity(new Intent(this, MainActivity.class));
-                        return true;
-                    case WITH_CSR:
-                        startActivity(new Intent(this, UserCertResponseActivity.class));
-                        return true;
-                    case WITH_CERTIFICATE:
-                        AlertDialog.Builder builder= new AlertDialog.Builder(this);
-                        builder.setTitle(getString(R.string.
-                                request_certificate_menu));
-                        builder.setMessage(Html.fromHtml(
-                                getString(R.string.request_cert_again_msg)));
-                        builder.setPositiveButton(getString(
-                                R.string.ok_button), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                Intent intent = new Intent(NavigationDrawer.this, UserCertRequestActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                            }
-                        });
-                        builder.setNegativeButton(getString(
-                                R.string.cancel_button), null);
-                        builder.show();
-                }
+                startActivity(new Intent(this, CertRequestActivity.class));
                 return true;
             case R.id.receipt_list:
                 startActivity(new Intent(this, VoteReceiptListActivity.class));

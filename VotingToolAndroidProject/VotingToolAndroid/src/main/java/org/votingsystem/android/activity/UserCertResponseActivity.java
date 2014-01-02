@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
@@ -35,11 +34,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.MainActivity;
-import org.votingsystem.android.activity.NavigationDrawer;
-import org.votingsystem.android.activity.UserCertRequestActivity;
+import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.android.ui.CertPinDialog;
@@ -49,7 +45,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
@@ -78,11 +73,10 @@ public class UserCertResponseActivity extends ActionBarActivity
     private Button requestCertButton;
     private ContextVS contextVS;
     
-    @Override
-	protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         
     	super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreate(...) ", " - onCreate");
+        Log.d(TAG + ".onCreate(...) ", "onCreate");
         setContentView(R.layout.user_cert_response_activity);
         contextVS = ContextVS.getInstance(getBaseContext());
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
@@ -108,11 +102,13 @@ public class UserCertResponseActivity extends ActionBarActivity
             	Intent intent = null;
           	  	switch(contextVS.getState()) {
 			    	case WITHOUT_CSR:
-			    		intent = new Intent(getBaseContext(), MainActivity.class);
+			    		intent = new Intent(getBaseContext(), CertRequestActivity.class);
 			    		break;
 			    	case WITH_CSR:
 			    	case WITH_CERTIFICATE:
-			    		intent = new Intent(getBaseContext(), UserCertRequestActivity.class);
+			    		intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+                        intent.putExtra(ContextVS.FRAGMENT_KEY,
+                                UserCertRequestFormFragment.class.getName());
 			    		break;
           	  	}
           	  	if(intent != null) {
@@ -130,12 +126,13 @@ public class UserCertResponseActivity extends ActionBarActivity
     private void checkCertState () {
   	  	switch(contextVS.getState()) {
 	    	case WITHOUT_CSR:
-	    		Intent intent = new Intent(getBaseContext(), MainActivity.class);
+	    		Intent intent = new Intent(getBaseContext(), UserCertRequestFormFragment.class);
 	    		startActivity(intent);
 	    		break;
 	    	case WITH_CSR:
 	    		if(isCertStateChecked) break;
-	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+	        	SharedPreferences settings = getSharedPreferences(
+                        VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
 	        	Log.d(TAG + ".checkCertState() ", "- csrRequestId: " + csrRequestId);
                 GetDataTask getDataTask = new GetDataTask(null);
@@ -220,7 +217,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 			PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
 	        Collection<X509Certificate> certificates =
                     CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
-	        Log.d(TAG + ".updateKeyStore(...)", " - certificates.size(): " + certificates.size());
+	        Log.d(TAG + ".updateKeyStore(...)", "certificates.size(): " + certificates.size());
 	        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
 	        certificates.toArray(arrayCerts);
 	        keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, password, arrayCerts);
@@ -231,14 +228,14 @@ public class UserCertResponseActivity extends ActionBarActivity
             contextVS.setState(ContextVS.State.WITH_CERTIFICATE);
     		return true;
 		} catch (Exception ex) {
-			Log.e(TAG, " - ex.getMessage(): " + ex.getMessage());
+			ex.printStackTrace();
 			showException(getString(R.string.pin_error_msg));
     		return false;
 		}
     }
     
     private void setMessage(String message) {
-		Log.d(TAG + ".setMessage(...) ", " - message: " + message);
+		Log.d(TAG + ".setMessage(...) ", "message: " + message);
 		this.screenMessage = message;
     	TextView contentTextView = (TextView) findViewById(R.id.text);
     	contentTextView.setText(Html.fromHtml(message));
@@ -246,20 +243,17 @@ public class UserCertResponseActivity extends ActionBarActivity
     }
     
 	public void showException(String exMessage) {
-		Log.d(TAG + ".showException(...) ", " - exMessage: " + exMessage);
+		Log.d(TAG + ".showException(...) ", "exMessage: " + exMessage);
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
-		builder.setTitle(getString(
-				R.string.alert_exception_caption)).setMessage(exMessage)
-		.setPositiveButton(getString(
-				R.string.ok_button), null).show();
+		builder.setTitle(getString(R.string.alert_exception_caption)).setMessage(exMessage)
+		.setPositiveButton(getString(R.string.ok_button), null).show();
 	}
 
 	@Override
 	public void setPin(String pin) {
 		if(pin != null) {
 			if(updateKeyStore(pin.toCharArray())) {
-				setMessage(getString(
-	    				R.string.request_cert_result_activity_ok));
+				setMessage(getString(R.string.request_cert_result_activity_ok));
 			    insertPinButton.setVisibility(View.GONE);
 			    requestCertButton.setVisibility(View.GONE);
 			} else {
@@ -267,8 +261,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 						R.string.cert_install_error_msg));
 			}
 		} else {
-			setMessage(getString(
-					R.string.cert_install_error_msg));
+			setMessage(getString(R.string.cert_install_error_msg));
 		} 
 		goAppButton.setVisibility(View.VISIBLE);
 	}

@@ -41,10 +41,13 @@ public class ContextVS {
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
 
-    public static final String STATE_KEY                  = "STATE";
-    public static final String CSR_REQUEST_ID_KEY         = "csrRequestId";
-    public static final String APPLICATION_ID_KEY         = "idAplicacion";
-    public static final String EVENT_KEY                  = "eventKey";
+    public static final String STATE_KEY                   = "STATE";
+    public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
+    public static final String APPLICATION_ID_KEY          = "idAplicacion";
+    public static final String EVENT_KEY                   = "eventKey";
+    public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
+
+
 
     public static final String SIGNED_FILE_NAME           = "signedFile";
     public static final String CSR_FILE_NAME              = "csr";
@@ -54,6 +57,7 @@ public class ContextVS {
     public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
 
     //Intent keys
+    public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";
     public static final String URI_DATA_KEY = "URI_DATA";
@@ -204,8 +208,8 @@ public class ContextVS {
     public void setState(State state) {
         Log.d(TAG + ".setState(...)", " - state: " + state.toString()
                 + " - server: " + STATE_KEY + "_" + accessControlVS.getServerURL());
-        this.state = state;
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(STATE_KEY + "_" + accessControlVS.getServerURL() , state.toString());
         editor.commit();
@@ -241,7 +245,8 @@ public class ContextVS {
     public void setAccessControlVS(AccessControlVS accessControlVS) {
         Log.d(TAG + ".setAccessControlURL() ", " - setAccessControlURL: " +
                 accessControlVS.getServerURL());
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String stateStr = settings.getString(
                 STATE_KEY + "_" + accessControlVS.getServerURL(), State.WITHOUT_CSR.toString());
         state = State.valueOf(stateStr);

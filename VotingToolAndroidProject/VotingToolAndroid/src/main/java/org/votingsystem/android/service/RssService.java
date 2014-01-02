@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -69,7 +70,8 @@ public class RssService extends Service  implements Runnable {
         handler = new Handler();
         // Load last updated value.
         // We store last updated value in preferences.
-        SharedPreferences pref = getSharedPreferences("", 0);
+        SharedPreferences pref = getSharedPreferences(
+                ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         lastCheckedTime = new GregorianCalendar();
         lastCheckedTime.setTimeInMillis(pref.getLong(LAST_CHECKED_KEY, 0));
 

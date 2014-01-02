@@ -2,6 +2,7 @@ package org.votingsystem.android.service;
 
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -9,14 +10,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.AppWithoutCertActivity;
+import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.EventVSPublishingActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
-import org.votingsystem.android.activity.UserCertRequestActivity;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -39,7 +38,7 @@ public class VotingAppService extends Service {
     private ContextVS contextVS;
 
     @Override public void onCreate(){
-        contextVS = ContextVS.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getApplicationContext());
         Log.i(TAG + ".onCreate(...) ", "VotingAppService created");
     }
 
@@ -81,7 +80,8 @@ public class VotingAppService extends Service {
                     }
                 } else {
                     Intent intent = null;
-                    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                    SharedPreferences settings =  getSharedPreferences(
+                            ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
                     switch (contextVS.getState()) {
                         case WITHOUT_CSR:
                             String applicationID = settings.getString(APPLICATION_ID_KEY, null);
@@ -92,7 +92,7 @@ public class VotingAppService extends Service {
                                 editor.putString(APPLICATION_ID_KEY, applicationID);
                                 editor.commit();
                             }
-                            intent = new Intent(getBaseContext(), AppWithoutCertActivity.class);
+                            intent = new Intent(getBaseContext(), CertRequestActivity.class);
                             break;
                         case WITH_CSR:
                             intent = new Intent(getBaseContext(), UserCertResponseActivity.class);
