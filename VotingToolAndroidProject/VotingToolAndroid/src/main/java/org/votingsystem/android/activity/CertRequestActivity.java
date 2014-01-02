@@ -40,7 +40,7 @@ public class CertRequestActivity extends FragmentActivity {
     	super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getApplicationContext());
         Log.d(TAG + ".onCreate(...)", "contextVS.getState(): " + contextVS.getState() +
-                "savedInstanceState: " + savedInstanceState);
+                " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.app_without_cert_activity);
         Button cancelButton = (Button) findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(new View.OnClickListener() {

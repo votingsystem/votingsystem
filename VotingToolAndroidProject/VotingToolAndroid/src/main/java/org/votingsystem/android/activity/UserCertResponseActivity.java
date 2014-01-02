@@ -53,6 +53,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
@@ -71,7 +72,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	private String csrSigned = null;
 	private String SCREEN_MESSAGE = "screenMessage";
 	private String screenMessage = null;
-	private boolean isCertStateChecked = false;
+	private AtomicBoolean isCertStateChecked = new AtomicBoolean(false);
 	private String CERT_CHECKED = "isCertStateChecked";
     private Button goAppButton;
     private Button insertPinButton;
@@ -123,7 +124,7 @@ public class UserCertResponseActivity extends ActionBarActivity
             }
         });
         if(savedInstanceState != null) 
-        	isCertStateChecked = savedInstanceState.getBoolean(CERT_CHECKED, false);
+        	isCertStateChecked.set(savedInstanceState.getBoolean(CERT_CHECKED, false));
         Log.d(TAG + ".onCreate() ", "isCertStateChecked: " + isCertStateChecked);
         checkCertState();
     }
@@ -135,7 +136,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	    		startActivity(intent);
 	    		break;
 	    	case WITH_CSR:
-	    		if(isCertStateChecked) break;
+	    		if(isCertStateChecked.get()) break;
 	        	SharedPreferences settings = getSharedPreferences(
                         VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
@@ -157,14 +158,10 @@ public class UserCertResponseActivity extends ActionBarActivity
     }
 
 	@Override public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(CERT_CHECKED, isCertStateChecked);
+        outState.putBoolean(CERT_CHECKED, isCertStateChecked.get());
         outState.putString(CSR_SIGNED, csrSigned);
         outState.putString(SCREEN_MESSAGE, screenMessage);
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
-	}
-	
-	private void setCertStateChecked(boolean isChecked) {
-		isCertStateChecked = isChecked;
 	}
 	
 	private void setCsrSigned (String csrSigned) {
@@ -175,8 +172,8 @@ public class UserCertResponseActivity extends ActionBarActivity
 		Log.d(TAG + ".onRestoreInstanceState(...) ", "savedInstanceState: " + savedInstanceState);
 		setMessage(savedInstanceState.getString(SCREEN_MESSAGE));
 		csrSigned = savedInstanceState.getString(CSR_SIGNED);
-		isCertStateChecked = savedInstanceState.getBoolean(CERT_CHECKED, false);
-		if(isCertStateChecked) {
+		isCertStateChecked.set(savedInstanceState.getBoolean(CERT_CHECKED, false));
+		if(isCertStateChecked.get()) {
 			if(csrSigned != null)
 				insertPinButton.setVisibility(View.VISIBLE);
 			else goAppButton.setVisibility(View.VISIBLE);
@@ -298,7 +295,7 @@ public class UserCertResponseActivity extends ActionBarActivity
                 setCsrSigned(responseVS.getMessage());
                 setMessage(getString(R.string.cert_downloaded_msg));
                 insertPinButton.setVisibility(View.VISIBLE);
-                setCertStateChecked(true);
+                isCertStateChecked.set(true);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 String certificationAddresses = contextVS.getAccessControl().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));

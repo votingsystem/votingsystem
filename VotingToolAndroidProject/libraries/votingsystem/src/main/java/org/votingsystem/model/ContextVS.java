@@ -206,13 +206,14 @@ public class ContextVS {
     }
 
     public void setState(State state) {
-        Log.d(TAG + ".setState(...)", " - state: " + state.toString()
-                + " - server: " + STATE_KEY + "_" + accessControlVS.getServerURL());
+        Log.d(TAG + ".setState(...)", STATE_KEY + "_" + accessControlVS.getServerURL() +
+                " - state: " + state.toString());
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(STATE_KEY + "_" + accessControlVS.getServerURL() , state.toString());
         editor.commit();
+        this.state = state;
     }
 
     public State getState() {
