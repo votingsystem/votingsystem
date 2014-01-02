@@ -208,9 +208,9 @@ public class EventVSPublishingFragment extends Fragment {
     }
 
     private void showPinScreen(String message) {
-        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
                 message, false, this.getClass().getName());
-        pinDialog.show(getFragmentManager(), CertPinDialogFragment.TAG);
+        pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     //This is for JavaScriptInterface.java operation processing

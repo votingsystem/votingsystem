@@ -34,8 +34,8 @@ import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
+import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.fragment.CertPinDialogFragment;
 import org.votingsystem.android.ui.ReceiptOperationsListener;
 import org.votingsystem.android.ui.ReceiptOptionsDialog;
 import org.votingsystem.model.ContentTypeVS;
@@ -141,9 +141,9 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
     }
 
     private void showPinScreen(String message) {
-        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
                 message, false, this.getClass().getName());
-        pinDialog.show(getSupportFragmentManager(), CertPinDialogFragment.TAG);
+        pinDialog.show(getSupportFragmentManager(), PinDialogFragment.TAG);
     }
 
     private void refreshReceiptList() {

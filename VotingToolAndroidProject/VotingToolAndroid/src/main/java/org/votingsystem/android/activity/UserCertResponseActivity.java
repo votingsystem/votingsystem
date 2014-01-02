@@ -25,8 +25,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
@@ -39,8 +37,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
-import org.votingsystem.android.fragment.CertPinDialogFragment;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -252,9 +250,9 @@ public class UserCertResponseActivity extends ActionBarActivity {
     }
 
     private void showPinScreen(String message) {
-        CertPinDialogFragment pinDialog = CertPinDialogFragment.newInstance(
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
                 message, false, this.getClass().getName());
-        pinDialog.show(getSupportFragmentManager(), CertPinDialogFragment.TAG);
+        pinDialog.show(getSupportFragmentManager(), PinDialogFragment.TAG);
     }
     
     private void setMessage(String message) {

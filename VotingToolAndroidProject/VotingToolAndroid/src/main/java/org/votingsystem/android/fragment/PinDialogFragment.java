@@ -36,9 +36,9 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 
-public class CertPinDialogFragment extends DialogFragment implements OnKeyListener {
+public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
-    public static final String TAG = "CertPinDialogFragment";
+    public static final String TAG = "PinDialogFragment";
 
     private static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
 
@@ -48,9 +48,9 @@ public class CertPinDialogFragment extends DialogFragment implements OnKeyListen
     private String dialogCaller = null;
     private String firstPin = null;
 
-    public static CertPinDialogFragment newInstance(String msg, boolean isWithPasswordConfirm,
+    public static PinDialogFragment newInstance(String msg, boolean isWithPasswordConfirm,
                                                      String caller) {
-        CertPinDialogFragment dialog = new CertPinDialogFragment();
+        PinDialogFragment dialog = new PinDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, msg);
         args.putString(ContextVS.CALLER_KEY, caller);
