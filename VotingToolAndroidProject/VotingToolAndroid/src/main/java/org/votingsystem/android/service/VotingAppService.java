@@ -51,7 +51,10 @@ public class VotingAppService extends Service {
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
             intent.putExtra(ContextVS.CAPTION_KEY, getString(R.string.connection_error_msg));
-            intent.putExtra(ContextVS.MESSAGE_KEY, responseVS.getMessage());
+            String message = responseVS.getMessage();
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())
+                message = getString(R.string.conn_timeout_msg);
+            intent.putExtra(ContextVS.MESSAGE_KEY, message);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } else {

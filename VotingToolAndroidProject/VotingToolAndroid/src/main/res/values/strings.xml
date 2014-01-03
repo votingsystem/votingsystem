@@ -107,6 +107,7 @@
 	<string name="vote_cert_request_error_msg">No existe ningún certificado de voto</string>
     <string name="operations_lbl">Operaciones</string>
     <string name="app_name">Votaciones</string>
+
     <string name="request_cert_msg">Tramitando solicitud</string>
     <string name="alert_exception_caption">Excepción!</string>
     <string name="cancel_back_msg">Pulsar \'atrás\' para cancelar</string>
@@ -251,5 +252,12 @@
     <string name="edit_representative_button">Editar datos del representante</string>
 
     <string name="signature_msg_subject">[Firma]-</string>
+    <string name="representative_lbl">Representante</string>
+    <string name="num_representations_lbl">%1$s representaciones</string>
+    <string name="representative_data_lbl">Datos del representante</string>
+    <string name="rss_service_lbl">Servicio de subscripciones</string>
+    <string name="websocket_service_conn_lbl">Conectado mensajería del sistema de votación</string>
+    <string name="signature_ok_notification_msg">Documento firmado y enviado</string>
+    <string name="signature_error_notification_msg">Error firmando documento</string>
 
 </resources>

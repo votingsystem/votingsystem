@@ -27,7 +27,7 @@ public class WebSocketService extends Service {
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         Notification note = new NotificationCompat.Builder(this)
-                .setContentTitle(ContextVS.getMessage("signAndSendNotificationMsg"))
+                .setContentTitle(getString(R.string.websocket_service_conn_lbl))
                 .setSmallIcon(R.drawable.manifest_22)
                 .build();
         notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);

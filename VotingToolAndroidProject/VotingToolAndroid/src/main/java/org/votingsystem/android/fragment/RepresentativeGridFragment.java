@@ -1,7 +1,6 @@
 package org.votingsystem.android.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,7 +11,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -40,6 +38,7 @@ import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -63,20 +62,21 @@ public class RepresentativeGridFragment extends Fragment
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private View progressContainer;
-    private FrameLayout listContainer;
+    private FrameLayout gridContainer;
+    private int loaderId = -1;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                        ResponseVS.SC_ERROR);
-                if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
-                    hasHTTPConnection.set(false);
-                }
-                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-                showMessage(responseStatusCode, caption, message);
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                "intent.getExtras(): " + intent.getExtras());
+        int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                ResponseVS.SC_ERROR);
+        if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
+            hasHTTPConnection.set(false);
+        }
+        String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+        String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+        showMessage(responseStatusCode, caption, message);
         }
     };
 
@@ -97,13 +97,15 @@ public class RepresentativeGridFragment extends Fragment
             Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
             startActivity(intent);
         }
+        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(
+                NavigatorDrawerOptionsAdapter.ChildPosition.REPRESENTATIVE_LIST);
         queryStr = getArguments().getString(SearchManager.QUERY);
-        Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
+        Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + "caption: " + caption +
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
@@ -130,8 +132,8 @@ public class RepresentativeGridFragment extends Fragment
         });
         gridView.setOnScrollListener(this);
         progressContainer = rootView.findViewById(R.id.progressContainer);
-        listContainer =  (FrameLayout)rootView.findViewById(R.id.listContainer);
-        listContainer.getForeground().setAlpha(0);
+        gridContainer =  (FrameLayout)rootView.findViewById(R.id.gridContainer);
+        gridContainer.getForeground().setAlpha(0);
         return rootView;
     }
 
@@ -139,13 +141,11 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         //Prepare the loader. Either re-connect with an existing one or start a new one.
-        getLoaderManager().initLoader(ContextVS.REPRESENTATIVE_LOADER_ID, null, this);
+        getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-        }
-        if(savedInstanceState != null) {
             hasHTTPConnection.set(savedInstanceState.getBoolean(ContextVS.RESPONSE_STATUS_KEY,true));
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
         }
@@ -174,13 +174,22 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     private void loadHttpItems(Long offset) {
-        showProgress(true, true);
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                RepresentativeService.class);
-        startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
-                getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
-        startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
-        getActivity().startService(startIntent);
+        Log.d(TAG +  ".loadHttpItems(...)", "offset: " + offset + " - hasHTTPConnection: " +
+                hasHTTPConnection.get());
+        if(!hasHTTPConnection.get()) {
+            showProgress(false, true);
+            if(gridView.getAdapter().getCount() == 0)
+                rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+        }
+        else {
+            showProgress(true, true);
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    RepresentativeService.class);
+            startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
+                    getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
+            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            getActivity().startService(startIntent);
+        }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -204,7 +213,7 @@ public class RepresentativeGridFragment extends Fragment
         switch (item.getItemId()) {
             case R.id.reload:
                 hasHTTPConnection.set(true);
-                getLoaderManager().restartLoader(ContextVS.REPRESENTATIVE_LOADER_ID, null, this);
+                getLoaderManager().restartLoader(loaderId, null, this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -232,19 +241,17 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
-                " - firstVisiblePosition: " + firstVisiblePosition + " - hasHTTPConnection: " +
-                hasHTTPConnection.get());
-        if(RepresentativeContentProvider.getNumTotalRepresentatives() == null &&
-                hasHTTPConnection.get()) loadHttpItems(offset);
+                " - firstVisiblePosition: " + firstVisiblePosition);
+        if(RepresentativeContentProvider.getNumTotalRepresentatives() == null)
+            loadHttpItems(offset);
         else {
             showProgress(false, true);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             firstVisiblePosition = null;
             ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
             if(cursor.getCount() == 0) {
-                TextView emptyMsgTextView = (TextView) rootView.findViewById(android.R.id.empty);
-                emptyMsgTextView.setVisibility(View.VISIBLE);
-            }
+                rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+            } else rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
         }
     }
 
@@ -277,10 +284,10 @@ public class RepresentativeGridFragment extends Fragment
     }
 
     @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(this.getClass().getName()));
-        Log.d(TAG + ".onResume() ", "onResume");
     }
 
     @Override public void onPause() {
@@ -298,7 +305,7 @@ public class RepresentativeGridFragment extends Fragment
             if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
                     getActivity().getApplicationContext(), android.R.anim.fade_in));
             progressContainer.setVisibility(View.VISIBLE);
-            listContainer.getForeground().setAlpha(150); // dim
+            gridContainer.getForeground().setAlpha(150); // dim
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to disable touch events on background view
                 @Override public boolean onTouch(View v, MotionEvent event) {
@@ -309,7 +316,7 @@ public class RepresentativeGridFragment extends Fragment
             if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
                     getActivity().getApplicationContext(), android.R.anim.fade_out));
             progressContainer.setVisibility(View.GONE);
-            listContainer.getForeground().setAlpha(0); // restore
+            gridContainer.getForeground().setAlpha(0); // restore
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to enable touch events on background view
                 @Override public boolean onTouch(View v, MotionEvent event) {
@@ -344,7 +351,7 @@ public class RepresentativeGridFragment extends Fragment
                 TextView delegationInfo = (TextView) view.findViewById(
                         R.id.representative_delegations);
                 representativeName.setText(fullName);
-                delegationInfo.setText(ContextVS.getMessage("representationsMessage",
+                delegationInfo.setText(context.getString(R.string.num_representations_lbl,
                         String.valueOf(numRepresentations)));
                 ImageView imgView = (ImageView)view.findViewById(R.id.representative_icon);
                 //imgView.setImageDrawable();

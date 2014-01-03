@@ -55,7 +55,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
 
     private void updateActionBarTitle() {
         getSupportActionBar().setLogo(R.drawable.system_users_22);
-        getSupportActionBar().setTitle(contextVS.getMessage("representativeLbl"));
+        getSupportActionBar().setTitle(getString(R.string.representative_lbl));
         String fullName = cursor.getString(cursor.getColumnIndex(
                 RepresentativeContentProvider.FULL_NAME_COL));
         getSupportActionBar().setSubtitle(fullName);

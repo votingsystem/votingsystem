@@ -15,7 +15,6 @@ import org.votingsystem.android.fragment.RepresentativeGridFragment;
 import org.votingsystem.android.fragment.RepresentativeOperationsFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
-import org.votingsystem.model.ContextVS;
 
 /**
  * @author jgzornoza
@@ -60,9 +59,9 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
     public String getSelectedChildDescription(Context context) {
         switch(selectedChild) {
             case REPRESENTATIVE_LIST:
-                return ContextVS.getMessage("representativeListDescription");
+                return context.getString(R.string.representatives_list_lbl);
             case REPRESENTATIVE_OPERATION:
-                return ContextVS.getMessage("representativeOperationsDescription");
+                return context.getString(R.string.representatives_operations_lbl);
             default:
                 return context.getString(R.string.unknown_drop_down_lbl);
         }

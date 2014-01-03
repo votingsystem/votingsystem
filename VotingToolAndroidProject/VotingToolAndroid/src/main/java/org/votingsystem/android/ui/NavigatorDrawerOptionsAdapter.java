@@ -25,7 +25,6 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.TypeVS;
 
@@ -47,6 +46,12 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int MANIFESTS_GROUP_POSITION       = 1;
     public static final int CLAIMS_GROUP_POSITION          = 2;
     public static final int REPRESENTATIVES_GROUP_POSITION = 3;
+
+    public static final int OPEN_CHILD_POSITION                     = 0;
+    public static final int PENDING_CHILD_POSITION                  = 1;
+    public static final int CLOSED_CHILD_POSITION                   = 2;
+    public static final int REPRESENTATIVE_LIST_CHILD_POSITION      = 0;
+    public static final int REPRESENTATIVE_OPERATION_CHILD_POSITION = 1;
 
     public enum GroupPosition {
         VOTING(VOTING_GROUP_POSITION, SubSystemVS.VOTES, TypeVS.VOTING_EVENT, Arrays.asList(
@@ -111,7 +116,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 case CLAIMS:
                     return context.getString(R.string.claims_drop_down_lbl);
                 case REPRESENTATIVES:
-                    return ContextVS.getMessage("representativeListOptionLbl");
+                    return context.getString(R.string.representatives_drop_down_lbl);
                 default:
                     return context.getString(R.string.unknown_drop_down_lbl);
             }
@@ -120,9 +125,27 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         public TypeVS getTypeVS() {
             return typeVS;
         }
+
+        public int getLoaderId(ChildPosition childPosition){
+            return (10 * position) + childPosition.getPosition();
+        }
     }
 
-    public enum ChildPosition{OPEN, PENDING, CLOSED, REPRESENTATIVE_LIST, REPRESENTATIVE_OPERATION;}
+    public enum ChildPosition{OPEN(OPEN_CHILD_POSITION), PENDING(PENDING_CHILD_POSITION),
+        CLOSED(CLOSED_CHILD_POSITION), REPRESENTATIVE_LIST(REPRESENTATIVE_LIST_CHILD_POSITION),
+        REPRESENTATIVE_OPERATION(REPRESENTATIVE_OPERATION_CHILD_POSITION);
+
+        int position;
+
+        private ChildPosition(int position) {
+            this.position = position;
+        }
+
+        public int getPosition() {
+            return position;
+        }
+
+    }
 
 	private Context context;
 	private List<String> listDataHeader; // header titles
@@ -217,7 +240,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         listDataHeader.add(GroupPosition.CLAIMS.getPosition(),
                 context.getString(R.string.claims_drop_down_lbl));
         listDataHeader.add(GroupPosition.REPRESENTATIVES.getPosition(),
-                ContextVS.getMessage("representativeNavDrawerLbl"));
+                context.getString(R.string.representatives_drop_down_lbl));
 
         List<String> voting = new ArrayList<String>();
         voting.add(context.getString(R.string.open_voting_lbl));
@@ -236,13 +259,14 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         claims.add(context.getString(R.string.closed_claim_lbl));
 
         List<String> representatives = new ArrayList<String>();
-        representatives.add(ContextVS.getMessage("representativeListOptionLbl"));
-        representatives.add(ContextVS.getMessage("representativeOperationsOptionLbl"));
+        representatives.add(context.getString(R.string.representatives_list_lbl));
+        representatives.add(context.getString(R.string.representatives_operations_lbl));
 
         listDataChild.put(listDataHeader.get(GroupPosition.VOTING.getPosition()), voting);
         listDataChild.put(listDataHeader.get(GroupPosition.MANIFESTS.getPosition()), manifests);
         listDataChild.put(listDataHeader.get(GroupPosition.CLAIMS.getPosition()), claims);
-        listDataChild.put(listDataHeader.get(GroupPosition.REPRESENTATIVES.getPosition()), representatives);
+        listDataChild.put(listDataHeader.get(GroupPosition.REPRESENTATIVES.getPosition()),
+                representatives);
     }
 
 }

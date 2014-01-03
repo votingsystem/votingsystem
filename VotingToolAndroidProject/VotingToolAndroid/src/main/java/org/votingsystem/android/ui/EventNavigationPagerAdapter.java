@@ -52,9 +52,12 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
                 eventState = EventVS.State.TERMINATED;
                 break;
         }
+
         Bundle args = new Bundle();
-        args.putString(ContextVS.EVENT_TYPE_KEY, selectedGroup.toString());
-        args.putString(ContextVS.EVENT_STATE_KEY, eventState.toString());
+        args.putSerializable(ContextVS.EVENT_TYPE_KEY, selectedGroup);
+        args.putSerializable(ContextVS.EVENT_STATE_KEY, eventState);
+        args.putSerializable(ContextVS.CHILD_POSITION_KEY, childPosition);
+
         args.putString(SearchManager.QUERY, searchQuery);
         selectedFragment.setArguments(args);
         Log.d(TAG + ".getItem(...) ", "childPosition: " +  childPosition +

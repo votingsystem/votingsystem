@@ -8,7 +8,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONException;
+import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
+import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -59,12 +61,12 @@ public class EventVSService extends IntentService {
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.EVENT_TYPE_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
-            String eventStateStr = arguments.getString(ContextVS.STATE_KEY);
-            EventVS.State eventState = EventVS.State.valueOf(eventStateStr);
-            String eventTypeStr = arguments.getString(ContextVS.EVENT_TYPE_KEY);
+            String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
+            EventVS.State eventState = (EventVS.State) arguments.getSerializable(ContextVS.STATE_KEY);
+            TypeVS eventType = (TypeVS)arguments.getSerializable(ContextVS.EVENT_TYPE_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
             String serviceURL = ContextVS.getInstance(this).getAccessControl().getEventVSURL(
-                    eventState, EventVS.getURLPart(TypeVS.valueOf(eventTypeStr)),
+                    eventState, EventVS.getURLPart(eventType),
                     ContextVS.EVENTS_PAGE_SIZE, offset);
             ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -135,15 +137,35 @@ public class EventVSService extends IntentService {
                                 EventVSContentProvider.CONTENT_URI, contentValuesList.toArray(
                                 new ContentValues[contentValuesList.size()]));
                         Log.d(TAG + ".onHandleIntent(...)", "inserted: " + numRowsCreated + " rows" +
-                            " - eventType: " + eventTypeStr + " - eventState: " + eventState);
-                    } else Log.d(TAG + ".onHandleIntent(...)", "Response empty");
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                            " - eventType: " + eventType + " - eventState: " + eventState);
+                    } else { //To notify ContentProvider Listeners
+                        getContentResolver().insert(EventVSContentProvider.CONTENT_URI, null);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    sendMessage(ResponseVS.SC_ERROR, getString(R.string.alert_exception_caption),
+                            ex.getMessage(), serviceCaller);
+
                 }
-            }
+            } else sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
+                    responseVS.getMessage(), serviceCaller);
         }
+    }
+
+
+    private void sendMessage(Integer statusCode, String caption, String message,
+            String serviceCaller) {
+        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
+                serviceCaller  + " - caption: " + caption  + " - message: " + message );
+        Intent intent = new Intent(serviceCaller);
+        if(statusCode != null) {
+            intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == statusCode)
+                message = getString(R.string.conn_timeout_msg);
+        }
+        if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
+        if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
 }

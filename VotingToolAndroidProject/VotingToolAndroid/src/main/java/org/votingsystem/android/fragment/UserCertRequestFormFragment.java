@@ -39,6 +39,7 @@ import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.NifUtils;
+
 import java.text.Normalizer;
 import java.util.UUID;
 

@@ -62,7 +62,7 @@ public class RssService extends Service  implements Runnable {
         clickIntent.setClassName(this, NavigationDrawer.class.getName());
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
         Notification note = new NotificationCompat.Builder(this)
-                .setContentTitle(ContextVS.getMessage("rssNotificationMsg"))
+                .setContentTitle(getString(R.string.rss_service_lbl))
                 .setContentIntent(pIntent)
                 .setSmallIcon(R.drawable.feed_16)
                 .build();

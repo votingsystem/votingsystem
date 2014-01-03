@@ -115,7 +115,7 @@ public class RepresentativeFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.representative_fragment, container, false);
         TextView repNameView = (TextView)rootView.findViewById(R.id.representative_name);
         repNameView.setText(fullName);
-        getActivity().setTitle(ContextVS.getMessage("representativeCaption"));
+        getActivity().setTitle(getActivity().getString(R.string.representative_data_lbl));
 
         EditText nifText = (EditText)rootView.findViewById(R.id.nif_edit);
 

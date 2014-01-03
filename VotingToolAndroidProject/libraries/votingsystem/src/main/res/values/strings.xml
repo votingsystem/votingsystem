@@ -3,6 +3,10 @@
     <string name="voting_drop_down_lbl">Votaciones</string>
     <string name="claims_drop_down_lbl">Reclamaciones</string>
     <string name="manifiests_drop_down_lbl">Manifiestos</string>
+    <string name="representatives_drop_down_lbl">Representantes</string>
+    <string name="representatives_list_lbl">Lista de representantes</string>
+    <string name="representatives_operations_lbl">Operaciones</string>
+
     <string name="unknown_drop_down_lbl">Sistema desconocido</string>
     <string name="vote_repeated_msg"><![CDATA[Ya había enviado un voto para la convocatoria \'%1$s\' en el que
         había elegido la opción \'%2$s\']]></string>

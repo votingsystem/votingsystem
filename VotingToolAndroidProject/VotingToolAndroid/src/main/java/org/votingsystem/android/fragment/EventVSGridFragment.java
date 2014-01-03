@@ -3,8 +3,10 @@ package org.votingsystem.android.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,17 +15,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,10 +39,11 @@ import org.votingsystem.android.activity.EventVSPagerActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.service.EventVSService;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+import org.votingsystem.model.ResponseVS;
 
 import java.text.Collator;
 import java.util.Comparator;
@@ -52,21 +58,39 @@ public class EventVSGridFragment extends Fragment
 
     public static final String TAG = "EventVSGridFragment";
 
-    private AtomicBoolean progressVisible = null;
-    private TextView searchTextView;
-    private TextView emptyResultsView;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private AtomicBoolean hasHTTPConnection = new AtomicBoolean(true);
+    private View rootView;
+    //private TextView searchTextView;
     private GridView gridView;
     //private ListView gridView;
-    private View mProgressContainer;
-    private View mListContainer;
+    private View progressContainer;
+    private FrameLayout gridContainer;
     private EventListAdapter mAdapter = null;
     private EventVS.State eventState = null;
     private GroupPosition groupPosition = GroupPosition.VOTING;
+    private ChildPosition childPosition = null;
     private String queryStr = null;
     private ContextVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private int loaderId = -1;
+    private String broadCastId = null;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                    ResponseVS.SC_ERROR);
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
+                hasHTTPConnection.set(false);
+            }
+            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+            showMessage(responseStatusCode, caption, message);
+        }
+    };
 
     public GroupPosition getGroupPosition() {
         return groupPosition;
@@ -94,17 +118,15 @@ public class EventVSGridFragment extends Fragment
             startActivity(intent);
         }
         if (getArguments() != null) {
-            String eventStateStr = getArguments().getString(ContextVS.EVENT_STATE_KEY);
-            if(eventStateStr != null) eventState = EventVS.State.valueOf(eventStateStr);
-            String subSystemStr = getArguments().getString(ContextVS.EVENT_TYPE_KEY);
-            if(subSystemStr != null) groupPosition = GroupPosition.valueOf(subSystemStr);
+            eventState = (EventVS.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
+            groupPosition = (GroupPosition) getArguments().getSerializable(ContextVS.EVENT_TYPE_KEY);
+            childPosition = (ChildPosition)getArguments().getSerializable(ContextVS.CHILD_POSITION_KEY);
             queryStr = getArguments().getString(SearchManager.QUERY);
 
         }
-        loaderId = VotingSystemKeyGenerator.INSTANCE.getSerno().intValue();
+        loaderId = groupPosition.getLoaderId(childPosition);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
-        progressVisible = new AtomicBoolean(false);
     };
 
     /*
@@ -121,17 +143,19 @@ public class EventVSGridFragment extends Fragment
                 }
      */
 
-    private void showMessage(String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
-        AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-        builder.setTitle(caption).setMessage(message).show();
+    private void showMessage(Integer statusCode, String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+                " - message: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+        showProgress(false, true);
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
-        View rootView = inflater.inflate(R.layout.eventvs_grid_fragment, container, false);
-        searchTextView = (TextView) rootView.findViewById(R.id.search_query);
+        rootView = inflater.inflate(R.layout.eventvs_grid_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
         mAdapter = new EventListAdapter(getActivity().getApplicationContext(), null,false);
@@ -148,11 +172,13 @@ public class EventVSGridFragment extends Fragment
             }
         });
         gridView.setOnScrollListener(this);
-        emptyResultsView = (TextView) rootView.findViewById(android.R.id.empty);
-        searchTextView.setVisibility(View.GONE);
-        emptyResultsView.setVisibility(View.GONE);
-        mProgressContainer = rootView.findViewById(R.id.progressContainer);
-        mListContainer =  rootView.findViewById(R.id.listContainer);
+        progressContainer = rootView.findViewById(R.id.progressContainer);
+        gridContainer = (FrameLayout) rootView.findViewById(R.id.gridContainer);
+        broadCastId = this.getClass().getSimpleName()+ "_" + groupPosition.toString() + "_" +
+                eventState.toString();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+        gridContainer.getForeground().setAlpha(0);
         return rootView;
     }
 
@@ -164,6 +190,8 @@ public class EventVSGridFragment extends Fragment
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
+            hasHTTPConnection.set(savedInstanceState.getBoolean(ContextVS.RESPONSE_STATUS_KEY,true));
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
         }
     }
 
@@ -172,28 +200,32 @@ public class EventVSGridFragment extends Fragment
         return true;
     }
 
-    public void showProgressIndicator(boolean showProgress, boolean animate){
-        if (progressVisible.get() == showProgress) return;
-        else progressVisible.set(showProgress);
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);
         if (progressVisible.get()) {
-            if (animate) {
-                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-            }
-            mProgressContainer.setVisibility(View.VISIBLE);
-            mListContainer.setVisibility(View.INVISIBLE);
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_in));
+            progressContainer.setVisibility(View.VISIBLE);
+            gridContainer.getForeground().setAlpha(150); // dim
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to disable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
         } else {
-            if (animate) {
-                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-            }
-            mProgressContainer.setVisibility(View.GONE);
-            mListContainer.setVisibility(View.VISIBLE);
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_out));
+            progressContainer.setVisibility(View.GONE);
+            gridContainer.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });
         }
     }
 
@@ -210,7 +242,7 @@ public class EventVSGridFragment extends Fragment
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
         Long numTotalEvents = EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(),
                 eventState);
-        if(numTotalEvents == null && !progressVisible.get()) loadHttpItems(offset);
+        if(numTotalEvents == null) loadHttpItems(offset);
         else {
             int cursorCount = ((CursorAdapter)gridView.getAdapter()).getCursor().getCount();
             if(loadMore && !progressVisible.get() && offset < numTotalEvents &&
@@ -227,15 +259,25 @@ public class EventVSGridFragment extends Fragment
     }
 
     private void loadHttpItems(Long offset) {
-        showProgressIndicator(true, true);
-        String serviceURL = contextVS.getAccessControl().getEventVSURL(eventState,
-                groupPosition.getURLPart(), ContextVS.EVENTS_PAGE_SIZE, offset);
-        Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                EventVSService.class);
-        startIntent.putExtra(ContextVS.STATE_KEY, eventState.toString());
-        startIntent.putExtra(ContextVS.OFFSET_KEY, offset);
-        startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, groupPosition.getTypeVS().toString());
-        getActivity().startService(startIntent);
+        Log.d(TAG +  ".loadHttpItems(...)", "offset: " + offset + " - hasHTTPConnection: " +
+                hasHTTPConnection.get() + " - progressVisible: " + progressVisible +
+                " - groupPosition: " + groupPosition + " - eventState: " + eventState);
+        if(progressVisible.get()) return;
+        if(!hasHTTPConnection.get()) {
+            showProgress(false, true);
+            if(gridView.getAdapter().getCount() == 0)
+                rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+        }
+        else {
+            showProgress(true, true);
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    EventVSService.class);
+            startIntent.putExtra(ContextVS.STATE_KEY, eventState);
+            startIntent.putExtra(ContextVS.OFFSET_KEY, offset);
+            startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, groupPosition.getTypeVS());
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            getActivity().startService(startIntent);
+        }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -243,6 +285,8 @@ public class EventVSGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+        outState.putBoolean(ContextVS.RESPONSE_STATUS_KEY, hasHTTPConnection.get());
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
@@ -253,11 +297,11 @@ public class EventVSGridFragment extends Fragment
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG +  ".onOptionsItemSelected(..)", " - Title: " + item.getTitle() +
-                " - ItemId: " + item.getItemId());
+                " - ItemId: " + item.getItemId() + " - groupPosition: " + groupPosition +
+                " - eventState: " + eventState);
         switch (item.getItemId()) {
             case R.id.reload:
-                Log.d(TAG +  ".onOptionsItemSelected(..)", "==== Reloading EventVSGridFragment" +
-                    " - groupPosition: " + groupPosition + " - eventState: " + eventState);
+                hasHTTPConnection.set(true);
                 //gridView.invalidateViews();
                 getLoaderManager().restartLoader(loaderId, null, this);
                 //((CursorAdapter)gridView.getAdapter()).notifyDataSetChanged();
@@ -268,7 +312,7 @@ public class EventVSGridFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
+        Log.d(TAG + ".onListItemClick(...)", "Clicked item - position:" + position +
                 " -id: " + id);
         //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity().getApplicationContext(), EventVSPagerActivity.class);
@@ -295,15 +339,17 @@ public class EventVSGridFragment extends Fragment
                 getNumTotal(groupPosition.getTypeVS(), eventState) +
                 " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        if(EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(), eventState) == null
-                && !progressVisible.get())
+        if(EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(), eventState) == null)
             loadHttpItems(offset);
         else {
-            showProgressIndicator(false, true);
+            showProgress(false, true);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             else cursor.moveToFirst();
             firstVisiblePosition = null;
             ((CursorAdapter)gridView.getAdapter()).changeCursor(cursor);
+            if(cursor.getCount() == 0) {
+                rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+            } else rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
         }
     }
 
@@ -333,8 +379,8 @@ public class EventVSGridFragment extends Fragment
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", "onDestroy");
-        //LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-        //        unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
     }
 
     public class EventListAdapter  extends CursorAdapter {

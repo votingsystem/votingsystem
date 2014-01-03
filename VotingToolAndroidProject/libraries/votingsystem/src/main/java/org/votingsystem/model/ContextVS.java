@@ -65,17 +65,11 @@ public class ContextVS {
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
     public static final String EVENT_TYPE_KEY  = "EVENT_TYPE";
+    public static final String CHILD_POSITION_KEY  = "CHILD_POSITION";
     public static final String EVENTVS_KEY  = "EVENTVS";
     public static final String STATE_KEY                   = "STATE";
     public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
     public static final String APPLICATION_ID_KEY          = "idAplicacion";
-
-    //Loaders
-    public static final int EVENT_LIST_LOADER1_ID = 0;
-    public static final int VOTING_EVENT_ACTIVE_LIST_LOADER_ID = 2;
-    public static final int VOTING_EVENT_PENDING_LIST_LOADER_ID = 3;
-    public static final int VOTING_EVENT_TERMINATED_LIST_LOADER_ID = 4;
-    public static final int REPRESENTATIVE_LOADER_ID = 1;
 
     //Pages size
     //public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;

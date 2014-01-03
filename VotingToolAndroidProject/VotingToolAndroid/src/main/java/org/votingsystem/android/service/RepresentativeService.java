@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.model.ContentTypeVS;
@@ -14,6 +15,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSResponse;
 import org.votingsystem.util.HttpHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class RepresentativeService extends IntentService {
                                 RepresentativeContentProvider.CONTENT_URI,contentValuesList.toArray(
                                 new ContentValues[contentValuesList.size()]));
                         Log.d(TAG + ".onHandleIntent(...)", "inserted: " + numRowsCreated +" rows");
-                    } else {
+                    } else { //To notify ContentProvider Listeners
                         getContentResolver().insert(RepresentativeContentProvider.CONTENT_URI, null);
                     }
                 } catch (Exception ex) {
@@ -73,13 +75,10 @@ public class RepresentativeService extends IntentService {
     private void sendMessage(Integer statusCode, String caption, String message,
              String serviceCaller) {
         Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - caption: " +
-                caption  + " - message: " + message);
+                caption  + " - message: " + message + " - serviceCaller: " + serviceCaller);
         Intent intent = new Intent(serviceCaller);
         if(statusCode != null) {
             intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());
-            //To notify ContentProvider Listeners
-            if(ResponseVS.SC_OK != statusCode) getContentResolver().insert(
-                    RepresentativeContentProvider.CONTENT_URI, null);
             if(ResponseVS.SC_CONNECTION_TIMEOUT == statusCode)
                 message = getString(R.string.conn_timeout_msg);
         }

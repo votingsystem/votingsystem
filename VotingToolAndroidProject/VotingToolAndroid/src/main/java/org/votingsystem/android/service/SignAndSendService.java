@@ -103,8 +103,8 @@ public class SignAndSendService extends IntentService {
         String title = null;
         String message = null;
         if(ResponseVS.SC_OK == responseVS.getStatusCode())
-            title = contextVS.getMessage("signatureOK_NotificationMessage");
-        else title = contextVS.getMessage("signatureError_NotificationMessage");
+            title = getString(R.string.signature_ok_notification_msg);
+        else title = getString(R.string.signature_error_notification_msg);
         message = typeVS.toString();
         // Display an icon to show that the service is running.
         NotificationManager notificationManager = (NotificationManager)

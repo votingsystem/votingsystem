@@ -60,7 +60,7 @@ public class RepresentativeOperationsFragment extends Fragment {
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         View rootView = inflater.inflate(R.layout.representative_operations_fragment, container, false);
         progressContainer = rootView.findViewById(R.id.progressContainer);
-        getActivity().setTitle(ContextVS.getMessage("representativeOperationsDescription"));
+        getActivity().setTitle(getActivity().getString(R.string.representatives_operations_lbl));
         Button checkRepresentativeButton = (Button) rootView.findViewById(R.id.check_representative_button);
         Button newRepresentativeButton = (Button) rootView.findViewById(R.id.new_representative_button);
         Button cancelRepresentativeButton = (Button) rootView.findViewById(R.id.cancel_representative_button);

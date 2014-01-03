@@ -23,12 +23,12 @@
     <TextView android:id="@android:id/empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textColor="@color/progress_text"
         android:visibility="gone"
+        android:textColor="@color/drawer_list_item"
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/empty_search_lbl"/>
 
-    <FrameLayout android:id="@+id/listContainer"
+    <FrameLayout android:id="@+id/gridContainer"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:foreground="@drawable/shape_window_dim">
@@ -58,7 +58,7 @@
         <ProgressBar android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:indeterminateDrawable="@drawable/loading_progress"/>
+            android:indeterminateDrawable="@drawable/progress_loading"/>
         <TextView android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
