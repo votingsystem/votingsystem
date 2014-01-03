@@ -89,7 +89,8 @@ public class EventVSStatisticsFragment extends Fragment {
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        //Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        Log.d(TAG +  ".onActivityCreated(...)", "");
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
@@ -154,7 +155,8 @@ public class EventVSStatisticsFragment extends Fragment {
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putString(ContextVS.MESSAGE_KEY, htmlContent);
         outState.putString(ContextVS.URL_KEY, baseURL);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        //Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        Log.d(TAG +  ".onSaveInstanceState(...)", "");
     }
 
     private void loadUrl(String serverURL) {

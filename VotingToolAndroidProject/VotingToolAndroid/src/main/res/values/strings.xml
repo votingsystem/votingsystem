@@ -244,7 +244,7 @@
     <string name="manifest_info_lbl">Datos sobre el manifiesto</string>
     <string name="claim_info_lbl">Datos sobre la reclamación</string>
     <string name="voting_info_lbl">Datos sobre la votación</string>
-    <string name="eventfields_dialog_caption">Campos de la evento</string>
+    <string name="eventfields_dialog_caption">Campos de la reclamación</string>
 
 
     <string name="check_representative_button">Comprobar mi representante</string>

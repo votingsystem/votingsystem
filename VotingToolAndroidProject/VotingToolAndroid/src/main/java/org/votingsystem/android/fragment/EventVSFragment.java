@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -223,7 +224,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         Log.d(TAG + ".onClickSubject(...)", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
-            showMessage(null, eventVS.getSubject(), null);
+            showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
         }
     }
 
@@ -296,12 +297,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         LinearLayout mFormView = (LinearLayout) mScrollView.findViewById(R.id.form);
         final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
         errorMsgTextView.setVisibility(View.GONE);
-        Set<FieldEventVS> campos = eventVS.getFieldsEventVS();
+        Set<FieldEventVS> fields = eventVS.getFieldsEventVS();
 
         fieldsMap = new HashMap<Integer, EditText>();
-        for (FieldEventVS campo : campos) {
-            addFormField(campo.getContent(), InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
-                    mFormView, campo.getId().intValue());
+        for (FieldEventVS field : fields) {
+            addFormField(field.getContent(), InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
+                    mFormView, field.getId().intValue());
         }
         builder.setTitle(R.string.eventfields_dialog_caption).setView(mScrollView).
                 setPositiveButton(getString(R.string.aceptar_button), null).
@@ -314,15 +315,16 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View onClick) {
-                Set<FieldEventVS> campos = eventVS.getFieldsEventVS();
-                for (FieldEventVS campo : campos) {
-                    EditText editText = fieldsMap.get(campo.getId().intValue());
+                Set<FieldEventVS> fields = eventVS.getFieldsEventVS();
+                for (FieldEventVS field : fields) {
+                    EditText editText = fieldsMap.get(field.getId().intValue());
                     String fieldValue = editText.getText().toString();
                     if ("".equals(fieldValue)) {
                         errorMsgTextView.setVisibility(View.VISIBLE);
                         return;
-                    } else campo.setValue(fieldValue);
-                    Log.d(TAG + " - claim field dialog", " - campo id: " + campo.getId() + " - text: " + fieldValue);
+                    } else field.setValue(fieldValue);
+                    Log.d(TAG + ".ClaimFieldsDialog", "field id: " + field.getId() +
+                            " - text: " + fieldValue);
                 }
                 dialog.dismiss();
                 showPinScreen(null);
@@ -331,20 +333,20 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
-        Log.d(TAG + ".addFormField(...)", "addFormField - field: " + label);
-        TextView tvLabel = new TextView(getActivity().getApplicationContext());
-        tvLabel.setLayoutParams(getDefaultParams(true));
-        tvLabel.setText(label);
-
-        EditText editView = new EditText(getActivity().getApplicationContext());
-        editView.setLayoutParams(getDefaultParams(false));
+        Log.d(TAG + ".addFormField(...)", "field: " + label);
+        TextView textView = new TextView(getActivity().getApplicationContext());
+        textView.setLayoutParams(getDefaultParams(true));
+        textView.setText(label);
+        EditText fieldText = new EditText(getActivity().getApplicationContext());
+        fieldText.setLayoutParams(getDefaultParams(false));
+        fieldText.setTextColor(Color.BLACK);
         // setting an unique id is important in order to save the state
         // (content) of this view across screen configuration changes
-        editView.setId(id);
-        editView.setInputType(type);
-        mFormView.addView(tvLabel);
-        mFormView.addView(editView);
-        fieldsMap.put(id, editView);
+        fieldText.setId(id);
+        fieldText.setInputType(type);
+        mFormView.addView(textView);
+        mFormView.addView(fieldText);
+        fieldsMap.put(id, fieldText);
     }
 
     private LinearLayout.LayoutParams getDefaultParams(boolean isLabel) {
