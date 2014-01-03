@@ -15,6 +15,7 @@ import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.fragment.EventVSStatisticsFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
 /**
@@ -32,18 +33,29 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getBaseContext());
         Integer cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
-        String eventStateStr = getIntent().getStringExtra(ContextVS.EVENT_STATE_KEY);
-        String eventTypeStr = getIntent().getStringExtra(ContextVS.EVENT_TYPE_KEY);
+        EventVS.State eventState = (EventVS.State)getIntent().getSerializableExtra(ContextVS.EVENT_STATE_KEY);
+        TypeVS eventType = (TypeVS)getIntent().getSerializableExtra(ContextVS.EVENT_TYPE_KEY);
+        Long eventId = getIntent().getLongExtra(ContextVS.ITEM_ID_KEY, -1L);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                 EventVSContentProvider.STATE_COL + "= ? ";
+        Log.d(TAG + ".onCreate(...) ", "eventId: " + eventId + "cursorPosition: " + cursorPosition +
+                " - eventState:" + eventState + " - eventType: " + eventType);
         cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
-                null, selection, new String[]{eventTypeStr, eventStateStr}, null);
-        cursor.moveToPosition(cursorPosition);
+                null, selection, new String[]{eventType.toString(), eventState.toString()}, null);
+        cursor.moveToFirst();
+        if(cursorPosition < 0) {
+            while (!cursor.isLast()) {
+                if (cursor.getLong(cursor.getColumnIndex(EventVSContentProvider.ID_COL)) == eventId) {
+                    cursorPosition = cursor.getPosition();
+                    break;
+                } else cursor.moveToNext();
+            }
+        } else cursor.moveToPosition(cursorPosition);
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(getSupportFragmentManager(),
-                eventStateStr, eventTypeStr);
+        EventVSPagerAdapter eventsPagerAdapter = new EventVSPagerAdapter(getSupportFragmentManager(),
+                eventState.toString(), eventType.toString());
         mViewPager.setAdapter(eventsPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
@@ -171,11 +183,11 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
         }
     }
 
-    public class EventsPagerAdapter extends FragmentStatePagerAdapter {
+    public class EventVSPagerAdapter extends FragmentStatePagerAdapter {
 
         private Cursor cursor;
 
-        public EventsPagerAdapter(FragmentManager fm, String eventStateStr, String eventTypeStr) {
+        public EventVSPagerAdapter(FragmentManager fm, String eventStateStr, String eventTypeStr) {
             super(fm);
             String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                     EventVSContentProvider.STATE_COL + "= ? ";
@@ -184,7 +196,7 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".EventsPagerAdapter.getItem(...) ", "item: " + i);
+            Log.d(TAG + ".EventVSPagerAdapter.getItem(...) ", "item: " + i);
             cursor.moveToPosition(i);
             Long eventId = cursor.getLong(cursor.getColumnIndex(EventVSContentProvider.ID_COL));
             return EventVSStatisticsFragment.newInstance(eventId);

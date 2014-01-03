@@ -48,6 +48,7 @@ import java.net.URL;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
@@ -63,7 +64,7 @@ public class EventVSPublishingFragment extends Fragment {
 	public static final String EDITOR_SESSION_KEY = "editorSessionKey";
     public static final String FORM_TYPE_KEY = "formTypeKey";
 	
-	private WebView svWebView;
+	private WebView webView;
 	private TypeVS formType;
 	private JavaScriptInterface javaScriptInterface;
 	private OperationVS pendingOperationVS;
@@ -71,7 +72,7 @@ public class EventVSPublishingFragment extends Fragment {
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean progressVisible;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private PublishTask publishTask;
     private View rootView;
 
@@ -92,11 +93,10 @@ public class EventVSPublishingFragment extends Fragment {
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         rootView = inflater.inflate(R.layout.eventvs_publishing_fragment, container, false);
-        mainLayout = (FrameLayout) rootView.findViewById( R.id.mainLayout);
+        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
         mainLayout.getForeground().setAlpha(0);
-        progressVisible = false;
         loadForm();
         // if set to true savedInstanceState will be allways null
         //setRetainInstance(true);
@@ -154,10 +154,10 @@ public class EventVSPublishingFragment extends Fragment {
         progressMessage.setText(R.string.loading_data_msg);
         showProgress(true, true);
         javaScriptInterface = new JavaScriptInterface(getActivity());
-        svWebView = (WebView) rootView.findViewById(R.id.webview);
-        svWebView.setWebChromeClient(new WebChromeClient());
-        svWebView.setWebViewClient(new WebViewClient());
-        WebSettings webSettings = svWebView.getSettings();
+        webView = (WebView) rootView.findViewById(R.id.webview);
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient());
+        WebSettings webSettings = webView.getSettings();
         webSettings.setBuiltInZoomControls(true);
         webSettings.setSupportZoom(true);
         webSettings.setUseWideViewPort(true);
@@ -165,18 +165,18 @@ public class EventVSPublishingFragment extends Fragment {
         String userAgent = webSettings.getUserAgentString();
         //To prevent block if ckeditor detects the 'Mobile' in user agent
         webSettings.setUserAgentString(userAgent.replaceAll("Mobile", ""));
-        svWebView.setClickable(true);
+        webView.setClickable(true);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setDomStorageEnabled(true);
-        svWebView.addJavascriptInterface(javaScriptInterface, "androidClient");
+        webView.addJavascriptInterface(javaScriptInterface, "androidClient");
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        svWebView.setWebViewClient(new WebViewClient() {
+        webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 showProgress(false, true);
             }
         });
-        svWebView.loadUrl(serverURL);
+        webView.loadUrl(serverURL);
     }
 
 
@@ -232,7 +232,7 @@ public class EventVSPublishingFragment extends Fragment {
     
     public void onBackPressed() {
         Log.d(TAG + ".onBackPressed(...)",  "onBackPressed");
-        if(svWebView.canGoBack()) svWebView.goBack();
+        if(webView.canGoBack()) webView.goBack();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -259,7 +259,7 @@ public class EventVSPublishingFragment extends Fragment {
             String operationStr = operationVS.getJSON().toString();
             Log.d(TAG + ".sendMessageToWebApp(...) ", "operationStr: " + operationStr);
             String jsOperation = "javascript:sendMessageToWebApp('" + operationStr + "')";
-            svWebView.loadUrl(jsOperation);
+            webView.loadUrl(jsOperation);
 		} catch(Exception ex) {
 			ex.printStackTrace();
 		}
@@ -284,39 +284,33 @@ public class EventVSPublishingFragment extends Fragment {
         Log.d(TAG + ".onResume() ", "onResume");
     }
 
-    public void showProgress(boolean shown, boolean animate) {
-        if (progressVisible == shown) return;
-        progressVisible = shown;
-        if (!shown) {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha( 0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {return false;}
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if (progressVisible.get() && progressContainer != null) {
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_in));
             progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
             mainLayout.getForeground().setAlpha(150); // dim
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) { return true; }
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        } else {
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_out));
+            progressContainer.setVisibility(View.GONE);
+            mainLayout.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
             });
         }
-
     }
 
     private class PublishTask extends AsyncTask<URL, Integer, ResponseVS> {

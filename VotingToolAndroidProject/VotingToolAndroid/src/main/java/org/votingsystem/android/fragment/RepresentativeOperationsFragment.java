@@ -19,12 +19,13 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -35,10 +36,9 @@ public class RepresentativeOperationsFragment extends Fragment {
 	public static final String TAG = "RepresentativeOperationsFragment";
 
     private ContextVS contextVS;
-    private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean progressVisible;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SendDataTask sendDataTask;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -70,10 +70,7 @@ public class RepresentativeOperationsFragment extends Fragment {
         });
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
-        progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
-        progressMessage.setText(R.string.loading_data_msg);
         mainLayout.getForeground().setAlpha(0);
-        progressVisible = false;
         // if set to true savedInstanceState will be allways null
         setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -141,36 +138,31 @@ public class RepresentativeOperationsFragment extends Fragment {
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
-    public void showProgress(boolean shown, boolean animate) {
-        if (progressVisible == shown) return;
-        progressVisible = shown;
-        if (!shown) {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha( 0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {return false;}
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if (progressVisible.get() && progressContainer != null) {
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_in));
             progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
             mainLayout.getForeground().setAlpha(150); // dim
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) { return true; }
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        } else {
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_out));
+            progressContainer.setVisibility(View.GONE);
+            mainLayout.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
             });
         }
     }

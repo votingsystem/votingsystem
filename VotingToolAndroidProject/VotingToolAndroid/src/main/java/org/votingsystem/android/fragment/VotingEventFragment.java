@@ -74,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
@@ -96,7 +97,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     private View rootView;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean progressVisible;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private ProcessSignatureTask processSignatureTask;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -154,7 +155,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
-        progressVisible = false;
         setHasOptionsMenu(true);
         Button cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
         cancelVoteButton.setOnClickListener(this);
@@ -398,38 +398,31 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         if(processSignatureTask != null) processSignatureTask.cancel(true);
     }
 
-    public void showProgress(boolean shown, boolean animate) {
-        if (progressVisible == shown) {
-            return;
-        }
-        progressVisible = shown;
-        if (!shown) {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha( 0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {return false;}
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if (progressVisible.get() && progressContainer != null) {
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_in));
             progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
             mainLayout.getForeground().setAlpha(150); // dim
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) { return true; }
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        } else {
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_out));
+            progressContainer.setVisibility(View.GONE);
+            mainLayout.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
             });
         }
     }

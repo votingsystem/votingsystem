@@ -213,6 +213,7 @@ public class RepresentativeGridFragment extends Fragment
         switch (item.getItemId()) {
             case R.id.reload:
                 hasHTTPConnection.set(true);
+                rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
                 getLoaderManager().restartLoader(loaderId, null, this);
                 return true;
             default:
@@ -300,7 +301,7 @@ public class RepresentativeGridFragment extends Fragment
     public void showProgress(boolean showProgress, boolean animate) {
         if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);
-        if (progressVisible.get()) {
+        if (progressVisible.get() && progressContainer != null) {
             getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
             if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
                     getActivity().getApplicationContext(), android.R.anim.fade_in));

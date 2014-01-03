@@ -214,6 +214,7 @@
 	<string name="msg_lbl">Mensaje</string>   
 	<string name="operation_ok_msg">Operación completada con éxito</string>
     <string name="operation_error_msg">Error en la operación</string>
+    <string name="operation_unknown_error_msg">El servicio no está preparado para la operación \'%1$s\'</string>
     <string name="conn_timeout_msg">Problemas conectando con el servicio</string>
 	<string name="receipt_file_saved_msg">Documento incorporado a la lista de recibos</string> 
 	<string name="cert_not_found_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>

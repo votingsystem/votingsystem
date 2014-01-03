@@ -7,10 +7,8 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import org.json.JSONException;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
-import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -19,7 +17,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.HttpHelper;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;

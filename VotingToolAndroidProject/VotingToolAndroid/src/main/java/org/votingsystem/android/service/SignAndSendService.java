@@ -82,6 +82,10 @@ public class SignAndSendService extends IntentService {
                             getApplicationContext());
                     responseVS = smimeSignedSender.call();
                     break;
+                default:
+                    responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, getString(
+                            R.string.operation_unknown_error_msg, typeVS.toString()));
+                    break;
             }
             showNotification(responseVS, typeVS);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -122,8 +126,8 @@ public class SignAndSendService extends IntentService {
 
     private void sendMessage(Integer statusCode, String caption, String message,
              String serviceCaller) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - caption: " +
-                caption  + " - message: " + message);
+        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
+                serviceCaller +" - caption: " + caption  + " - message: " + message);
         Intent intent = new Intent(serviceCaller);
         if(statusCode != null)
             intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());

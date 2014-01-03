@@ -63,6 +63,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private String broadCastId = null;
 
 
     public static EventVSFragment newInstance(String eventJSONStr) {
@@ -98,7 +99,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                     SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
-            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
                 startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
             } else {
@@ -171,6 +172,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         eventSubject.setOnClickListener(this);
         if(savedInstanceState != null && savedInstanceState.getBoolean(
                 ContextVS.LOADING_KEY, false)) showProgress(true, true);
+        broadCastId = this.getClass().getSimpleName()+ "_" + eventVS.getId();
         return rootView;
     }
 
@@ -187,11 +189,14 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
                         EventVSStatisticsPagerActivity.class);
+                intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
+                intent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+                intent.putExtra(ContextVS.EVENT_STATE_KEY, eventVS.getState());
                 startActivity(intent);
                 return true;
             default:
@@ -200,8 +205,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override public void onDestroy() {
+        Log.d(TAG + ".onDestroy()", "");
         super.onDestroy();
-        Log.d(TAG + ".onDestroy()", " - onDestroy");
     };
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -210,17 +215,15 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override public void onStop() {
+        Log.d(TAG + ".onStop()", "");
         super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop");
     }
 
     public void onClickSubject(View v) {
-        Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
+        Log.d(TAG + ".onClickSubject(...)", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
-            AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-            builder.setTitle(eventVS.getSubject());
-            builder.show();
+            showMessage(null, eventVS.getSubject(), null);
         }
     }
 
@@ -235,15 +238,14 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
         if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);
-        if (progressVisible.get()) {
+        if (progressVisible.get() && progressContainer != null) {
             getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
@@ -282,9 +284,9 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showClaimFieldsDialog() {
-        Log.d(TAG + ".showClaimFieldsDialog(...)", " - showClaimFieldsDialog");
+        Log.d(TAG + ".showClaimFieldsDialog(...)", "");
         if (eventVS.getFieldsEventVS() == null) {
-            Log.d(TAG + ".showClaimFieldsDialog(...)", " - claim without fields");
+            Log.d(TAG + ".showClaimFieldsDialog(...)", "Event without fields");
             return;
         }
         AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
@@ -329,7 +331,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
-        Log.d(TAG + ".addFormField(...)", " - addFormField - field: " + label);
+        Log.d(TAG + ".addFormField(...)", "addFormField - field: " + label);
         TextView tvLabel = new TextView(getActivity().getApplicationContext());
         tvLabel.setLayoutParams(getDefaultParams(true));
         tvLabel.setText(label);
@@ -340,10 +342,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         // (content) of this view across screen configuration changes
         editView.setId(id);
         editView.setInputType(type);
-
         mFormView.addView(tvLabel);
         mFormView.addView(editView);
-
         fieldsMap.put(id, editView);
     }
 
@@ -360,23 +360,19 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + "caption: " + caption +
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
-                MessageDialogFragment.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        newFragment.show(ft, MessageDialogFragment.TAG);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+        showProgress(false, true);
     }
 
     @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
-        Log.d(TAG + ".onResume() ", "onResume");
+                broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {

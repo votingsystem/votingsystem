@@ -1,6 +1,5 @@
 package org.votingsystem.android.activity;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -34,6 +34,7 @@ import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.ReceiptOperationsListener;
@@ -56,6 +57,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
@@ -73,19 +75,19 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
     private ContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private boolean progressVisible;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private ProcessSignatureTask processSignatureTask;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            if(pin != null) {
-                if(processSignatureTask != null) processSignatureTask.cancel(true);
-                processSignatureTask = new ProcessSignatureTask(pin);
-                processSignatureTask.execute();
-            }
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                "intent.getExtras(): " + intent.getExtras());
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        if(pin != null) {
+            if(processSignatureTask != null) processSignatureTask.cancel(true);
+            processSignatureTask = new ProcessSignatureTask(pin);
+            processSignatureTask.execute();
+        }
         }
     };
 
@@ -121,10 +123,12 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
         adapter.notifyDataSetChanged();
         mainLayout = (FrameLayout) findViewById( R.id.mainLayout);
         progressContainer = findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha( 0);
-        progressVisible = false;
+        mainLayout.getForeground().setAlpha(0);
+        if(savedInstanceState != null && savedInstanceState.getBoolean(
+                ContextVS.LOADING_KEY, false)) {
+            showProgress(true, true);
+        }
     }
-
 
     private void launchOptionsDialog(VoteVS receipt) {
         String caption = receipt.getVote().getSubject();
@@ -285,10 +289,13 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
         }
     }
 
-    private void showMessage(String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", " - caption: " + caption + "  - showMessage: " + message);
-        AlertDialog.Builder builder= new AlertDialog.Builder(this);
-        builder.setTitle(caption).setMessage(message).show();
+    private void showMessage(Integer statusCode, String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+                " - message: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
+        showProgress(false, true);
     }
 
     @Override public void cancelVote(VoteVS receipt) {
@@ -348,6 +355,13 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
             e.printStackTrace();
         }
     }
+
+    @Override protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+        Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
+    }
+
     @Override protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", "onDestroy");
@@ -360,33 +374,47 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
         if(processSignatureTask != null) processSignatureTask.cancel(true);
     }
 
-    public void showProgress(boolean shown, boolean animate) {
-        if (progressVisible == shown) {
-            return;
-        }
-        progressVisible = shown;
-        if (!shown) {
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if (progressVisible.get() && progressContainer != null) {
+            getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha( 0); // restore
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_in));
+                        getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }
             progressContainer.setVisibility(View.VISIBLE);
             //eventContainer.setVisibility(View.INVISIBLE);
             mainLayout.getForeground().setAlpha(150); // dim
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to disable touch events on background view
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        } else {
+            if (animate) {
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getApplicationContext(), android.R.anim.fade_out));
+                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
+                //        this, android.R.anim.fade_in));
+            }
+            progressContainer.setVisibility(View.GONE);
+            //eventContainer.setVisibility(View.VISIBLE);
+            mainLayout.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });
         }
     }
+
     private class ProcessSignatureTask extends AsyncTask<URL, Integer, ResponseVS> {
 
         private String pin = null;
@@ -451,12 +479,12 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                     ex.printStackTrace();
                 }
                 refreshReceiptList();
-                showMessage(getString(R.string.msg_lbl), msg);
+                showMessage(responseVS.getStatusCode(), getString(R.string.msg_lbl), msg);
             } else {
                 caption = getString(R.string.error_lbl) + " "
                         + responseVS.getStatusCode();
                 if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                    Log.e(TAG + ".setSignServiceMsg(...)", " --- ANULACION_REPETIDA --- ");
+                    Log.e(TAG + ".setSignServiceMsg(...)", "ANULACION_REPETIDA");
                     operationReceipt.setCanceled(true);
                     try {
                         db.updateVoteReceipt(operationReceipt);
@@ -464,7 +492,7 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                         e.printStackTrace();
                     }
                 }
-                showMessage(caption, responseVS.getMessage());
+                showMessage(responseVS.getStatusCode(), caption, responseVS.getMessage());
             }
         }
 

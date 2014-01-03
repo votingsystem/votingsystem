@@ -32,8 +32,10 @@ public class MessageDialogFragment extends DialogFragment {
         int statusCode = getArguments().getInt(ContextVS.RESPONSE_STATUS_KEY, -1);
         String caption = getArguments().getString(ContextVS.CAPTION_KEY);
         String message = getArguments().getString(ContextVS.MESSAGE_KEY);
-        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(caption).
-                setMessage(message).create();
+        AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity());
+        if(caption != null) builder.setTitle(caption);
+        if(message != null) builder.setMessage(message);
+        AlertDialog dialog = builder.create();
         if(statusCode > 0) {
             if(ResponseVS.SC_OK == statusCode) dialog.setIcon(R.drawable.accept_16);
             else dialog.setIcon(R.drawable.cancel_16);
