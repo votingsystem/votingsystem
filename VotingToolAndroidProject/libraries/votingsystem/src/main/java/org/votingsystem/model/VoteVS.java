@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,8 +8,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.security.PrivateKey;
 import java.util.Date;
 import java.util.Random;

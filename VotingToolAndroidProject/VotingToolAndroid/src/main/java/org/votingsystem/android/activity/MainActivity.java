@@ -29,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.service.VotingAppService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.StringUtils;
@@ -87,7 +88,7 @@ public class MainActivity extends FragmentActivity {
         if (savedInstanceState != null) return;
         String caption = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
         String message = getIntent().getStringExtra(ContextVS.MESSAGE_KEY);
-        if(caption != null && message != null) showMessage(caption, message);
+        if(caption != null && message != null) showMessage(null, caption, message);
         else if(uriData != null || contextVS.getAccessControl() == null) runAppService(uriData);
         else if(contextVS.getAccessControl() != null) {
             Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
@@ -157,11 +158,12 @@ public class MainActivity extends FragmentActivity {
         progressDialog.show();
     }
 
-    private void showMessage(String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
-        AlertDialog.Builder builder= new AlertDialog.Builder(this);
-        builder.setTitle(caption).setMessage(message);
-        alertDialog = builder.setTitle(caption).setMessage(message).show();
+    private void showMessage(Integer statusCode, String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + "caption: " + caption +
+                " - message: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
     }
 
     @Override protected void onStop() {

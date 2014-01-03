@@ -3,24 +3,14 @@ package org.votingsystem.model;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-
 import com.itextpdf.text.Context_iTextVS;
-
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
-
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class ContextVS {
 
@@ -40,10 +30,6 @@ public class ContextVS {
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
 
-    public static final String STATE_KEY                   = "STATE";
-    public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
-    public static final String APPLICATION_ID_KEY          = "idAplicacion";
-    public static final String EVENT_KEY                   = "eventKey";
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
     public static final String SIGNED_FILE_NAME           = "signedFile";
@@ -80,6 +66,9 @@ public class ContextVS {
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
     public static final String EVENT_TYPE_KEY  = "EVENT_TYPE";
     public static final String EVENTVS_KEY  = "EVENTVS";
+    public static final String STATE_KEY                   = "STATE";
+    public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
+    public static final String APPLICATION_ID_KEY          = "idAplicacion";
 
     //Loaders
     public static final int EVENT_LIST_LOADER1_ID = 0;
@@ -125,14 +114,10 @@ public class ContextVS {
 
     private AccessControlVS accessControlVS;
     private UserVS userVS;
-    private List<UserVS> representativeList;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private OperationVS operationVS = null;
-
     private static ContextVS INSTANCE;
     private Context context = null;
-
-    private ExecutorService executorService;
 
     private static PropertyResourceBundle resourceBundle;
 
@@ -171,27 +156,8 @@ public class ContextVS {
         }
     }
 
-    public List<UserVS> getRepresentatives(int offset, int size) {
-        if(representativeList == null) return null;
-        return representativeList.subList(offset, size);
-    }
-
-    public void setRepresentatives(int offset, Collection<UserVS> representativeSet) {
-        if(representativeList == null) {
-            int initialCapacity = offset + representativeSet.size();
-            representativeList = new ArrayList<UserVS>(initialCapacity);
-            representativeList.addAll(offset, representativeSet);
-        } else representativeList.addAll(offset, representativeSet);
-    }
-
     public String getHostID() {
         return android.os.Build.ID;
-    }
-
-    public Future<ResponseVS> submit(Callable<ResponseVS> callable) {
-        Log.d(TAG + ".submit(...)", " --- submit");
-        if(executorService == null) executorService = Executors.newFixedThreadPool(3);
-        return executorService.submit(callable);
     }
 
     public OperationVS getOperationVS() {

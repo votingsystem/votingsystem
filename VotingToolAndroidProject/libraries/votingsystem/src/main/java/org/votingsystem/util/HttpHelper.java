@@ -10,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -94,6 +95,8 @@ public class HttpHelper {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()));
             }
+        } catch(ConnectTimeoutException ex) {
+            responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
@@ -136,31 +139,48 @@ public class HttpHelper {
                 }
                 responseVS.setData(headerValues);
             }
-        } catch(Exception ex) {
+        } catch(ConnectTimeoutException ex) {
+            responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
+        }  catch(Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
         }
         return responseVS;
     }
 
-    public static HttpResponse sendFile (File file, String serverURL) throws IOException {
-        HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendFile(...)" , " - serverURL: " + httpPost.getURI() 
-        		+ " - file: " + file.getAbsolutePath());
-        FileBody fileBody = new FileBody(file);
-        MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(SIGNED_FILE_NAME, fileBody);
-        httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
-        Log.d(TAG + ".sendFile" , "----------------------------------------");
-        Log.d(TAG + ".sendFile" , response.getStatusLine().toString());
-        Log.d(TAG + ".sendFile" , "----------------------------------------");
-        return response;
+    public static ResponseVS sendFile (File file, String serverURL) throws IOException {
+        ResponseVS responseVS = null;
+        try {
+            HttpPost httpPost = new HttpPost(serverURL);
+            Log.d(TAG + ".sendFile(...)" , " - serverURL: " + httpPost.getURI()
+                    + " - file: " + file.getAbsolutePath());
+            FileBody fileBody = new FileBody(file);
+            MultipartEntity reqEntity = new MultipartEntity();
+            reqEntity.addPart(SIGNED_FILE_NAME, fileBody);
+            httpPost.setEntity(reqEntity);
+            HttpResponse response = httpclient.execute(httpPost);
+            Log.d(TAG + ".sendFile" , "----------------------------------------");
+            Log.d(TAG + ".sendFile" , response.getStatusLine().toString());
+            Log.d(TAG + ".sendFile" , "----------------------------------------");
+            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
+                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),responseBytes);
+            } else {
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
+                        EntityUtils.toString(response.getEntity()));
+            }
+        } catch(ConnectTimeoutException ex) {
+            responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
+        }  catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+        }
+        return responseVS;
     }
      
      public static ResponseVS sendObjectMap(
              Map<String, Object> fileMap, String serverURL) throws Exception {
-    	 Log.d(TAG + ".sendObjectMap" , ".sendObjectMap - serverURL: " + serverURL); 
+    	 Log.d(TAG + ".sendObjectMap(...)" , "serverURL: " + serverURL);
          ResponseVS responseVS = null;
          if(fileMap == null || fileMap.isEmpty()) throw new Exception("Empty Map");
          HttpPost httpPost = new HttpPost(serverURL);
@@ -191,7 +211,9 @@ public class HttpHelper {
              responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                      new String(responseBytes), responseBytes);
              //EntityUtils.consume(response.getEntity());
-         } catch(Exception ex) {
+         } catch(ConnectTimeoutException ex) {
+             responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
+         }  catch(Exception ex) {
              ex.printStackTrace();
         	 String statusLine = null;
              if(response != null) {
@@ -203,10 +225,7 @@ public class HttpHelper {
          return responseVS;
      }
 
-
-
-
-    public boolean isOnline(Context context) {
+    public static boolean isOnline(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();

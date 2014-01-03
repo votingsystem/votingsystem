@@ -229,9 +229,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
                 ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-        if (prev != null) {
-            ft.remove(prev);
-        }
+        if (prev != null) ft.remove(prev);
         ft.addToBackStack(null);
         certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
@@ -362,10 +360,16 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + " - showMessage: " + message);
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + "caption: " + caption +
+                " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
+                MessageDialogFragment.TAG);
+        if (prev != null) ft.remove(prev);
+        ft.addToBackStack(null);
+        newFragment.show(ft, MessageDialogFragment.TAG);
     }
 
     @Override public void onResume() {

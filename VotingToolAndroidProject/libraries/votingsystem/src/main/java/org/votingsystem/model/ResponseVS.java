@@ -23,13 +23,13 @@ public class ResponseVS<T> {
     public static final int SC_ERROR_REQUEST_REPEATED = 470;
     public static final int SC_NULL_REQUEST = 472;
 
-    public static final int SC_ERROR           = 500;
-    public static final int SC_ERROR_EXCEPCION = 500;
-    public static final int SC_ERROR_TIMESTAMP = 570;    
-    public static final int SC_PROCESSING      = 700;
-    public static final int SC_CANCELLED       = 0;
-    public static final int SC_INITIALIZED     = 1;
-    public static final int SC_PAUSED          = 10;
+    public static final int SC_ERROR              = 500;
+    public static final int SC_CONNECTION_TIMEOUT = 522;
+    public static final int SC_ERROR_TIMESTAMP    = 570;
+    public static final int SC_PROCESSING         = 700;
+    public static final int SC_CANCELLED          = 0;
+    public static final int SC_INITIALIZED        = 1;
+    public static final int SC_PAUSED             = 10;
 
 
     private int statusCode;
