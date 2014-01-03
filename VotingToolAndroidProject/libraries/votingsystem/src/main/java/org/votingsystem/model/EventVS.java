@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.DateUtils;
 
+import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.UUID;
  *
  * @author jgzornoza
  */
-public class EventVS {
+public class EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

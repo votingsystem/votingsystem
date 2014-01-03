@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 
+import java.io.Serializable;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
@@ -19,7 +20,7 @@ import java.util.Set;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class UserVS {
+public class UserVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

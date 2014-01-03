@@ -16,13 +16,11 @@
 
 package org.votingsystem.android.fragment;
 
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -49,86 +47,107 @@ import android.widget.TextView;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
-import org.votingsystem.android.callable.SMIMESignedSender;
-import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
+import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.ui.CancelVoteDialog;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.VotingResultDialog;
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.HttpHelper;
 
-import java.io.FileInputStream;
-import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
 public class VotingEventFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = "VotingEventFragment";
 
-    public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
-
-    private Operation operation = Operation.VOTE;
+    private VoteService.Operation operation = VoteService.Operation.VOTE;
     private EventVS eventVS;
-    private VoteVS receipt;
     private List<Button> optionButtonList;
-    private byte[] keyStoreBytes;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
     private ContextVS contextVS;
-
     private View rootView;
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private ProcessSignatureTask processSignatureTask;
+    private String broadCastId = null;
+
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            if(pin != null) launchVoteService(pin);
-            else {
-
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)", "intentExtras:" + intent.getExtras());
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        if(pin != null) launchVoteService(pin);
+        else {
+            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                    ResponseVS.SC_ERROR);
+            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+            VoteService.Operation resultOperation = (VoteService.Operation) intent.
+                    getSerializableExtra(ContextVS.OPERATION_KEY);
+            if(resultOperation == VoteService.Operation.VOTE) {
+                if(ResponseVS.SC_OK == responseStatusCode) {
+                    VoteVS resultReceipt = contextVS.getVoteReceipt(eventVS.getId());
+                    VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
+                            getString(R.string.operation_ok_msg), resultReceipt);
+                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                    votingResultDialog.show(fragmentManager, VotingResultDialog.TAG);
+                    setReceiptScreen(contextVS.getVoteReceipt(eventVS.getId()));
+                } else {
+                    showMessage(responseStatusCode, caption, message);
+                    if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseStatusCode){
+                        setOptionButtonsEnabled(true);
+                    }
+                }
+            } else if(resultOperation == VoteService.Operation.CANCEL_VOTE){
+                if(ResponseVS.SC_OK == responseStatusCode) {
+                    setEventScreen(eventVS);
+                    CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
+                            getString(R.string.msg_lbl), message,
+                            contextVS.getVoteReceipt(eventVS.getId()));
+                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                    cancelVoteDialog.show(fragmentManager, CancelVoteDialog.TAG);
+                } else {
+                    cancelVoteButton.setEnabled(true);
+                    showMessage(responseStatusCode, caption, message);
+                }
             }
+        }
         }
     };
 
     private void launchVoteService(String pin) {
-        X509Certificate controlCenterCert = contextVS.getCert(eventVS.getControlCenter().getServerURL());
-        if(eventVS.getControlCenter().getCertificate() == null && controlCenterCert == null) {
-            GetCertTask getCertTask = new GetCertTask(pin, eventVS.getControlCenter());
-            getCertTask.execute();
-        } else {
-            if(eventVS.getControlCenter().getCertificate() == null) {
-                eventVS.getControlCenter().setCertificate(controlCenterCert);
-            }
-            if(processSignatureTask != null) processSignatureTask.cancel(true);
-            processSignatureTask = new ProcessSignatureTask(pin);
-            processSignatureTask.execute();
+        Log.d(TAG + ".launchVoteService() ", "");
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    VoteService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.OPERATION_KEY, operation);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.EVENTVS_KEY, eventVS);
+            if(operation == VoteService.Operation.CANCEL_VOTE) {
+                VoteVS receipt = contextVS.getVoteReceipt(eventVS.getId());
+                startIntent.putExtra(ContextVS.MESSAGE_KEY, receipt.getVote().getCancelVoteData());
+                cancelVoteButton.setEnabled(false);
+            } else setOptionButtonsEnabled(false);
+            showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
     }
 
-    public static EventVSFragment newInstance(String eventJSONStr) {
-        EventVSFragment fragment = new EventVSFragment();
+    public static VotingEventFragment newInstance(String eventJSONStr) {
+        VotingEventFragment fragment = new VotingEventFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.EVENTVS_KEY, eventJSONStr);
         fragment.setArguments(args);
@@ -162,6 +181,9 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         saveReceiptButton.setOnClickListener(this);
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
+        if(savedInstanceState != null && savedInstanceState.getBoolean(
+                ContextVS.LOADING_KEY, false)) showProgress(true, true);
+        broadCastId = this.getClass().getSimpleName()+ "_" + eventVS.getId();
         return rootView;
     }
 
@@ -184,11 +206,14 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
                         EventVSStatisticsPagerActivity.class);
+                intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
+                intent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+                intent.putExtra(ContextVS.EVENT_STATE_KEY, eventVS.getState());
                 startActivity(intent);
                 return true;
             default:
@@ -233,8 +258,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         Log.d(TAG + ".cancelVote(...)", "");
         NotificationManager notificationManager =
                 (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(receipt.getNotificationId());
-        operation = Operation.CANCEL_VOTE;
+        notificationManager.cancel(contextVS.getVoteReceipt(eventVS.getId()).getNotificationId());
+        operation = VoteService.Operation.CANCEL_VOTE;
         showPinScreen(getString(R.string.cancel_vote_msg));
     }
 
@@ -242,6 +267,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         Log.d(TAG + ".saveVote(...)", "");
         NotificationManager notificationManager =
                 (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        VoteVS receipt = contextVS.getVoteReceipt(eventVS.getId());
         notificationManager.cancel(receipt.getNotificationId());
 		/*Log.d(TAG + ".guardarReciboButton ", " - Files dir path: " +
 		getActivity().getApplicationContext().getFilesDir().getAbsolutePath());
@@ -264,10 +290,9 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             receipt.setId(db.insertVoteReceipt(receipt));
             saveReceiptButton.setEnabled(false);
         } catch (Exception ex) {
-            Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
+            ex.printStackTrace();
         }
     }
-
 
     private void setEventScreen(final EventVS event) {
         Log.d(TAG + ".setEventScreen(...)", " - setEventScreen");
@@ -314,7 +339,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     private void processSelectedOption(FieldEventVS optionSelected) {
         Log.d(TAG + ".processSelectedOption", "processSelectedOption");
-        operation = Operation.VOTE;
+        operation = VoteService.Operation.VOTE;
         eventVS.setOptionSelected(optionSelected);
         if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
             showCertNotFoundDialog();
@@ -330,7 +355,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     @Override public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+                broadcastReceiver, new IntentFilter(broadCastId));
         Log.d(TAG + ".onResume() ", "onResume");
     }
 
@@ -354,13 +379,10 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     public void onClickSubject(View v) {
-        Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
+        Log.d(TAG + ".onClickSubject(...)", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
-            AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-            builder.setTitle(getString(R.string.subject_lbl));
-            builder.setMessage(eventVS.getSubject());
-            builder.show();
+            showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
         }
     }
 
@@ -381,21 +403,23 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", " - onDestroy");
-        if(processSignatureTask != null) processSignatureTask.cancel(true);
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
     }
 
     @Override public void onStop() {
         super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop");
-        if(processSignatureTask != null) processSignatureTask.cancel(true);
+        Log.d(TAG + ".onStop()", "");
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
@@ -424,183 +448,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                     return false;
                 }
             });
-        }
-    }
-
-    private class ProcessSignatureTask extends AsyncTask<URL, Integer, ResponseVS> {
-
-        private String pin = null;
-
-        public ProcessSignatureTask(String pin) {
-            this.pin = pin;
-        }
-
-        protected void onPreExecute() {
-            Log.d(TAG + ".ProcessSignatureTask.onPreExecute(...)", " --- onPreExecute");
-            getActivity().getWindow().getDecorView().findViewById(
-                    android.R.id.content).invalidate();
-            showProgress(true, true);
-            switch(operation) {
-                case VOTE:
-                    setOptionButtonsEnabled(false);
-                    break;
-                case CANCEL_VOTE:
-                    cancelVoteButton.setEnabled(false);
-                    break;
-            }
-        }
-
-        protected ResponseVS doInBackground(URL... urls) {
-            Log.d(TAG + ".ProcessSignatureTask.doInBackground(...)",
-                    " - doInBackground - event type: " + eventVS.getTypeVS());
-            ResponseVS responseVS = null;
-            switch(operation) {
-                case VOTE:
-                    try {
-                        FileInputStream fis = null;
-                        fis = getActivity().openFileInput(KEY_STORE_FILE);
-                        keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-                        VoteSender voteSender = new VoteSender(eventVS, keyStoreBytes,
-                                pin.toCharArray(), getActivity().getApplicationContext());
-                        responseVS = voteSender.call();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        return new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
-                    }
-                    break;
-                case CANCEL_VOTE:
-                    String subject = getString(R.string.cancel_vote_msg_subject);
-                    String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
-                    try {
-                        String signatureContent = receipt.getVote().getCancelVoteData();
-                        FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
-                        byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-                        SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                                signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                                subject, keyStoreBytes, pin.toCharArray(),
-                                contextVS.getAccessControl().getCertificate(),
-                                getActivity().getApplicationContext());
-                        responseVS = smimeSignedSender.call();
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
-                        return new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
-                    }
-                    break;
-                default:
-                    Log.d(TAG + ".processPinTask(...)", "--- unknown operation: " + operation);
-                    responseVS = new ResponseVS(ResponseVS.SC_ERROR, getString(R.string.operationNotFoundErrorMsg));
-            }
-            return responseVS;
-        }
-
-        // This is called each time you call publishProgress()
-        protected void onProgressUpdate(Integer... progress) { }
-
-        protected void onPostExecute(ResponseVS response) {
-            Log.d(TAG + ".ProcessSignatureTask.onPostExecute(...)", " - onPostExecute - status:" +
-                    response.getStatusCode());
-            showProgress(false, true);
-            switch(operation) {
-                case VOTE:
-                    setOptionButtonsEnabled(false);
-                    if(ResponseVS.SC_OK == response.getStatusCode()) {
-                        receipt = (VoteVS)response.getData();
-                        VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
-                                getString(R.string.operation_ok_msg), receipt);
-                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                        votingResultDialog.show(fragmentManager, "fragment_voting_result");
-                        setReceiptScreen(receipt);
-                    } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == response.getStatusCode()) {
-                        showMessage(response.getStatusCode(), getString
-                                (R.string.access_request_repeated_caption), getString(
-                                R.string.access_request_repeated_msg,
-                                eventVS.getSubject(), response.getMessage()));
-                        return;
-                    } else {
-                        showMessage(response.getStatusCode(), getString(R.string.error_lbl),
-                                Html.fromHtml(response.getMessage()).toString());
-                        setOptionButtonsEnabled(true);
-                    }
-                    break;
-                case CANCEL_VOTE:
-                    if(ResponseVS.SC_OK == response.getStatusCode()) {
-                        SMIMEMessageWrapper cancelReceipt = response.getSmimeMessage();
-                        receipt.setCancelVoteReceipt(cancelReceipt);
-                        String msg = getString(R.string.cancel_vote_result_msg,
-                                receipt.getVote().getSubject());
-                        if(receipt.getId() > 0) {
-                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(
-                                    getActivity().getApplicationContext());
-                            try {
-                                db.insertVoteReceipt(receipt);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-                        setEventScreen(eventVS);
-                        CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
-                                getString(R.string.msg_lbl), msg, receipt);
-                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                        cancelVoteDialog.show(fragmentManager, "fragment_cancel_vote_result");
-                    } else {
-                        cancelVoteButton.setEnabled(true);
-                        showMessage(response.getStatusCode(), getString(R.string.error_lbl),
-                                response.getMessage());
-                    }
-                    break;
-            }
-        }
-    }
-
-    private class GetCertTask extends AsyncTask<String, Integer, ResponseVS> {
-
-        private ActorVS actorVS = null;
-        private String pin = null;
-
-        public GetCertTask(String pin,ActorVS actorVS) {
-            this.actorVS = actorVS;
-            this.pin = pin;
-        }
-
-        protected void onPreExecute() {
-            Log.d(TAG + ".GetCertTask.onPreExecute(...)", "");
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            showProgress(true, true);
-        }
-
-        protected ResponseVS doInBackground(String... urls) {
-            Log.d(TAG + ".GetCertTask.doInBackground(...)", "serviceURL: " +
-                    actorVS.getCertChainURL());
-            return HttpHelper.getData(actorVS.getCertChainURL(), null);
-        }
-
-        // This is called each time you call publishProgress()
-        protected void onProgressUpdate(Integer... progress) { }
-
-        protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + ".GetCertTask.onPostExecute(...)", "onPostExecute - status:" +
-                    responseVS.getStatusCode());
-            showProgress(false, true);
-            try {
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
-                            responseVS.getMessageBytes());
-                    X509Certificate serverCert = certChain.iterator().next();
-                    contextVS.putCert(actorVS.getServerURL(), serverCert);
-                    eventVS.getControlCenter().setCertificate(serverCert);
-                    if(processSignatureTask != null) processSignatureTask.cancel(true);
-                    processSignatureTask = new ProcessSignatureTask(pin);
-                    processSignatureTask.execute();
-                } else {
-                    Log.d(TAG + ".getServerCert() ", "Error message: " + responseVS.getMessage());
-                    showMessage(responseVS.getStatusCode(), getString(R.string.get_cert_error_msg) +
-                            ": " + actorVS.getServerURL(), responseVS.getMessage());
-                }
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                showMessage(responseVS.getStatusCode(), getString(R.string.error_lbl),
-                        ex.getMessage());
-            }
         }
     }
 

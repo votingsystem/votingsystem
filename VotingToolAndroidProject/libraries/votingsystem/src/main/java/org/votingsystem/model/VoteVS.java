@@ -17,9 +17,11 @@ import java.util.Random;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VoteVS {
+public class VoteVS implements java.io.Serializable {
 
 	public static final String TAG = "VoteVS";
+
+    private static final long serialVersionUID = 1L;
     
     private int id;
     private int notificationId;

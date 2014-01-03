@@ -53,6 +53,7 @@ public class ContextVS {
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String OPERATION_KEY = "OPERATION_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
     public static final String OFFSET_KEY = "OFFSET";
@@ -79,6 +80,7 @@ public class ContextVS {
     //Notifications IDs
     public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;
     public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID = 2;
+    public static final int VOTE_SERVICE_NOTIFICATION_ID          = 3;
 
     public static final int KEY_SIZE = 1024;
     public static final int SYMETRIC_ENCRYPTION_KEY_LENGTH = 256;
@@ -109,6 +111,7 @@ public class ContextVS {
     private AccessControlVS accessControlVS;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
+    private Map<Long, VoteVS> voteReceiptMap = new HashMap<Long, VoteVS>();
     private OperationVS operationVS = null;
     private static ContextVS INSTANCE;
     private Context context = null;
@@ -186,8 +189,19 @@ public class ContextVS {
     }
 
     public void putCert(String serverURL, X509Certificate cert) {
-        Log.d(TAG + ".putCert(...)", " - putCert - serverURL: " + serverURL);
+        Log.d(TAG + ".putCert(...)", " serverURL: " + serverURL);
         certsMap.put(serverURL, cert);
+    }
+
+    public void putVoteReceipt(Long eventId, VoteVS receipt) {
+        Log.d(TAG + ".putVoteReceipt(...)", "");
+        voteReceiptMap.put(eventId, receipt);
+    }
+
+    public VoteVS getVoteReceipt(Long eventId) {
+        Log.d(TAG + ".getVoteReceipt(...)", "");
+        if(eventId == null) return null;
+        return voteReceiptMap.get(eventId);
     }
 
     public UserVS getUserVS() {

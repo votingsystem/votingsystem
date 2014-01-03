@@ -94,7 +94,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     };
 
     private void launchSignAndSendService(String pin) {
-        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
+        Log.d(TAG + ".launchUserCertRequestService() ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
@@ -112,7 +112,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                         + eventVS.getSubject();
                 startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
                 JSONObject signatureContent = eventVS.getSignatureContentJSON();
-                signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
                 startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
             }
             showProgress(true, true);

@@ -78,10 +78,10 @@ public class VoteSender implements Callable<ResponseVS> {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     privateKey, chain, ContextVS.SIGNATURE_ALGORITHM);
             String signedContent = event.getAccessRequestJSON().toString();
-            SMIMEMessageWrapper solicitudAcceso = signedMailGenerator.genMimeMessage(
+            SMIMEMessageWrapper accessRequest = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControl().getNameNormalized(),
                     signedContent, subject);
-            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(solicitudAcceso,
+            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(accessRequest,
                     event, contextVS.getAccessControl().getCertificate(),
                     contextVS.getAccessControl().getAccessServiceURL(),context);
             responseVS = accessRequestDataSender.call();

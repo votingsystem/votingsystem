@@ -1,10 +1,14 @@
 package org.votingsystem.model;
 
+import java.io.Serializable;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class FieldEventVS {
+public class FieldEventVS implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private EventVS eventVS;

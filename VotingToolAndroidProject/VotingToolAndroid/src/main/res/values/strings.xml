@@ -237,7 +237,7 @@
 
     <string name="close_app_lbl">Cerrar aplicación</string>
 
-    <string name="get_cert_error_msg">Error obteniendo certificado de: </string>
+    <string name="get_cert_error_msg">Error obteniendo certificado de \'%1$s\'</string>
 
     <string name="event_canceled">Evento cancelado</string>
     <string name="info_lbl">Información</string>
@@ -260,5 +260,9 @@
     <string name="websocket_service_conn_lbl">Conectado mensajería del sistema de votación</string>
     <string name="signature_ok_notification_msg">Documento firmado y enviado</string>
     <string name="signature_error_notification_msg">Error firmando documento</string>
+    <string name="vote_ok_notification_msg">Voto enviado</string>
+    <string name="cancel_vote_ok_notification_msg">Voto cancelado</string>
+    <string name="vote_error_notification_msg">Error en votación</string>
+    <string name="cancel_vote_error_notification_msg">Error cancelando voto</string>
 
 </resources>
