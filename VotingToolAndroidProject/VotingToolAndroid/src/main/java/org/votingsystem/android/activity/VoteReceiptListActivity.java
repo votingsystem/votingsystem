@@ -31,13 +31,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.bouncycastle2.util.encoders.Base64;
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.ui.ReceiptOperationsListener;
 import org.votingsystem.android.ui.ReceiptOptionsDialog;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -62,16 +62,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
-public class VoteReceiptListActivity extends ActionBarActivity implements ReceiptOperationsListener{
+public class VoteReceiptListActivity extends ActionBarActivity {
 
     public static final String TAG = "VoteReceiptListActivity";
 
-
-    private static final String OPTIONS_DIALOG_ID = "optionsDialog";
     protected VoteReceiptDBHelper db;
     private List<VoteVS> voteVSList;
     private ReceiptListAdapter adapter;
-    private VoteVS operationReceipt = null;
+    private VoteVS vote = null;
     private ContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -83,10 +81,19 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
         Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                 "intent.getExtras(): " + intent.getExtras());
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        ReceiptOptionsDialog.Operation operation = (ReceiptOptionsDialog.Operation) intent.
+                getSerializableExtra(ContextVS.OPERATION_KEY);
         if(pin != null) {
             if(processSignatureTask != null) processSignatureTask.cancel(true);
             processSignatureTask = new ProcessSignatureTask(pin);
             processSignatureTask.execute();
+        } else {
+            VoteVS vote = (VoteVS)intent.getSerializableExtra(ContextVS.VOTE_KEY);
+            if(operation == ReceiptOptionsDialog.Operation.CANCEL_VOTE) {
+                cancelVote(vote);
+            } else if(operation == ReceiptOptionsDialog.Operation.REMOVE_RECEIPT) {
+                removeReceipt(vote);
+            }
         }
         }
     };
@@ -130,18 +137,18 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
         }
     }
 
-    private void launchOptionsDialog(VoteVS receipt) {
-        String caption = receipt.getVote().getSubject();
+    private void launchOptionsDialog(VoteVS vote) {
+        String caption = vote.getEventVS().getSubject();
         String msg = getString(R.string.receipt_options_dialog_msg);
         ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
-                caption, msg, receipt, this);
+                caption, msg, vote, this.getClass().getName());
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(OPTIONS_DIALOG_ID);
+        Fragment prev = getSupportFragmentManager().findFragmentByTag(ReceiptOptionsDialog.TAG);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        optionsDialog.show(ft, OPTIONS_DIALOG_ID);
+        optionsDialog.show(ft, ReceiptOptionsDialog.TAG);
     }
 
     private void showPinScreen(String message) {
@@ -250,21 +257,22 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                 TextView author = (TextView) view.findViewById(R.id.event_author);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
 
-                subject.setText(voteVS.getVote().getSubject());
+                subject.setText(voteVS.getEventVS().getSubject());
                 String dateInfoStr = null;
                 ImageView imgView = (ImageView)view.findViewById(R.id.event_state_icon);
-                if(DateUtils.getTodayDate().after(voteVS.getVote().getDateFinish())) {
+                if(DateUtils.getTodayDate().after(voteVS.getEventVS().getDateFinish())) {
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getContext().getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getContext().getString(R.string.inicio_lbl) + "</b>: " +
                             DateUtils.getShortSpanishStringFromDate(
-                                    voteVS.getVote().getDateBegin()) + " - " +
+                                    voteVS.getEventVS().getDateBegin()) + " - " +
                             "<b>" + getContext().getString(R.string.fin_lbl) + "</b>: " +
-                            DateUtils.getShortSpanishStringFromDate(voteVS.getVote().getDateFinish());
+                            DateUtils.getShortSpanishStringFromDate(
+                                    voteVS.getEventVS().getDateFinish());
                 } else {
                     imgView.setImageResource(R.drawable.open);
                     dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl, DateUtils.
-                            getElpasedTimeHoursFromNow(voteVS.getVote().getDateFinish()))  +"</b>";
+                            getElpasedTimeHoursFromNow(voteVS.getEventVS().getDateFinish()))  +"</b>";
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
@@ -278,10 +286,10 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                             + " -position: " + position);
                     receiptState.setVisibility(View.GONE);
                 }
-                if(voteVS.getVote().getUserVS() != null && !"".equals(
-                        voteVS.getVote().getUserVS().getFullName())) {
+                if(voteVS.getEventVS().getUserVS() != null && !"".equals(
+                        voteVS.getEventVS().getUserVS().getFullName())) {
                     String authorStr =  "<b>" + getContext().getString(R.string.author_lbl) + "</b>: " +
-                            voteVS.getVote().getUserVS().getFullName();
+                            voteVS.getEventVS().getUserVS().getFullName();
                     author.setText(Html.fromHtml(authorStr));
                 } else author.setVisibility(View.GONE);
             }
@@ -298,9 +306,9 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
         showProgress(false, true);
     }
 
-    @Override public void cancelVote(VoteVS receipt) {
+    private void cancelVote(VoteVS receipt) {
         Log.d(TAG + ".cancelVote(...)", " - cancelVote");
-        operationReceipt = receipt;
+        vote = receipt;
         if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
             Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
             showCertNotFoundDialog();
@@ -311,7 +319,8 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
 
     private void dismissOptionsDialog() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        DialogFragment prev = (DialogFragment) getSupportFragmentManager().findFragmentByTag(OPTIONS_DIALOG_ID);
+        DialogFragment prev = (DialogFragment) getSupportFragmentManager().findFragmentByTag(
+                ReceiptOptionsDialog.TAG);
         if(prev != null) {
             prev.getDialog().dismiss();
             if (prev != null) {
@@ -346,7 +355,7 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                 unregisterReceiver(broadcastReceiver);
     }
 
-    @Override public void removeReceipt(VoteVS receipt) {
+    private void removeReceipt(VoteVS receipt) {
         Log.d(TAG + ".removeReceipt()", " --- receipt: " + receipt.getId());
         try {
             db.deleteVoteReceipt(receipt);
@@ -435,16 +444,16 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                 X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(USER_CERT_ALIAS);
 
                 byte[] base64encodedvoteCertPrivateKey = Encryptor.decryptMessage(
-                        operationReceipt.getEncryptedKey(), signerCert, signerPrivatekey);
+                        vote.getEncryptedKey(), signerCert, signerPrivatekey);
                 PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(
                         Base64.decode(base64encodedvoteCertPrivateKey));
                 KeyFactory kf = KeyFactory.getInstance("RSA");
                 PrivateKey certPrivKey = kf.generatePrivate(keySpec);
-                operationReceipt.setCertVotePrivateKey(certPrivKey);
-                String signatureContent = operationReceipt.getVote().getCancelVoteData();
+                vote.setCertVotePrivateKey(certPrivKey);
+                JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
                 String serviceURL =contextVS.getAccessControl().getCancelVoteServiceURL();
                 SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                        signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject,
+                        cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject,
                         keyStoreBytes, pin.toCharArray(),
                         contextVS.getAccessControl().getCertificate(), getBaseContext());
                 return smimeSignedSender.call();
@@ -470,11 +479,11 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
             showProgress(false, true);
             String caption  = null;
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                operationReceipt.setCancelVoteReceipt(responseVS.getSmimeMessage());
+                vote.setCancelVoteReceipt(responseVS.getSmimeMessage());
                 String msg = getString(R.string.cancel_vote_result_msg,
-                        operationReceipt.getVote().getSubject());
+                        vote.getEventVS().getSubject());
                 try {
-                    db.updateVoteReceipt(operationReceipt);
+                    db.updateVoteReceipt(vote);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -484,10 +493,10 @@ public class VoteReceiptListActivity extends ActionBarActivity implements Receip
                 caption = getString(R.string.error_lbl) + " "
                         + responseVS.getStatusCode();
                 if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                    Log.e(TAG + ".setSignServiceMsg(...)", "ANULACION_REPETIDA");
-                    operationReceipt.setCanceled(true);
+                    Log.e(TAG + ".setSignServiceMsg(...)", "CANCEL REPEATED");
+                    vote.setCanceled(true);
                     try {
-                        db.updateVoteReceipt(operationReceipt);
+                        db.updateVoteReceipt(vote);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

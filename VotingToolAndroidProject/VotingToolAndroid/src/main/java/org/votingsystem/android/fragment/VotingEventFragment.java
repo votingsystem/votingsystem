@@ -1,19 +1,3 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.android.fragment;
 
 import android.app.NotificationManager;
@@ -44,7 +28,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
@@ -52,13 +35,11 @@ import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.ui.CancelVoteDialog;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.ui.VotingResultDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -66,12 +47,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class VotingEventFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = "VotingEventFragment";
 
     private VoteService.Operation operation = VoteService.Operation.VOTE;
     private EventVS eventVS;
+    private VoteVS vote;
     private List<Button> optionButtonList;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
@@ -99,10 +85,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             if(resultOperation == VoteService.Operation.VOTE) {
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     VoteVS resultReceipt = contextVS.getVoteReceipt(eventVS.getId());
-                    VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
-                            getString(R.string.operation_ok_msg), resultReceipt);
-                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                    votingResultDialog.show(fragmentManager, VotingResultDialog.TAG);
+                    showMessage(responseStatusCode, getString(R.string.operation_ok_msg),
+                            resultReceipt.getMessage(getActivity().getApplicationContext()), null);
                     setReceiptScreen(contextVS.getVoteReceipt(eventVS.getId()));
                 } else {
                     if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseStatusCode){
@@ -136,9 +120,11 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             startIntent.putExtra(ContextVS.OPERATION_KEY, operation);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.EVENTVS_KEY, eventVS);
+            startIntent.putExtra(ContextVS.VOTE_KEY, vote);
             if(operation == VoteService.Operation.CANCEL_VOTE) {
                 VoteVS receipt = contextVS.getVoteReceipt(eventVS.getId());
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, receipt.getVote().getCancelVoteData());
+                JSONObject cancelDataJSON = new JSONObject(receipt.getCancelVoteDataMap());
+                startIntent.putExtra(ContextVS.MESSAGE_KEY, cancelDataJSON.toString());
                 cancelVoteButton.setEnabled(false);
             } else setOptionButtonsEnabled(false);
             showProgress(true, true);
@@ -193,7 +179,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     @Override public void onClick(View view) {
         switch (view.getId()) {
             case R.id.cancel_vote_button:
-                cancelVote(view);
+                operation = VoteService.Operation.CANCEL_VOTE;
+                showPinScreen(getString(R.string.cancel_vote_msg));
                 break;
             case R.id.save_receipt_button:
                 saveVote(view);
@@ -224,23 +211,23 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    private void setReceiptScreen(final VoteVS receipt) {
+    private void setReceiptScreen(final VoteVS vote) {
         Log.d(TAG + ".setReceiptScreen(...)", " - setReceiptScreen");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
         ((ActionBarActivity)getActivity().getApplicationContext()).getSupportActionBar().
-                setTitle(getString(R.string.already_voted_lbl, receipt.getVote().
-                getOptionSelected().getContent()));
+                setTitle(getString(R.string.already_voted_lbl, vote.getOptionSelected().
+                        getContent()));
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
-        String subject = receipt.getVote().getSubject();
+        String subject = vote.getEventVS().getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         subjectTextView.setText(subject);
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
-        contentTextView.setText(Html.fromHtml(receipt.getVote().getContent()) + "\n");
+        contentTextView.setText(Html.fromHtml(vote.getEventVS().getContent()) + "\n");
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        Set<FieldEventVS> fieldsEventVS = receipt.getVote().getFieldsEventVS();
+        Set<FieldEventVS> fieldsEventVS = vote.getEventVS().getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(optionButtonList == null) {
             optionButtonList = new ArrayList<Button>();
@@ -257,21 +244,12 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         } else setOptionButtonsEnabled(false);
     }
 
-    public void cancelVote(View v) {
-        Log.d(TAG + ".cancelVote(...)", "");
-        NotificationManager notificationManager =
-                (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(contextVS.getVoteReceipt(eventVS.getId()).getNotificationId());
-        operation = VoteService.Operation.CANCEL_VOTE;
-        showPinScreen(getString(R.string.cancel_vote_msg));
-    }
 
     public void saveVote(View v) {
         Log.d(TAG + ".saveVote(...)", "");
         NotificationManager notificationManager =
                 (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         VoteVS receipt = contextVS.getVoteReceipt(eventVS.getId());
-        notificationManager.cancel(receipt.getNotificationId());
 		/*Log.d(TAG + ".guardarReciboButton ", " - Files dir path: " +
 		getActivity().getApplicationContext().getFilesDir().getAbsolutePath());
 		String receiptFileName = StringUtils.getNormalized(reciboVoto.getEventURL()) ;
@@ -334,19 +312,15 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             linearLayout.addView(optionButton, paramsButton);
 
         }
-        if(event.getOptionSelected() != null) {
-            Log.d(TAG + ".setEventScreen", "Selected option: " +event.getOptionSelected().getContent() );
-            processSelectedOption(event.getOptionSelected());
-        } else Log.d(TAG + ".setEventScreen", "Selected null option");
     }
 
     private void processSelectedOption(FieldEventVS optionSelected) {
         Log.d(TAG + ".processSelectedOption", "processSelectedOption");
         operation = VoteService.Operation.VOTE;
-        eventVS.setOptionSelected(optionSelected);
         if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
             showCertNotFoundDialog();
         } else {
+            vote = new VoteVS(eventVS, optionSelected);
             String content = optionSelected.getContent().length() >
                     ContextVS.SELECTED_OPTION_MAX_LENGTH ?
                     optionSelected.getContent().substring(0, ContextVS.SELECTED_OPTION_MAX_LENGTH) +
@@ -434,8 +408,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         if(progressVisible.get()) {
             if (progressDialog == null) progressDialog = new ProgressDialog(getActivity());
             progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle("========= Titulo dialogo voto");
-            progressDialog.setMessage("========= Mensaje dialogo voto");
+            progressDialog.setTitle(getString(R.string.send_vote_caption));
+            progressDialog.setMessage(getString(R.string.subject_lbl) + ": " + eventVS.getSubject());
             progressDialog.setIndeterminate(true);
             progressDialog.setCancelable(false);
             progressDialog.show();

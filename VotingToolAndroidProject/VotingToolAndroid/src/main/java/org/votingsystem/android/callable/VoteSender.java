@@ -1,29 +1,13 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Base64;
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -42,19 +26,22 @@ import java.util.concurrent.Callable;
 
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class VoteSender implements Callable<ResponseVS> {
 
     public static final String TAG = "VoteSender";
 
-    private EventVS event;
+    private VoteVS vote;
     private char[] password;
     private Context context = null;
-    private String serviceURL = null;
     private ContextVS contextVS = null;
     private byte[] keyStoreBytes = null;
 
-    public VoteSender(EventVS event, byte[] keyStoreBytes, char[] password, Context context) {
-        this.event = event;
+    public VoteSender(VoteVS vote, byte[] keyStoreBytes, char[] password, Context context) {
+        this.vote = vote;
         this.keyStoreBytes = keyStoreBytes;
         this.password = password;
         this.context = context;
@@ -62,12 +49,13 @@ public class VoteSender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() {
-        Log.d(TAG + ".processVote(...)", " - call - event subject: " + event.getSubject());
+        Log.d(TAG + ".processVote(...)", "call - event subject: " + vote.getEventVS().getSubject());
         ResponseVS responseVS = null;
         try {
-            event.initVoteData();
-            String serviceURL = event.getControlCenter().getVoteServiceURL();
-            String subject = context.getString(R.string.request_msg_subject, event.getEventVSId());
+            vote.genVote();
+            String serviceURL = contextVS.getControlCenter().getVoteServiceURL();
+            String subject = context.getString(R.string.request_msg_subject,
+                    vote.getEventVS().getEventVSId());
             String userVS = null;
             if (contextVS.getUserVS() != null) userVS = contextVS.getUserVS().getNif();
 
@@ -77,42 +65,47 @@ public class VoteSender implements Callable<ResponseVS> {
             X509Certificate userCert = (X509Certificate) chain[0];
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     privateKey, chain, ContextVS.SIGNATURE_ALGORITHM);
-            String signedContent = event.getAccessRequestJSON().toString();
+
+            JSONObject accessRequestJSON = new JSONObject(vote.getAccessRequestDataMap());
             SMIMEMessageWrapper accessRequest = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControl().getNameNormalized(),
-                    signedContent, subject);
+                    accessRequestJSON.toString(), subject);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(accessRequest,
-                    event, contextVS.getAccessControl().getCertificate(),
+                    vote, contextVS.getAccessControl().getCertificate(),
                     contextVS.getAccessControl().getAccessServiceURL(),context);
             responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            String votoJSON = event.getVoteJSON().toString();
+            JSONObject voteJSON = new JSONObject(vote.getVoteDataMap());
             CertificationRequestVS certificationRequest = accessRequestDataSender.getPKCS10WrapperClient();
             SMIMEMessageWrapper signedVote = certificationRequest.genMimeMessage(
-                    event.getHashCertVSBase64(), event.getControlCenter().getNameNormalized(),
-                    votoJSON, context.getString(R.string.vote_msg_subject), null);
+                    vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getNameNormalized(),
+                    voteJSON.toString(), context.getString(R.string.vote_msg_subject), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, context);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                //AccesRequest OK and Vote error -> Cancel access request
                 cancelAccessRequest(signedMailGenerator, userVS);
                 return responseVS;
             }
             signedVote = timeStamper.getSmimeMessage();
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
-                    event.getControlCenter().getCertificate());
+                    vote.getEventVS().getControlCenter().getCertificate());
             responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE,serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
                         certificationRequest.getKeyPair().getPrivate());
-                VoteVS receipt = new VoteVS(ResponseVS.SC_OK, voteReceipt, event);
+                vote.setVoteReceipt(voteReceipt);
                 byte[] base64EncodedKey = Base64.encode(
                         certificationRequest.getPrivateKey().getEncoded());
                 byte[] encryptedKey = Encryptor.encryptMessage(base64EncodedKey, userCert);
-                receipt.setPkcs10WrapperClient(certificationRequest);
-                receipt.setEncryptedKey(encryptedKey);
-                responseVS.setData(receipt);
-            } else return responseVS;
+                vote.setPkcs10WrapperClient(certificationRequest);
+                vote.setEncryptedKey(encryptedKey);
+                responseVS.setData(vote);
+            } else {//AccesRequest OK and Vote error -> Cancel access request
+                cancelAccessRequest(signedMailGenerator, userVS);
+                return responseVS;
+            }
             /* problema -> javax.activation.UnsupportedDataTypeException:
              * no object DCH for MIME type application/pkcs7-signature
             MimeMessage solicitudAccesoMimeMessage = dnies.gen(userVS,
@@ -141,15 +134,13 @@ public class VoteSender implements Callable<ResponseVS> {
 
 
     private ResponseVS cancelAccessRequest(SignedMailGenerator signedMailGenerator, String userVS) {
-        Log.d(TAG + ".cancelAccessRequest(...)", " - cancelAccessRequest ");
+        Log.d(TAG + ".cancelAccessRequest(...)", "");
         try {
             String subject = context.getString(R.string.cancel_vote_msg_subject);
             String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
-            SMIMEMessageWrapper cancelAccessRequest = signedMailGenerator.genMimeMessage(
-                    userVS, contextVS.getAccessControl().getNameNormalized(),
-                    event.getCancelVoteData(), subject);
+            JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                    event.getCancelVoteData(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     subject,  keyStoreBytes, password,
                     contextVS.getAccessControl().getCertificate(), context);
             return smimeSignedSender.call();

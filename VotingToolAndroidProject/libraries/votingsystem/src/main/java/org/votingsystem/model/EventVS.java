@@ -1,15 +1,11 @@
 package org.votingsystem.model;
 
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.DateUtils;
-
 import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,8 +17,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- *
  * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class EventVS implements Serializable {
 
@@ -45,24 +41,20 @@ public class EventVS implements Serializable {
     private Integer numVotesCollected;
     private ControlCenterVS controlCenter;
     private UserVS userVS;
-    private AccessControlVS accessControlVS;
+    private AccessControlVS accessControl;
     private Integer numComments = 0;
 
-    private Set<FieldEventVS> fieldsEventVS = new HashSet<FieldEventVS>(0);
-    private Set<EventTagVS> eventTagVSes = new HashSet<EventTagVS>(0);
-    private Set<CommentVS> commentVSes = new HashSet<CommentVS>(0);
+    private Set<FieldEventVS> fieldEventVSSet = new HashSet<FieldEventVS>(0);
+    private Set<EventTagVS> eventTagVSSet = new HashSet<EventTagVS>(0);
+    private Set<CommentVS> commentVSSet = new HashSet<CommentVS>(0);
 
     private Date dateBegin;
     private Date dateFinish;
     private Date dateCreated;
     private Date lastUpdated;
-    private String originHashCertVote;
-    private String hashCertVSBase64;
-    private String originHashAccessRequest;
-    private String hashAccessRequestBase64;
     private String[] tags;
-    private FieldEventVS optionSelected;
     private State state;
+    private VoteVS vote;
 
     public TypeVS getTypeVS() {
         return typeVS;
@@ -111,19 +103,19 @@ public class EventVS implements Serializable {
     }
 
     public Set<FieldEventVS> getFieldsEventVS() {
-        return fieldsEventVS;
+        return fieldEventVSSet;
     }
 
     public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
-        this.fieldsEventVS = fieldsEventVS;
+        this.fieldEventVSSet = fieldsEventVS;
     }
 
-    public void setEventTagVSes(Set<EventTagVS> eventTagVSes) {
-        this.eventTagVSes = eventTagVSes;
+    public void setEventTagVSes(Set<EventTagVS> eventTagVSSet) {
+        this.eventTagVSSet = eventTagVSSet;
     }
 
     public Set<EventTagVS> getEventTagVSes() {
-        return eventTagVSes;
+        return eventTagVSSet;
     }
 
     public void setId(Long id) {
@@ -155,20 +147,12 @@ public class EventVS implements Serializable {
         this.tags = arrayTags.toArray(tags);
     }
 
-    public void setOptionSelected(FieldEventVS optionSelected) {
-        this.optionSelected = optionSelected;
-    }
-
-    public FieldEventVS getOptionSelected() {
-        return optionSelected;
-    }
-
-    public void setCommentVSes(Set<CommentVS> commentVSes) {
-        this.commentVSes = commentVSes;
+    public void setCommentVSes(Set<CommentVS> commentVSSet) {
+        this.commentVSSet = commentVSSet;
     }
 
     public Set<CommentVS> getCommentVSes() {
-        return commentVSes;
+        return commentVSSet;
     }
 
     public void setNumComments(int numComments) {
@@ -223,72 +207,29 @@ public class EventVS implements Serializable {
         return dateFinish;
     }
 
-    public void setdateFinish(Date dateFinish) {
+    public void setDateFinish(Date dateFinish) {
         this.dateFinish = dateFinish;
     }
 
     public AccessControlVS getAccessControl() {
-        return accessControlVS;
+        return accessControl;
     }
 
-    public void setAccessControlVS(AccessControlVS accessControlVS) {
-        this.accessControlVS = accessControlVS;
+    public void setAccessControlVS(AccessControlVS accessControl) {
+        this.accessControl = accessControl;
     }
 
-    public String getOriginHashCertVote() {
-        return originHashCertVote;
+
+    public void setVote(VoteVS vote) {
+        this.vote = vote;
     }
 
-    public void setOriginHashCertVote(String originHashCertVote) {
-        this.originHashCertVote = originHashCertVote;
-    }
-
-    public String getHashCertVSBase64() {
-        return hashCertVSBase64;
-    }
-
-    public void setHashCertVSBase64(String hashCertVSBase64) {
-        this.hashCertVSBase64 = hashCertVSBase64;
-    }
-
-    public String getOriginHashAccessRequest() {
-        return originHashAccessRequest;
-    }
-
-    public void setOriginHashAccessRequest(String originHashAccessRequest) {
-        this.originHashAccessRequest = originHashAccessRequest;
-    }
-
-    public String getAccessRequestHashBase64() {
-        return hashAccessRequestBase64;
-    }
-
-    public EventVS initVoteData() throws NoSuchAlgorithmException {
-        this.originHashAccessRequest = UUID.randomUUID().toString();
-        this.hashAccessRequestBase64 = CMSUtils.getHashBase64(
-                this.originHashAccessRequest, ContextVS.SIG_HASH);
-        this.originHashCertVote = UUID.randomUUID().toString();
-        this.hashCertVSBase64 = CMSUtils.getHashBase64(
-                this.originHashCertVote, ContextVS.SIG_HASH);
-        return this;
-    }
-
-    public String getCancelVoteData() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("eventURL", URL);
-        jsonObject.put("originHashCertVote",
-                getOriginHashCertVote());
-        jsonObject.put("hashCertVSBase64",
-                getHashCertVSBase64());
-        jsonObject.put("originHashAccessRequest",
-                getOriginHashAccessRequest());
-        jsonObject.put("hashAccessRequestBase64",
-                getAccessRequestHashBase64());
-        return jsonObject.toString();
+    public VoteVS getVote() {
+        return vote;
     }
 
     public String getURLStatistics() {
-        String basePath = accessControlVS.getServerURL();
+        String basePath = accessControl.getServerURL();
         switch(this.getTypeVS()) {
             case VOTING_EVENT:
                 basePath = basePath + "/eventVSElection/";
@@ -312,25 +253,10 @@ public class EventVS implements Serializable {
         return "/eventVS";
     }
 
-    public void setAccessRequestHashBase64(String hashAccessRequestBase64) {
-        this.hashAccessRequestBase64 = hashAccessRequestBase64;
-    }
-
     public boolean isActive() {
         Date todayDate = DateUtils.getTodayDate();
         if (todayDate.after(dateBegin) && todayDate.before(dateFinish)) return true;
         else return false;
-    }
-
-    public JSONObject getVoteJSON() {
-        Log.d(TAG + ".getVoteJSON", "getVoteJSON");
-        Map map = new HashMap();
-        map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
-        map.put("eventURL", URL);
-        map.put("optionSelectedId", optionSelected.getId());
-        map.put("optionSelectedContent", optionSelected.getContent());
-        map.put("UUID", UUID.randomUUID().toString());
-        return new JSONObject(map);
     }
 
     public void setState(State state) {
@@ -352,10 +278,10 @@ public class EventVS implements Serializable {
     public JSONObject getSignatureContentJSON() throws JSONException {
         Log.d(TAG + ".getSignatureData(...)", "");
         Map<String, Object> map = new HashMap<String, Object>();
-        if(accessControlVS != null) {
+        if(accessControl != null) {
             Map<String, Object> accessControlMap = new HashMap<String, Object>();
-            accessControlMap.put("serverURL", accessControlVS.getServerURL());
-            accessControlMap.put("name", accessControlVS.getName());
+            accessControlMap.put("serverURL", accessControl.getServerURL());
+            accessControlMap.put("name", accessControl.getName());
             map.put("accessControlVS", accessControlMap);
         }
         map.put("id", id);
@@ -369,9 +295,9 @@ public class EventVS implements Serializable {
             map.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
         }
         JSONObject jsonObject = new JSONObject(map);
-        if (fieldsEventVS != null) {
+        if (fieldEventVSSet != null) {
             JSONArray jsonArray = new JSONArray();
-            for (FieldEventVS field : fieldsEventVS) {
+            for (FieldEventVS field : fieldEventVSSet) {
                 Map<String, Object> campoMap = new HashMap<String, Object>();
                 campoMap.put("id", field.getId());
                 campoMap.put("content", field.getContent());
@@ -387,18 +313,6 @@ public class EventVS implements Serializable {
     public static EventVS parse(String eventoStr) throws ParseException, JSONException  {
         Log.d(TAG + ".parse(...)", eventoStr);
         return parse(new JSONObject(eventoStr));
-    }
-
-    public JSONObject getAccessRequestJSON() {
-        Log.d(TAG + ".getAccessRequestJSON(...)", "getAccessRequestJSON");
-        Map map = new HashMap();
-        map.put("operation", TypeVS.ACCESS_REQUEST.toString());
-        if(eventId != null) map.put("eventId", eventId);
-        else map.put("eventId", id);
-        map.put("eventURL", URL);
-        map.put("UUID", UUID.randomUUID().toString());
-        map.put("hashAccessRequestBase64", hashAccessRequestBase64);
-        return new JSONObject(map);
     }
 
     public static EventVS parse(JSONObject jsonData) throws ParseException, JSONException {
@@ -433,7 +347,7 @@ public class EventVS implements Serializable {
         if (jsonData.has("dateBegin"))
             androidEventVS.setDateBegin(DateUtils.getDateFromString(jsonData.getString("dateBegin")));
         if (jsonData.has("dateFinish") && !jsonData.isNull("dateFinish"))
-            androidEventVS.setdateFinish(DateUtils.getDateFromString(jsonData.getString("dateFinish")));
+            androidEventVS.setDateFinish(DateUtils.getDateFromString(jsonData.getString("dateFinish")));
         if (jsonData.has("accessControl") && jsonData.getJSONObject("accessControl") != null) {
             jsonObject = jsonData.getJSONObject("accessControl");
             AccessControlVS accessControlVS = new AccessControlVS();
@@ -472,24 +386,9 @@ public class EventVS implements Serializable {
         if (jsonData.has("state")) {
             androidEventVS.setState(State.valueOf(jsonData.getString("state")));
         }
-        if (jsonData.has("hashAccessRequestBase64")) {
-            androidEventVS.setAccessRequestHashBase64(jsonData.getString("hashAccessRequestBase64"));
-        }
-        if (jsonData.has("originHashAccessRequest")) {
-            androidEventVS.setOriginHashAccessRequest(jsonData.getString("originHashAccessRequest"));
-        }
-        if (jsonData.has("hashCertVSBase64")) {
-            androidEventVS.setHashCertVSBase64(jsonData.getString("hashCertVSBase64"));
-        }
-        if (jsonData.has("originHashCertVote")) {
-            androidEventVS.setOriginHashCertVote(jsonData.getString("originHashCertVote"));
-        }
-        if (jsonData.has("optionSelected")) {
-            jsonObject = jsonData.getJSONObject("optionSelected");
-            FieldEventVS optionSelected = new FieldEventVS();
-            optionSelected.setId(jsonObject.getLong("id"));
-            optionSelected.setContent(jsonObject.getString("content"));
-            androidEventVS.setOptionSelected(optionSelected);
+        if(jsonData.has("voteVS")) {
+            VoteVS voteVS = VoteVS.populate((Map) jsonData.get("voteVS"));
+            androidEventVS.setVote(voteVS);
         }
         return androidEventVS;
     }
@@ -523,10 +422,10 @@ public class EventVS implements Serializable {
             JSONObject controlCenterJSON = new JSONObject(controlCenterMap);
             jsonObject.put("controlCenter", controlCenterJSON);
         }
-        if (fieldsEventVS != null) {
+        if (fieldEventVSSet != null) {
             JSONArray jsonArray = new JSONArray();
             Map<String, Object> fieldMap = new HashMap<String, Object>();
-            for (FieldEventVS field : fieldsEventVS) {
+            for (FieldEventVS field : fieldEventVSSet) {
                 fieldMap.put("id", field.getId());
                 fieldMap.put("content", field.getContent());
                 fieldMap.put("value", field.getValue());
@@ -536,17 +435,6 @@ public class EventVS implements Serializable {
             jsonObject.put("fieldsEventVS", jsonArray);
         }
         if (cardinality != null) jsonObject.put("cardinality", cardinality.toString());
-        if (optionSelected != null) {
-            Map<String, Object> optionSelectedMap = new HashMap<String, Object>();
-            optionSelectedMap.put("id", optionSelected.getId());
-            optionSelectedMap.put("content", optionSelected.getContent());
-            JSONObject optionSelectedJSON = new JSONObject(optionSelectedMap);
-            jsonObject.put("optionSelected", optionSelectedJSON);
-        }
-        if(hashAccessRequestBase64 != null) jsonObject.put("hashAccessRequestBase64", hashAccessRequestBase64);
-        if(originHashAccessRequest != null) jsonObject.put("originHashAccessRequest", originHashAccessRequest);
-        if(hashCertVSBase64 != null) jsonObject.put("hashCertVSBase64", hashCertVSBase64);
-        if(originHashCertVote != null) jsonObject.put("originHashCertVote", originHashCertVote);
         return jsonObject;
     }
 

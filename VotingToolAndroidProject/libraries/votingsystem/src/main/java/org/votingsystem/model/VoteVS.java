@@ -1,16 +1,19 @@
 package org.votingsystem.model;
 
 import android.content.Context;
+import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.votingsystem.android.R;
+import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Date;
-import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 
 /**
@@ -19,13 +22,12 @@ import java.util.Random;
 */
 public class VoteVS implements java.io.Serializable {
 
-	public static final String TAG = "VoteVS";
-
     private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "VoteVS";
     
-    private int id;
-    private int notificationId;
-    private int statusCode = 0;
+    private Long id;
+    private int statusCode = ResponseVS.SC_CANCELLED;
     private String message;
     private String eventURL;
     private Long eventVSElectionId;
@@ -34,7 +36,7 @@ public class VoteVS implements java.io.Serializable {
     private ActorVS actorVS;
     private String accessControlServerURL;
     private boolean isValid = false;
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessageWrapper voteReceipt;
     private SMIMEMessageWrapper cancelVoteReceipt;
     private byte[] encryptedKey = null;
     private boolean isCanceled = false;
@@ -43,72 +45,113 @@ public class VoteVS implements java.io.Serializable {
     private EventVS eventVS;
     private Date dateCreated;
     private Date dateUpdated;
-    
-    public int initNotificationId() {
-        Random randomGenerator = new Random();
-        this.notificationId = randomGenerator.nextInt(100);
-        return notificationId;
-    }
-    
-    public int getNotificationId() {
-        return notificationId;
-    }
-    
-    public VoteVS(int statusCode,SMIMEMessageWrapper voteReceipt, EventVS eventVS)throws Exception {
-        this.smimeMessage = voteReceipt;
-        this.statusCode = statusCode;
+    private FieldEventVS optionSelected;
+    private String voteUUID;
+    private String originHashCertVote;
+    private String hashCertVoteHex;
+    private String hashCertVSBase64;
+    private String originHashAccessRequest;
+    private String hashAccessRequestBase64;
+
+    public VoteVS () {}
+
+    public VoteVS (EventVS eventVS, FieldEventVS optionSelected) {
         this.eventVS = eventVS;
-        String receiptContent = voteReceipt.getSignedContent();
-        JSONObject receiptContentJSON = new JSONObject(receiptContent);
-        this.optionSelectedId = receiptContentJSON.getLong("optionSelectedId");
-        this.eventURL = receiptContentJSON.getString("eventURL");
-        if (smimeMessage.isValidSignature()) {
-            isValid = true;
+        this.optionSelected = optionSelected;
+    }
+
+    public void genVote() throws NoSuchAlgorithmException {
+        Log.d(TAG + ".genVote()", "");
+        originHashAccessRequest = UUID.randomUUID().toString();
+        setHashAccessRequestBase64(CMSUtils.getHashBase64(originHashAccessRequest,
+                ContextVS.VOTING_DATA_DIGEST));
+        originHashCertVote = UUID.randomUUID().toString();
+        hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
+    }
+
+    public HashMap getVoteDataMap() {
+        Log.d(TAG + ".getVoteDataMap()", "");
+        Map map = new HashMap();
+        map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
+        map.put("eventURL", eventVS.getURL());
+        HashMap optionSelectedMap = new HashMap();
+        optionSelectedMap.put("id", optionSelected.getId());
+        optionSelectedMap.put("content", optionSelected.getContent());
+        map.put("optionSelected", optionSelectedMap);
+        map.put("UUID", UUID.randomUUID().toString());
+        return new HashMap(map);
+    }
+
+    public HashMap getAccessRequestDataMap() {
+        Log.d(TAG + ".getAccessRequestDataMap()", "");
+        Map map = new HashMap();
+        map.put("operation", TypeVS.ACCESS_REQUEST.toString());
+        map.put("eventId", eventVS.getId());
+        map.put("eventURL", eventVS.getURL());
+        map.put("UUID", UUID.randomUUID().toString());
+        map.put("hashAccessRequestBase64", getHashAccessRequestBase64());
+        return new HashMap(map);
+    }
+
+    public HashMap getCancelVoteDataMap() {
+        Log.d(TAG + ".getCancelVoteDataMap()", "");
+        Map map = new HashMap();
+        map.put("operation", TypeVS.CANCEL_VOTE.toString());
+        map.put("originHashCertVote", originHashCertVote);
+        map.put("hashCertVSBase64", getHashCertVSBase64());
+        map.put("originHashAccessRequest", originHashAccessRequest);
+        map.put("hashAccessRequestBase64", getHashAccessRequestBase64());
+        map.put("UUID", UUID.randomUUID().toString());
+        map.put("eventURL", eventVS.getURL());
+        HashMap dataMap = new HashMap(map);
+        return dataMap;
+    }
+
+    public Map getDataMap() {
+        Log.d(TAG + ".getDataMap()", "");
+        Map resultMap = new HashMap();
+        try {
+            if(optionSelected != null) {
+                HashMap opcionHashMap = new HashMap();
+                opcionHashMap.put("id", optionSelected.getId());
+                opcionHashMap.put("content", optionSelected.getContent());
+                resultMap.put("optionSelected", opcionHashMap);
+            }
+            if(getHashCertVSBase64() != null) {
+                resultMap.put("hashCertVSBase64", getHashCertVSBase64());
+                resultMap.put("hashCertVoteHex", CMSUtils.getBase64ToHexStr(getHashCertVSBase64()));
+            }
+            if(getHashAccessRequestBase64() != null) {
+                resultMap.put("hashAccessRequestBase64", getHashAccessRequestBase64());
+                resultMap.put("hashSolicitudAccesoHex", CMSUtils.getBase64ToHexStr(getHashAccessRequestBase64()));
+            }
+
+            if (eventVS != null) resultMap.put("eventId", eventVS.getId());
+            if (id != null) resultMap.put("id", id);
+            //map.put("UUID", UUID.randomUUID().toString());
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
-        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//vote repeated
-            isValid = false;
-        }
-        if (!optionSelectedId.equals(eventVS.getOptionSelected().getId())) {
-            isValid = false;
-        }
+        return resultMap;
     }
-    
-    public VoteVS(int statusCode, EventVS eventVS) throws Exception {
-        this.statusCode = statusCode;
-        this.eventVS = eventVS;
+
+    public void setOptionSelected(FieldEventVS optionSelected) {
+        this.optionSelected = optionSelected;
     }
-    
-    public JSONObject toJSON() throws JSONException {
-    	JSONObject jsonObject = new JSONObject();
-    	jsonObject.put("statusCode", statusCode);
-        if(eventVS != null) jsonObject.put("vote", eventVS.toJSON());
-        jsonObject.put("isCanceled", isCanceled);
-        return jsonObject;
+
+    public FieldEventVS getOptionSelected() {
+        return optionSelected;
     }
-    
-    public static VoteVS parse(String jsonVoteReceipt) throws Exception {
-    	if(jsonVoteReceipt == null) return null;
-    	int statusCode = 0;
-    	boolean isCanceled = false;
-    	EventVS eventVS = null;
-    	JSONObject jsonObject = new JSONObject (jsonVoteReceipt);
-        if(jsonObject.has("statusCode")) statusCode = jsonObject.getInt("statusCode");
-        if(jsonObject.has("isCanceled")) isCanceled = jsonObject.getBoolean("isCanceled");
-        if(jsonObject.has("vote")) eventVS = EventVS.parse(jsonObject.getJSONObject("vote"));
-        VoteVS voteVS = new VoteVS(statusCode, eventVS);
-        voteVS.setCanceled(isCanceled);
-    	return voteVS;
-    }
-    
+
     public boolean isValid () throws Exception {
         return isValid;
     }
     
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -163,28 +206,20 @@ public class VoteVS implements java.io.Serializable {
     public String getMessage(Context context) {
         if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//vote repeated
             return context.getString(R.string.vote_repeated_msg,
-                    eventVS.getSubject(), eventVS.getOptionSelected().getContent());
+                    eventVS.getSubject(), optionSelected.getContent());
         }
-        if (!optionSelectedId.equals(eventVS.getOptionSelected().getId())) {
+        if (!optionSelectedId.equals(optionSelected.getId())) {
             return context.getString(R.string.option_error_msg);
         }
-        if (smimeMessage.isValidSignature()) {
-            return context.getString(R.string.vote_ok_msg,
-                    eventVS.getSubject(), eventVS.getOptionSelected().getContent());
+        if (voteReceipt.isValidSignature()) {
+            return context.getString(R.string.vote_ok_msg, eventVS.getSubject(),
+                    optionSelected.getContent());
         }
         return null;
     }
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public SMIMEMessageWrapper getSmimeMessage() {
-        return smimeMessage;
-    }
-
-    public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
-        this.smimeMessage = smimeMessage;
     }
 
     public String getEventURL() {
@@ -195,11 +230,11 @@ public class VoteVS implements java.io.Serializable {
         this.eventURL = eventURL;
     }
 
-    public EventVS getVote() {
+    public EventVS getEventVS() {
         return eventVS;
     }
 
-    public void setVote(EventVS eventVS) {
+    public void setEventVS(EventVS eventVS) {
         this.eventVS = eventVS;
     }
 
@@ -211,6 +246,14 @@ public class VoteVS implements java.io.Serializable {
 		this.cancelVoteReceipt = cancelVoteReceipt;
 		if(cancelVoteReceipt != null) isCanceled = true;
 	}
+
+    public SMIMEMessageWrapper getVoteReceipt() {
+        return voteReceipt;
+    }
+
+    public void setVoteReceipt(SMIMEMessageWrapper voteReceipt) {
+        this.voteReceipt = voteReceipt;
+    }
 
 	public Date getDateUpdated() {
 		return dateUpdated;
@@ -259,5 +302,56 @@ public class VoteVS implements java.io.Serializable {
 	public void setCertVotePrivateKey(PrivateKey certVotePrivateKey) {
 		this.certVotePrivateKey = certVotePrivateKey;
 	}
-	
+
+    public String getHashCertVSBase64() {
+        return hashCertVSBase64;
+    }
+
+    public static VoteVS populate (Map eventMap) {
+        VoteVS voteVS = null;
+        try {
+            voteVS = new VoteVS();
+            EventVS eventVS = new EventVS();
+            if(eventMap.containsKey("eventId")) {
+                eventVS.setId(((Integer) eventMap.get("eventId")).longValue());
+            }
+            if(eventMap.containsKey("UUID")) {
+                voteVS.setVoteUUID((String) eventMap.get("UUID"));
+            }
+            if(eventMap.containsKey("eventURL")) eventVS.setURL((String) eventMap.get("eventURL"));
+            if(eventMap.containsKey("hashAccessRequestBase64")) voteVS.setHashAccessRequestBase64(
+                    (String) eventMap.get("hashAccessRequestBase64"));
+            if(eventMap.containsKey("optionSelectedId")) {
+                FieldEventVS optionSelected = new FieldEventVS();
+                optionSelected.setId(((Integer) eventMap.get("optionSelectedId")).longValue());
+                if(eventMap.containsKey("optionSelectedContent")) {
+                    optionSelected.setContent((String) eventMap.get("optionSelectedContent"));
+                }
+                voteVS.setOptionSelected(optionSelected);
+            }
+            if(eventMap.containsKey("optionSelected")) {
+                voteVS.setOptionSelected(FieldEventVS.populate((Map) eventMap.get("optionSelected")));
+            }
+            voteVS.setEventVS(eventVS);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return voteVS;
+    }
+
+    public String getHashAccessRequestBase64() {
+        return hashAccessRequestBase64;
+    }
+
+    public void setHashAccessRequestBase64(String hashAccessRequestBase64) {
+        this.hashAccessRequestBase64 = hashAccessRequestBase64;
+    }
+
+    public String getVoteUUID() {
+        return voteUUID;
+    }
+
+    public void setVoteUUID(String voteUUID) {
+        this.voteUUID = voteUUID;
+    }
 }

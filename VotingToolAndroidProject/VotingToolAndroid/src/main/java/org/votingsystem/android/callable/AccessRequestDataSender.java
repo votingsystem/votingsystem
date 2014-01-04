@@ -7,6 +7,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
@@ -32,37 +33,37 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     
 	public static final String TAG = "AccessRequestDataSender";
 
-    private SMIMEMessageWrapper accessRequets;
+    private SMIMEMessageWrapper accessRequest;
     private CertificationRequestVS certificationRequest;
     private X509Certificate destinationCert = null;
     private String serviceURL = null;
     private Context context = null;
 
-    public AccessRequestDataSender(SMIMEMessageWrapper accessRequets, EventVS eventVS,
+    public AccessRequestDataSender(SMIMEMessageWrapper accessRequest, VoteVS vote,
             X509Certificate destinationCert, String serviceURL, Context context) throws Exception {
-        this.accessRequets = accessRequets;
+        this.accessRequest = accessRequest;
         this.serviceURL = serviceURL;
         this.destinationCert = destinationCert;
         this.context = context;
         this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME,
-               VOTE_SIGN_MECHANISM, PROVIDER, eventVS.getAccessControl().getServerURL(),
-               eventVS.getEventVSId().toString(), eventVS.getHashCertVSBase64());
+               VOTE_SIGN_MECHANISM, PROVIDER, vote.getEventVS().getAccessControl().getServerURL(),
+                vote.getEventVS().getEventVSId().toString(), vote.getHashCertVSBase64());
     }
     
     @Override public ResponseVS call() {
         Log.d(TAG + ".call", " - urlAccessRequest: " + serviceURL);
         try {
-            MessageTimeStamper timeStamper = new MessageTimeStamper(accessRequets, context);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(accessRequest, context);
             ResponseVS responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            accessRequets = timeStamper.getSmimeMessage();
+            accessRequest = timeStamper.getSmimeMessage();
 
             Header header = new Header("votingSystemMessageType", "voteCsr");
             byte[] csrEncryptedBytes = Encryptor.encryptMessage(certificationRequest.
             		getCsrPEM(), destinationCert, header);
 
             byte[] csrEncryptedAccessRequestBytes = Encryptor.encryptSMIME(
-                    accessRequets, destinationCert);
+                    accessRequest, destinationCert);
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
 
             String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +

@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -17,16 +18,10 @@ public class FieldEventVS implements Serializable {
 
     public FieldEventVS() {}
 
-    /**
-     * @return the content
-     */
     public String getContent() {
         return content;
     }
 
-    /**
-     * @param content the content to set
-     */
     public void setContent(String content) {
         this.content = content;
     }
@@ -39,33 +34,38 @@ public class FieldEventVS implements Serializable {
         this.eventVS = eventVS;
     }
 
-    /**
-     * @return the id
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * @return the value
-     */
     public String getValue() {
         return value;
     }
 
-    /**
-     * @param value the value to set
-     */
     public void setValue(String value) {
         this.value = value;
     }
 
+    public static FieldEventVS populate (Map fieldMap) {
+        FieldEventVS fieldEvent = null;
+        try {
+            fieldEvent = new FieldEventVS();
+            if(fieldMap.containsKey("id"))
+                fieldEvent.setId(((Integer) fieldMap.get("id")).longValue());
+            if(fieldMap.containsKey("content")) {
+                fieldEvent.setContent((String) fieldMap.get("content"));
+            }
+            if(fieldMap.containsKey("value")) {
+                fieldEvent.setValue((String) fieldMap.get("value"));
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return fieldEvent;
+    }
 
 }

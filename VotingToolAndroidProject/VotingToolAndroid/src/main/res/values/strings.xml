@@ -146,7 +146,7 @@
     <string name="solicitud_csr">Solicitud CSR</string>
     <string name="enviarVoto">Enviar Voto</string>
     <string name="receipt_error_msg">Error validando recibo de voto</string>
-    <string name="cert_not_found_caption">Falta certificado de votación</string>
+    <string name="cert_not_found_caption">Falta certificado</string>
 
     <string name="lanzarServicio">Lanzar Servicio</string>
     <string name="eventos_no_encontrados_message">No se han encontrado eventos</string>
@@ -172,8 +172,6 @@
         <a href="%1$s"> las siguientes direcciones</a>]]></string>
         
     <string name="search_query_info_msg"><![CDATA[<b>Resultado de la busqueda</b>: %1$s]]></string>
-
-
         
     <string name="access_request_repeated_msg"><![CDATA[Usted ya ha votado en el asunto \'%1$s\' <br/><br/>
 	Puede consultar la solicitud anterior visitando <a href="%2$s">este enlace</a>]]></string>
@@ -264,5 +262,6 @@
     <string name="cancel_vote_ok_notification_msg">Voto cancelado</string>
     <string name="vote_error_notification_msg">Error en votación</string>
     <string name="cancel_vote_error_notification_msg">Error cancelando voto</string>
+    <string name="send_vote_caption">Enviando voto</string>
 
 </resources>

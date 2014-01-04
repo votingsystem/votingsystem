@@ -69,6 +69,7 @@ public class ContextVS {
     public static final String EVENT_TYPE_KEY  = "EVENT_TYPE";
     public static final String CHILD_POSITION_KEY  = "CHILD_POSITION";
     public static final String EVENTVS_KEY  = "EVENTVS";
+    public static final String VOTE_KEY  = "VOTE_KEY";
     public static final String STATE_KEY                   = "STATE";
     public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
     public static final String APPLICATION_ID_KEY          = "idAplicacion";
@@ -91,7 +92,7 @@ public class ContextVS {
     public static final int MAX_SUBJECT_SIZE = 60;
     public static final int SELECTED_OPTION_MAX_LENGTH       = 60;
     //TODO por el bug en froyo de -> JcaDigestCalculatorProviderBuilder
-    public static final String SIG_HASH = "SHA256";
+    public static final String VOTING_DATA_DIGEST = "SHA256";
     public static final String SIG_NAME = "RSA";
     /** Random Number Generator algorithm. */
     private static final String ALGORITHM_RNG = "SHA1PRNG";
@@ -109,7 +110,8 @@ public class ContextVS {
 
     private State state = State.WITHOUT_CSR;
 
-    private AccessControlVS accessControlVS;
+    private AccessControlVS accessControl;
+    private ControlCenterVS controlCenter;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private Map<Long, VoteVS> voteReceiptMap = new HashMap<Long, VoteVS>();
@@ -169,12 +171,12 @@ public class ContextVS {
     }
 
     public void setState(State state) {
-        Log.d(TAG + ".setState(...)", STATE_KEY + "_" + accessControlVS.getServerURL() +
+        Log.d(TAG + ".setState(...)", STATE_KEY + "_" + accessControl.getServerURL() +
                 " - state: " + state.toString());
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(STATE_KEY + "_" + accessControlVS.getServerURL() , state.toString());
+        editor.putString(STATE_KEY + "_" + accessControl.getServerURL() , state.toString());
         editor.commit();
         this.state = state;
     }
@@ -214,18 +216,26 @@ public class ContextVS {
     }
 
     public AccessControlVS getAccessControl() {
-        return accessControlVS;
+        return accessControl;
     }
 
-    public void setAccessControlVS(AccessControlVS accessControlVS) {
+    public void setAccessControlVS(AccessControlVS accessControl) {
         Log.d(TAG + ".setAccessControlURL() ", " - setAccessControlURL: " +
-                accessControlVS.getServerURL());
+                accessControl.getServerURL());
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String stateStr = settings.getString(
-                STATE_KEY + "_" + accessControlVS.getServerURL(), State.WITHOUT_CSR.toString());
+                STATE_KEY + "_" + accessControl.getServerURL(), State.WITHOUT_CSR.toString());
         state = State.valueOf(stateStr);
-        this.accessControlVS = accessControlVS;
+        this.accessControl = accessControl;
+    }
+
+    public void setControlCenter(ControlCenterVS controlCenter) {
+        this.controlCenter = controlCenter;
+    }
+
+    public ControlCenterVS getControlCenter() {
+        return controlCenter;
     }
 
 }

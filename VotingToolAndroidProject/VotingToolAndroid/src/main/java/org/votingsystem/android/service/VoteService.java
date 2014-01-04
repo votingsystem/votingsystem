@@ -17,6 +17,7 @@ import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
@@ -54,10 +55,10 @@ public class VoteService extends IntentService {
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String pin = arguments.getString(ContextVS.PIN_KEY);
             String signatureContent = arguments.getString(ContextVS.MESSAGE_KEY);
-            EventVS eventVS = (EventVS) intent.getSerializableExtra(ContextVS.EVENTVS_KEY);
+            VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
             Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation + " - event: " +
-                    eventVS.getId());
-            ActorVS controlCenter = eventVS.getControlCenter();
+                    vote.getEventVS().getId());
+            ControlCenterVS controlCenter = vote.getEventVS().getControlCenter();
             X509Certificate controlCenterCert = contextVS.getCert(controlCenter.getServerURL());
             ResponseVS responseVS = null;
             if(controlCenterCert == null) {
@@ -74,28 +75,28 @@ public class VoteService extends IntentService {
                     contextVS.putCert(controlCenter.getServerURL(), controlCenterCert);
                 }
             }
-            eventVS.getControlCenter().setCertificate(controlCenterCert);
-
+            controlCenter.setCertificate(controlCenterCert);
+            contextVS.setControlCenter(controlCenter);
             String caption = null;
             String message = null;
             switch(operation) {
                 case VOTE:
-                    responseVS = processVote(pin, eventVS);
+                    responseVS = processVote(pin, vote);
                     break;
                 case CANCEL_VOTE:
                     responseVS = processCancellation(pin, signatureContent);
                     break;
             }
-            showNotification(responseVS, eventVS.getSubject(), operation);
+            showNotification(responseVS, vote.getEventVS().getSubject(), operation);
             switch(operation) {
                 case VOTE:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         VoteVS voteReceipt = (VoteVS)responseVS.getData();
-                        contextVS.putVoteReceipt(eventVS.getId(), voteReceipt);
+                        contextVS.putVoteReceipt(vote.getEventVS().getId(), voteReceipt);
                     } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                         caption = getString(R.string.access_request_repeated_caption);
                         message = getString( R.string.access_request_repeated_msg,
-                                eventVS.getSubject(), responseVS.getMessage());
+                                vote.getEventVS().getSubject(), responseVS.getMessage());
                     } else {
                         caption = getString(R.string.error_lbl);
                         message = Html.fromHtml(responseVS.getMessage()).toString();
@@ -107,7 +108,7 @@ public class VoteService extends IntentService {
                         VoteVS receipt = contextVS.getVoteReceipt(eventId);
                         receipt.setCancelVoteReceipt(cancelReceipt);
                         message = getString(R.string.cancel_vote_result_msg,
-                                receipt.getVote().getSubject());
+                                receipt.getEventVS().getSubject());
                         if(receipt.getId() > 0) {
                             VoteReceiptDBHelper db = new VoteReceiptDBHelper(
                                     getApplicationContext());
@@ -131,12 +132,12 @@ public class VoteService extends IntentService {
         }
     }
 
-    private ResponseVS processVote(String pin, EventVS eventVS) {
+    private ResponseVS processVote(String pin, VoteVS vote) {
         ResponseVS responseVS = null;
         try {
             FileInputStream fis = openFileInput(KEY_STORE_FILE);
             byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            VoteSender voteSender = new VoteSender(eventVS, keyStoreBytes, pin.toCharArray(),
+            VoteSender voteSender = new VoteSender(vote, keyStoreBytes, pin.toCharArray(),
                     getApplicationContext());
             responseVS = voteSender.call();
         } catch (Exception ex) {
@@ -165,7 +166,6 @@ public class VoteService extends IntentService {
         }
         return responseVS;
     }
-
 
     private void showNotification(ResponseVS responseVS, String eventSubject, Operation operation){
         String title = null;

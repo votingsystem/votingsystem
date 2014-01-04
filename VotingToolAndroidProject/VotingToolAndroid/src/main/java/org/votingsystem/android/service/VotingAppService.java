@@ -59,8 +59,7 @@ public class VotingAppService extends Service {
             startActivity(intent);
         } else {
             try {
-                AccessControlVS accessControl = AccessControlVS.parse(
-                        responseVS.getMessage());
+                AccessControlVS accessControl = AccessControlVS.parse(responseVS.getMessage());
                 contextVS.setAccessControlVS(accessControl);
                 if(operationStr != null  &&
                         ContextVS.State.WITH_CERTIFICATE == contextVS.getState()){
@@ -71,8 +70,7 @@ public class VotingAppService extends Service {
                         responseVS = HttpHelper.getData(operationVS.getEventVS().getURL(), null);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             EventVS selectedEvent = EventVS.parse(responseVS.getMessage());
-                            selectedEvent.setOptionSelected(operationVS.
-                                    getEventVS().getOptionSelected());
+                            Log.d(TAG + ".onStartCommand(...)", " _ TODO _ Fetch option selected");
                             operationVS.setEventVS(selectedEvent);
                             processOperation(operationVS);
                         }

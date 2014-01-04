@@ -301,8 +301,8 @@ public class VoteVS implements Serializable {
         map.put("originHashAccessRequest", originHashAccessRequest);
         map.put("hashAccessRequestBase64", hashAccessRequestBase64);
         map.put("UUID", UUID.randomUUID().toString());
-        HashMap jsonObject = new HashMap(map);
-        return jsonObject;
+        HashMap dataMap = new HashMap(map);
+        return dataMap;
     }
 
     @Transient public Map getDataMap() {

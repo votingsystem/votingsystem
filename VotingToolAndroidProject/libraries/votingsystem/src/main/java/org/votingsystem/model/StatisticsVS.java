@@ -70,7 +70,7 @@ public class StatisticsVS {
     public Date getDateBegin() {
             return dateBegin;
     }
-    public void setdateFinish(Date dateFinish) {
+    public void setDateFinish(Date dateFinish) {
         this.dateFinish = dateFinish;
     }
     public Date getDateFinish() {

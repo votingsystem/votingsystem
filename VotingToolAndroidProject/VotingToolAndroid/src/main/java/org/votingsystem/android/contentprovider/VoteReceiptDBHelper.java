@@ -36,12 +36,12 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	static final String KEY_COL                       = "key";
 	static final String SMIME_COL                     = "smime";
 	static final String CANCEL_VOTE_RECEIPT_SMIME_COL = "cancelVoteRecepitSmime";
-	static final String JSON_DATA_COL                 = "jsonData";
+	static final String SERIALIZED_OBJECT_COL         = "serializedObject";
 	static final String ENCRYPTED_KEY_COL             = "encryptedKey";
 	static final String TIMESTAMP_CREATED_COL         = "timestampCreated";
 	static final String TIMESTAMP_UPDATED_COL         = "timestampUpdated";
 
-	private static final String[] ID_DETAIL_COL_PROJECTION = { SMIME_COL, JSON_DATA_COL };
+	private static final String[] ID_DETAIL_COL_PROJECTION = { SMIME_COL, SERIALIZED_OBJECT_COL };
 	
 	public VoteReceiptDBHelper(Context context) {
 		super(context, DB_NAME, null, DATABASE_VERSION);
@@ -56,7 +56,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 				SMIME_COL                     + " blob, " + 
 				TIMESTAMP_CREATED_COL         + " INTEGER, " +
 				TIMESTAMP_UPDATED_COL         + " INTEGER, " +
-				JSON_DATA_COL                 + " blob, " +
+				SERIALIZED_OBJECT_COL         + " blob, " +
 				CANCEL_VOTE_RECEIPT_SMIME_COL + " blob, " +
 				ENCRYPTED_KEY_COL             + " blob);";
 		Log.d(TAG + ".onCreate(...)", "");
@@ -70,31 +70,25 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	}
 	  
 	//returns the receipt id in the database
-	public int insertVoteReceipt(VoteVS voteVS) throws
+	public Long insertVoteReceipt(VoteVS voteVS) throws
 		JSONException, IOException, MessagingException {
 		SQLiteDatabase db = this.getWritableDatabase();
 
 		ContentValues values = new ContentValues();
-		String receiptKey = StringUtils.getNormalized(
-				voteVS.getEventURL());
+		String receiptKey = StringUtils.getNormalized(voteVS.getEventURL());
 
-		if(voteVS.getSmimeMessage() != null) {
-	        values.put(SMIME_COL, voteVS.getSmimeMessage().getBytes());
+		if(voteVS.getVoteReceipt() != null) {
+	        values.put(SMIME_COL, voteVS.getVoteReceipt().getBytes());
 		}
 		if(voteVS.getCancelVoteReceipt() != null) {
 			values.put(CANCEL_VOTE_RECEIPT_SMIME_COL, 
 					voteVS.getCancelVoteReceipt().getBytes());
 		}
 		if(voteVS.getEncryptedKey()!= null) {
-			values.put(ENCRYPTED_KEY_COL, 
-					voteVS.getEncryptedKey());
+			values.put(ENCRYPTED_KEY_COL, voteVS.getEncryptedKey());
 		}
-		byte[] jsonDataBytes = null;
-		String jsonDataStr = voteVS.toJSON().toString();
-		//Log.d(TAG + ".insertVoteReceipt(...)", "===== jsonDataStr: " + jsonDataStr);
-		if(jsonDataStr != null) jsonDataBytes = jsonDataStr.getBytes();
 		values.put(KEY_COL, receiptKey);
-		values.put(JSON_DATA_COL, jsonDataBytes);
+		values.put(SERIALIZED_OBJECT_COL, StringUtils.serializeObjectToString(voteVS).getBytes());
 	    values.put(TIMESTAMP_CREATED_COL, System.currentTimeMillis());
 	    values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
 	    //From SQLite.org: If a table contains a column of type 
@@ -102,7 +96,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		long rowId = db.insert(TABLE_NAME, null, values);
 		db.close();
 		Log.d(TAG + ".insertVoteReceipt(...)", " - inserted receipt: " + rowId);
-		return new Long(rowId).intValue();
+		return new Long(rowId);
 	}
 	
 	public void deleteVoteReceipt(VoteVS voteVS) {
@@ -131,30 +125,31 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 				+ cursor.getCount());
 		if (cursor.moveToFirst()) {
 			do {
-				int id = cursor.getInt(0);
-				String receiptKey = cursor.getString(1);
-				byte[] smimeMessageBytes = cursor.getBlob(2);
-				Long timestampCreated = cursor.getLong(3);
-				Long timestampUPdated = cursor.getLong(4);
-				byte[] jsonDataBytes = cursor.getBlob(5);
-				byte[] cancelVoteSmimeMessageBytes = cursor.getBlob(6);
-				byte[] encryptedKeyBytes = cursor.getBlob(7);
-				String jsonDataStr =  new String(jsonDataBytes);
+				Long id = cursor.getLong(cursor.getColumnIndex(ID_COL));
+				String receiptKey = cursor.getString(cursor.getColumnIndex(KEY_COL));
+				byte[] smimeMessageBytes = cursor.getBlob(cursor.getColumnIndex(SMIME_COL));
+				Long timestampCreated = cursor.getLong(cursor.getColumnIndex(TIMESTAMP_CREATED_COL));
+				Long timestampUpdated = cursor.getLong(cursor.getColumnIndex(TIMESTAMP_UPDATED_COL));
+				byte[] serializedVote = cursor.getBlob(cursor.getColumnIndex(SERIALIZED_OBJECT_COL));
+				byte[] cancelVoteSmimeMessageBytes = cursor.getBlob(
+                        cursor.getColumnIndex(CANCEL_VOTE_RECEIPT_SMIME_COL));
+				byte[] encryptedKeyBytes = cursor.getBlob(cursor.getColumnIndex(ENCRYPTED_KEY_COL));
 				Log.d(TAG + ".getVoteReceiptList(...)", " - reading receipt: " + id);
 				/*Log.d(TAG + ".getVoteReceiptList(...)", " - reading receipt: " + id + 
 						" -receiptKey: " + receiptKey + " - timestampCreated: " + timestampCreated + 
-						" - timestampUPdated: " + timestampUPdated + 
+						" - timestampUpdated: " + timestampUpdated +
 						" - jsonDataStr: " + jsonDataStr);*/
 				try {
-					VoteVS voteVS = VoteVS.parse(jsonDataStr);
+					VoteVS voteVS = (VoteVS) StringUtils.deSerializedObjectFromString(
+                            new String(serializedVote));
 					voteVS.setId(id);
 					if(timestampCreated != null) 
 						voteVS.setDateCreated(new Date(timestampCreated));
-					if(timestampUPdated != null) 
-						voteVS.setDateUpdated(new Date(timestampUPdated));
+					if(timestampUpdated != null)
+						voteVS.setDateUpdated(new Date(timestampUpdated));
 					if(smimeMessageBytes != null)
-						voteVS.setSmimeMessage(new SMIMEMessageWrapper(null,
-								new ByteArrayInputStream(smimeMessageBytes), null));
+						voteVS.setVoteReceipt(new SMIMEMessageWrapper(null,
+                                new ByteArrayInputStream(smimeMessageBytes), null));
 					if(cancelVoteSmimeMessageBytes != null) {
 						SMIMEMessageWrapper smimeMessageWrapper = new SMIMEMessageWrapper(null,
 								new ByteArrayInputStream(cancelVoteSmimeMessageBytes), null);
@@ -178,12 +173,12 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		Log.d(TAG + ".updateVoteReceipt(...)", " - updateVoteReceipt");
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		if(voteVS.getSmimeMessage() != null)
-	        values.put(SMIME_COL, voteVS.getSmimeMessage().getBytes());
+		if(voteVS.getVoteReceipt() != null)
+	        values.put(SMIME_COL, voteVS.getVoteReceipt().getBytes());
 		if(voteVS.getCancelVoteReceipt() != null)
 			values.put(CANCEL_VOTE_RECEIPT_SMIME_COL, 
 					voteVS.getCancelVoteReceipt().getBytes());
-		values.put(JSON_DATA_COL, voteVS.toJSON().toString());
+		values.put(SERIALIZED_OBJECT_COL, StringUtils.serializeObjectToString(voteVS).getBytes());
 	    values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
 		db.update(TABLE_NAME, values, ID_COL + " = ?",new String[] {String.valueOf(voteVS.getId())});
 		db.close();

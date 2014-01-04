@@ -25,12 +25,14 @@ import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.util.encoders.Base64;
+import org.bouncycastle2.util.encoders.Hex;
 import org.bouncycastle2.util.io.Streams;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -281,43 +283,18 @@ public class CMSUtils {
         if (ENCRYPTION_ECGOST3410.equals(encryptionAlgOID)) return "ECGOST3410";
         return null;
     }
-
-   public static String getCertInfo (X509Certificate certificate) {
-        StringBuilder infoCertificado = new StringBuilder();
-        infoCertificado.append("<html><b>Asunto: </b>")
-                .append(certificate.getSubjectDN().toString())
-                .append("<br/><b>Emisor del certificado: </b>")
-                .append(certificate.getIssuerDN().toString())
-                .append("<br/><b>Número de serie del certificado: </b>")
-                .append(certificate.getSerialNumber().toString())
-                .append("<br/><b>Valido desde: </b>")
-                .append(certificate.getNotBefore())
-                .append("<br/><b>Valido hasta: </b>")
-                .append(certificate.getNotAfter())
-                .append("<br/></html>");
-        return infoCertificado.toString();
-    }
-
-   public static CMSSignedData getCMSSignedDataFromBytes (byte[] signedData)
-            throws Exception {
-        MimeMessage email = getMimeMessageFromBytes(signedData);
-        CMSSignedData cmsSignedData = new CMSSignedData(email.getInputStream());
-        return cmsSignedData;
-    }
-
-    public static MimeMessage getMimeMessageFromBytes (byte[] signedData)
-	    	throws Exception {
-        ByteArrayInputStream bais = new ByteArrayInputStream(signedData);
-        MimeMessage email = new MimeMessage(null, bais);
-        return email;
-    }
     
-    public static String getHashBase64 (
-            String cadenaOrigen, String digestAlgorithm) 
+    public static String getHashBase64 (String originStr, String digestAlgorithm)
             throws NoSuchAlgorithmException {
         MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
-        byte[] resultDigest =  sha.digest( cadenaOrigen.getBytes() );
+        byte[] resultDigest =  sha.digest(originStr.getBytes());
         return new String(Base64.encode(resultDigest));
+    }
+
+    public static String getBase64ToHexStr(String base64Str) throws UnsupportedEncodingException {
+        if (base64Str == null) return null;
+        byte[] hexBytes = Hex.encode(base64Str.getBytes());
+        return new String(hexBytes, "UTF-8");
     }
 
     public static AlgorithmIdentifier fixAlgID(AlgorithmIdentifier algId) {

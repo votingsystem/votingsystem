@@ -2,9 +2,16 @@ package org.votingsystem.util;
 
 import android.util.Log;
 
+import org.bouncycastle2.util.encoders.Base64;
+import org.votingsystem.signature.smime.CMSUtils;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Random;
@@ -16,18 +23,10 @@ import java.util.Random;
 public class StringUtils {
 	
 	public static final String TAG = "StringUtils";
-	
-    private static final int TAMANYO_TITULO = 20;
-
-    public static String getTitleString (String title) {
-        if (title.length() > TAMANYO_TITULO)
-            return title.substring(0, TAMANYO_TITULO) + "...";
-        else return title;
-    }
  
     public static String getStringFromInputStream(InputStream entrada) throws IOException {
     	ByteArrayOutputStream salida = new ByteArrayOutputStream();
-        byte[] buf =new byte[1024];
+        byte[] buf =new byte[4096];
         int len;
         while((len = entrada.read(buf)) > 0){
             salida.write(buf,0,len);
@@ -75,5 +74,24 @@ public class StringUtils {
             result = result.substring(0, result.length() -1);
         }
         return result;
+    }
+
+    /** Write the object to a Base64 string. */
+    public static String serializeObjectToString(Serializable serializable) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(serializable);
+        oos.close();
+        return new String(Base64.encode(baos.toByteArray()));
+    }
+
+    /** Read the object from Base64 string. */
+    public static Object deSerializedObjectFromString(String base64SerializedObject) throws IOException,
+            ClassNotFoundException {
+        byte [] data = Base64.decode(base64SerializedObject);
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+        Object object  = ois.readObject();
+        ois.close();
+        return object;
     }
 }
