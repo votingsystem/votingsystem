@@ -34,8 +34,8 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	static final String TABLE_NAME                    = "vote_receipt";
 	static final String ID_COL                        = "_id";
 	static final String KEY_COL                       = "key";
-	static final String SMIME_COL                     = "smime";
-	static final String CANCEL_VOTE_RECEIPT_SMIME_COL = "cancelVoteRecepitSmime";
+	static final String SMIME_COL                     = "voteReceipt";
+	static final String CANCEL_VOTE_RECEIPT_SMIME_COL = "cancelVoteReceipt";
 	static final String SERIALIZED_OBJECT_COL         = "serializedObject";
 	static final String ENCRYPTED_KEY_COL             = "encryptedKey";
 	static final String TIMESTAMP_CREATED_COL         = "timestampCreated";

@@ -250,8 +250,8 @@ class VoteVSService {
 			}
 			MessageSMIME.withTransaction { messageSMIMEResp.save()}
 			voteCanceller = new VoteVSCanceller(messageSMIME:messageSMIMEResp, state:cancellerState,
-				accessRequestVS:accessRequestVS, voteRequestCsrVS:certificateVS.voteRequestCsrVS,
-				originHashAccessRequestBase64:cancelDataJSON.originHashAccessRequest,
+				accessRequestVS:accessRequestVS,
+                originHashAccessRequestBase64:cancelDataJSON.originHashAccessRequest,
 				originHashCertVSBase64:cancelDataJSON.originHashCertVote,
 				hashAccessRequestBase64:hashAccessRequestBase64,
 				hashCertVSBase64:hashCertVSBase64,
