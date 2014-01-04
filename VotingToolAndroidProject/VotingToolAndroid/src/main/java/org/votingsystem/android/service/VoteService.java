@@ -63,9 +63,9 @@ public class VoteService extends IntentService {
             if(controlCenterCert == null) {
                 responseVS = HttpHelper.getData(controlCenter.getCertChainURL(), null);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                    sendMessage(responseVS.getStatusCode(), getString(R.string.get_cert_error_msg,
-                            controlCenter.getName()), responseVS.getMessage(), serviceCaller,
-                            operation);
+                    sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
+                            getString(R.string.get_cert_error_msg, controlCenter.getName()),
+                            serviceCaller, operation);
                     return;
                 } else {
                     Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
@@ -95,7 +95,7 @@ public class VoteService extends IntentService {
                     } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                         caption = getString(R.string.access_request_repeated_caption);
                         message = getString( R.string.access_request_repeated_msg,
-                                eventVS.getSubject(), message);
+                                eventVS.getSubject(), responseVS.getMessage());
                     } else {
                         caption = getString(R.string.error_lbl);
                         message = Html.fromHtml(responseVS.getMessage()).toString();

@@ -26,6 +26,7 @@ public class ResponseVS<T> {
     public static final int SC_EXCEPTION                = 490;
     public static final int SC_NULL_REQUEST             = 472;
     public static final int SC_ERROR                    = 500;
+    public static final int SC_CONNECTION_TIMEOUT       = 522;
     public static final int SC_ERROR_TIMESTAMP          = 570;
     public static final int SC_PROCESSING               = 700;
     public static final int SC_TERMINATED               = 710;

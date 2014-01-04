@@ -15,21 +15,24 @@ import java.util.Date;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class ResponseVS<T> {
-    
-    public static final int SC_OK = 200;
-    public static final int SC_OK_ANULACION_ACCESS_REQUEST = 270;
-    public static final int SC_ERROR_REQUEST = 400;
-    public static final int SC_NOT_FOUND = 404;
-    public static final int SC_ERROR_REQUEST_REPEATED = 470;
-    public static final int SC_NULL_REQUEST = 472;
 
-    public static final int SC_ERROR              = 500;
-    public static final int SC_CONNECTION_TIMEOUT = 522;
-    public static final int SC_ERROR_TIMESTAMP    = 570;
-    public static final int SC_PROCESSING         = 700;
-    public static final int SC_CANCELLED          = 0;
-    public static final int SC_INITIALIZED        = 1;
-    public static final int SC_PAUSED             = 10;
+    public static final int SC_OK                       = 200;
+    public static final int SC_OK_WITHOUT_BODY          = 204;
+    public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
+    public static final int SC_REQUEST_TIMEOUT          = 408;
+    public static final int SC_ERROR_REQUEST            = 400;
+    public static final int SC_NOT_FOUND                = 404;
+    public static final int SC_ERROR_REQUEST_REPEATED   = 409;
+    public static final int SC_EXCEPTION                = 490;
+    public static final int SC_NULL_REQUEST             = 472;
+    public static final int SC_ERROR                    = 500;
+    public static final int SC_CONNECTION_TIMEOUT       = 522;
+    public static final int SC_ERROR_TIMESTAMP          = 570;
+    public static final int SC_PROCESSING               = 700;
+    public static final int SC_TERMINATED               = 710;
+    public static final int SC_CANCELLED                = 0;
+    public static final int SC_INITIALIZED              = 1;
+    public static final int SC_PAUSED                   = 10;
 
 
     private int statusCode;
@@ -38,13 +41,13 @@ public class ResponseVS<T> {
     private String message;
     private T data;
     private TypeVS typeVS;
-    private Date fecha;
     private Long eventId;
     private SMIMEMessageWrapper smimeMessage;
     private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private ActorVS actorVS;
     private byte[] messageBytes;
-    
+
+    public ResponseVS() {  }
     
     public ResponseVS(int statusCode,
                       String message, byte[] messageBytes) {
@@ -77,35 +80,11 @@ public class ResponseVS<T> {
          } else Log.e("", " Receipt with errors");
     }
 
-    /*
-    public ResponseVS(int statusCode, SMIMEMessageWrapper recibo) throws Exception {
-        this.statusCode = statusCode;
-        this.setSmimeMessage(recibo);
-        if (recibo.isValidSignature()) {
-            JSONObject resultadoJSON = new JSONObject(recibo.getSignedContent());
-            Log.e("ResponseVS", "ResultadoJSON: " + resultadoJSON.toString());
-            if (resultadoJSON.has("tipoRespuesta")) 
-                typeVS = TypeVS.valueOf(resultadoJSON.getString("tipoRespuesta"));
-            if (resultadoJSON.has("fecha"))  
-                fecha = DateUtils.getDateFromString(resultadoJSON.getString("fecha"));
-            if (resultadoJSON.has("message"))
-                message = resultadoJSON.getString("message");
-         } else Log.e("ResponseVS","Error en la validación de la respuesta");
-    }*/
-    
-    
-    public ResponseVS() {  }
-    /**
-     * @return the message
-     */
     public String getMessage() {
         if(message == null && messageBytes != null) return new String(messageBytes);
         else return message;
     }
 
-    /**
-     * @param message the message to set
-     */
     public void setMessage(String message) {
         this.message = message;
     }
@@ -120,23 +99,14 @@ public class ResponseVS<T> {
     	return respuesta.toString();
     }
 
-    /**
-     * @return the eventQueryResponse
-     */
     public EventVSResponse getEventQueryResponse() {
         return eventQueryResponse;
     }
 
-    /**
-     * @param eventQueryResponse the eventQueryResponse to set
-     */
     public void setEventQueryResponse(EventVSResponse eventQueryResponse) {
         this.eventQueryResponse = eventQueryResponse;
     }
 
-    /**
-     * @return the statusCodeHTTP
-     */
     public int getStatusCode() {
         return statusCode;
     }
@@ -153,14 +123,6 @@ public class ResponseVS<T> {
         this.typeVS = typeVS;
     }
 
-    public void setFecha(Date fecha) {
-            this.fecha = fecha;
-    }
-
-    public Date getFecha() {
-            return fecha;
-    }
-
     public Long getEventVSId() {
         return eventId;
     }
@@ -169,16 +131,10 @@ public class ResponseVS<T> {
         this.eventId = eventId;
     }
 
-    /**
-     * @return the actorVS
-     */
     public ActorVS getActorVS() {
         return actorVS;
     }
 
-    /**
-     * @param actorVS the actorVS to set
-     */
     public void setActorVS(ActorVS actorVS) {
         this.actorVS = actorVS;
     }
@@ -222,4 +178,5 @@ public class ResponseVS<T> {
     public void setContentType(ContentTypeVS contentType) {
         this.contentType = contentType;
     }
+
 }

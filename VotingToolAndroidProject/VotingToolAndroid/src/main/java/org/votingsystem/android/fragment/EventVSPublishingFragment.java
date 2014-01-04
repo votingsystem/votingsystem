@@ -265,11 +265,13 @@ public class EventVSPublishingFragment extends Fragment {
 		}
 	}
 
-	private void showMessage(String caption, String message) {
-		Log.d(TAG + ".showMessage(...) ", "caption: "+ caption + "  - message: " + message);
-		AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-		builder.setTitle(caption).setMessage(Html.fromHtml((message == null? "" : message))).show();
-	}
+    private void showMessage(Integer statusCode, String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+                " - message: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+    }
 
     @Override public void onStop() {
         super.onStop();
@@ -410,8 +412,9 @@ public class EventVSPublishingFragment extends Fragment {
                 }).show();
             } else {
                 resultCaption = getString(R.string.publish_document_ERROR_msg);
-                resultMsg = response.getMessage();
-                showMessage(resultCaption, resultMsg);
+                if(response.getMessage() != null)
+                    resultMsg =  Html.fromHtml(response.getMessage()).toString();
+                showMessage(response.getStatusCode(), resultCaption, resultMsg);
             }
         }
     }

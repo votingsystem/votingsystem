@@ -183,11 +183,13 @@ public class RepresentativeFragment extends Fragment {
 		}
 	}
 
-	private void showMessage(String caption, String message) {
-		Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
-		AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-		builder.setTitle(caption).setMessage(message).show();
-	}
+    private void showMessage(Integer statusCode, String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+                " - message: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+    }
 
     private void showPinScreen(String message) {
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(

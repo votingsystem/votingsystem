@@ -17,6 +17,7 @@
 package org.votingsystem.android.fragment;
 
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -81,6 +82,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
 
+    private ProgressDialog progressDialog = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -103,10 +105,10 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                     votingResultDialog.show(fragmentManager, VotingResultDialog.TAG);
                     setReceiptScreen(contextVS.getVoteReceipt(eventVS.getId()));
                 } else {
-                    showMessage(responseStatusCode, caption, message);
                     if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseStatusCode){
                         setOptionButtonsEnabled(true);
-                    }
+                        showMessage(responseStatusCode, caption, message, null);
+                    } else showMessage(responseStatusCode, caption, null, message);
                 }
             } else if(resultOperation == VoteService.Operation.CANCEL_VOTE){
                 if(ResponseVS.SC_OK == responseStatusCode) {
@@ -118,7 +120,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                     cancelVoteDialog.show(fragmentManager, CancelVoteDialog.TAG);
                 } else {
                     cancelVoteButton.setEnabled(true);
-                    showMessage(responseStatusCode, caption, message);
+                    showMessage(responseStatusCode, caption, message, null);
                 }
             }
         }
@@ -163,6 +165,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
                 eventVS = EventVS.parse(new JSONObject(getArguments().getString(
                         ContextVS.EVENTVS_KEY)));
+                eventVS.setAccessControlVS(contextVS.getAccessControl());
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -382,7 +385,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         Log.d(TAG + ".onClickSubject(...)", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
-            showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
+            showMessage(null, getActivity().getString(R.string.subject_lbl),
+                    eventVS.getSubject(), null);
         }
     }
 
@@ -393,11 +397,12 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + "caption: " + caption +
-                " - message: " + message);
+    private void showMessage(Integer statusCode, String caption, String message,
+                             String htmlMessage) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+                " - message: " + message + " - htmlMessage: " + htmlMessage);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
+                message, htmlMessage);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
         showProgress(false, true);
     }
@@ -409,6 +414,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     @Override public void onDestroy() {
         super.onDestroy();
+        if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
         Log.d(TAG + ".onDestroy()", " - onDestroy");
     }
 
@@ -423,6 +429,20 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if(progressVisible.get()) {
+            if (progressDialog == null) progressDialog = new ProgressDialog(getActivity());
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setTitle("========= Titulo dialogo voto");
+            progressDialog.setMessage("========= Mensaje dialogo voto");
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        } else if (progressDialog != null) progressDialog.dismiss();
+    }
+
+    /*public void showProgress(boolean showProgress, boolean animate) {
         if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);
         if (progressVisible.get() && progressContainer != null) {
@@ -449,6 +469,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                 }
             });
         }
-    }
+    }*/
 
 }

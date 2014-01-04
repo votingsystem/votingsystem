@@ -53,6 +53,7 @@ public class ContextVS {
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String HTML_MESSAGE_KEY = "HTML_MESSAGE_KEY";
     public static final String OPERATION_KEY = "OPERATION_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
