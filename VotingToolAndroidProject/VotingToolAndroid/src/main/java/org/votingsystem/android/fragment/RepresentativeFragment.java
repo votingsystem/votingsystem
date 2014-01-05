@@ -1,6 +1,5 @@
 package org.votingsystem.android.fragment;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

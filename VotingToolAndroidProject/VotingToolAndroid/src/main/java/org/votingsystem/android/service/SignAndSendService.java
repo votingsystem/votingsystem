@@ -11,7 +11,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.model.ContentTypeVS;
@@ -19,8 +18,10 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
 
 import java.io.FileInputStream;
+import java.util.List;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 
@@ -39,6 +40,7 @@ public class SignAndSendService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
+        TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.OPERATION_KEY);
         try {
             contextVS = ContextVS.getInstance(getApplicationContext());
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
@@ -48,28 +50,44 @@ public class SignAndSendService extends IntentService {
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
             ContentTypeVS contentType = (ContentTypeVS)intent.getSerializableExtra(
                     ContextVS.CONTENT_TYPE_KEY);
-            TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.EVENT_TYPE_KEY);
+
             byte[] keyStoreBytes = null;
             FileInputStream fis = openFileInput(KEY_STORE_FILE);
             keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
             ResponseVS responseVS = null;
             String caption = null;
             String message = null;
+            byte[] pdfBytes = null;
             String notificationMessage = null;
-            Log.d(TAG + ".onHandleIntent(...) ", "typeVS: " + typeVS + " - contentType: " +
-                    contentType);
-            switch(typeVS) {
+            Log.d(TAG + ".onHandleIntent(...) ", "operationType: " + operationType +
+                    " - contentType: " + contentType);
+            switch(operationType) {
                 case MANIFEST_PUBLISHING:
-                    PDFPublisher publisher = new PDFPublisher(serviceURL, signatureContent,
-                            keyStoreBytes, pin.toCharArray(), null, null, getApplicationContext());
-                    responseVS = publisher.call();
+                    //Get the PDF to sign
+                    responseVS = HttpHelper.sendData(signatureContent.getBytes(), null,
+                            serviceURL, "eventId");
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        String manifestId = ((List<String>)responseVS.getData()).iterator().next();
+                        pdfBytes = responseVS.getMessageBytes();
+                        serviceURL = serviceURL + "/" + manifestId;
+                        PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes, serviceURL,
+                                keyStoreBytes, pin.toCharArray(), null, null,
+                                getApplicationContext());
+                        responseVS = pdfSignedSender.call();
+                    }
                     break;
                 case MANIFEST_EVENT:
-                    PDFSignedSender pdfSignedSender = new PDFSignedSender(
-                            contextVS.getAccessControl().getEventVSManifestURL(eventId),
-                            contextVS.getAccessControl().getEventVSManifestCollectorURL(eventId),
-                            keyStoreBytes, pin.toCharArray(), null, null, getApplicationContext());
-                    responseVS = pdfSignedSender.call();
+                    //Get the PDF to sign
+                    responseVS = HttpHelper.getData(contextVS.getAccessControl().
+                            getEventVSManifestURL(eventId), ContentTypeVS.PDF);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        pdfBytes = responseVS.getMessageBytes();
+                        PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes,
+                                contextVS.getAccessControl().getEventVSManifestCollectorURL(eventId),
+                                keyStoreBytes, pin.toCharArray(), null, null,
+                                getApplicationContext());
+                        responseVS = pdfSignedSender.call();
+                    }
                     break;
                 case VOTING_PUBLISHING:
                 case CLAIM_PUBLISHING:
@@ -84,10 +102,10 @@ public class SignAndSendService extends IntentService {
                     break;
                 default:
                     responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, getString(
-                            R.string.operation_unknown_error_msg, typeVS.toString()));
+                            R.string.operation_unknown_error_msg, operationType.toString()));
                     break;
             }
-            showNotification(responseVS, typeVS);
+            showNotification(responseVS, operationType);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 caption = getString(R.string.operation_ok_msg);
                 message = getString(R.string.operation_ok_msg);
@@ -95,11 +113,11 @@ public class SignAndSendService extends IntentService {
                 caption = getString(R.string.operation_error_msg);
                 message = responseVS.getMessage();
             }
-            sendMessage(responseVS.getStatusCode(), caption, message,serviceCaller);
+            sendMessage(responseVS.getStatusCode(),operationType, caption, message,serviceCaller);
         } catch(Exception ex) {
             ex.printStackTrace();
-            sendMessage(ResponseVS.SC_ERROR,getString(R.string.alert_exception_caption),
-                    ex.getMessage(), serviceCaller);
+            sendMessage(ResponseVS.SC_ERROR,operationType ,
+                    getString(R.string.alert_exception_caption), ex.getMessage(), serviceCaller);
         }
     }
 
@@ -124,11 +142,12 @@ public class SignAndSendService extends IntentService {
         notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
     }
 
-    private void sendMessage(Integer statusCode, String caption, String message,
-             String serviceCaller) {
+    private void sendMessage(Integer statusCode, TypeVS operationType, String caption,
+             String message, String serviceCaller) {
         Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
                 serviceCaller +" - caption: " + caption  + " - message: " + message);
         Intent intent = new Intent(serviceCaller);
+        intent.putExtra(ContextVS.OPERATION_KEY, operationType);
         if(statusCode != null)
             intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());
         if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);

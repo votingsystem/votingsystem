@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -29,8 +28,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
-import org.votingsystem.android.callable.PDFPublisher;
-import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.JavaScriptInterface;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
@@ -40,18 +38,8 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.FileUtils;
 
-import java.io.FileInputStream;
-import java.net.URL;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -60,9 +48,6 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 public class EventVSPublishingFragment extends Fragment {
 	
 	public static final String TAG = "EventVSPublishingFragment";
-
-	public static final String EDITOR_SESSION_KEY = "editorSessionKey";
-    public static final String FORM_TYPE_KEY = "formTypeKey";
 	
 	private WebView webView;
 	private TypeVS formType;
@@ -73,7 +58,6 @@ public class EventVSPublishingFragment extends Fragment {
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private PublishTask publishTask;
     private View rootView;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -81,13 +65,73 @@ public class EventVSPublishingFragment extends Fragment {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            if(pin != null) {
-                if(publishTask != null) publishTask.cancel(true);
-                publishTask = new PublishTask(pin);
-                publishTask.execute();
+            TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.OPERATION_KEY);
+            if(pin != null) launchSignAndSendService(pin);
+            else {
+                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                        ResponseVS.SC_ERROR);
+                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+                showProgress(false, true);
+                GroupPosition selectedSubsystem = null;
+                if(ResponseVS.SC_OK == responseStatusCode) {
+                    caption = getString(R.string.operation_ok_msg);
+                    switch(operationType) {
+                        case MANIFEST_PUBLISHING:
+                            message = getString(R.string.publish_manifest_OK_prefix_msg);
+                            selectedSubsystem = GroupPosition.MANIFESTS;
+                            break;
+                        case CLAIM_PUBLISHING:
+                            message = getString(R.string.publish_claim_OK_prefix_msg);
+                            selectedSubsystem = GroupPosition.CLAIMS;
+                            break;
+                        case VOTING_PUBLISHING:
+                            message = getString(R.string.publish_voting_OK_prefix_msg);
+                            selectedSubsystem = GroupPosition.VOTING;
+                            break;
+                    }
+                    final GroupPosition groupPosition = selectedSubsystem;
+                    message = message + " " + getString(R.string.publish_document_OK_sufix_msg);
+                    new AlertDialog.Builder(getActivity()).setTitle(caption).
+                            setMessage(message).setPositiveButton(R.string.ok_button,
+                            new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            Intent intent = new Intent(getActivity().getApplicationContext(),
+                                    NavigationDrawer.class);
+                            intent.putExtra(NavigatorDrawerOptionsAdapter.GROUP_POSITION_KEY,
+                                    groupPosition.getPosition());
+                            startActivity(intent);
+                        }
+                    }).show();
+                } else {
+                    caption = getString(R.string.publish_document_ERROR_msg);
+                    showMessage(responseStatusCode, caption, Html.fromHtml(message).toString());
+                }
             }
         }
     };
+
+    private void launchSignAndSendService(String pin) {
+        Log.d(TAG + ".launchSignAndSendService(...) ", "operation: " +
+                pendingOperationVS.getTypeVS());
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    SignAndSendService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.OPERATION_KEY, pendingOperationVS.getTypeVS());
+            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            startIntent.putExtra(ContextVS.URL_KEY, pendingOperationVS.getUrlEnvioDocumento());
+            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, pendingOperationVS.getSignedMessageSubject());
+            startIntent.putExtra(ContextVS.MESSAGE_KEY,
+                    pendingOperationVS.getContentFirma().toString());
+            progressMessage.setText(R.string.publishing_document_msg);
+            showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -131,25 +175,21 @@ public class EventVSPublishingFragment extends Fragment {
                 ex.printStackTrace();
             }
         }
-        String formTypeStr = getArguments().getString(FORM_TYPE_KEY);
+        TypeVS formType = (TypeVS)getArguments().getSerializable(ContextVS.OPERATION_KEY);
         String screenTitle = null;
-        String serverURL = null;
-        if(formTypeStr != null) {
-            formType = TypeVS.valueOf(formTypeStr);
-            serverURL = contextVS.getAccessControl().getPublishServiceURL(formType);
-            switch(formType) {
-                case CLAIM_PUBLISHING:
-                    screenTitle = getString(R.string.publish_claim_caption);
-                    break;
-                case MANIFEST_PUBLISHING:
-                    screenTitle = getString(R.string.publish_manifest_caption);
-                    break;
-                case VOTING_PUBLISHING:
-                    screenTitle = getString(R.string.publish_voting_caption);
-                    break;
-            }
+        String serverURL = contextVS.getAccessControl().getPublishServiceURL(formType);
+        switch(formType) {
+            case CLAIM_PUBLISHING:
+                screenTitle = getString(R.string.publish_claim_caption);
+                break;
+            case MANIFEST_PUBLISHING:
+                screenTitle = getString(R.string.publish_manifest_caption);
+                break;
+            case VOTING_PUBLISHING:
+                screenTitle = getString(R.string.publish_voting_caption);
+                break;
         }
-        Log.d(TAG + ".onCreate(...) ", "onCreate: " + formType + " - serverURL: " + serverURL);
+        Log.d(TAG + ".onCreate(...) ", "formType: " + formType + " - serverURL: " + serverURL);
         getActivity().setTitle(screenTitle);
         progressMessage.setText(R.string.loading_data_msg);
         showProgress(true, true);
@@ -194,17 +234,9 @@ public class EventVSPublishingFragment extends Fragment {
 		}
 	}
 
-    @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
-    }
-
     @Override public void onDestroy() {
+        Log.d(TAG + ".onDestroy()", "onDestroy");
         super.onDestroy();
-    	Log.d(TAG + ".onDestroy()", "onDestroy");
-        if(publishTask != null) publishTask.cancel(true);
     }
 
     private void showPinScreen(String message) {
@@ -274,16 +306,22 @@ public class EventVSPublishingFragment extends Fragment {
     }
 
     @Override public void onStop() {
+        Log.d(TAG + ".onStop()", "");
         super.onStop();
-        Log.d(TAG + ".onStop()", "onStop");
-        if(publishTask != null) publishTask.cancel(true);
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(this.getClass().getName()));
-        Log.d(TAG + ".onResume() ", "onResume");
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
@@ -312,110 +350,6 @@ public class EventVSPublishingFragment extends Fragment {
                     return false;
                 }
             });
-        }
-    }
-
-    private class PublishTask extends AsyncTask<URL, Integer, ResponseVS> {
-
-        private String pin = null;
-
-        public PublishTask(String pin) { this.pin = pin; }
-
-        protected ResponseVS doInBackground(URL... urls) {
-            Log.d(TAG + ".PublishTask.doInBackground(...)",
-                    "doInBackground - operation: " + pendingOperationVS.getTypeVS());
-            try {
-                ResponseVS responseVS = null;
-                byte[] keyStoreBytes = null;
-                FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
-                keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-                KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, pin.toCharArray());
-                PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, pin.toCharArray());
-                //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(USER_CERT_ALIAS);
-                switch(pendingOperationVS.getTypeVS()) {
-                    case MANIFEST_PUBLISHING:
-                        PDFPublisher publisher = new PDFPublisher(pendingOperationVS.getUrlEnvioDocumento(),
-                                pendingOperationVS.getContentFirma().toString(),
-                                keyStoreBytes, pin.toCharArray(), null, null,
-                                getActivity().getApplicationContext());
-                        responseVS = publisher.call();
-                        break;
-                    case VOTING_PUBLISHING:
-                    case CLAIM_PUBLISHING:
-                    case CONTROL_CENTER_ASSOCIATION:
-                        pendingOperationVS.getContentFirma().put("UUID", UUID.randomUUID().toString());
-                        SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
-                                pendingOperationVS.getUrlEnvioDocumento(),
-                                pendingOperationVS.getContentFirma().toString(),
-                                ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                                pendingOperationVS.getSignedMessageSubject(),
-                                keyStoreBytes, pin.toCharArray(),
-                                contextVS.getAccessControl().getCertificate(),
-                                getActivity().getApplicationContext());
-                        responseVS = smimeSignedSender.call();
-                        break;
-                    default:
-                        Log.d(TAG + ".doInBackground(...) ", "unknown operation: " +
-                                pendingOperationVS.getTypeVS().toString());
-                }
-                return responseVS;
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                return new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
-            }
-        }
-
-        protected void onPreExecute() {
-            Log.d(TAG + ".PublishTask.onPreExecute(...)", "onPreExecute");
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            progressMessage.setText(R.string.publishing_document_msg);
-            showProgress(true, true);
-        }
-
-        // This is called each time you call publishProgress()
-        protected void onProgressUpdate(Integer... progress) { }
-
-        protected void onPostExecute(ResponseVS response) {
-            Log.d(TAG + ".PublishTask.onPostExecute(...)", "onPostExecute - status:" +
-                    response.getStatusCode());
-            showProgress(false, true);
-            String resultMsg = null;
-            String resultCaption = null;
-            GroupPosition selectedSubsystem = null;
-            if(ResponseVS.SC_OK == response.getStatusCode()) {
-                resultCaption = getString(R.string.operation_ok_msg);
-                switch(pendingOperationVS.getTypeVS()) {
-                    case MANIFEST_PUBLISHING:
-                        resultMsg = getString(R.string.publish_manifest_OK_prefix_msg);
-                        selectedSubsystem = GroupPosition.MANIFESTS;
-                        break;
-                    case CLAIM_PUBLISHING:
-                        resultMsg = getString(R.string.publish_claim_OK_prefix_msg);
-                        selectedSubsystem = GroupPosition.CLAIMS;
-                        break;
-                    case VOTING_PUBLISHING:
-                        resultMsg = getString(R.string.publish_voting_OK_prefix_msg);
-                        selectedSubsystem = GroupPosition.VOTING;
-                        break;
-                }
-                final GroupPosition groupPosition = selectedSubsystem;
-                resultMsg = resultMsg + " " + getString(R.string.publish_document_OK_sufix_msg);
-                new AlertDialog.Builder(getActivity()).setTitle(resultCaption).
-                        setMessage(resultMsg).setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Intent intent = new Intent(getActivity().getApplicationContext(),
-                                NavigationDrawer.class);
-                        intent.putExtra(NavigatorDrawerOptionsAdapter.GROUP_POSITION_KEY,
-                                groupPosition.getPosition());
-                        startActivity(intent);
-                    }
-                }).show();
-            } else {
-                resultCaption = getString(R.string.publish_document_ERROR_msg);
-                if(response.getMessage() != null)
-                    resultMsg =  Html.fromHtml(response.getMessage()).toString();
-                showMessage(response.getStatusCode(), resultCaption, resultMsg);
-            }
         }
     }
 

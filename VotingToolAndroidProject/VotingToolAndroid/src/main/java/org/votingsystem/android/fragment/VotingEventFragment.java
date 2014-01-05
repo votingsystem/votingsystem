@@ -19,15 +19,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
@@ -40,6 +39,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

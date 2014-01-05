@@ -94,12 +94,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     };
 
     private void launchSignAndSendService(String pin) {
-        Log.d(TAG + ".launchUserCertRequestService() ", "");
+        Log.d(TAG + ".launchSignAndSendService(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+            startIntent.putExtra(ContextVS.OPERATION_KEY, eventVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
                 startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());

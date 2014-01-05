@@ -5,7 +5,6 @@ import android.util.Log;
 
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;

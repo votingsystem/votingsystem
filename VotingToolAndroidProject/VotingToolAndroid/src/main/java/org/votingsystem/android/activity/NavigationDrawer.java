@@ -260,15 +260,15 @@ public class NavigationDrawer extends ActionBarActivity {
                         Intent intent = new Intent(NavigationDrawer.this, EventVSPublishingActivity.class);
                         switch (which) {
                             case 0:
-                                intent.putExtra(EventVSPublishingFragment.FORM_TYPE_KEY,
+                                intent.putExtra(ContextVS.OPERATION_KEY,
                                         TypeVS.VOTING_PUBLISHING.toString());
                                 break;
                             case 1:
-                                intent.putExtra(EventVSPublishingFragment.FORM_TYPE_KEY,
+                                intent.putExtra(ContextVS.OPERATION_KEY,
                                         TypeVS.MANIFEST_PUBLISHING.toString());
                                 break;
                             case 2:
-                                intent.putExtra(EventVSPublishingFragment.FORM_TYPE_KEY,
+                                intent.putExtra(ContextVS.OPERATION_KEY,
                                         TypeVS.CLAIM_PUBLISHING.toString());
                                 break;
                         }
