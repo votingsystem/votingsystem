@@ -378,17 +378,18 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     @Override public void onActivityCreated(Bundle bundle) {
+        super.onActivityCreated(bundle);
         if(bundle != null) {
             if(bundle.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
             vote = (VoteVS) bundle.getSerializable(ContextVS.VOTE_KEY);
         }
-        if(vote.getVoteReceipt() != null) setReceiptScreen(vote);
+        if(vote != null && vote.getVoteReceipt() != null) setReceiptScreen(vote);
         else setEventScreen(eventVS);
     }
 
     @Override public void onStop() {
-        super.onStop();
         Log.d(TAG + ".onStop()", "");
+        super.onStop();
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
