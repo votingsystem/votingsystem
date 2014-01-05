@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -83,7 +84,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
-
             VoteService.Operation resultOperation = (VoteService.Operation) intent.
                     getSerializableExtra(ContextVS.OPERATION_KEY);
             if(resultOperation == VoteService.Operation.VOTE) {
@@ -241,8 +241,10 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     public void saveVote() {
         Log.d(TAG + ".saveVote(...)", "");
         ContentValues values = new ContentValues();
+        byte[] serializedObjectBytes = null;
         try {
-            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
+            serializedObjectBytes = ObjectUtils.serializeObject(vote);
+            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, serializedObjectBytes);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -250,7 +252,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
         values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
         values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-        getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
+        Uri uri = getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
         saveReceiptButton.setEnabled(false);
     }
 

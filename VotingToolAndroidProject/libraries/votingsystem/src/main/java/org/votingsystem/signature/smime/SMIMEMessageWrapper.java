@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.security.cert.PKIXParameters;
@@ -83,8 +84,10 @@ import static org.votingsystem.model.ContextVS.PROVIDER;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class SMIMEMessageWrapper extends MimeMessage {
-	
+public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    
 	public static final String TAG = "SMIMEMessageWrapper";
 	
     static {

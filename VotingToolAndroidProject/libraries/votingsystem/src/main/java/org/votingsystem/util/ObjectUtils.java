@@ -1,5 +1,8 @@
 package org.votingsystem.util;
 
+import android.os.Bundle;
+import android.os.Parcel;
+
 import org.bouncycastle2.util.encoders.Base64;
 
 import java.io.ByteArrayInputStream;
@@ -24,12 +27,12 @@ public class ObjectUtils {
         return baos.toByteArray();
     }
 
-    public static Object deSerializedObject(byte[] serializedObject) throws IOException,
+    public static Serializable deSerializedObject(byte[] serializedObject) throws IOException,
             ClassNotFoundException {
         //byte [] data = Base64.decode(base64SerializedObject);
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serializedObject));
         Object object  = ois.readObject();
         ois.close();
-        return object;
+        return (Serializable)object;
     }
 }

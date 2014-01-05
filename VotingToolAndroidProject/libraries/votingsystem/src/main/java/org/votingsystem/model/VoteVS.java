@@ -5,6 +5,11 @@ import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Date;
@@ -23,10 +28,10 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
 	public static final String TAG = "VoteVS";
     
     private Long id;
-    private SMIMEMessageWrapper voteReceipt;
-    private SMIMEMessageWrapper cancelVoteReceipt;
+    private transient SMIMEMessageWrapper voteReceipt;
+    private transient SMIMEMessageWrapper cancelVoteReceipt;
     private byte[] encryptedKey = null;
-    private CertificationRequestVS certificationRequest;
+    private transient CertificationRequestVS certificationRequest;
     private PrivateKey certVotePrivateKey;
     private EventVS eventVS;
     private FieldEventVS optionSelected;
@@ -277,4 +282,35 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     public void setVoteUUID(String voteUUID) {
         this.voteUUID = voteUUID;
     }
+
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(voteReceipt != null) s.writeObject(voteReceipt.getBytes());
+            else s.writeObject(null);
+            if(cancelVoteReceipt != null) s.writeObject(cancelVoteReceipt.getBytes());
+            else s.writeObject(null);
+            s.writeObject(eventVS);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        try {
+            byte[] voteReceiptBytes = (byte[]) s.readObject();
+            if(voteReceiptBytes != null) voteReceipt = new SMIMEMessageWrapper(null,
+                    new ByteArrayInputStream(voteReceiptBytes), null);
+            byte[] cancelReceiptBytes = (byte[]) s.readObject();
+            if(cancelReceiptBytes != null) cancelVoteReceipt = new SMIMEMessageWrapper(null,
+                    new ByteArrayInputStream(cancelReceiptBytes), null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
 }

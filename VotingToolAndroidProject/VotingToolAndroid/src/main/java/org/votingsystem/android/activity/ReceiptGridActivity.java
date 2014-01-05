@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -51,8 +52,8 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ReceiptGridActivity extends ActionBarActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
+public class ReceiptGridActivity extends FragmentActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{
 
     public static final String TAG = "ReceiptGridActivity";
 
@@ -130,6 +131,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
         }
+        getSupportLoaderManager().initLoader(loaderId, null, this);
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
