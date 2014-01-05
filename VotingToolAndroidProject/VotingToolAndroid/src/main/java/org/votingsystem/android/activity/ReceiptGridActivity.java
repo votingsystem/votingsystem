@@ -143,7 +143,7 @@ public class ReceiptGridActivity extends FragmentActivity implements
         ReceiptContainer receiptContainer = null;
         try {
             receiptContainer = (ReceiptContainer) ObjectUtils.
-                    deSerializedObject(serializedReceiptContainer);
+                    deSerializeObject(serializedReceiptContainer);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -193,13 +193,12 @@ public class ReceiptGridActivity extends FragmentActivity implements
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        CursorLoader loader = new CursorLoader(this,
-                RepresentativeContentProvider.CONTENT_URI, null, null, null, null);
+        CursorLoader loader = new CursorLoader(this, ReceiptContentProvider.CONTENT_URI, null, null, null, null);
         return loader;
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount());
+        Log.d(TAG + ".f(...)", " - cursor.getCount(): " + cursor.getCount());
         showProgress(false, true);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
@@ -228,7 +227,7 @@ public class ReceiptGridActivity extends FragmentActivity implements
         }
 
         @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return inflater.inflate(R.layout.row_eventvs, viewGroup, false);
+            return inflater.inflate(R.layout.row_receipt, viewGroup, false);
         }
 
         @Override public void bindView(View view, Context context, Cursor cursor) {
@@ -238,7 +237,7 @@ public class ReceiptGridActivity extends FragmentActivity implements
                 ReceiptContainer receiptContainer = null;
                 try {
                     receiptContainer = (ReceiptContainer) ObjectUtils.
-                            deSerializedObject(serializedReceiptContainer);
+                            deSerializeObject(serializedReceiptContainer);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

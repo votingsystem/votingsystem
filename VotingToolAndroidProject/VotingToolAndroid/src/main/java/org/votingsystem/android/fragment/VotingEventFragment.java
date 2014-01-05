@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -241,10 +242,9 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     public void saveVote() {
         Log.d(TAG + ".saveVote(...)", "");
         ContentValues values = new ContentValues();
-        byte[] serializedObjectBytes = null;
         try {
-            serializedObjectBytes = ObjectUtils.serializeObject(vote);
-            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, serializedObjectBytes);
+            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
+                    ObjectUtils.serializeObject(vote));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -253,6 +253,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
         values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         Uri uri = getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
+        Log.d(TAG + ".saveVote(...)", "uri: " + uri.toString());
         saveReceiptButton.setEnabled(false);
     }
 

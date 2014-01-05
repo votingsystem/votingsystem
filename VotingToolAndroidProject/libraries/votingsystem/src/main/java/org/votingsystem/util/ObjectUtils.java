@@ -23,14 +23,13 @@ public class ObjectUtils {
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(serializable);
         oos.close();
-        //return new String(Base64.encode(baos.toByteArray()));
-        return baos.toByteArray();
+        return Base64.encode(baos.toByteArray());
     }
 
-    public static Serializable deSerializedObject(byte[] serializedObject) throws IOException,
+    public static Serializable deSerializeObject(byte[] base64SerializedObject) throws IOException,
             ClassNotFoundException {
-        //byte [] data = Base64.decode(base64SerializedObject);
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serializedObject));
+        byte [] data = Base64.decode(base64SerializedObject);
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
         Object object  = ois.readObject();
         ois.close();
         return (Serializable)object;
