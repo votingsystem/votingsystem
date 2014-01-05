@@ -263,5 +263,6 @@
     <string name="vote_error_notification_msg">Error en votación</string>
     <string name="cancel_vote_error_notification_msg">Error cancelando voto</string>
     <string name="send_vote_caption">Enviando voto</string>
+    <string name="vote_option_mismatch">Problemas graves en el servicio de voto. Por favor, Inténtelo mas tarde</string>
 
 </resources>

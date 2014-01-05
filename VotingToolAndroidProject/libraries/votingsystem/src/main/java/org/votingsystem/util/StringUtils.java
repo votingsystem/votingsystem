@@ -76,22 +76,4 @@ public class StringUtils {
         return result;
     }
 
-    /** Write the object to a Base64 string. */
-    public static String serializeObjectToString(Serializable serializable) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(serializable);
-        oos.close();
-        return new String(Base64.encode(baos.toByteArray()));
-    }
-
-    /** Read the object from Base64 string. */
-    public static Object deSerializedObjectFromString(String base64SerializedObject) throws IOException,
-            ClassNotFoundException {
-        byte [] data = Base64.decode(base64SerializedObject);
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-        Object object  = ois.readObject();
-        ois.close();
-        return object;
-    }
 }

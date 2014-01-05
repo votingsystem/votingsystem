@@ -44,10 +44,10 @@
 			<select id="controlCenterSelect" style="margin:0px 0px 0px 20px;display:inline;" required
 					oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
 	   				onchange="this.setCustomValidity('')">
-				<g:each status="i" in="${controlCenters}" var="controlCenterVS">
-					<option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
-				  	<option value="${controlCenterVS.id}">${controlCenterVS.name}</option>
-				</g:each>
+                <option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
+                <g:each status="i" in="${controlCenters}" var="controlCenterVS">
+                    <option value="${controlCenterVS.id}">${controlCenterVS.name}</option>
+                </g:each>
 			</select>		
 		</div>
 	</div>

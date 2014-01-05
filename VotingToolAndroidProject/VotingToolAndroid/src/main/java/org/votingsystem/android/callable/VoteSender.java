@@ -95,7 +95,14 @@ public class VoteSender implements Callable<ResponseVS> {
                 SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
                         certificationRequest.getKeyPair().getPrivate());
-                vote.setVoteReceipt(voteReceipt);
+                try {
+                    vote.setVoteReceipt(voteReceipt);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                    cancelAccessRequest(signedMailGenerator, userVS);
+                    return new ResponseVS(ResponseVS.SC_ERROR,
+                            context.getString(R.string.vote_option_mismatch));
+                }
                 byte[] base64EncodedKey = Base64.encode(
                         certificationRequest.getPrivateKey().getEncoded());
                 byte[] encryptedKey = Encryptor.encryptMessage(base64EncodedKey, userCert);

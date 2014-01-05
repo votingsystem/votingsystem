@@ -36,7 +36,6 @@ import android.view.View;
 import android.widget.ExpandableListView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.EventVSPublishingFragment;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
@@ -237,7 +236,7 @@ public class NavigationDrawer extends ActionBarActivity {
                 startActivity(new Intent(this, CertRequestActivity.class));
                 return true;
             case R.id.receipt_list:
-                startActivity(new Intent(this, VoteReceiptListActivity.class));
+                startActivity(new Intent(this, ReceiptGridActivity.class));
                 return true;
             case R.id.publish_document:
                 showPublishDialog();
@@ -260,16 +259,13 @@ public class NavigationDrawer extends ActionBarActivity {
                         Intent intent = new Intent(NavigationDrawer.this, EventVSPublishingActivity.class);
                         switch (which) {
                             case 0:
-                                intent.putExtra(ContextVS.OPERATION_KEY,
-                                        TypeVS.VOTING_PUBLISHING.toString());
+                                intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.VOTING_PUBLISHING);
                                 break;
                             case 1:
-                                intent.putExtra(ContextVS.OPERATION_KEY,
-                                        TypeVS.MANIFEST_PUBLISHING.toString());
+                                intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.MANIFEST_PUBLISHING);
                                 break;
                             case 2:
-                                intent.putExtra(ContextVS.OPERATION_KEY,
-                                        TypeVS.CLAIM_PUBLISHING.toString());
+                                intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.CLAIM_PUBLISHING);
                                 break;
                         }
                         startActivity(intent);

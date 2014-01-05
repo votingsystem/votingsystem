@@ -56,7 +56,7 @@ public class RepresentativeGridFragment extends Fragment
     private GridView gridView;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private AtomicBoolean hasHTTPConnection = new AtomicBoolean(true);
-    private RepresentativeListAdapter mAdapter = null;
+    private RepresentativeListAdapter adapter = null;
     private String queryStr = null;
     private ContextVS contextVS = null;
     private Long offset = new Long(0);
@@ -117,8 +117,8 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.representative_grid_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        mAdapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
-        gridView.setAdapter(mAdapter);
+        adapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
+        gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {

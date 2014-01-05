@@ -1,5 +1,8 @@
 package org.votingsystem.android.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,6 +33,14 @@ public class EventVSPagerActivity extends ActionBarActivity {
 
     private ContextVS contextVS;
     private Cursor cursor = null;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "intentExtras:" + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        }
+    };
+
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);

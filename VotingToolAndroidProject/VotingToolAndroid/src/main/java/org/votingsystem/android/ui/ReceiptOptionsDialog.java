@@ -19,12 +19,14 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.VoteVS;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 
-public class ReceiptOptionsDialog  extends DialogFragment {
+public class ReceiptOptionsDialog extends DialogFragment {
 
 	public static final String TAG = "ReceiptOptionsDialog";
 	
@@ -36,8 +38,8 @@ public class ReceiptOptionsDialog  extends DialogFragment {
     
     private VoteVS vote;
 	
-    public static ReceiptOptionsDialog newInstance(String caption, String message, VoteVS vote,
-               String caller) {
+    public static ReceiptOptionsDialog newInstance(String caption, String message,
+               Serializable receipt, String caller) {
     	ReceiptOptionsDialog receiptOptionsDialog = new ReceiptOptionsDialog();
         Bundle args = new Bundle();
         args.putString(ContextVS.CAPTION_KEY, caption);
@@ -45,7 +47,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
             message = message.substring(0, MAX_MSG_LENGTH) + "...";
         args.putString(ContextVS.MESSAGE_KEY, message);
         args.putString(ContextVS.CALLER_KEY, caller);
-        args.putSerializable(ContextVS.VOTE_KEY, vote);
+        args.putSerializable(ContextVS.RECEIPT_KEY, receipt);
         receiptOptionsDialog.setArguments(args);
         return receiptOptionsDialog;
     }
@@ -56,7 +58,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
         TextView msgTextView = (TextView) view.findViewById(R.id.msg);
         final Button cancelVoteButton = (Button) view.findViewById(R.id.cancel_vote_button);
         final String dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
-        vote = (VoteVS)getArguments().getSerializable(ContextVS.VOTE_KEY);
+        vote = (VoteVS)getArguments().getSerializable(ContextVS.RECEIPT_KEY);
         cancelVoteButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
             	cancelVoteButton.setEnabled(false);
@@ -72,7 +74,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
             	openReceipt();
             }  
         });
-        if(vote != null && vote.isCanceled()) {
+        if(vote != null && vote.getCancelVoteReceipt() != null) {
         	cancelVoteButton.setVisibility(View.GONE);
         	if(vote.getCancelVoteReceipt() != null) {
         		openReceiptButton.setText(getActivity().
@@ -106,13 +108,11 @@ public class ReceiptOptionsDialog  extends DialogFragment {
 	    		builder.show();
             }
         });
- 
-        
         if(getArguments().getString(ContextVS.CAPTION_KEY) != null) {
-        	getDialog().setTitle(getArguments().getString("caption"));
+        	getDialog().setTitle(getArguments().getString(ContextVS.CAPTION_KEY));
         }
         if(getArguments().getString(ContextVS.MESSAGE_KEY) != null) {
-        	msgTextView.setText(getArguments().getString("message"));
+        	msgTextView.setText(getArguments().getString(ContextVS.MESSAGE_KEY));
         }
         return view;
     }

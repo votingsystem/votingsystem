@@ -1,13 +1,10 @@
 package org.votingsystem.model;
 
-import android.content.Context;
 import android.util.Log;
-
-import org.votingsystem.android.R;
+import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Date;
@@ -15,36 +12,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VoteVS implements java.io.Serializable {
+public class VoteVS implements java.io.Serializable, ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "VoteVS";
     
     private Long id;
-    private int statusCode = ResponseVS.SC_CANCELLED;
-    private String message;
-    private String eventURL;
-    private Long eventVSElectionId;
-    private Long optionSelectedId;
-    private TypeVS typeVS;
-    private ActorVS actorVS;
-    private String accessControlServerURL;
-    private boolean isValid = false;
     private SMIMEMessageWrapper voteReceipt;
     private SMIMEMessageWrapper cancelVoteReceipt;
     private byte[] encryptedKey = null;
-    private boolean isCanceled = false;
     private CertificationRequestVS certificationRequest;
     private PrivateKey certVotePrivateKey;
     private EventVS eventVS;
-    private Date dateCreated;
-    private Date dateUpdated;
     private FieldEventVS optionSelected;
     private String voteUUID;
     private String originHashCertVote;
@@ -52,6 +36,8 @@ public class VoteVS implements java.io.Serializable {
     private String hashCertVSBase64;
     private String originHashAccessRequest;
     private String hashAccessRequestBase64;
+    private Date dateCreated;
+    private Date dateUpdated;
 
     public VoteVS () {}
 
@@ -100,7 +86,7 @@ public class VoteVS implements java.io.Serializable {
         map.put("originHashCertVote", originHashCertVote);
         map.put("hashCertVSBase64", getHashCertVSBase64());
         map.put("originHashAccessRequest", originHashAccessRequest);
-        map.put("hashAccessRequestBase64", getHashAccessRequestBase64());
+        map.put("hashAccessRequestBase64", hashAccessRequestBase64);
         map.put("UUID", UUID.randomUUID().toString());
         map.put("eventURL", eventVS.getURL());
         HashMap dataMap = new HashMap(map);
@@ -142,10 +128,6 @@ public class VoteVS implements java.io.Serializable {
     public FieldEventVS getOptionSelected() {
         return optionSelected;
     }
-
-    public boolean isValid () throws Exception {
-        return isValid;
-    }
     
     public void setId(Long id) {
         this.id = id;
@@ -153,81 +135,6 @@ public class VoteVS implements java.io.Serializable {
 
     public Long getId() {
         return id;
-    }
-
-    public Long getEventVSElectionId() {
-        return eventVSElectionId;
-    }
-
-    public void setEventVSElectionId(Long eventVSElectionId) {
-        this.eventVSElectionId = eventVSElectionId;
-    }
-
-    public Long getOptionSelectedId() {
-        return optionSelectedId;
-    }
-
-    public void setOptionSelectedId(Long optionSelectedId) {
-        this.optionSelectedId = optionSelectedId;
-    }
-
-    public ActorVS getActorVS() {
-        return actorVS;
-    }
-
-    public void setActorVS(ActorVS actorVS) {
-        this.actorVS = actorVS;
-    }
-
-    public String getAccessControlServerURL() {
-        return accessControlServerURL;
-    }
-
-    public void setAccessControlServerURL(String accessControlServerURL) {
-        this.accessControlServerURL = accessControlServerURL;
-    }
-
-    public TypeVS getTypeVS() {
-        return typeVS;
-    }
-
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public String getMessage(Context context) {
-        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//vote repeated
-            return context.getString(R.string.vote_repeated_msg,
-                    eventVS.getSubject(), optionSelected.getContent());
-        }
-        if (!optionSelectedId.equals(optionSelected.getId())) {
-            return context.getString(R.string.option_error_msg);
-        }
-        if (voteReceipt.isValidSignature()) {
-            return context.getString(R.string.vote_ok_msg, eventVS.getSubject(),
-                    optionSelected.getContent());
-        }
-        return null;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getEventURL() {
-        return eventURL;
-    }
-
-    public void setEventURL(String eventURL) {
-        this.eventURL = eventURL;
     }
 
     public EventVS getEventVS() {
@@ -244,40 +151,56 @@ public class VoteVS implements java.io.Serializable {
 
 	public void setCancelVoteReceipt(SMIMEMessageWrapper cancelVoteReceipt) {
 		this.cancelVoteReceipt = cancelVoteReceipt;
-		if(cancelVoteReceipt != null) isCanceled = true;
 	}
 
     public SMIMEMessageWrapper getVoteReceipt() {
         return voteReceipt;
     }
 
-    public void setVoteReceipt(SMIMEMessageWrapper voteReceipt) {
+    public void setVoteReceipt(SMIMEMessageWrapper voteReceipt) throws Exception {
+        JSONObject receiptContentJSON = new JSONObject(voteReceipt.getSignedContent());
+        JSONObject receiptOptionSelected = receiptContentJSON.getJSONObject("optionSelected");
+        if(optionSelected.getId() != receiptOptionSelected.getLong("id") ||
+                !optionSelected.getContent().equals(receiptOptionSelected.getString("content"))) {
+            throw new Exception("Receipt option doesn't match vote option !!!");
+        }
+        if (!voteReceipt.isValidSignature()) {
+            throw new Exception("Receipt with signature errors!!!");
+        }
         this.voteReceipt = voteReceipt;
     }
 
-	public Date getDateUpdated() {
-		return dateUpdated;
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
 	}
 
-	public void setDateUpdated(Date dateUpdated) {
-		this.dateUpdated = dateUpdated;
-	}
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
 
-	public Date getDateCreated() {
-		return dateCreated;
-	}
+    @Override public Date getValidFrom() {
+        return eventVS.getDateBegin();
+    }
 
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
+    @Override public Date getValidTo() {
+        return eventVS.getDateFinish();
+    }
 
-	public boolean isCanceled() {
-		return isCanceled;
-	}
+    @Override public String getSubject() {
+        return eventVS.getSubject();
+    }
 
-	public void setCanceled(boolean isCanceled) {
-		this.isCanceled = isCanceled;
-	}
+    @Override public TypeVS getType() {
+        return TypeVS.VOTEVS;
+    }
 
 	public byte[] getEncryptedKey() {
 		return encryptedKey;

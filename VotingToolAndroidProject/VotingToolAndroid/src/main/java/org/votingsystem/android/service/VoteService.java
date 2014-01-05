@@ -3,6 +3,7 @@ package org.votingsystem.android.service;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
@@ -10,19 +11,23 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
 
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
-import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
+import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
+import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ObjectUtils;
 
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
@@ -48,12 +53,11 @@ public class VoteService extends IntentService {
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         Operation operation = (Operation)arguments.getSerializable(ContextVS.OPERATION_KEY);
+        VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         try {
             contextVS = ContextVS.getInstance(getApplicationContext());
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String pin = arguments.getString(ContextVS.PIN_KEY);
-            String signatureContent = arguments.getString(ContextVS.MESSAGE_KEY);
-            VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
             Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation + " - event: " +
                     vote.getEventVS().getId());
             ControlCenterVS controlCenter = vote.getEventVS().getControlCenter();
@@ -64,7 +68,7 @@ public class VoteService extends IntentService {
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
                             getString(R.string.get_cert_error_msg, controlCenter.getName()),
-                            serviceCaller, operation);
+                            serviceCaller, operation, vote);
                     return;
                 } else {
                     Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
@@ -82,15 +86,15 @@ public class VoteService extends IntentService {
                     responseVS = processVote(pin, vote);
                     break;
                 case CANCEL_VOTE:
-                    responseVS = processCancellation(pin, signatureContent);
+                    JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
+                    responseVS = processCancellation(pin, cancelDataJSON.toString());
                     break;
             }
-            showNotification(responseVS, vote.getEventVS().getSubject(), operation);
+            showNotification(responseVS, vote.getEventVS().getSubject(), operation, vote);
             switch(operation) {
                 case VOTE:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         VoteVS voteReceipt = (VoteVS)responseVS.getData();
-                        contextVS.putVoteReceipt(vote.getEventVS().getId(), voteReceipt);
                     } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                         caption = getString(R.string.access_request_repeated_caption);
                         message = getString( R.string.access_request_repeated_msg,
@@ -103,18 +107,21 @@ public class VoteService extends IntentService {
                 case CANCEL_VOTE:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         SMIMEMessageWrapper cancelReceipt = responseVS.getSmimeMessage();
-                        VoteVS receipt = contextVS.getVoteReceipt(eventId);
-                        receipt.setCancelVoteReceipt(cancelReceipt);
+                        vote.setCancelVoteReceipt(cancelReceipt);
                         message = getString(R.string.cancel_vote_result_msg,
-                                receipt.getEventVS().getSubject());
-                        if(receipt.getId() > 0) {
-                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(
-                                    getApplicationContext());
-                            try {
-                                db.insertVoteReceipt(receipt);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
+                                vote.getEventVS().getSubject());
+                        if(vote.getId() > 0) {//Update
+                            ContentValues values = new ContentValues(5);
+                            values.put(ReceiptContentProvider.ID_COL, vote.getId());
+                            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
+                                    ObjectUtils.serializeObject(vote));
+                            values.put(ReceiptContentProvider.TYPE_COL, TypeVS.VOTEVS.toString());
+                            values.put(ReceiptContentProvider.STATE_COL,
+                                    ReceiptContainer.State.CANCELLED.toString());
+                            values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL,
+                                    System.currentTimeMillis());
+                            getContentResolver().update(ReceiptContentProvider.getreceiptURI(
+                                    vote.getId()), values, null, null);
                         }
                     } else {
                         caption = getString(R.string.error_lbl);
@@ -122,11 +129,11 @@ public class VoteService extends IntentService {
                     }
                     break;
             }
-            sendMessage(responseVS.getStatusCode(), caption, message, serviceCaller, operation);
+            sendMessage(responseVS.getStatusCode(), caption, message, serviceCaller, operation, vote);
         } catch(Exception ex) {
             ex.printStackTrace();
             sendMessage(ResponseVS.SC_ERROR,getString(R.string.alert_exception_caption),
-                    ex.getMessage(), serviceCaller, operation);
+                    ex.getMessage(), serviceCaller, operation, vote);
         }
     }
 
@@ -165,7 +172,8 @@ public class VoteService extends IntentService {
         return responseVS;
     }
 
-    private void showNotification(ResponseVS responseVS, String eventSubject, Operation operation){
+    private void showNotification(ResponseVS responseVS, String eventSubject, Operation operation,
+            VoteVS vote){
         String title = null;
         String message = null;
         if(eventSubject != null) {
@@ -205,7 +213,7 @@ public class VoteService extends IntentService {
     }
 
     private void sendMessage(Integer statusCode, String caption, String message,
-             String serviceCaller, Operation operation) {
+             String serviceCaller, Operation operation, VoteVS vote) {
         Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
                 serviceCaller + " - operation: " + operation + " - caption: " + caption  +
                 " - message: " + message);
@@ -215,6 +223,7 @@ public class VoteService extends IntentService {
         if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
         if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
         intent.putExtra(ContextVS.OPERATION_KEY, operation);
+        intent.putExtra(ContextVS.VOTE_KEY, vote);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 

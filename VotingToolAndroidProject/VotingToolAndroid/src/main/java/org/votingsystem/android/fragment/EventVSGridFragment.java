@@ -301,9 +301,10 @@ public class EventVSGridFragment extends Fragment
         switch (item.getItemId()) {
             case R.id.reload:
                 hasHTTPConnection.set(true);
-                rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
+                loadHttpItems(offset);
+                //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
                 //gridView.invalidateViews();
-                getLoaderManager().restartLoader(loaderId, null, this);
+                //getLoaderManager().restartLoader(loaderId, null, this);
                 //((CursorAdapter)gridView.getAdapter()).notifyDataSetChanged();
                 return true;
             default:

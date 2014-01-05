@@ -51,6 +51,10 @@ public class RepresentativeService extends IntentService {
                         values.put(RepresentativeContentProvider.NIF_COL, representative.getNif());
                         values.put(RepresentativeContentProvider.NUM_REPRESENTATIONS_COL,
                                 representative.getNumRepresentations());
+                        values.put(RepresentativeContentProvider.TIMESTAMP_CREATED_COL,
+                                System.currentTimeMillis());
+                        values.put(RepresentativeContentProvider.TIMESTAMP_UPDATED_COL,
+                                System.currentTimeMillis());
                         contentValuesList.add(values);
                     }
                     if(!contentValuesList.isEmpty()) {

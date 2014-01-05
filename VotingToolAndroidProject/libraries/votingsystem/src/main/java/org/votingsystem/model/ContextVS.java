@@ -70,6 +70,7 @@ public class ContextVS {
     public static final String CHILD_POSITION_KEY  = "CHILD_POSITION";
     public static final String EVENTVS_KEY  = "EVENTVS";
     public static final String VOTE_KEY  = "VOTE_KEY";
+    public static final String RECEIPT_KEY  = "RECEIPT_KEY";
     public static final String STATE_KEY                   = "STATE";
     public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
     public static final String APPLICATION_ID_KEY          = "idAplicacion";
@@ -114,7 +115,6 @@ public class ContextVS {
     private ControlCenterVS controlCenter;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
-    private Map<Long, VoteVS> voteReceiptMap = new HashMap<Long, VoteVS>();
     private OperationVS operationVS = null;
     private static ContextVS INSTANCE;
     private Context context = null;
@@ -194,17 +194,6 @@ public class ContextVS {
     public void putCert(String serverURL, X509Certificate cert) {
         Log.d(TAG + ".putCert(...)", " serverURL: " + serverURL);
         certsMap.put(serverURL, cert);
-    }
-
-    public void putVoteReceipt(Long eventId, VoteVS receipt) {
-        Log.d(TAG + ".putVoteReceipt(...)", "");
-        voteReceiptMap.put(eventId, receipt);
-    }
-
-    public VoteVS getVoteReceipt(Long eventId) {
-        Log.d(TAG + ".getVoteReceipt(...)", "");
-        if(eventId == null) return null;
-        return voteReceiptMap.get(eventId);
     }
 
     public UserVS getUserVS() {
