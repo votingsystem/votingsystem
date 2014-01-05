@@ -19,6 +19,7 @@ package org.votingsystem.android.activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -107,6 +108,10 @@ public class MainActivity extends FragmentActivity {
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
     }
 
+    /*@Override public void onBackPressed() {
+        Log.d(TAG +  ".onBackPressed(...)", "");
+    }*/
+
     private void runAppService(Uri uriData) {
         showProgressDialog(getString(R.string.connecting_caption),
                 getString(R.string.loading_data_msg));
@@ -149,12 +154,15 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void showProgressDialog(String title, String dialogMessage) {
-        if (progressDialog == null) progressDialog = new ProgressDialog(this);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle(title);
-        progressDialog.setMessage(dialogMessage);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setCancelable(true);
+            progressDialog.setTitle(title);
+            progressDialog.setMessage(dialogMessage);
+            progressDialog.setIndeterminate(true);
+            /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
+                @Override public void onCancel(DialogInterface dialog){}});*/
+        }
         progressDialog.show();
     }
 

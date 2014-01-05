@@ -46,6 +46,8 @@ public class VotingAppService extends Service {
     }
 
     private void processOperation (String accessControlURL, String operationStr) {
+        Log.d(TAG + ".processOperation(...)", "accessControlURL: " + accessControlURL + " - " +
+            " - operationStr: " + operationStr);
         ResponseVS responseVS = HttpHelper.getData(AccessControlVS.
                 getServerInfoURL(accessControlURL), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
