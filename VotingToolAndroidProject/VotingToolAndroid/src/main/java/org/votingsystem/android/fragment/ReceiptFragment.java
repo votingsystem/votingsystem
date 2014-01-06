@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -39,6 +40,7 @@ import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.ObjectUtils;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -80,8 +82,8 @@ public class ReceiptFragment extends Fragment {
                         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
                         values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
                         values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-                        getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
-
+                        Uri uriToUpdate = ReceiptContentProvider.getreceiptURI(vote.getId());
+                        getActivity().getContentResolver().update(uriToUpdate, values, null, null);
                         CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
                                 caption, message, vote);
                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
@@ -101,23 +103,6 @@ public class ReceiptFragment extends Fragment {
         startIntent.putExtra(ContextVS.VOTE_KEY, vote);
         showProgress(true, true);
         getActivity().startService(startIntent);
-    }
-
-    private void launchSignAndSendService(String pin) {
-        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
-        try {
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    SignAndSendService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            //startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
-            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
-
-            showProgress(true, true);
-            //signAndSendButton.setEnabled(false);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     private ContextVS contextVS;
@@ -193,12 +178,12 @@ public class ReceiptFragment extends Fragment {
         switch(receiptType) {
             case VOTEVS:
                 menuInflater.inflate(R.menu.receipt_vote, menu);
+                if(vote.getEventVS().getDateFinish().after(new Date(System.currentTimeMillis()))) {
+                    menu.removeItem(R.id.cancel_vote);
+                }
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " + receiptType);
         }
-
-
-        menu.removeItem(R.id.delete_receipt);
     }
 
     @Override public void onStart() {
