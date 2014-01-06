@@ -43,7 +43,6 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.ui.CertNotFoundDialog;
-import org.votingsystem.android.ui.ReceiptOptionsDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.VoteVS;
@@ -73,13 +72,13 @@ public class ReceiptGridActivity extends FragmentActivity implements
         Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                 "intent.getExtras(): " + intent.getExtras());
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-        ReceiptOptionsDialog.Operation operation = (ReceiptOptionsDialog.Operation) intent.
+            ReceiptContentProvider.Operation operation = (ReceiptContentProvider.Operation) intent.
                 getSerializableExtra(ContextVS.OPERATION_KEY);
         if(pin != null) launchVoteCancellationService(pin);
         else {
-            if(operation == ReceiptOptionsDialog.Operation.CANCEL_VOTE) {
+            if(operation == ReceiptContentProvider.Operation.CANCEL_VOTE) {
                 cancelVote(vote);
-            } else if(operation == ReceiptOptionsDialog.Operation.REMOVE_RECEIPT) {
+            } else if(operation == ReceiptContentProvider.Operation.REMOVE_RECEIPT) {
                 removeReceipt(vote);
             }
         }
@@ -138,6 +137,16 @@ public class ReceiptGridActivity extends FragmentActivity implements
         Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
                 " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
+        Intent intent = new Intent(this,ReceiptPagerActivity.class);
+        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
+        startActivity(intent);
+
+
+
+
+
+
+
         byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                 ReceiptContentProvider.SERIALIZED_OBJECT_COL));
         ReceiptContainer receiptContainer = null;
@@ -147,19 +156,6 @@ public class ReceiptGridActivity extends FragmentActivity implements
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        launchOptionsDialog(receiptContainer);
-    }
-
-    private void launchOptionsDialog(ReceiptContainer receiptContainer) {
-        String caption = receiptContainer.getSubject();
-        String msg = getString(R.string.receipt_options_dialog_msg);
-        ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
-                caption, msg, vote, this.getClass().getName());
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(ReceiptOptionsDialog.TAG);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        optionsDialog.show(ft, ReceiptOptionsDialog.TAG);
     }
 
     private void showPinScreen(String message) {
@@ -303,19 +299,6 @@ public class ReceiptGridActivity extends FragmentActivity implements
             showCertNotFoundDialog();
         } else {
             showPinScreen(getString(R.string.cancel_vote_msg));
-        }
-    }
-
-    private void dismissOptionsDialog() {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        DialogFragment prev = (DialogFragment) getSupportFragmentManager().findFragmentByTag(
-                ReceiptOptionsDialog.TAG);
-        if(prev != null) {
-            prev.getDialog().dismiss();
-            if (prev != null) {
-                ft.remove(prev);
-            }
-            ft.addToBackStack(null);
         }
     }
 

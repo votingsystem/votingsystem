@@ -11,17 +11,23 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
+import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.android.fragment.RepresentativeFragment;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.DateUtils;
+
+import java.util.Date;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class RepresentativePagerActivity extends ActionBarActivity {
+public class ReceiptPagerActivity extends ActionBarActivity {
 
-    public static final String TAG = "RepresentativePagerActivity";
+    public static final String TAG = "ReceiptPagerActivity";
 
     private ContextVS contextVS;
     private Cursor cursor = null;
@@ -34,15 +40,14 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
+        int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
-        RepresentativePagerAdapter pagerAdapter = new RepresentativePagerAdapter(
-                getSupportFragmentManager());
+        ReceiptPagerAdapter pagerAdapter = new ReceiptPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
-                null, null, null, null);
-        cursor.moveToFirst();
+        cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,null, null, null,
+                null);
+        cursor.moveToPosition(cursorPosition);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
                 cursor.moveToPosition(position);
@@ -50,15 +55,48 @@ public class RepresentativePagerActivity extends ActionBarActivity {
             }
         });
         mViewPager.setCurrentItem(cursorPosition);
+        getSupportActionBar().setLogo(R.drawable.receipt_32);
         updateActionBarTitle();
     }
 
     private void updateActionBarTitle() {
-        getSupportActionBar().setLogo(R.drawable.system_users_22);
-        getSupportActionBar().setTitle(getString(R.string.representative_lbl));
-        String fullName = cursor.getString(cursor.getColumnIndex(
-                RepresentativeContentProvider.FULL_NAME_COL));
-        getSupportActionBar().setSubtitle(fullName);
+        String title = null;
+        String subtitle = "";
+        String typeStr = cursor.getString(cursor.getColumnIndex(
+                ReceiptContentProvider.TYPE_COL));
+        TypeVS type = TypeVS.valueOf(typeStr);
+        switch(type) {
+            case VOTEVS:
+                title = getString(R.string.receipt_vote_page_title);
+                break;
+            case CANCEL_VOTE:
+                title = getString(R.string.receipt_cancel_vote_page_title);
+                break;
+        }
+        Date dateCreated = null;
+        Date dateUpdated = null;
+        Long timestampCreated = cursor.getLong(cursor.getColumnIndex(
+                ReceiptContentProvider.TIMESTAMP_CREATED_COL));
+        if(timestampCreated != null) dateCreated = new Date(timestampCreated);
+        Long timestampUpdated = cursor.getLong(cursor.getColumnIndex(
+                ReceiptContentProvider.TIMESTAMP_UPDATED_COL));
+        if(timestampUpdated != null) dateUpdated = new Date(timestampUpdated);
+        if(dateCreated != null) {
+            subtitle = getString(R.string.saved_lbl) + " " + DateUtils.
+                    getShortSpanishStringFromDate(dateCreated);
+        }
+        if(dateUpdated != null) {
+            if(timestampCreated != timestampUpdated)
+            subtitle = getString(R.string.updated_lbl) + " " + DateUtils.
+                    getShortSpanishStringFromDate(dateCreated);
+        }
+        getSupportActionBar().setTitle(title);
+        getSupportActionBar().setSubtitle(subtitle);
+    }
+
+    public void setActionBarTitle(String title, String subtitle) {
+        getSupportActionBar().setTitle(title);
+        getSupportActionBar().setSubtitle(subtitle);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -82,22 +120,20 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         }
     }
 
-    class RepresentativePagerAdapter extends FragmentStatePagerAdapter {
+    class ReceiptPagerAdapter extends FragmentStatePagerAdapter {
 
         private Cursor cursor;
 
-        public RepresentativePagerAdapter(FragmentManager fm) {
+        public ReceiptPagerAdapter(FragmentManager fm) {
             super(fm);
-            cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
+            cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,
                     null, null, null, null);
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".RepresentativePagerAdapter.getItem(...) ", " - item: " + i);
+            Log.d(TAG + ".ReceiptPagerAdapter.getItem(...) ", " - item: " + i);
             cursor.moveToPosition(i);
-            Long representativeId = cursor.getLong(cursor.getColumnIndex(
-                    RepresentativeContentProvider.ID_COL));
-            return RepresentativeFragment.newInstance(representativeId);
+            return ReceiptFragment.newInstance(cursor.getPosition());
         }
 
         @Override public int getCount() {

@@ -1,11 +1,17 @@
 package org.votingsystem.model;
 
 import android.util.Log;
+
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.x509.extension.X509ExtensionUtil;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
-
+import java.security.cert.X509Certificate;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,7 +20,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -30,12 +38,16 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     private Long id;
     private transient SMIMEMessageWrapper voteReceipt;
     private transient SMIMEMessageWrapper cancelVoteReceipt;
+    private transient TimeStampToken timeStampToken;
+    private X509Certificate x509Certificate;
     private byte[] encryptedKey = null;
     private transient CertificationRequestVS certificationRequest;
     private PrivateKey certVotePrivateKey;
     private EventVS eventVS;
     private FieldEventVS optionSelected;
     private String voteUUID;
+    private String representativeURL;
+    private String accessControlURL;
     private String originHashCertVote;
     private String hashCertVoteHex;
     private String hashCertVSBase64;
@@ -43,6 +55,7 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     private String hashAccessRequestBase64;
     private Date dateCreated;
     private Date dateUpdated;
+    private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
 
     public VoteVS () {}
 
@@ -235,6 +248,10 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
         return hashCertVSBase64;
     }
 
+    public void setHashCertVSBase64(String hashCertVSBase64) {
+        this.hashCertVSBase64 = hashCertVSBase64;
+    }
+
     public static VoteVS populate (Map eventMap) {
         VoteVS voteVS = null;
         try {
@@ -267,6 +284,28 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
         return voteVS;
     }
 
+    private void setTimeStampToken(TimeStampToken timeStampToken) {
+        this.timeStampToken = timeStampToken;
+    }
+
+    public TimeStampToken getTimeStampToken() {
+        return timeStampToken;
+    }
+
+    private void setX509Certificate(X509Certificate x509Certificate) {
+        this.x509Certificate = x509Certificate;
+    }
+
+    public X509Certificate getX509Certificate() { return x509Certificate; }
+
+    public String getRepresentativeURL() {
+        return representativeURL;
+    }
+
+    public void setRepresentativeURL(String representativeURL) {
+        this.representativeURL = representativeURL;
+    }
+
     public String getHashAccessRequestBase64() {
         return hashAccessRequestBase64;
     }
@@ -282,7 +321,6 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     public void setVoteUUID(String voteUUID) {
         this.voteUUID = voteUUID;
     }
-
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
@@ -313,4 +351,44 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
 
     }
 
+
+    public static VoteVS getInstance(Map contentMap, X509Certificate x509Certificate,
+            TimeStampToken timeStampToken) throws IOException, JSONException {
+        VoteVS voteVS = VoteVS.populate(contentMap);
+        voteVS.setTimeStampToken(timeStampToken);
+        voteVS.setX509Certificate(x509Certificate);
+        byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
+        if(voteExtensionValue != null) {
+            DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
+            JSONObject voteCertData = new JSONObject(((DERUTF8String) voteCertDataDER.getObject()).toString());
+            EventVS eventVS = new EventVS();
+            eventVS.setId(Long.valueOf(voteCertData.getString("eventId")));
+            voteVS.setEventVS(eventVS);
+            voteVS.setAccessControlURL(voteCertData.getString("accessControlURL"));
+            voteVS.setHashCertVSBase64(voteCertData.getString("hashCertVS"));
+        }
+        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
+        if(representativeURLExtensionValue != null) {
+            DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    representativeURLExtensionValue);
+            voteVS.setRepresentativeURL(((DERUTF8String)representativeURL_DER.getObject()).toString());
+        }
+        return voteVS;
+    }
+
+    public String getAccessControlURL() {
+        return accessControlURL;
+    }
+
+    public void setAccessControlURL(String accessControlURL) {
+        this.accessControlURL = accessControlURL;
+    }
+
+    public Set<X509Certificate> getServerCerts() {
+        return serverCerts;
+    }
+
+    public void setServerCerts(Set<X509Certificate> serverCerts) {
+        this.serverCerts = serverCerts;
+    }
 }

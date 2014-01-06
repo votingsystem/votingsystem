@@ -8,8 +8,11 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,23 +22,35 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ReceiptContainer;
+import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.VoteVS;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ObjectUtils;
 
+import java.security.cert.X509Certificate;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class RepresentativeFragment extends Fragment {
+public class ReceiptFragment extends Fragment {
 
-	public static final String TAG = "RepresentativeFragment";
+	public static final String TAG = "ReceiptFragment";
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -55,20 +70,7 @@ public class RepresentativeFragment extends Fragment {
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
             //startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
-            /*if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
-                startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
-            } else {
-                startIntent.putExtra(ContextVS.URL_KEY,
-                        contextVS.getAccessControl().getEventVSClaimCollectorURL());
-                startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
-                String messageSubject = getActivity().getString(R.string.signature_msg_subject)
-                        + eventVS.getSubject();
-                startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
-                JSONObject signatureContent = eventVS.getSignatureContentJSON();
-                signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
-            }*/
+
             showProgress(true, true);
             //signAndSendButton.setEnabled(false);
             getActivity().startService(startIntent);
@@ -78,15 +80,18 @@ public class RepresentativeFragment extends Fragment {
     }
 
     private ContextVS contextVS;
+    private TypeVS receiptType;
+    private VoteVS vote;
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private SMIMEMessageWrapper selectedReceipt;
 
 
-    public static Fragment newInstance(Long representativeId) {
-        RepresentativeFragment fragment = new RepresentativeFragment();
+    public static Fragment newInstance(int cursorPosition) {
+        ReceiptFragment fragment = new ReceiptFragment();
         Bundle args = new Bundle();
-        args.putLong(ContextVS.ITEM_ID_KEY, representativeId);
+        args.putInt(ContextVS.CURSOR_POSITION_KEY, cursorPosition);
         fragment.setArguments(args);
         return fragment;
     }
@@ -94,43 +99,61 @@ public class RepresentativeFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        Long representativeId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
+        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                RepresentativeContentProvider.getRepresentativeURI(representativeId),
-                null, null, null, null);
-
-        cursor.moveToFirst();
-        String fullName = cursor.getString(cursor.getColumnIndex(
-                RepresentativeContentProvider.FULL_NAME_COL));
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-
-        IntentFilter intentFilter = new IntentFilter();
-
-
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, intentFilter);
-
-        View rootView = inflater.inflate(R.layout.representative_fragment, container, false);
-        TextView repNameView = (TextView)rootView.findViewById(R.id.representative_name);
-        repNameView.setText(fullName);
-        getActivity().setTitle(getActivity().getString(R.string.representative_data_lbl));
-
-        EditText nifText = (EditText)rootView.findViewById(R.id.nif_edit);
-
-
-        Button selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
-        selectButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                showPinScreen(null);
+                ReceiptContentProvider.CONTENT_URI, null, null, null, null);
+        cursor.moveToPosition(cursorPosition);
+        byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
+                ReceiptContentProvider.SERIALIZED_OBJECT_COL));
+        String typeStr = cursor.getString(cursor.getColumnIndex(ReceiptContentProvider.TYPE_COL));
+        receiptType = TypeVS.valueOf(typeStr);
+        ReceiptContainer receipt = null;
+        View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
+        LinearLayout receiptDataContainer = (LinearLayout) rootView.
+                findViewById(R.id.receipt_data_container);
+        try {
+            receipt = (ReceiptContainer) ObjectUtils.
+                    deSerializeObject(serializedReceiptContainer);
+            switch(receiptType) {
+                case VOTEVS:
+                    vote = (VoteVS) receipt;
+                    initVoteReceiptScreen(vote, receiptType, inflater, receiptDataContainer);
+                    break;
+                default:
+                    Log.d(TAG + ".onCreateView(...)", "unknown receipt type: " + receipt.getType());
             }
-        });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        TextView receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
+        receiptSubject.setText(receipt.getSubject());
+        Log.d(TAG + ".onCreateView(...)", "receiptSubject: " + receipt.getSubject());
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         return rootView;
+    }
+
+    private void initVoteReceiptScreen (VoteVS vote, TypeVS type, LayoutInflater inflater,
+            LinearLayout receiptDataContainer) {
+        Log.d(TAG + ".initVoteReceiptScreen(...)", "type: " + type);
+        if(TypeVS.VOTEVS == type) selectedReceipt = vote.getVoteReceipt();
+        else if(TypeVS.CANCEL_VOTE == type) selectedReceipt = vote.getCancelVoteReceipt();
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        Log.d(TAG + ".onCreateOptionsMenu(...) ", "");
+        switch(receiptType) {
+            case VOTEVS:
+                menuInflater.inflate(R.menu.vote_receipt, menu);
+                break;
+            default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " + receiptType);
+        }
+
     }
 
     @Override public void onStart() {
@@ -141,6 +164,8 @@ public class RepresentativeFragment extends Fragment {
     @Override public void onDestroy() {
         Log.d(TAG + ".onDestroy()", "");
         super.onDestroy();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -153,10 +178,10 @@ public class RepresentativeFragment extends Fragment {
     }
 
     @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(this.getClass().getName()));
+        Log.d(TAG + ".onResume() ", "onResume");
     }
 
     @Override public void onPause() {
@@ -170,21 +195,43 @@ public class RepresentativeFragment extends Fragment {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
-	    		Log.d(TAG + ".onOptionsItemSelected(...) ", "home");
 	    		Intent intent = new Intent(getActivity().getApplicationContext(),
                         NavigationDrawer.class);
 	    		startActivity(intent);
 	    		return true;
-	    	default:
-	    		return super.onOptionsItemSelected(item);
+            case R.id.share_receipt:
+                try {
+                    Intent sendIntent = new Intent();
+                    String receiptStr = new String(selectedReceipt.getBytes());
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
+                    sendIntent.setType(ContentTypeVS.TEXT.getName());
+                    startActivity(sendIntent);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                }
+                return true;
+            case R.id.show_signers_info:
+                try {
+                    SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
+                            selectedReceipt.getBytes());
+                    newFragment.show(getFragmentManager(), SignersInfoDialogFragment.TAG);
+                }catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                break;
+            case R.id.check_receipt:
+                Log.d(TAG + ".onOptionsItemSelected(...) ", "Checking vote in system");
+                return true;
 		}
+        return super.onOptionsItemSelected(item);
 	}
 
-    private void showMessage(Integer statusCode, String caption, String message) {
+    private void showMessage(Integer statusCode,String caption,String message, String htmlMessage) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
+                message, htmlMessage);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
     }
 

@@ -103,7 +103,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                     } else if (part instanceof ByteArrayInputStream) {
                         ByteArrayInputStream contentStream = (ByteArrayInputStream)cont;
                         ByteArrayOutputStream output = new ByteArrayOutputStream();
-                        byte[] buf =new byte[2048];
+                        byte[] buf =new byte[4096];
                         int len;
                         while((len = contentStream.read(buf)) > 0){
                             output.write(buf,0,len);
@@ -397,7 +397,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
 	public VoteVS getVoteVS() {
 		return voteVS;
 	}
-
 
     public Set<UserVS> getSigners() {
         return signers;

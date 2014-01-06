@@ -22,6 +22,7 @@ import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.CMSProcessable;
 import org.bouncycastle2.cms.CMSSignedData;
+import org.bouncycastle2.cms.CMSVerifierCertificateNotValidException;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.SignerInformationStore;
 import org.bouncycastle2.cms.SignerInformationVerifier;
@@ -30,11 +31,15 @@ import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.SMIMESigned;
 import org.bouncycastle2.util.Store;
 import org.bouncycastle2.util.encoders.Base64;
+import org.json.JSONObject;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.JsonUtils;
 import org.votingsystem.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -54,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -114,12 +120,10 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
     private String signedContent;
     private SMIMESigned smimeSigned = null;
     private boolean isValidSignature = false;
-    private Set<UserVS> usersVS;
 
-    
-    public Set<UserVS> getUserVSs() {
-        return usersVS;
-    }
+    private Set<UserVS> signers = null;
+    private UserVS signerVS;
+    private VoteVS voteVS;
     
     public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
@@ -186,7 +190,7 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
                      	isr = new InputStreamReader((ByteArrayInputStream)part);
                      else isr = new InputStreamReader((BASE64DecoderStream)part);
                      Writer writer = new StringWriter();
-                     char[] buffer = new char[1024];
+                     char[] buffer = new char[4096];
                      try {
                          Reader reader = new BufferedReader(isr);
                          int n;
@@ -197,9 +201,7 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
                          isr.close();
                      }
                      signedContent = writer.toString();
-                 } else  {
-                 	Log.d("SMIMEMessageWrapper", "IMPOSIBLE EXTRAER CONTENIDO FIRMADO");
-                 }
+                 } else  Log.d(TAG + ".initSMIMEMessage()", "");
              }
         }
         checkSignature(); 
@@ -218,22 +220,16 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
     }
 
     public void updateMessageID(String nifUsuario) throws MessagingException {
-            messageId = getFileName() + "@" + nifUsuario;
-            Address[] addresses = {new InternetAddress(nifUsuario)};
-            addFrom(addresses);
-            updateMessageID(); 
+        messageId = getFileName() + "@" + nifUsuario;
+        Address[] addresses = {new InternetAddress(nifUsuario)};
+        addFrom(addresses);
+        updateMessageID();
     }
 
-    /**
-     * @return the signedContent
-     */
     public String getSignedContent() {
         return signedContent;
     }
 
-    /**
-     * @return the smimeSigned
-     */
     public SMIMESigned getSmimeSigned() {
         return smimeSigned;
     }
@@ -278,72 +274,49 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
     public boolean isValidSignature() {
         return isValidSignature;
     }
-    
+
     /**
-     * verify that the sig is correct and that it was generated when the 
+     * verify that the signature is correct and that it was generated when the
      * certificate was current(assuming the cert is contained in the message).
      */
     private void checkSignature() throws Exception {
-        // certificates and crls passed in the signature
         Store certs = smimeSigned.getCertificates();
-        // SignerInfo blocks which contain the signatures
-        SignerInformationStore  signers = smimeSigned.getSignerInfos();
-    	Log.d(TAG + ".checkSignature() ", "signers.size(): " + signers.size()); ;
-        Iterator<SignerInformation> it = signers.getSigners().iterator();
-        // check each signer
-        usersVS = new HashSet<UserVS>();
+        SignerInformationStore  signerInfos = smimeSigned.getSignerInfos();
+        Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
+        Log.d(TAG + ".checkSignature()", "document with '" + signerInfos.size() + "' signers");
+        Collection c = signerInfos.getSigners();
+        Iterator it = c.iterator();
+        Date firstSignature = null;
         isValidSignature = false;
-        while (it.hasNext()) {
-            Log.d(TAG, "----------------------- Signer -----------------------------------");
-            SignerInformation   signer = it.next();
-            AttributeTable  attributes = signer.getSignedAttributes();
-            DERUTCTime time = null;
-            Collection certCollection = certs.getMatches(signer.getSID());
-            Log.d(TAG, "Collection matches: " + certCollection.size());
+        signers = new HashSet<UserVS>();
+        while (it.hasNext()) {// check each signer
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certs.getMatches(signer.getSID());
             Iterator        certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter()
-                    .setProvider(PROVIDER).getCertificate(
-                            (X509CertificateHolder)certIt.next());
-
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER)
+                    .getCertificate((X509CertificateHolder)certIt.next());
+            Log.d(TAG + ".checkSignature()", "cert: " + cert.getSubjectDN() + " --- " + certCollection.size() + " match");
+            isValidSignature = verifySignerCert(signer, cert);
+            if(!isValidSignature) return;
             UserVS userVS = UserVS.getUserVS(cert);
-            userVS.setSigner(signer);
-            userVS.setContentSigned(getSignedContent());
-            byte[] hash = null;
-            if (attributes != null) {
-                Attribute signingTimeAttribute = attributes.get(CMSAttributes.signingTime);
-                time = (DERUTCTime) signingTimeAttribute.getAttrValues().getObjectAt(0);
-                userVS.setFechaFirma(time.getDate());
-                Attribute messageDigestAttribute = attributes.get( CMSAttributes.messageDigest );
-                hash = ((ASN1OctetString)messageDigestAttribute.getAttrValues().getObjectAt(0)).getOctets();
-                String hashStr = new String(Base64.encode(hash));
-                Log.d(TAG, " -- hashStr: " + hashStr);
-            }   
-
-
-
-            userVS.setCertificate(cert);
-            usersVS.add(userVS);
-            Log.d(TAG, "cert.getSubjectDN(): " + cert.getSubjectDN());
-            SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(PROVIDER).build(cert);
-            isValidSignature = signer.verify(siv);
-            if(isValidSignature) {
-            	userVS.setTimeStampToken(checkTimeStampToken(signer));//method can only be called after verify.
-            } else {
-            	Log.d(TAG, "signature failed!");
-            	return;
+            userVS.setSignerInformation(signer);
+            TimeStampToken timeStampToken = checkTimeStampToken(signer);//method can only be called after verify.
+            userVS.setTimeStampToken(timeStampToken);
+            if(timeStampToken != null) {
+                Date timeStampDate = timeStampToken.getTimeStampInfo().getGenTime();
+                if(firstSignature == null || firstSignature.after(timeStampDate)) {
+                    firstSignature = timeStampDate;
+                    this.signerVS = userVS;
+                }
             }
-            byte[] digestParams = signer.getDigestAlgParams();
-            String digestParamsStr = new String(Base64.encode(hash));
-            Log.d(TAG, " -- digestParamsStr: " + digestParamsStr);
-            
-            // boolean cmsVerifyDigest = CMSUtils.verifyDigest(signer, cert, PROVIDER);
-            // Log.d(TAG, " -- cmsVerifyDigest: " + cmsVerifyDigest);
-            // boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, PROVIDER);
-            // Log.d(TAG, " -- cmsVerifySignature: " + cmsVerifySignature);
+            signers.add(userVS);
+            if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
+                JSONObject voteJSON = new JSONObject(signedContent);
+                voteVS = VoteVS.getInstance(JsonUtils.toMap(voteJSON), cert, timeStampToken);
+            } else {signerCerts.add(cert);}
         }
+        if(voteVS != null) voteVS.setServerCerts(signerCerts);
     }
-    
     
     public boolean hasTimeStampToken() throws Exception {
         //Call this method after isValidSignature()
@@ -408,10 +381,10 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
             SignerInformation signer = it.next();
             byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
             //String digestStr = new String(Base64.encode(digestBytes));
-            //logger.debug("setTimeStampToken - hash firmante: " +  digestStr + 
+            //logger.debug("setTimeStampToken - hash signer: " +  digestStr +
             //        " - hash token: " + hashTokenStr);
             if(Arrays.equals(hashTokenBytes, digestBytes)) {
-            	Log.d(TAG, "setTimeStampToken - firmante"); 
+            	Log.d(TAG, "setTimeStampToken - signer");
                 AttributeTable attributeTable = signer.getUnsignedAttributes();
                 SignerInformation updatedSigner = null;
                 if(attributeTable != null) {
@@ -450,12 +423,10 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
     
 
     private void replaceSigners(CMSSignedData cmsdata) throws Exception {
-        SMIMESignedGenerator gen = 
-                new SMIMESignedGenerator();
+        SMIMESignedGenerator gen =  new SMIMESignedGenerator();
         gen.addAttributeCertificates(cmsdata.getAttributeCertificates());
         gen.addCertificates(cmsdata.getCertificates());
         gen.addSigners(cmsdata.getSignerInfos());
-
         MimeMultipart mimeMultipart = gen.generate(smimeSigned.getContent(), 
                 smimeSigned.getContent().getFileName());
         setContent(mimeMultipart, mimeMultipart.getContentType());
@@ -470,9 +441,42 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
         return messageBytes;
     }
 
-    /**
-     * @return the fileName
-     */
+    private boolean verifySignerCert(SignerInformation signer, X509Certificate cert) {
+        boolean result = false;
+        try {
+            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                    ContextVS.PROVIDER).build(cert))){
+                Log.d(TAG + ".verifySignerCert(...)" , "signature verified");
+                result = true;
+            } else {Log.d(TAG + ".verifySignerCert(...)" , "signature failed!");}
+        } catch(CMSVerifierCertificateNotValidException ex) {
+            Log.d(TAG + ".verifySignerCert(...)" , "-----> cert.getNotBefore(): " + cert.getNotBefore());
+            Log.d(TAG + ".verifySignerCert(...)" , "-----> cert.getNotAfter(): " + cert.getNotAfter());
+            ex.printStackTrace();
+        } finally {
+            return result;
+        }
+    }
+
+    public VoteVS getVoteVS() {
+        return voteVS;
+    }
+
+    public Set<UserVS> getSigners() {
+        return signers;
+    }
+
+    public void setSigners(Set<UserVS> signers) {
+        this.signers = signers;
+    }
+
+    public UserVS getSigner() {
+        if(signerVS == null && !signers.isEmpty()) {
+            signerVS = signers.iterator().next();
+        }
+        return signerVS;
+    }
+
     public String getFileName() {
         return fileName;
     }

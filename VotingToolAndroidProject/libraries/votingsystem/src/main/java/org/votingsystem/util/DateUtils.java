@@ -223,4 +223,10 @@ public class DateUtils {
         if (elapsedHours > 0) duracion.append(elapsedHours + ", horas");
         return duracion.toString();
     }
+
+    public static String getSpanishFormattedStringFromDate (Date date) {
+        DateFormat formatter = new SimpleDateFormat("dd MMM yyyy' 'HH:mm:ss");
+        return formatter.format(date);
+    }
+
 }

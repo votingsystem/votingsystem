@@ -25,13 +25,14 @@ public class ReceiptContentProvider extends ContentProvider {
 
     public static final String TAG = "ReceiptContentProvider";
 
+    public enum Operation {CANCEL_VOTE, REMOVE_RECEIPT}
+
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME = "voting_system_receipt.db";
     private static final String TABLE_NAME = "receipt";
     public static final String AUTHORITY = "votingsystem.org.receipt";
 
     public static final String ID_COL                = "_id";
-    public static final String URL_COL               = "url";
     public static final String TYPE_COL              = "type";
     public static final String STATE_COL             = "state";
     public static final String SERIALIZED_OBJECT_COL = "serializedObject";
@@ -148,7 +149,6 @@ public class ReceiptContentProvider extends ContentProvider {
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                URL_COL + " TEXT," +
                 TYPE_COL + " TEXT," +
                 STATE_COL + " TEXT," +
                 SERIALIZED_OBJECT_COL + " blob, " +

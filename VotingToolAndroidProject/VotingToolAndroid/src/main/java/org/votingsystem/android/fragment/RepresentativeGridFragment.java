@@ -225,8 +225,6 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
                 " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        /*Long representativeId = cursor.getLong(cursor.getColumnIndex(
-                RepresentativeContentProvider.ID_COL));*/
         Intent intent = new Intent(getActivity().getApplicationContext(),
                 RepresentativePagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
