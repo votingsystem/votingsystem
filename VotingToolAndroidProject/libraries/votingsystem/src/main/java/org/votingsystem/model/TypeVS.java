@@ -16,6 +16,7 @@ public enum TypeVS {
     VOTING_EVENT,
     VOTING_EVENT_ERROR,
     VOTEVS,
+    VOTEVS_CANCELLED,
     VOTE_ERROR,
     CANCEL_VOTE,
 

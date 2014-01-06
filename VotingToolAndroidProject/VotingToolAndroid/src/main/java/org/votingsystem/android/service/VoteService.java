@@ -43,8 +43,6 @@ public class VoteService extends IntentService {
 
     public static final String TAG = "VoteService";
 
-    public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
-
     public VoteService() { super(TAG); }
 
     private ContextVS contextVS;
@@ -52,7 +50,7 @@ public class VoteService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-        Operation operation = (Operation)arguments.getSerializable(ContextVS.OPERATION_KEY);
+        TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         try {
             contextVS = ContextVS.getInstance(getApplicationContext());
@@ -82,7 +80,7 @@ public class VoteService extends IntentService {
             String caption = null;
             String message = null;
             switch(operation) {
-                case VOTE:
+                case VOTEVS:
                     responseVS = processVote(pin, vote);
                     break;
                 case CANCEL_VOTE:
@@ -92,7 +90,7 @@ public class VoteService extends IntentService {
             }
             showNotification(responseVS, vote.getEventVS().getSubject(), operation, vote);
             switch(operation) {
-                case VOTE:
+                case VOTEVS:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         VoteVS voteReceipt = (VoteVS)responseVS.getData();
                     } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
@@ -172,7 +170,7 @@ public class VoteService extends IntentService {
         return responseVS;
     }
 
-    private void showNotification(ResponseVS responseVS, String eventSubject, Operation operation,
+    private void showNotification(ResponseVS responseVS, String eventSubject, TypeVS operation,
             VoteVS vote){
         String title = null;
         String message = null;
@@ -183,17 +181,17 @@ public class VoteService extends IntentService {
         Integer notificationIcon = null;
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             notificationIcon = R.drawable.accept_16;
-            if(Operation.VOTE == operation) {
+            if(TypeVS.VOTEVS == operation) {
                 title = getString(R.string.vote_ok_notification_msg);
-            } else  if(Operation.VOTE == operation) {
+            } else  if(TypeVS.CANCEL_VOTE == operation) {
                 title = getString(R.string.cancel_vote_ok_notification_msg);
             }
         } else {
             title = getString(R.string.signature_error_notification_msg);
             notificationIcon = R.drawable.cancel_16;
-            if(Operation.VOTE == operation) {
+            if(TypeVS.VOTEVS == operation) {
                 title = getString(R.string.vote_error_notification_msg);
-            } else  if(Operation.VOTE == operation) {
+            } else  if(TypeVS.CANCEL_VOTE == operation) {
                 title = getString(R.string.cancel_vote_error_notification_msg);
             }
         }
@@ -213,7 +211,7 @@ public class VoteService extends IntentService {
     }
 
     private void sendMessage(Integer statusCode, String caption, String message,
-             String serviceCaller, Operation operation, VoteVS vote) {
+             String serviceCaller, TypeVS operation, VoteVS vote) {
         Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
                 serviceCaller + " - operation: " + operation + " - caption: " + caption  +
                 " - message: " + message);
@@ -222,7 +220,7 @@ public class VoteService extends IntentService {
             intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());
         if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
         if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
-        intent.putExtra(ContextVS.OPERATION_KEY, operation);
+        intent.putExtra(ContextVS.TYPEVS_KEY, operation);
         intent.putExtra(ContextVS.VOTE_KEY, vote);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }

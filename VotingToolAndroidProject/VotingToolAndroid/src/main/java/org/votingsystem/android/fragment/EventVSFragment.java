@@ -99,7 +99,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            startIntent.putExtra(ContextVS.OPERATION_KEY, eventVS.getTypeVS());
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
                 startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
@@ -195,7 +195,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 Intent intent = new Intent(getActivity().getApplicationContext(),
                         EventVSStatisticsPagerActivity.class);
                 intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
-                intent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+                intent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
                 intent.putExtra(ContextVS.EVENT_STATE_KEY, eventVS.getState());
                 startActivity(intent);
                 return true;
@@ -238,7 +238,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId);
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId, null);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 

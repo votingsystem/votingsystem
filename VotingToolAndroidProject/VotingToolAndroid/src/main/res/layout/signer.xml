@@ -7,12 +7,6 @@
     android:showDividers="end"
     android:orientation="vertical">
 
-    <View android:layout_width="fill_parent"
-        android:layout_height="0.2dp"
-        android:id="@+id/separator"
-        android:visibility="visible"
-        android:background="@android:color/darker_gray"/>
-
     <TextView
         android:id="@+id/signer_info"
         android:layout_width="fill_parent"
@@ -20,5 +14,10 @@
         android:textSize="15sp"
         android:layout_weight="1.0"/>
 
+    <View android:layout_width="fill_parent"
+        android:layout_height="0.2dp"
+        android:id="@+id/separator"
+        android:visibility="visible"
+        android:background="@android:color/darker_gray"/>
 
 </LinearLayout>

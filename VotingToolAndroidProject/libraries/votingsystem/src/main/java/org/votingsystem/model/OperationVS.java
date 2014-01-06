@@ -15,7 +15,7 @@ public class OperationVS {
 
 	public static final String TAG = "Operacion";
 
-    public static final String OPERATION_KEY   = "operationKey";
+    public static final String TYPEVS_KEY   = "operationKey";
     
     private TypeVS typeVS;
     private Integer statusCode;

@@ -118,7 +118,7 @@ public class EventVSGridFragment extends Fragment
         }
         if (getArguments() != null) {
             eventState = (EventVS.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
-            groupPosition = (GroupPosition) getArguments().getSerializable(ContextVS.EVENT_TYPE_KEY);
+            groupPosition = (GroupPosition) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
             childPosition = (ChildPosition)getArguments().getSerializable(ContextVS.CHILD_POSITION_KEY);
             queryStr = getArguments().getString(SearchManager.QUERY);
 
@@ -273,7 +273,7 @@ public class EventVSGridFragment extends Fragment
                     EventVSService.class);
             startIntent.putExtra(ContextVS.STATE_KEY, eventState);
             startIntent.putExtra(ContextVS.OFFSET_KEY, offset);
-            startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, groupPosition.getTypeVS());
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, groupPosition.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             getActivity().startService(startIntent);
         }
@@ -318,7 +318,7 @@ public class EventVSGridFragment extends Fragment
         //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity().getApplicationContext(), EventVSPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
-        intent.putExtra(ContextVS.EVENT_TYPE_KEY, groupPosition.getTypeVS().toString());
+        intent.putExtra(ContextVS.TYPEVS_KEY, groupPosition.getTypeVS().toString());
         intent.putExtra(ContextVS.EVENT_STATE_KEY, eventState.toString());
         startActivity(intent);
     }

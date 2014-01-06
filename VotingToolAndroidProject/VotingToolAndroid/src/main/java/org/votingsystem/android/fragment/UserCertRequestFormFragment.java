@@ -292,7 +292,7 @@ public class UserCertRequestFormFragment extends Fragment {
 
     private void showPinScreen(String message) {
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+                message, false, this.getClass().getName(), null);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 

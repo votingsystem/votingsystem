@@ -54,7 +54,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
         }
 
         Bundle args = new Bundle();
-        args.putSerializable(ContextVS.EVENT_TYPE_KEY, selectedGroup);
+        args.putSerializable(ContextVS.TYPEVS_KEY, selectedGroup);
         args.putSerializable(ContextVS.EVENT_STATE_KEY, eventState);
         args.putSerializable(ContextVS.CHILD_POSITION_KEY, childPosition);
 

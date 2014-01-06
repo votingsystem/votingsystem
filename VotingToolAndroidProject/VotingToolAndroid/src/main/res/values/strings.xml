@@ -264,21 +264,27 @@
     <string name="cancel_vote_error_notification_msg">Error cancelando voto</string>
     <string name="send_vote_caption">Enviando voto</string>
     <string name="vote_option_mismatch">Problemas graves en el servicio de voto. Por favor, Inténtelo mas tarde</string>
-    <string name="receipt_vote_page_title">Recibos de voto</string>
-    <string name="receipt_cancel_vote_page_title">Recibos de cancelación de voto</string>
+    <string name="receipt_vote_page_title">Recibo de voto</string>
+    <string name="receipt_cancel_vote_page_title">Recibo de cancelación de voto</string>
 
-    <string name="cert_info_formated_msg"><![CDATA[<html><b>Asunto:</b>%1$s<br/><b>Emisor del certificado:</b> %2$s <br/> \n \
-    <b>N\u00famero de serie del certificado:</b> %3$s <br/><b>Valido desde:</b> %4$s<br/> \n \
-    <b>Valido hasta:</b> %5$s<br/></html>]]></string>
+    <string name="cert_info_formated_msg"><![CDATA[<html><b>Asunto: </b>%1$s<br/><b>Emisor del certificado: </b> %2$s <br/> \n \
+    <b>Num. serie del certificado: </b> %3$s <br/><b>Valido desde: </b> %4$s<br/> \n \
+    <b>Valido hasta: </b> %5$s<br/></html>]]></string>
+    <string name="timestamp_info_formated_msg"><![CDATA[<html><b>Fecha: </b>%1$s<br/><b>Num. de serie: </b> %2$s <br/> \n \
+    <b>Num.serie del certificado firmante: </b> %3$s <br/><b>Expendedor del certificado firmante:<br/></b> %4$s]]></string>
+
     <string name="share_receipt_lbl">Compartir recibo</string>
     <string name="check_receipt_lbl">Comprobar voto en el recuento</string>
     <string name="delete_receipt_lbl">Borrar recibo</string>
     <string name="open_receipt_lbl">Abrir recibo</string>
     <string name="signers_part_lbl">Datos de los certificados firmantes:</string>
-    <string name="show_signers_info_lbl">Información de los firmantes</string>
-    <string name="show_timestamp_info_lbl">Información del sello de tiempo</string>
+    <string name="show_signers_info_lbl">Datos de los firmantes del recibo</string>
+    <string name="show_timestamp_info_lbl">Datos del sello de tiempo</string>
 
-    <string name="saved_lbl">Guardado el</string>
-    <string name="updated_lbl">Actualizado el</string>
+    <string name="date_saved_lbl">Guardado el día</string>
+    <string name="date_updated_lbl">Actualizado el día </string>
+    <string name="cancel_vote_from_receipt_msg"><![CDATA[Si continua anulará el voto del recibo en el asunto \'<b>%1$s</b>\'<br/> \n \
+        Una vez anulado el voto podrá volver a votar.<br/>¿Desea continuar?]]></string>
+
 
 </resources>

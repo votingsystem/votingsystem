@@ -59,7 +59,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     public static final String TAG = "VotingEventFragment";
 
-    private VoteService.Operation operation = VoteService.Operation.VOTE;
+    private TypeVS operation = TypeVS.VOTEVS;
     private EventVS eventVS;
     private VoteVS vote;
     private List<Button> optionButtonList;
@@ -85,9 +85,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
-            VoteService.Operation resultOperation = (VoteService.Operation) intent.
-                    getSerializableExtra(ContextVS.OPERATION_KEY);
-            if(resultOperation == VoteService.Operation.VOTE) {
+            TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+            if(resultOperation == TypeVS.VOTEVS) {
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     message = getString(R.string.vote_ok_msg, eventVS.getSubject(),
                             vote.getOptionSelected().getContent());
@@ -100,7 +99,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                         showMessage(responseStatusCode, caption, message, null);
                     } else showMessage(responseStatusCode, caption, null, message);
                 }
-            } else if(resultOperation == VoteService.Operation.CANCEL_VOTE){
+            } else if(resultOperation == TypeVS.CANCEL_VOTE){
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     setEventScreen(eventVS);
                     CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
@@ -122,10 +121,10 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VoteService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            startIntent.putExtra(ContextVS.OPERATION_KEY, operation);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, operation);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-            if(operation == VoteService.Operation.CANCEL_VOTE) cancelVoteButton.setEnabled(false);
+            if(operation == TypeVS.CANCEL_VOTE) cancelVoteButton.setEnabled(false);
             else setOptionButtonsEnabled(false);
             showProgress(true, true);
             getActivity().startService(startIntent);
@@ -176,7 +175,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     @Override public void onClick(View view) {
         switch (view.getId()) {
             case R.id.cancel_vote_button:
-                operation = VoteService.Operation.CANCEL_VOTE;
+                operation = TypeVS.CANCEL_VOTE;
                 showPinScreen(getString(R.string.cancel_vote_msg));
                 break;
             case R.id.save_receipt_button:
@@ -199,7 +198,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                 Intent intent = new Intent(getActivity().getApplicationContext(),
                         EventVSStatisticsPagerActivity.class);
                 intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
-                intent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+                intent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
                 intent.putExtra(ContextVS.EVENT_STATE_KEY, eventVS.getState());
                 startActivity(intent);
                 return true;
@@ -298,7 +297,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     private void processSelectedOption(FieldEventVS optionSelected) {
         Log.d(TAG + ".processSelectedOption", "processSelectedOption");
-        operation = VoteService.Operation.VOTE;
+        operation = TypeVS.VOTEVS;
         if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
             showCertNotFoundDialog();
         } else {
@@ -364,7 +363,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId);
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId, null);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 

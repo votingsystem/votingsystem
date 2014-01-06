@@ -259,13 +259,13 @@ public class NavigationDrawer extends ActionBarActivity {
                         Intent intent = new Intent(NavigationDrawer.this, EventVSPublishingActivity.class);
                         switch (which) {
                             case 0:
-                                intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.VOTING_PUBLISHING);
+                                intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
                                 break;
                             case 1:
-                                intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.MANIFEST_PUBLISHING);
+                                intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MANIFEST_PUBLISHING);
                                 break;
                             case 2:
-                                intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.CLAIM_PUBLISHING);
+                                intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CLAIM_PUBLISHING);
                                 break;
                         }
                         startActivity(intent);

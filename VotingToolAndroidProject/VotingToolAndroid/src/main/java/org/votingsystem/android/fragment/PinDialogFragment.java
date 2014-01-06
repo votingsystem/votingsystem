@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 
 public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
@@ -42,6 +43,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
     private static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
 
+    private TypeVS typeVS;
     private TextView msgTextView;
     private EditText userPinEditText;
     private Boolean withPasswordConfirm = null;
@@ -49,12 +51,13 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     private String firstPin = null;
 
     public static PinDialogFragment newInstance(String msg, boolean isWithPasswordConfirm,
-                                                     String caller) {
+            String caller, TypeVS type) {
         PinDialogFragment dialog = new PinDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, msg);
         args.putString(ContextVS.CALLER_KEY, caller);
         args.putBoolean(PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
+        args.putSerializable(ContextVS.TYPEVS_KEY, type);
         dialog.setArguments(args);
         return dialog;
     }
@@ -74,6 +77,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         userPinEditText = (EditText)view.findViewById(R.id.user_pin);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
                 getString(R.string.pin_dialog_Caption));
+        typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         if(getArguments().getString(ContextVS.MESSAGE_KEY) == null) {
             msgTextView.setVisibility(View.GONE);
         } else {
@@ -113,6 +117,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         if(dialogCaller != null) {
             Intent intent = new Intent(dialogCaller);
             intent.putExtra(ContextVS.PIN_KEY, pin);
+            intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
             LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
         }
         firstPin = null;

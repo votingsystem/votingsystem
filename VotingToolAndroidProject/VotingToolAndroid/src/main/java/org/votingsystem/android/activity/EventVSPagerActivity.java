@@ -49,7 +49,7 @@ public class EventVSPagerActivity extends ActionBarActivity {
         setContentView(R.layout.pager_activity);
         Integer cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         String eventStateStr = getIntent().getStringExtra(ContextVS.EVENT_STATE_KEY);
-        String eventTypeStr = getIntent().getStringExtra(ContextVS.EVENT_TYPE_KEY);
+        String eventTypeStr = getIntent().getStringExtra(ContextVS.TYPEVS_KEY);
 
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +

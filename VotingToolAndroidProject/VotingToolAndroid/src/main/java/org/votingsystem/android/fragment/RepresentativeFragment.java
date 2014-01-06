@@ -53,7 +53,7 @@ public class RepresentativeFragment extends Fragment {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            //startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+            //startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
             /*if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
                 startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
@@ -190,7 +190,7 @@ public class RepresentativeFragment extends Fragment {
 
     private void showPinScreen(String message) {
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+                message, false, this.getClass().getName(), null);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 

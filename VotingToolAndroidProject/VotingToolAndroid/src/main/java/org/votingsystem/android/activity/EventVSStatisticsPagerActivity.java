@@ -34,7 +34,7 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
         contextVS = ContextVS.getInstance(getBaseContext());
         Integer cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         EventVS.State eventState = (EventVS.State)getIntent().getSerializableExtra(ContextVS.EVENT_STATE_KEY);
-        TypeVS eventType = (TypeVS)getIntent().getSerializableExtra(ContextVS.EVENT_TYPE_KEY);
+        TypeVS eventType = (TypeVS)getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         Long eventId = getIntent().getLongExtra(ContextVS.ITEM_ID_KEY, -1L);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                 EventVSContentProvider.STATE_COL + "= ? ";

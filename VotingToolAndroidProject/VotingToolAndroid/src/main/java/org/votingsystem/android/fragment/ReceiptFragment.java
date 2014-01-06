@@ -1,12 +1,16 @@
 package org.votingsystem.android.fragment;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
@@ -16,32 +20,25 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
-import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.android.service.VoteService;
+import org.votingsystem.android.ui.CancelVoteDialog;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
-import java.security.cert.X509Certificate;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -57,10 +54,54 @@ public class ReceiptFragment extends Fragment {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            if(pin != null) launchSignAndSendService(pin);
+            TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+            if(pin != null) {
+                switch(typeVS) {
+                    case CANCEL_VOTE:
+                        launchVoteCancellation(pin);
+                        break;
+                }
+            } else {
+                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                        ResponseVS.SC_ERROR);
+                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+                TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+                if(resultOperation == TypeVS.CANCEL_VOTE){
+                    if(ResponseVS.SC_OK == responseStatusCode) {
+                        ContentValues values = new ContentValues();
+                        try {
+                            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
+                                    ObjectUtils.serializeObject(vote));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                        values.put(ReceiptContentProvider.TYPE_COL, TypeVS.VOTEVS_CANCELLED.toString());
+                        values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
+                        values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+                        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+                        getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
 
+                        CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
+                                caption, message, vote);
+                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                        cancelVoteDialog.show(fragmentManager, CancelVoteDialog.TAG);
+                    }
+                }
+            }
         }
     };
+
+    private void launchVoteCancellation(String pin) {
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                VoteService.class);
+        startIntent.putExtra(ContextVS.PIN_KEY, pin);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.VOTE_KEY, vote);
+        showProgress(true, true);
+        getActivity().startService(startIntent);
+    }
 
     private void launchSignAndSendService(String pin) {
         Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
@@ -68,7 +109,7 @@ public class ReceiptFragment extends Fragment {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            //startIntent.putExtra(ContextVS.EVENT_TYPE_KEY, eventVS.getTypeVS());
+            //startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
 
             showProgress(true, true);
@@ -86,6 +127,7 @@ public class ReceiptFragment extends Fragment {
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SMIMEMessageWrapper selectedReceipt;
+    private String broadCastId = null;
 
 
     public static Fragment newInstance(int cursorPosition) {
@@ -103,6 +145,7 @@ public class ReceiptFragment extends Fragment {
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
         Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
                 ReceiptContentProvider.CONTENT_URI, null, null, null, null);
         cursor.moveToPosition(cursorPosition);
@@ -149,11 +192,13 @@ public class ReceiptFragment extends Fragment {
         Log.d(TAG + ".onCreateOptionsMenu(...) ", "");
         switch(receiptType) {
             case VOTEVS:
-                menuInflater.inflate(R.menu.vote_receipt, menu);
+                menuInflater.inflate(R.menu.receipt_vote, menu);
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " + receiptType);
         }
 
+
+        menu.removeItem(R.id.delete_receipt);
     }
 
     @Override public void onStart() {
@@ -178,10 +223,10 @@ public class ReceiptFragment extends Fragment {
     }
 
     @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "onResume");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
-        Log.d(TAG + ".onResume() ", "onResume");
+                broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
@@ -194,11 +239,21 @@ public class ReceiptFragment extends Fragment {
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
 		switch (item.getItemId()) {
-	    	case android.R.id.home:
-	    		Intent intent = new Intent(getActivity().getApplicationContext(),
-                        NavigationDrawer.class);
-	    		startActivity(intent);
-	    		return true;
+            case R.id.show_signers_info:
+                try {
+                    SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
+                            selectedReceipt.getBytes());
+                    newFragment.show(getFragmentManager(), SignersInfoDialogFragment.TAG);
+                }catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                break;
+            case R.id.show_timestamp_info:
+                TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
+                        selectedReceipt.getSigner().getTimeStampToken(),
+                        getActivity().getApplicationContext());
+                newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
+                break;
             case R.id.share_receipt:
                 try {
                     Intent sendIntent = new Intent();
@@ -211,17 +266,28 @@ public class ReceiptFragment extends Fragment {
                     ex.printStackTrace();
                 }
                 return true;
-            case R.id.show_signers_info:
-                try {
-                    SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
-                            selectedReceipt.getBytes());
-                    newFragment.show(getFragmentManager(), SignersInfoDialogFragment.TAG);
-                }catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                break;
             case R.id.check_receipt:
-                Log.d(TAG + ".onOptionsItemSelected(...) ", "Checking vote in system");
+                return true;
+            case R.id.delete_receipt:
+                return true;
+            case R.id.cancel_vote:
+                AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
+                builder.setTitle(getString(R.string.cancel_vote_lbl));
+                builder.setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
+                        vote.getSubject())));
+                builder.setPositiveButton(getString(R.string.ok_button),
+                        new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        showPinScreen(getString(R.string.cancel_vote_msg), TypeVS.CANCEL_VOTE);
+                    }
+                });
+                builder.setNegativeButton(getString(R.string.cancel_button),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.show();
                 return true;
 		}
         return super.onOptionsItemSelected(item);
@@ -235,9 +301,8 @@ public class ReceiptFragment extends Fragment {
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
     }
 
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+    private void showPinScreen(String message, TypeVS typeVS) {
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId, typeVS);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 

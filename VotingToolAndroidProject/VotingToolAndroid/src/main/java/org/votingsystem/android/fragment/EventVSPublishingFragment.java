@@ -65,7 +65,7 @@ public class EventVSPublishingFragment extends Fragment {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.OPERATION_KEY);
+            TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             if(pin != null) launchSignAndSendService(pin);
             else {
                 int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
@@ -118,7 +118,7 @@ public class EventVSPublishingFragment extends Fragment {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            startIntent.putExtra(ContextVS.OPERATION_KEY, pendingOperationVS.getTypeVS());
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, pendingOperationVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
             startIntent.putExtra(ContextVS.URL_KEY, pendingOperationVS.getUrlEnvioDocumento());
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
@@ -166,7 +166,7 @@ public class EventVSPublishingFragment extends Fragment {
 
     private void loadForm() {
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-        String operationStr = getArguments().getString(OperationVS.OPERATION_KEY);
+        String operationStr = getArguments().getString(OperationVS.TYPEVS_KEY);
         if(!TextUtils.isEmpty(operationStr)) { //called from browser
             try {
                 this.pendingOperationVS = OperationVS.parse(operationStr);
@@ -175,7 +175,7 @@ public class EventVSPublishingFragment extends Fragment {
                 ex.printStackTrace();
             }
         }
-        TypeVS formType = (TypeVS)getArguments().getSerializable(ContextVS.OPERATION_KEY);
+        TypeVS formType = (TypeVS)getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         String screenTitle = null;
         String serverURL = contextVS.getAccessControl().getPublishServiceURL(formType);
         switch(formType) {
@@ -241,7 +241,7 @@ public class EventVSPublishingFragment extends Fragment {
 
     private void showPinScreen(String message) {
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+                message, false, this.getClass().getName(), null);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 

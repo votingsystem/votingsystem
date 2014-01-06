@@ -27,7 +27,8 @@
                     android:id="@+id/receipt_subject"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
-                    android:textSize="20sp"
+                    android:textColor="@color/event_subject"
+                    android:textSize="25sp"
                     android:layout_weight="1.0"/>
                 <TextView
                     android:id="@+id/receipt_content"
@@ -35,14 +36,6 @@
                     android:layout_height="fill_parent"
                     android:layout_marginBottom="20dp"
                     android:textSize="15sp"
-                    android:layout_weight="1.0"/>
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:textSize="25sp"
-                    android:textColor="@color/event_subject"
-                    android:text="@string/signers_part_lbl"
                     android:layout_weight="1.0"/>
 
             </LinearLayout>

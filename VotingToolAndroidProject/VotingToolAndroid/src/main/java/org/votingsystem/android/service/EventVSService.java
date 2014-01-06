@@ -56,11 +56,11 @@ public class EventVSService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
-                && arguments.containsKey(ContextVS.EVENT_TYPE_KEY)
+                && arguments.containsKey(ContextVS.TYPEVS_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
             String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
             EventVS.State eventState = (EventVS.State) arguments.getSerializable(ContextVS.STATE_KEY);
-            TypeVS eventType = (TypeVS)arguments.getSerializable(ContextVS.EVENT_TYPE_KEY);
+            TypeVS eventType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
             String serviceURL = ContextVS.getInstance(this).getAccessControl().getEventVSURL(
                     eventState, EventVS.getURLPart(eventType),

@@ -251,7 +251,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
 
     private void showPinScreen(String message) {
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+                message, false, this.getClass().getName(), null);
         pinDialog.show(getSupportFragmentManager(), PinDialogFragment.TAG);
     }
     

@@ -9,9 +9,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -38,20 +36,20 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
-import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ReceiptGridActivity extends FragmentActivity implements
+public class ReceiptGridActivity extends ActionBarActivity implements
         LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{
 
     public static final String TAG = "ReceiptGridActivity";
@@ -67,44 +65,13 @@ public class ReceiptGridActivity extends FragmentActivity implements
     private GridView gridView;
     private FrameLayout gridContainer;
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                "intent.getExtras(): " + intent.getExtras());
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            ReceiptContentProvider.Operation operation = (ReceiptContentProvider.Operation) intent.
-                getSerializableExtra(ContextVS.OPERATION_KEY);
-        if(pin != null) launchVoteCancellationService(pin);
-        else {
-            if(operation == ReceiptContentProvider.Operation.CANCEL_VOTE) {
-                cancelVote(vote);
-            } else if(operation == ReceiptContentProvider.Operation.REMOVE_RECEIPT) {
-                removeReceipt(vote);
-            }
-        }
-        }
-    };
-
-    private void launchVoteCancellationService(String pin) {
-        Log.d(TAG + ".launchVoteCancellationService(...)", "");
-        try {
-            Intent startIntent = new Intent(getApplicationContext(), VoteService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            startIntent.putExtra(ContextVS.OPERATION_KEY, VoteService.Operation.CANCEL_VOTE);
-            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
-            startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-            showProgress(true, true);
-            startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.receipt_grid_activity);
         contextVS = ContextVS.getInstance(getBaseContext());
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         queryStr = getIntent().getStringExtra(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getIntent().getExtras() + " - loaderId: " +
                 loaderId);
@@ -140,27 +107,11 @@ public class ReceiptGridActivity extends FragmentActivity implements
         Intent intent = new Intent(this,ReceiptPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
-
-
-
-
-
-
-
-        byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
-                ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-        ReceiptContainer receiptContainer = null;
-        try {
-            receiptContainer = (ReceiptContainer) ObjectUtils.
-                    deSerializeObject(serializedReceiptContainer);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     private void showPinScreen(String message) {
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName());
+                message, false, this.getClass().getName(), null);
         pinDialog.show(getSupportFragmentManager(), PinDialogFragment.TAG);
     }
 
@@ -169,14 +120,11 @@ public class ReceiptGridActivity extends FragmentActivity implements
         return true;
     }
 
-
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
-                Intent intent = new Intent(this, NavigationDrawer.class);
-                startActivity(intent);
-                this.finish();
+                super.onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -184,7 +132,7 @@ public class ReceiptGridActivity extends FragmentActivity implements
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.vote_receipt_list, menu);
+        getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
         return true;
     }
 
@@ -316,15 +264,11 @@ public class ReceiptGridActivity extends FragmentActivity implements
     @Override public void onResume() {
         Log.d(TAG + ".onResume()", "");
         super.onResume();
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
     }
 
     @Override public void onPause() {
         Log.d(TAG + ".onPause(...)", "");
         super.onPause();
-        LocalBroadcastManager.getInstance(getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
     }
 
     private void removeReceipt(ReceiptContainer receipt) {

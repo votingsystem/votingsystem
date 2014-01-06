@@ -40,7 +40,7 @@ public class SignAndSendService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-        TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.OPERATION_KEY);
+        TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         try {
             contextVS = ContextVS.getInstance(getApplicationContext());
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
@@ -147,7 +147,7 @@ public class SignAndSendService extends IntentService {
         Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
                 serviceCaller +" - caption: " + caption  + " - message: " + message);
         Intent intent = new Intent(serviceCaller);
-        intent.putExtra(ContextVS.OPERATION_KEY, operationType);
+        intent.putExtra(ContextVS.TYPEVS_KEY, operationType);
         if(statusCode != null)
             intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());
         if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
