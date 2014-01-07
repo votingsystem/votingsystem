@@ -281,10 +281,16 @@
     <string name="show_signers_info_lbl">Datos de los firmantes del recibo</string>
     <string name="show_timestamp_info_lbl">Datos del sello de tiempo</string>
 
-    <string name="date_saved_lbl">Guardado el día</string>
-    <string name="date_updated_lbl">Actualizado el día </string>
-    <string name="cancel_vote_from_receipt_msg"><![CDATA[Si continua anulará el voto del recibo en el asunto \'<b>%1$s</b>\'<br/> \n \
+    <string name="date_saved_lbl">Guardado</string>
+    <string name="date_updated_lbl">Actualizado</string>
+    <string name="cancel_vote_from_receipt_msg"><![CDATA[Si continua anulará el voto del asunto \'<b>%1$s</b>\'<br/> \n \
         Una vez anulado el voto podrá volver a votar.<br/>¿Desea continuar?]]></string>
-
+    <string name="delete_receipt_msg"><![CDATA[Si continua borrará el recibo con asunto \'<b>%1$s</b>\'. \n \
+       <br/> ¿Desea continuar?]]></string>
+    <string name="show_all_receipts_lbl">Mostrar todos los recibos</string>
+    <string name="vote_receipts_lbl">Recibos de voto</string>
+    <string name="show_vote_receipts_lbl">Mostrar sólo recibos de voto</string>
+    <string name="show_cancellations_vote_receipts_lbl">Mostrar sólo cancelaciones de voto</string>
+    <string name="cancellations_vote_receipts_lbl">Recibos de cancelaciones de voto</string>
 
 </resources>

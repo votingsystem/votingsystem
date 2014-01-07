@@ -26,16 +26,16 @@
                 android:textSize="23sp" />
 
             <LinearLayout android:id="@+id/receipt_buttons"
-                android:layout_width="fill_parent" android:layout_height="wrap_content">
+                android:layout_width="fill_parent" android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <Button
                     android:id="@+id/cancel_vote_button"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="15dp"
                     android:layout_marginLeft="30dp"
-                    android:layout_marginRight="20dip"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="30dp"
                     android:layout_weight="0.32"
                     android:drawableLeft="@drawable/cancel_22"
                     android:text="@string/cancel_vote_lbl"
@@ -43,12 +43,12 @@
 
                 <Button
                     android:id="@+id/save_receipt_button"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="20dip"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="30dp"
                     android:layout_marginRight="30dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_weight="0.43"
                     android:drawableLeft="@drawable/filesave_22x22"
                     android:text="@string/guardar_recibo_voto_label"

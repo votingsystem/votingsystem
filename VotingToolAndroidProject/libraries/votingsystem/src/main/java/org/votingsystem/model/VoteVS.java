@@ -11,6 +11,8 @@ import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
+
+import java.io.NotActiveException;
 import java.security.cert.X509Certificate;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,9 +37,11 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
 
 	public static final String TAG = "VoteVS";
     
-    private Long id;
+    private Long localId = -1L;
     private transient SMIMEMessageWrapper voteReceipt;
+    private transient byte[] voteReceiptBytes;
     private transient SMIMEMessageWrapper cancelVoteReceipt;
+    private transient byte[] cancelVoteReceiptBytes;
     private transient TimeStampToken timeStampToken;
     private X509Certificate x509Certificate;
     private byte[] encryptedKey = null;
@@ -131,7 +135,6 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
             }
 
             if (eventVS != null) resultMap.put("eventId", eventVS.getId());
-            if (id != null) resultMap.put("id", id);
             //map.put("UUID", UUID.randomUUID().toString());
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -146,14 +149,6 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     public FieldEventVS getOptionSelected() {
         return optionSelected;
     }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
 
     public EventVS getEventVS() {
         return eventVS;
@@ -164,7 +159,15 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     }
 
 	public SMIMEMessageWrapper getCancelVoteReceipt() {
-		return cancelVoteReceipt;
+        if(cancelVoteReceipt == null && cancelVoteReceiptBytes != null) {
+            try {
+                cancelVoteReceipt = new SMIMEMessageWrapper(null,
+                        new ByteArrayInputStream(cancelVoteReceiptBytes), null);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return cancelVoteReceipt;
 	}
 
 	public void setCancelVoteReceipt(SMIMEMessageWrapper cancelVoteReceipt) {
@@ -172,6 +175,14 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
 	}
 
     public SMIMEMessageWrapper getVoteReceipt() {
+        if(voteReceipt == null && voteReceiptBytes != null) {
+            try {
+                voteReceipt = new SMIMEMessageWrapper(null,
+                        new ByteArrayInputStream(voteReceiptBytes), null);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         return voteReceipt;
     }
 
@@ -338,17 +349,8 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
 
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
         s.defaultReadObject();
-        try {
-            byte[] voteReceiptBytes = (byte[]) s.readObject();
-            if(voteReceiptBytes != null) voteReceipt = new SMIMEMessageWrapper(null,
-                    new ByteArrayInputStream(voteReceiptBytes), null);
-            byte[] cancelReceiptBytes = (byte[]) s.readObject();
-            if(cancelReceiptBytes != null) cancelVoteReceipt = new SMIMEMessageWrapper(null,
-                    new ByteArrayInputStream(cancelReceiptBytes), null);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-
+        voteReceiptBytes = (byte[]) s.readObject();
+        cancelVoteReceiptBytes = (byte[]) s.readObject();
     }
 
 
@@ -390,5 +392,13 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
 
     public void setServerCerts(Set<X509Certificate> serverCerts) {
         this.serverCerts = serverCerts;
+    }
+
+    public Long getLocalId() {
+        return localId;
+    }
+
+    public void setLocalId(Long localId) {
+        this.localId = localId;
     }
 }

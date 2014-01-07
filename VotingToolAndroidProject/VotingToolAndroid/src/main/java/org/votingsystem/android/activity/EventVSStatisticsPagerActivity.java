@@ -90,25 +90,25 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
                     case AWAITING:
                         subtTitle = getString(R.string.manifest_pendind_lbl) + " - "+
                                 getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
                         break;
                     case CANCELLED:
                         subtTitle = getString(R.string.manifest_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ") - " +
                                 getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish()) +
+                                DateUtils.getSpanishStringFromDate(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
                     case TERMINATED:
                         subtTitle = getString(R.string.manifest_closed_lbl) + " - " +
                                 getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
                         break;
                     default:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
@@ -125,25 +125,25 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
                     case AWAITING:
                         subtTitle = getString(R.string.claim_pending_lbl) +
                                 getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
                         break;
                     case CANCELLED:
                         subtTitle = getString(R.string.claim_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ") " +
                                 getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish()) +
+                                DateUtils.getSpanishStringFromDate(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
                     case TERMINATED:
                         subtTitle = getString(R.string.claim_closed_lbl) + " - " +
                                 getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
                     default:
                         subtTitle = getString(R.string.claim_closed_lbl);
                 }
@@ -159,9 +159,9 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
                     case AWAITING:
                         subtTitle = getString(R.string.voting_pending_lbl) + " - " +
                                 getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
                         break;
                     default:
                         subtTitle = getString(R.string.voting_closed_lbl);

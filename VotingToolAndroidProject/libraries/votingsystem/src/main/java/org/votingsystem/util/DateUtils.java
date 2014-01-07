@@ -156,12 +156,7 @@ public class DateUtils {
     }
     
     public static String getSpanishStringFromDate (Date date) {
-    	SimpleDateFormat formatter = new SimpleDateFormat("dd MMM 'de' yyyy 'a las' HH:mm"); 
-    	return formatter.format(date);
-    }
-    
-    public static String getShortSpanishStringFromDate (Date date) {
-    	SimpleDateFormat formatter = new SimpleDateFormat("HH:mm 'del' dd/MMM/yyyy"); 
+    	SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
     	return formatter.format(date);
     }
     

@@ -11,6 +11,7 @@ public interface ReceiptContainer {
     public TypeVS getType();
     public Date getValidFrom();
     public Date getValidTo();
-    public Long getId();
+    public Long getLocalId();
+    public void setLocalId(Long localId);
 
 }

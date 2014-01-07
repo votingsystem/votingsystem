@@ -62,9 +62,11 @@ public class ReceiptGridActivity extends ActionBarActivity implements
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String queryStr;
     private int loaderId = 1;
+    private int menuItemSelected = R.id.all_receipts;
     private GridView gridView;
     private FrameLayout gridContainer;
-
+    private Menu menu;
+    private CursorLoader loader;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +99,8 @@ public class ReceiptGridActivity extends ActionBarActivity implements
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
         }
+        if(savedInstanceState != null)
+        menuItemSelected = savedInstanceState.getInt(ContextVS.ITEM_ID_KEY, R.id.all_receipts);
         getSupportLoaderManager().initLoader(loaderId, null, this);
     }
 
@@ -126,23 +130,74 @@ public class ReceiptGridActivity extends ActionBarActivity implements
             case android.R.id.home:
                 super.onBackPressed();
                 return true;
+            case R.id.all_receipts:
+            case R.id.vote_receipts:
+            case R.id.cancel_vote_receipts:
+                if(menuItemSelected != item.getItemId()) {
+                    String selection = null;
+                    String[] selectionArgs = null;
+                    if(item.getItemId() != R.id.all_receipts) {
+                        selection = ReceiptContentProvider.TYPE_COL + "=? ";
+                        String typeStr = null;
+                        if(item.getItemId() == R.id.vote_receipts) typeStr = TypeVS.VOTEVS.toString();
+                        else if (item.getItemId() == R.id.cancel_vote_receipts) typeStr = TypeVS.CANCEL_VOTE.toString();
+                        selectionArgs = new String[]{typeStr};
+                        Log.d(TAG + ".onOptionsItemSelected(...)", "filtering by " + typeStr);
+                    } Log.d(TAG + ".onOptionsItemSelected(...)", "showing all receipts");
+                    Cursor cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,
+                            null, selection, selectionArgs, null);
+                    loader.deliverResult(cursor);
+                }
+                onOptionsItemSelected(item.getItemId());
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
+    private boolean onOptionsItemSelected(int itemId) {
+        menuItemSelected = itemId;
+        menu.removeItem(R.id.all_receipts);
+        menu.removeItem(R.id.vote_receipts);
+        menu.removeItem(R.id.cancel_vote_receipts);
+        switch (itemId) {
+            case R.id.all_receipts:
+                getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
+                menu.removeItem(R.id.all_receipts);
+                break;
+            case R.id.vote_receipts:
+                getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
+                menu.removeItem(R.id.vote_receipts);
+                break;
+            case R.id.cancel_vote_receipts:
+                getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
+                menu.removeItem(R.id.cancel_vote_receipts);
+                break;
+        }
         return true;
     }
 
-    @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d(TAG + ".onCreateOptionsMenu(...)", "onCreateOptionsMenu");
+        this.menu = menu;
+        onOptionsItemSelected(menuItemSelected);
+        return true;
+    }
+
+
+    /*@Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         CursorLoader loader = new CursorLoader(this, ReceiptContentProvider.CONTENT_URI, null, null, null, null);
+        return loader;
+    }*/
+
+    @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        loader = new CursorLoader(this, ReceiptContentProvider.CONTENT_URI, null,
+                null, null, null);
         return loader;
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".f(...)", " - cursor.getCount(): " + cursor.getCount());
+        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount());
         showProgress(false, true);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
@@ -178,15 +233,8 @@ public class ReceiptGridActivity extends ActionBarActivity implements
             if(cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-                ReceiptContainer receiptContainer = null;
-                try {
-                    receiptContainer = (ReceiptContainer) ObjectUtils.
-                            deSerializeObject(serializedReceiptContainer);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - receiptId: " +
-                        receiptContainer.getId() + " - type: " + receiptContainer.getType());
+                ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
+                        deSerializeObject(serializedReceiptContainer);
                 String stateStr = cursor.getString(cursor.getColumnIndex(
                         ReceiptContentProvider.STATE_COL));
                 ReceiptContainer.State state =  ReceiptContainer.State.valueOf(stateStr);
@@ -205,10 +253,10 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getString(R.string.inicio_lbl) + "</b>: " +
-                            DateUtils.getShortSpanishStringFromDate(
+                            DateUtils.getSpanishStringFromDate(
                                     receiptContainer.getValidFrom()) + " - " +
                             "<b>" + getString(R.string.fin_lbl) + "</b>: " +
-                            DateUtils.getShortSpanishStringFromDate(receiptContainer.getValidTo());
+                            DateUtils.getSpanishStringFromDate(receiptContainer.getValidTo());
                 } else {
                     imgView.setImageResource(R.drawable.open);
                     dateInfoStr = "<b>" + getString(R.string.remain_lbl, DateUtils.
@@ -223,8 +271,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                     receiptState.setVisibility(View.GONE);
                 }
                 if(true) {
-                    String authorStr =  "<b> ===========</b>: " + "==========";
-                    author.setText(Html.fromHtml(authorStr));
+                    author.setText(Html.fromHtml(receiptContainer.getType().toString()));
                 } else author.setVisibility(View.GONE);
             }
         }
@@ -239,28 +286,6 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         showProgress(false, true);
     }
 
-    private void cancelVote(VoteVS receipt) {
-        Log.d(TAG + ".cancelVote(...)", " - cancelVote");
-        vote = receipt;
-        if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
-            Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
-            showCertNotFoundDialog();
-        } else {
-            showPinScreen(getString(R.string.cancel_vote_msg));
-        }
-    }
-
-    private void showCertNotFoundDialog() {
-        CertNotFoundDialog certDialog = new CertNotFoundDialog();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
-        certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-    }
-
     @Override public void onResume() {
         Log.d(TAG + ".onResume()", "");
         super.onResume();
@@ -271,18 +296,12 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         super.onPause();
     }
 
-    private void removeReceipt(ReceiptContainer receipt) {
-        Log.d(TAG + ".removeReceipt()", "receipt: " + receipt.getId());
-        String selection = ReceiptContentProvider.ID_COL + "=? ";
-        getContentResolver().delete(ReceiptContentProvider.CONTENT_URI, selection,
-                new String[]{receipt.getId().toString()});
-    }
-
     @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
+        outState.putInt(ContextVS.ITEM_ID_KEY, menuItemSelected);
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
     }
 

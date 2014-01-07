@@ -128,7 +128,7 @@ public class MainActivity extends FragmentActivity {
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG +  ".onCreateOptionsMenu(...)", "onCreateOptionsMenu");
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.main_activity, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

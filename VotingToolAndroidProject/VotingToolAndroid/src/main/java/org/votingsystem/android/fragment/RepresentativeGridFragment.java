@@ -204,7 +204,7 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         Log.d(TAG +  ".onCreateOptionsMenu(..)", "onCreateOptionsMenu");
-        inflater.inflate(R.menu.event_list_fragment, menu);
+        inflater.inflate(R.menu.eventvs_grid_fragment, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

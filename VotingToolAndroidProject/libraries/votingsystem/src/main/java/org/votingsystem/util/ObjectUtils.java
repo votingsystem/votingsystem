@@ -18,20 +18,30 @@ import java.io.Serializable;
  */
 public class ObjectUtils {
 
-    public static byte[] serializeObject(Serializable serializable) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(serializable);
-        oos.close();
-        return Base64.encode(baos.toByteArray());
+    public static byte[] serializeObject(Serializable serializable) {
+        byte[] base64EncodedSerializedObject = null;
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(serializable);
+            oos.close();
+            base64EncodedSerializedObject = Base64.encode(baos.toByteArray());
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return base64EncodedSerializedObject;
     }
 
-    public static Serializable deSerializeObject(byte[] base64SerializedObject) throws IOException,
-            ClassNotFoundException {
-        byte [] data = Base64.decode(base64SerializedObject);
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-        Object object  = ois.readObject();
-        ois.close();
-        return (Serializable)object;
+    public static Serializable deSerializeObject(byte[] base64SerializedObject) {
+        Serializable deserializedObject = null;
+        try {
+            byte [] data = Base64.decode(base64SerializedObject);
+            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+            deserializedObject  = (Serializable) ois.readObject();
+            ois.close();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return deserializedObject;
     }
 }

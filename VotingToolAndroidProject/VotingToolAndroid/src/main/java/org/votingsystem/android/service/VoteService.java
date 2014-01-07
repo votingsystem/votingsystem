@@ -108,18 +108,16 @@ public class VoteService extends IntentService {
                         vote.setCancelVoteReceipt(cancelReceipt);
                         message = getString(R.string.cancel_vote_result_msg,
                                 vote.getEventVS().getSubject());
-                        if(vote.getId() > 0) {//Update
-                            ContentValues values = new ContentValues(5);
-                            values.put(ReceiptContentProvider.ID_COL, vote.getId());
+                        if(vote.getLocalId() > 0) {//Update local receipt database
+                            ContentValues values = new ContentValues();
                             values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
                                     ObjectUtils.serializeObject(vote));
-                            values.put(ReceiptContentProvider.TYPE_COL, TypeVS.VOTEVS.toString());
-                            values.put(ReceiptContentProvider.STATE_COL,
-                                    ReceiptContainer.State.CANCELLED.toString());
+                            values.put(ReceiptContentProvider.TYPE_COL,
+                                    TypeVS.VOTEVS_CANCELLED.toString());
                             values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL,
                                     System.currentTimeMillis());
                             getContentResolver().update(ReceiptContentProvider.getreceiptURI(
-                                    vote.getId()), values, null, null);
+                                    vote.getLocalId()), values, null, null);
                         }
                     } else {
                         caption = getString(R.string.error_lbl);

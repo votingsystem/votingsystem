@@ -1,9 +1,20 @@
-<menu>
-<!-- 
-<item
-        android:id="@+id/menu_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="Receipt menu settings"/> -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto"
+    android:title="Todos los recibos">
+
+    <item
+        android:id="@+id/all_receipts"
+        android:title="@string/show_all_receipts_lbl">
+    </item>
+    <item
+        android:id="@+id/vote_receipts"
+        android:title="@string/show_vote_receipts_lbl">
+    </item>
+    <item
+        android:id="@+id/cancel_vote_receipts"
+        android:title="@string/show_cancellations_vote_receipts_lbl">
+    </item>
+
+
 
 </menu>

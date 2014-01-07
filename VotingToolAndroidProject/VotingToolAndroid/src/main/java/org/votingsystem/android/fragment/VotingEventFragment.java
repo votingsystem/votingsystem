@@ -188,7 +188,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.event, menu);
+        menuInflater.inflate(R.menu.eventvs, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -241,12 +241,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     public void saveVote() {
         Log.d(TAG + ".saveVote(...)", "");
         ContentValues values = new ContentValues();
-        try {
-            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
-                    ObjectUtils.serializeObject(vote));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
         values.put(ReceiptContentProvider.TYPE_COL, TypeVS.VOTEVS.toString());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
         values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());

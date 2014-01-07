@@ -60,7 +60,7 @@ public class ReceiptFragment extends Fragment {
             if(pin != null) {
                 switch(typeVS) {
                     case CANCEL_VOTE:
-                        launchVoteCancellation(pin);
+                        launchVoteCancellation(pin, (VoteVS)selectedReceipt);
                         break;
                 }
             } else {
@@ -70,31 +70,15 @@ public class ReceiptFragment extends Fragment {
                 String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
                 TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
                 if(resultOperation == TypeVS.CANCEL_VOTE){
-                    if(ResponseVS.SC_OK == responseStatusCode) {
-                        ContentValues values = new ContentValues();
-                        try {
-                            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
-                                    ObjectUtils.serializeObject(vote));
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                        values.put(ReceiptContentProvider.TYPE_COL, TypeVS.VOTEVS_CANCELLED.toString());
-                        values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
-                        values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-                        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-                        Uri uriToUpdate = ReceiptContentProvider.getreceiptURI(vote.getId());
-                        getActivity().getContentResolver().update(uriToUpdate, values, null, null);
-                        CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
-                                caption, message, vote);
-                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                        cancelVoteDialog.show(fragmentManager, CancelVoteDialog.TAG);
-                    }
+                    if(ResponseVS.SC_OK == responseStatusCode) { }
                 }
+                showProgress(false, true);
+                showMessage(responseStatusCode, caption, message, null);
             }
         }
     };
 
-    private void launchVoteCancellation(String pin) {
+    private void launchVoteCancellation(String pin, VoteVS vote) {
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VoteService.class);
         startIntent.putExtra(ContextVS.PIN_KEY, pin);
@@ -106,12 +90,11 @@ public class ReceiptFragment extends Fragment {
     }
 
     private ContextVS contextVS;
-    private TypeVS receiptType;
-    private VoteVS vote;
+    private ReceiptContainer selectedReceipt;
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private SMIMEMessageWrapper selectedReceipt;
+    private SMIMEMessageWrapper selectedReceiptSMIME;
     private String broadCastId = null;
 
 
@@ -136,29 +119,27 @@ public class ReceiptFragment extends Fragment {
         cursor.moveToPosition(cursorPosition);
         byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                 ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-        String typeStr = cursor.getString(cursor.getColumnIndex(ReceiptContentProvider.TYPE_COL));
-        receiptType = TypeVS.valueOf(typeStr);
-        ReceiptContainer receipt = null;
+        Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
         View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.receipt_data_container);
         try {
-            receipt = (ReceiptContainer) ObjectUtils.
-                    deSerializeObject(serializedReceiptContainer);
-            switch(receiptType) {
+            selectedReceipt = (ReceiptContainer) ObjectUtils.deSerializeObject(serializedReceiptContainer);
+            selectedReceipt.setLocalId(receiptId);
+            switch(selectedReceipt.getType()) {
                 case VOTEVS:
-                    vote = (VoteVS) receipt;
-                    initVoteReceiptScreen(vote, receiptType, inflater, receiptDataContainer);
+                    initVoteReceiptScreen((VoteVS)selectedReceipt, selectedReceipt.getType(),
+                            inflater, receiptDataContainer);
                     break;
                 default:
-                    Log.d(TAG + ".onCreateView(...)", "unknown receipt type: " + receipt.getType());
+                    Log.d(TAG + ".onCreateView(...)", "unknown receipt type: " + selectedReceipt.getType());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         TextView receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
-        receiptSubject.setText(receipt.getSubject());
-        Log.d(TAG + ".onCreateView(...)", "receiptSubject: " + receipt.getSubject());
+        receiptSubject.setText(selectedReceipt.getSubject());
+        Log.d(TAG + ".onCreateView(...)", "receiptSubject: " + selectedReceipt.getSubject());
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -169,20 +150,22 @@ public class ReceiptFragment extends Fragment {
     private void initVoteReceiptScreen (VoteVS vote, TypeVS type, LayoutInflater inflater,
             LinearLayout receiptDataContainer) {
         Log.d(TAG + ".initVoteReceiptScreen(...)", "type: " + type);
-        if(TypeVS.VOTEVS == type) selectedReceipt = vote.getVoteReceipt();
-        else if(TypeVS.CANCEL_VOTE == type) selectedReceipt = vote.getCancelVoteReceipt();
+        if(TypeVS.VOTEVS == type) selectedReceiptSMIME = vote.getVoteReceipt();
+        else if(TypeVS.CANCEL_VOTE == type) selectedReceiptSMIME = vote.getCancelVoteReceipt();
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         Log.d(TAG + ".onCreateOptionsMenu(...) ", "");
-        switch(receiptType) {
+        switch(selectedReceipt.getType()) {
             case VOTEVS:
                 menuInflater.inflate(R.menu.receipt_vote, menu);
-                if(vote.getEventVS().getDateFinish().after(new Date(System.currentTimeMillis()))) {
+                if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
+                        new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
                 break;
-            default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " + receiptType);
+            default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
+                    selectedReceipt.getType());
         }
     }
 
@@ -190,6 +173,7 @@ public class ReceiptFragment extends Fragment {
     	Log.d(TAG + ".onStart(...) ", "");
     	super.onStart();
     }
+
 
     @Override public void onDestroy() {
         Log.d(TAG + ".onDestroy()", "");
@@ -227,7 +211,7 @@ public class ReceiptFragment extends Fragment {
             case R.id.show_signers_info:
                 try {
                     SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
-                            selectedReceipt.getBytes());
+                            selectedReceiptSMIME.getBytes());
                     newFragment.show(getFragmentManager(), SignersInfoDialogFragment.TAG);
                 }catch (Exception ex) {
                     ex.printStackTrace();
@@ -235,14 +219,14 @@ public class ReceiptFragment extends Fragment {
                 break;
             case R.id.show_timestamp_info:
                 TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
-                        selectedReceipt.getSigner().getTimeStampToken(),
+                        selectedReceiptSMIME.getSigner().getTimeStampToken(),
                         getActivity().getApplicationContext());
                 newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
                 break;
             case R.id.share_receipt:
                 try {
                     Intent sendIntent = new Intent();
-                    String receiptStr = new String(selectedReceipt.getBytes());
+                    String receiptStr = new String(selectedReceiptSMIME.getBytes());
                     sendIntent.setAction(Intent.ACTION_SEND);
                     sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
                     sendIntent.setType(ContentTypeVS.TEXT.getName());
@@ -254,25 +238,35 @@ public class ReceiptFragment extends Fragment {
             case R.id.check_receipt:
                 return true;
             case R.id.delete_receipt:
-                return true;
-            case R.id.cancel_vote:
-                AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-                builder.setTitle(getString(R.string.cancel_vote_lbl));
-                builder.setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
-                        vote.getSubject())));
-                builder.setPositiveButton(getString(R.string.ok_button),
+                new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_receipt_lbl)).
+                        setMessage(Html.fromHtml(getString(R.string.delete_receipt_msg,
+                                ((VoteVS)selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_button),
                         new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        showPinScreen(getString(R.string.cancel_vote_msg), TypeVS.CANCEL_VOTE);
-                    }
-                });
-                builder.setNegativeButton(getString(R.string.cancel_button),
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                getActivity().getContentResolver().delete(ReceiptContentProvider.
+                                        getreceiptURI(selectedReceipt.getLocalId()), null, null);
+                            }
+                        }).setNegativeButton(getString(R.string.cancel_button),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 dialog.dismiss();
                             }
-                        });
-                builder.show();
+                        }).show();
+                return true;
+            case R.id.cancel_vote:
+                new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
+                        setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
+                                ((VoteVS) selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_button),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                showPinScreen(getString(R.string.cancel_vote_msg), TypeVS.CANCEL_VOTE);
+                            }
+                        }).setNegativeButton(getString(R.string.cancel_button),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                dialog.dismiss();
+                            }
+                        }).show();
                 return true;
 		}
         return super.onOptionsItemSelected(item);

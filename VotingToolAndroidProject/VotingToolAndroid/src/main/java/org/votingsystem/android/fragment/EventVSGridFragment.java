@@ -291,7 +291,7 @@ public class EventVSGridFragment extends Fragment
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         Log.d(TAG +  ".onCreateOptionsMenu(...)", "onCreateOptionsMenu - onCreateOptionsMenu");
-        if(menu.findItem(R.id.reload) == null) inflater.inflate(R.menu.event_list_fragment, menu);
+        if(menu.findItem(R.id.reload) == null) inflater.inflate(R.menu.eventvs_grid_fragment, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -447,20 +447,20 @@ public class EventVSGridFragment extends Fragment
                             imgView.setImageResource(R.drawable.pending);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.inicio_lbl) + "</b>: " +
-                                    DateUtils.getShortSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
+                                    DateUtils.getSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.fin_lbl) + "</b>: " +
-                                    DateUtils.getShortSpanishStringFromDate(eventVS.getDateFinish());
+                                    DateUtils.getSpanishStringFromDate(eventVS.getDateFinish());
                             break;
                         case CANCELLED:
                         case TERMINATED:
                             imgView.setImageResource(R.drawable.closed);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.inicio_lbl) + "</b>: " +
-                                    DateUtils.getShortSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
+                                    DateUtils.getSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.fin_lbl) + "</b>: " +
-                                    DateUtils.getShortSpanishStringFromDate(eventVS.getDateFinish());
+                                    DateUtils.getSpanishStringFromDate(eventVS.getDateFinish());
                             break;
                         default:
                             Log.d(TAG +  ".bindView(...)", "unknown event state: " +

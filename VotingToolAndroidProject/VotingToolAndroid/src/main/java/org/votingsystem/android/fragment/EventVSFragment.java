@@ -185,7 +185,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.event, menu);
+        menuInflater.inflate(R.menu.eventvs, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

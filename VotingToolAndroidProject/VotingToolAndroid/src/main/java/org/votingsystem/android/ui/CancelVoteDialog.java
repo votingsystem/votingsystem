@@ -41,11 +41,7 @@ public class CancelVoteDialog  extends DialogFragment {
 	public void saveCancelReceipt(View v, VoteVS vote) {
 		Log.d(TAG + ".saveCancelReceipt(...)", "saveCancelReceipt");
         ContentValues values = new ContentValues();
-        try {
-            values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
         values.put(ReceiptContentProvider.TYPE_COL, TypeVS.CANCEL_VOTE.toString());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
         values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
@@ -66,7 +62,7 @@ public class CancelVoteDialog  extends DialogFragment {
             	saveCancelReceipt(v, vote);
             }  
         });
-        if(vote.getId() > 0) saveCancellationButton.setVisibility(View.GONE);
+        if(vote.getLocalId() > 0) saveCancellationButton.setVisibility(View.GONE);
         getDialog().setTitle(getArguments().getString(ContextVS.CAPTION_KEY));
         String message = getArguments().getString(ContextVS.MESSAGE_KEY);
         if(message != null && message.length() > MAX_MSG_LENGTH)
