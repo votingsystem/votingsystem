@@ -124,14 +124,7 @@ public class ReceiptFragment extends Fragment {
         try {
             selectedReceipt = (ReceiptContainer) ObjectUtils.deSerializeObject(serializedReceiptContainer);
             selectedReceipt.setLocalId(receiptId);
-            switch(selectedReceipt.getType()) {
-                case VOTEVS:
-                    initVoteReceiptScreen((VoteVS)selectedReceipt, selectedReceipt.getType(),
-                            inflater, receiptDataContainer);
-                    break;
-                default:
-                    Log.d(TAG + ".onCreateView(...)", "unknown receipt type: " + selectedReceipt.getType());
-            }
+            initReceiptScreen(selectedReceipt, inflater, receiptDataContainer);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -145,11 +138,20 @@ public class ReceiptFragment extends Fragment {
         return rootView;
     }
 
-    private void initVoteReceiptScreen (VoteVS vote, TypeVS type, LayoutInflater inflater,
+    private void initReceiptScreen (ReceiptContainer receipt, LayoutInflater inflater,
             LinearLayout receiptDataContainer) {
-        Log.d(TAG + ".initVoteReceiptScreen(...)", "type: " + type);
-        if(TypeVS.VOTEVS == type) selectedReceiptSMIME = vote.getVoteReceipt();
-        else if(TypeVS.CANCEL_VOTE == type) selectedReceiptSMIME = vote.getCancelVoteReceipt();
+        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getType());
+        switch(receipt.getType()) {
+            case CANCEL_VOTE:
+            case VOTEVS_CANCELLED:
+                selectedReceiptSMIME = ((VoteVS)receipt).getCancelVoteReceipt();
+                break;
+            case VOTEVS:
+                selectedReceiptSMIME = ((VoteVS)receipt).getVoteReceipt();
+                break;
+            default: Log.d(TAG + ".initReceiptScreen(...)", "unprocessed type: " +
+                    receipt.getType());
+        }
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
