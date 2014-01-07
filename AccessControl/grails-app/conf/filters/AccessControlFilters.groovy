@@ -250,6 +250,8 @@ class AccessControlFilters {
 
     private boolean printOutputStream(HttpServletResponseWrapper response, ResponseVS responseVS) {
         response.status = responseVS.getStatusCode()
+        if(responseVS?.data?.fileName) response.setHeader(
+                "Content-Disposition", "inline; filename='${responseVS.data.fileName}'");
         response.contentLength = responseVS.getMessageBytes().length
         response.setContentType(responseVS.getContentType().getName())
         response.outputStream <<  responseVS.getMessageBytes()

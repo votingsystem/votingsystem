@@ -283,6 +283,7 @@ class RepresentativeController {
 	def image() {
 		ImageVS image;
 		String msg
+        Map dataMap = null
 		if(params.long('id')) {
 			ImageVS.withTransaction{ image = ImageVS.get(params.long('id')) }
 			if(!image) msg = message(code:'imageNotFound', args:[params.id])
@@ -290,12 +291,14 @@ class RepresentativeController {
 			UserVS representative
 			UserVS.withTransaction { representative = UserVS.get(params.long('representativeId')) }
 			if (UserVS.Type.REPRESENTATIVE == representative?.type) {
-				image = ImageVS.findWhere(userVS:representative, type:ImageVS.Type.REPRESENTATIVE)
+                ImageVS.withTransaction{ image = ImageVS.findWhere(userVS:representative,
+                        type:ImageVS.Type.REPRESENTATIVE) }
+                dataMap = [fileName:"imageRepresentative_${representative.id}"]
 				if(!image) msg = message(code:'representativeWithoutImageErrorMsg', args:[params.representativeId])
 			} else  msg = message(code:'representativeIdErrorMsg', args[params.representativeId])
 		}
 		if (image) return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.IMAGE,
-                    messageBytes: image.fileBytes)]
+                    messageBytes: image.fileBytes, data:dataMap)]
 		else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, msg)]
 	}
 	
