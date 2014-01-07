@@ -241,6 +241,7 @@ public class ReceiptFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 getActivity().getContentResolver().delete(ReceiptContentProvider.
                                         getreceiptURI(selectedReceipt.getLocalId()), null, null);
+                                getActivity().onBackPressed();
                             }
                         }).setNegativeButton(getString(R.string.cancel_button),
                         new DialogInterface.OnClickListener() {
