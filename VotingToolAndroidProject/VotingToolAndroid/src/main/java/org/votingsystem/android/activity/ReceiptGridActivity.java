@@ -93,6 +93,21 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         getSupportLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
     }
 
+    private void updateActionBarTitle(TypeVS typeVS) {
+        String title = getString(R.string.receipts_lbl);
+        if(typeVS != null) {
+            switch(typeVS) {
+                case VOTEVS:
+                    title = getString(R.string.vote_receipts_lbl);
+                    break;
+                case CANCEL_VOTE:
+                    title = getString(R.string.cancellations_vote_receipts_lbl);
+                    break;
+            }
+        }
+        getSupportActionBar().setTitle(title);
+    }
+
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
                 " -id: " + id);
@@ -116,6 +131,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
             case R.id.all_receipts:
             case R.id.vote_receipts:
             case R.id.cancel_vote_receipts:
+                TypeVS typeVS = null;
                 if(menuItemSelected != item.getItemId()) {
                     String selection = null;
                     String[] selectionArgs = null;
@@ -127,6 +143,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                         else if (item.getItemId() == R.id.cancel_vote_receipts)
                             typeStr = TypeVS.CANCEL_VOTE.toString();
                         selectionArgs = new String[]{typeStr};
+                        if(typeStr != null) typeVS = TypeVS.valueOf(typeStr);
                         Log.d(TAG + ".onOptionsItemSelected(...)", "filtering by " + typeStr);
                     } Log.d(TAG + ".onOptionsItemSelected(...)", "showing all receipts");
                     Cursor cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,
@@ -134,6 +151,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                     getSupportLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
                             deliverResult(cursor);
                 }
+                updateActionBarTitle(typeVS);
                 onOptionsItemSelected(item.getItemId());
                 return true;
             default:

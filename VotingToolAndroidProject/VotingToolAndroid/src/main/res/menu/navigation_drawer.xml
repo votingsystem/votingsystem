@@ -24,7 +24,7 @@
         android:orderInCategory="3"
         android:showAsAction="never"
         android:icon="@drawable/receipt_32"
-        android:title="@string/menu_receipt_list"/>
+        android:title="@string/receipts_lbl"/>
 
     <item
         android:id="@+id/close_app"

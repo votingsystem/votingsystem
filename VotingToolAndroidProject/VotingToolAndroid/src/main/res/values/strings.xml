@@ -152,7 +152,7 @@
     <string name="eventos_no_encontrados_message">No se han encontrado eventos</string>
     <string name="menu_actualizar">Actualizar</string>
     <string name="request_certificate_menu">Solicitar certificado</string>
-    <string name="menu_receipt_list">Recibos</string>
+    <string name="receipts_lbl">Recibos</string>
     <string name="receipt_list_screen_caption">Recibos guardados por el usuario</string>
     <string name="receipt_options_dialog_msg">Opciones disponibles para el recibo</string>
     <string name="canceling_vote_caption">Anulando voto</string>
