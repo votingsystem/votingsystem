@@ -54,23 +54,23 @@ public class RepresentativeFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            if(pin != null) launchSignAndSendService(pin);
-            else {
-                if(TypeVS.ITEM_REQUEST == typeVS) {
-                    Cursor cursor = getActivity().getApplicationContext().getContentResolver().
-                            query(UserContentProvider.getRepresentativeURI(representativeId),
-                            null, null, null, null);
-                    cursor.moveToFirst();
-                    UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                            cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
-                    printRepresentativeData(representative);
-                    showProgress(false, true);
-                }
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                "intent.getExtras(): " + intent.getExtras());
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        if(pin != null) launchSignAndSendService(pin);
+        else {
+            if(TypeVS.ITEM_REQUEST == typeVS) {
+                Cursor cursor = getActivity().getApplicationContext().getContentResolver().
+                        query(UserContentProvider.getRepresentativeURI(representativeId),
+                        null, null, null, null);
+                cursor.moveToFirst();
+                UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                        cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+                printRepresentativeData(representative);
+                showProgress(false, true);
             }
+        }
         }
     };
 
@@ -146,8 +146,8 @@ public class RepresentativeFragment extends Fragment {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     RepresentativeService.class);
             startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
-            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEM_REQUEST);
             getActivity().startService(startIntent);
         }
         return rootView;
@@ -164,22 +164,6 @@ public class RepresentativeFragment extends Fragment {
             ((TextView)rootView.findViewById(R.id.representative_description)).setText(
                     representative.getDescription());
         }
-    }
-
-    @Override public void onStart() {
-    	Log.d(TAG + ".onStart(...) ", "");
-    	super.onStart();
-    }
-
-    @Override public void onDestroy() {
-        Log.d(TAG + ".onDestroy()", "");
-        super.onDestroy();
-    }
-
-
-    @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "");
-        super.onStop();
     }
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -263,7 +247,6 @@ public class RepresentativeFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
-
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

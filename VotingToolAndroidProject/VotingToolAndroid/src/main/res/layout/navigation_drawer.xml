@@ -31,7 +31,7 @@
     <ExpandableListView
         android:id="@+id/left_drawer"
         android:layout_height="match_parent"
-        android:layout_width="250dp"
+        android:layout_width="245dp"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
         android:divider="@android:color/background_light"

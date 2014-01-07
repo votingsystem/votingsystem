@@ -34,16 +34,14 @@ public class RepresentativeService extends IntentService {
 
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
-        Log.d(TAG + ".onHandleIntent(...) ", "arguments: " + arguments);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
-        if(arguments != null && arguments.containsKey(ContextVS.URL_KEY)) {
-            if(operation == TypeVS.ITEMS_REQUEST) {
-                requestRepresentatives(arguments.getString(
-                        ContextVS.URL_KEY), arguments.getString(ContextVS.CALLER_KEY));
-            } else if (operation == TypeVS.ITEM_REQUEST) {
-                requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY),
-                        arguments.getString(ContextVS.CALLER_KEY));
-            }
+        Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation);
+        if(operation == TypeVS.ITEMS_REQUEST) {
+            requestRepresentatives(arguments.getString(
+                    ContextVS.URL_KEY), arguments.getString(ContextVS.CALLER_KEY));
+        } else if (operation == TypeVS.ITEM_REQUEST) {
+            requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY),
+                    arguments.getString(ContextVS.CALLER_KEY));
         }
     }
 
@@ -61,6 +59,7 @@ public class RepresentativeService extends IntentService {
                     values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true );
                     values.put(UserContentProvider.ID_COL, representative.getId());
                     values.put(UserContentProvider.URL_COL, representative.getURL());
+                    values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
                     values.put(UserContentProvider.FULL_NAME_COL, representative.getFullName());
                     values.put(UserContentProvider.SERIALIZED_OBJECT_COL,
                             ObjectUtils.serializeObject(representative));
@@ -107,7 +106,7 @@ public class RepresentativeService extends IntentService {
                 UserVS representative = UserVS.populate(requestJSON);
                 representative.setImageBytes(representativeImageBytes);
                 ContentValues values = new ContentValues();
-                values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true );
+                values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true);
                 values.put(UserContentProvider.ID_COL, representative.getId());
                 values.put(UserContentProvider.URL_COL, representative.getURL());
                 values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
@@ -119,14 +118,14 @@ public class RepresentativeService extends IntentService {
                         representative.getNumRepresentations());
                 values.put(UserContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
                 values.put(UserContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-                getContentResolver().insert(UserContentProvider.CONTENT_URI, null);
-                sendMessage(responseVS.getStatusCode(), null, null, TypeVS.ITEMS_REQUEST, serviceCaller);
+                getContentResolver().insert(UserContentProvider.CONTENT_URI, values);
+                sendMessage(responseVS.getStatusCode(), null, null, TypeVS.ITEM_REQUEST, serviceCaller);
             } else sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
-                    responseVS.getMessage(), TypeVS.ITEMS_REQUEST, serviceCaller);
+                    responseVS.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
         } catch(Exception ex) {
             ex.printStackTrace();
             sendMessage(ResponseVS.SC_ERROR, getString(R.string.operation_error_msg),
-                    ex.getMessage(), TypeVS.ITEMS_REQUEST, serviceCaller);
+                    ex.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
         }
     }
 

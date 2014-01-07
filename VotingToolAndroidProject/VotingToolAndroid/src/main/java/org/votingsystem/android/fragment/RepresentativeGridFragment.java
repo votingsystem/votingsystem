@@ -225,7 +225,7 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.d(TAG + ".onCreateLoader(...)", "");
-        String selection = UserContentProvider.TYPE_COL + "=? ";
+        String selection = UserContentProvider.TYPE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 UserContentProvider.CONTENT_URI, null, selection,
                 new String[]{UserVS.Type.REPRESENTATIVE.toString()}, null);

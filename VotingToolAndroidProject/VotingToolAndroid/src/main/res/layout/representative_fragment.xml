@@ -12,41 +12,38 @@
         android:foreground="@drawable/shape_window_dim" >
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent" android:layout_height="fill_parent"
-            android:orientation="horizontal">
-            <ImageView
-                android:id="@+id/representative_image"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_marginRight="10dp"/>
+            android:orientation="vertical">
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/representative_image"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginRight="10dp"/>
+                <Button
+                    android:id="@+id/select_representative_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="0"
+                    android:drawableLeft="@drawable/system_users_22"
+                    android:text="@string/select_representative_button" />
+            </LinearLayout>
             <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/scroller"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:fillViewport="true">
-                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/representative_data_container"
+                <TextView
+                    android:id="@+id/representative_description"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
-                    android:padding="10dp"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/representative_description"
-                        android:layout_width="fill_parent"
-                        android:layout_height="fill_parent"
-                        android:textSize="20sp"
-                        android:layout_weight="1.0"/>
-
-                    <Button
-                        android:id="@+id/select_representative_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="10dp"
-                        android:layout_weight="0"
-                        android:drawableLeft="@drawable/system_users_22"
-                        android:text="@string/select_representative_button" />
-
-                </LinearLayout>
+                    android:textSize="20sp"
+                    android:layout_weight="1.0"/>
             </ScrollView>
         </LinearLayout>
     </FrameLayout>
