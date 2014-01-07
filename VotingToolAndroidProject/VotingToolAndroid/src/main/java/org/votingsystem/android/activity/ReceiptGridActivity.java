@@ -1,20 +1,15 @@
 package org.votingsystem.android.activity;
 
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
@@ -37,9 +32,6 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.PinDialogFragment;
-import org.votingsystem.android.service.VoteService;
-import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.TypeVS;
@@ -108,12 +100,6 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         Intent intent = new Intent(this,ReceiptPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
-    }
-
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName(), null);
-        pinDialog.show(getSupportFragmentManager(), PinDialogFragment.TAG);
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
