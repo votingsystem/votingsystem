@@ -124,20 +124,24 @@ public class SignAndSendService extends IntentService {
     private void showNotification(ResponseVS responseVS, TypeVS typeVS){
         String title = null;
         String message = null;
-        if(ResponseVS.SC_OK == responseVS.getStatusCode())
+        int resultIcon = R.drawable.cancel_22;
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             title = getString(R.string.signature_ok_notification_msg);
+            resultIcon = R.drawable.signature_ok_32;
+        }
         else title = getString(R.string.signature_error_notification_msg);
-        message = typeVS.toString();
+        message = typeVS.toString() +  " " + responseVS.getMessage();
         // Display an icon to show that the service is running.
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
-        Intent clickIntent = new Intent(Intent.ACTION_MAIN);
+        PendingIntent pendingIntent = null;
+        //Intent clickIntent = new Intent(Intent.ACTION_MAIN);
         //clickIntent.setClassName(this, NavigationDrawer.class.getName());
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
-        Notification note = new NotificationCompat.Builder(this)
-                .setContentTitle(title).setContentText(message)
-                .setContentIntent(pIntent).setSmallIcon(R.drawable.application_certificate_16)
-                .build();
+        //pendingIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon);
+        if(pendingIntent != null) builder.setContentIntent(pendingIntent);
+        Notification note = builder.build();
         //Identifies our service icon in the icon tray.
         notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
     }

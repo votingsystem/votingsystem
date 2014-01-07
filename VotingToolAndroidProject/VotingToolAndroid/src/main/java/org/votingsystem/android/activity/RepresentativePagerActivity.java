@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
+import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.RepresentativeFragment;
 import org.votingsystem.model.ContextVS;
 
@@ -40,7 +40,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         RepresentativePagerAdapter pagerAdapter = new RepresentativePagerAdapter(
                 getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
+        cursor = getContentResolver().query(UserContentProvider.CONTENT_URI,
                 null, null, null, null);
         cursor.moveToFirst();
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -57,7 +57,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
         getSupportActionBar().setLogo(R.drawable.system_users_22);
         getSupportActionBar().setTitle(getString(R.string.representative_lbl));
         String fullName = cursor.getString(cursor.getColumnIndex(
-                RepresentativeContentProvider.FULL_NAME_COL));
+                UserContentProvider.FULL_NAME_COL));
         getSupportActionBar().setSubtitle(fullName);
     }
 
@@ -88,7 +88,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
 
         public RepresentativePagerAdapter(FragmentManager fm) {
             super(fm);
-            cursor = getContentResolver().query(RepresentativeContentProvider.CONTENT_URI,
+            cursor = getContentResolver().query(UserContentProvider.CONTENT_URI,
                     null, null, null, null);
         }
 
@@ -96,7 +96,7 @@ public class RepresentativePagerActivity extends ActionBarActivity {
             Log.d(TAG + ".RepresentativePagerAdapter.getItem(...) ", " - item: " + i);
             cursor.moveToPosition(i);
             Long representativeId = cursor.getLong(cursor.getColumnIndex(
-                    RepresentativeContentProvider.ID_COL));
+                    UserContentProvider.ID_COL));
             return RepresentativeFragment.newInstance(representativeId);
         }
 

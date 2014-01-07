@@ -24,9 +24,12 @@ public class UserVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public enum Type {REPRESENTATIVE, USER}
+
     private Long id;
     private Long numRepresentations;
     private String nif;
+    private byte[] imageBytes;
     private String firstName;
     private String country;
     private String cn;
@@ -36,46 +39,17 @@ public class UserVS implements Serializable {
     private String organization;
     private String email;
     private String phone;
+    private String description;
 
-    private Date fechaFirma;
     private String subjectDN;
     private SignerInformation signer;
     private CertPath certPath;
     private String signedContent;
     private TimeStampToken timeStampToken;
-
-    private Set<CommentVS> commentVSes = new HashSet<CommentVS>(0);
-
+    private Set<CommentVS> commentSet = new HashSet<CommentVS>(0);
     private X509Certificate certificate;
     private CertificateVS certificateCA;
 
-    /**
-     * @return the id
-     */
-    public String getNif() {
-        return nif;
-    }
-
-    /**
-     * @param nif the nif to set
-     */
-    public void setNif(String nif) {
-        this.nif = nif;
-    }
-
-    /**
-     * @return the commentVSes
-     */
-    public Set<CommentVS> getCommentVSes() {
-        return commentVSes;
-    }
-
-    /**
-     * @param commentVSes the commentVSes to set
-     */
-    public void setCommentVSes(Set<CommentVS> commentVSes) {
-        this.commentVSes = commentVSes;
-    }
 
     public static UserVS getUserVS (X509Certificate certificate) {
         UserVS userVS = new UserVS();
@@ -92,6 +66,22 @@ public class UserVS implements Serializable {
         if (subjectDN.contains("CN="))
             userVS.setCn(subjectDN.split("CN=")[1]);
         return userVS;
+    }
+
+    public byte[] getImageBytes() {
+        return imageBytes;
+    }
+
+    public void setImageBytes(byte[] imageBytes) {
+        this.imageBytes = imageBytes;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setCountry(String country) {
@@ -126,35 +116,13 @@ public class UserVS implements Serializable {
         this.id = id;
     }
 
-    /**
-     * @return the fechaFirma
-     */
-    public Date getFechaFirma() {
-        return fechaFirma;
-    }
-
-    /**
-     * @param fechaFirma the fechaFirma to set
-     */
-    public void setFechaFirma(Date fechaFirma) {
-        this.fechaFirma = fechaFirma;
-    }
-
-    /**
-     * @return the subjectDN
-     */
     public String getSubjectDN() {
         return subjectDN;
     }
 
-    /**
-     * @param subjectDN the subjectDN to set
-     */
     public void setSubjectDN(String subjectDN) {
         this.subjectDN = subjectDN;
     }
-
-
 
     public void setCertificate(X509Certificate certificate) {
         this.certificate = certificate;
@@ -180,51 +148,24 @@ public class UserVS implements Serializable {
         this.phone = phone;
     }
 
-    /**
-     * @return the contentDigest
-     */
-    public String getContentDigestBase64() {
-        if (signer.getContentDigest() == null) return null;
-        return new String(Base64.encode(signer.getContentDigest()));
+    public String getNif() {
+        return nif;
     }
 
-    /**
-     * @return the contentDigest
-     */
-    public String getContentDigestHex() {
-        if (signer.getContentDigest() == null) return null;
-        return new String(Hex.encode(signer.getContentDigest()));
+    public void setNif(String nif) {
+        this.nif = nif;
     }
 
-    /**
-     * @return the contentDigest
-     */
-    public String getFirmaBase64() {
-        if (signer.getSignature() == null) return null;
-        return new String(Base64.encode(signer.getSignature()));
-    }
-
-    /**
-     * @return the contentDigest
-     */
-    public String getFirmaHex() {
-        if (signer.getSignature() == null) return null;
-        return new String(signer.getSignature());
-    }
-
-    /**
-     * @param signer the signer to set
-     */
     public void setSigner(SignerInformation signer) {
         this.signer = signer;
     }
 
-    public String getEncryptiontId() {
-        return CMSUtils.getEncryptiontId(signer.getEncryptionAlgOID());
+    public Set<CommentVS> getCommentSet() {
+        return commentSet;
     }
 
-    public String getDigestId() {
-        return CMSUtils.getDigestId(signer.getDigestAlgOID());
+    public void setCommentSet(Set<CommentVS> commentSet) {
+        this.commentSet = commentSet;
     }
 
     public String getURL() {
@@ -235,16 +176,10 @@ public class UserVS implements Serializable {
         this.URL = URL;
     }
 
-    /**
-     * @return the timeStampToken
-     */
     public TimeStampToken getTimeStampToken() {
         return timeStampToken;
     }
 
-    /**
-     * @param timeStampToken the timeStampToken to set
-     */
     public void setTimeStampToken(TimeStampToken timeStampToken) {
         this.timeStampToken = timeStampToken;
     }
@@ -255,44 +190,26 @@ public class UserVS implements Serializable {
         return phone;
     }
 
-    /**
-     * @return the certPath
-     */
     public CertPath getCertPath() {
         return certPath;
     }
 
-    /**
-     * @param certPath the certPath to set
-     */
     public void setCertPath(CertPath certPath) {
         this.certPath = certPath;
     }
 
-    /**
-     * @return the signedContent
-     */
     public String getContentSigned() {
         return signedContent;
     }
 
-    /**
-     * @param signedContent the signedContent to set
-     */
     public void setContentSigned(String signedContent) {
         this.signedContent = signedContent;
     }
 
-    /**
-     * @return the organization
-     */
     public String getOrganization() {
         return organization;
     }
 
-    /**
-     * @param organization the organization to set
-     */
     public void setOrganization(String organization) {
         this.organization = organization;
     }
@@ -321,26 +238,26 @@ public class UserVS implements Serializable {
         this.numRepresentations = numRepresentations;
     }
 
-    public static UserVS parse(JSONObject userJSON) throws ParseException, JSONException {
+    public static UserVS populate(JSONObject userJSON) throws ParseException, JSONException {
         UserVS userVS = new UserVS();
-        String name = null;
-        String firsName = null;
         if (userJSON.has("id")) userVS.setId(userJSON.getLong("id"));
         if (userJSON.has("URL")) userVS.setURL(userJSON.getString("URL"));
         if (userJSON.has("nif")) userVS.setNif(userJSON.getString("nif"));
         if (userJSON.has("numRepresentations")) userVS.setNumRepresentations(
                 userJSON.getLong("numRepresentations"));
         if (userJSON.has("name")) {
-            name = userJSON.getString("name");
-            userVS.setName(name);
+            userVS.setName(userJSON.getString("name"));
+            userVS.setFullName(userVS.getName());
         }
         if (userJSON.has("firstName")) {
-            firsName = userJSON.getString("firstName");
-            userVS.setName(firsName);
-            if(name != null) userVS.setFullName(name + " " + firsName);
-            else userVS.setFullName(firsName);
+            if(userVS.getName() != null) userVS.setFullName(userVS.getName() + " " +
+                    userJSON.getString("firstName"));
+            else {
+                userVS.setFullName(userJSON.getString("firstName"));
+                userVS.setName(userJSON.getString("firstName"));
+            }
         }
-        if(firsName == null && name != null) userVS.setFullName(name);
+        if (userJSON.has("description")) userVS.setDescription(userJSON.getString("description"));
         return userVS;
     }
 

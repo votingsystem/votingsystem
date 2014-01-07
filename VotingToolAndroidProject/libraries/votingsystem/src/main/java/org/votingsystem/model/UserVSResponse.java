@@ -52,25 +52,24 @@ public class UserVSResponse {
         this.numTotalRepresentatives = numTotalRepresentatives;
     }
 
-	public static UserVSResponse parse(String requestStr) throws ParseException, JSONException {
+	public static UserVSResponse populate(JSONObject userJSON) throws ParseException, JSONException {
     	Log.d(TAG + ".parse(...)", "parse(...)");
         UserVSResponse eventVSResponse = new UserVSResponse();
-    	JSONObject requestJSON = new JSONObject(requestStr);
         List<UserVS> users = new ArrayList<UserVS>();
-        JSONArray representativesArray = requestJSON.getJSONArray("representatives");
+        JSONArray representativesArray = userJSON.getJSONArray("representatives");
         if (representativesArray != null) {
             for (int i=0; i < representativesArray.length(); i++) {
-                UserVS representative = UserVS.parse(representativesArray.getJSONObject(i));
+                UserVS representative = UserVS.populate(representativesArray.getJSONObject(i));
                 users.add(representative);
             }
         }
         eventVSResponse.setUsers(users);
-        if(requestJSON.has("numRepresentatives"))
-        	eventVSResponse.setNumRepresentatives(requestJSON.getLong("numRepresentatives"));
-        if(requestJSON.has("numTotalRepresentatives"))
-        	eventVSResponse.setNumTotalRepresentatives(requestJSON.getLong("numTotalRepresentatives"));
-        if(requestJSON.has("offset"))
-        	eventVSResponse.setOffset(requestJSON.getLong("offset"));
+        if(userJSON.has("numRepresentatives"))
+        	eventVSResponse.setNumRepresentatives(userJSON.getLong("numRepresentatives"));
+        if(userJSON.has("numTotalRepresentatives"))
+        	eventVSResponse.setNumTotalRepresentatives(userJSON.getLong("numTotalRepresentatives"));
+        if(userJSON.has("offset"))
+        	eventVSResponse.setOffset(userJSON.getLong("offset"));
         return eventVSResponse;
     }
 

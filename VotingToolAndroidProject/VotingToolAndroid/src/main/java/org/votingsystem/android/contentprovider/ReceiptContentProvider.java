@@ -161,9 +161,9 @@ public class ReceiptContentProvider extends ContentProvider {
 
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
-                ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                TYPE_COL + " TEXT," +
-                STATE_COL + " TEXT," +
+                ID_COL                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                TYPE_COL              + " TEXT," +
+                STATE_COL             + " TEXT," +
                 SERIALIZED_OBJECT_COL + " blob, " +
                 TIMESTAMP_UPDATED_COL + " INTEGER DEFAULT 0, " +
                 TIMESTAMP_CREATED_COL + " INTEGER DEFAULT 0);";

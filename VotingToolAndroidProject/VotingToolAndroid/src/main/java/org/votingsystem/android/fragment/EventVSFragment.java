@@ -209,11 +209,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         super.onDestroy();
     };
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
-    }
-
     @Override public void onStop() {
         Log.d(TAG + ".onStop()", "");
         super.onStop();
@@ -383,5 +378,10 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 unregisterReceiver(broadcastReceiver);
     }
 
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+    }
 }
 

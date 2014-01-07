@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,13 +21,18 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
-import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
+import org.votingsystem.android.contentprovider.UserContentProvider;
+import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.util.ObjectUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,13 +44,33 @@ public class RepresentativeFragment extends Fragment {
 
 	public static final String TAG = "RepresentativeFragment";
 
+    private View rootView;
+    private String broadCastId = null;
+    private ContextVS contextVS;
+    private View progressContainer;
+    private FrameLayout mainLayout;
+    private Long representativeId;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             if(pin != null) launchSignAndSendService(pin);
-
+            else {
+                if(TypeVS.ITEM_REQUEST == typeVS) {
+                    Cursor cursor = getActivity().getApplicationContext().getContentResolver().
+                            query(UserContentProvider.getRepresentativeURI(representativeId),
+                            null, null, null, null);
+                    cursor.moveToFirst();
+                    UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                            cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+                    printRepresentativeData(representative);
+                    showProgress(false, true);
+                }
+            }
         }
     };
 
@@ -77,11 +104,6 @@ public class RepresentativeFragment extends Fragment {
         }
     }
 
-    private ContextVS contextVS;
-    private View progressContainer;
-    private FrameLayout mainLayout;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
-
 
     public static Fragment newInstance(Long representativeId) {
         RepresentativeFragment fragment = new RepresentativeFragment();
@@ -96,29 +118,15 @@ public class RepresentativeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        Long representativeId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
-        Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                RepresentativeContentProvider.getRepresentativeURI(representativeId),
-                null, null, null, null);
-
-        cursor.moveToFirst();
-        String fullName = cursor.getString(cursor.getColumnIndex(
-                RepresentativeContentProvider.FULL_NAME_COL));
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-
-        IntentFilter intentFilter = new IntentFilter();
-
-
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, intentFilter);
-
-        View rootView = inflater.inflate(R.layout.representative_fragment, container, false);
-        TextView repNameView = (TextView)rootView.findViewById(R.id.representative_name);
-        repNameView.setText(fullName);
-        getActivity().setTitle(getActivity().getString(R.string.representative_data_lbl));
-
-        EditText nifText = (EditText)rootView.findViewById(R.id.nif_edit);
-
+        representativeId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
+        Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+                UserContentProvider.getRepresentativeURI(representativeId),
+                null, null, null, null);
+        cursor.moveToFirst();
+        UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+        rootView = inflater.inflate(R.layout.representative_fragment, container, false);
 
         Button selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
@@ -130,7 +138,32 @@ public class RepresentativeFragment extends Fragment {
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
+        broadCastId = this.getClass().getSimpleName()+ "_" + representativeId;
+        if(representative.getDescription() != null) {
+            printRepresentativeData(representative);
+        } else {
+            showProgress(true, true);
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    RepresentativeService.class);
+            startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
+            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);
+            getActivity().startService(startIntent);
+        }
         return rootView;
+    }
+
+    private void printRepresentativeData(UserVS representative) {
+        if(representative.getImageBytes() != null) {
+            Bitmap bmp = BitmapFactory.decodeByteArray(representative.getImageBytes(), 0,
+                    representative.getImageBytes().length);
+            ImageView image = (ImageView) rootView.findViewById(R.id.representative_image);
+            image.setImageBitmap(bmp);
+        }
+        if(representative.getDescription() != null) {
+            ((TextView)rootView.findViewById(R.id.representative_description)).setText(
+                    representative.getDescription());
+        }
     }
 
     @Override public void onStart() {
@@ -143,27 +176,10 @@ public class RepresentativeFragment extends Fragment {
         super.onDestroy();
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
 
     @Override public void onStop() {
         Log.d(TAG + ".onStop()", "");
         super.onStop();
-    }
-
-    @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
-        super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
-    }
-
-    @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
     }
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -234,5 +250,23 @@ public class RepresentativeFragment extends Fragment {
             });
         }
     }
+    @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+    }
 
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
+
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+    }
 }

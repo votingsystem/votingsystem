@@ -18,25 +18,28 @@ import android.util.Log;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class RepresentativeContentProvider extends ContentProvider {
+public class UserContentProvider extends ContentProvider {
 
-    public static final String TAG = "RepresentativeContentProvider";
+    public static final String TAG = "UserContentProvider";
+
+    //from http://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
+    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME = "voting_system_representatives.db";
     private static final String TABLE_NAME = "representatives";
     public static final String AUTHORITY = "votingsystem.org.representative";
 
-    public static final String ID_COL = "_id";
-    public static final String URL_COL = "url";
-    public static final String NIF_COL = "nif";
+    public static final String ID_COL                  = "_id";
+    public static final String URL_COL                 = "url";
+    public static final String NIF_COL                 = "nif";
+    public static final String TYPE_COL                = "type";
     public static final String NUM_REPRESENTATIONS_COL = "numRepresentations";
-    public static final String FULL_NAME_COL = "fullName";
-    public static final String JSON_DATA_COL = "jsonData";
-    public static final String IMAGE_COL = "image";
-    public static final String TIMESTAMP_CREATED_COL = "timestampCreated";
-    public static final String TIMESTAMP_UPDATED_COL = "timestampUpdated";
-    public static final String DEFAULT_SORT_ORDER = ID_COL + " DESC";
+    public static final String SERIALIZED_OBJECT_COL   = "serializedObject";
+    public static final String FULL_NAME_COL           = "fullName";
+    public static final String TIMESTAMP_CREATED_COL   = "timestampCreated";
+    public static final String TIMESTAMP_UPDATED_COL   = "timestampUpdated";
+    public static final String DEFAULT_SORT_ORDER      = ID_COL + " DESC";
 
     private SQLiteDatabase database;
 
@@ -117,11 +120,24 @@ public class RepresentativeContentProvider extends ContentProvider {
         return updateCount;
     }
 
-    @Override public Uri insert(Uri requestUri, ContentValues initialValues) {
+    @Override public Uri insert(Uri requestUri, ContentValues values) {
         // NOTE Argument checking code omitted. Check your parameters! Check that
         // your row addition request succeeded!
         long rowId = -1;
-        rowId = database.insert(TABLE_NAME, null, initialValues);
+        boolean replace = false;
+        if ( values.containsKey(SQL_INSERT_OR_REPLACE)) {
+            replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
+            // Clone the values object, so we don't modify the original.
+            // This is not strictly necessary, but depends on your needs
+            //values = new ContentValues( values );
+            // Remove the key, so we don't pass that on to db.insert() or db.replace()
+            values.remove( SQL_INSERT_OR_REPLACE );
+        }
+        if ( replace ) {
+            rowId = database.replace(TABLE_NAME, null, values);
+        } else {
+            rowId = database.insert(TABLE_NAME, null, values);
+        }
         Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         // Notify any listeners and return the URI of the new row.
         getContext().getContentResolver().notifyChange(CONTENT_URI, null);
@@ -148,15 +164,15 @@ public class RepresentativeContentProvider extends ContentProvider {
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
-                ID_COL + " INTEGER PRIMARY KEY, " +
-                URL_COL + " TEXT," +
-                NIF_COL + " TEXT," +
+                ID_COL                  + " INTEGER PRIMARY KEY, " +
+                URL_COL                 + " TEXT," +
+                NIF_COL                 + " TEXT," +
                 NUM_REPRESENTATIONS_COL + " INTEGER DEFAULT 1, " +
-                FULL_NAME_COL + " TEXT, " +
-                JSON_DATA_COL + " TEXT, " +
-                IMAGE_COL + " blob, " +
-                TIMESTAMP_UPDATED_COL + " INTEGER DEFAULT 0, " +
-                TIMESTAMP_CREATED_COL + " INTEGER DEFAULT 0);";
+                FULL_NAME_COL           + " TEXT, " +
+                TYPE_COL                + " TEXT," +
+                SERIALIZED_OBJECT_COL   + " blob, " +
+                TIMESTAMP_UPDATED_COL   + " INTEGER DEFAULT 0, " +
+                TIMESTAMP_CREATED_COL   + " INTEGER DEFAULT 0);";
 
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);

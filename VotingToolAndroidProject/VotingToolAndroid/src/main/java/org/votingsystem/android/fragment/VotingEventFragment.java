@@ -297,19 +297,18 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             showCertNotFoundDialog();
         } else {
             vote = new VoteVS(eventVS, optionSelected);
-            String content = optionSelected.getContent().length() >
-                    ContextVS.SELECTED_OPTION_MAX_LENGTH ?
-                    optionSelected.getContent().substring(0, ContextVS.SELECTED_OPTION_MAX_LENGTH) +
-                            "..." : optionSelected.getContent();
-            showPinScreen(getString(R.string.option_selected_msg, content));
+            String pinMsgPart = optionSelected.getContent().length() >
+                    ContextVS.SELECTED_OPTION_MAX_LENGTH ? optionSelected.getContent().substring(0,
+                    ContextVS.SELECTED_OPTION_MAX_LENGTH) + "..." : optionSelected.getContent();
+            showPinScreen(getString(R.string.option_selected_msg, pinMsgPart));
         }
     }
 
     @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
-        Log.d(TAG + ".onResume() ", "onResume");
     }
 
     @Override public void onPause() {
@@ -348,7 +347,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     }
 
     private void showMessage(Integer statusCode, String caption, String message,
-                             String htmlMessage) {
+                 String htmlMessage) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message + " - htmlMessage: " + htmlMessage);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,

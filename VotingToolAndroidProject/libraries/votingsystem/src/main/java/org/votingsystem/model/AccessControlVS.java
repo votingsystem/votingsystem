@@ -95,6 +95,14 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/representative?offset=" + offset + "&max=" + pageSize;
     }
 
+    public String getRepresentativeURL (Long representativeId) {
+        return getServerURL() + "/representative/" + representativeId;
+    }
+
+    public String getRepresentativeImageURL (Long representativeId) {
+        return getServerURL() + "/representative/" + representativeId + "/image";
+    }
+
     public static String getServerInfoURL (String serverURL) {
         return StringUtils.checkURL(serverURL) + "/serverInfo";
     }

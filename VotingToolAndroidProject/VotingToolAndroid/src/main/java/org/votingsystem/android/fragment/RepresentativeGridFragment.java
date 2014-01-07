@@ -36,11 +36,12 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
-import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
+import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 
 import java.text.Collator;
@@ -164,8 +165,8 @@ public class RepresentativeGridFragment extends Fragment
         /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
         if(loadMore && !progressVisible.get() && offset <
-                RepresentativeContentProvider.getNumTotalRepresentatives() &&
-                totalItemCount < RepresentativeContentProvider.getNumTotalRepresentatives()) {
+                UserContentProvider.getNumTotalRepresentatives() &&
+                totalItemCount < UserContentProvider.getNumTotalRepresentatives()) {
             Log.d(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
                     " - visibleItemCount:" + visibleItemCount + " - totalItemCount:" + totalItemCount);
             firstVisiblePosition = firstVisibleItem;
@@ -188,18 +189,9 @@ public class RepresentativeGridFragment extends Fragment
             startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
                     getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
             startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);
             getActivity().startService(startIntent);
         }
-    }
-
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putLong(ContextVS.OFFSET_KEY, offset);
-        Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
-        outState.putBoolean(ContextVS.RESPONSE_STATUS_KEY, hasHTTPConnection.get());
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -233,15 +225,17 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.d(TAG + ".onCreateLoader(...)", "");
+        String selection = UserContentProvider.TYPE_COL + "=? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
-                RepresentativeContentProvider.CONTENT_URI, null, null, null, null);
+                UserContentProvider.CONTENT_URI, null, selection,
+                new String[]{UserVS.Type.REPRESENTATIVE.toString()}, null);
         return loader;
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        if(RepresentativeContentProvider.getNumTotalRepresentatives() == null)
+        if(UserContentProvider.getNumTotalRepresentatives() == null)
             loadHttpItems(offset);
         else {
             showProgress(false, true);
@@ -270,30 +264,6 @@ public class RepresentativeGridFragment extends Fragment
             Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
-    }
-
-    @Override public void onStop() {
-        super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop - ");
-    }
-
-    @Override public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG + ".onDestroy()", "onDestroy");
-    }
-
-    @Override public void onResume() {
-        Log.d(TAG + ".onResume() ", "");
-        super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
-    }
-
-    @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
@@ -341,9 +311,9 @@ public class RepresentativeGridFragment extends Fragment
         @Override public void bindView(View view, Context context, Cursor cursor) {
             if(cursor != null) {
                 String fullName = cursor.getString(cursor.getColumnIndex(
-                        RepresentativeContentProvider.FULL_NAME_COL));
+                        UserContentProvider.FULL_NAME_COL));
                 int numRepresentations = cursor.getInt(cursor.getColumnIndex(
-                        RepresentativeContentProvider.NUM_REPRESENTATIONS_COL));
+                        UserContentProvider.NUM_REPRESENTATIONS_COL));
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView representativeName = (TextView)view.findViewById(R.id.representative_name);
@@ -358,4 +328,38 @@ public class RepresentativeGridFragment extends Fragment
         }
     }
 
+
+    @Override public void onStop() {
+        super.onStop();
+        Log.d(TAG + ".onStop()", " - onStop - ");
+    }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG + ".onDestroy()", "onDestroy");
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(ContextVS.OFFSET_KEY, offset);
+        Parcelable gridState = gridView.onSaveInstanceState();
+        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+        outState.putBoolean(ContextVS.RESPONSE_STATUS_KEY, hasHTTPConnection.get());
+        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+    }
+
+    @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
 }
