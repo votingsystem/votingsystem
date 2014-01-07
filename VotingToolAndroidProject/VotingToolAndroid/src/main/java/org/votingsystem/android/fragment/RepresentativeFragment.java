@@ -47,6 +47,7 @@ public class RepresentativeFragment extends Fragment {
     private View rootView;
     private String broadCastId = null;
     private ContextVS contextVS;
+    private Button selectButton;
     private View progressContainer;
     private FrameLayout mainLayout;
     private Long representativeId;
@@ -127,13 +128,13 @@ public class RepresentativeFragment extends Fragment {
         UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         rootView = inflater.inflate(R.layout.representative_fragment, container, false);
-
-        Button selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
+        selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 showPinScreen(null);
             }
         });
+        selectButton.setVisibility(View.GONE);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -164,6 +165,7 @@ public class RepresentativeFragment extends Fragment {
             ((TextView)rootView.findViewById(R.id.representative_description)).setText(
                     representative.getDescription());
         }
+        selectButton.setVisibility(View.VISIBLE);
     }
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
