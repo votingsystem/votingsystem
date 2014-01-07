@@ -110,7 +110,7 @@ public class RepresentativeService extends IntentService {
                 values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true );
                 values.put(UserContentProvider.ID_COL, representative.getId());
                 values.put(UserContentProvider.URL_COL, representative.getURL());
-                values.put(UserContentProvider.USER_TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
+                values.put(UserContentProvider.TYPE_COL, UserVS.Type.REPRESENTATIVE.toString());
                 values.put(UserContentProvider.FULL_NAME_COL, representative.getFullName());
                 values.put(UserContentProvider.SERIALIZED_OBJECT_COL,
                         ObjectUtils.serializeObject(representative));
