@@ -79,6 +79,10 @@ public class ContextVS {
     public static final Integer REPRESENTATIVE_PAGE_SIZE = 20;
     public static final Integer EVENTVS_PAGE_SIZE = 20;
 
+
+    //loader IDs
+    public static final int RECEIPT_LOADER_ID = 1;
+
     //Notifications IDs
     public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;
     public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID = 2;

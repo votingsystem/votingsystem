@@ -61,12 +61,10 @@ public class ReceiptGridActivity extends ActionBarActivity implements
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String queryStr;
-    private int loaderId = 1;
     private int menuItemSelected = R.id.all_receipts;
     private GridView gridView;
     private FrameLayout gridContainer;
     private Menu menu;
-    private CursorLoader loader;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,8 +73,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         contextVS = ContextVS.getInstance(getBaseContext());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         queryStr = getIntent().getStringExtra(SearchManager.QUERY);
-        Log.d(TAG +  ".onCreate(...)", "args: " + getIntent().getExtras() + " - loaderId: " +
-                loaderId);
+        Log.d(TAG +  ".onCreate(...)", "args: " + getIntent().getExtras());
         gridView = (GridView) findViewById(R.id.gridview);
         adapter = new ReceiptGridAdapter(getApplicationContext(), null,false);
         gridView.setAdapter(adapter);
@@ -101,7 +98,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         }
         if(savedInstanceState != null)
         menuItemSelected = savedInstanceState.getInt(ContextVS.ITEM_ID_KEY, R.id.all_receipts);
-        getSupportLoaderManager().initLoader(loaderId, null, this);
+        getSupportLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -139,14 +136,17 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                     if(item.getItemId() != R.id.all_receipts) {
                         selection = ReceiptContentProvider.TYPE_COL + "=? ";
                         String typeStr = null;
-                        if(item.getItemId() == R.id.vote_receipts) typeStr = TypeVS.VOTEVS.toString();
-                        else if (item.getItemId() == R.id.cancel_vote_receipts) typeStr = TypeVS.CANCEL_VOTE.toString();
+                        if(item.getItemId() == R.id.vote_receipts)
+                            typeStr = TypeVS.VOTEVS.toString();
+                        else if (item.getItemId() == R.id.cancel_vote_receipts)
+                            typeStr = TypeVS.CANCEL_VOTE.toString();
                         selectionArgs = new String[]{typeStr};
                         Log.d(TAG + ".onOptionsItemSelected(...)", "filtering by " + typeStr);
                     } Log.d(TAG + ".onOptionsItemSelected(...)", "showing all receipts");
                     Cursor cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,
                             null, selection, selectionArgs, null);
-                    loader.deliverResult(cursor);
+                    getSupportLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
+                            deliverResult(cursor);
                 }
                 onOptionsItemSelected(item.getItemId());
                 return true;
@@ -184,16 +184,8 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         return true;
     }
 
-
-    /*@Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        CursorLoader loader = new CursorLoader(this, ReceiptContentProvider.CONTENT_URI, null, null, null, null);
-        return loader;
-    }*/
-
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        loader = new CursorLoader(this, ReceiptContentProvider.CONTENT_URI, null,
-                null, null, null);
-        return loader;
+        return new CursorLoader(this, ReceiptContentProvider.CONTENT_URI, null, null, null, null);
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
