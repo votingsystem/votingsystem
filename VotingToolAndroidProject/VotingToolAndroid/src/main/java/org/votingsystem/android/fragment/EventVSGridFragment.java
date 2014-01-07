@@ -446,20 +446,20 @@ public class EventVSGridFragment extends Fragment
                         case AWAITING:
                             imgView.setImageResource(R.drawable.pending);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.inicio_lbl) + "</b>: " +
+                                    R.string.init_lbl) + "</b>: " +
                                     DateUtils.getSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.fin_lbl) + "</b>: " +
+                                    R.string.finish_lbl) + "</b>: " +
                                     DateUtils.getSpanishStringFromDate(eventVS.getDateFinish());
                             break;
                         case CANCELLED:
                         case TERMINATED:
                             imgView.setImageResource(R.drawable.closed);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.inicio_lbl) + "</b>: " +
+                                    R.string.init_lbl) + "</b>: " +
                                     DateUtils.getSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
-                                    R.string.fin_lbl) + "</b>: " +
+                                    R.string.finish_lbl) + "</b>: " +
                                     DateUtils.getSpanishStringFromDate(eventVS.getDateFinish());
                             break;
                         default:

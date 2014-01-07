@@ -59,6 +59,7 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     private String hashAccessRequestBase64;
     private Date dateCreated;
     private Date dateUpdated;
+    private TypeVS type;
     private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
 
     public VoteVS () {}
@@ -228,7 +229,11 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
     }
 
     @Override public TypeVS getType() {
-        return TypeVS.VOTEVS;
+        return type;
+    }
+
+    public void setType(TypeVS type) {
+        this.type = type;
     }
 
 	public byte[] getEncryptedKey() {

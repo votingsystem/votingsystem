@@ -58,19 +58,11 @@ public class ReceiptPagerActivity extends ActionBarActivity {
     }
 
     private void updateActionBarTitle() {
-        String title = null;
         String subtitle = "";
         String typeStr = cursor.getString(cursor.getColumnIndex(
                 ReceiptContentProvider.TYPE_COL));
         TypeVS type = TypeVS.valueOf(typeStr);
-        switch(type) {
-            case VOTEVS:
-                title = getString(R.string.receipt_vote_page_title);
-                break;
-            case CANCEL_VOTE:
-                title = getString(R.string.receipt_cancel_vote_page_title);
-                break;
-        }
+        String title = ReceiptContentProvider.getDescription(this.getApplicationContext(), type);
         Date dateCreated = null;
         Date dateUpdated = null;
         Long timestampCreated = cursor.getLong(cursor.getColumnIndex(

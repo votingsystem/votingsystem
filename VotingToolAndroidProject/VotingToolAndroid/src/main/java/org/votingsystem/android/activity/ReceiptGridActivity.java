@@ -90,20 +90,22 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         }
         if(savedInstanceState != null)
         menuItemSelected = savedInstanceState.getInt(ContextVS.ITEM_ID_KEY, R.id.all_receipts);
+        updateActionBarTitle(menuItemSelected);
         getSupportLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
     }
 
-    private void updateActionBarTitle(TypeVS typeVS) {
-        String title = getString(R.string.receipts_lbl);
-        if(typeVS != null) {
-            switch(typeVS) {
-                case VOTEVS:
-                    title = getString(R.string.vote_receipts_lbl);
-                    break;
-                case CANCEL_VOTE:
-                    title = getString(R.string.cancellations_vote_receipts_lbl);
-                    break;
-            }
+    private void updateActionBarTitle(int menuOptionId) {
+        String title = null;
+        switch(menuOptionId) {
+            case R.id.all_receipts:
+                title = getString(R.string.receipts_lbl);
+                break;
+            case R.id.vote_receipts:
+                title = getString(R.string.vote_receipts_lbl);
+                break;
+            case R.id.cancel_vote_receipts:
+                title = getString(R.string.cancellations_vote_receipts_lbl);
+                break;
         }
         getSupportActionBar().setTitle(title);
     }
@@ -151,7 +153,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                     getSupportLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
                             deliverResult(cursor);
                 }
-                updateActionBarTitle(typeVS);
+                updateActionBarTitle(item.getItemId());
                 onOptionsItemSelected(item.getItemId());
                 return true;
             default:
@@ -237,9 +239,9 @@ public class ReceiptGridActivity extends ActionBarActivity implements
 
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
-                TextView subject = (TextView) view.findViewById(R.id.event_subject);
-                TextView dateInfo = (TextView) view.findViewById(R.id.event_date_info);
-                TextView author = (TextView) view.findViewById(R.id.event_author);
+                TextView subject = (TextView) view.findViewById(R.id.receipt_subject);
+                TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
+                TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
 
                 subject.setText(receiptContainer.getSubject());
@@ -248,10 +250,10 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                 if(DateUtils.getTodayDate().after(receiptContainer.getValidTo())) {
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getString(R.string.closed_upper_lbl) + "</b> - " +
-                            "<b>" + getString(R.string.inicio_lbl) + "</b>: " +
+                            "<b>" + getString(R.string.init_lbl) + "</b>: " +
                             DateUtils.getSpanishStringFromDate(
                                     receiptContainer.getValidFrom()) + " - " +
-                            "<b>" + getString(R.string.fin_lbl) + "</b>: " +
+                            "<b>" + getString(R.string.finish_lbl) + "</b>: " +
                             DateUtils.getSpanishStringFromDate(receiptContainer.getValidTo());
                 } else {
                     imgView.setImageResource(R.drawable.open);
@@ -266,9 +268,8 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                 } else {
                     receiptState.setVisibility(View.GONE);
                 }
-                if(true) {
-                    author.setText(Html.fromHtml(receiptContainer.getType().toString()));
-                } else author.setVisibility(View.GONE);
+                typeTextView.setText(Html.fromHtml(ReceiptContentProvider.getDescription(
+                        ReceiptGridActivity.this.getApplicationContext(), receiptContainer.getType())));
             }
         }
     }

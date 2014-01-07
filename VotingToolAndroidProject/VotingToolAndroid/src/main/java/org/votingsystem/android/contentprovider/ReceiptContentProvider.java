@@ -14,6 +14,9 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.votingsystem.android.R;
+import org.votingsystem.model.TypeVS;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -59,6 +62,11 @@ public class ReceiptContentProvider extends ContentProvider {
     }
 
     @Override public boolean onCreate() {
+        //Delete previous session database
+        getContext().deleteDatabase(DB_NAME);
+
+
+
         // If database file isn't found this will throw a  FileNotFoundException, and we will
         // then create the database.
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
@@ -138,6 +146,20 @@ public class ReceiptContentProvider extends ContentProvider {
         Log.d(TAG + ".delete(...)", "receipt id: " + idColStr);
         getContext().getContentResolver().notifyChange(uri, null);
         return rowCount;
+    }
+
+    public static String getDescription(Context context, TypeVS type) {
+        String title = context.getString(R.string.receipt_lbl);
+        switch(type) {
+            case VOTEVS:
+                title = context.getString(R.string.receipt_vote_lbl);
+                break;
+            case VOTEVS_CANCELLED:
+            case CANCEL_VOTE:
+                title = context.getString(R.string.receipt_cancel_vote_page_lbl);
+                break;
+        }
+        return title;
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {

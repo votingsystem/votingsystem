@@ -67,6 +67,7 @@ public class ReceiptFragment extends Fragment {
                 TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
                 if(resultOperation == TypeVS.CANCEL_VOTE){
                     if(ResponseVS.SC_OK == responseStatusCode) { }
+                    getActivity().onBackPressed();
                 }
                 showProgress(false, true);
                 showMessage(responseStatusCode, caption, message, null);
@@ -116,6 +117,7 @@ public class ReceiptFragment extends Fragment {
         byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                 ReceiptContentProvider.SERIALIZED_OBJECT_COL));
         Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
+        String typeStr = cursor.getString(cursor.getColumnIndex(ReceiptContentProvider.TYPE_COL));
         View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.receipt_data_container);
@@ -151,7 +153,8 @@ public class ReceiptFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", "");
+        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected receipt type:" +
+                selectedReceipt.getType());
         switch(selectedReceipt.getType()) {
             case VOTEVS:
                 menuInflater.inflate(R.menu.receipt_vote, menu);
@@ -159,6 +162,13 @@ public class ReceiptFragment extends Fragment {
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
+                break;
+            case CANCEL_VOTE:
+            case VOTEVS_CANCELLED:
+                menuInflater.inflate(R.menu.receipt_vote, menu);
+                MenuItem checkReceiptMenuItem = menu.findItem(R.id.check_receipt);
+                checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
+                menu.removeItem(R.id.cancel_vote);
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
                     selectedReceipt.getType());
