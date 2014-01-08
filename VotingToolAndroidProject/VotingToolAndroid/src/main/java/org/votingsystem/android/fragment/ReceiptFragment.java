@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -215,7 +216,8 @@ public class ReceiptFragment extends Fragment {
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
-		switch (item.getItemId()) {
+        AlertDialog dialog = null;
+        switch (item.getItemId()) {
             case R.id.show_signers_info:
                 try {
                     SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
@@ -246,7 +248,7 @@ public class ReceiptFragment extends Fragment {
             case R.id.check_receipt:
                 return true;
             case R.id.delete_receipt:
-                new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_receipt_lbl)).
+                dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_receipt_lbl)).
                         setMessage(Html.fromHtml(getString(R.string.delete_receipt_msg,
                                 ((VoteVS)selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_button),
                         new DialogInterface.OnClickListener() {
@@ -261,9 +263,11 @@ public class ReceiptFragment extends Fragment {
                                 dialog.dismiss();
                             }
                         }).show();
+                //to avoid avoid dissapear on screen orientation change
+                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
             case R.id.cancel_vote:
-                new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
+                dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
                         setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
                                 ((VoteVS) selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_button),
                         new DialogInterface.OnClickListener() {
@@ -276,6 +280,8 @@ public class ReceiptFragment extends Fragment {
                                 dialog.dismiss();
                             }
                         }).show();
+                //to avoid avoid dissapear on screen orientation change
+                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
 		}
         return super.onOptionsItemSelected(item);

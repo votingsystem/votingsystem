@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -218,6 +219,8 @@ public class UserCertRequestFormFragment extends Fragment {
                             R.string.keyguard_password_enter_first_pin_code));
                 }
             }).setNegativeButton(getString(R.string.cancel_button), null).show();
+            //to avoid avoid dissapear on screen orientation change
+            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     		TextView textView = ((TextView) dialog.findViewById(android.R.id.message));
             textView.setGravity(Gravity.CENTER);
       	}

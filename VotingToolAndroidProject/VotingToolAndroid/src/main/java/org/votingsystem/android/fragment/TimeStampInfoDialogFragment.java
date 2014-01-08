@@ -10,6 +10,7 @@ import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import org.bouncycastle.tsp.TimeStampToken;
@@ -105,6 +106,8 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
         builder.setIcon(R.drawable.signature_ok_32);
         AlertDialog dialog = builder.create();
         dialog.setView(view);
+        //to avoid avoid dissapear on screen orientation change
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         return dialog;
     }
 

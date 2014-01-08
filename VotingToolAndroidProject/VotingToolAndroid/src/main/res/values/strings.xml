@@ -294,5 +294,6 @@
     <string name="show_cancellations_vote_receipts_lbl">Mostrar sólo cancelaciones de voto</string>
     <string name="cancellations_vote_receipts_lbl">Recibos de cancelaciones de voto</string>
     <string name="check_vote_Cancellation_lbl">Comprobar la cancelación</string>
+    <string name="send_msg_lbl">Enviar mensaje</string>
 
 </resources>

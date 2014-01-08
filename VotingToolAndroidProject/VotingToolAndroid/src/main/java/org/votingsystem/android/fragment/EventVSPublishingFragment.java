@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -92,7 +93,7 @@ public class EventVSPublishingFragment extends Fragment {
                     }
                     final GroupPosition groupPosition = selectedSubsystem;
                     message = message + " " + getString(R.string.publish_document_OK_sufix_msg);
-                    new AlertDialog.Builder(getActivity()).setTitle(caption).
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(caption).
                             setMessage(message).setPositiveButton(R.string.ok_button,
                             new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -103,6 +104,8 @@ public class EventVSPublishingFragment extends Fragment {
                             startActivity(intent);
                         }
                     }).show();
+                    //to avoid avoid dissapear on screen orientation change
+                    dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
                     caption = getString(R.string.publish_document_ERROR_msg);
                     showMessage(responseStatusCode, caption, Html.fromHtml(message).toString());

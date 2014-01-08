@@ -39,7 +39,7 @@ public class RepresentativeOperationsFragment extends Fragment {
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private SendDataTask sendDataTask;
+
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -47,9 +47,7 @@ public class RepresentativeOperationsFragment extends Fragment {
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             if(pin != null) {
-                if(sendDataTask != null) sendDataTask.cancel(true);
-                sendDataTask = new SendDataTask(pin);
-                sendDataTask.execute(contextVS.getAccessControl().getUserCSRServiceURL());
+
             }
         }
     };
@@ -167,43 +165,5 @@ public class RepresentativeOperationsFragment extends Fragment {
         }
     }
 
-    public class SendDataTask extends AsyncTask<String, Void, ResponseVS> {
-
-        private String password;
-
-        public SendDataTask(String password) {
-            this.password = password;
-        }
-
-        protected void onPreExecute() {
-            Log.d(TAG + ".SendDataTask.onPreExecute(...)", "onPreExecute");
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            showProgress(true, true);
-        }
-
-
-        @Override protected ResponseVS doInBackground(String... urls) {
-            Log.d(TAG + ".SendDataTask.doInBackground(...)", "url:" + urls[0]);
-            byte[] csrBytes = null;
-            try {
-                return new ResponseVS(ResponseVS.SC_OK);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            }
-        }
-
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + ".SendDataTask.onPostExecute", "statusCode: " + responseVS.getStatusCode());
-            //showProgress(false, true);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-
-            } else {
-                AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.alert_exception_caption).setMessage(
-                        responseVS.getMessage()).setPositiveButton("OK", null).show();
-            }
-        }
-    }
 
 }

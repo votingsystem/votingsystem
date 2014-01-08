@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ExpandableListView;
 
 import org.votingsystem.android.R;
@@ -252,9 +253,8 @@ public class NavigationDrawer extends ActionBarActivity {
     };
 
     private void showPublishDialog(){
-        Dialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.publish_document_lbl).setIcon(R.drawable.view_detailed_32)
-                .setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl).
+                setIcon(R.drawable.view_detailed_32).setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(NavigationDrawer.this, EventVSPublishingActivity.class);
                         switch (which) {
@@ -270,9 +270,9 @@ public class NavigationDrawer extends ActionBarActivity {
                         }
                         startActivity(intent);
                     }
-                })
-                .create();
-        dialog.show();
+                }).show();
+        //to avoid avoid dissapear on screen orientation change
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
     @Override protected void onPostCreate(Bundle savedInstanceState) {

@@ -12,6 +12,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -64,7 +66,7 @@ public class RepresentativeFragment extends Fragment {
             if(TypeVS.ITEM_REQUEST == typeVS) {
                 Cursor cursor = getActivity().getApplicationContext().getContentResolver().
                         query(UserContentProvider.getRepresentativeURI(representativeId),
-                        null, null, null, null);
+                                null, null, null, null);
                 cursor.moveToFirst();
                 UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                         cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
@@ -168,20 +170,6 @@ public class RepresentativeFragment extends Fragment {
         selectButton.setVisibility(View.VISIBLE);
     }
 
-	@Override public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
-		switch (item.getItemId()) {
-	    	case android.R.id.home:
-	    		Log.d(TAG + ".onOptionsItemSelected(...) ", "home");
-	    		Intent intent = new Intent(getActivity().getApplicationContext(),
-                        NavigationDrawer.class);
-	    		startActivity(intent);
-	    		return true;
-	    	default:
-	    		return super.onOptionsItemSelected(item);
-		}
-	}
-
     private void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
@@ -194,6 +182,21 @@ public class RepresentativeFragment extends Fragment {
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
                 message, false, this.getClass().getName(), null);
         pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.representative, menu);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        switch (item.getItemId()) {
+            case R.id.send_message:
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void showProgress(boolean showProgress, boolean animate) {

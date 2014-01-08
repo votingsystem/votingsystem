@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.model.ContentTypeVS;
@@ -115,7 +116,8 @@ public class UserCertResponseActivity extends ActionBarActivity {
                 requestCertButton.setVisibility(View.GONE);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                showException(getString(R.string.pin_error_msg));
+                showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                        getString(R.string.pin_error_msg), null);
             }
         }
         goAppButton.setVisibility(View.VISIBLE);
@@ -262,13 +264,14 @@ public class UserCertResponseActivity extends ActionBarActivity {
     	contentTextView.setText(Html.fromHtml(message));
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
     }
-    
-	public void showException(String exMessage) {
-		Log.d(TAG + ".showException(...) ", "exMessage: " + exMessage);
-		AlertDialog.Builder builder= new AlertDialog.Builder(this);
-		builder.setTitle(getString(R.string.alert_exception_caption)).setMessage(exMessage)
-		.setPositiveButton(getString(R.string.ok_button), null).show();
-	}
+
+    private void showMessage(Integer statusCode,String caption,String message, String htmlMessage) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+                " - message: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message, htmlMessage);
+        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
+    }
 
     public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
 
@@ -305,8 +308,8 @@ public class UserCertResponseActivity extends ActionBarActivity {
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 String certificationAddresses = contextVS.getAccessControl().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
-            } else showException(getString(
-                    R.string.request_user_cert_error_msg));
+            } else showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.request_user_cert_error_msg), null);
             goAppButton.setVisibility(View.VISIBLE);
         }
     }

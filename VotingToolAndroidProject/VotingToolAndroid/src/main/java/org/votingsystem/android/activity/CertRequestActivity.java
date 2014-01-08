@@ -24,6 +24,7 @@ import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import org.votingsystem.android.R;
@@ -64,12 +65,9 @@ public class CertRequestActivity extends FragmentActivity {
                 startActivity(new Intent(this, UserCertResponseActivity.class));
                 break;
             case WITH_CERTIFICATE:
-                AlertDialog.Builder builder= new AlertDialog.Builder(this);
-                builder.setTitle(getString(R.string.
-                        request_certificate_menu));
-                builder.setMessage(Html.fromHtml(
-                        getString(R.string.request_cert_again_msg)));
-                builder.setPositiveButton(getString(
+                AlertDialog dialog= new AlertDialog.Builder(this).setTitle(getString(R.string.
+                        request_certificate_menu)).setMessage(Html.fromHtml(
+                        getString(R.string.request_cert_again_msg))).setPositiveButton(getString(
                         R.string.ok_button), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Intent intent = new Intent(CertRequestActivity.this,
@@ -79,14 +77,14 @@ public class CertRequestActivity extends FragmentActivity {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }
-                });
-                builder.setNegativeButton(getString(R.string.cancel_button),
+                }).setNegativeButton(getString(R.string.cancel_button),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 CertRequestActivity.super.onBackPressed();
                             }
-                });
-                builder.show();
+                }).show();
+                //to avoid avoid dissapear on screen orientation change
+                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 break;
         }
     }

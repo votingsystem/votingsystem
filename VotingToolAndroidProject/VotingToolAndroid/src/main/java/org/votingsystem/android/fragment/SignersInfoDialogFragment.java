@@ -7,6 +7,7 @@ import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -70,6 +71,8 @@ public class SignersInfoDialogFragment extends DialogFragment {
                 getString(R.string.show_signers_info_lbl));
         AlertDialog dialog = builder.create();
         dialog.setView(mainLayout);
+        //to avoid avoid dissapear on screen orientation change
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         return dialog;
     }
 

@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -324,6 +325,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 showPinScreen(null);
             }
         });
+        //to avoid avoid dissapear on screen orientation change
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
