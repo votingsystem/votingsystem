@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.PDFSignedSender;
@@ -20,10 +19,8 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
-
 import java.io.FileInputStream;
 import java.util.List;
-
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 
 /**
@@ -129,11 +126,19 @@ public class SignAndSendService extends IntentService {
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             title = getString(R.string.signature_ok_notification_msg);
             resultIcon = R.drawable.signature_ok_32;
+            switch(typeVS) {
+                case CLAIM_PUBLISHING:
+                    message = getString(R.string.claim_published_ok_msg);
+                    break;
+                case VOTING_PUBLISHING:
+                    message = getString(R.string.election_published_ok_msg);
+                    break;
+            }
         }
         else title = getString(R.string.signature_error_notification_msg);
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
-        PendingIntent pendingIntent = null;
+
         Intent clickIntent = new Intent(this, MessageActivity.class);
         clickIntent.putExtra(ContextVS.RESPONSE_STATUS_KEY, responseVS.getStatusCode());
         clickIntent.putExtra(ContextVS.ICON_KEY, resultIcon);
@@ -141,7 +146,8 @@ public class SignAndSendService extends IntentService {
         clickIntent.putExtra(ContextVS.CAPTION_KEY, title);
         clickIntent.putExtra(ContextVS.MESSAGE_KEY, message);
         clickIntent.putExtra(ContextVS.CALLER_KEY, serviceCaller);
-        pendingIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
+                SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)
                 .setContentIntent(pendingIntent);

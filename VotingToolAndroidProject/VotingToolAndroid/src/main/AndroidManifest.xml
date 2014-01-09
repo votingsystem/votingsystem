@@ -27,14 +27,14 @@
             </intent-filter>
 
            	<intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.7"/>
+		       	<data android:scheme="http" android:host="192.168.1.4"/>
 	       	    <data android:path="/ControlCenter/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
 		    <intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.7"/>
+		       	<data android:scheme="http" android:host="192.168.1.4"/>
 	       	    <data android:path="/AccessControl/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  

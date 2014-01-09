@@ -317,5 +317,7 @@
     <string name="vote_options_lbl">Opciones de la votación</string>
     <string name="claim_options_lbl">Campos de la reclamación</string>
     <string name="option_repeated_msg">Ya ha introducido una opción con el valor \'%1$s\'</string>
+    <string name="claim_published_ok_msg">La reclmación se ha publicado corréctamente</string>
+    <string name="election_published_ok_msg">La votación se ha publicado corréctamente</string>
 
 </resources>
