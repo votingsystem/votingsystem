@@ -134,14 +134,13 @@ public class SignAndSendService extends IntentService {
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         PendingIntent pendingIntent = null;
-        Intent clickIntent = new Intent(Intent.ACTION_MAIN);
-        clickIntent.putExtra(ContextVS.RESPONSE_STATUS_KEY, responseVS.getMessage());
+        Intent clickIntent = new Intent(this, MessageActivity.class);
+        clickIntent.putExtra(ContextVS.RESPONSE_STATUS_KEY, responseVS.getStatusCode());
         clickIntent.putExtra(ContextVS.ICON_KEY, resultIcon);
         clickIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         clickIntent.putExtra(ContextVS.CAPTION_KEY, title);
         clickIntent.putExtra(ContextVS.MESSAGE_KEY, message);
         clickIntent.putExtra(ContextVS.CALLER_KEY, serviceCaller);
-        clickIntent.setClassName(this, MessageActivity.class.getName());
         pendingIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)

@@ -50,7 +50,6 @@ import org.votingsystem.util.DateUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -216,18 +215,20 @@ public class PublishEventVSFragment extends Fragment {
                 signedMessageSubject = getActivity().getString(R.string.publish_election_msg_subject);
                 eventVS.setControlCenter(controlCenterList.get(new Long(
                         controlCenterSetSpinner.getSelectedItemId()).intValue()));
-                Set<FieldEventVS> voteOptionSet = new HashSet<FieldEventVS>();
-                for(String optionContent:optionList) {
-                    FieldEventVS optionField = new FieldEventVS();
-                    optionField.setContent(optionContent);
-                    voteOptionSet.add(optionField);
-                }
-                eventVS.setFieldsEventVS(voteOptionSet);
                 eventVS.setDateBegin(dateBeginCalendar.getTime());
                 break;
             case MANIFEST_PUBLISHING:
                 signedMessageSubject = getActivity().getString(R.string.publish_manifest_msg_subject);
                 break;
+        }
+        if(!optionList.isEmpty()) {
+            Set<FieldEventVS> voteOptionSet = new HashSet<FieldEventVS>();
+            for(String optionContent:optionList) {
+                FieldEventVS optionField = new FieldEventVS();
+                optionField.setContent(optionContent);
+                voteOptionSet.add(optionField);
+            }
+            eventVS.setFieldsEventVS(voteOptionSet);
         }
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),

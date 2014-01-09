@@ -14,9 +14,8 @@
         <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/scroller"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:fillViewport="true" >
-            <LinearLayout android:layout_width="wrap_content"
+            android:layout_height="fill_parent">
+            <LinearLayout android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:orientation="vertical">
                 <EditText
@@ -29,9 +28,7 @@
                     android:singleLine="true"
                     android:imeOptions="actionNext"
                     android:nextFocusDown="@+id/dateFinish"
-                    android:gravity="center_vertical|center_horizontal">
-                    <requestFocus />
-                </EditText>
+                    android:gravity="center_vertical|center_horizontal"/>
 
                 <EditText
                     android:id="@+id/dateFinish"
@@ -41,18 +38,37 @@
                     android:layout_marginLeft="10dip"
                     android:layout_marginRight="10dip"
                     android:singleLine="true"
-                    android:gravity="center_vertical|center_horizontal">
-                    <requestFocus />
-                </EditText>
+                    android:gravity="center_vertical|center_horizontal"/>
                 <fragment android:name="org.votingsystem.android.fragment.EditorFragment"
                     xmlns:android="http://schemas.android.com/apk/res/android"
                     android:id="@+id/editor"
                     android:tag="EditorFragment"
                     android:layout_width="match_parent"
                     android:layout_height="fill_parent" />
+                <View android:layout_width="fill_parent"
+                    android:layout_marginTop="15dp"
+                    android:layout_height="0.2dp"
+                    android:id="@+id/separator"
+                    android:visibility="visible"
+                    android:background="@android:color/darker_gray"/>
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textColor="@color/event_subject"
+                    android:text ="@string/claim_options_lbl"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="10dip"
+                    android:layout_marginRight="10dip"
+                    android:singleLine="true"
+                    android:textSize="25sp"
+                    android:gravity="center_vertical|center_horizontal"/>
                 <LinearLayout android:id="@+id/optionContainer" android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
-                    android:orientation="vertical"></LinearLayout>
+                    android:layout_marginLeft="20dip"
+                    android:layout_marginRight="20dip"
+                    android:layout_marginBottom="50dp"
+                    android:orientation="vertical"/>
             </LinearLayout>
         </ScrollView>
     </FrameLayout>
