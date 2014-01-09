@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.EventVSPublishingFragment;
+import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.model.OperationVS;
 
 /**
@@ -24,22 +24,22 @@ public class EventVSPublishingActivity extends ActionBarActivity {
         if (savedInstanceState != null) {
             return;
         }
-        EventVSPublishingFragment publishFragment = new EventVSPublishingFragment();
+        EditorFragment publishFragment = new EditorFragment();
         publishFragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
-                publishFragment, EventVSPublishingFragment.TAG).commit();
+                publishFragment, EditorFragment.TAG).commit();
     }
 
     public void processOperation(OperationVS operationVS) {
-        EventVSPublishingFragment fragment = (EventVSPublishingFragment)getSupportFragmentManager().
-                findFragmentByTag(EventVSPublishingFragment.TAG);
+        EditorFragment fragment = (EditorFragment)getSupportFragmentManager().
+                findFragmentByTag(EditorFragment.TAG);
         if (fragment != null) fragment.processOperation(operationVS);
 
     }
 
     /*@Override public void onBackPressed() {
-        EventVSPublishingFragment fragment = (EventVSPublishingFragment)getSupportFragmentManager().
-                findFragmentByTag(EventVSPublishingFragment.TAG);
+        EditorFragment fragment = (EditorFragment)getSupportFragmentManager().
+                findFragmentByTag(EditorFragment.TAG);
         if (fragment != null) fragment.onBackPressed();
         else  super.onBackPressed();
     }*/

@@ -1,6 +1,8 @@
 package org.votingsystem.model;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 import com.itextpdf.text.Context_iTextVS;
@@ -43,6 +45,7 @@ public class ContextVS {
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";
+    public static final String FORM_DATA_KEY = "FORM_DATA";
     public static final String NIF_KEY = "NIF";
     public static final String EMAIL_KEY = "EMAIL_KEY";
     public static final String SURNAME_KEY = "SURNAME_KEY";
@@ -59,6 +62,8 @@ public class ContextVS {
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
     public static final String OFFSET_KEY = "OFFSET";
     public static final String CAPTION_KEY = "CAPTION";
+    public static final String ERROR_PANEL_KEY = "ERROR_PANEL";
+    public static final String ICON_KEY = "ICON_KEY";
     public static final String LOADING_KEY = "LOADING_KEY";
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
@@ -87,6 +92,8 @@ public class ContextVS {
     public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;
     public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID = 2;
     public static final int VOTE_SERVICE_NOTIFICATION_ID          = 3;
+
+    public static final int NUM_MIN_OPTIONS = 2;
 
     public static final int KEY_SIZE = 1024;
     public static final int SYMETRIC_ENCRYPTION_KEY_LENGTH = 256;
@@ -123,6 +130,11 @@ public class ContextVS {
     private Context context = null;
 
     private static PropertyResourceBundle resourceBundle;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+
+        }};
 
     private ContextVS(Context context) {
         System.setProperty("android.os.Build.ID", android.os.Build.ID);

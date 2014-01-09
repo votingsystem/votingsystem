@@ -30,7 +30,7 @@ $('#requestEventBackupForm').submit(function(event){
 	    	Operation.BACKUP_REQUEST)
    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 	webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-	webAppMessage.receiverSignServiceURL = "${createLink(controller:'backupVS', absolute:true)}"
+	webAppMessage.serviceURL = "${createLink(controller:'backupVS', absolute:true)}"
 	webAppMessage.signedMessageSubject = "${eventMap.subject}"
 	webAppMessage.eventVS = pageEvent
 	pageEvent.operation = Operation.BACKUP_REQUEST

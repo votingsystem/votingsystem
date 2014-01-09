@@ -4,27 +4,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.util.StringUtils;
-
 import java.text.ParseException;
 
 /**
- *
  * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class OperationVS {
 
-	public static final String TAG = "Operacion";
-
-    public static final String TYPEVS_KEY   = "operationKey";
+	public static final String TAG = "OperationVS";
     
     private TypeVS typeVS;
     private Integer statusCode;
-    private String mensaje;
-    private String urlDocumento;
+    private String caption;
+    private String message;
     private String urlTimeStampServer;
-    private String receiverSignServiceURL;
+    private String serviceURL;
     private String receiverName;
-    private String emailSolicitante;
     private String signedMessageSubject;
     private JSONObject signedContent;
     private EventVS eventVS;
@@ -46,14 +42,14 @@ public class OperationVS {
         this.typeVS = TypeVS.valueOf(typeVS);
     }
     
-    public OperationVS(int statusCode, String mensaje) {
+    public OperationVS(int statusCode, String message) {
         this.statusCode = statusCode;
-        this.mensaje = mensaje;
+        this.message = message;
     }
     
-    public OperationVS(int statusCode, String mensaje, TypeVS typeVS) {
+    public OperationVS(int statusCode, String message, TypeVS typeVS) {
         this.statusCode = statusCode;
-        this.mensaje = mensaje;
+        this.message = message;
         this.typeVS = typeVS;
     }
 
@@ -64,10 +60,7 @@ public class OperationVS {
     public void setArgs(String[] args) {
         this.args = args;
     }
-    
-    /**
-     * @return the urlTimeStampServer
-     */
+
     public String getUrlTimeStampServer() {
         return urlTimeStampServer;
     }
@@ -80,117 +73,42 @@ public class OperationVS {
         this.sessionId = sessionId;
     }
 
-    /**
-     * @param urlTimeStampServer the urlTimeStampServer to set
-     */
     public void setUrlTimeStampServer(String urlTimeStampServer) {
         this.urlTimeStampServer = urlTimeStampServer;
     }
-     
-    /**
-     * @return the typeVS
-     */
+
     public TypeVS getTypeVS() {
         return typeVS;
     }
 
-    /**
-     * @param typeVS the typeVS to set
-     */
     public void setTypeVS(TypeVS typeVS) {
         this.typeVS = typeVS;
     }
 
-    /**
-     * @return the statusCode
-     */
     public Integer getStatusCode() {
         return statusCode;
     }
 
-    /**
-     * @param statusCode the statusCode to set
-     */
     public void setStatusCode(Integer statusCode) {
         this.statusCode = statusCode;
     }
 
-    /**
-     * @return the mensaje
-     */
-    public String getMensaje() {
-        return mensaje;
-    }
-    
-    /**
-     * @param mensaje the mensaje to set
-     */
-    public void setMensaje(String mensaje) {
-        this.mensaje = mensaje;
-    }
-    
-    
-    /**
-     * @return the urlDocumento
-     */
-    public String getUrlDocumento() {
-        return urlDocumento;
+    public String getMessage() {
+        return message;
     }
 
-    /**
-     * @param urlDocumento the urlDocumento to set
-     */
-    public void setUrlDocumento(String urlDocumento) {
-        this.urlDocumento = urlDocumento;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    /**
-     * @return the receiverSignServiceURL
-     */
-    public String getUrlEnvioDocumento() {
-        return receiverSignServiceURL;
-    }
-
-    /**
-     * @param receiverSignServiceURL the receiverSignServiceURL to set
-     */
-    public void setUrlEnvioDocumento(String receiverSignServiceURL) {
-        this.receiverSignServiceURL = receiverSignServiceURL;
-    }
-    
-    
-    /**
-     * @return the eventVS
-     */
     public EventVS getEventVS() {
         return eventVS;
     }
 
-    /**
-     * @param eventVS the eventVS to set
-     */
     public void setEventVS(EventVS eventVS) {
         this.eventVS = eventVS;
     }
-    
-    
-    /**
-     * @return the signedContent
-     */
-    public JSONObject getContentFirma() {
-        return signedContent;
-    }
 
-    /**
-     * @param signedContent the signedContent to set
-     */
-    public void setContentFirma(JSONObject signedContent) {
-        this.signedContent = signedContent;
-    }
-    
-    /**
-     * @return the receiverName
-     */
     public String getReceiverName() {
         return receiverName;
     }
@@ -200,9 +118,6 @@ public class OperationVS {
         return StringUtils.getNormalized(receiverName);
     }
 
-    /**
-     * @param receiverName the receiverName to set
-     */
     public void setReceiverName(String receiverName) {
         this.receiverName = receiverName;
     }
@@ -225,15 +140,12 @@ public class OperationVS {
         if (operationJSON.has("statusCode")) {
             operation.setStatusCode(operationJSON.getInt("statusCode"));
         }
-        if (operationJSON.has("mensaje")) {
-            operation.setMensaje(operationJSON.getString("mensaje"));
+        if (operationJSON.has("message")) {
+            operation.setMessage(operationJSON.getString("message"));
         }   
-        if (operationJSON.has("receiverSignServiceURL")) {
-            operation.setUrlEnvioDocumento(operationJSON.getString("receiverSignServiceURL"));
-        }  
-        if (operationJSON.has("urlDocumento")) {
-            operation.setUrlDocumento(operationJSON.getString("urlDocumento"));
-        }  
+        if (operationJSON.has("serviceURL")) {
+            operation.setServiceURL(operationJSON.getString("serviceURL"));
+        }
         if (operationJSON.has("urlTimeStampServer")) {
             operation.setUrlTimeStampServer(operationJSON.getString("urlTimeStampServer"));
         }  
@@ -242,68 +154,69 @@ public class OperationVS {
             operation.setEventVS(eventVS);
         }  
         if (operationJSON.has("signedContent"))
-             operation.setContentFirma(operationJSON.getJSONObject("signedContent"));
+             operation.setSignedContent(operationJSON.getJSONObject("signedContent"));
         if (operationJSON.has("receiverName")) {
             operation.setReceiverName(operationJSON.getString("receiverName"));
         }
         if (operationJSON.has("signedMessageSubject")) {
             operation.setSignedMessageSubject(operationJSON.getString("signedMessageSubject"));
         }
-        if (operationJSON.has("emailSolicitante")) {
-            operation.setEmailSolicitante(operationJSON.getString("emailSolicitante"));
-        }
         if (operationJSON.has("sessionId")) {
         	operation.setSessionId(operationJSON.getString("sessionId"));
         }
+        if (operationJSON.has("caption")) operation.setCaption(operationJSON.getString("caption"));
         return operation;
     }
 
     public JSONObject getJSON () throws JSONException {
     	JSONObject jsonObject = new JSONObject();
         if(statusCode != null) jsonObject.put("statusCode", statusCode);
-        if(mensaje != null) jsonObject.put("mensaje", mensaje);
+        if(message != null) jsonObject.put("message", message);
         if(typeVS != null) jsonObject.put("operation", typeVS.toString());
-        if(urlDocumento != null) jsonObject.put("urlDocumento", urlDocumento);
-        if(receiverSignServiceURL != null) jsonObject.put("receiverSignServiceURL", receiverSignServiceURL);
-        if(signedMessageSubject != null) jsonObject.put("signedMessageSubject", receiverSignServiceURL);
+        if(getServiceURL() != null) jsonObject.put("serviceURL", getServiceURL());
+        if(signedMessageSubject != null) jsonObject.put("signedMessageSubject", getServiceURL());
         if(receiverName != null) jsonObject.put("receiverName", receiverName);
         if(urlTimeStampServer != null) jsonObject.put("urlTimeStampServer", urlTimeStampServer);
         if(args != null) jsonObject.put("args", args);
         if(sessionId != null) jsonObject.put("sessionId", sessionId);
         if(eventVS != null) jsonObject.put("eventVS", eventVS.toJSON());
+        if(caption != null) jsonObject.put("caption", caption);
+        if(signedContent != null) jsonObject.put("signedContent", signedContent);
         return jsonObject;
     }
 
-    /**
-     * @return the signedMessageSubject
-     */
     public String getSignedMessageSubject() {
         return signedMessageSubject;
     }
 
-    /**
-     * @param signedMessageSubject the signedMessageSubject to set
-     */
     public void setSignedMessageSubject(String signedMessageSubject) {
         this.signedMessageSubject = signedMessageSubject;
     }
 
-    /**
-     * @return the emailSolicitante
-     */
-    public String getEmailSolicitante() {
-        return emailSolicitante;
+
+    public String getCaption() {
+        return caption;
     }
 
-    /**
-     * @param emailSolicitante the emailSolicitante to set
-     */
-    public void setEmailSolicitante(String emailSolicitante) {
-        this.emailSolicitante = emailSolicitante;
-    }		
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
 
+    public JSONObject getSignedContent() {
+        return signedContent;
+    }
 
+    public void setSignedContent(JSONObject signedContent) {
+        this.signedContent = signedContent;
+    }
 
+    public String getServiceURL() {
+        return serviceURL;
+    }
+
+    public void setServiceURL(String serviceURL) {
+        this.serviceURL = serviceURL;
+    }
 }
 
 

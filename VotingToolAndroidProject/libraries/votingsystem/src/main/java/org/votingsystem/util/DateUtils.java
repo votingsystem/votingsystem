@@ -125,17 +125,9 @@ public class DateUtils {
         return time;
     }
 
-    public static final String getFechaYYYYMMDD () {
-        Date date = new Date();
-        String resultado = null;
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-        resultado = formatter.format(date);
-        return resultado;
-    }
-
-    public static Calendar xDiasAntes(int numDias) {
+    public static Calendar xDaysElapsed(int numDias) {
         Calendar today = Calendar.getInstance();
-        today.add(Calendar.DATE, - numDias);
+        today.add(Calendar.DATE, numDias);
         return (today);
     }
     
@@ -156,10 +148,15 @@ public class DateUtils {
     }
     
     public static String getSpanishStringFromDate (Date date) {
-    	SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
+    	SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy");
     	return formatter.format(date);
     }
-    
+
+    public static String getLongSpanishStringFromDate (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
+        return formatter.format(date);
+    }
+
     public static String getElpasedTimeHoursFromNow(Date end) {
     	Float hours = (end.getTime() -DateUtils.getTodayDate().getTime())/(60*60*1000F);
     	return Integer.valueOf(hours.intValue()).toString();
@@ -217,11 +214,6 @@ public class DateUtils {
         if (elapsedDays > 0) duracion.append(elapsedDays + " días");
         if (elapsedHours > 0) duracion.append(elapsedHours + ", horas");
         return duracion.toString();
-    }
-
-    public static String getSpanishFormattedStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("dd MMM yyyy' 'HH:mm:ss");
-        return formatter.format(date);
     }
 
 }

@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.model.ContentTypeVS;
@@ -105,7 +106,7 @@ public class SignAndSendService extends IntentService {
                             R.string.operation_unknown_error_msg, operationType.toString()));
                     break;
             }
-            showNotification(responseVS, operationType);
+            showNotification(responseVS, operationType, serviceCaller);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 caption = getString(R.string.operation_ok_msg);
                 message = getString(R.string.operation_ok_msg);
@@ -121,26 +122,29 @@ public class SignAndSendService extends IntentService {
         }
     }
 
-    private void showNotification(ResponseVS responseVS, TypeVS typeVS){
+    private void showNotification(ResponseVS responseVS, TypeVS typeVS, String serviceCaller){
         String title = null;
-        String message = null;
+        String message = responseVS.getMessage();
         int resultIcon = R.drawable.cancel_22;
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             title = getString(R.string.signature_ok_notification_msg);
             resultIcon = R.drawable.signature_ok_32;
         }
         else title = getString(R.string.signature_error_notification_msg);
-        message = typeVS.toString() +  " " + responseVS.getMessage();
-        // Display an icon to show that the service is running.
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         PendingIntent pendingIntent = null;
-        //Intent clickIntent = new Intent(Intent.ACTION_MAIN);
-        //clickIntent.setClassName(this, NavigationDrawer.class.getName());
-        //pendingIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
+        Intent clickIntent = new Intent(Intent.ACTION_MAIN);
+        clickIntent.putExtra(ContextVS.ICON_KEY, resultIcon);
+        clickIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
+        clickIntent.putExtra(ContextVS.CAPTION_KEY, title);
+        clickIntent.putExtra(ContextVS.MESSAGE_KEY, message);
+        clickIntent.putExtra(ContextVS.CALLER_KEY, serviceCaller);
+        clickIntent.setClassName(this, MessageActivity.class.getName());
+        pendingIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon);
-        if(pendingIntent != null) builder.setContentIntent(pendingIntent);
+                .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)
+                .setContentIntent(pendingIntent);
         Notification note = builder.build();
         //Identifies our service icon in the icon tray.
         notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);

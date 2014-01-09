@@ -16,7 +16,6 @@
 
 package org.votingsystem.android.activity;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;

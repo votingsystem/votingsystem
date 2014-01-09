@@ -3,8 +3,8 @@ var WebAppMessage = function (statusCode, operation) {
 	this.operation = operation
 	this.subject ;
 	this.signedContent;
-	this.receiverSignServiceURL;
-	this.urlDocumento;
+	this.serviceURL;
+	this.documentURL;
 	this.receiverName;
 	this.serverURL;
 	this.eventVS;

@@ -65,7 +65,7 @@
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.signedContent = {representativeInfo:getEditor_editorDivData(),
                     operation:Operation.REPRESENTATIVE_DATA}
-            webAppMessage.receiverSignServiceURL = "${createLink( controller:'representative', absolute:true)}"
+            webAppMessage.serviceURL = "${createLink( controller:'representative', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
             webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
             votingSystemClient.setMessageToSignatureClient(webAppMessage, newRepresentativeCallback);

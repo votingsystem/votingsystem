@@ -306,7 +306,7 @@ public class RepresentativeFormDialog extends JDialog {
                     operation.getNormalizedReceiverName(), documentToSignJSON.toString(), password.toCharArray(),
                     operation.getSignedMessageSubject(), null);
             RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME, selectedImage,
-                    operation.getUrlEnvioDocumento());
+                    operation.getServiceURL());
             return dataSender.call();
         }
 

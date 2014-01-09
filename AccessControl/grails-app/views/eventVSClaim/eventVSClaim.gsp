@@ -145,7 +145,7 @@
 	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SMIME_CLAIM_SIGNATURE)
 	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
     		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-   			webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSClaimCollector', absolute:true)}"
+   			webAppMessage.serviceURL = "${createLink( controller:'eventVSClaimCollector', absolute:true)}"
   				webAppMessage.signedMessageSubject = "${eventMap.subject}"
 			webAppMessage.eventVS = pageEvent
 

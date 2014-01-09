@@ -123,7 +123,7 @@
     				representativeName:"${representativeFullName}", dateFrom:dateFromStr,
     				dateTo:dateToStr, email:$("#userEmailText").val()}
 			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
-			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
+			webAppMessage.serviceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestVotingHistoryLbl"/>'
 			webAppMessage.email = $("#userEmailText").val()
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
@@ -139,7 +139,7 @@
     				representativeNif:"${representative.nif}", email:$("#accreditationReqUserEmailText").val(),
     				representativeName:"${representativeFullName}", selectedDate:accreditationDateSelectedStr}
 			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
-			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
+			webAppMessage.serviceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.email = $("#accreditationReqUserEmailText").val()
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 

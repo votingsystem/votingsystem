@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="empty_field_form">#f00</color>
+    <color name="terminated">#cc1606</color>
+    <color name="awaiting">#fba131</color>
+    <color name="active">#6bad74</color>
     <color name="progress_text">#8e8e8e</color>
     <color name="event_progress_text_lbl">#FFF</color>
     <color name="white_background">#FFF</color>
@@ -10,4 +13,5 @@
     <color name="event_subject">#005b92</color>
     <color name="loading_data">#33b5e5</color>
     <color name="representative_name">#005b92</color>
+    <color name="form_background">#eeeeee</color>
 </resources>

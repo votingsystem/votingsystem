@@ -16,7 +16,6 @@
 package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,6 +36,7 @@ import android.view.WindowManager;
 import android.widget.ExpandableListView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.PublishEventVSFragment;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
@@ -256,7 +256,8 @@ public class NavigationDrawer extends ActionBarActivity {
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl).
                 setIcon(R.drawable.view_detailed_32).setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(NavigationDrawer.this, EventVSPublishingActivity.class);
+                        Intent intent = new Intent(NavigationDrawer.this, FragmentContainerActivity.class);
+                        intent.putExtra(ContextVS.FRAGMENT_KEY, PublishEventVSFragment.class.getName());
                         switch (which) {
                             case 0:
                                 intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);

@@ -31,5 +31,10 @@ function getEditor_${attrs.id}Data() {
 	return editor.getData().trim()
 }
 
+function setDataEditor_${attrs.id}(value) {
+    editor.insertHtml( value );
+}
+
+
 $(function() {showEditor_${attrs.id}() })
 </r:script>

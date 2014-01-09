@@ -73,7 +73,7 @@ public class ReceiptPagerActivity extends ActionBarActivity {
         if(timestampUpdated != null) dateUpdated = new Date(timestampUpdated);
         if(dateCreated != null) {
             subtitle = getString(R.string.date_saved_lbl) + " " + DateUtils.
-                    getSpanishFormattedStringFromDate(dateCreated);
+                    getSpanishStringFromDate(dateCreated);
         }
         if(dateUpdated != null) {
             if(timestampCreated != timestampUpdated)

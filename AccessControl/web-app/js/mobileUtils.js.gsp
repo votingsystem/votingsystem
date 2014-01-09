@@ -7,7 +7,7 @@ var VotingSystemClient = function () {
 
 	this.setMessageToSignatureClient = function (messageJSON) {
 		var message = JSON.stringify(messageJSON)
-		console.log("---- setMessageToSignatureClient: " + message);
+		//console.log("---- setMessageToSignatureClient: " + message);
 		androidClient.setVotingWebAppMessage(message);
 	}
 }

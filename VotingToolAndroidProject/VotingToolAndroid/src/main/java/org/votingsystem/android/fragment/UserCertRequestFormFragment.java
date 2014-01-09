@@ -236,7 +236,7 @@ public class UserCertRequestFormFragment extends Fragment {
     }
 
     private boolean validateForm () {
-    	Log.d(TAG + ".validateForm", "validateForm");
+    	Log.d(TAG + ".validateForm()", "");
         nif = NifUtils.validate(nifText.getText().toString());
     	if(nif == null) {
     		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),

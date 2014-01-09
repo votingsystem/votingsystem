@@ -68,7 +68,7 @@ function submitAdminForm() {
     	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
-		webAppMessage.receiverSignServiceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
+		webAppMessage.serviceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
 		var signedContent = {operation:Operation.EVENT_CANCELLATION,
 				accessControlURL:"${grailsApplication.config.grails.serverURL}",
 				eventId:"${eventMap?.id}", state:state}

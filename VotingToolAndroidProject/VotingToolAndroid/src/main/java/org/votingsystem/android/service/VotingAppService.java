@@ -80,7 +80,7 @@ public class VotingAppService extends Service {
                         if(operationStr != null) {
                             Intent operIntent = new Intent(VotingAppService.this,
                                     EventVSPublishingActivity.class);
-                            operIntent.putExtra(OperationVS.TYPEVS_KEY, operationStr);
+                            operIntent.putExtra(ContextVS.TYPEVS_KEY, operationStr);
                             startActivity(operIntent);
                         }
                     }

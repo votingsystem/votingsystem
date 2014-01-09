@@ -31,7 +31,7 @@ function removeRepresentative() {
 	webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 	webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE}
 	webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
-	webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
+	webAppMessage.serviceURL = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
 	webAppMessage.signedMessageSubject = '<g:message code="removeRepresentativeMsgSubject"/>'
 	votingSystemClient.setMessageToSignatureClient(webAppMessage, removeRepresentativeCallback); 
 }

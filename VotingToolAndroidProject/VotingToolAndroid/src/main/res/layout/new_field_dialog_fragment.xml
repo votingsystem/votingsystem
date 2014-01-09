@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/row"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dip">
+
+    <LinearLayout android:id="@+id/error_panel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:padding="6dip">
+        <ImageView android:id="@+id/left_icon"
+            android:src="@drawable/cancel_22"
+            android:layout_width="25dip"
+            android:layout_height="25dip"
+            android:layout_marginRight="5dip"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:scaleType="fitCenter"/>
+        <TextView android:layout_width="fill_parent"
+            android:textColor="@color/terminated"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip"
+            android:textSize="12sp"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="fill_parent"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"/>
+
+    <EditText android:id="@+id/field_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/subject_lbl"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:gravity="center_vertical|center_horizontal">
+        <requestFocus />
+    </EditText>
+    
+</LinearLayout>

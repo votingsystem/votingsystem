@@ -20,10 +20,10 @@ public class OperationVS {
     private Integer statusCode;
     private String callerCallback;
     private String message;
-    private String urlDocumento;
+    private String documentURL;
     private String urlTimeStampServer;
     private String serverURL;
-    private String receiverSignServiceURL;
+    private String serviceURL;
     private String receiverName;
     private String email;
     private String signedMessageSubject;
@@ -105,20 +105,20 @@ public class OperationVS {
         this.message = message;
     }
 
-    public String getUrlDocumento() {
-        return urlDocumento;
+    public String getDocumentURL() {
+        return documentURL;
     }
 
-    public void setUrlDocumento(String urlDocumento) {
-        this.urlDocumento = urlDocumento;
+    public void setDocumentURL(String documentURL) {
+        this.documentURL = documentURL;
     }
 
-    public String getUrlEnvioDocumento() {
-        return receiverSignServiceURL;
+    public String getServiceURL() {
+        return serviceURL;
     }
 
-    public void setUrlEnvioDocumento(String receiverSignServiceURL) {
-        this.receiverSignServiceURL = receiverSignServiceURL;
+    public void setServiceURL(String serviceURL) {
+        this.serviceURL = serviceURL;
     }
 
     public EventVS getEventVS() {
@@ -210,9 +210,9 @@ public class OperationVS {
         }
         if (dataMap.containsKey("statusCode")) operationVS.setStatusCode((Integer)dataMap.get("statusCode"));
         if (dataMap.containsKey("message")) operationVS.setMessage((String)dataMap.get("message"));
-        if (dataMap.containsKey("receiverSignServiceURL"))
-            operationVS.setUrlEnvioDocumento((String)dataMap.get("receiverSignServiceURL"));
-        if (dataMap.containsKey("urlDocumento")) operationVS.setUrlDocumento((String)dataMap.get("urlDocumento"));
+        if (dataMap.containsKey("serviceURL"))
+            operationVS.setServiceURL((String)dataMap.get("serviceURL"));
+        if (dataMap.containsKey("documentURL")) operationVS.setDocumentURL((String)dataMap.get("documentURL"));
         if (dataMap.containsKey("urlTimeStampServer")) operationVS.setUrlTimeStampServer((String)dataMap.get("urlTimeStampServer"));
         if (dataMap.containsKey("serverURL")) operationVS.setUrlServer((String)dataMap.get("serverURL"));
         if (dataMap.containsKey("callerCallback")) operationVS.setCallerCallback((String)dataMap.get("callerCallback"));
@@ -246,8 +246,8 @@ public class OperationVS {
         if(statusCode != null) dataMap.put("statusCode", statusCode);
         if(message != null) dataMap.put("message", message);
         if(typeVS != null) dataMap.put("operation", typeVS.toString());
-        if(urlDocumento != null) dataMap.put("urlDocumento", urlDocumento);
-        if(receiverSignServiceURL != null) dataMap.put("receiverSignServiceURL", receiverSignServiceURL);
+        if(documentURL != null) dataMap.put("documentURL", documentURL);
+        if(serviceURL != null) dataMap.put("serviceURL", serviceURL);
         if(signedMessageSubject != null) dataMap.put("signedMessageSubject", signedMessageSubject);
         if(receiverName != null) dataMap.put("receiverName", receiverName);
         if(urlTimeStampServer != null) dataMap.put("urlTimeStampServer", urlTimeStampServer);

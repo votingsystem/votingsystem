@@ -250,7 +250,7 @@
     <string name="new_representative_button">Darse de alta como representante</string>
     <string name="cancel_representative_button">Darse de baja como representante</string>
     <string name="edit_representative_button">Editar datos del representante</string>
-
+    <string name="editor_empty_error_lbl">Debe rellenar el campo del editor</string>
     <string name="signature_msg_subject">[Firma]-</string>
     <string name="representative_lbl">Representante</string>
     <string name="num_representations_lbl">%1$s representaciones</string>
@@ -295,5 +295,25 @@
     <string name="cancellations_vote_receipts_lbl">Recibos de cancelaciones de voto</string>
     <string name="check_vote_Cancellation_lbl">Comprobar la cancelación</string>
     <string name="send_msg_lbl">Enviar mensaje</string>
+    <string name="save_editor_lbl">Guardar</string>
+    <string name="add_option_lbl">Añadir opción</string>
+    <string name="date_finish_lbl">Fecha finalización</string>
+    <string name="date_error_lbl">Debe seleccionar una fecha válida posterior a la fecha actual</string>
+    <string name="subject_error_lbl">Debe rellenar el campo asunto</string>
+    <string name="publish_claim_msg_subject">Solicitud de publicación de reclamación</string>
+    <string name="publish_election_msg_subject">Solicitud de publicación de votación</string>
+    <string name="publish_manifest_msg_subject">Solicitud de publicación de manifiesto</string>
+    <string name="date_begin_lbl">Fecha inicio</string>
+    <string name="date_init_after_finish_error_lbl">La fecha de inicio no puede ser posterior a la fecha de finalización</string>
+    <string name="select_control_center_lbl">Seleccione un centro de control</string>
+    <string name="control_center_missing_error_lbl">Debe seleccionar un centro de control</string>
+    <string name="empty_field_error_lbl">El contenido del campo no puede ir vacío</string>
+    <string name="add_vote_option_lbl">Añadir opción de votación</string>
+    <string name="add_claim_option_lbl">Añadir campo de reclamación</string>
+    <string name="add_vote_option_msg">Introduzca el texto que aparecerá como opción en la votación</string>
+    <string name="add_claim_option_msg">Introduzca el texto que aparecerá como campo de la reclamación</string>
+    <string name="delete_option_lbl">Borrar opción</string>
+    <string name="num_vote_options_error_msg">Debe añadir al menos un par de opciones en la votación</string>
+    <string name="vote_options_lbl">Opciones de la votación</string>
 
 </resources>

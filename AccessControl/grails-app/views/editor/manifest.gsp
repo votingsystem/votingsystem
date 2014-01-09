@@ -83,7 +83,7 @@
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.signedContent = eventVS
-        webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
+        webAppMessage.serviceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
         webAppMessage.signedMessageSubject = '<g:message code="publishManifestSubject"/>'
 
         votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback);
@@ -104,7 +104,7 @@
                 caption = '<g:message code="publishOKCaption"/>'
                 var msgTemplate = "<g:message code='documentLinkMsg'/>";
                 msg = "<p><g:message code='publishOKMsg'/>.</p>" +
-                    msgTemplate.format(appMessageJSON.receiverSignServiceURL);
+                    msgTemplate.format(appMessageJSON.serviceURL);
                 manifestDocumentURL = appMessageJSON.message
             }
             showResultDialog(caption, msg, resultCallback)

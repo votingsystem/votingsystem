@@ -114,13 +114,13 @@
 				    	Operation.MANIFEST_SIGN)
 		    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 	    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-    			webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSManifestCollector', absolute:true)}/${eventMap.id}"
+    			webAppMessage.serviceURL = "${createLink( controller:'eventVSManifestCollector', absolute:true)}/${eventMap.id}"
    				webAppMessage.signedMessageSubject = "${eventMap.subject}"
 		    	//signed and encrypted
     			webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
 	    		webAppMessage.eventVS = pageEvent
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
-				webAppMessage.urlDocumento = pageEvent.URL
+				webAppMessage.documentURL = pageEvent.URL
 				votingSystemClient.setMessageToSignatureClient(webAppMessage, sendManifestCallback); 
 			}
 

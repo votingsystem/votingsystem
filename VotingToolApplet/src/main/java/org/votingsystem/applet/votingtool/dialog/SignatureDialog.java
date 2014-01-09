@@ -249,12 +249,12 @@ public class SignatureDialog extends JDialog {
             try {
                 switch(operation.getType()) {
                     case MANIFEST_SIGN:
-                        responseVS = HttpHelper.getInstance().getData(operation.getUrlDocumento(), ContentTypeVS.PDF);
+                        responseVS = HttpHelper.getInstance().getData(operation.getDocumentURL(), ContentTypeVS.PDF);
                         return responseVS;
                     case MANIFEST_PUBLISHING:
                         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operation.getDocumentToSignMap());
                         responseVS = HttpHelper.getInstance().sendData(jsonObject.toString().getBytes(),
-                                ContentTypeVS.JSON, operation.getUrlEnvioDocumento(), "eventId");
+                                ContentTypeVS.JSON, operation.getServiceURL(), "eventId");
                         return responseVS;
                 }  
             } catch(Exception ex) {
@@ -278,8 +278,8 @@ public class SignatureDialog extends JDialog {
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             pdfDocumentBytes = responseVS.getMessageBytes();
                             eventId = ((List<String>)responseVS.getData()).iterator().next();
-                            String receiverSignServiceURL = operation.getUrlEnvioDocumento() +  "/" + eventId;
-                            operation.setUrlEnvioDocumento(receiverSignServiceURL);
+                            String serviceURL = operation.getServiceURL() +  "/" + eventId;
+                            operation.setServiceURL(serviceURL);
                         } else {
                             sendResponse(responseVS.getStatusCode(), ContextVS.getInstance().getMessage(
                                     "errorDownloadingDocument") + " - " + responseVS.getMessage());
@@ -336,7 +336,7 @@ public class SignatureDialog extends JDialog {
                     PdfReader readerManifesto = new PdfReader(pdfDocumentBytes);
                     String reason = null;
                     String location = null;
-                    PDFSignedSender pdfSignedSender = new PDFSignedSender(operation.getUrlEnvioDocumento(),
+                    PDFSignedSender pdfSignedSender = new PDFSignedSender(operation.getServiceURL(),
                             reason, location, password.toCharArray(), readerManifesto, null, null,
                             ContextVS.getInstance().getAccessControl().getX509Certificate());
                     return pdfSignedSender.call();
@@ -351,7 +351,7 @@ public class SignatureDialog extends JDialog {
             SMIMEMessageWrapper smimeMessage = DNIeContentSigner.genMimeMessage(null,
                     operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
                     password.toCharArray(), operation.getSignedMessageSubject(), null);
-            SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getUrlEnvioDocumento(),
+            SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getServiceURL(),
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, ContextVS.getInstance().getAccessControl().
                     getX509Certificate(), header);
             return senderWorker.call();
@@ -376,7 +376,7 @@ public class SignatureDialog extends JDialog {
                             if(TypeVS.VOTING_PUBLISHING == operation.getType() ||
                                     TypeVS.CLAIM_PUBLISHING == operation.getType()) {
                                 String eventURL = ((List<String>)responseVS.getData()).iterator().next();
-                                result.setUrlDocumento(eventURL);
+                                result.setDocumentURL(eventURL);
                                 msg = eventURL;
                             }
                             sendResponse(responseVS.getStatusCode(), msg);

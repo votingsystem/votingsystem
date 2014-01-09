@@ -124,7 +124,7 @@ function submitSelectRepresentativeForm() {
             webAppMessage.signedContent = {operation:representativeOperation, representativeNif:"${representative.nif}",
                     representativeName:representativeFullName, weeksOperationActive:weeksAnonymousDelegation}
             webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
-            webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
+            webAppMessage.serviceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDelegationMsgSubject"/>'
             votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback);
         } else {
