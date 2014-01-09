@@ -47,6 +47,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -97,22 +98,7 @@ public class PublishEventVSFragment extends Fragment {
                 String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
                 if(TypeVS.ITEM_REQUEST == operationType) {
                     optionList.add(message);
-                    final LinearLayout newOptionView = (LinearLayout) getActivity().getLayoutInflater().
-                            inflate(R.layout.new_eventvs_field, null);
-                    Button remove_option_button = (Button) newOptionView.findViewById(
-                            R.id.remove_option_button);
-                    TextView fieldContentTextView = (TextView) newOptionView.findViewById(
-                            R.id.field_content);
-                    newOptionView.setVisibility(View.VISIBLE);
-                    fieldContentTextView.setText(message);
-                    final String finalMessage = message;
-                    remove_option_button.setOnClickListener(new View.OnClickListener() {
-                        public void onClick(View v) {
-                            optionList.remove(finalMessage);
-                            optionContainer.removeView(newOptionView);
-                        }
-                    });
-                    optionContainer.addView(newOptionView);
+                    addEventOption(message);;
                     return;
                 }
                 showProgress(false, true);
@@ -343,6 +329,10 @@ public class PublishEventVSFragment extends Fragment {
         editorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(EditorFragment.TAG);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
+            optionList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
+            for(String optionContent:optionList) {
+                addEventOption(optionContent);
+            }
         }
         String screenTitle = null;
         String serverURL = contextVS.getAccessControl().getPublishServiceURL(formType);
@@ -361,9 +351,28 @@ public class PublishEventVSFragment extends Fragment {
         getActivity().setTitle(screenTitle);
     }
 
+    private void addEventOption(final String optionContent) {
+        final LinearLayout newOptionView = (LinearLayout) getActivity().getLayoutInflater().
+                inflate(R.layout.new_eventvs_field, null);
+        Button remove_option_button = (Button) newOptionView.findViewById(
+                R.id.remove_option_button);
+        TextView fieldContentTextView = (TextView) newOptionView.findViewById(
+                R.id.option_content);
+        newOptionView.setVisibility(View.VISIBLE);
+        fieldContentTextView.setText(optionContent);
+        remove_option_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                optionList.remove(optionContent);
+                optionContainer.removeView(newOptionView);
+            }
+        });
+        optionContainer.addView(newOptionView);
+    }
+
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+        outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) optionList);
         //Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
         Log.d(TAG +  ".onSaveInstanceState(...)", "");
     }

@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -31,8 +32,7 @@ public class NewFieldDialogFragment extends DialogFragment {
 
     public static final String TAG = "NewFieldDialogFragment";
 
-
-    private LinearLayout errorPanel;
+    private TextView error_message;
     private EditText fieldEditText;
     private String dialogCaller;
     private TypeVS typeVS;
@@ -64,9 +64,9 @@ public class NewFieldDialogFragment extends DialogFragment {
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity());
         TextView messageTextView = (TextView)view.findViewById(R.id.message);
         fieldEditText = (EditText)view.findViewById(R.id.field_content);
-        errorPanel = (LinearLayout) view.findViewById(R.id.error_panel);
+        error_message = (TextView) view.findViewById(R.id.error_message);
         if(savedInstanceState != null) {
-            errorPanel.setVisibility(savedInstanceState.getInt(
+            error_message.setVisibility(savedInstanceState.getInt(
                     ContextVS.ERROR_PANEL_KEY, View.GONE));
         }
         if(caption != null) builder.setTitle(caption);
@@ -93,7 +93,7 @@ public class NewFieldDialogFragment extends DialogFragment {
 
     private void submitForm() {
         if(TextUtils.isEmpty(fieldEditText.getText())) {
-            errorPanel.setVisibility(View.VISIBLE);
+            error_message.setVisibility(View.VISIBLE);
         } else {
             Intent intent = new Intent(dialogCaller);
             intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
@@ -109,7 +109,7 @@ public class NewFieldDialogFragment extends DialogFragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(ContextVS.ERROR_PANEL_KEY, errorPanel.getVisibility());
+        outState.putInt(ContextVS.ERROR_PANEL_KEY, error_message.getVisibility());
         Log.d(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
     }
 

@@ -135,6 +135,7 @@ public class SignAndSendService extends IntentService {
                 getSystemService(NOTIFICATION_SERVICE);
         PendingIntent pendingIntent = null;
         Intent clickIntent = new Intent(Intent.ACTION_MAIN);
+        clickIntent.putExtra(ContextVS.RESPONSE_STATUS_KEY, responseVS.getMessage());
         clickIntent.putExtra(ContextVS.ICON_KEY, resultIcon);
         clickIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         clickIntent.putExtra(ContextVS.CAPTION_KEY, title);
