@@ -14,7 +14,6 @@ import android.util.Log;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
-import org.votingsystem.android.activity.EventVSPublishingActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
@@ -75,13 +74,6 @@ public class VotingAppService extends Service {
                             Log.d(TAG + ".onStartCommand(...)", " _ TODO _ Fetch option selected");
                             operationVS.setEventVS(selectedEvent);
                             processOperation(operationVS);
-                        }
-                    } else {
-                        if(operationStr != null) {
-                            Intent operIntent = new Intent(VotingAppService.this,
-                                    EventVSPublishingActivity.class);
-                            operIntent.putExtra(ContextVS.TYPEVS_KEY, operationStr);
-                            startActivity(operIntent);
                         }
                     }
                 } else {

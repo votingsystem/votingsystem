@@ -16,6 +16,7 @@
 
 package org.votingsystem.android.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -58,6 +59,11 @@ public class FragmentContainerActivity extends ActionBarActivity {
         }
     }
 
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     public void processOperation(OperationVS operationVS) {
         EditorFragment fragment = (EditorFragment)getSupportFragmentManager().

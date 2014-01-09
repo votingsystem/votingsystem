@@ -393,7 +393,6 @@ public class PublishEventVSFragment extends Fragment {
         super.onStart();
     }
 
-
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.editor, menu);
         boolean withAddOption = false;

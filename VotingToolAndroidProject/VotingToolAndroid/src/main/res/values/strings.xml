@@ -319,5 +319,7 @@
     <string name="option_repeated_msg">Ya ha introducido una opción con el valor \'%1$s\'</string>
     <string name="claim_published_ok_msg">La reclmación se ha publicado corréctamente</string>
     <string name="election_published_ok_msg">La votación se ha publicado corréctamente</string>
+    <string name="representative_image_lbl">Imagen del representante</string>
+    <string name="new_representative_title">Dar de alta representante</string>
 
 </resources>

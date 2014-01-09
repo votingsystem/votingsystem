@@ -282,5 +282,10 @@ public class NavigationDrawer extends ActionBarActivity {
         mDrawerToggle.syncState();
     }
 
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
 }

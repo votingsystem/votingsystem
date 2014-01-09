@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,8 +20,11 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.activity.NewRepresentativeActivity;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TypeVS;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -58,6 +62,13 @@ public class RepresentativeOperationsFragment extends Fragment {
         getActivity().setTitle(getActivity().getString(R.string.representatives_operations_lbl));
         Button checkRepresentativeButton = (Button) rootView.findViewById(R.id.check_representative_button);
         Button newRepresentativeButton = (Button) rootView.findViewById(R.id.new_representative_button);
+        newRepresentativeButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), NewRepresentativeActivity.class);
+                startActivity(intent);
+            }
+        });
+
         Button cancelRepresentativeButton = (Button) rootView.findViewById(R.id.cancel_representative_button);
         Button editRepresentativeButton = (Button) rootView.findViewById(R.id.edit_representative_button);
         editRepresentativeButton.setOnClickListener(new OnClickListener() {
@@ -70,6 +81,11 @@ public class RepresentativeOperationsFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
         return rootView;
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
     }
 
     @Override public void onStart() {
