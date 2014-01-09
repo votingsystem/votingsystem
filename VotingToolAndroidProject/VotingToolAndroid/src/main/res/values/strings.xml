@@ -316,5 +316,6 @@
     <string name="num_vote_options_error_msg">Debe añadir al menos un par de opciones en la votación</string>
     <string name="vote_options_lbl">Opciones de la votación</string>
     <string name="claim_options_lbl">Campos de la reclamación</string>
+    <string name="option_repeated_msg">Ya ha introducido una opción con el valor \'%1$s\'</string>
 
 </resources>

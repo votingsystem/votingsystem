@@ -96,8 +96,13 @@ public class PublishEventVSFragment extends Fragment {
                 String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
                 String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
                 if(TypeVS.ITEM_REQUEST == operationType) {
-                    optionList.add(message);
-                    addEventOption(message);;
+                    if(optionList.contains(message)) {
+                        showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                                getActivity().getString(R.string.option_repeated_msg, message));
+                    } else {
+                        optionList.add(message);
+                        addEventOption(message);
+                    }
                     return;
                 }
                 showProgress(false, true);
@@ -214,7 +219,7 @@ public class PublishEventVSFragment extends Fragment {
             case VOTING_PUBLISHING:
                 signedMessageSubject = getActivity().getString(R.string.publish_election_msg_subject);
                 eventVS.setControlCenter(controlCenterList.get(new Long(
-                        controlCenterSetSpinner.getSelectedItemId()).intValue()));
+                        controlCenterSetSpinner.getSelectedItemId()).intValue() - 1)); //-1 -> Select Control Center msg
                 eventVS.setDateBegin(dateBeginCalendar.getTime());
                 break;
             case MANIFEST_PUBLISHING:

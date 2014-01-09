@@ -146,6 +146,8 @@ public class SignAndSendService extends IntentService {
                 .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)
                 .setContentIntent(pendingIntent);
         Notification note = builder.build();
+        // hide the notification after its selected
+        note.flags |= Notification.FLAG_AUTO_CANCEL;
         //Identifies our service icon in the icon tray.
         notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
     }

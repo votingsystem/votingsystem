@@ -39,8 +39,8 @@ public class MessageActivity extends FragmentActivity {
             Log.d(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
             return;
         }
-        ((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
-                ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);
+        /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
+                ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
         int responseStatusCode = getIntent().getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                 ResponseVS.SC_ERROR);
         String caption = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
