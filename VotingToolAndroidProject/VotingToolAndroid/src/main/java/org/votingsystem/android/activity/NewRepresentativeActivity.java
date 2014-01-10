@@ -16,27 +16,20 @@
 
 package org.votingsystem.android.activity;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -44,7 +37,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
-import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.model.ContentTypeVS;
@@ -163,7 +155,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
-        if(data.getData() != null) {
+        if(data != null && data.getData() != null) {
             Uri selectedImageUri = data.getData();
             String imagePath = selectedImageUri.getPath();
             File imageFile = new File(selectedImageUri.getPath());

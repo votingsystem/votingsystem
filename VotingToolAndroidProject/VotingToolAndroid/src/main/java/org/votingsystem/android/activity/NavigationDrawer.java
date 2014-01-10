@@ -40,7 +40,7 @@ import org.votingsystem.android.fragment.PublishEventVSFragment;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
-import org.votingsystem.android.ui.RepresentativeNavigationPagerAdapter;
+import org.votingsystem.android.ui.SingleOptionPagerAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ScreenUtils;
@@ -63,7 +63,8 @@ public class NavigationDrawer extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private ContextVS contextVS = null;
 
-    private RepresentativeNavigationPagerAdapter representativePagerAdapter;
+    //private RepresentativeNavigationPagerAdapter representativePagerAdapter;
+    private SingleOptionPagerAdapter singleOptionPagerAdapter;
     private EventNavigationPagerAdapter pagerAdapter;
 
 
@@ -74,10 +75,10 @@ public class NavigationDrawer extends ActionBarActivity {
 
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        pagerAdapter = new EventNavigationPagerAdapter(getSupportFragmentManager(), mViewPager);
-        representativePagerAdapter = new RepresentativeNavigationPagerAdapter(
-                getSupportFragmentManager(), mViewPager);
 
+        pagerAdapter = new EventNavigationPagerAdapter(getSupportFragmentManager(), mViewPager);
+        //representativePagerAdapter = new RepresentativeNavigationPagerAdapter(
+        //        getSupportFragmentManager(), mViewPager);
         mViewPager.setAdapter(pagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
@@ -97,6 +98,8 @@ public class NavigationDrawer extends ActionBarActivity {
                                         int groupPosition, long id) {
                 //Log.d(TAG +  ".GroupExpandListener", " - onGroupClick - groupPosition: " +
                 //        listDataHeader.get(groupPosition));
+                selectItem(groupPosition, null);
+                //return true;
                 return false;
             }
         });
@@ -181,26 +184,33 @@ public class NavigationDrawer extends ActionBarActivity {
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    private void selectItem(int groupPosition, int childPosition) {
+    private void selectItem(Integer groupPosition, Integer childPosition) {
         Log.d(TAG + ".selectItem(...)", "groupPosition: " + groupPosition + " - childPosition: " +
                 childPosition);
-        mDrawerLayout.closeDrawer(expListView);
         NavigatorDrawerOptionsAdapter.GroupPosition selectedSubsystem =
                 NavigatorDrawerOptionsAdapter.GroupPosition.valueOf(groupPosition);
         switch(selectedSubsystem) {
             case VOTING:
             case MANIFESTS:
             case CLAIMS:
-                if(mViewPager.getAdapter() instanceof  RepresentativeNavigationPagerAdapter) {
+                if(childPosition == null) return;
+                if(!(mViewPager.getAdapter() instanceof  EventNavigationPagerAdapter)) {
                     mViewPager.setAdapter(pagerAdapter);
                 }
                 break;
+            case RECEIPTS:
             case REPRESENTATIVES:
-                if(mViewPager.getAdapter() instanceof EventNavigationPagerAdapter) {
+                if(singleOptionPagerAdapter == null) singleOptionPagerAdapter=
+                        new SingleOptionPagerAdapter(getSupportFragmentManager(), mViewPager);
+                singleOptionPagerAdapter.selectItem(groupPosition, childPosition);
+                mViewPager.setAdapter(singleOptionPagerAdapter);
+                childPosition = 0;
+                /*if(mViewPager.getAdapter() instanceof EventNavigationPagerAdapter) {
                     mViewPager.setAdapter(representativePagerAdapter);
-                }
+                }*/
                 break;
         }
+        mDrawerLayout.closeDrawer(expListView);
         ((PagerAdapterVS)mViewPager.getAdapter()).selectItem(groupPosition, childPosition);
         updateActionBarTitle();
         mViewPager.setCurrentItem(childPosition, true);
@@ -235,9 +245,6 @@ public class NavigationDrawer extends ActionBarActivity {
                 return true;
             case R.id.get_cert:
                 startActivity(new Intent(this, CertRequestActivity.class));
-                return true;
-            case R.id.receipt_list:
-                startActivity(new Intent(this, ReceiptGridActivity.class));
                 return true;
             case R.id.publish_document:
                 showPublishDialog();

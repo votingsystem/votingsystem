@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MainActivity;
+import org.votingsystem.android.activity.NewRepresentativeActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
@@ -98,8 +99,7 @@ public class RepresentativeGridFragment extends Fragment
             Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
             startActivity(intent);
         }
-        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(
-                NavigatorDrawerOptionsAdapter.ChildPosition.REPRESENTATIVE_LIST);
+        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
@@ -196,7 +196,8 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         Log.d(TAG +  ".onCreateOptionsMenu(..)", "onCreateOptionsMenu");
-        inflater.inflate(R.menu.eventvs_grid_fragment, menu);
+        menu.removeGroup(R.id.general_items);
+        inflater.inflate(R.menu.representative_grid, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -207,6 +208,10 @@ public class RepresentativeGridFragment extends Fragment
                 hasHTTPConnection.set(true);
                 rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
                 getLoaderManager().restartLoader(loaderId, null, this);
+                return true;
+            case R.id.new_representative:
+                Intent intent = new Intent(getActivity(), NewRepresentativeActivity.class);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

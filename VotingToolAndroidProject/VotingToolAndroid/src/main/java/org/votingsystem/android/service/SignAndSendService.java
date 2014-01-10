@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.PDFSignedSender;
@@ -19,8 +20,10 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
+
 import java.io.FileInputStream;
 import java.util.List;
+
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 
 /**

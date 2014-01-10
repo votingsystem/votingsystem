@@ -1,22 +1,20 @@
-package org.votingsystem.android.activity;
+package org.votingsystem.android.fragment;
 
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
-import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.TypeVS;
@@ -41,33 +39,29 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ReceiptGridActivity extends ActionBarActivity implements
+public class ReceiptGridFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{
 
-    public static final String TAG = "ReceiptGridActivity";
+    public static final String TAG = "ReceiptGridFragment";
 
+    private View rootView;
     private ReceiptGridAdapter adapter = null;
     private VoteVS vote = null;
     private ContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private String queryStr;
     private int menuItemSelected = R.id.all_receipts;
     private GridView gridView;
     private FrameLayout gridContainer;
     private Menu menu;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
-        setContentView(R.layout.receipt_grid_activity);
-        contextVS = ContextVS.getInstance(getBaseContext());
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        queryStr = getIntent().getStringExtra(SearchManager.QUERY);
-        Log.d(TAG +  ".onCreate(...)", "args: " + getIntent().getExtras());
-        gridView = (GridView) findViewById(R.id.gridview);
-        adapter = new ReceiptGridAdapter(getApplicationContext(), null,false);
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                       Bundle savedInstanceState) {
+        Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
+        rootView = inflater.inflate(R.layout.receipt_grid_fragment, container, false);
+        gridView = (GridView) rootView.findViewById(R.id.gridview);
+        adapter = new ReceiptGridAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -81,40 +75,19 @@ public class ReceiptGridActivity extends ActionBarActivity implements
             }
         });
         gridView.setOnScrollListener(this);
-        progressContainer = findViewById(R.id.progressContainer);
-        gridContainer =  (FrameLayout)findViewById(R.id.gridContainer);
+        progressContainer = rootView.findViewById(R.id.progressContainer);
+        gridContainer =  (FrameLayout)rootView.findViewById(R.id.gridContainer);
         gridContainer.getForeground().setAlpha(0);
-        if(savedInstanceState != null) {
-            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
-            gridView.onRestoreInstanceState(gridState);
-        }
-        if(savedInstanceState != null)
-        menuItemSelected = savedInstanceState.getInt(ContextVS.ITEM_ID_KEY, R.id.all_receipts);
-        updateActionBarTitle(menuItemSelected);
-        getSupportLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
+        getLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
+        return rootView;
     }
 
-    private void updateActionBarTitle(int menuOptionId) {
-        String title = null;
-        switch(menuOptionId) {
-            case R.id.all_receipts:
-                title = getString(R.string.receipts_lbl);
-                break;
-            case R.id.vote_receipts:
-                title = getString(R.string.vote_receipts_lbl);
-                break;
-            case R.id.cancel_vote_receipts:
-                title = getString(R.string.cancellations_vote_receipts_lbl);
-                break;
-        }
-        getSupportActionBar().setTitle(title);
-    }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
                 " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(this,ReceiptPagerActivity.class);
+        Intent intent = new Intent(getActivity(),ReceiptPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
@@ -124,74 +97,21 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         return true;
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                return true;
-            case R.id.all_receipts:
-            case R.id.vote_receipts:
-            case R.id.cancel_vote_receipts:
-                TypeVS typeVS = null;
-                if(menuItemSelected != item.getItemId()) {
-                    String selection = null;
-                    String[] selectionArgs = null;
-                    if(item.getItemId() != R.id.all_receipts) {
-                        selection = ReceiptContentProvider.TYPE_COL + "=? ";
-                        String typeStr = null;
-                        if(item.getItemId() == R.id.vote_receipts)
-                            typeStr = TypeVS.VOTEVS.toString();
-                        else if (item.getItemId() == R.id.cancel_vote_receipts)
-                            typeStr = TypeVS.CANCEL_VOTE.toString();
-                        selectionArgs = new String[]{typeStr};
-                        if(typeStr != null) typeVS = TypeVS.valueOf(typeStr);
-                        Log.d(TAG + ".onOptionsItemSelected(...)", "filtering by " + typeStr);
-                    } Log.d(TAG + ".onOptionsItemSelected(...)", "showing all receipts");
-                    Cursor cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,
-                            null, selection, selectionArgs, null);
-                    getSupportLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
-                            deliverResult(cursor);
-                }
-                updateActionBarTitle(item.getItemId());
-                onOptionsItemSelected(item.getItemId());
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+    private void filterReceiptList(TypeVS receiptType) {
+        String selection = null;
+        String[] selectionArgs = null;
+        if(receiptType != null) {
+            selection = ReceiptContentProvider.TYPE_COL + "=? ";
+            selectionArgs = new String[]{receiptType.toString()};
         }
-    }
-
-    private boolean onOptionsItemSelected(int itemId) {
-        menuItemSelected = itemId;
-        menu.removeItem(R.id.all_receipts);
-        menu.removeItem(R.id.vote_receipts);
-        menu.removeItem(R.id.cancel_vote_receipts);
-        switch (itemId) {
-            case R.id.all_receipts:
-                getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
-                menu.removeItem(R.id.all_receipts);
-                break;
-            case R.id.vote_receipts:
-                getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
-                menu.removeItem(R.id.vote_receipts);
-                break;
-            case R.id.cancel_vote_receipts:
-                getMenuInflater().inflate(R.menu.receipt_grid_activity, menu);
-                menu.removeItem(R.id.cancel_vote_receipts);
-                break;
-        }
-        return true;
-    }
-
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d(TAG + ".onCreateOptionsMenu(...)", "onCreateOptionsMenu");
-        this.menu = menu;
-        onOptionsItemSelected(menuItemSelected);
-        return true;
+        Cursor cursor = getActivity().getContentResolver().query(
+                ReceiptContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
+        getLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
+                deliverResult(cursor);
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this, ReceiptContentProvider.CONTENT_URI, null, null, null, null);
+        return new CursorLoader(getActivity(), ReceiptContentProvider.CONTENT_URI, null, null, null, null);
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
@@ -199,8 +119,8 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         showProgress(false, true);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
-            findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
-        } else findViewById(android.R.id.empty).setVisibility(View.GONE);
+            rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+        } else rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
@@ -269,7 +189,7 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                     receiptState.setVisibility(View.GONE);
                 }
                 typeTextView.setText(Html.fromHtml(ReceiptContentProvider.getDescription(
-                        ReceiptGridActivity.this.getApplicationContext(), receiptContainer.getType())));
+                        getActivity().getApplicationContext(), receiptContainer.getType())));
             }
         }
     }
@@ -279,21 +199,11 @@ public class ReceiptGridActivity extends ActionBarActivity implements
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
-        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-        showProgress(false, true);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
     }
 
-    @Override public void onResume() {
-        Log.d(TAG + ".onResume()", "");
-        super.onResume();
-    }
 
-    @Override public void onPause() {
-        Log.d(TAG + ".onPause(...)", "");
-        super.onPause();
-    }
-
-    @Override protected void onSaveInstanceState(Bundle outState) {
+    @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         Parcelable gridState = gridView.onSaveInstanceState();
@@ -302,51 +212,29 @@ public class ReceiptGridActivity extends ActionBarActivity implements
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
     }
 
-    @Override protected void onDestroy() {
-        Log.d(TAG + ".onDestroy()", "");
-        super.onDestroy();
-    };
-
-    @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "onStop");
-        super.onStop();
-    }
-
     public void showProgress(boolean showProgress, boolean animate) {
         if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);
         if (progressVisible.get() && progressContainer != null) {
-            getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_in));
             progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
+            gridContainer.getForeground().setAlpha(150); // dim
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
+                @Override public boolean onTouch(View v, MotionEvent event) {
                     return true;
                 }
             });
         } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity().getApplicationContext(), android.R.anim.fade_out));
             progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
+            gridContainer.getForeground().setAlpha(0); // restore
             progressContainer.setOnTouchListener(new View.OnTouchListener() {
                 //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
+                @Override public boolean onTouch(View v, MotionEvent event) {
                     return false;
                 }
             });

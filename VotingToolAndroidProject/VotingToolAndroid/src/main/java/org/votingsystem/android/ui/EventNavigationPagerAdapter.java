@@ -131,7 +131,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
         this.searchQuery = searchQuery;
     }
 
-    public void selectItem(int groupPosition, int childPosition) {
+    public void selectItem(Integer groupPosition, Integer childPosition) {
         GroupPosition newSelectedSubsystem = GroupPosition.valueOf(groupPosition);
         if(newSelectedSubsystem != selectedGroup) {
             Log.d(TAG + ".selectItem(...) ", "from: " + selectedGroup + " - to: " +

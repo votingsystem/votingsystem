@@ -247,7 +247,6 @@
 
 
     <string name="check_representative_button">Comprobar mi representante</string>
-    <string name="new_representative_button">Darse de alta como representante</string>
     <string name="cancel_representative_button">Darse de baja como representante</string>
     <string name="edit_representative_button">Editar datos del representante</string>
     <string name="editor_empty_error_lbl">Debe rellenar el campo del editor</string>
@@ -321,5 +320,10 @@
     <string name="election_published_ok_msg">La votación se ha publicado corréctamente</string>
     <string name="representative_image_lbl">Imagen del representante</string>
     <string name="new_representative_title">Dar de alta representante</string>
+    <string name="cancel_anonymouys_representation_lbl">Cancelar representación anónima</string>
 
+    <string name="representative_list_lbl">Lista de representantes</string>
+    <string name="receipt_list_lbl">Lista de recibos</string>
+    <string name="options_for_representatives_lbl">Opciones para representantes</string>
+    <string name="new_representative_lbl">Darse de alta como representante</string>
 </resources>

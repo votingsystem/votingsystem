@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -46,12 +47,11 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int MANIFESTS_GROUP_POSITION       = 1;
     public static final int CLAIMS_GROUP_POSITION          = 2;
     public static final int REPRESENTATIVES_GROUP_POSITION = 3;
+    public static final int RECEIPTS_GROUP_POSITION        = 4;
 
-    public static final int OPEN_CHILD_POSITION                     = 0;
-    public static final int PENDING_CHILD_POSITION                  = 1;
-    public static final int CLOSED_CHILD_POSITION                   = 2;
-    public static final int REPRESENTATIVE_LIST_CHILD_POSITION      = 0;
-    public static final int REPRESENTATIVE_OPERATION_CHILD_POSITION = 1;
+    public static final int OPEN_CHILD_POSITION            = 0;
+    public static final int PENDING_CHILD_POSITION         = 1;
+    public static final int CLOSED_CHILD_POSITION          = 2;
 
     public enum GroupPosition {
         VOTING(VOTING_GROUP_POSITION, SubSystemVS.VOTES, TypeVS.VOTING_EVENT, Arrays.asList(
@@ -61,8 +61,9 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         CLAIMS(CLAIMS_GROUP_POSITION, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT, Arrays.asList(
                 ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
         REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, SubSystemVS.REPRESENTATIVES,
-                TypeVS.REPRESENTATIVE, Arrays.asList(
-                ChildPosition.REPRESENTATIVE_LIST, ChildPosition.REPRESENTATIVE_OPERATION));
+                TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
+        RECEIPTS(RECEIPTS_GROUP_POSITION, SubSystemVS.RECEIPTS,
+                TypeVS.RECEIPT, new ArrayList<ChildPosition>());
 
         int position;
         SubSystemVS subsystem;
@@ -70,7 +71,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         TypeVS typeVS;
 
         private GroupPosition(int position, SubSystemVS subsystem, TypeVS typeVS,
-                              List<ChildPosition> childList) {
+              List<ChildPosition> childList) {
             this.position = position;
             this.subsystem = subsystem;
             this.typeVS = typeVS;
@@ -82,6 +83,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 case MANIFESTS_GROUP_POSITION: return MANIFESTS;
                 case CLAIMS_GROUP_POSITION: return CLAIMS;
                 case REPRESENTATIVES_GROUP_POSITION: return REPRESENTATIVES;
+                case RECEIPTS_GROUP_POSITION: return RECEIPTS;
                 default: return null;
             }
         }
@@ -90,11 +92,16 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
             return childList;
         }
 
+        public boolean isEmpty() {
+            return childList.isEmpty();
+        }
+
         public String getURLPart() {
             switch(this) {
                 case CLAIMS: return "/eventVSClaim";
                 case MANIFESTS: return "/eventVSManifest";
                 case VOTING: return "/eventVSElection";
+                case REPRESENTATIVES: return "/representative";
             }
             return "/eventVS";
         }
@@ -109,16 +116,12 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
         public String getDescription(Context context) {
             switch(this) {
-                case VOTING:
-                    return context.getString(R.string.voting_drop_down_lbl);
-                case MANIFESTS:
-                    return context.getString(R.string.manifiests_drop_down_lbl);
-                case CLAIMS:
-                    return context.getString(R.string.claims_drop_down_lbl);
-                case REPRESENTATIVES:
-                    return context.getString(R.string.representatives_drop_down_lbl);
-                default:
-                    return context.getString(R.string.unknown_drop_down_lbl);
+                case VOTING: return context.getString(R.string.voting_drop_down_lbl);
+                case MANIFESTS: return context.getString(R.string.manifiests_drop_down_lbl);
+                case CLAIMS: return context.getString(R.string.claims_drop_down_lbl);
+                case REPRESENTATIVES: return context.getString(R.string.representatives_drop_down_lbl);
+                case RECEIPTS: return context.getString(R.string.receipts_drop_down_lbl);
+                default: return context.getString(R.string.unknown_drop_down_lbl);
             }
         }
 
@@ -126,14 +129,14 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
             return typeVS;
         }
 
-        public int getLoaderId(ChildPosition childPosition){
-            return (10 * position) + childPosition.getPosition();
+        public int getLoaderId(int childPosition){
+            //enough to avoid loader id collisions while child list count < 10
+            return (10 * position) + childPosition;
         }
     }
 
     public enum ChildPosition{OPEN(OPEN_CHILD_POSITION), PENDING(PENDING_CHILD_POSITION),
-        CLOSED(CLOSED_CHILD_POSITION), REPRESENTATIVE_LIST(REPRESENTATIVE_LIST_CHILD_POSITION),
-        REPRESENTATIVE_OPERATION(REPRESENTATIVE_OPERATION_CHILD_POSITION);
+        CLOSED(CLOSED_CHILD_POSITION);
 
         int position;
 
@@ -168,18 +171,13 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
 	@Override public View getChildView(int groupPosition, final int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
-
 		final String childText = (String) getChild(groupPosition, childPosition);
-
 		if (convertView == null) {
 			LayoutInflater infalInflater = (LayoutInflater) this.context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = infalInflater.inflate(R.layout.drawer_list_item, null);
 		}
-
-		TextView txtListChild = (TextView) convertView
-				.findViewById(R.id.lblListItem);
-
+		TextView txtListChild = (TextView) convertView.findViewById(R.id.lblListItem);
 		txtListChild.setText(childText);
 		return convertView;
 	}
@@ -210,15 +208,17 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 			convertView = layoutInflater.inflate(R.layout.drawer_list_group, null);
 		}
 
-		TextView lblListHeader = (TextView) convertView
-				.findViewById(R.id.lblListHeader);
+		TextView lblListHeader = (TextView) convertView.findViewById(R.id.lblListHeader);
 		lblListHeader.setTypeface(null, Typeface.BOLD);
 		lblListHeader.setText(headerTitle);
-        /*ImageView imageView = (ImageView)convertView.findViewById(R.id.headerIcon);
-        if(isExpanded) {
-            imageView.setImageResource(R.drawable.bullet_toggle_minus);
-        } else imageView.setImageResource(R.drawable.bullet_toggle_plus);*/
-		return convertView;
+
+        //Drawable groupIndicator = context.getResources().getDrawable(R.drawable.navigation_drawer_expandable_icon);
+        //((ExpandableListView)parent).setGroupIndicator(groupIndicator);
+        GroupPosition gPosition = GroupPosition.valueOf(groupPosition);
+        if(gPosition.isEmpty()) {
+            ((ExpandableListView)parent).setGroupIndicator(null);
+        }
+        return convertView;
 	}
 
 	@Override public boolean hasStableIds() {
@@ -241,6 +241,8 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 context.getString(R.string.claims_drop_down_lbl));
         listDataHeader.add(GroupPosition.REPRESENTATIVES.getPosition(),
                 context.getString(R.string.representatives_drop_down_lbl));
+        listDataHeader.add(GroupPosition.RECEIPTS.getPosition(),
+                context.getString(R.string.receipts_drop_down_lbl));
 
         List<String> voting = new ArrayList<String>();
         voting.add(context.getString(R.string.open_voting_lbl));
@@ -258,15 +260,14 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         claims.add(context.getString(R.string.pending_claim_lbl));
         claims.add(context.getString(R.string.closed_claim_lbl));
 
-        List<String> representatives = new ArrayList<String>();
-        representatives.add(context.getString(R.string.representatives_list_lbl));
-        representatives.add(context.getString(R.string.representatives_operations_lbl));
 
         listDataChild.put(listDataHeader.get(GroupPosition.VOTING.getPosition()), voting);
         listDataChild.put(listDataHeader.get(GroupPosition.MANIFESTS.getPosition()), manifests);
         listDataChild.put(listDataHeader.get(GroupPosition.CLAIMS.getPosition()), claims);
         listDataChild.put(listDataHeader.get(GroupPosition.REPRESENTATIVES.getPosition()),
-                representatives);
+                new ArrayList<String>());
+        listDataChild.put(listDataHeader.get(GroupPosition.RECEIPTS.getPosition()),
+                new ArrayList<String>());
     }
 
 }

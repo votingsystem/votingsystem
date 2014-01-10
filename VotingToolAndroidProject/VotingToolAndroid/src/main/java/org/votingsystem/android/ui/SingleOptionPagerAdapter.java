@@ -11,8 +11,8 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.ReceiptGridFragment;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
-import org.votingsystem.android.fragment.RepresentativeOperationsFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 
@@ -20,19 +20,21 @@ import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdapter
+public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         implements PagerAdapterVS {
 
-    public static final String TAG = "RepresentativeNavigationPagerAdapter";
+    public static final String TAG = "SingleOptionPagerAdapter";
 
-    private ChildPosition selectedChild = GroupPosition.REPRESENTATIVES.getChildList().get(0);
+    private ChildPosition selectedChild = null;
+    private GroupPosition selectedGroup = null;
+
 
     private String searchQuery = null;
     private FragmentManager fragmentManager;
     private ViewPager viewPager;
     //private Fragment operationsFragment;
 
-    public RepresentativeNavigationPagerAdapter(FragmentManager fragmentManager, ViewPager viewPager) {
+    public SingleOptionPagerAdapter(FragmentManager fragmentManager, ViewPager viewPager) {
         super(fragmentManager);
         this.fragmentManager = fragmentManager;
         this.viewPager = viewPager;
@@ -40,13 +42,12 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
 
     @Override public Fragment getItem(int position) {
         Fragment selectedFragment = null;
-        ChildPosition childPosition = GroupPosition.REPRESENTATIVES.getChildList().get(position);
-        switch(childPosition) {
-            case REPRESENTATIVE_LIST:
+        switch(selectedGroup) {
+            case REPRESENTATIVES:
                 selectedFragment = new RepresentativeGridFragment();
                 break;
-            case REPRESENTATIVE_OPERATION:
-                selectedFragment = new RepresentativeOperationsFragment();
+            case RECEIPTS:
+                selectedFragment = new ReceiptGridFragment();
                 break;
         }
         Bundle args = new Bundle();
@@ -57,47 +58,53 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
     }
 
     public String getSelectedChildDescription(Context context) {
-        switch(selectedChild) {
-            case REPRESENTATIVE_LIST:
-                return context.getString(R.string.representatives_list_lbl);
-            case REPRESENTATIVE_OPERATION:
-                return context.getString(R.string.representatives_operations_lbl);
-            default:
-                return context.getString(R.string.unknown_drop_down_lbl);
+        switch(selectedGroup) {
+            case REPRESENTATIVES: return context.getString(R.string.representatives_list_lbl);
+            case RECEIPTS: return context.getString(R.string.receipt_list_lbl);
         }
-
+        return context.getString(R.string.unknown_drop_down_lbl);
     }
 
     public String getSelectedGroupDescription(Context context) {
-        return GroupPosition.REPRESENTATIVES.getDescription(context);
+        switch(selectedGroup) {
+            case REPRESENTATIVES: return GroupPosition.REPRESENTATIVES.getDescription(context);
+            case RECEIPTS: return GroupPosition.RECEIPTS.getDescription(context);
+        }
+        return context.getString(R.string.unknown_drop_down_lbl);
     }
 
     public void setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery;
     }
 
-    public void selectItem(int groupPosition, int childPosition) {
-        selectedChild = GroupPosition.REPRESENTATIVES.getChildList().get(childPosition);
+    public void selectItem(Integer groupPosition, Integer childPosition) {
+        selectedGroup = GroupPosition.valueOf(groupPosition);
     }
 
-    public void updateChildPosition(int childPosition) {
-        selectedChild = GroupPosition.REPRESENTATIVES.getChildList().get(childPosition);
-    }
+    public void updateChildPosition(int childPosition) { }
 
     public int getSelectedChildPosition() {
-        return  GroupPosition.REPRESENTATIVES.getChildList().indexOf(selectedChild);
+        return  1;
     }
 
     public int getSelectedGroupPosition() {
-        return GroupPosition.REPRESENTATIVES.getPosition();
+        switch(selectedGroup) {
+            case REPRESENTATIVES: return GroupPosition.REPRESENTATIVES.getPosition();
+            case RECEIPTS: return GroupPosition.RECEIPTS.getPosition();
+        }
+        return -1;
     }
 
     public Drawable getLogo(Context context) {
-        return context.getResources().getDrawable(R.drawable.system_users_22);
+        switch(selectedGroup) {
+            case REPRESENTATIVES: return context.getResources().getDrawable(R.drawable.system_users_22);
+            case RECEIPTS: return context.getResources().getDrawable(R.drawable.receipt_22);
+        }
+        return context.getResources().getDrawable(R.drawable.mail_mark_unread_22);
     }
 
     @Override public int getCount() {
-        return GroupPosition.REPRESENTATIVES.getChildList().size();
+        return 1;//Container for groups without childs
     }
 
 }

@@ -123,7 +123,7 @@ public class EventVSGridFragment extends Fragment
             queryStr = getArguments().getString(SearchManager.QUERY);
 
         }
-        loaderId = groupPosition.getLoaderId(childPosition);
+        loaderId = groupPosition.getLoaderId(childPosition.getPosition());
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };

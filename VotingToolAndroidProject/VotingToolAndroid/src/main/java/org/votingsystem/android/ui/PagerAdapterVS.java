@@ -10,7 +10,7 @@ import android.graphics.drawable.Drawable;
 public interface PagerAdapterVS {
 
     public void updateChildPosition(int position);
-    public void selectItem(int groupPosition, int childPosition);
+    public void selectItem(Integer groupPosition, Integer childPosition);
     public int getSelectedGroupPosition();
     public int getSelectedChildPosition();
     public String getSelectedGroupDescription(Context context);

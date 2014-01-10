@@ -1,0 +1,45 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto" >
+
+    <item
+        android:id="@+id/reload"
+        votingSystem:showAsAction="ifRoom"
+        android:icon="@drawable/navigation_refresh"
+        android:title="@string/menu_actualizar">
+    </item>
+
+
+    <item android:id="@+id/check_representative"
+        android:orderInCategory="1"
+        android:showAsAction="never"
+        android:title="@string/check_representative_button"/>
+
+    <item android:id="@+id/cancel_anonymouys_representatioin"
+        android:orderInCategory="2"
+        android:showAsAction="never"
+        android:title="@string/cancel_anonymouys_representation_lbl"/>
+
+
+    <item android:id="@+id/options_for_representatives" android:orderInCategory="3"
+        android:title="@string/options_for_representatives_lbl" >
+        <menu>
+            <item
+                android:id="@+id/new_representative"
+                android:orderInCategory="1"
+                android:showAsAction="never"
+                android:title="@string/new_representative_lbl"/>
+            <item
+                android:id="@+id/cancel_representative"
+                android:orderInCategory="2"
+                android:showAsAction="never"
+                android:title="@string/cancel_representative_button"/>
+            <item
+                android:id="@+id/edit_representative"
+                android:orderInCategory="3"
+                android:showAsAction="never"
+                android:title="@string/edit_representative_button"/>
+        </menu>
+    </item>
+
+
+</menu>

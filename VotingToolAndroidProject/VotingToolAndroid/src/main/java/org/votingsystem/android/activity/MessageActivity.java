@@ -1,7 +1,6 @@
 package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.DialogInterface;

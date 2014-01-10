@@ -7,24 +7,20 @@
           votingSystem:showAsAction="ifRoom"
           android:actionViewClass="android.widget.SearchView" />
 
-    <item
-        android:id="@+id/get_cert"
-        android:orderInCategory="1"
-        android:showAsAction="never"
-        android:icon="@android:drawable/btn_plus"
-        android:title="@string/request_certificate_menu"/>
-    <item
-        android:id="@+id/publish_document"
-        android:orderInCategory="2"
-        android:showAsAction="never"
-        android:icon="@drawable/view_detailed_22"
-        android:title="@string/publish_document_lbl"/>
-    <item
-        android:id="@+id/receipt_list"
-        android:orderInCategory="3"
-        android:showAsAction="never"
-        android:icon="@drawable/receipt_32"
-        android:title="@string/receipts_lbl"/>
+    <group android:id="@+id/general_items">
+        <item
+            android:id="@+id/get_cert"
+            android:orderInCategory="1"
+            android:showAsAction="never"
+            android:icon="@android:drawable/btn_plus"
+            android:title="@string/request_certificate_menu"/>
+        <item
+            android:id="@+id/publish_document"
+            android:orderInCategory="2"
+            android:showAsAction="never"
+            android:icon="@drawable/view_detailed_22"
+            android:title="@string/publish_document_lbl"/>
+    </group>
 
     <item
         android:id="@+id/close_app"

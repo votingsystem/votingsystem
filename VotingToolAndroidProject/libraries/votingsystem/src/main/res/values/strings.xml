@@ -4,6 +4,7 @@
     <string name="claims_drop_down_lbl">Reclamaciones</string>
     <string name="manifiests_drop_down_lbl">Manifiestos</string>
     <string name="representatives_drop_down_lbl">Representantes</string>
+    <string name="receipts_drop_down_lbl">Recibos</string>
     <string name="representatives_list_lbl">Lista de representantes</string>
     <string name="representatives_operations_lbl">Operaciones</string>
 
