@@ -3,7 +3,6 @@
 
     <string name="content_error_msg">Contenido nulo</string>
     <string name="vote_canceled_receipt_lbl">Recibo de anulación de voto</string>
-    <string name="save_cancelation_receipt_lbl">Guardar recibo de la cancelación</string>
     <string name="loading_data_msg">Cargando datos...</string>
     
     <string name="sending_data_caption">Por favor, espere</string>
@@ -139,7 +138,7 @@
     <string name="cancel_vote_lbl">Anular voto</string>
     <string name="open_recepit_lbl">Abrir recibo</string>
     <string name="cancel_vote_msg">Si continua anulará su voto</string>
-    <string name="save_receipt_lbl">Guardar recibo de voto</string>
+    <string name="save_receipt_lbl">Guardar recibo</string>
     <string name="app_name_lbl">Aplicación de votación</string>
     <string name="eventsVS_label">Eventos</string>
     <string name="eventVS_label">Evento</string>

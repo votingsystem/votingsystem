@@ -28,11 +28,9 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
     private ChildPosition selectedChild = null;
     private GroupPosition selectedGroup = null;
 
-
     private String searchQuery = null;
     private FragmentManager fragmentManager;
     private ViewPager viewPager;
-    //private Fragment operationsFragment;
 
     public SingleOptionPagerAdapter(FragmentManager fragmentManager, ViewPager viewPager) {
         super(fragmentManager);

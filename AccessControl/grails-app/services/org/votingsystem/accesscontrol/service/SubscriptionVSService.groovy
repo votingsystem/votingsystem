@@ -79,8 +79,10 @@ class SubscriptionVSService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:certificate)
 	}
 	
-	ResponseVS checkDevice(String nif, String phone, String email,  String deviceId, Locale locale) {
-		log.debug "checkDevice - nif:${nif} - phone:${phone} - email:${email} - deviceId:${deviceId}"
+	ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email,
+               String deviceId, Locale locale) {
+		log.debug "checkDevice - givenname: ${givenname} - surname: ${surname} - nif:${nif} - phone:${phone} " +
+                "- email:${email} - deviceId:${deviceId}"
 		if(!nif || !deviceId) {
 			log.debug "Missing params"
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
@@ -93,7 +95,8 @@ class SubscriptionVSService {
 		}
 		UserVS userVS = UserVS.findWhere(nif:validatedNIF)
 		if (!userVS) {
-			userVS = new UserVS(nif:validatedNIF, email:email, phone:phone, type:UserVS.Type.USER).save()
+			userVS = new UserVS(nif:validatedNIF, email:email, phone:phone, type:UserVS.Type.USER,
+                    name:givenname, firstName:givenname, lastName:surname).save()
 		}
 		DeviceVS dispositivo = DeviceVS.findWhere(deviceId:deviceId)
 		if (!dispositivo || (dispositivo.userVS.id != userVS.id)) dispositivo =

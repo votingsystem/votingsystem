@@ -82,7 +82,9 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         Log.d(TAG + ".onCreateDialog(...) ", "savedInstanceState: " + savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         ContextVS contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-        if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
+        typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
+        if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) &&
+                typeVS != TypeVS.WITHOUT_CERT_VALIDATION) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
                     getString(R.string.cert_not_found_caption)).setMessage(
                     Html.fromHtml(getString(R.string.cert_not_found_msg))).setPositiveButton(
@@ -109,7 +111,6 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             userPinEditText = (EditText)view.findViewById(R.id.user_pin);
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
                     getString(R.string.pin_dialog_caption));
-            typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
             if(getArguments().getString(ContextVS.MESSAGE_KEY) == null) {
                 msgTextView.setVisibility(View.GONE);
             } else {

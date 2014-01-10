@@ -1,9 +1,11 @@
 package org.votingsystem.android.fragment;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -20,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -31,7 +34,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
-import org.votingsystem.android.ui.CancelVoteDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
@@ -99,10 +101,16 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             } else if(resultOperation == TypeVS.CANCEL_VOTE){
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     setEventScreen(eventVS);
-                    CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
-                            getString(R.string.msg_lbl), message, vote);
-                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                    cancelVoteDialog.show(fragmentManager, CancelVoteDialog.TAG);
+                    AlertDialog dialog  = new AlertDialog.Builder(getActivity()).setTitle(
+                            getString(R.string.msg_lbl)).setMessage(Html.fromHtml(message)).
+                            setPositiveButton(R.string.save_receipt_lbl,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        saveCancelReceipt(vote);
+                                    }
+                                }).setNegativeButton(R.string.cancel_button, null).show();
+                    dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
                     cancelVoteButton.setEnabled(true);
                     showMessage(responseStatusCode, caption, message, null);
@@ -381,33 +389,17 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         } else if (progressDialog != null) progressDialog.dismiss();
     }
 
-    /*public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_in));
-            progressContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_out));
-            progressContainer.setVisibility(View.GONE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
-    }*/
+    public void saveCancelReceipt(VoteVS vote) {
+        Log.d(TAG + ".saveCancelReceipt(...)", "saveCancelReceipt");
+        ContentValues values = new ContentValues();
+        values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
+        values.put(ReceiptContentProvider.TYPE_COL, TypeVS.CANCEL_VOTE.toString());
+        values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
+        values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
+        showMessage(null, getString(R.string.msg_lbl),
+                getString(R.string.saved_cancel_vote_recepit_msg), null);
+    }
 
 }

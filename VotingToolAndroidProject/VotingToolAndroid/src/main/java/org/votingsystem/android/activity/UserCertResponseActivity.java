@@ -42,6 +42,7 @@ import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
@@ -145,7 +146,8 @@ public class UserCertResponseActivity extends ActionBarActivity {
         insertPinButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                        getString(R.string.enter_pin_import_cert_msg), false, null);
+                        getString(R.string.enter_pin_import_cert_msg), false,
+                        TypeVS.WITHOUT_CERT_VALIDATION);
             }
         });
         requestCertButton = (Button) findViewById(R.id.request_cert_button);

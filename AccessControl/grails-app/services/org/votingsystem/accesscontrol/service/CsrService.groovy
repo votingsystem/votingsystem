@@ -190,12 +190,17 @@ class CsrService {
 	public ResponseVS saveUserCSR(byte[] csrPEMBytes, Locale locale) {
 		PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		CertificationRequestInfo info = csr.getCertificationRequestInfo();
-		String nif;
+        String givenname;
+        String surname;
+        String nif;
 		String email;
 		String phone;
 		String deviceId;
 		String subjectDN = info.getSubject().toString();
 		log.debug("saveUserCSR - subject: " + subjectDN)
+
+        if(subjectDN.split("GIVENNAME=").length > 1)  givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0]
+        if(subjectDN.split("SURNAME=").length > 1)  surname = subjectDN.split("SURNAME=")[1].split(",")[0]
 		if(subjectDN.split("emailAddress=").length > 1)  email = subjectDN.split("emailAddress=")[1].split(",")[0]
 		if(subjectDN.split("SERIALNUMBER=").length > 1) {
 			nif = subjectDN.split("SERIALNUMBER=")[1];
@@ -203,7 +208,8 @@ class CsrService {
 		}
 		if (subjectDN.split("mobilePhone=").length > 1)  phone = subjectDN.split("mobilePhone=")[1].split(",")[0];
 		if (subjectDN.split("UID=deviceId:").length > 1) deviceId = subjectDN.split("UID=deviceId:")[1].split(",")[0];
-		ResponseVS responseVS = subscriptionVSService.checkDevice(nif, phone, email, deviceId, locale)
+		ResponseVS responseVS = subscriptionVSService.checkDevice(
+                givenname, surname, nif, phone, email, deviceId, locale)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
 		UserRequestCsrVS requestCSR
 		def previousRequest = UserRequestCsrVS.findAllByDeviceVSAndUserVSAndState(

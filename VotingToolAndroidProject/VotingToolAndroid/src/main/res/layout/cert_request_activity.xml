@@ -19,7 +19,8 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
     <!-- Alert dialog style buttons along the bottom. -->
-    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp">
 
         <Button
             android:id="@+id/cancel_button"
