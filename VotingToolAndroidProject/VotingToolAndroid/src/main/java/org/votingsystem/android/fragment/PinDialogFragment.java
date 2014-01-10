@@ -55,18 +55,29 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
     public static void showPinScreen(FragmentManager fragmentManager, String broadCastId,
              String message, boolean isWithPasswordConfirm, TypeVS type) {
+        boolean isWithCertValidation = true;
         PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, isWithPasswordConfirm, broadCastId, type);
+                message, isWithPasswordConfirm, isWithCertValidation, broadCastId, type);
         pinDialog.show(fragmentManager, PinDialogFragment.TAG);
     }
 
+    public static void showPinScreenWithoutCertValidation(FragmentManager fragmentManager,
+            String broadCastId, String message, boolean isWithPasswordConfirm, TypeVS type) {
+        boolean isWithCertValidation = false;
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
+                message, isWithPasswordConfirm, isWithCertValidation, broadCastId, type);
+        pinDialog.show(fragmentManager, PinDialogFragment.TAG);
+    }
+
+
     public static PinDialogFragment newInstance(String msg, boolean isWithPasswordConfirm,
-            String caller, TypeVS type) {
+            boolean isWithCertValidation, String caller, TypeVS type) {
         PinDialogFragment dialog = new PinDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, msg);
         args.putString(ContextVS.CALLER_KEY, caller);
         args.putBoolean(ContextVS.PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
+        args.putBoolean(ContextVS.CERT_VALIDATION_KEY, isWithCertValidation);
         args.putSerializable(ContextVS.TYPEVS_KEY, type);
         dialog.setArguments(args);
         return dialog;
@@ -82,9 +93,9 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         Log.d(TAG + ".onCreateDialog(...) ", "savedInstanceState: " + savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         ContextVS contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) &&
-                typeVS != TypeVS.WITHOUT_CERT_VALIDATION) {
+        if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) && isWithCertValidation) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
                     getString(R.string.cert_not_found_caption)).setMessage(
                     Html.fromHtml(getString(R.string.cert_not_found_msg))).setPositiveButton(

@@ -39,7 +39,6 @@ import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.NifUtils;
 
 import java.text.Normalizer;
@@ -218,9 +217,9 @@ public class UserCertRequestFormFragment extends Fragment {
                     surname, nif))).setPositiveButton(getString(
                     R.string.continue_label), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                    getString(R.string.keyguard_password_enter_first_pin_code), true,
-                    TypeVS.WITHOUT_CERT_VALIDATION);
+                    PinDialogFragment.showPinScreenWithoutCertValidation(getFragmentManager(),
+                            broadCastId, getString(R.string.keyguard_password_enter_first_pin_code),
+                            true, null);
                 }
             }).setNegativeButton(getString(R.string.cancel_button), null).show();
             //to avoid avoid dissapear on screen orientation change

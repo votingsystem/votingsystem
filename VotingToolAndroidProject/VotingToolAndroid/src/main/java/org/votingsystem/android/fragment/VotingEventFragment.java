@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -104,12 +103,12 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                     AlertDialog dialog  = new AlertDialog.Builder(getActivity()).setTitle(
                             getString(R.string.msg_lbl)).setMessage(Html.fromHtml(message)).
                             setPositiveButton(R.string.save_receipt_lbl,
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        saveCancelReceipt(vote);
-                                    }
-                                }).setNegativeButton(R.string.cancel_button, null).show();
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            saveCancelReceipt(vote);
+                                        }
+                                    }).setNegativeButton(R.string.cancel_button, null).show();
                     dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
                     cancelVoteButton.setEnabled(true);
