@@ -77,6 +77,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
     private Button insertPinButton;
     private Button requestCertButton;
     private ContextVS contextVS;
+    private String broadCastId;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -126,6 +127,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.user_cert_response_activity);
         contextVS = ContextVS.getInstance(getBaseContext());
+        broadCastId = this.getClass().getName();
         Log.d(TAG + ".onCreate(...) ", "state: " + contextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
@@ -142,7 +144,8 @@ public class UserCertResponseActivity extends ActionBarActivity {
         insertPinButton.setVisibility(View.GONE);
         insertPinButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	showPinScreen(getString(R.string.enter_pin_import_cert_msg));
+                PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
+                        getString(R.string.enter_pin_import_cert_msg), false, null);
             }
         });
         requestCertButton = (Button) findViewById(R.id.request_cert_button);
@@ -239,7 +242,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
     @Override public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+                broadcastReceiver, new IntentFilter(broadCastId));
         Log.d(TAG + ".onResume() ", "onResume");
     }
 
@@ -248,12 +251,6 @@ public class UserCertResponseActivity extends ActionBarActivity {
         super.onPause();
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
-    }
-
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName(), null);
-        pinDialog.show(getSupportFragmentManager(), PinDialogFragment.TAG);
     }
     
     private void setMessage(String message) {

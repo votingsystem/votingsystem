@@ -24,7 +24,9 @@ import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -34,14 +36,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.CertRequestActivity;
+import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 
 public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
     public static final String TAG = "PinDialogFragment";
-
-    private static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
 
     private TypeVS typeVS;
     private TextView msgTextView;
@@ -50,13 +52,21 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     private String dialogCaller = null;
     private String firstPin = null;
 
+
+    public static void showPinScreen(FragmentManager fragmentManager, String broadCastId,
+             String message, boolean isWithPasswordConfirm, TypeVS type) {
+        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
+                message, isWithPasswordConfirm, broadCastId, type);
+        pinDialog.show(fragmentManager, PinDialogFragment.TAG);
+    }
+
     public static PinDialogFragment newInstance(String msg, boolean isWithPasswordConfirm,
             String caller, TypeVS type) {
         PinDialogFragment dialog = new PinDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, msg);
         args.putString(ContextVS.CALLER_KEY, caller);
-        args.putBoolean(PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
+        args.putBoolean(ContextVS.PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
         args.putSerializable(ContextVS.TYPEVS_KEY, type);
         dialog.setArguments(args);
         return dialog;
@@ -65,30 +75,54 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
-        if(savedInstanceState == null) firstPin = null;
-        else firstPin = savedInstanceState.getString(ContextVS.PIN_KEY);
+        if(savedInstanceState != null) firstPin = savedInstanceState.getString(ContextVS.PIN_KEY);
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateDialog(...) ", "savedInstanceState: " + savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.pin_dialog_fragment, null);
-        msgTextView = (TextView) view.findViewById(R.id.msg);
-        userPinEditText = (EditText)view.findViewById(R.id.user_pin);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
-                getString(R.string.pin_dialog_Caption));
-        typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        if(getArguments().getString(ContextVS.MESSAGE_KEY) == null) {
-            msgTextView.setVisibility(View.GONE);
+        ContextVS contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
+                    getString(R.string.cert_not_found_caption)).setMessage(
+                    Html.fromHtml(getString(R.string.cert_not_found_msg))).setPositiveButton(
+                    R.string.request_certificate_menu, new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = null;
+                    switch(ContextVS.getInstance(getActivity().getApplicationContext()).getState()) {
+                        case WITH_CSR:
+                            intent = new Intent(getActivity().getApplicationContext(),
+                                    UserCertResponseActivity.class);
+                            break;
+                        case WITHOUT_CSR:
+                            intent = new Intent(getActivity().getApplicationContext(),
+                                    CertRequestActivity.class);
+                            break;
+                    }
+                    if(intent != null) startActivity(intent);
+                }
+            }).setNegativeButton(R.string.cancel_button, null);
+            return builder.create();
         } else {
-            msgTextView.setVisibility(View.VISIBLE);
-            msgTextView.setText(getArguments().getString(ContextVS.MESSAGE_KEY));
+            View view = inflater.inflate(R.layout.pin_dialog_fragment, null);
+            msgTextView = (TextView) view.findViewById(R.id.msg);
+            userPinEditText = (EditText)view.findViewById(R.id.user_pin);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
+                    getString(R.string.pin_dialog_caption));
+            typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
+            if(getArguments().getString(ContextVS.MESSAGE_KEY) == null) {
+                msgTextView.setVisibility(View.GONE);
+            } else {
+                msgTextView.setVisibility(View.VISIBLE);
+                msgTextView.setText(getArguments().getString(ContextVS.MESSAGE_KEY));
+            }
+            withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
+            dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
+            builder.setView(view).setOnKeyListener(this);
+            return builder.create();
         }
-        withPasswordConfirm = getArguments().getBoolean(PASSWORD_CONFIRM_KEY);
-        dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
-        builder.setView(view).setOnKeyListener(this);
-        return builder.create();
     }
+
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

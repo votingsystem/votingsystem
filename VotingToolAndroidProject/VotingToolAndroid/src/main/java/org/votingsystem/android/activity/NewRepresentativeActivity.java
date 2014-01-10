@@ -19,10 +19,14 @@ package org.votingsystem.android.activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.provider.OpenableColumns;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +35,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -38,23 +44,25 @@ import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
-import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.util.FileUtils;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class NewRepresentativeActivity extends ActionBarActivity {
 	
 	public static final String TAG = "NewRepresentativeActivity";
 
-
     private static final int SELECT_PICTURE = 1;
 
-    private TypeVS formType;
     private EditorFragment editorFragment;
     private ContextVS contextVS;
     private TextView progressMessage;
@@ -62,6 +70,8 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
+    private byte[] representativeImageBytes = null;
+    private String representativeImageName = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -77,14 +87,14 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     };
 
     private void launchSignAndSendService(String pin) {
-        Log.d(TAG + ".launchSignAndSendService(...) ", "operation: " + formType);
-        String serviceURL = contextVS.getAccessControl().getPublishServiceURL(formType);
+        Log.d(TAG + ".launchSignAndSendService(...) ", "");
+        String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
         String signedMessageSubject = null;
         String contentToSign = null;
         try {
             Intent startIntent = new Intent(getApplicationContext(), SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, formType);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
@@ -105,12 +115,28 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         broadCastId = this.getClass().getSimpleName();
         Log.d(TAG + ".onCreate(...)", "contextVS.getState(): " + contextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
-        setContentView(R.layout.new_representative_fragment);
+        setContentView(R.layout.new_representative);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        editorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(
+                EditorFragment.TAG);
         mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
         progressContainer =findViewById(R.id.progressContainer);
         progressMessage = (TextView)findViewById(R.id.progressMessage);
+        LinearLayout imageContainer = (LinearLayout) findViewById(R.id.imageContainer);
+        imageContainer.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                openFileChooser();
+            }
+        });
         mainLayout.getForeground().setAlpha(0);
+        if(savedInstanceState != null) {
+            representativeImageBytes = (byte[]) savedInstanceState.
+                    getSerializable(ContextVS.FORM_DATA_KEY);
+            representativeImageName = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
+            if(representativeImageBytes != null) {
+                setRepresentativeImage(representativeImageBytes, representativeImageName);
+            }
+        }
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
@@ -120,20 +146,25 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                 return true;
             case R.id.save_editor:
                 if(validateForm()) {
-                    showPinScreen(null);
+                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
+                            null, false, null);
                 }
                 return true;
             case R.id.add_option:
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                //To select multiple images
-                //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(Intent.createChooser(intent,"Seeeelect Picture"), SELECT_PICTURE);
+                openFileChooser();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void openFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); -> To select multiple images
+        startActivityForResult(Intent.createChooser(intent,
+                getString(R.string.select_img_lbl)), SELECT_PICTURE);
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,40 +175,57 @@ public class NewRepresentativeActivity extends ActionBarActivity {
 
     private boolean validateForm () {
         Log.d(TAG + ".validateForm()", "");
-        if(editorFragment.isEditorDataEmpty()) {
+        if(editorFragment == null || editorFragment.isEditorDataEmpty()) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.editor_empty_error_lbl));
+            return false;
+        }
+        if(representativeImageBytes == null) {
+            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.missing_representative_img_error_msg));
             return false;
         }
         return true;
     }
 
+    //https://developer.android.com/guide/topics/providers/document-provider.html
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
+                resultCode); //Activity.RESULT_OK;
         if(data != null && data.getData() != null) {
             Uri selectedImageUri = data.getData();
-            String imagePath = selectedImageUri.getPath();
-            File imageFile = new File(selectedImageUri.getPath());
-            Log.d(TAG + ".onActivityResult(...)", "imagePath: " + imagePath);
+            try {
+                Cursor cursor = getContentResolver().query(selectedImageUri, null, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    representativeImageName = cursor.getString(
+                            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+                InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
+                representativeImageBytes = FileUtils.getBytesFromInputStream(inputStream);
+                setRepresentativeImage(representativeImageBytes, representativeImageName);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, broadCastId, null);
-        pinDialog.show(getSupportFragmentManager(), PinDialogFragment.TAG);
+    private void setRepresentativeImage(byte[] imageBytes, String imageName) {
+        Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        ImageView image = (ImageView)findViewById(R.id.representative_image);
+        image.setImageBitmap(bmp);
+        TextView imagePathTextView = (TextView) findViewById(R.id.representative_image_path);
+        ((TextView) findViewById(R.id.representative_image_caption)).setText(getString(
+                R.string.representative_image_lbl));
+        imagePathTextView.setText(imageName);
+        LinearLayout imageContainer = (LinearLayout) findViewById(R.id.imageContainer);
+        imageContainer.setVisibility(View.VISIBLE);
     }
 
-    private void showCertNotFoundDialog() {
-        Log.d(TAG + ".showCertNotFoundDialog(...)", "showCertNotFoundDialog");
-        CertNotFoundDialog certDialog = new CertNotFoundDialog();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(
-                ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(ContextVS.FORM_DATA_KEY, representativeImageBytes);
+        outState.putSerializable(ContextVS.MESSAGE_KEY, representativeImageName);
+        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
@@ -218,18 +266,22 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     }
 
     @Override public void onResume() {
-    	super.onResume();
-    	Log.d(TAG + ".onResume() ", "onResume");
+        Log.d(TAG + ".onResume() ", "");
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter(broadCastId));
     }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+    }
+
 
     @Override protected void onStop() {
         super.onStop();
     	Log.d(TAG + ".onStop()", "onStop");
-    };
-
-    @Override protected void onDestroy() {
-        super.onDestroy();
-    	Log.d(TAG + ".onDestroy()", "onDestroy");
     };
 
 }

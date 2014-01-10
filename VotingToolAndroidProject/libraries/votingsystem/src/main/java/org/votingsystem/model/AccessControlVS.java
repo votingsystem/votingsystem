@@ -103,6 +103,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/representative/" + representativeId + "/image";
     }
 
+    public String getRepresentativeServiceURL () {
+        return getServerURL() + "/representative";
+    }
+
     public static String getServerInfoURL (String serverURL) {
         return StringUtils.checkURL(serverURL) + "/serverInfo";
     }

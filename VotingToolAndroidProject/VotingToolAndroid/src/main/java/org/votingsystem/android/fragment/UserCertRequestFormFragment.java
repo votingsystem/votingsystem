@@ -54,6 +54,7 @@ public class UserCertRequestFormFragment extends Fragment {
 
 	public static final String TAG = "UserCertRequestFormFragment";
 
+    private String broadCastId = null;
     private String givenname = null;
     private String surname = null;
     private String email = null;
@@ -91,6 +92,7 @@ public class UserCertRequestFormFragment extends Fragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        broadCastId = this.getClass().getName();
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         // if set to true savedInstanceState will be allways null
         setRetainInstance(true);
@@ -177,7 +179,7 @@ public class UserCertRequestFormFragment extends Fragment {
     @Override public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+                broadcastReceiver, new IntentFilter(broadCastId));
         Log.d(TAG + ".onResume() ", "onResume");
     }
 
@@ -215,8 +217,8 @@ public class UserCertRequestFormFragment extends Fragment {
                     surname, nif))).setPositiveButton(getString(
                     R.string.continue_label), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    showPinScreen(getString(
-                            R.string.keyguard_password_enter_first_pin_code));
+                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                            getString(R.string.keyguard_password_enter_first_pin_code), false, null);
                 }
             }).setNegativeButton(getString(R.string.cancel_button), null).show();
             //to avoid avoid dissapear on screen orientation change
@@ -291,12 +293,6 @@ public class UserCertRequestFormFragment extends Fragment {
         startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
         getActivity().startService(startIntent);
         showProgress(true, true);
-    }
-
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName(), null);
-        pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {

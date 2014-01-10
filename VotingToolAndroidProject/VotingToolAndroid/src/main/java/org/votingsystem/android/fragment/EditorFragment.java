@@ -101,7 +101,7 @@ public class EditorFragment extends Fragment {
         String editorFileName = "editor_" + Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
             if(!Arrays.asList(getResources().getAssets().list("")).contains(editorFileName)) {
-                Log.d(TAG + ".loadHTMLContent(...)", "missing editorFileName: " + editorFileName);
+                Log.d(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
                 editorFileName = "editor_es.html";
             }
         } catch(Exception ex) {

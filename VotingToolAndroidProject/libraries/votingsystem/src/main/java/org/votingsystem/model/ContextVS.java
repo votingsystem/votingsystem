@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -56,6 +57,7 @@ public class ContextVS {
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
     public static final String HTML_MESSAGE_KEY = "HTML_MESSAGE_KEY";
     public static final String TYPEVS_KEY = "TYPEVS_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
@@ -117,7 +119,6 @@ public class ContextVS {
     public static final String TIMESTAMP_VOTE_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
 
     public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
-    public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
 
     private State state = State.WITHOUT_CSR;
 

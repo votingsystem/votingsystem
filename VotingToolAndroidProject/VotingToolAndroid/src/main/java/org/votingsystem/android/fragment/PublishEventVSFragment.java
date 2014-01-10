@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -35,7 +34,6 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.service.SignAndSendService;
-import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.model.ContentTypeVS;
@@ -411,9 +409,8 @@ public class PublishEventVSFragment extends Fragment {
                 getActivity().onBackPressed();
                 return true;
             case R.id.save_editor:
-                if(validateForm()) {
-                    showPinScreen(null);
-                }
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        null, false, null);
                 return true;
             case R.id.add_option:
                 String caption = null;
@@ -478,24 +475,6 @@ public class PublishEventVSFragment extends Fragment {
         Log.d(TAG + ".onDestroy()", "onDestroy");
         super.onDestroy();
     }
-
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, broadCastId, null);
-        pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
-    }
-
-
-	private void showCertNotFoundDialog() {
-		Log.d(TAG + ".showCertNotFoundDialog(...)", "showCertNotFoundDialog");
-		CertNotFoundDialog certDialog = new CertNotFoundDialog();
-		FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
-                ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-	    if (prev != null) ft.remove(prev);
-	    ft.addToBackStack(null);
-	    certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-	}
 
     private void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +

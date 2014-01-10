@@ -272,7 +272,8 @@ public class ReceiptFragment extends Fragment {
                                 ((VoteVS) selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_button),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                showPinScreen(getString(R.string.cancel_vote_msg), TypeVS.CANCEL_VOTE);
+                                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                                        getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
                             }
                         }).setNegativeButton(getString(R.string.cancel_button),
                         new DialogInterface.OnClickListener() {
@@ -293,11 +294,6 @@ public class ReceiptFragment extends Fragment {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message, htmlMessage);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    private void showPinScreen(String message, TypeVS typeVS) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId, typeVS);
-        pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {

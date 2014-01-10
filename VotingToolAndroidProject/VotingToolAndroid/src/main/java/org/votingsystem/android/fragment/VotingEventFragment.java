@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -33,7 +32,6 @@ import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.android.ui.CancelVoteDialog;
-import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
@@ -175,7 +173,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         switch (view.getId()) {
             case R.id.cancel_vote_button:
                 operation = TypeVS.CANCEL_VOTE;
-                showPinScreen(getString(R.string.cancel_vote_msg));
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        getString(R.string.cancel_vote_msg), false, null);
                 break;
             case R.id.save_receipt_button:
                 saveVote();
@@ -293,15 +292,12 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     private void processSelectedOption(FieldEventVS optionSelected) {
         Log.d(TAG + ".processSelectedOption", "processSelectedOption");
         operation = TypeVS.VOTEVS;
-        if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
-            showCertNotFoundDialog();
-        } else {
-            vote = new VoteVS(eventVS, optionSelected);
-            String pinMsgPart = optionSelected.getContent().length() >
-                    ContextVS.SELECTED_OPTION_MAX_LENGTH ? optionSelected.getContent().substring(0,
-                    ContextVS.SELECTED_OPTION_MAX_LENGTH) + "..." : optionSelected.getContent();
-            showPinScreen(getString(R.string.option_selected_msg, pinMsgPart));
-        }
+        vote = new VoteVS(eventVS, optionSelected);
+        String pinMsgPart = optionSelected.getContent().length() >
+                ContextVS.SELECTED_OPTION_MAX_LENGTH ? optionSelected.getContent().substring(0,
+                ContextVS.SELECTED_OPTION_MAX_LENGTH) + "..." : optionSelected.getContent();
+        PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                getString(R.string.option_selected_msg, pinMsgPart), false, null);
     }
 
     @Override public void onResume() {
@@ -316,18 +312,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
-    }
-
-    private void showCertNotFoundDialog() {
-        CertNotFoundDialog certDialog = new CertNotFoundDialog();
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
-                ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
-        certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
     public void onClickSubject(View v) {
@@ -354,11 +338,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                 message, htmlMessage);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
         showProgress(false, true);
-    }
-
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId, null);
-        pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     @Override public void onDestroy() {

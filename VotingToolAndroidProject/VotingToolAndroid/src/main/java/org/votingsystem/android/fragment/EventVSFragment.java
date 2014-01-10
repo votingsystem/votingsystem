@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.InputType;
@@ -35,7 +34,6 @@ import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.service.SignAndSendService;
-import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -151,18 +149,14 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         signAndSendButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 Log.d(TAG + "- signAndSendButton -", " - state: " + contextVS.getState().toString());
-                if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
-                    Log.d(TAG + "-signAndSendButton-", " - showCertNotFoundDialog");
-                    showCertNotFoundDialog();
-                    return;
-                }
                 if (eventVS.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
-                    if(eventVS.getFieldsEventVS() != null && eventVS.getFieldsEventVS().size() > 0) {
+                    if(eventVS.getFieldsEventVS() != null && !eventVS.getFieldsEventVS().isEmpty()) {
                         showClaimFieldsDialog();
                         return;
                     }
                 }
-                showPinScreen(null);
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        null, false, null);
             }
         });
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
@@ -221,21 +215,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
             showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
         }
-    }
-
-    private void showCertNotFoundDialog() {
-        CertNotFoundDialog certDialog = new CertNotFoundDialog();
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
-                ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-        if (prev != null) ft.remove(prev);
-        ft.addToBackStack(null);
-        certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
-    }
-
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(message, false, broadCastId, null);
-        pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
@@ -322,7 +301,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                             " - text: " + fieldValue);
                 }
                 dialog.dismiss();
-                showPinScreen(null);
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        null, false, null);
             }
         });
         //to avoid avoid dissapear on screen orientation change

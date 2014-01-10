@@ -131,7 +131,8 @@ public class RepresentativeFragment extends Fragment {
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                showPinScreen(null);
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        null, false, null);
             }
         });
         selectButton.setVisibility(View.GONE);
@@ -174,12 +175,6 @@ public class RepresentativeFragment extends Fragment {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    private void showPinScreen(String message) {
-        PinDialogFragment pinDialog = PinDialogFragment.newInstance(
-                message, false, this.getClass().getName(), null);
-        pinDialog.show(getFragmentManager(), PinDialogFragment.TAG);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
