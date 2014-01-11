@@ -170,11 +170,7 @@ public class RepresentativeService extends IntentService {
             String editorContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
             Uri imageUri = (Uri) arguments.getParcelable(ContextVS.URI_KEY);
-
             byte[] imageBytes = reduceImageFileSize(imageUri);
-
-
-
             MessageDigest messageDigest = MessageDigest.getInstance(
                     ContextVS.VOTING_DATA_DIGEST);
             byte[] resultDigest =  messageDigest.digest(imageBytes);
@@ -234,14 +230,13 @@ public class RepresentativeService extends IntentService {
 
     private byte[] reduceImageFileSize(Uri imageUri) {
         byte[] imageBytes = null;
-        int maxSize = 512 * 1024;
         try {
             ParcelFileDescriptor parcelFileDescriptor =
                     getContentResolver().openFileDescriptor(imageUri, "r");
             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
             Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
             parcelFileDescriptor.close();
-            int compressFactor = 100;
+            int compressFactor = 80;
             //Gallery images form phones like Nexus4 can be greater than 3 MB
             //InputStream inputStream = getContentResolver().openInputStream(imageUri);
             //representativeImageBytes = FileUtils.getBytesFromInputStream(inputStream);
@@ -253,7 +248,7 @@ public class RepresentativeService extends IntentService {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, compressFactor, out);
                 imageBytes = out.toByteArray();
                 compressFactor = compressFactor - 10;
-            } while(imageBytes.length > maxSize);
+            } while(imageBytes.length > ContextVS.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
 
             Log.d(TAG + ".reduceImageFileSize(...)", "compressFactor: " + compressFactor +
                     " - imageBytes: " + imageBytes.length);
