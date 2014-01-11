@@ -18,6 +18,7 @@ package org.votingsystem.android.ui;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -211,13 +212,10 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 		TextView lblListHeader = (TextView) convertView.findViewById(R.id.lblListHeader);
 		lblListHeader.setTypeface(null, Typeface.BOLD);
 		lblListHeader.setText(headerTitle);
-
-        //Drawable groupIndicator = context.getResources().getDrawable(R.drawable.navigation_drawer_expandable_icon);
-        //((ExpandableListView)parent).setGroupIndicator(groupIndicator);
-        GroupPosition gPosition = GroupPosition.valueOf(groupPosition);
+        /*GroupPosition gPosition = GroupPosition.valueOf(groupPosition);
         if(gPosition.isEmpty()) {
             ((ExpandableListView)parent).setGroupIndicator(null);
-        }
+        }*/
         return convertView;
 	}
 

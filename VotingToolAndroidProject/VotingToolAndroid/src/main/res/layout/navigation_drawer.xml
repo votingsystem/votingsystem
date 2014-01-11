@@ -34,6 +34,7 @@
         android:layout_width="245dp"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
+        android:groupIndicator="@drawable/navigation_drawer_expandable_icon"
         android:divider="@android:color/background_light"
         android:dividerHeight="1dp"
         android:background="#ffff"/>
