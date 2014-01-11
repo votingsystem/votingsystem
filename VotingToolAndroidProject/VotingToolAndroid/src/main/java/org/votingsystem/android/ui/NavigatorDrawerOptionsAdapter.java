@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -55,25 +56,28 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int CLOSED_CHILD_POSITION          = 2;
 
     public enum GroupPosition {
-        VOTING(VOTING_GROUP_POSITION, SubSystemVS.VOTES, TypeVS.VOTING_EVENT, Arrays.asList(
-                ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        MANIFESTS(MANIFESTS_GROUP_POSITION, SubSystemVS.MANIFESTS, TypeVS.MANIFEST_EVENT,
+        VOTING(VOTING_GROUP_POSITION, R.drawable.poll_22, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        CLAIMS(CLAIMS_GROUP_POSITION, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT, Arrays.asList(
-                ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, SubSystemVS.REPRESENTATIVES,
-                TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
-        RECEIPTS(RECEIPTS_GROUP_POSITION, SubSystemVS.RECEIPTS,
+        MANIFESTS(MANIFESTS_GROUP_POSITION, R.drawable.manifest_22, SubSystemVS.MANIFESTS,
+                TypeVS.MANIFEST_EVENT, Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING,
+                ChildPosition.CLOSED)),
+        CLAIMS(CLAIMS_GROUP_POSITION, R.drawable.filenew_22, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT,
+                Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
+        REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, R.drawable.system_users_22,
+                SubSystemVS.REPRESENTATIVES, TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
+        RECEIPTS(RECEIPTS_GROUP_POSITION, R.drawable.receipt_22, SubSystemVS.RECEIPTS,
                 TypeVS.RECEIPT, new ArrayList<ChildPosition>());
 
         int position;
+        int logo;
         SubSystemVS subsystem;
         List<ChildPosition> childList;
         TypeVS typeVS;
 
-        private GroupPosition(int position, SubSystemVS subsystem, TypeVS typeVS,
+        private GroupPosition(int position, int logo, SubSystemVS subsystem, TypeVS typeVS,
               List<ChildPosition> childList) {
             this.position = position;
+            this.logo = logo;
             this.subsystem = subsystem;
             this.typeVS = typeVS;
             this.childList = childList;
@@ -109,6 +113,10 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
         public int getPosition() {
             return position;
+        }
+
+        public int getLogo() {
+            return logo;
         }
 
         public SubSystemVS getSubsystem() {
@@ -202,20 +210,18 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 	@Override public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
         //Log.d(TAG + ".getGroupView(...)", "isExpanded: " + isExpanded);
+        LayoutInflater layoutInflater = (LayoutInflater) this.context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		String headerTitle = (String) getGroup(groupPosition);
-		if (convertView == null) {
-			LayoutInflater layoutInflater = (LayoutInflater) this.context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = layoutInflater.inflate(R.layout.drawer_list_group, null);
-		}
-
-		TextView lblListHeader = (TextView) convertView.findViewById(R.id.lblListHeader);
-		lblListHeader.setTypeface(null, Typeface.BOLD);
-		lblListHeader.setText(headerTitle);
-        /*GroupPosition gPosition = GroupPosition.valueOf(groupPosition);
-        if(gPosition.isEmpty()) {
-            ((ExpandableListView)parent).setGroupIndicator(null);
-        }*/
+        GroupPosition gPosition = GroupPosition.valueOf(groupPosition);
+        ((ExpandableListView)parent).setGroupIndicator(null);
+        if (convertView == null) {
+            convertView = layoutInflater.inflate(R.layout.drawer_list_group, null);
+        }
+        TextView lblListHeader = (TextView) convertView.findViewById(R.id.lblListHeader);
+        lblListHeader.setText(headerTitle);
+        ImageView imageView = (ImageView) convertView.findViewById(R.id.header_image);
+        imageView.setImageResource(gPosition.getLogo());
         return convertView;
 	}
 
