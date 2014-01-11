@@ -1,19 +1,3 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.android.activity;
 
 import android.content.BroadcastReceiver;
@@ -25,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -43,14 +28,13 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
-import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.FileUtils;
 
-import java.io.InputStream;
+import java.io.FileDescriptor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -65,13 +49,14 @@ public class NewRepresentativeActivity extends ActionBarActivity {
 
     private EditorFragment editorFragment;
     private ContextVS contextVS;
-    private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
-    private byte[] representativeImageBytes = null;
     private String representativeImageName = null;
+    private String editorContent = null;
+    private Uri representativeImageUri = null;
+    private Menu menu;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -79,9 +64,16 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                    ResponseVS.SC_ERROR);
+            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             if(pin != null) launchSignAndSendService(pin);
             else {
-
+                if(TypeVS.NEW_REPRESENTATIVE == operationType) {
+                    showMessage(responseStatusCode, caption, message);
+                    if(menu != null) menu.removeGroup(R.id.general_items);
+                }
             }
         }
     };
@@ -90,18 +82,17 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         Log.d(TAG + ".launchSignAndSendService(...) ", "");
         String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
         String signedMessageSubject = null;
-        String contentToSign = null;
         try {
-            Intent startIntent = new Intent(getApplicationContext(), SignAndSendService.class);
+            Intent startIntent = new Intent(getApplicationContext(), RepresentativeService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.NEW_REPRESENTATIVE);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
-            startIntent.putExtra(ContextVS.MESSAGE_KEY, contentToSign);
-            progressMessage.setText(R.string.publishing_document_msg);
+            startIntent.putExtra(ContextVS.MESSAGE_KEY, editorContent);
+            startIntent.putExtra(ContextVS.URI_KEY, representativeImageUri);
             showProgress(true, true);
             startService(startIntent);
         } catch(Exception ex) {
@@ -121,7 +112,6 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                 EditorFragment.TAG);
         mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
         progressContainer =findViewById(R.id.progressContainer);
-        progressMessage = (TextView)findViewById(R.id.progressMessage);
         LinearLayout imageContainer = (LinearLayout) findViewById(R.id.imageContainer);
         imageContainer.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -130,11 +120,10 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         });
         mainLayout.getForeground().setAlpha(0);
         if(savedInstanceState != null) {
-            representativeImageBytes = (byte[]) savedInstanceState.
-                    getSerializable(ContextVS.FORM_DATA_KEY);
-            representativeImageName = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
-            if(representativeImageBytes != null) {
-                setRepresentativeImage(representativeImageBytes, representativeImageName);
+            representativeImageUri = (Uri) savedInstanceState.getSerializable(ContextVS.URI_KEY);
+            representativeImageName = savedInstanceState.getString(ContextVS.ICON_KEY);
+            if(representativeImageUri != null) {
+                setRepresentativeImage(representativeImageUri, representativeImageName);
             }
         }
     }
@@ -146,6 +135,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                 return true;
             case R.id.save_editor:
                 if(validateForm()) {
+                    editorContent = editorFragment.getEditorData();
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
                             null, false, null);
                 }
@@ -180,7 +170,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                     getString(R.string.editor_empty_error_lbl));
             return false;
         }
-        if(representativeImageBytes == null) {
+        if(representativeImageUri == null) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.missing_representative_img_error_msg));
             return false;
@@ -193,39 +183,46 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode); //Activity.RESULT_OK;
         if(data != null && data.getData() != null) {
-            Uri selectedImageUri = data.getData();
+            representativeImageUri = data.getData();
             try {
-                Cursor cursor = getContentResolver().query(selectedImageUri, null, null, null, null);
+                Cursor cursor = getContentResolver().query(representativeImageUri, null, null, null, null);
                 if (cursor != null && cursor.moveToFirst()) {
                     representativeImageName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
-                InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
-                representativeImageBytes = FileUtils.getBytesFromInputStream(inputStream);
-                setRepresentativeImage(representativeImageBytes, representativeImageName);
+                setRepresentativeImage(representativeImageUri, representativeImageName);
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
         }
     }
 
-    private void setRepresentativeImage(byte[] imageBytes, String imageName) {
-        Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-        ImageView image = (ImageView)findViewById(R.id.representative_image);
-        image.setImageBitmap(bmp);
-        TextView imagePathTextView = (TextView) findViewById(R.id.representative_image_path);
-        ((TextView) findViewById(R.id.representative_image_caption)).setText(getString(
-                R.string.representative_image_lbl));
-        imagePathTextView.setText(imageName);
-        LinearLayout imageContainer = (LinearLayout) findViewById(R.id.imageContainer);
-        imageContainer.setVisibility(View.VISIBLE);
+    private void setRepresentativeImage(Uri imageUri, String imageName) {
+        try {
+            //Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            ParcelFileDescriptor parcelFileDescriptor =
+                    getContentResolver().openFileDescriptor(imageUri, "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            parcelFileDescriptor.close();
+            ImageView image = (ImageView)findViewById(R.id.representative_image);
+            image.setImageBitmap(bitmap);
+            TextView imagePathTextView = (TextView) findViewById(R.id.representative_image_path);
+            ((TextView) findViewById(R.id.representative_image_caption)).setText(getString(
+                    R.string.representative_image_lbl));
+            imagePathTextView.setText(imageName);
+            LinearLayout imageContainer = (LinearLayout) findViewById(R.id.imageContainer);
+            imageContainer.setVisibility(View.VISIBLE);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ContextVS.FORM_DATA_KEY, representativeImageBytes);
-        outState.putSerializable(ContextVS.MESSAGE_KEY, representativeImageName);
-        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+        outState.putParcelable(ContextVS.URI_KEY, representativeImageUri);
+        outState.putSerializable(ContextVS.ICON_KEY, representativeImageName);
+        Log.d(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {

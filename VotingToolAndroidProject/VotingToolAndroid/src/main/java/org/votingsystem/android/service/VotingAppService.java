@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -24,6 +25,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.StringUtils;
 
 import java.util.UUID;
 
@@ -132,10 +134,18 @@ public class VotingAppService extends Service {
         Bundle arguments = intent.getExtras();
         if(arguments != null) {
             final String accessControlURL = arguments.getString(ContextVS.ACCESS_CONTROL_URL_KEY);
-            final String operationStr = arguments.getString(ContextVS.URI_DATA_KEY);
+            Uri uriData = (Uri) arguments.getParcelable(ContextVS.URI_KEY);
+            String operationStr = null;
+            if(uriData != null) {
+                String encodedMsg = uriData.getQueryParameter("msg");
+                if(encodedMsg != null) {
+                    operationStr = StringUtils.decodeString(encodedMsg);
+                }
+            }
+            final String operationStrFinal = operationStr;
             Runnable runnable = new Runnable() {
                 @Override public void run() {
-                    processOperation(accessControlURL, operationStr);
+                    processOperation(accessControlURL, operationStrFinal);
                 }
             };
             /*Services run in the main thread of their hosting process. This means that, if

@@ -16,7 +16,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.service.VotingAppService;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -103,11 +102,7 @@ public class MainActivity extends FragmentActivity {
         showProgressDialog(getString(R.string.connecting_caption),
                 getString(R.string.loading_data_msg));
         Intent startIntent = new Intent(getApplicationContext(), VotingAppService.class);
-        if(uriData != null) {
-            String encodedMsg = uriData.getQueryParameter("msg");
-            String msg = StringUtils.decodeString(encodedMsg);
-            startIntent.putExtra(ContextVS.URI_DATA_KEY, msg);
-        }
+        if(uriData != null) startIntent.putExtra(ContextVS.URI_KEY, uriData);
         startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
         startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
         startService(startIntent);

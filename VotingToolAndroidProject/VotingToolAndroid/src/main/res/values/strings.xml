@@ -221,7 +221,7 @@
 	<string name="error_vote_repeated_msg">Error, voto repetido</string>
 	<string name="connection_error_msg">Error de conexión</string>
 
-   <string name="timestamp_connection_error_msg">Error conectando con el servicio de sellado de tiempo</string>
+   <string name="timestamp_service_error_caption">Error con el sellado de tiempo</string>
 	
 	<string name="given_name_lbl">Nombre</string>
 	<string name="surname_lbl">Apellidos</string>
@@ -328,4 +328,7 @@
     <string name="missing_representative_img_error_msg">Debe proporcionar una imagen que identifique al representante</string>
     <string name="select_img_lbl">Seleccione una imagen</string>
     <string name="select_representative_image_lbl">Seleccione una imagen asociada al representante</string>
+    <string name="new_representative_error_caption">Error dando de alta representante</string>
+    <string name="new_representative_ok_notification_msg">Usuario dado de alta como representante</string>
+    <string name="new_representative_progress_lbl">Dando de alta representante</string>
 </resources>

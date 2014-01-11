@@ -35,12 +35,14 @@ public class ContextVS {
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
-    public static final String SIGNED_FILE_NAME           = "signedFile";
-    public static final String CSR_FILE_NAME              = "csr";
-    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
-    public static final String DEFAULT_SIGNED_FILE_NAME   = "smimeMessage.p7m";
-    public static final String PROVIDER                   = "BC";
-    public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
+    public static final String SIGNED_FILE_NAME              = "signedFile";
+    public static final String CSR_FILE_NAME                 = "csr";
+    public static final String IMAGE_FILE_NAME               = "image";
+    public static final String ACCESS_REQUEST_FILE_NAME      = "accessRequest";
+    public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
+    public static final String DEFAULT_SIGNED_FILE_NAME      = "smimeMessage.p7m";
+    public static final String PROVIDER                      = "BC";
+    public static final String SERVER_URL_EXTRA_PROP_NAME    = "serverURL";
 
     //Intent keys
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
@@ -53,10 +55,11 @@ public class ContextVS {
     public static final String PHONE_KEY = "PHONE_KEY";
     public static final String DEVICE_ID_KEY = "DEVICE_ID_KEY";
     public static final String NAME_KEY = "NAME_KEY";
-    public static final String URI_DATA_KEY = "URI_DATA";
+    public static final String URI_KEY = "URI_DATA";
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String MESSAGE_BYTES_KEY = "MESSAGE_BYTES_KEY";
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
     public static final String CERT_VALIDATION_KEY = "CERT_VALIDATION_KEY";
     public static final String HTML_MESSAGE_KEY = "HTML_MESSAGE_KEY";
