@@ -357,7 +357,7 @@ class RepresentativeController {
      * Servicio que valida las delegaciones anónimas de representantes.
      *
      * @httpMethod [POST]
-     * @serviceURL [/representative/anonymousDelegation]
+     * @serviceURL [/representative/anonymousDelegationRequest]
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de certificado de delegación.
      * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
      * @return La solicitud de certificado de delegación anónima firmada.

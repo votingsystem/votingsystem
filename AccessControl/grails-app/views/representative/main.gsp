@@ -12,12 +12,6 @@
     <div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">
         <div style="display: table;  margin: auto;">
             <div style="display:table-cell;">
-                <votingSystem:simpleButton id="checkRepresentativeButton" style="margin:0px 30px 0px 0px;">
-                    <g:message code="checkRepresentativeLbl"/>
-                </votingSystem:simpleButton>
-            </div>
-
-            <div style="display:table-cell;">
                 <votingSystem:simpleButton href="${createLink(controller:'representative', action:'representativeAdmin')}"
                            style="margin:0px 20px 0px 30px;">
                     <g:message code="adminRepresentativeLbl"/>
@@ -31,9 +25,7 @@
         </div>
     </div>
 </div>
-<g:render template="/template/pagination"/> 	
-
-<g:include view="/include/dialog/checkRepresentativeDialog.gsp"/>	
+<g:render template="/template/pagination"/>
 
 <template id="representativeTemplate" style="display:none;">
     <g:render template="/template/representative"/>
@@ -45,10 +37,6 @@
        	
 	 	$(function() {		
 	 		paginate(1)
-
-	 		$('#checkRepresentativeButton').click(function() {
-	 			$("#checkRepresentativeDialog").dialog("open");
-			})
 		 });
 
 		function loadRepresentatives(representativesURL) {

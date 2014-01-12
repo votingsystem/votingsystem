@@ -349,11 +349,6 @@ class UrlMappings {
 			}
 		}
 
-		"/userVS/$nif/representative" {
-			controller = "userVS"
-			action = [GET:"representative"]
-		}
-
 		"/userVS" {
 			controller = "userVS"
 			action = [POST:"save"]

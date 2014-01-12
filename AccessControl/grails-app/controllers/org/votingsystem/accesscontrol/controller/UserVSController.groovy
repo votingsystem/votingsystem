@@ -17,49 +17,8 @@ class UserVSController {
 	
 	def subscriptionVSService
         
-        def index() {}
+    def index() {}
 
-	/**
-	 *
-	 * Servicio que sirve para comprobar el representante de un usuario
-	 *
-	 * @httpMethod [GET]
-	 * @serviceURL [/user/$nif/representative]
-	 * @param [nif] NIF del usuario que se desea consultar.
-	 * @responseContentType [application/json]
-	 * @return documento JSON con información básica del representante asociado
-	 *         al usuario cuyo nif se pada como parámetro nif
-	 */
-	def representative() {
-		String nif = NifUtils.validate(params.nif)
-		if(nif) {
-            UserVS userVS = UserVS.findByNif(nif)
-            if(userVS) {
-                String msg = null
-                if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-                    return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                            message(code: 'userIsRepresentativeMsg', args:[nif]))]
-                } else {
-                    if(!userVS.representative) {
-                        if(UserVS.Type.USER_WITH_CANCELLED_REPRESENTATIVE == userVS.type) {
-                            msg = message(code: 'userRepresentativeUnsubscribedMsg', args:[nif])
-                        } else msg = message(code: 'nifWithoutRepresentative', args:[nif])
-                        return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, msg)]
-                    } else {
-                        UserVS representative = userVS.representative
-                        String name = "${representative.name} ${representative.firstName}"
-                        def resultMap = [representativeId: representative.id, representativeName:name,
-                                representativeNIF:representative.nif]
-                        render resultMap as JSON
-                    }
-                }
-            } else {
-                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'userVSNotFoundByNIF', args:[nif]))]
-            }
-		} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'nifWithErrors', args:[params.nif]))]
-	}
 	
 	/**
 	 * Servicio que sirve para añadir usuarios de pruebas.
