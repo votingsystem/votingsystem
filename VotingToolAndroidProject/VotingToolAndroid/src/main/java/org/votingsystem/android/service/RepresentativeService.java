@@ -248,10 +248,9 @@ public class RepresentativeService extends IntentService {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, compressFactor, out);
                 imageBytes = out.toByteArray();
                 compressFactor = compressFactor - 10;
+                Log.d(TAG + ".reduceImageFileSize(...)", "compressFactor: " + compressFactor +
+                        " - imageBytes: " + imageBytes.length);
             } while(imageBytes.length > ContextVS.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
-
-            Log.d(TAG + ".reduceImageFileSize(...)", "compressFactor: " + compressFactor +
-                    " - imageBytes: " + imageBytes.length);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

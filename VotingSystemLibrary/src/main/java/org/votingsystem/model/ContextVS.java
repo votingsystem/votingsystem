@@ -113,7 +113,7 @@ public class ContextVS {
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
-    public static final int IMAGE_MAX_FILE_SIZE_KB = 512;
+    public static final int IMAGE_MAX_FILE_SIZE_KB = 1024;
     public static final int IMAGE_MAX_FILE_SIZE = IMAGE_MAX_FILE_SIZE_KB * 1024;
     public static final int SIGNED_MAX_FILE_SIZE_KB = 512;
     public static final int SIGNED_MAX_FILE_SIZE = SIGNED_MAX_FILE_SIZE_KB * 1024;

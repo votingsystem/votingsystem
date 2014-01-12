@@ -51,7 +51,7 @@
                     android:id="@+id/separator"
                     android:visibility="visible"
                     android:background="@android:color/darker_gray"/>
-                <TextView
+                <TextView android:id="@+id/eventFieldsCaption"
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:textColor="@color/event_subject"

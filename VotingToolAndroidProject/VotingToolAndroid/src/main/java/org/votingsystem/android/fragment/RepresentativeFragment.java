@@ -20,10 +20,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -127,7 +127,7 @@ public class RepresentativeFragment extends Fragment {
         cursor.moveToFirst();
         UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
-        rootView = inflater.inflate(R.layout.representative_fragment, container, false);
+        rootView = inflater.inflate(R.layout.representative, container, false);
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -163,8 +163,8 @@ public class RepresentativeFragment extends Fragment {
             image.setImageBitmap(bmp);
         }
         if(representative.getDescription() != null) {
-            ((TextView)rootView.findViewById(R.id.representative_description)).setText(
-                    representative.getDescription());
+            ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
+                    representative.getDescription(), null, null);
         }
         selectButton.setVisibility(View.VISIBLE);
     }

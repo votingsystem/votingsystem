@@ -51,6 +51,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     private ContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
+    private TextView imageCaption;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
     private String representativeImageName = null;
@@ -71,8 +72,14 @@ public class NewRepresentativeActivity extends ActionBarActivity {
             if(pin != null) launchSignAndSendService(pin);
             else {
                 if(TypeVS.NEW_REPRESENTATIVE == operationType) {
+                    showProgress(false, true);
                     showMessage(responseStatusCode, caption, message);
-                    if(menu != null) menu.removeGroup(R.id.general_items);
+                    if(ResponseVS.SC_OK != responseStatusCode) {
+                        editorFragment.setEditable(true);
+                        if(menu != null) getMenuInflater().inflate(R.menu.editor, menu);
+                    } else {
+                        imageCaption.setOnClickListener(null);
+                    }
                 }
             }
         }
@@ -80,6 +87,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
 
     private void launchSignAndSendService(String pin) {
         Log.d(TAG + ".launchSignAndSendService(...) ", "");
+        editorFragment.setEditable(false);
         String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
         String signedMessageSubject = null;
         try {
@@ -112,21 +120,23 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                 EditorFragment.TAG);
         mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
         progressContainer =findViewById(R.id.progressContainer);
-        LinearLayout imageContainer = (LinearLayout) findViewById(R.id.imageContainer);
-        imageContainer.setOnClickListener(new View.OnClickListener() {
+        imageCaption = (TextView) findViewById(R.id.representative_image_caption);
+        imageCaption.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 openFileChooser();
             }
         });
         mainLayout.getForeground().setAlpha(0);
         if(savedInstanceState != null) {
-            representativeImageUri = (Uri) savedInstanceState.getSerializable(ContextVS.URI_KEY);
+            representativeImageUri = (Uri) savedInstanceState.getParcelable(ContextVS.URI_KEY);
             representativeImageName = savedInstanceState.getString(ContextVS.ICON_KEY);
             if(representativeImageUri != null) {
                 setRepresentativeImage(representativeImageUri, representativeImageName);
             }
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
         }
     }
+
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
@@ -136,12 +146,10 @@ public class NewRepresentativeActivity extends ActionBarActivity {
             case R.id.save_editor:
                 if(validateForm()) {
                     editorContent = editorFragment.getEditorData();
+                    menu.removeGroup(R.id.general_items);
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
                             null, false, null);
                 }
-                return true;
-            case R.id.add_option:
-                openFileChooser();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -160,6 +168,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG + ".onCreateOptionsMenu(...)", "");
         getMenuInflater().inflate(R.menu.editor, menu);
+        this.menu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -222,6 +231,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ContextVS.URI_KEY, representativeImageUri);
         outState.putSerializable(ContextVS.ICON_KEY, representativeImageName);
+        outState.putSerializable(ContextVS.LOADING_KEY, progressVisible.get());
         Log.d(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
     }
 

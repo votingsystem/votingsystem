@@ -73,7 +73,7 @@
                     android:id="@+id/separator"
                     android:visibility="visible"
                     android:background="@android:color/darker_gray"/>
-                <TextView  android:layout_height="wrap_content"
+                <TextView android:id="@+id/eventFieldsCaption" android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:textColor="@color/event_subject"
                     android:text ="@string/vote_options_lbl"

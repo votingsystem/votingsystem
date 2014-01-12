@@ -2,11 +2,11 @@
     xmlns:votingSystem="http://schemas.android.com/apk/res-auto" >
 
     <group android:id="@+id/general_items">
-        <item android:id="@+id/add_option"
+        <!--<item android:id="@+id/add_option"
             android:showAsAction="always"
             votingSystem:showAsAction="always"
             android:icon="@drawable/content_new"
-            android:title="@string/add_option_lbl"/>
+            android:title="@string/add_option_lbl"/>-->
 
         <item android:id="@+id/save_editor"
             android:showAsAction="always"

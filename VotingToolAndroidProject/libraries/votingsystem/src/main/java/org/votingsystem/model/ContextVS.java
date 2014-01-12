@@ -70,6 +70,7 @@ public class ContextVS {
     public static final String CAPTION_KEY = "CAPTION";
     public static final String ERROR_PANEL_KEY = "ERROR_PANEL";
     public static final String ICON_KEY = "ICON_KEY";
+    public static final String EDITOR_VISIBLE_KEY = "EDITOR_VISIBLE_KEY";
     public static final String LOADING_KEY = "LOADING_KEY";
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
@@ -105,7 +106,7 @@ public class ContextVS {
     public static final int SYMETRIC_ENCRYPTION_KEY_LENGTH = 256;
     public static final int SYMETRIC_ENCRYPTION_ITERATION_COUNT = 100;
 
-    public static final int MAX_REPRESENTATIVE_IMAGE_FILE_SIZE = 512 * 1024;
+    public static final int MAX_REPRESENTATIVE_IMAGE_FILE_SIZE = 1024 * 1024;
 
     public static final int EVENTS_PAGE_SIZE = 30;
     public static final int MAX_SUBJECT_SIZE = 60;

@@ -68,6 +68,7 @@ public class PublishEventVSFragment extends Fragment {
     private TextView progressMessage;
     private EditText dateFinishEditText;
     private EditText dateBeginEditText;
+    private TextView optionCaption;
     private Spinner controlCenterSetSpinner;
     private EditText subjectEditText;
     private View progressContainer;
@@ -262,6 +263,7 @@ public class PublishEventVSFragment extends Fragment {
             case CLAIM_PUBLISHING:
                 rootView = inflater.inflate(R.layout.publish_claim_fragment, container, false);
                 optionContainer = (LinearLayout) rootView.findViewById(R.id.optionContainer);
+                optionCaption = (TextView) rootView.findViewById(R.id.eventFieldsCaption);
                 break;
             case MANIFEST_PUBLISHING:
                 rootView = inflater.inflate(R.layout.publish_manifest_fragment, container, false);
@@ -269,6 +271,7 @@ public class PublishEventVSFragment extends Fragment {
             case VOTING_PUBLISHING:
                 rootView = inflater.inflate(R.layout.publish_election_fragment, container, false);
                 optionContainer = (LinearLayout) rootView.findViewById(R.id.optionContainer);
+                optionCaption = (TextView) rootView.findViewById(R.id.eventFieldsCaption);
                 controlCenterSetSpinner = (Spinner) rootView.findViewById(R.id.controlCenterSetSpinner);
                 Set<ControlCenterVS> controlCenterSet =
                         contextVS.getAccessControl().getControlCenters();
@@ -316,6 +319,11 @@ public class PublishEventVSFragment extends Fragment {
             }
         });
         dateFinishEditText.setKeyListener(null);
+        if(optionCaption != null) optionCaption.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                addOption();
+            }
+        });
         progressContainer = rootView.findViewById(R.id.progressContainer);
         progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
         mainLayout.getForeground().setAlpha(0);
@@ -393,14 +401,6 @@ public class PublishEventVSFragment extends Fragment {
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.editor, menu);
-        boolean withAddOption = false;
-        switch(formType) {
-            case CLAIM_PUBLISHING:
-            case VOTING_PUBLISHING:
-                withAddOption = true;
-                break;
-        }
-        if(!withAddOption) menu.findItem(R.id.add_option).setVisible(false);
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
@@ -409,29 +409,30 @@ public class PublishEventVSFragment extends Fragment {
                 getActivity().onBackPressed();
                 return true;
             case R.id.save_editor:
-                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        null, false, null);
-                return true;
-            case R.id.add_option:
-                String caption = null;
-                String message = null;
-                switch(formType) {
-                    case VOTING_PUBLISHING:
-                        caption = getActivity().getString(R.string.add_vote_option_lbl);
-                        message = getActivity().getString(R.string.add_vote_option_msg);
-                        break;
-                    case CLAIM_PUBLISHING:
-                        caption = getActivity().getString(R.string.add_claim_option_lbl);
-                        message = getActivity().getString(R.string.add_claim_option_msg);
-                        break;
-                }
-                NewFieldDialogFragment newFieldDialog = NewFieldDialogFragment.newInstance(caption,
-                        message, broadCastId,  TypeVS.ITEM_REQUEST);
-                newFieldDialog.show(getFragmentManager(), NewFieldDialogFragment.TAG);
+                if(validateForm()) PinDialogFragment.showPinScreen(getFragmentManager(),
+                        broadCastId, null, false, null);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void addOption() {
+        String caption = null;
+        String message = null;
+        switch(formType) {
+            case VOTING_PUBLISHING:
+                caption = getActivity().getString(R.string.add_vote_option_lbl);
+                message = getActivity().getString(R.string.add_vote_option_msg);
+                break;
+            case CLAIM_PUBLISHING:
+                caption = getActivity().getString(R.string.add_claim_option_lbl);
+                message = getActivity().getString(R.string.add_claim_option_msg);
+                break;
+        }
+        NewFieldDialogFragment newFieldDialog = NewFieldDialogFragment.newInstance(caption,
+                message, broadCastId,  TypeVS.ITEM_REQUEST);
+        newFieldDialog.show(getFragmentManager(), NewFieldDialogFragment.TAG);
     }
 
     private boolean validateForm () {

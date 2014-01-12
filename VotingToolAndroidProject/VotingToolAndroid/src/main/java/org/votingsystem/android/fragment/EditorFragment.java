@@ -12,6 +12,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.ui.JavaScriptInterface;
@@ -34,8 +35,10 @@ public class EditorFragment extends Fragment {
 	private WebView webView;
 	private JavaScriptInterface javaScriptInterface;
     private FrameLayout mainLayout;
+    private TextView textview;
     private View rootView;
     private String editorDataStr = "";
+    private boolean isEditable = true;
     private CountDownLatch countDownLatch = new CountDownLatch(1);
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,6 +46,7 @@ public class EditorFragment extends Fragment {
         super.onCreate(savedInstanceState);
         rootView = inflater.inflate(R.layout.editor_fragment, container, false);
         webView = (WebView) rootView.findViewById(R.id.webview);
+        textview = (TextView) rootView.findViewById(R.id.textview);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         return rootView;
     }
@@ -50,14 +54,17 @@ public class EditorFragment extends Fragment {
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null) editorDataStr =
-                savedInstanceState.getString(ContextVS.FORM_DATA_KEY);
+        if(savedInstanceState != null) {
+            editorDataStr = savedInstanceState.getString(ContextVS.FORM_DATA_KEY);
+            isEditable = savedInstanceState.getBoolean(ContextVS.EDITOR_VISIBLE_KEY, true);
+        }
         loadEditor();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.FORM_DATA_KEY, editorDataStr);
+        outState.putBoolean(ContextVS.EDITOR_VISIBLE_KEY, isEditable);
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
@@ -95,6 +102,7 @@ public class EditorFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 String functionStr = "javascript:setEditorContent('" + editorDataStr + "')";
                 webView.loadUrl(functionStr);
+                if(!isEditable) setEditable(isEditable);
                 rootView.invalidate();
             }
         });
@@ -118,7 +126,7 @@ public class EditorFragment extends Fragment {
                 showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
                         operationVS.getMessage());
             } else if (ResponseVS.SC_PAUSED == operationVS.getStatusCode()) {
-                editorDataStr = operationVS.getMessage();
+                if(isEditable) editorDataStr = operationVS.getMessage();
             } else if(ResponseVS.SC_OK == operationVS.getStatusCode()) {
                 editorDataStr = operationVS.getMessage();
                 countDownLatch.countDown();
@@ -157,5 +165,17 @@ public class EditorFragment extends Fragment {
         if(webView.canGoBack()) webView.goBack();
     }
 
+    public void setEditable(boolean editable) {
+        Log.d(TAG + ".setEditable(...)", " - editable: " + editable);
+        String functionStr = null;
+        if(editable) {
+            functionStr = "javascript:createEditor('" + editorDataStr + "')";
+            webView.loadUrl(functionStr);
+        } else {
+            functionStr = "javascript:removeEditor()";
+            webView.loadUrl(functionStr);
+        }
+        this.isEditable = editable;
+    }
 
 }

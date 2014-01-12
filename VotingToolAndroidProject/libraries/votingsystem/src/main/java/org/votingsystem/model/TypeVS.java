@@ -21,6 +21,7 @@ public enum TypeVS {
     MANIFEST_EVENT,
     CLAIM_EVENT,
 
+    PIN,
     EVENT_CANCELLATION,
     BACKUP_REQUEST,
     SEND_SMIME_VOTE,

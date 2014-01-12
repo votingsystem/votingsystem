@@ -20,9 +20,6 @@ class RepresentativeController {
 	def signatureVSService
 	def grailsApplication
     def csrService
-	
-	private static final int MAX_FILE_SIZE_KB = 512;
-	private static final int MAX_FILE_SIZE = 512 * 1024;
 
 	
 	/**
@@ -261,9 +258,10 @@ class RepresentativeController {
             return [responseVS :new ResponseVS(ResponseVS.SC_ERROR_REQUEST, msg)]
 		}
 		request.messageSMIMEReq = messageSMIMEReq
-		if(imageBytes.length > MAX_FILE_SIZE) {
+		if(imageBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
 			response.status =  ResponseVS.SC_ERROR_REQUEST
-			String msg = message(code: 'imageSizeExceededMsg', args:[imageBytes.length/1024, MAX_FILE_SIZE_KB])
+			String msg = message(code: 'imageSizeExceededMsg', args:[imageBytes.length/1024,
+                    ContextVS.IMAGE_MAX_FILE_SIZE_KB])
 			log.error "processFileMap - ERROR - msg: ${msg}"
             return [responseVS : new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     type:TypeVS.REPRESENTATIVE_DATA_ERROR)]

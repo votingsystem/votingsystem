@@ -49,10 +49,9 @@ public class NewFieldDialogFragment extends DialogFragment {
         return frag;
     }
 
-
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.new_field_dialog_fragment, null);
+        View view = inflater.inflate(R.layout.new_field_dialog, null);
         caption = getArguments().getString(ContextVS.CAPTION_KEY);
         message = getArguments().getString(ContextVS.MESSAGE_KEY);
         String htmlMessage = getArguments().getString(ContextVS.HTML_MESSAGE_KEY);
@@ -102,7 +101,6 @@ public class NewFieldDialogFragment extends DialogFragment {
             alertDialog.dismiss();
         }
     }
-
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
