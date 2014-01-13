@@ -1,0 +1,14 @@
+/web-app/WEB-INF/cms/*.jks
+
+/grails-app/views/restDoc
+/grails-app/views/restDocTemplates
+
+/build
+/logs
+/target
+/target-eclipse
+/VotingSystem
+wrapper
+.VotingSystem
+.idea
+*.iml
