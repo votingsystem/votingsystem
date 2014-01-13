@@ -2,17 +2,20 @@ package org.votingsystem.simulation
 
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
+import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.callable.TimeStamperTestSender
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
+import org.votingsystem.util.StringUtils
 
 import java.util.concurrent.*
 
 class TimeStampSimulationService {
 
-    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INIT_ACCESS_CONTROL, SEND_SIGNATURES,
+    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INIT_SERVER, SEND_SIGNATURES,
         FINISH_SIMULATION}
 
     private Long broadcastMessageInterval = 10000;
@@ -103,15 +106,21 @@ class TimeStampSimulationService {
         }
     }
 
-    private void initAccessControl() {
-        log.debug("initAccessControl ### Enter status INIT_ACCESS_CONTROl")
-        ServerInitializer accessControlInitializer = new ServerInitializer(simulationData.getAccessControlURL(),
-                ActorVS.Type.ACCESS_CONTROL);
-        ResponseVS responseVS = accessControlInitializer.call();
-        responseVS.setStatus(Status.INIT_ACCESS_CONTROL)
+    private void initServer() {
+        log.debug("initServer ### Enter status INIT_SERVER")
+        ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+                simulationData.getServerURL()),ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+            ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next())
+            String serviceURL = "${timeStampServer.getServerURL()}/timeStamp/addCertificateTestAuthority"
+            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
+            responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA, serviceURL);
+        }
+        responseVS.setStatus(Status.INIT_SERVER)
         changeSimulationStatus(responseVS)
     }
-	
+
 	private void sendSignatures(){
         log.debug("sendVotes ### Enter status SEND_SIGNATURES");
 		if(!(simulationData.getNumRequestsProjected() > 0)) {
@@ -143,7 +152,7 @@ class TimeStampSimulationService {
             if((simulationData.getNumRequests() - simulationData.
                     getNumRequestsColected()) <= simulationData.getMaxPendingResponses()) {
                 String nifFrom = NifUtils.getNif(simulationData.getAndIncrementNumRequests().intValue());
-                signCompletionService.submit(new TimeStamperTestSender(nifFrom, simulationData.getEventId()));
+                signCompletionService.submit(new TimeStamperTestSender(nifFrom, simulationData.getAccessControlURL()));
             } else Thread.sleep(300);
         }
 	}
@@ -216,10 +225,10 @@ class TimeStampSimulationService {
             switch(statusFromResponse.getStatus()) {
                 case Status.INIT_SIMULATION:
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
-                        initAccessControl();
+                        initServer();
                     } else finishSimulation(statusFromResponse);
                     break;
-                case Status.INIT_ACCESS_CONTROL:
+                case Status.INIT_SERVER:
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
                         sendSignatures();
                     } else finishSimulation(statusFromResponse);

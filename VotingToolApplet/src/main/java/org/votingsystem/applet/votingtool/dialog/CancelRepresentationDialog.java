@@ -206,6 +206,7 @@ public class CancelRepresentationDialog extends JDialog {
                     ContextVS.getInstance().getAccessControl().getNameNormalized(), documentToSignStr,
                     password.toCharArray(), operation.getSignedMessageSubject(), null);
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getServiceURL(),
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, ContextVS.getInstance().getAccessControl().
                     getX509Certificate());
             return senderWorker.call();

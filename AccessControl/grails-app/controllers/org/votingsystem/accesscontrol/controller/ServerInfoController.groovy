@@ -14,7 +14,7 @@ import org.votingsystem.model.ActorVS
 class ServerInfoController {
 
     def signatureVSService
-	def timeStampVSService
+	def timeStampService
     
 	/**
 	 * @httpMethod [GET]
@@ -27,6 +27,7 @@ class ServerInfoController {
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.ACCESS_CONTROL.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
+        serverInfo.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         serverInfo.urlBlog = grailsApplication.config.VotingSystem.blogURL
 		serverInfo.state = ActorVS.State.RUNNING.toString()
 		serverInfo.environmentMode = ApplicationContextHolder.getEnvironment().toString()
@@ -40,7 +41,7 @@ class ServerInfoController {
 		File certChain = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.certChainPath).getFile();
 		serverInfo.certChainPEM = certChain?.text
-		serverInfo.timeStampCertPEM = new String(timeStampVSService.getSigningCertPEMBytes())
+		serverInfo.timeStampCertPEM = new String(timeStampService.getSigningCertPEMBytes())
 		
 		response.setHeader('Access-Control-Allow-Origin', "*")
 		

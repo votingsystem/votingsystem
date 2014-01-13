@@ -36,7 +36,7 @@ $('#requestEventBackupForm').submit(function(event){
 	pageEvent.operation = Operation.BACKUP_REQUEST
 	webAppMessage.signedContent = pageEvent
 	webAppMessage.email = $("#eventBackupUserEmailText").val()
-	webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
+    webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
 	pendingOperation = Operation.SMIME_CLAIM_SIGNATURE
 	votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback); 
 });

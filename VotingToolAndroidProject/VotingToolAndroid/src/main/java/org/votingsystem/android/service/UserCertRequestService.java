@@ -76,7 +76,7 @@ public class UserCertRequestService extends IntentService {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 editor.putLong(CSR_REQUEST_ID_KEY, requestId);
                 editor.commit();
-                contextVS.setState(State.WITH_CSR);
+                contextVS.setState(State.WITH_CSR, null);
             }
             String caption = null;
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

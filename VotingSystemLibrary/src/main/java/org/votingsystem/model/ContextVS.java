@@ -135,6 +135,7 @@ public class ContextVS {
 
     private UserVS userTest;
     private X509Certificate rootCACert;
+    private X509Certificate timeStampCACert;
     private KeyStore rootCAKeyStore;
     private PrivateKey rootCAPrivateKey;
     private X500PrivateCredential rootCAPrivateCredential;
@@ -302,10 +303,14 @@ public class ContextVS {
 
     public void setAppHost(AppHostVS appHost) { this.appHost = appHost;  }
 
-
     public X509Certificate getTimeStampServerCert() {
+        if(timeStampCACert != null) return timeStampCACert;
         if(accessControl == null) return null;
         return accessControl.getTimeStampCert();
+    }
+
+    public void setTimeStampServerCert(X509Certificate timeStampCACert) {
+        this.timeStampCACert = timeStampCACert;
     }
     
     public ResponseVS getHashCertVSData(String hashCertVSBase64) {

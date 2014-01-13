@@ -25,7 +25,7 @@ class EventVSManifestService {
 	def messageSource
 	def filesService
 	def sessionFactory
-	def timeStampVSService
+	def timeStampService
 
 	public ResponseVS saveManifest(PDFDocumentVS pdfDocument, EventVS eventVS, Locale locale) {
 		PDFDocumentVS documento = PDFDocumentVS.findWhere(eventVS:eventVS, state:PDFDocumentVS.State.VALIDATED_MANIFEST)
@@ -78,7 +78,7 @@ class EventVSManifestService {
 		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
 		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 		
-		byte[] timeStampCertPEMBytes = timeStampVSService.getSigningCertPEMBytes()
+		byte[] timeStampCertPEMBytes = timeStampService.getSigningCertPEMBytes()
 		File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
 		timeStampCertFile.setBytes(timeStampCertPEMBytes)
 		

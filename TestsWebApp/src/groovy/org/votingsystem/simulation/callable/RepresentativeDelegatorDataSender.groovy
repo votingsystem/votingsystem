@@ -54,6 +54,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         
         X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
         SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, destinationCert);
         reponseVS = senderSender.call();
         if (ResponseVS.SC_OK == reponseVS.getStatusCode()) reponseVS.setMessage(userNIF);

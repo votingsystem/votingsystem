@@ -118,6 +118,7 @@ public class CertGenerator {
                 Boolean isTimeStampingCert = false;
                 if (certMap.get("file") != null) {
                 	certFile = new File((String) certMap.get("file"));
+                    certFile.getParentFile().mkdirs();
                 	certFile.createNewFile();
                 } else throw new Exception("Cert with Missing arg -> file");
                 if (certMap.get("distinguishedName") != null) {

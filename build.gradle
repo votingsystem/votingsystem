@@ -23,7 +23,7 @@ ext {
 }
 
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'ValidationToolApplet:signJar',
-	 'AccessControl:war', 'ControlCenter:war', ':releaseAndroid']) << { }
+	 'TimeStampServer:war','AccessControl:war', 'ControlCenter:war', ':releaseAndroid']) << { }
 
 
 task releaseAndroid () {
@@ -66,13 +66,17 @@ def initWebAppsCertsData() {
     initRootCertData()
     Map accessControlMap = [file:"$projectDir/AccessControl/web-app/WEB-INF/cms/AccessControl.jks",
             distinguishedName:accessControlDN, alias:accessControlCertAlias,
-            isTimeStampingCert:true]
+            isTimeStampingCert:false]
 
     Map controlCenterMap = [file:"$projectDir/ControlCenter/web-app/WEB-INF/cms/ControlCenter.jks",
             distinguishedName:controlCenterDN, alias:controlCenterCertAlias,
+            isTimeStampingCert:false]
+
+    Map timeStampServerMap = [file:"$projectDir/TimeStampServer/web-app/WEB-INF/cms/TimeStampServer.jks",
+            distinguishedName:timeStampServerDN, alias:timeStampServerCertAlias,
             isTimeStampingCert:true]
 
-    List certs = [accessControlMap, controlCenterMap]
+    List certs = [accessControlMap, controlCenterMap, timeStampServerMap]
     rootProject.certsDataMap.certs = certs
 }
 

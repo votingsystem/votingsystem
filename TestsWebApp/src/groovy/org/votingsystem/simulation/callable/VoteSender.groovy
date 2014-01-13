@@ -56,6 +56,7 @@ public class VoteSender implements Callable<ResponseVS> {
                         ContextVS.getInstance().getAccessControl().getNameNormalized(), votoStr, subject, null);
                 SMIMESignedSender sender = new SMIMESignedSender(smimeMessage,
                         ContextVS.getInstance().getControlCenter().getVoteServiceURL(),
+                        ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                         ContentTypeVS.VOTE, wrapperClient.getKeyPair(),
                         ContextVS.getInstance().getControlCenter().getX509Certificate());
                 responseVS = sender.call();

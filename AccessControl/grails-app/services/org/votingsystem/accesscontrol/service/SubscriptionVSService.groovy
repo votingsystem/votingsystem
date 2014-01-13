@@ -143,7 +143,6 @@ class SubscriptionVSService {
                     serialNumber:x509controlCenterCert?.getSerialNumber()?.longValue(),
                     validFrom:x509controlCenterCert?.getNotBefore(), type:CertificateVS.Type.ACTOR_VS,
                     validTo:x509controlCenterCert?.getNotAfter())
-            controlCenterCert.setCertChainPEM(actorVS.certChainPEM.getBytes())
             controlCenterCert.save();
             log.debug("checkControlCenter - added CertificateVS  ${controlCenterCert.id}")
 			controlCenterDB.x509Certificate = x509controlCenterCert

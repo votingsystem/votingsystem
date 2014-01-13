@@ -390,7 +390,7 @@ class SignatureVSService {
 		return validateSignersCerts(smimeMessageReq, locale)
 	}
 		
-	public ResponseVS validateSignersCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
+	public ResponseVS validateSignersCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {        log.debug("validateSignersCertificate - number of signers: ${signersVS.size()}")
 		Set<UserVS> signersVS = smimeMessageReq.getSigners();
 		if(signersVS.isEmpty()) return new ResponseVS( statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 			messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))

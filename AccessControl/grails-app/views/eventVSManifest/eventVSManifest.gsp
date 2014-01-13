@@ -119,7 +119,7 @@
 		    	//signed and encrypted
     			webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
 	    		webAppMessage.eventVS = pageEvent
-				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
+                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
 				webAppMessage.documentURL = pageEvent.URL
 				votingSystemClient.setMessageToSignatureClient(webAppMessage, sendManifestCallback); 
 			}

@@ -16,7 +16,7 @@ public class TimeStampVS {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public enum State {OK, CANCELLED, ERRORES}
+	public enum State {OK, CANCELLED, ERROR}
 	
     @Id
     @Column(name="serialNumber", unique=true, nullable=false)

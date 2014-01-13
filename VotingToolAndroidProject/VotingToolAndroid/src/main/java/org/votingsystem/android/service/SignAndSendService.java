@@ -95,6 +95,7 @@ public class SignAndSendService extends IntentService {
                 case CONTROL_CENTER_ASSOCIATION:
                 case SMIME_CLAIM_SIGNATURE:
                 case CLAIM_EVENT:
+                case REPRESENTATIVE_REVOKE:
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                             signatureContent, contentType, messageSubject, keyStoreBytes,
                             pin.toCharArray(), contextVS.getAccessControl().getCertificate(),
@@ -106,14 +107,16 @@ public class SignAndSendService extends IntentService {
                             R.string.operation_unknown_error_msg, operationType.toString()));
                     break;
             }
-            showNotification(responseVS, operationType, serviceCaller);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 caption = getString(R.string.operation_ok_msg);
                 message = getString(R.string.operation_ok_msg);
+                if(operationType == TypeVS.REPRESENTATIVE_REVOKE)
+                    responseVS.setMessage(getString(R.string.representative_revoke_ok_msg));
             } else {
                 caption = getString(R.string.operation_error_msg);
                 message = responseVS.getMessage();
             }
+            showNotification(responseVS, operationType, serviceCaller);
             sendMessage(responseVS.getStatusCode(),operationType, caption, message,serviceCaller);
         } catch(Exception ex) {
             ex.printStackTrace();

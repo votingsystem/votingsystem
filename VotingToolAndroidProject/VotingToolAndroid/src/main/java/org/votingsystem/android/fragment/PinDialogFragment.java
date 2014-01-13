@@ -114,7 +114,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                     }
                     if(intent != null) startActivity(intent);
                 }
-            }).setNegativeButton(R.string.cancel_button, null);
+            }).setNegativeButton(R.string.cancel_lbl, null);
             return builder.create();
         } else {
             View view = inflater.inflate(R.layout.pin_dialog_fragment, null);

@@ -257,7 +257,7 @@ public class ReceiptFragment extends Fragment {
                                         getreceiptURI(selectedReceipt.getLocalId()), null, null);
                                 getActivity().onBackPressed();
                             }
-                        }).setNegativeButton(getString(R.string.cancel_button),
+                        }).setNegativeButton(getString(R.string.cancel_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 dialog.dismiss();
@@ -275,7 +275,7 @@ public class ReceiptFragment extends Fragment {
                                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                                         getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
                             }
-                        }).setNegativeButton(getString(R.string.cancel_button),
+                        }).setNegativeButton(getString(R.string.cancel_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 dialog.dismiss();

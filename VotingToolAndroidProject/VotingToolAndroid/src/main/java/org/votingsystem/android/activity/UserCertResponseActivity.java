@@ -1,19 +1,3 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.android.activity;
 
 import android.app.ProgressDialog;
@@ -42,6 +26,7 @@ import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
@@ -60,7 +45,10 @@ import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
-
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class UserCertResponseActivity extends ActionBarActivity {
 	
 	public static final String TAG = "UserCertResponseActivity";
@@ -102,7 +90,10 @@ public class UserCertResponseActivity extends ActionBarActivity {
                         pin.toCharArray());
                 Collection<X509Certificate> certificates =
                         CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
-                Log.d(TAG + ".updateKeyStore(...)", "certificates.size(): " + certificates.size());
+                X509Certificate userCert = certificates.iterator().next();
+                UserVS user = UserVS.getUserVS(userCert);
+                Log.d(TAG + ".updateKeyStore(...)", "user: " + user.getNif() +
+                        " - certificates.size(): " + certificates.size());
                 X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
                 certificates.toArray(arrayCerts);
                 keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, pin.toCharArray(), arrayCerts);
@@ -110,7 +101,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
                 FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
                 fos.write(keyStoreBytes);
                 fos.close();
-                contextVS.setState(ContextVS.State.WITH_CERTIFICATE);
+                contextVS.setState(ContextVS.State.WITH_CERTIFICATE, user.getNif());
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 insertPinButton.setVisibility(View.GONE);
                 requestCertButton.setVisibility(View.GONE);

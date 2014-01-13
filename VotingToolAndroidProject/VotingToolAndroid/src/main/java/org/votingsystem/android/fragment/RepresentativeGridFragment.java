@@ -1,9 +1,11 @@
 package org.votingsystem.android.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -24,6 +26,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -33,13 +36,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NewRepresentativeActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
+import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -47,6 +53,9 @@ import org.votingsystem.model.UserVS;
 
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RepresentativeGridFragment extends Fragment
@@ -65,6 +74,7 @@ public class RepresentativeGridFragment extends Fragment
     private Integer firstVisiblePosition = null;
     private View progressContainer;
     private FrameLayout gridContainer;
+    private String broadCastId;
     private int loaderId = -1;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -73,14 +83,47 @@ public class RepresentativeGridFragment extends Fragment
                 "intent.getExtras(): " + intent.getExtras());
         int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                 ResponseVS.SC_ERROR);
-        if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
-            hasHTTPConnection.set(false);
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        if(pin != null) launchSignAndSendService(pin);
+        else {
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
+                hasHTTPConnection.set(false);
+            }
+            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+            if(operationType == TypeVS.REPRESENTATIVE_REVOKE) {
+                showProgress(false, true);
+            }
+            showMessage(responseStatusCode, caption, message);
         }
-        String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-        String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-        showMessage(responseStatusCode, caption, message);
         }
     };
+
+    private void launchSignAndSendService(String pin) {
+        Log.d(TAG + ".launchSignAndSendService(...) ", "");
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    SignAndSendService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE_REVOKE);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.URL_KEY,
+                    contextVS.getAccessControl().getRepresentativeRevokeServiceURL());
+            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
+                    getString(R.string.revoke_representative_msg_subject));
+            Map signedContentDataMap = new HashMap();
+            signedContentDataMap.put("operation", TypeVS.REPRESENTATIVE_REVOKE.toString());
+            signedContentDataMap.put("UUID", UUID.randomUUID().toString());
+            startIntent.putExtra(ContextVS.MESSAGE_KEY, new JSONObject(signedContentDataMap).toString());
+            showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -95,6 +138,7 @@ public class RepresentativeGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = contextVS.getInstance(getActivity().getApplicationContext());
+        broadCastId = this.getClass().getName();
         if(contextVS.getAccessControl() == null) {
             Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
             startActivity(intent);
@@ -212,6 +256,25 @@ public class RepresentativeGridFragment extends Fragment
             case R.id.new_representative:
                 Intent intent = new Intent(getActivity(), NewRepresentativeActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.cancel_representative:
+                AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(
+                        R.string.remove_representative_caption)).
+                        setMessage(R.string.remove_representative_msg).setPositiveButton(
+                        R.string.continue_lbl, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                                        getString(R.string.remove_representative_caption),
+                                        false, null);
+                            }
+                        }).setNegativeButton(R.string.cancel_lbl,null).show();
+                //to avoid avoid dissapear on screen orientation change
+                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                return true;
+            case R.id.edit_representative:
+                Intent editIntent = new Intent(getActivity(), NewRepresentativeActivity.class);
+                editIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
+                startActivity(editIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

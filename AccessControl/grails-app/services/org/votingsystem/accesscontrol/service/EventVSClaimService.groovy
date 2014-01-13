@@ -31,7 +31,7 @@ class EventVSClaimService {
     def grailsApplication
 	def messageSource
 	def filesService
-	def timeStampVSService
+	def timeStampService
 	def sessionFactory
 
     ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -170,7 +170,7 @@ class EventVSClaimService {
 		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
 		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 		
-		byte[] timeStampCertPEMBytes = timeStampVSService.getSigningCertPEMBytes()
+		byte[] timeStampCertPEMBytes = timeStampService.getSigningCertPEMBytes()
 		File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
 		timeStampCertFile.setBytes(timeStampCertPEMBytes)
 		

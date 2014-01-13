@@ -122,7 +122,7 @@
 			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representativeNif:"${representative.nif}",
     				representativeName:"${representativeFullName}", dateFrom:dateFromStr,
     				dateTo:dateToStr, email:$("#userEmailText").val()}
-			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
 			webAppMessage.serviceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestVotingHistoryLbl"/>'
 			webAppMessage.email = $("#userEmailText").val()
@@ -138,7 +138,7 @@
 			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
     				representativeNif:"${representative.nif}", email:$("#accreditationReqUserEmailText").val(),
     				representativeName:"${representativeFullName}", selectedDate:accreditationDateSelectedStr}
-			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
 			webAppMessage.serviceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.email = $("#accreditationReqUserEmailText").val()

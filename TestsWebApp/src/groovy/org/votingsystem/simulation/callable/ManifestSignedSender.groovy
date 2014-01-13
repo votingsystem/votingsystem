@@ -42,8 +42,9 @@ public class ManifestSignedSender implements Callable<ResponseVS> {
         PrivateKey privateKey =(PrivateKey)mockDnie.getKey(ContextVS.END_ENTITY_ALIAS,ContextVS.PASSWORD.toCharArray());
         Certificate[] signerCertChain = mockDnie.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
         X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-        PDFSignedSender worker = new PDFSignedSender(urlToSendDocument,reason,location,null,manifestToSign, privateKey,
-				signerCertChain, destinationCert);
+        PDFSignedSender worker = new PDFSignedSender(urlToSendDocument,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
+                reason,location,null,manifestToSign, privateKey, signerCertChain, destinationCert);
         responseVS = worker.call();
         return responseVS;
     }

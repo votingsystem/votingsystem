@@ -37,15 +37,18 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     private SMIMEMessageWrapper smimeMessage;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
+    private String timeStampServerURL;
     private static final int numMaxAttempts = 3;
       
-    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage) throws Exception {
+    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage, String timeStampServerURL) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
+        this.timeStampServerURL = timeStampServerURL;
     }
     
-    public MessageTimeStamper (TimeStampRequest timeStampRequest) throws Exception {
+    public MessageTimeStamper (TimeStampRequest timeStampRequest, String timeStampServerURL) throws Exception {
         this.timeStampRequest = timeStampRequest;
+        this.timeStampServerURL = timeStampServerURL;
     }
         
     @Override public ResponseVS call() throws Exception {
@@ -53,9 +56,8 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         AtomicBoolean done = new AtomicBoolean(false);
         ResponseVS responseVS = null;
         while(!done.get()) {
-            AccessControlVS accessControl = (AccessControlVS) ContextVS.getInstance().getAccessControl();
             responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
-                    accessControl.getTimeStampServerURL());
+                    timeStampServerURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] bytesToken = responseVS.getMessageBytes();
                 timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));

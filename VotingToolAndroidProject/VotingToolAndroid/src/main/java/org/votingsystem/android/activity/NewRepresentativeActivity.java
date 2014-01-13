@@ -33,7 +33,11 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.ObjectUtils;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -112,6 +116,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     	super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getApplicationContext());
         broadCastId = this.getClass().getSimpleName();
+        TypeVS operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         Log.d(TAG + ".onCreate(...)", "contextVS.getState(): " + contextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.new_representative);
@@ -127,6 +132,28 @@ public class NewRepresentativeActivity extends ActionBarActivity {
             }
         });
         mainLayout.getForeground().setAlpha(0);
+        if(operationType != null && TypeVS.REPRESENTATIVE == operationType) {
+            File representativeDataFile = new File(getApplicationContext().getFilesDir(),
+                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
+            if(representativeDataFile == null) {
+                Log.d(TAG + ".create(...)", "representative data not found -> http request");
+
+            } else {
+                try {
+                    byte[] serializedRepresentative = FileUtils.getBytesFromFile(
+                            representativeDataFile);
+                    UserVS representativeData = (UserVS) ObjectUtils.deSerializeObject(
+                            serializedRepresentative);
+                    editorFragment.setEditorData(representativeData.getDescription());
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(representativeData.getImageBytes(),
+                            0, representativeData.getImageBytes().length);
+                    ImageView image = (ImageView)findViewById(R.id.representative_image);
+                    image.setImageBitmap(bitmap);
+                }catch(Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
         if(savedInstanceState != null) {
             representativeImageUri = (Uri) savedInstanceState.getParcelable(ContextVS.URI_KEY);
             representativeImageName = savedInstanceState.getString(ContextVS.ICON_KEY);
@@ -208,7 +235,6 @@ public class NewRepresentativeActivity extends ActionBarActivity {
 
     private void setRepresentativeImage(Uri imageUri, String imageName) {
         try {
-            //Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
             ParcelFileDescriptor parcelFileDescriptor =
                     getContentResolver().openFileDescriptor(imageUri, "r");
             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();

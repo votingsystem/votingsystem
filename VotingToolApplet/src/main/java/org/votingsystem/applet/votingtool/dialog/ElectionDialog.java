@@ -274,6 +274,7 @@ public class ElectionDialog extends JDialog {
                 smimeMessage = certificationRequest.genMimeMessage(fromUser, toUser, textToSign, msgSubject, null);
                 String urlVoteService = ((ControlCenterVS)ContextVS.getInstance().getControlCenter()).getVoteServiceURL();
                 SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, urlVoteService,
+                        ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                         ContentTypeVS.VOTE, certificationRequest.getKeyPair(), ContextVS.getInstance().getControlCenter().
                         getX509Certificate(), "voteURL");
                 return signedSender.call();

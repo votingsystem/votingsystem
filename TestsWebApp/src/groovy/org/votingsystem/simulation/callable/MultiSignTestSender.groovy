@@ -44,7 +44,9 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         String toUser = "MultiSignController";
         SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
                 requestNIF, toUser, testJSONstr, msgSubject, null);
-        SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL,ContentTypeVS.JSON_SIGNED, null, null);
+        SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
+                ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS senderResponse = sender.call();
         if(ResponseVS.SC_OK == senderResponse.getStatusCode()) {
             byte[] multiSigendResponseBytes = senderResponse.getMessageBytes();

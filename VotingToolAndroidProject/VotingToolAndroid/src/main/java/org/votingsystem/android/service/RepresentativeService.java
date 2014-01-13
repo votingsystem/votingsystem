@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,6 +38,7 @@ import org.votingsystem.util.ObjectUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,12 +66,16 @@ public class RepresentativeService extends IntentService {
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation);
         contextVS = ContextVS.getInstance(getApplicationContext());
+        String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         if(operation == TypeVS.ITEMS_REQUEST) {
-            requestRepresentatives(arguments.getString(
-                    ContextVS.URL_KEY), arguments.getString(ContextVS.CALLER_KEY));
+            requestRepresentatives(arguments.getString(ContextVS.URL_KEY), serviceCaller);
         } else if (operation == TypeVS.ITEM_REQUEST) {
-            requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY),
-                    arguments.getString(ContextVS.CALLER_KEY));
+            String nif = arguments.getString(ContextVS.NIF_KEY);
+            if(nif != null) {
+                requestRepresentativebyNif(nif, serviceCaller);
+            } else {
+                requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY), serviceCaller);
+            }
         } else if(operation == TypeVS.NEW_REPRESENTATIVE) {
             newRepresentative(intent.getExtras());
         }
@@ -118,6 +124,26 @@ public class RepresentativeService extends IntentService {
             }
         } else sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
                 responseVS.getMessage(),TypeVS.ITEMS_REQUEST, serviceCaller);
+    }
+
+
+    private void requestRepresentativebyNif(String nif, String serviceCaller) {
+        String serviceURL = ContextVS.getInstance(this).getAccessControl().
+                getRepresentativeURLByNif(nif);
+        ResponseVS responseVS = HttpHelper.getData(serviceURL, null);
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
+                    responseVS.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
+        } else {
+            try {
+                JSONObject jsonResponse = new JSONObject(responseVS.getMessage());
+                Long representativeId = jsonResponse.getLong("representativeId");
+                requestRepresentative(representativeId, serviceCaller);
+            } catch(Exception ex) {
+                sendMessage(ResponseVS.SC_ERROR, getString(R.string.operation_error_msg),
+                        ex.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
+            }
+        }
     }
 
     private void requestRepresentative(Long representativeId, String serviceCaller) {
@@ -215,6 +241,19 @@ public class RepresentativeService extends IntentService {
                     caption = getString(R.string.new_representative_error_caption);
                 } else {
                     caption = getString(R.string.operation_ok_msg);
+                    UserVS representativeData = new UserVS();
+                    representativeData.setDescription(editorContent);
+                    representativeData.setImageBytes(imageBytes);
+                    byte[] representativeDataBytes = ObjectUtils.serializeObject(representativeData);
+                    FileOutputStream outputStream;
+                    try {
+                        outputStream = openFileOutput(ContextVS.REPRESENTATIVE_DATA_FILE_NAME,
+                                Context.MODE_PRIVATE);
+                        outputStream.write(representativeDataBytes);
+                        outputStream.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 message = responseVS.getMessage();
                 showNotification(responseVS, operationType, serviceCaller);

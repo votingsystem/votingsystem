@@ -22,7 +22,6 @@ class EncryptorController {
 	
 	def grailsApplication
 	def signatureVSService
-	def timeStampVSService
 
     def index() { 
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {

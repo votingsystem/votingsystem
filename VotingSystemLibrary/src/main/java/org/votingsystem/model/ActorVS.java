@@ -27,7 +27,7 @@ public class ActorVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type {CONTROL_CENTER, ACCESS_CONTROL;}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, TIMESTAMP_SERVER;}
 
     public enum State { SUSPENDED, RUNNING, PAUSED;}
 
@@ -48,7 +48,9 @@ public class ActorVS implements Serializable {
     @Column(name="lastUpdated", length=23, insertable=true) public Date lastUpdated;
 
     @Transient private Type serverType;
-    @Transient private String certChainPEM;;
+    @Transient private String certChainPEM;
+    @Transient private String urlTimeStampServer;
+    @Transient private Collection<X509Certificate> certChain;
     @Transient private transient X509Certificate x509Certificate;
     @Transient private Set<TrustAnchor> trustAnchors = null;
     @Transient private CertificateVS certificateVS;
@@ -106,6 +108,19 @@ public class ActorVS implements Serializable {
 
     public void setServerURL(String serverURL) {
         this.serverURL = StringUtils.checkURL(serverURL);
+    }
+
+
+    public String getTimeStampServiceURL() {
+        return getUrlTimeStampServer() + "/timeStamp";
+    }
+
+    public String getUrlTimeStampServer() {
+        return urlTimeStampServer;
+    }
+
+    public void setUrlTimeStampServer(String urlTimeStampServer) {
+        this.urlTimeStampServer = urlTimeStampServer;
     }
 
     public String getServerURL() {
@@ -179,13 +194,17 @@ public class ActorVS implements Serializable {
     }
 
     public void setCertChainPEM(String certChainPEM) throws Exception {
-        x509Certificate = CertUtil.fromPEMToX509CertCollection(certChainPEM.getBytes()).iterator().next();
-        Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        certChain = CertUtil.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        x509Certificate = certChain.iterator().next();
         trustAnchors = new HashSet<TrustAnchor>();
-        for (X509Certificate cert:certificates) {
+        for (X509Certificate cert:certChain) {
             trustAnchors.add(new TrustAnchor(cert, null));
         }
         this.certChainPEM = certChainPEM;
+    }
+
+    public Collection<X509Certificate> getCertChain() {
+        return certChain;
     }
 
     public List<ControlCenterVS> getControlCenters() {
@@ -266,6 +285,7 @@ public class ActorVS implements Serializable {
                 }
                 break;
             default:
+                actorVS = new ActorVS();
                 actorVS.setType(serverType);
                 break;
         }
@@ -288,6 +308,10 @@ public class ActorVS implements Serializable {
         }
         if (actorVSMap.containsKey("timeStampCertPEM")) {
             actorVS.setTimeStampCertPEM((String) actorVSMap.get("timeStampCertPEM"));
+        }
+        if(actorVSMap.containsKey("urlTimeStampServer")) {
+            String urlTimeStampServer = StringUtils.checkURL((String) actorVSMap.get("urlTimeStampServer"));
+            actorVS.setUrlTimeStampServer((String) actorVSMap.get("urlTimeStampServer"));
         }
         return actorVS;
     }

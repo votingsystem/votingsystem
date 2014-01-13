@@ -39,7 +39,6 @@ public class EditorFragment extends Fragment {
     private View rootView;
     private String editorDataStr = "";
     private boolean isEditable = true;
-    private CountDownLatch countDownLatch = new CountDownLatch(1);
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -129,7 +128,6 @@ public class EditorFragment extends Fragment {
                 if(isEditable) editorDataStr = operationVS.getMessage();
             } else if(ResponseVS.SC_OK == operationVS.getStatusCode()) {
                 editorDataStr = operationVS.getMessage();
-                countDownLatch.countDown();
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -140,16 +138,12 @@ public class EditorFragment extends Fragment {
         return (editorDataStr == null || TextUtils.isEmpty(editorDataStr));
     }
 
-    private String getEditorDataStr() {
-        return editorDataStr;
+    public void setEditorData(String editorData) {
+        webView.loadUrl("javascript:setEditorContent('" + editorData + "')");
     }
 
     public String getEditorData() {
-        //if(editorDataStr == null || TextUtils.isEmpty(editorDataStr))
-        //    throw new Exception ("Editor data null");
-        //webView.loadUrl("javascript:submitForm()");
-        //countDownLatch.await();
-        return getEditorDataStr();
+        return editorDataStr;
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {

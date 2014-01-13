@@ -26,6 +26,7 @@ class ServerInfoController {
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
 		serverInfo.serverType = ActorVS.Type.CONTROL_CENTER.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
+        serverInfo.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         serverInfo.urlBlog = grailsApplication.config.VotingSystem.blogURL
         serverInfo.state = ActorVS.State.RUNNING.toString()
 		serverInfo.environmentMode = ApplicationContextHolder.getEnvironment().toString()

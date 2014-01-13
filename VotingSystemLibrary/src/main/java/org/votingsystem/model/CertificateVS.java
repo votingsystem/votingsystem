@@ -31,7 +31,7 @@ public class CertificateVS implements Serializable {
     public enum State {OK, ERROR, CANCELLED, USED, UNKNOWN}
 
     public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_TEST, ACTOR_VS,
-        ANONYMOUS_REPRESENTATIVE_DELEGATION}
+        ANONYMOUS_REPRESENTATIVE_DELEGATION, TIMESTAMP_SERVER}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;

@@ -19,7 +19,6 @@ class EventVSClaimSignatureCollectorService {
 	def signatureVSService
 	def grailsApplication
 	def messageSource
-	def timeStampVSService
 
     ResponseVS save (MessageSMIME messageSMIMEReq, Locale locale) {
         log.debug("save")

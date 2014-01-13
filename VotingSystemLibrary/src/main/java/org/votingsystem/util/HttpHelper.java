@@ -234,8 +234,10 @@ public class HttpHelper {
             else entity = new ByteArrayEntity(byteArray);
             httpPost.setEntity(entity);
             response = httpclient.execute(httpPost);
-            ContentTypeVS responseContentType = ContentTypeVS.getByName(
-                    response.getFirstHeader("Content-Type").getValue());
+            ContentTypeVS responseContentType = null;
+            if(response.getFirstHeader("Content-Type") != null) {
+                responseContentType = ContentTypeVS.getByName(response.getFirstHeader("Content-Type").getValue());
+            }
             logger.debug("------------------------------------------------");
             logger.debug(response.getStatusLine().toString() + " - contentType: " + responseContentType);
             logger.debug("------------------------------------------------");

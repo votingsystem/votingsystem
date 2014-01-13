@@ -337,6 +337,7 @@ public class SignatureDialog extends JDialog {
                     String reason = null;
                     String location = null;
                     PDFSignedSender pdfSignedSender = new PDFSignedSender(operation.getServiceURL(),
+                            ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                             reason, location, password.toCharArray(), readerManifesto, null, null,
                             ContextVS.getInstance().getAccessControl().getX509Certificate());
                     return pdfSignedSender.call();
@@ -352,6 +353,7 @@ public class SignatureDialog extends JDialog {
                     operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
                     password.toCharArray(), operation.getSignedMessageSubject(), null);
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getServiceURL(),
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, ContextVS.getInstance().getAccessControl().
                     getX509Certificate(), header);
             return senderWorker.call();

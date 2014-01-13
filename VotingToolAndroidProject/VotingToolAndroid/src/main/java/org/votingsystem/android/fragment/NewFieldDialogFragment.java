@@ -70,7 +70,7 @@ public class NewFieldDialogFragment extends DialogFragment {
         else if(message != null) messageTextView.setText(message);
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setPositiveButton(getString(R.string.aceptar_button), null)
-                .setNegativeButton(R.string.cancel_button, null);
+                .setNegativeButton(R.string.cancel_lbl, null);
         alertDialog = builder.create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override public void onShow(DialogInterface dialog) {

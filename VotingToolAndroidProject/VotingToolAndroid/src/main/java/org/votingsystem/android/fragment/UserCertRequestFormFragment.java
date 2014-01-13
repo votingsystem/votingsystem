@@ -107,7 +107,7 @@ public class UserCertRequestFormFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         getActivity().setTitle(getString(R.string.request_certificate_form_lbl));
-        Button cancelButton = (Button) rootView.findViewById(R.id.cancel_button);
+        Button cancelButton = (Button) rootView.findViewById(R.id.cancel_lbl);
         cancelButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 //finish();
@@ -215,13 +215,13 @@ public class UserCertRequestFormFragment extends Fragment {
             Dialog dialog = builder.setTitle(getString(R.string.request_certificate_form_lbl)).
                     setMessage(Html.fromHtml(getString(R.string.cert_data_confirm_msg, givenname,
                     surname, nif))).setPositiveButton(getString(
-                    R.string.continue_label), new DialogInterface.OnClickListener() {
+                    R.string.continue_lbl), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     PinDialogFragment.showPinScreenWithoutCertValidation(getFragmentManager(),
                             broadCastId, getString(R.string.keyguard_password_enter_first_pin_code),
                             true, null);
                 }
-            }).setNegativeButton(getString(R.string.cancel_button), null).show();
+            }).setNegativeButton(getString(R.string.cancel_lbl), null).show();
             //to avoid avoid dissapear on screen orientation change
             dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     		TextView textView = ((TextView) dialog.findViewById(android.R.id.message));

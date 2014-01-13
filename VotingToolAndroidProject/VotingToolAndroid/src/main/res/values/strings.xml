@@ -194,14 +194,13 @@
     
     <string name="request_user_cert_error_msg">Error comprobando el estado de la solicitud</string>
     <string name="cancel_lbl">Cancelar</string>
-    <string name="continue_label">Continuar</string>
+    <string name="continue_lbl">Continuar</string>
     <string name="request_lbl">Solicitar</string>
     <string name="nif_label">Introduzca su NIF</string>
     <string name="password_label">Contraseña del certificado</string>
     <string name="dialogo_password_text_entry">Introducir contraseña</string>
     <string name="repeat_password_label">Repita la contraseña</string>
-    <string name="cancel_button">Cancelar</string>
-    <string name="cerrar_button">Cerrar</string>
+    <string name="close_lbl">Cerrar</string>
     <string name="ok_button">OK</string>
     <string name="aceptar_button">Aceptar</string>
     <string name="request_certificate_form_lbl">Datos del certificado de usuario</string>
@@ -246,7 +245,7 @@
 
 
     <string name="check_representative_button">Comprobar mi representante</string>
-    <string name="cancel_representative_button">Darse de baja como representante</string>
+    <string name="cancel_representative_button">Dar de baja como representante</string>
     <string name="edit_representative_button">Editar datos del representante</string>
     <string name="editor_empty_error_lbl">Debe rellenar el campo del editor</string>
     <string name="signature_msg_subject">[Firma]-</string>
@@ -324,11 +323,18 @@
     <string name="representative_list_lbl">Lista de representantes</string>
     <string name="receipt_list_lbl">Lista de recibos</string>
     <string name="options_for_representatives_lbl">Opciones para representantes</string>
-    <string name="new_representative_lbl">Darse de alta como representante</string>
+    <string name="new_representative_lbl">Dar de alta como representante</string>
     <string name="missing_representative_img_error_msg">Debe proporcionar una imagen que identifique al representante</string>
     <string name="select_img_lbl">Seleccione una imagen</string>
     <string name="select_representative_image_lbl">Seleccione una imagen asociada al representante</string>
     <string name="new_representative_error_caption">Error dando de alta representante</string>
     <string name="new_representative_ok_notification_msg">Usuario dado de alta como representante</string>
     <string name="new_representative_progress_lbl">Dando de alta representante</string>
+
+    <string name="remove_representative_caption">Dar de baja como representante</string>
+    <string name="remove_representative_msg"> <![CDATA[Para darse de baja como representante deberá firmar
+        la solicitud con su certificado. La solicitud debe estar firmada por por el propio representante que se da de baja]]></string>
+    <string name="revoke_representative_msg_subject">Dar de baja representante</string>
+    <string name="representative_revoke_ok_msg">El usuario ha sido dado de alta como representante</string>
+
 </resources>

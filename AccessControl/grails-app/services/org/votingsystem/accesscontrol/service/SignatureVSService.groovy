@@ -45,7 +45,7 @@ class SignatureVSService {
 	def grailsApplication;
 	def messageSource
 	def subscriptionVSService
-	def timeStampVSService
+	def timeStampService
 	def sessionFactory
 	
 	public ResponseVS deleteTestCerts () {
@@ -384,10 +384,10 @@ class SignatureVSService {
 						certificate.save()
 						trustedCertsHashMap.put(cert?.getSerialNumber()?.longValue(), certificate)
 					}
-				} 
-				trustedCerts.addAll(certX509CertCollection)
+				}
 				log.debug "Almacenada Autoridad Certificadora de pruebas con id:'${certificate?.id}'"
 			}
+            trustedCerts.addAll(certX509CertCollection)
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, 
 				message:messageSource.getMessage('cert.newCACertMsg', null, locale))
 		} catch(Exception ex) {
@@ -426,7 +426,7 @@ class SignatureVSService {
 		for(UserVS userVS: signersVS) {
 			try {
                 if(userVS.getTimeStampToken() != null) {
-                    ResponseVS timestampValidationResp = timeStampVSService.validateToken(
+                    ResponseVS timestampValidationResp = timeStampService.validateToken(
                             userVS.getTimeStampToken(), locale)
                     log.debug("validateSignersCertificate - timestampValidationResp - " +
                             "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")

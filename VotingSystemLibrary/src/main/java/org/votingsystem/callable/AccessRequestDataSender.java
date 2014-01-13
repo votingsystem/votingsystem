@@ -46,7 +46,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
         logger.debug("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
-                ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServerURL());
+                ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
             TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));

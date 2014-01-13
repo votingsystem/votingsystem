@@ -41,7 +41,8 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
         logger.debug("doInBackground - RepresentativeRequest service: " + urlToSendDocument);
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         try {
-            MessageTimeStamper timeStamper = new MessageTimeStamper(representativeDataSmimeMessage);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(representativeDataSmimeMessage,
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL());
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             representativeDataSmimeMessage = timeStamper.getSmimeMessage();

@@ -105,7 +105,7 @@
                     android:layout_marginTop="15dip">
 
                     <Button
-                        android:id="@+id/cancel_button"
+                        android:id="@+id/cancel_lbl"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="30dp"

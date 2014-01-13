@@ -1,4 +1,4 @@
-package org.votingsystem.accesscontrol.service
+package org.votingsystem.timestamp.service
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 import org.bouncycastle.asn1.ASN1OctetString
@@ -20,7 +20,7 @@ import org.bouncycastle.tsp.*
 import org.bouncycastle.util.Store
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EventVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtil
@@ -29,21 +29,19 @@ import org.votingsystem.signature.util.TimeStampResponseGenerator
 import org.votingsystem.signature.util.VotingSystemKeyGenerator
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
-
 import javax.security.auth.x500.X500PrivateCredential
 import java.security.*
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 
-
-class TimeStampVSService {
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
+class TimeStampService {
 	
 	def grailsApplication
 	def messageSource
-	
-	private static final int numMaxAttempts = 3;
 	
 	private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 	private static final String DEFAULT_TSA_POLICY_OID = "1.2.3";
@@ -53,15 +51,13 @@ class TimeStampVSService {
 	
 	//# Optional. Specify if requests are ordered. Only false is supported.
 	private boolean ORDERING = false;
-	private static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
 
-	private AtomicLong sernoGenerator
 	private org.votingsystem.signature.util.TimeStampResponseGenerator timeStampResponseGen;
 	private SignerInformationVerifier timeStampSignerInfoVerifier
 	private byte[] signingCertPEMBytes
+    private byte[] signingCertChainPEMBytes
 	private String tsaName
-	
-	
+
 	private static List ACCEPTEDPOLICIES = ["1.2.3", "1.2.4"];
 	private static List ACCEPTEDEXTENSIONS = [];
 	private static List ACCEPTEDALGORITHMS = ["SHA1","SHA256", "SHA512"];
@@ -76,47 +72,59 @@ class TimeStampVSService {
 			"SHA512":TSPAlgorithms.SHA512
 		];
 
-	private synchronized Map initService() throws Exception {
+	private synchronized Map initService() {
 		log.debug(" - initService - initService - initService");
-		File keyStoreFile = grailsApplication.mainContext.getResource(
-			grailsApplication.config.VotingSystem.keyStorePath).getFile()
-		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
-		String password = grailsApplication.config.VotingSystem.signKeysPassword
-		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
-			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
-		PrivateKey signingKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
-		signingCert = keyStore.getCertificate(aliasClaves)
-		signingCertPEMBytes = CertUtil.getPEMEncoded (signingCert)
-		timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(signingCert);
-		
-		Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
-		Store certs = new JcaCertStore(Arrays.asList(chain));
-		JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
-			new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
-		TimeStampTokenGenerator timeStampTokenGen = new TimeStampTokenGenerator(infoGeneratorBuilder.build(
-			new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(BC).build(signingKey), signingCert),
-			new ASN1ObjectIdentifier(DEFAULT_TSA_POLICY_OID));
-		timeStampTokenGen.setAccuracyMicros(ACCURACYMICROS);
-		timeStampTokenGen.setAccuracyMillis(ACCURACYMILLIS);
-		timeStampTokenGen.setAccuracySeconds(ACCURACYSECONDS);
-		timeStampTokenGen.setOrdering(ORDERING);
-		timeStampTokenGen.addCertificates(certs);
-		timeStampResponseGen = new TimeStampResponseGenerator(timeStampTokenGen, getAcceptedAlgorithms(),
-                getAcceptedPolicies(), getAcceptedExtensions())
-        return [timeStampResponseGen:timeStampResponseGen, signingCertPEMBytes: signingCertPEMBytes,
-                timeStampSignerInfoVerifier:timeStampSignerInfoVerifier]
+        try {
+            File keyStoreFile = grailsApplication.mainContext.getResource(
+                    grailsApplication.config.VotingSystem.keyStorePath).getFile()
+            String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
+            String password = grailsApplication.config.VotingSystem.signKeysPassword
+            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
+                    FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
+            PrivateKey signingKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
+            signingCert = keyStore.getCertificate(aliasClaves)
+            signingCertPEMBytes = CertUtil.getPEMEncoded (signingCert)
+            timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                    ContextVS.PROVIDER).build(signingCert);
+            X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
+            TSPUtil.validateCertificate(certHolder);
+            Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
+            signingCertChainPEMBytes = CertUtil.getPEMEncoded (Arrays.asList(chain))
+            Store certs = new JcaCertStore(Arrays.asList(chain));
+            JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
+                    new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build());
+            TimeStampTokenGenerator timeStampTokenGen = new TimeStampTokenGenerator(infoGeneratorBuilder.build(
+                    new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(ContextVS.PROVIDER).build(signingKey),
+                    signingCert), new ASN1ObjectIdentifier(DEFAULT_TSA_POLICY_OID));
+            timeStampTokenGen.setAccuracyMicros(ACCURACYMICROS);
+            timeStampTokenGen.setAccuracyMillis(ACCURACYMILLIS);
+            timeStampTokenGen.setAccuracySeconds(ACCURACYSECONDS);
+            timeStampTokenGen.setOrdering(ORDERING);
+            timeStampTokenGen.addCertificates(certs);
+            timeStampResponseGen = new TimeStampResponseGenerator(timeStampTokenGen, getAcceptedAlgorithms(),
+                    getAcceptedPolicies(), getAcceptedExtensions())
+            return [timeStampResponseGen:timeStampResponseGen, signingCertPEMBytes: signingCertPEMBytes,
+                    signingCertChainPEMBytes: signingCertChainPEMBytes,
+                    timeStampSignerInfoVerifier:timeStampSignerInfoVerifier]
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+        }
 	}
 	
 	private TimeStampResponseGenerator getTimeStampResponseGen() {
-		if(!timeStampResponseGen) timeStampResponseGen = initService().timeStampResponseGen
+		if(!timeStampResponseGen) timeStampResponseGen = initService()?.timeStampResponseGen
 		return timeStampResponseGen
 	}
 	
 	public byte[] getSigningCertPEMBytes() {
-		log.debug("getSigningCertPEMBytes");
-		if(!signingCertPEMBytes) signingCertPEMBytes = initService().signingCertPEMBytes
+		if(!signingCertPEMBytes) signingCertPEMBytes = initService()?.signingCertPEMBytes
 		return signingCertPEMBytes
 	}
+
+    public byte[] getSigningCertChainPEMBytes() {
+        if(!signingCertChainPEMBytes) signingCertChainPEMBytes = initService()?.signingCertChainPEMBytes
+        return signingCertChainPEMBytes
+    }
 	
 	/*Method to Tests*/
 	void initTest() {
@@ -147,10 +155,10 @@ class TimeStampVSService {
         certList.add(rootCACert);
 		Store certs = new JcaCertStore(certList);
 		JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
-			new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
+			new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build());
 		TimeStampTokenGenerator timeStampTokenGen = new TimeStampTokenGenerator(infoGeneratorBuilder.build(
-			new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(BC).build(signingKey), signingCert),
-			new ASN1ObjectIdentifier(DEFAULT_TSA_POLICY_OID));
+			    new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(ContextVS.PROVIDER).build(signingKey),
+                signingCert), new ASN1ObjectIdentifier(DEFAULT_TSA_POLICY_OID));
 		timeStampTokenGen.setAccuracyMicros(ACCURACYMICROS);
 		timeStampTokenGen.setAccuracyMillis(ACCURACYMILLIS);
 		timeStampTokenGen.setAccuracySeconds(ACCURACYSECONDS);
@@ -160,8 +168,7 @@ class TimeStampVSService {
 			getAcceptedAlgorithms(), getAcceptedPolicies(), getAcceptedExtensions())
 	}	
 	
-	public ResponseVS processRequest(byte[] timeStampRequestBytes,
-			Locale locale) throws Exception {	
+	public ResponseVS processRequest(byte[] timeStampRequestBytes, Locale locale) throws Exception {
 		if(!timeStampRequestBytes) {
 			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
 			log.debug("processRequest - ${msg}"); 
@@ -183,41 +190,13 @@ class TimeStampVSService {
                 return new ResponseVS(ResponseVS.SC_ERROR, messageSource.getMessage('timestampGenErrorMsg', null, locale))
 			}
 		}
-		//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
-		//log.debug("timeStampRequestStr: ${timeStampRequestStr}")
-		//String digestStr = new String(Base64.encode(timeStampRequest.getMessageImprintDigest()));
-		//log.debug("timeStampRequest MessageImprintDigest: ${digestStr}")
-		//log.debug("timeStampRequest MessageImprintAlgOID: ${timeStampRequest.getMessageImprintAlgOID()}")
-		/*SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
-		AtomicBoolean done = new AtomicBoolean(false);
-		int numAttemp = 0;
-		while(!done.get()) {
-			log.debug("validating token");
-			try {
-				token.validate(sigVerifier)
-				//validate(token, locale)
-				done.set(true)
-			} catch(Exception ex) {
-				if(numAttemp < numMaxAttempts) {
-					++numAttemp;
-				} else {
-					File errorFile = new File("${grailsApplication.config.VotingSystem.errorsBaseDir}/timeStampError_${System.currentTimeMillis()}")
-					errorFile.setBytes(Base64.encode(token.getEncoded()))
-					log.error(" ------ Exceeded max num attemps - ${ex.getMessage()}", ex);
-					throw ex
-				}
-			}
-		}*/
-		//String tokenStr = new String(Base64.encode(token.getEncoded()));
-		//log.debug("processRequest - tokenStr: '${tokenStr}'");
-		new TimeStampVS(serialNumber:serialNumber.longValue(), tokenBytes:token.getEncoded(), state:TimeStampVS.State.OK,
-			timeStampRequestBytes:timeStampRequestBytes).save()
+		new TimeStampVS(serialNumber:serialNumber.longValue(), tokenBytes:token.getEncoded(),
+                state:TimeStampVS.State.OK, timeStampRequestBytes:timeStampRequestBytes).save()
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:token.getEncoded(),
                 contentType:ContentTypeVS.TIMESTAMP_RESPONSE)
 	}
 		
 	public ResponseVS validateToken(TimeStampToken  tsToken, Locale locale) {
-		log.debug("validateToken")
 		String msg = null
 		try {
 			SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
@@ -227,7 +206,7 @@ class TimeStampVSService {
 			cOut.write(certHolder.getEncoded());
 			cOut.close();
 			if (!Arrays.equals(tsToken.certID.getCertHash(), calc.getDigest())) {
-				msg = messageSource.getMessage('hashCertifcatesErrorMsg', null, locale)
+				msg = messageSource.getMessage('certHashErrorMsg', null, locale)
 				log.error("validate - ERROR - ${msg}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 			}
@@ -239,7 +218,6 @@ class TimeStampVSService {
 					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 				}
 			}
-			TSPUtil.validateCertificate(certHolder);
 			if (!certHolder.isValidOn(tsToken.tstInfo.getGenTime())) {
 				msg = messageSource.getMessage('certificateDateError', null, locale)
 				log.error("validate - ERROR - ${msg}");
@@ -283,10 +261,9 @@ class TimeStampVSService {
 	}
 	
 	public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
-		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = initService().timeStampSignerInfoVerifier
+		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = initService()?.timeStampSignerInfoVerifier
 		return timeStampSignerInfoVerifier
 	}
-	
 			
 	public byte[] getTimeStampRequest(byte[] digest) throws TSPException, IOException, Exception  {
 		log.debug("getTimeStampRequest")
@@ -298,26 +275,19 @@ class TimeStampVSService {
 		
 	private Set<String> getAcceptedAlgorithms() {
 		Set<String> acceptedAlgorithms = ACCEPTEDALGORITHMS?.collect {ACCEPTEDALGORITHMSMAP.get(it)}
-		log.debug(" -- acceptedAlgorithms: " + acceptedAlgorithms?.toArray())
+		log.debug("getAcceptedAlgorithms: " + acceptedAlgorithms?.toArray())
 		return acceptedAlgorithms;
-	}
-
-	private AtomicLong getSernoGenerator() {
-		if(!sernoGenerator) {
-			sernoGenerator = new AtomicLong(TimeStampVS.count())
-		}
-		return sernoGenerator
 	}
 
 	private Set<String> getAcceptedPolicies() {
 		Set<String> acceptedPolicies = ACCEPTEDPOLICIES?.collect {return it}
-		log.debug("-- acceptedPolicies: " + acceptedPolicies?.toArray())
+		log.debug("getAcceptedPolicies: " + acceptedPolicies?.toArray())
 		return acceptedPolicies;
 	}
 
 	private Set<String> getAcceptedExtensions() {
 		Set<String> acceptedExtensions = ACCEPTEDEXTENSIONS?.collect {return it}
-		log.debug("-- getAcceptedExtensions: " + acceptedExtensions?.toArray())
+		log.debug("getAcceptedExtensions: " + acceptedExtensions?.toArray())
 		return acceptedExtensions;
 	}
 	

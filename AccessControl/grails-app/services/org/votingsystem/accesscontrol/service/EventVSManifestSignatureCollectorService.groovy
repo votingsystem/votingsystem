@@ -13,7 +13,6 @@ class EventVSManifestSignatureCollectorService {
 	def messageSource
 	def signatureVSService
 	def subscriptionVSService
-	def timeStampVSService
 	
 	
 	public ResponseVS saveManifestSignature(PDFDocumentVS pdfDocument, EventVS eventVS, Locale locale) {

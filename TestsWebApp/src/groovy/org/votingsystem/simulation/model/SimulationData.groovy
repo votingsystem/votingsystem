@@ -249,6 +249,7 @@ class SimulationData {
     }
 
     public String getServerURL() {
+        if(serverURL == null) return accessControlURL;
         return serverURL;
     }
 

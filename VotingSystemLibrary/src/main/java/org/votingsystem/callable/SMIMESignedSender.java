@@ -20,6 +20,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private static Logger logger = Logger.getLogger(SMIMESignedSender.class);
 
     private String urlToSendDocument;
+    private String timeStampServerURL;
     private SMIMEMessageWrapper smimeMessage;
     private X509Certificate destinationCert = null;
     private KeyPair keypair;
@@ -27,11 +28,12 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     
     String[] headers = null;
     
-    public SMIMESignedSender(SMIMEMessageWrapper smimeMessage, String urlToSendDocument, ContentTypeVS cotentType,
-            KeyPair keypair, X509Certificate destinationCert, String... headerNames) {
+    public SMIMESignedSender(SMIMEMessageWrapper smimeMessage, String urlToSendDocument, String timeStampServerURL,
+            ContentTypeVS cotentType, KeyPair keypair, X509Certificate destinationCert, String... headerNames) {
         headers = headerNames;
         this.smimeMessage = smimeMessage;
         this.urlToSendDocument = urlToSendDocument;
+        this.timeStampServerURL = timeStampServerURL;
         this.cotentType = cotentType;
         this.keypair = keypair;
         this.destinationCert = destinationCert;
@@ -39,7 +41,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
 
     @Override public ResponseVS call() throws Exception {
         logger.debug("doInBackground - urlToSendDocument: " + urlToSendDocument);
-        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage);
+        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServerURL);
         ResponseVS responseVS = timeStamper.call();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         smimeMessage = timeStamper.getSmimeMessage();

@@ -122,7 +122,7 @@
 			webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 			votingEvent.voteVS = voteVS
 			webAppMessage.eventVS = votingEvent
-			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
+            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, sendVoteCallback); 
 		}

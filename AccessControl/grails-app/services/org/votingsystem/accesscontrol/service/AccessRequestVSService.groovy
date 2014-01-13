@@ -25,7 +25,6 @@ class AccessRequestVSService {
 	def messageSource
     def signatureVSService
     def grailsApplication
-	def timeStampVSService
 	
 	//{"operation":"ACCESS_REQUEST","hashAccessRequestBase64":"...",
 	// "eventId":"..","eventURL":"...","UUID":"..."}

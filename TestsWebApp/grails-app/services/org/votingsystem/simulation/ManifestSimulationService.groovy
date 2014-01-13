@@ -198,7 +198,8 @@ class ManifestSimulationService {
 				ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
 			Certificate[] signerCertChain = userTestKeyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
 			X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-			PDFSignedSender pdfSenderWorker = new PDFSignedSender(urlToSendDocument, reason, location, null,
+			PDFSignedSender pdfSenderWorker = new PDFSignedSender(urlToSendDocument,
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), reason, location, null,
 					manifestToSign, privateKey, signerCertChain, destinationCert);
 			responseVS = pdfSenderWorker.call();
 		}
@@ -303,7 +304,8 @@ class ManifestSimulationService {
                 ContextVS.getInstance().getAccessControl().getNameNormalized(),
                 cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument, ContextVS.getInstance().getAccessControl().
-                getCancelEventServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
+                getCancelEventServiceURL(), ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
+                ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
         if(ResponseVS.SC_OK == responseVS.statusCode) responseVS.setMessage("Event state changed")
@@ -323,7 +325,8 @@ class ManifestSimulationService {
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
         String urlBackupEvents = ContextVS.getInstance().getAccessControl().getBackupServiceURL();
 
-        PDFSignedSender worker = new PDFSignedSender(urlBackupEvents, null, null, null, requestBackupPDF,
+        PDFSignedSender worker = new PDFSignedSender(urlBackupEvents,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), null, null, null, requestBackupPDF,
                 signerPrivateKey,signerCertChain, null);
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

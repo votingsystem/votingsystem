@@ -48,6 +48,7 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
             smimeMessage = signedMailGenerator.genMimeMessage(nif, toUser, claimDataStr, subject);
             X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
             SMIMESignedSender worker = new SMIMESignedSender(smimeMessage, submitClaimsURL,
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, destinationCert);
             responseVS = worker.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {

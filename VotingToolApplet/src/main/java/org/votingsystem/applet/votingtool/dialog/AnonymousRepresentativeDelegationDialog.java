@@ -286,6 +286,7 @@ public class AnonymousRepresentativeDelegationDialog extends JDialog {
                 String anonymousDelegationService = ContextVS.getInstance().getAccessControl().
                         getAnonymousDelegationServiceURL();
                 SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, anonymousDelegationService,
+                        ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                         ContentTypeVS.SIGNED_AND_ENCRYPTED, certificationRequest.getKeyPair(),
                         ContextVS.getInstance().getAccessControl().getX509Certificate());
                 return signedSender.call();

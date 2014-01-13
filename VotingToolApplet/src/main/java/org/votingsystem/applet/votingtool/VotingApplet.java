@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.votingsystem.applet.votingtool.panel.AboutPanel;
+import org.votingsystem.util.NifUtils;
 
 /**
 * @author jgzornoza

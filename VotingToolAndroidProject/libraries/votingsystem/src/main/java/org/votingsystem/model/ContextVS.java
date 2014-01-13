@@ -193,15 +193,24 @@ public class ContextVS {
         this.operationVS = operationVS;
     }
 
-    public void setState(State state) {
+    public void setState(State state, String nif) {
         Log.d(TAG + ".setState(...)", STATE_KEY + "_" + accessControl.getServerURL() +
                 " - state: " + state.toString());
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(STATE_KEY + "_" + accessControl.getServerURL() , state.toString());
+        if(nif != null) editor.putString(NIF_KEY, nif);
         editor.commit();
         this.state = state;
+    }
+
+    public String getUserNif() {
+        if(state != State.WITH_CERTIFICATE) return null;
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        String userNif = settings.getString(NIF_KEY, null);
+        return userNif;
     }
 
     public State getState() {

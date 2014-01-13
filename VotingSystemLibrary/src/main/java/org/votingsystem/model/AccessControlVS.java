@@ -35,10 +35,6 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return Type.ACCESS_CONTROL;
     }
 
-    @Transient public String getTimeStampServerURL() {
-        return getServerURL() + "/timeStampVS";
-    }
-
     @Transient public String getAccessServiceURL() {
         return getServerURL() + "/accessRequestVS";
     }

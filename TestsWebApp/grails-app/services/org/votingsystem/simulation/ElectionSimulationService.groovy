@@ -208,6 +208,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
 		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishELection,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);
 		ResponseVS responseVS = signedSender.call();
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -341,6 +342,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                 ContextVS.getInstance().getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
@@ -360,8 +362,9 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
         String urlBackupEvents = ContextVS.getInstance().getAccessControl().getBackupServiceURL();
 
-        PDFSignedSender worker = new PDFSignedSender(urlBackupEvents, null, null, null, requestBackupPDF,
-                signerPrivateKey, signerCertChain, null);
+        PDFSignedSender worker = new PDFSignedSender(urlBackupEvents,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
+                null, null, null, requestBackupPDF, signerPrivateKey, signerCertChain, null);
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             String downloadServiceURL = ContextVS.getInstance().getAccessControl().getDownloadServiceURL(responseVS.getMessage());

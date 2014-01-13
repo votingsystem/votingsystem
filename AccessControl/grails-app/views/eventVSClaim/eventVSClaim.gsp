@@ -156,7 +156,7 @@
 			pageEvent.fieldsEventVS = fieldsArray
 			pageEvent.operation = Operation.SMIME_CLAIM_SIGNATURE
 			webAppMessage.signedContent = pageEvent
-			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
+            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, sendSignatureCallback); 
 		}

@@ -20,6 +20,7 @@ public class NifUtils {
     	}
     	String number = nif.substring(0, 8);
         String letter = nif.substring(8, 9);
+        if(nif.length() > 9) return null;
         try {
             if(!letter.equals(getNifLetter(new Integer(number)))) return null;
             else return nif;

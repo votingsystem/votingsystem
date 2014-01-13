@@ -280,7 +280,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         }
         builder.setTitle(R.string.eventfields_dialog_caption).setView(mScrollView).
                 setPositiveButton(getString(R.string.aceptar_button), null).
-                setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
+                setNegativeButton(R.string.cancel_lbl, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) { }
                 });
         final AlertDialog dialog = builder.create();

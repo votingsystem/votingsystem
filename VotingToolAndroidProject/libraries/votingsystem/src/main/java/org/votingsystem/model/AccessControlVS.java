@@ -99,6 +99,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/representative/" + representativeId;
     }
 
+    public String getRepresentativeURLByNif (String nif) {
+        return getServerURL() + "/representative/nif/" + nif;
+    }
+
     public String getRepresentativeImageURL (Long representativeId) {
         return getServerURL() + "/representative/" + representativeId + "/image";
     }
@@ -192,6 +196,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
                     "timeStampCertPEM"));
         }
         return actorVS;
+    }
+
+    public String getRepresentativeRevokeServiceURL() {
+        return getServerURL() + "/representative/revoke";
     }
 
 }

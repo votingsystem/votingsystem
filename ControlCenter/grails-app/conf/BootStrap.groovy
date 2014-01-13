@@ -8,6 +8,7 @@ class BootStrap {
 	def grailsApplication
 	def filesService
     def signatureVSService
+    def timeStampService
 	
     def init = { servletContext ->
 		JSON.registerObjectMarshaller(Date) {
@@ -17,6 +18,7 @@ class BootStrap {
         ContextVS.init()
 		filesService.init()
         signatureVSService.initService();
+        timeStampService.initService();
     }
 	
     def destroy = { }

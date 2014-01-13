@@ -11,6 +11,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 
 import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.util.StringUtils
 
 import java.security.KeyStore
 import java.util.concurrent.Callable
@@ -24,35 +25,26 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     
     private SMIMEMessageWrapper documentSMIME;
     private String requestNIF;
-    private String urlTimeStampService;
-    private Long eventId;
+    private String timestampServerURL;
 
-    public TimeStamperTestSender(String requestNIF, Long eventId)
-            throws Exception {
+    public TimeStamperTestSender(String requestNIF, String timestampServerURL) throws Exception {
         this.requestNIF = requestNIF;
-        this.eventId = eventId;
-        this.urlTimeStampService = ContextVS.getInstance().getAccessControl().getTimeStampServerURL();
+        this.timestampServerURL = timestampServerURL;
     }
         
     @Override public ResponseVS call() throws Exception {
         KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(requestNIF);
-
         ActorVS accessControl = ContextVS.getInstance().getAccessControl();
-        String toUser = accessControl.getNameNormalized();
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(),
                 ContextVS.VOTE_SIGN_MECHANISM);
         String subject = ApplicationContextHolder.getInstance().getMessage("timeStampMsgSubject");
-        
+        String toUser = StringUtils.getNormalized(timestampServerURL);
         documentSMIME = signedMailGenerator.genMimeMessage(requestNIF, toUser, getRequestDataJSON(), subject , null);
-
-        /*MessageTimeStamper timeStamper = new MessageTimeStamper(documentSMIME);
-        ResponseVS responseVS = timeStamper.call();
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        documentSMIME = timeStamper.getSmimeMessage();*/
-        String urlTimeStampTestService = urlTimeStampService + "/test"
+        String timeStamptServiceURL = timestampServerURL + "/timeStamp"
+        String urlTimeStampTestService = timestampServerURL + "/timeStamp/validateTestMessage"
         SMIMESignedSender signedSender = new SMIMESignedSender(documentSMIME, urlTimeStampTestService,
-                ContentTypeVS.JSON_SIGNED, null, null);
+                timeStamptServiceURL, ContentTypeVS.JSON_SIGNED, null, null);
         return signedSender.call();
     }
         
@@ -61,7 +53,6 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
         Map map = new HashMap();
         map.put("operation", "TIMESTAMP_TEST");
         map.put("UUID", UUID.randomUUID().toString());
-        map.put("eventId", eventId);
         JSONObject jsonObject = new JSONObject(map);
         return jsonObject.toString();
     }

@@ -50,6 +50,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private static Logger logger = Logger.getLogger(PDFSignedSender.class);
 
     private String urlToSendDocument;
+    private String timeStampServerURL;
     private String location;
     private String reason;
     private char[] password;
@@ -59,11 +60,12 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private Certificate[] signerCertChain;
     private ContentSignerVS systemSignedGenerator = null;
     
-    public PDFSignedSender(String urlToSendDocument, String reason, String location, char[] password, PdfReader reader,
-           PrivateKey signerPrivatekey, Certificate[] signerCertChain,  X509Certificate destinationCert)
-            throws NoSuchAlgorithmException, NoSuchAlgorithmException,  NoSuchAlgorithmException,
-            NoSuchProviderException, IOException, Exception {
+    public PDFSignedSender(String urlToSendDocument, String timeStampServerURL, String reason, String location,
+           char[] password, PdfReader reader, PrivateKey signerPrivatekey, Certificate[] signerCertChain,
+           X509Certificate destinationCert) throws NoSuchAlgorithmException, NoSuchAlgorithmException,
+            NoSuchAlgorithmException, NoSuchProviderException, IOException, Exception {
         this.urlToSendDocument = urlToSendDocument;
+        this.timeStampServerURL = timeStampServerURL;
         this.signerPrivatekey = signerPrivatekey;
         this.signerCertChain = signerCertChain;
         this.location = location;
@@ -135,8 +137,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
                     //reqgen.setReqPolicy(m_sPolicyOID);
                     TimeStampRequest timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
-                    MessageTimeStamper messageTimeStamper =
-                            new MessageTimeStamper(timeStampRequest);
+                    MessageTimeStamper messageTimeStamper= new MessageTimeStamper(timeStampRequest, timeStampServerURL);
                     ResponseVS responseVS = messageTimeStamper.call();
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                         logger.error("Error timestamping: " + responseVS.getMessage());

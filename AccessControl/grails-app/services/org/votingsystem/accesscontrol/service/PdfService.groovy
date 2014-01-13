@@ -20,7 +20,7 @@ import java.security.cert.X509Certificate
 class PdfService {
 
 	def grailsApplication
-    def timeStampVSService
+    def timeStampService
 	def signatureVSService
 	def messageSource
 	def subscriptionVSService
@@ -66,7 +66,7 @@ class PdfService {
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken timeStampToken = pk.getTimeStampToken();
             if(timeStampToken != null) {
-                ResponseVS timestampValidationResp = timeStampVSService.validateToken(timeStampToken, locale)
+                ResponseVS timestampValidationResp = timeStampService.validateToken(timeStampToken, locale)
                 log.debug("validateSignersCertificate - timestampValidationResp - " +
                         "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
                 if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {

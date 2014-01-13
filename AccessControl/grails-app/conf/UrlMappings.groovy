@@ -341,14 +341,6 @@ class UrlMappings {
 			action = "manifests"
 		}
 
-		"/timeStamp/$serialNumber" {
-			controller = "timeStamp"
-			action = [GET:"getBySerialNumber"]
-			constraints {
-				serialNumber(matches:/\d*/)
-			}
-		}
-
 		"/userVS" {
 			controller = "userVS"
 			action = [POST:"save"]

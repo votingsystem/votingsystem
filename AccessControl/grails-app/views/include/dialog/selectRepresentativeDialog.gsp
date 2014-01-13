@@ -123,7 +123,7 @@ function submitSelectRepresentativeForm() {
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.signedContent = {operation:representativeOperation, representativeNif:"${representative.nif}",
                     representativeName:representativeFullName, weeksOperationActive:weeksAnonymousDelegation}
-            webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             webAppMessage.serviceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDelegationMsgSubject"/>'
             votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback);

@@ -37,7 +37,7 @@ class EventVSElectionService {
 	def messageSource
 	def representativeService
 	def filesService
-	def timeStampVSService
+	def timeStampService
 	def sessionFactory
 
     ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -202,7 +202,7 @@ class EventVSElectionService {
 			File eventTrustedCertsFile = new File("${filesDir.absolutePath}/eventTrustedCerts.pem")
 			eventTrustedCertsFile.setBytes(eventTrustedCertsPEMBytes)
 
-			byte[] timeStampCertPEMBytes = timeStampVSService.getSigningCertPEMBytes()
+			byte[] timeStampCertPEMBytes = timeStampService.getSigningCertPEMBytes()
 			File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
 			timeStampCertFile.setBytes(timeStampCertPEMBytes)
 				

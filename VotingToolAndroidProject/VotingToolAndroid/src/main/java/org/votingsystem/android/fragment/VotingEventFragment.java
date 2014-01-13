@@ -108,7 +108,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                                         public void onClick(DialogInterface dialogInterface, int i) {
                                             saveCancelReceipt(vote);
                                         }
-                                    }).setNegativeButton(R.string.cancel_button, null).show();
+                                    }).setNegativeButton(R.string.cancel_lbl, null).show();
                     dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
                     cancelVoteButton.setEnabled(true);

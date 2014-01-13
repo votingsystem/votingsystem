@@ -1,2 +1,3 @@
-include "VotingSystemLibrary", "VotingToolApplet", "ValidationToolApplet", "AccessControl", "ControlCenter", "TestsWebApp"
+include "VotingSystemLibrary", "VotingToolApplet", "ValidationToolApplet", "TimeStampServer", "AccessControl",
+        "ControlCenter", "TestsWebApp"
 
