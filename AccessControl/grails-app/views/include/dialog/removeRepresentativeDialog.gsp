@@ -1,13 +1,12 @@
 <div id="removeRepresentativeDialog" title="<g:message code="removeRepresentativeLbl"/>"  style="padding:20px 20px 20px 20px">
 	<p style="text-align: center;"><g:message code="removeRepresentativeMsg"/></p>
-	<p style="text-align: center;"><g:message code="clickAcceptToContinueLbl"/></p>
 </div> 
 <r:script>
 
 $("#removeRepresentativeDialog").dialog({
    	  width: 450, autoOpen: false, modal: true,
       buttons: [{
-        		text:"<g:message code="acceptLbl"/>",
+        		text:"<g:message code="continuetLbl"/>",
                	icons: { primary: "ui-icon-check"},
              	click:function() {
              		$("#removeRepresentativeDialog").dialog("close");
