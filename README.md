@@ -36,7 +36,7 @@ De esta forma:
 
 #### Servicio de sellado de tiempo
 
-Los documentos firmados utilizados por la aplicación llevan incorporado un sello de tiempo. 
+Los documentos firmados utilizados por la aplicación llevan incorporado un **sello de tiempo**. 
 
 El proyecto incorpora un servidor de sellos de tiempo, la aplicación **TimeStampServer**. Para que el sistema funcione es necesario que **AccessControl** y **ControlCenter** tengan acceso a una instancia de **TimeStampServer**.
 
