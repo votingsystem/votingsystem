@@ -163,8 +163,10 @@ public class RepresentativeFragment extends Fragment {
             image.setImageBitmap(bmp);
         }
         if(representative.getDescription() != null) {
+            String representativeDescription = "<html style='background-color:#eeeeee;'>" +
+                    representative.getDescription() + "</html>";
             ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
-                    representative.getDescription(), null, null);
+                    representativeDescription, "text/html", "utf-8");
         }
         selectButton.setVisibility(View.VISIBLE);
     }

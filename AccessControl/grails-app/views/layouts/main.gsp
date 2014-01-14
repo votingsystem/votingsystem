@@ -30,6 +30,7 @@
 				</form>
 				</div>
 		   	</div>
+            <div id="headerButtonContainer" style="padding: 7px 0 0 0;"></div>
 		</div>
 
         <div style="min-height: 600px;"><g:layoutBody/></div>

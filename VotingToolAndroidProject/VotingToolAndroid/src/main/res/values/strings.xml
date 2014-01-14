@@ -338,5 +338,6 @@
     <string name="revoke_representative_msg_subject">Dar de baja representante</string>
     <string name="representative_revoke_ok_msg">El usuario ha sido dado de alta como representante</string>
     <string name="confirm_selection_msg">Confirme la selección</string>
+    <string name="representative_delegation_lbl">Delegar en representante</string>
 
 </resources>

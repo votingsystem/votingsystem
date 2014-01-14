@@ -36,6 +36,7 @@ public class UserVS implements Serializable {
     private String cn;
     private String URL;
     private String name;
+    private String fullName;
     private String organization;
     private String email;
     private String phone;
@@ -227,7 +228,12 @@ public class UserVS implements Serializable {
     }
 
     public String getFullName() {
-        return firstName + " " + lastName;
+        if(fullName != null) return fullName;
+        else return firstName + " " + lastName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public void setLastName(String lastName) {

@@ -5,20 +5,18 @@
 </head>
 <body>
 <div style="position:relative;">
+    <div id="adminButton">
+        <votingSystem:simpleButton href="${createLink(controller:'representative', action:'representativeAdmin')}"
+                                   style="margin:0px 20px 0px 30px;">
+            <g:message code="adminRepresentativeLbl"/>
+        </votingSystem:simpleButton>
+    </div>
+
     <div id="progressDiv" style="position: absolute; left: 40%; right:40%; top: 300px;">
         <progress style="margin:0px auto 0px auto;"></progress>
     </div>
 
     <div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">
-        <div style="display: table;  margin: auto;">
-            <div style="display:table-cell;">
-                <votingSystem:simpleButton href="${createLink(controller:'representative', action:'representativeAdmin')}"
-                           style="margin:0px 20px 0px 30px;">
-                    <g:message code="adminRepresentativeLbl"/>
-                </votingSystem:simpleButton>
-            </div>
-        </div>
-
         <div style="width:90%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
             <div style="display:table-cell;"><ul id="representativeList"></ul></div>
 
@@ -37,6 +35,9 @@
        	
 	 	$(function() {		
 	 		paginate(1)
+	 		$(".col-advancedSearch").hide()
+	 		$("#selectedSubsystemDiv").width(500)
+	 		$("#adminButton").appendTo("#headerButtonContainer");
 		 });
 
 		function loadRepresentatives(representativesURL) {
@@ -76,7 +77,7 @@
 	        var endTime = Date.parse(representativeJSON.dateFinish)
 	        
 	        var newRepresentativeHTML = newRepresentativeTemplate.format(representativeJSON.imageURL, 
-			        representativeJSON.name + " " + representativeJSON.firstName,
+			        representativeJSON.firstName + " " + representativeJSON.lastName,
 			        representativeJSON.numRepresentations);
 	        var $newRepresentative = $(newRepresentativeHTML)
 	        //$newRepresentative.attr("representativeData", dataStr)			
