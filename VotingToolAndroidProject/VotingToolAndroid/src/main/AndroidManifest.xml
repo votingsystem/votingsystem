@@ -101,6 +101,9 @@
         <activity android:name=".activity.MessageActivity"
             android:theme="@style/Theme.Transparent"/>
 
+        <activity android:name=".activity.ConfirmImageActivity"
+            android:theme="@style/Theme.AppCompat.Light"/>
+
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->

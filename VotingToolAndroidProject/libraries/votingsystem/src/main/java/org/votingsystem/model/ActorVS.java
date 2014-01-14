@@ -12,7 +12,7 @@ public class ActorVS implements java.io.Serializable {
 	public static final String TAG = "ActorVS";
 
     private static final long serialVersionUID = 1L;
-        
+
     public enum Type {CONTROL_CENTER, ACCESS_CONTROL}
 
     public enum State {CANCELLED, ACTIVE, PAUSED, RUNNING}
@@ -20,6 +20,7 @@ public class ActorVS implements java.io.Serializable {
     private Long id;
     private String serverURL;
     private String name;
+    private String urlTimeStampServer;
     private String urlBlog;
     private Date dateCreated;
     private Date lastUpdated;
@@ -133,6 +134,18 @@ public class ActorVS implements java.io.Serializable {
 	
     public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
         timeStampCert = CertUtil.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
+    }
+
+    public String getTimeStampServiceURL() {
+        return getUrlTimeStampServer() + "/timeStamp";
+    }
+
+    public String getUrlTimeStampServer() {
+        return urlTimeStampServer;
+    }
+
+    public void setUrlTimeStampServer(String urlTimeStampServer) {
+        this.urlTimeStampServer = urlTimeStampServer;
     }
 
     public X509Certificate getTimeStampCert() {

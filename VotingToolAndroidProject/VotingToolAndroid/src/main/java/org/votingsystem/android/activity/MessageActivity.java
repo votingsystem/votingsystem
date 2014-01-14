@@ -27,6 +27,11 @@ public class MessageActivity extends FragmentActivity {
     private ProgressDialog progressDialog = null;
     private String accessControlURL = null;
     private AlertDialog alertDialog;
+    private int iconKey = -1;
+    private String caption;
+    private String message;
+    private String serviceCaller;
+    private TypeVS typeVS;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
@@ -42,27 +47,30 @@ public class MessageActivity extends FragmentActivity {
                 ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
         int responseStatusCode = getIntent().getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                 ResponseVS.SC_ERROR);
-        String caption = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
-        String serviceCaller = getIntent().getStringExtra(ContextVS.CALLER_KEY);
-        String message = getIntent().getStringExtra(ContextVS.MESSAGE_KEY);
-        TypeVS typeVS = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
-        int iconKey = getIntent().getIntExtra(ContextVS.ICON_KEY, -1);
+        caption = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
+        serviceCaller = getIntent().getStringExtra(ContextVS.CALLER_KEY);
+        message = getIntent().getStringExtra(ContextVS.MESSAGE_KEY);
+        typeVS = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
+        iconKey = getIntent().getIntExtra(ContextVS.ICON_KEY, -1);
         Log.d(TAG + ".onCreate(...)", "responseStatusCode: " + responseStatusCode +
                 " - type: " + typeVS + " - caption: " + caption +
                 " - message: " + message + " - serviceCaller: " + serviceCaller +
                 " - iconKey: " + iconKey);
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(caption).
+    }
+
+    @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "onResume");
+        super.onResume();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(caption).
                 setMessage(Html.fromHtml(message)).setPositiveButton(getString(R.string.ok_button),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         onBackPressed();
                         finish();
                     }
-                }).show();
-        if(iconKey > 0) dialog.setIcon(iconKey);
-        dialog.show();
-        //to avoid avoid dissapear on screen orientation change
-        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                });
+        if(iconKey > 0) builder.setIcon(iconKey);
+        AlertDialog dialog = builder.show();
     }
 
 }

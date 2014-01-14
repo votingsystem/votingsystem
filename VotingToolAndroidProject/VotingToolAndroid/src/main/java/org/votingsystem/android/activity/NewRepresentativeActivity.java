@@ -1,7 +1,10 @@
 package org.votingsystem.android.activity;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -13,6 +16,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,8 +29,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.NewFieldDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContentTypeVS;
@@ -35,6 +41,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
@@ -49,8 +56,10 @@ public class NewRepresentativeActivity extends ActionBarActivity {
 	
 	public static final String TAG = "NewRepresentativeActivity";
 
-    private static final int SELECT_PICTURE = 1;
+    private static final int SELECT_PICTURE   = 1;
+    private static final int CONFIRM_PICTURE  = 2;
 
+    private TypeVS operationType;
     private EditorFragment editorFragment;
     private ContextVS contextVS;
     private View progressContainer;
@@ -68,14 +77,30 @@ public class NewRepresentativeActivity extends ActionBarActivity {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+            TypeVS broadcastType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                     ResponseVS.SC_ERROR);
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             if(pin != null) launchSignAndSendService(pin);
             else {
-                if(TypeVS.NEW_REPRESENTATIVE == operationType) {
+                if(TypeVS.NIF_REQUEST == broadcastType) {
+                    if(ResponseVS.SC_OK == responseStatusCode) {
+                        String representativeNif = NifUtils.validate(message);
+                        if(representativeNif == null) {
+                            new AlertDialog.Builder(
+                                    NewRepresentativeActivity.this).setTitle(getString(R.string.error_lbl)).
+                                    setMessage(getString(R.string.nif_error)).setPositiveButton(getString(R.string.ok_button),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            showNifDialog();
+                                        }
+                                    }).setCancelable(false).show();
+                        } else loadRepresentativeData(representativeNif);
+                    } else {
+                        NewRepresentativeActivity.this.onBackPressed();
+                    }
+                } else if(TypeVS.NEW_REPRESENTATIVE == broadcastType) {
                     showProgress(false, true);
                     showMessage(responseStatusCode, caption, message);
                     if(ResponseVS.SC_OK != responseStatusCode) {
@@ -84,6 +109,18 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                     } else {
                         imageCaption.setOnClickListener(null);
                     }
+                } else if(TypeVS.ITEM_REQUEST == broadcastType) {
+                    if(ResponseVS.SC_OK == responseStatusCode) {
+                        Uri representativeURI = intent.getParcelableExtra(ContextVS.URI_KEY);
+                        Cursor cursor = NewRepresentativeActivity.this.getApplicationContext().
+                                getContentResolver().query(representativeURI,
+                                null, null, null, null);
+                        cursor.moveToFirst();
+                        UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                                cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+                        printRepresentativeData(representative);
+                    }
+                    showProgress(false, true);
                 }
             }
         }
@@ -116,15 +153,15 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     	super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getApplicationContext());
         broadCastId = this.getClass().getSimpleName();
-        TypeVS operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
-        Log.d(TAG + ".onCreate(...)", "contextVS.getState(): " + contextVS.getState() +
+        operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
+        Log.d(TAG + ".onCreate(...)", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.new_representative);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         editorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(
                 EditorFragment.TAG);
         mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
-        progressContainer =findViewById(R.id.progressContainer);
+        progressContainer = findViewById(R.id.progressContainer);
         imageCaption = (TextView) findViewById(R.id.representative_image_caption);
         imageCaption.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -135,24 +172,19 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         if(operationType != null && TypeVS.REPRESENTATIVE == operationType) {
             File representativeDataFile = new File(getApplicationContext().getFilesDir(),
                     ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
-            if(representativeDataFile == null) {
-                Log.d(TAG + ".create(...)", "representative data not found -> http request");
-
-            } else {
+            if(!representativeDataFile.exists()) showNifDialog();
+            else {
                 try {
                     byte[] serializedRepresentative = FileUtils.getBytesFromFile(
                             representativeDataFile);
                     UserVS representativeData = (UserVS) ObjectUtils.deSerializeObject(
                             serializedRepresentative);
-                    editorFragment.setEditorData(representativeData.getDescription());
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(representativeData.getImageBytes(),
-                            0, representativeData.getImageBytes().length);
-                    ImageView image = (ImageView)findViewById(R.id.representative_image);
-                    image.setImageBitmap(bitmap);
+                    printRepresentativeData(representativeData);
                 }catch(Exception ex) {
                     ex.printStackTrace();
                 }
             }
+            getSupportActionBar().setTitle(getString(R.string.edit_representative_lbl));
         }
         if(savedInstanceState != null) {
             representativeImageUri = (Uri) savedInstanceState.getParcelable(ContextVS.URI_KEY);
@@ -162,6 +194,31 @@ public class NewRepresentativeActivity extends ActionBarActivity {
             }
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
         }
+    }
+
+    private void showNifDialog() {
+        String caption = getString(R.string.edit_representative_lbl);
+        String message = getString(R.string.representative_nif_lbl);
+        NewFieldDialogFragment newFieldDialog = NewFieldDialogFragment.newInstance(caption,
+                message, broadCastId,  TypeVS.NIF_REQUEST);
+        newFieldDialog.show(getSupportFragmentManager(), NewFieldDialogFragment.TAG);
+    }
+
+    private void printRepresentativeData(UserVS representativeData) {
+        editorFragment.setEditorData(representativeData.getDescription());
+        setRepresentativeImage(representativeData.getImageBytes(), null);
+        this.menu.setGroupVisible(R.id.general_items, true);
+    }
+
+    private void loadRepresentativeData(String representativeNif) {
+        TextView progressMessage = (TextView) findViewById(R.id.progressContainer);
+        progressMessage.setText(getString(R.string.loading_data_msg));
+        showProgress(true, true);
+        Intent startIntent = new Intent(this, RepresentativeService.class);
+        startIntent.putExtra(ContextVS.NIF_KEY, representativeNif);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.NIF_REQUEST);
+        startService(startIntent);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -196,6 +253,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         Log.d(TAG + ".onCreateOptionsMenu(...)", "");
         getMenuInflater().inflate(R.menu.editor, menu);
         this.menu = menu;
+        if(operationType == TypeVS.REPRESENTATIVE) this.menu.setGroupVisible(R.id.general_items, false);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -206,7 +264,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                     getString(R.string.editor_empty_error_lbl));
             return false;
         }
-        if(representativeImageUri == null) {
+        if(representativeImageUri == null && operationType != TypeVS.REPRESENTATIVE) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.missing_representative_img_error_msg));
             return false;
@@ -218,18 +276,54 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode); //Activity.RESULT_OK;
-        if(data != null && data.getData() != null) {
-            representativeImageUri = data.getData();
-            try {
-                Cursor cursor = getContentResolver().query(representativeImageUri, null, null, null, null);
+        if(SELECT_PICTURE == requestCode) {
+            if(data != null && data.getData() != null) {
+                try {
+                    Intent intent = new Intent(this, ConfirmImageActivity.class);
+                    intent.putExtra(ContextVS.URI_KEY, data.getData());
+                    startActivityForResult(intent, CONFIRM_PICTURE);
+                    //setRepresentativeImage(representativeImageUri, representativeImageName);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } else if(CONFIRM_PICTURE == requestCode) {
+            if(Activity.RESULT_OK == resultCode) {
+                representativeImageUri = data.getData();
+                Cursor cursor = getContentResolver().query(
+                        representativeImageUri, null, null, null, null);
                 if (cursor != null && cursor.moveToFirst()) {
                     representativeImageName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
-                setRepresentativeImage(representativeImageUri, representativeImageName);
-            } catch(Exception ex) {
-                ex.printStackTrace();
+                File representativeDataFile = new File(getApplicationContext().getFilesDir(),
+                        ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
+                try {
+                    byte[] serializedRepresentative = FileUtils.getBytesFromFile(
+                            representativeDataFile);
+                    UserVS representativeData = (UserVS) ObjectUtils.deSerializeObject(
+                            serializedRepresentative);
+                    setRepresentativeImage(representativeData.getImageBytes(), representativeImageName);
+                }catch(Exception ex) {
+                    ex.printStackTrace();
+                }
             }
+        }
+    }
+
+    private void setRepresentativeImage(byte[] imageBytes, String imageName) {
+        try {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            ImageView image = (ImageView)findViewById(R.id.representative_image);
+            image.setImageBitmap(bitmap);
+            TextView imagePathTextView = (TextView) findViewById(R.id.representative_image_path);
+            ((TextView) findViewById(R.id.representative_image_caption)).setText(getString(
+                    R.string.representative_image_lbl));
+            imagePathTextView.setText(imageName);
+            LinearLayout imageContainer = (LinearLayout) findViewById(R.id.imageContainer);
+            imageContainer.setVisibility(View.VISIBLE);
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -310,7 +404,6 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
-
 
     @Override protected void onStop() {
         super.onStop();

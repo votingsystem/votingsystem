@@ -157,7 +157,7 @@ class SubscriptionVSController {
 			String content = claim.content
 			String author = message(code: 'publishedBySystem')
 			if(claim.userVS) {
-				author = "${claim.userVS.name} ${claim.userVS.firstName}"
+				author = "${claim.userVS.firstName} ${claim.userVS.lastName}"
 			}
 			String urlReclamacion =  "${createLink(controller: 'eventVSClaim')}/" + claim.id
 			String accion = message(code: 'signClaim')
@@ -195,7 +195,7 @@ class SubscriptionVSController {
 			String content = votacion.content
 			String author = message(code: 'publishedBySystem')
 			if(votacion.userVS) {
-				author = "${votacion.userVS.name} ${votacion.userVS.firstName}"
+				author = "${votacion.userVS.firstName} ${votacion.userVS.lastName}"
 			}
 			String urlVotacion =  "${createLink(controller: 'eventVSElection')}/" + votacion.id
 			String accion = message(code: 'vote')
@@ -233,7 +233,7 @@ class SubscriptionVSController {
 			String content = manifest.content
 			String author = message(code: 'publishedBySystem')
 			if(manifest.userVS) {
-				author = "${manifest.userVS.name} ${manifest.userVS.firstName}"
+				author = "${manifest.userVS.firstName} ${manifest.userVS.lastName}"
 			}
 			String manifestURL = "${createLink(controller: 'eventVSManifest')}/" + manifest.id
 			String accion = message(code: 'signManifest')

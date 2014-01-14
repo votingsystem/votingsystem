@@ -97,7 +97,7 @@ class SubscriptionVSController {
 		elections.each { votacion ->
 			String content = votacion.content
 			String author = message(code: 'publishedBySystem')
-			if(votacion.userVS) { author = "${votacion.userVS.name} ${votacion.userVS.firstName}" }
+			if(votacion.userVS) { author = "${votacion.userVS.firstName} ${votacion.userVS.lastName}" }
 			String urlVotacion = "${createLink(controller: 'eventVSElection')}/" + votacion.id
 			String accion = message(code: 'electionFeedAction')
 			 //if(content?.length() > 500) content = content.substring(0, 500)

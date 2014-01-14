@@ -196,13 +196,14 @@
     <string name="cancel_lbl">Cancelar</string>
     <string name="continue_lbl">Continuar</string>
     <string name="request_lbl">Solicitar</string>
-    <string name="nif_label">Introduzca su NIF</string>
+    <string name="nif_lbl">Introduzca su NIF</string>
+    <string name="representative_nif_lbl">Introduzca el NIF del representante que desee editar</string>
     <string name="password_label">Contraseña del certificado</string>
     <string name="dialogo_password_text_entry">Introducir contraseña</string>
     <string name="repeat_password_label">Repita la contraseña</string>
     <string name="close_lbl">Cerrar</string>
     <string name="ok_button">OK</string>
-    <string name="aceptar_button">Aceptar</string>
+    <string name="accept_lbl">Aceptar</string>
     <string name="request_certificate_form_lbl">Datos del certificado de usuario</string>
 	<string name="campos_vacios_msg">Debe rellenar todos los campos</string>
 	<string name="password_error_msg">Las contraseñas no coinciden</string>
@@ -246,7 +247,7 @@
 
     <string name="check_representative_button">Comprobar mi representante</string>
     <string name="cancel_representative_button">Dar de baja como representante</string>
-    <string name="edit_representative_button">Editar datos del representante</string>
+    <string name="edit_representative_lbl">Editar datos de representante</string>
     <string name="editor_empty_error_lbl">Debe rellenar el campo del editor</string>
     <string name="signature_msg_subject">[Firma]-</string>
     <string name="representative_lbl">Representante</string>
@@ -336,5 +337,6 @@
         la solicitud con su certificado. La solicitud debe estar firmada por por el propio representante que se da de baja]]></string>
     <string name="revoke_representative_msg_subject">Dar de baja representante</string>
     <string name="representative_revoke_ok_msg">El usuario ha sido dado de alta como representante</string>
+    <string name="confirm_selection_msg">Confirme la selección</string>
 
 </resources>

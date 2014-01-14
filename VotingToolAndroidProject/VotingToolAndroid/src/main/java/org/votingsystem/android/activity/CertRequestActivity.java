@@ -77,19 +77,4 @@ public class CertRequestActivity extends FragmentActivity {
         }
     }
 
-    @Override public void onResume() {
-    	super.onResume();
-    	Log.d(TAG + ".onResume() ", "onResume");
-    }
-
-    @Override protected void onStop() {
-        super.onStop();
-    	Log.d(TAG + ".onStop()", "onStop");
-    };
-
-    @Override protected void onDestroy() {
-        super.onDestroy();
-    	Log.d(TAG + ".onDestroy()", "onDestroy");
-    };
-
 }

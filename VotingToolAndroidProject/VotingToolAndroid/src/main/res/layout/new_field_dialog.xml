@@ -26,7 +26,6 @@
 
     <EditText android:id="@+id/field_content"
         android:layout_height="wrap_content"
-        android:hint="@string/subject_lbl"
         android:layout_width="match_parent"
         android:layout_marginLeft="10dip"
         android:layout_marginRight="10dip"

@@ -106,6 +106,7 @@ public class ContextVS {
     public static final int SYMETRIC_ENCRYPTION_KEY_LENGTH = 256;
     public static final int SYMETRIC_ENCRYPTION_ITERATION_COUNT = 100;
 
+    public static final int MAX_REPRESENTATIVE_IMAGE_WIDTH = 500;//max width in pixels
     public static final int MAX_REPRESENTATIVE_IMAGE_FILE_SIZE = 1024 * 1024;
 
     public static final int EVENTS_PAGE_SIZE = 30;

@@ -9,6 +9,7 @@ public enum TypeVS {
     ACCESS_REQUEST,
 
     ITEM_REQUEST,
+    NIF_REQUEST,
     ITEMS_REQUEST,
 
     VOTING_EVENT,

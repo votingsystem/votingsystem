@@ -36,6 +36,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
@@ -70,12 +72,10 @@ public class RepresentativeService extends IntentService {
         if(operation == TypeVS.ITEMS_REQUEST) {
             requestRepresentatives(arguments.getString(ContextVS.URL_KEY), serviceCaller);
         } else if (operation == TypeVS.ITEM_REQUEST) {
+            requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY), serviceCaller);
+        } else if (operation == TypeVS.NIF_REQUEST) {
             String nif = arguments.getString(ContextVS.NIF_KEY);
-            if(nif != null) {
-                requestRepresentativebyNif(nif, serviceCaller);
-            } else {
-                requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY), serviceCaller);
-            }
+            requestRepresentativeByNif(nif, serviceCaller);
         } else if(operation == TypeVS.NEW_REPRESENTATIVE) {
             newRepresentative(intent.getExtras());
         }
@@ -119,21 +119,21 @@ public class RepresentativeService extends IntentService {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 sendMessage(ResponseVS.SC_ERROR, getString(R.string.alert_exception_caption),
-                        ex.getMessage(), TypeVS.ITEMS_REQUEST, serviceCaller);
+                        ex.getMessage(), TypeVS.ITEMS_REQUEST, serviceCaller, null);
 
             }
         } else sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
-                responseVS.getMessage(),TypeVS.ITEMS_REQUEST, serviceCaller);
+                responseVS.getMessage(),TypeVS.ITEMS_REQUEST, serviceCaller, null);
     }
 
 
-    private void requestRepresentativebyNif(String nif, String serviceCaller) {
+    private void requestRepresentativeByNif(String nif, String serviceCaller) {
         String serviceURL = ContextVS.getInstance(this).getAccessControl().
                 getRepresentativeURLByNif(nif);
         ResponseVS responseVS = HttpHelper.getData(serviceURL, null);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
-                    responseVS.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
+                    responseVS.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller, null);
         } else {
             try {
                 JSONObject jsonResponse = new JSONObject(responseVS.getMessage());
@@ -141,7 +141,7 @@ public class RepresentativeService extends IntentService {
                 requestRepresentative(representativeId, serviceCaller);
             } catch(Exception ex) {
                 sendMessage(ResponseVS.SC_ERROR, getString(R.string.operation_error_msg),
-                        ex.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
+                        ex.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller, null);
             }
         }
     }
@@ -161,6 +161,8 @@ public class RepresentativeService extends IntentService {
                 JSONObject requestJSON = new JSONObject(responseVS.getMessage());
                 UserVS representative = UserVS.populate(requestJSON);
                 representative.setImageBytes(representativeImageBytes);
+                Uri representativeURI = UserContentProvider.getRepresentativeURI(
+                        representative.getId());
                 ContentValues values = new ContentValues();
                 values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true);
                 values.put(UserContentProvider.ID_COL, representative.getId());
@@ -175,13 +177,14 @@ public class RepresentativeService extends IntentService {
                 values.put(UserContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
                 values.put(UserContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
                 getContentResolver().insert(UserContentProvider.CONTENT_URI, values);
-                sendMessage(responseVS.getStatusCode(), null, null, TypeVS.ITEM_REQUEST, serviceCaller);
+                sendMessage(responseVS.getStatusCode(), null, null, TypeVS.ITEM_REQUEST,
+                        serviceCaller, representativeURI);
             } else sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
-                    responseVS.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
+                    responseVS.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller, null);
         } catch(Exception ex) {
             ex.printStackTrace();
             sendMessage(ResponseVS.SC_ERROR, getString(R.string.operation_error_msg),
-                    ex.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller);
+                    ex.getMessage(), TypeVS.ITEM_REQUEST, serviceCaller, null);
         }
     }
 
@@ -195,8 +198,20 @@ public class RepresentativeService extends IntentService {
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
             String editorContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
-            Uri imageUri = (Uri) arguments.getParcelable(ContextVS.URI_KEY);
-            byte[] imageBytes = reduceImageFileSize(imageUri);
+            //Uri imageUri = (Uri) arguments.getParcelable(ContextVS.URI_KEY);
+            //reduceImageFileSize(imageUri);
+            byte[] imageBytes = null;
+            try {
+                File representativeDataFile = new File(getApplicationContext().getFilesDir(),
+                        ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
+                byte[] serializedRepresentative = FileUtils.getBytesFromFile(
+                        representativeDataFile);
+                UserVS representativeData = (UserVS) ObjectUtils.deSerializeObject(
+                        serializedRepresentative);
+                imageBytes = representativeData.getImageBytes();
+            }catch(Exception ex) {
+                ex.printStackTrace();
+            }
             MessageDigest messageDigest = MessageDigest.getInstance(
                     ContextVS.VOTING_DATA_DIGEST);
             byte[] resultDigest =  messageDigest.digest(imageBytes);
@@ -205,6 +220,7 @@ public class RepresentativeService extends IntentService {
             contentToSignMap.put("operation", TypeVS.NEW_REPRESENTATIVE.toString());
             contentToSignMap.put("base64ImageHash", base64ResultDigest);
             contentToSignMap.put("representativeInfo", editorContent);
+            contentToSignMap.put("UUID", UUID.randomUUID().toString());
             String contentToSign = new JSONObject(contentToSignMap).toString();
 
 
@@ -259,11 +275,11 @@ public class RepresentativeService extends IntentService {
                 showNotification(responseVS, operationType, serviceCaller);
             }
             sendMessage(responseVS.getStatusCode(), caption, message, operationType,
-                    serviceCaller);
+                    serviceCaller, null);
         } catch(Exception ex) {
             ex.printStackTrace();
             sendMessage(ResponseVS.SC_ERROR, getString(R.string.operation_error_msg),
-                    ex.getMessage(), operationType, serviceCaller);
+                    ex.getMessage(), operationType, serviceCaller, null);
         }
     }
 
@@ -329,7 +345,7 @@ public class RepresentativeService extends IntentService {
     }
 
     private void sendMessage(Integer statusCode, String caption, String message, TypeVS typeVS,
-             String serviceCaller) {
+             String serviceCaller, Uri representativeUri) {
         Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - caption: " +
                 caption  + " - message: " + message + " - serviceCaller: " + serviceCaller);
         Intent intent = new Intent(serviceCaller);
@@ -341,6 +357,7 @@ public class RepresentativeService extends IntentService {
         }
         if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
         if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
+        if(representativeUri != null) intent.putExtra(ContextVS.URI_KEY, representativeUri);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 

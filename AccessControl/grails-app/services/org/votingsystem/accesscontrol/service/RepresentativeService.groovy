@@ -493,11 +493,11 @@ class RepresentativeService {
 				userVS.representative = null
                 representativeDelegationService.cancelRepresentationDocument(messageSMIMEReq, userVS);
 				msg = messageSource.getMessage('representativeDataCreatedOKMsg', 
-					[userVS.name, userVS.firstName].toArray(), locale)
+					[userVS.firstName, userVS.lastName].toArray(), locale)
 			} else {
 				def representations = UserVS.countByRepresentative(userVS)
 				msg = messageSource.getMessage('representativeDataUpdatedMsg',
-					[userVS.name, userVS.firstName].toArray(), locale)
+					[userVS.firstName, userVS.lastName].toArray(), locale)
 			} 
 			userVS.setDescription(messageJSON.representativeInfo)
 			userVS.representativeMessage = messageSMIMEReq
@@ -843,7 +843,7 @@ class RepresentativeService {
 		def representativeMap = [id: representative.id, nif:representative.nif,
              URL:URL, representativeMessageURL:representativeMessageURL,
 			 imageURL:imageURL, numRepresentations:numRepresentations,
-			 name: representative.name, firstName:representative.firstName]
+			 name: representative.name, firstName:representative.firstName, lastName:representative.lastName]
 		return representativeMap
 	}
 	

@@ -146,10 +146,6 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() +  "/accessRequestVS";
     }
 
-    public String getTimeStampServiceURL () {
-        return getServerURL() + "/timeStampVS";
-    }
-
     public String getCheckDatesServiceURL (Long id) {
         return getServerURL() +  "/eventVS/checkDates?id=" + id;
     }
@@ -194,6 +190,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
         if (actorVSJSON.has("timeStampCertPEM")) {
             actorVS.setTimeStampCertPEM(actorVSJSON.getString(
                     "timeStampCertPEM"));
+        }
+        if(actorVSJSON.has("urlTimeStampServer")) {
+            String urlTimeStampServer = StringUtils.checkURL((String) actorVSJSON.get("urlTimeStampServer"));
+            actorVS.setUrlTimeStampServer((String) actorVSJSON.get("urlTimeStampServer"));
         }
         return actorVS;
     }

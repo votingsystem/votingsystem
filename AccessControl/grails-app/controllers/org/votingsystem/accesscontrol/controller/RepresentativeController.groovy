@@ -143,8 +143,9 @@ class RepresentativeController {
             return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'representativeNifErrorMsg', args:[nif]))]
 		} else {
-			def resultMap = [representativeId: index.id, representativeName:"${index.name} ${index.firstName}",
-				representativeNIF:index.nif]
+			def resultMap = [representativeId: representative.id,
+                    representativeName:"${representative.name} ${representative.firstName}",
+				    representativeNIF:representative.nif]
 			render resultMap as JSON
 		}
 	}

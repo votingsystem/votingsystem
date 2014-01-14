@@ -1,4 +1,4 @@
-<% def representativeFullName = representative?.name + " " + representative?.firstName %>
+<% def representativeFullName = representative?.firstName + " " + representative?.lastName %>
 <html>
 <head>
 	<meta name="layout" content="main" />

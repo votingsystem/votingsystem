@@ -22,7 +22,6 @@ import org.votingsystem.model.ResponseVS;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author jgzornoza
@@ -39,6 +38,7 @@ public class EditorFragment extends Fragment {
     private View rootView;
     private String editorDataStr = "";
     private boolean isEditable = true;
+    private boolean isEditorLoaded = false;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -102,6 +102,7 @@ public class EditorFragment extends Fragment {
                 String functionStr = "javascript:setEditorContent('" + editorDataStr + "')";
                 webView.loadUrl(functionStr);
                 if(!isEditable) setEditable(isEditable);
+                isEditorLoaded = true;
                 rootView.invalidate();
             }
         });
@@ -139,7 +140,8 @@ public class EditorFragment extends Fragment {
     }
 
     public void setEditorData(String editorData) {
-        webView.loadUrl("javascript:setEditorContent('" + editorData + "')");
+        if(isEditorLoaded)  webView.loadUrl("javascript:setEditorContent('" + editorData + "')");
+        else editorDataStr = editorData;
     }
 
     public String getEditorData() {

@@ -87,6 +87,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         if(savedInstanceState != null) firstPin = savedInstanceState.getString(ContextVS.PIN_KEY);
+        this.setCancelable(false);
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {

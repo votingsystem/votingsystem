@@ -313,8 +313,12 @@ public class UserVS implements Serializable {
         String subjectDN = certificate.getSubjectDN().getName();
         if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
         if (subjectDN.contains("SERIALNUMBER=")) userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
-        if (subjectDN.contains("SURNAME=")) userVS.setFirstName(subjectDN.split("SURNAME=")[1].split(",")[0]);
-        if (subjectDN.contains("GIVENNAME=")) userVS.setName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
+        if (subjectDN.contains("SURNAME=")) userVS.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
+        if (subjectDN.contains("GIVENNAME=")) {
+            String givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0];
+            userVS.setName(givenname);
+            userVS.setFirstName(givenname);
+        }
         if (subjectDN.contains("CN=")) userVS.setCn(subjectDN.split("CN=")[1]);
         if (subjectDN.split("emailAddress=").length > 1) userVS.setEmail(subjectDN.split("emailAddress=")[1].split(",")[0]);
         if (subjectDN.split("mobilePhone=").length > 1) userVS.setPhone(subjectDN.split("mobilePhone=")[1].split(",")[0]);

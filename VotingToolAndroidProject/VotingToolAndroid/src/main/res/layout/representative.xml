@@ -9,10 +9,10 @@
         android:id="@+id/mainLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:foreground="@drawable/navigation_drawer_expandable_icon" >
+        android:foreground="@drawable/shape_window_dim" >
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent" android:layout_height="fill_parent"
-            android:orientation="vertical">
+            android:layout_marginRight="10dp" android:orientation="vertical">
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal">

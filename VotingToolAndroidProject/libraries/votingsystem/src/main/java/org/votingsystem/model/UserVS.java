@@ -31,11 +31,11 @@ public class UserVS implements Serializable {
     private String nif;
     private byte[] imageBytes;
     private String firstName;
+    private String lastName;
     private String country;
     private String cn;
     private String URL;
     private String name;
-    private String fullName = "";
     private String organization;
     private String email;
     private String phone;
@@ -222,12 +222,16 @@ public class UserVS implements Serializable {
         return name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public String getLastName() {
+        return lastName;
     }
 
     public String getFullName() {
-        return fullName;
+        return firstName + " " + lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Long getNumRepresentations() {
@@ -245,18 +249,9 @@ public class UserVS implements Serializable {
         if (userJSON.has("nif")) userVS.setNif(userJSON.getString("nif"));
         if (userJSON.has("numRepresentations")) userVS.setNumRepresentations(
                 userJSON.getLong("numRepresentations"));
-        if (userJSON.has("name")) {
-            userVS.setName(userJSON.getString("name"));
-            userVS.setFullName(userVS.getName());
-        }
-        if (userJSON.has("firstName")) {
-            if(userVS.getName() != null) userVS.setFullName(userVS.getName() + " " +
-                    userJSON.getString("firstName"));
-            else {
-                userVS.setFullName(userJSON.getString("firstName"));
-                userVS.setName(userJSON.getString("firstName"));
-            }
-        }
+        if (userJSON.has("name")) userVS.setName(userJSON.getString("name"));
+        if (userJSON.has("firstName"))  userVS.setFirstName(userJSON.getString("firstName"));
+        if (userJSON.has("lastName"))  userVS.setLastName(userJSON.getString("lastName"));
         if (userJSON.has("description")) userVS.setDescription(userJSON.getString("description"));
         return userVS;
     }

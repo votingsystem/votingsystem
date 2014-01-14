@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 
 /**
@@ -49,6 +50,11 @@ public class NewFieldDialogFragment extends DialogFragment {
         return frag;
     }
 
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.setCancelable(false);
+    }
+
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.new_field_dialog, null);
@@ -69,8 +75,12 @@ public class NewFieldDialogFragment extends DialogFragment {
         if(htmlMessage != null) messageTextView.setText(Html.fromHtml(htmlMessage));
         else if(message != null) messageTextView.setText(message);
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        builder.setPositiveButton(getString(R.string.aceptar_button), null)
-                .setNegativeButton(R.string.cancel_lbl, null);
+        builder.setPositiveButton(getString(R.string.accept_lbl), null)
+                .setNegativeButton(R.string.cancel_lbl, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        cancelRequest();
+                    }
+                });
         alertDialog = builder.create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override public void onShow(DialogInterface dialog) {
@@ -82,7 +92,6 @@ public class NewFieldDialogFragment extends DialogFragment {
             });
             }
         });
-
         alertDialog.setView(view);
         return alertDialog;
     }
@@ -92,6 +101,7 @@ public class NewFieldDialogFragment extends DialogFragment {
             error_message.setVisibility(View.VISIBLE);
         } else {
             Intent intent = new Intent(dialogCaller);
+            intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, ResponseVS.SC_OK);
             intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
             if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
             if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY,
@@ -100,6 +110,18 @@ public class NewFieldDialogFragment extends DialogFragment {
                     sendBroadcast(intent);
             alertDialog.dismiss();
         }
+    }
+
+    private void cancelRequest() {
+        Intent intent = new Intent(dialogCaller);
+        intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
+        if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
+        if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY,
+                fieldEditText.getText().toString());
+        intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, ResponseVS.SC_ERROR);
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                sendBroadcast(intent);
+        alertDialog.dismiss();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
