@@ -4,15 +4,12 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/mainLayout"
+    <FrameLayout android:id="@+id/mainLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:foreground="@drawable/shape_window_dim" >
 
-        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/scroller"
+        <ScrollView android:id="@+id/scroller"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
             <LinearLayout android:layout_width="fill_parent"

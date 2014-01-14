@@ -49,7 +49,6 @@ public class ConfirmImageActivity extends ActionBarActivity {
         setContentView(R.layout.confirm_image);
         image = (ImageView) findViewById(R.id.selected_image);
         imageUri = (Uri) getIntent().getParcelableExtra(ContextVS.URI_KEY);
-        byte[] imageBytes = (byte[]) getIntent().getSerializableExtra(ContextVS.ICON_KEY);
         String title = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
         if(imageUri != null) {
             try {
@@ -77,11 +76,6 @@ public class ConfirmImageActivity extends ActionBarActivity {
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
-        } else {
-            LinearLayout buttonsPanel = (LinearLayout) findViewById(R.id.buttons_panel);
-            buttonsPanel.setVisibility(View.GONE);
-            Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            image.setImageBitmap(bmp);
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(title);

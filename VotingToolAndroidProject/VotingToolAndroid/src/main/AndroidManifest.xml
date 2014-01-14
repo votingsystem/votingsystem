@@ -89,6 +89,7 @@
         <activity android:name=".activity.NewRepresentativeActivity" android:icon="@drawable/system_users_22"
             android:label="@string/new_representative_title" android:theme="@style/Theme.AppCompat.Light"/>
 
+
         <activity android:label="@string/app_name" android:name=".activity.EventVSPagerActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
 
@@ -104,6 +105,8 @@
         <activity android:name=".activity.ConfirmImageActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
 
+        <activity android:name=".activity.RepresentativeDelegationActivity"
+            android:label="@string/representative_delegation_lbl" android:theme="@style/Theme.AppCompat.Light"/>
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->

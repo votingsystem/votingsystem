@@ -12,6 +12,7 @@
         android:foreground="@drawable/shape_window_dim" >
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent" android:layout_height="fill_parent"
+            android:background="@color/form_background"
             android:layout_marginRight="10dp" android:orientation="vertical">
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -25,13 +26,13 @@
                     android:layout_marginRight="10dp"/>
                 <Button
                     android:id="@+id/select_representative_button"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop ="7dp"
                     android:layout_marginRight ="7dp"
                     android:layout_gravity="center"
                     android:layout_weight="0"
-                    android:drawableLeft="@drawable/system_users_22"
+                    android:textStyle="bold"
                     android:text="@string/select_representative_button" />
             </LinearLayout>
             <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"

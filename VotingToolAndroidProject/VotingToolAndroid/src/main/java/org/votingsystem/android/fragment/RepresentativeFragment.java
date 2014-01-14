@@ -1,7 +1,10 @@
 package org.votingsystem.android.fragment;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -10,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,12 +28,15 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ObjectUtils;
@@ -43,6 +50,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class RepresentativeFragment extends Fragment {
 
 	public static final String TAG = "RepresentativeFragment";
+
+    private static final int REPRESENTATIVE_DELEGATION   = 1;
 
     private View rootView;
     private String broadCastId = null;
@@ -59,7 +68,7 @@ public class RepresentativeFragment extends Fragment {
                 "intent.getExtras(): " + intent.getExtras());
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(pin != null) launchSignAndSendService(pin);
+        if(pin != null);
         else {
             if(TypeVS.ITEM_REQUEST == typeVS) {
                 Cursor cursor = getActivity().getApplicationContext().getContentResolver().
@@ -74,36 +83,6 @@ public class RepresentativeFragment extends Fragment {
         }
         }
     };
-
-    private void launchSignAndSendService(String pin) {
-        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
-        try {
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    SignAndSendService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            //startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
-            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
-            /*if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
-                startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
-            } else {
-                startIntent.putExtra(ContextVS.URL_KEY,
-                        contextVS.getAccessControl().getEventVSClaimCollectorURL());
-                startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
-                String messageSubject = getActivity().getString(R.string.signature_msg_subject)
-                        + eventVS.getSubject();
-                startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
-                JSONObject signatureContent = eventVS.getSignatureContentJSON();
-                signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
-            }*/
-            showProgress(true, true);
-            //signAndSendButton.setEnabled(false);
-            getActivity().startService(startIntent);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
 
     public static Fragment newInstance(Long representativeId) {
@@ -131,8 +110,8 @@ public class RepresentativeFragment extends Fragment {
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        null, false, null);
+                Intent intent = new Intent(getActivity(), RepresentativeDelegationActivity.class);
+                startActivityForResult(intent, REPRESENTATIVE_DELEGATION);
             }
         });
         selectButton.setVisibility(View.GONE);
@@ -155,12 +134,40 @@ public class RepresentativeFragment extends Fragment {
         return rootView;
     }
 
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        int statusCode = -1;
+        String caption = null;
+        String message = null;
+        if(data != null) message = data.getStringExtra(ContextVS.MESSAGE_KEY);
+        if(Activity.RESULT_OK == requestCode) {
+            statusCode = ResponseVS.SC_OK;
+            caption = getString(R.string.operation_ok_msg);
+            showMessage(statusCode, caption, message);
+        } else if(message != null) {
+            statusCode = ResponseVS.SC_ERROR;
+            caption = getString(R.string.operation_error_msg);
+            showMessage(statusCode, caption, message);
+        }
+    }
+
     private void printRepresentativeData(UserVS representative) {
         if(representative.getImageBytes() != null) {
-            Bitmap bmp = BitmapFactory.decodeByteArray(representative.getImageBytes(), 0,
+            final Bitmap bmp = BitmapFactory.decodeByteArray(representative.getImageBytes(), 0,
                     representative.getImageBytes().length);
             ImageView image = (ImageView) rootView.findViewById(R.id.representative_image);
             image.setImageBitmap(bmp);
+            image.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    ImageView imageView = new ImageView(getActivity());
+                    imageView.setLayoutParams(new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT));
+                    imageView.setImageBitmap(bmp);
+                    new AlertDialog.Builder(getActivity()).setView(imageView).show();
+                }
+            });
         }
         if(representative.getDescription() != null) {
             String representativeDescription = "<html style='background-color:#eeeeee;'>" +
@@ -234,6 +241,7 @@ public class RepresentativeFragment extends Fragment {
             });
         }
     }
+
     @Override public void onResume() {
         Log.d(TAG + ".onResume() ", "");
         super.onResume();
@@ -252,4 +260,5 @@ public class RepresentativeFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
     }
+
 }

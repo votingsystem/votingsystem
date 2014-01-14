@@ -5,8 +5,8 @@
     <string name="vote_canceled_receipt_lbl">Recibo de anulación de voto</string>
     <string name="loading_data_msg">Cargando datos...</string>
     
-    <string name="sending_data_caption">Por favor, espere</string>
-    <string name="sending_data_lbl">Enviando información ... </string>
+    <string name="wait_caption">Por favor, espere</string>
+    <string name="sending_data_lbl">Enviando datos ... </string>
     <string name="back_to_cancel_lbl">Pulsar \'atrás\' para cancelar</string>
     
     <string name="manifest_pendind_lbl">Manifiesto pendiente de abrir</string>
@@ -339,5 +339,7 @@
     <string name="representative_revoke_ok_msg">El usuario ha sido dado de alta como representante</string>
     <string name="confirm_selection_msg">Confirme la selección</string>
     <string name="representative_delegation_lbl">Delegar en representante</string>
+    <string name="anonymous_delegation_lbl">Delegar de forma anónima</string>
+    <string name="public_delegation_lbl">Delegar de forma pública</string>
 
 </resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <FrameLayout android:id="@+id/mainLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:foreground="@drawable/shape_window_dim" >
+        <ScrollView android:id="@+id/scroller"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:fillViewport="true">
+            <LinearLayout android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/form_background"
+                android:orientation="vertical">
+                <WebView
+                    android:id="@+id/representative_description"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+                    <CheckBox android:id="@+id/anonymous_delegation_checkbox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/anonymous_delegation_lbl"
+                        android:onClick="onCheckboxClicked"/>
+                    <CheckBox android:id="@+id/public_delegation_checkbox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/public_delegation_lbl"
+                        android:onClick="onCheckboxClicked"/>
+                </LinearLayout>
+
+
+                <EditText android:id="@+id/weeks_delegation"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="20dip"
+                    android:layout_marginRight="20dip"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:textAppearance="?android:attr/textAppearanceMedium" >
+                </EditText>
+
+
+                <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal"
+                    android:layout_marginBottom="30dp">
+                    <Button android:id="@+id/cancel_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop ="7dp"
+                        android:layout_marginRight ="7dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:text="@string/cancel_lbl"
+                        android:onClick="onButtonClicked"/>
+                    <Button android:id="@+id/accept_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop ="7dp"
+                        android:layout_marginRight ="7dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:text="@string/accept_lbl"
+                        android:onClick="onButtonClicked"/>
+                </LinearLayout>
+        </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+
+</RelativeLayout>
