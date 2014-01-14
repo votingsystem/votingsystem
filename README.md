@@ -33,8 +33,20 @@ De esta forma:
 *   Se instalan los editores de texto empleados en las aplicaciones **Control de Acceso**, y **TestsWebApp**
 *   Se instalan los certificados empleados por la aplicación para generar firmas y descifrar documentos.
 
+
+#### Servicio de sellado de tiempo
+
+Los documentos firmados utilizados por la aplicación llevan incorporado un **sello de tiempo**. 
+
+El proyecto incorpora un servidor de sellos de tiempo, la aplicación **TimeStampServer**. Para que el sistema funcione es necesario que **AccessControl** y **ControlCenter** tengan acceso a una instancia de **TimeStampServer**.
+
+La dirección del servidor de sello de tiempo de las aplicaciones **AccessControl** y **ControlCenter** se configura en la propiedad 'VotingSystem.urlTimeStampServer' del archivo:
+
+    grails-app/conf/Config.groovy
+
+
 =======================================================================================================
-*   Las aplicaciones que utilizan **Hibernate** y **Grails** (**AccessControl**, **ControlCenter** y **TestsWebApp**
+*   Las aplicaciones que utilizan **Hibernate** y **Grails** (**TimeStampServer**, **AccessControl**, **ControlCenter** y **TestsWebApp**
 dan problemas con OpenJDK 1.7.0_25).
 
 *   En entornos de desarrollo con máquinas virtuales Oracle pueden presentarse problemas de colisión de clases entre las
