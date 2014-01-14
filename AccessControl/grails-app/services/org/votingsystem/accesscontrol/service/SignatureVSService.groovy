@@ -402,7 +402,6 @@ class SignatureVSService {
 	}
 		
 	public ResponseVS validateSMIME(SMIMEMessageWrapper messageWrapper, Locale locale) {
-		log.debug("validateSMIME")
 		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
 		if(messageSMIME) {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
@@ -417,7 +416,6 @@ class SignatureVSService {
 		Set<UserVS> signersVS = messageWrapper.getSigners();
 		if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 			messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
-		log.debug("validateSignersCertificate - number of signers: ${signersVS.size()}")
 		Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
         UserVS anonymousSigner = null

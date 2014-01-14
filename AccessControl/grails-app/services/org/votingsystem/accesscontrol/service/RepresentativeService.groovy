@@ -464,7 +464,6 @@ class RepresentativeService {
 	
     ResponseVS saveRepresentativeData(MessageSMIME messageSMIMEReq, 
 		byte[] imageBytes, Locale locale) {
-		log.debug("saveRepresentativeData - ")
 		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		log.debug("saveRepresentativeData - userVS: ${userVS.nif}")

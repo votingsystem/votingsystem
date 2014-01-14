@@ -431,7 +431,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 String digestTokenStr = new String(Base64.encode(hashToken));
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                logger.debug("checkTimeStampToken - timeStampToken - fecha: " +  cal.getTime());
+                logger.debug("checkTimeStampToken - timeStampToken: " +  cal.getTime());
                 //logger.debug("checkTimeStampToken - digestStr: " + digestStr 
                 //		+ " - digestTokenStr " + digestTokenStr);
                 return timeStampToken;

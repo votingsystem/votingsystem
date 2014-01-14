@@ -54,9 +54,11 @@ class TimeStampService {
             } else {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,
                         type:CertificateVS.Type.TIMESTAMP_SERVER)
-                if(timeStampServerCert)
-                    x509TimeStampServerCert = CertUtil.loadCertificateFromStream (timeStampServerCert.content)
-                else {
+                if(timeStampServerCert) {
+                    x509TimeStampServerCert = CertUtil.loadCertificateFromStream (
+                            new ByteArrayInputStream(timeStampServerCert.content))
+                    signingCertPEMBytes = CertUtil.getPEMEncoded(x509TimeStampServerCert)
+                } else {
                     ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
                             ContentTypeVS.JSON);
                     timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
@@ -174,6 +176,11 @@ class TimeStampService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                     message:messageSource.getMessage('timeStampErrorMsg', null, locale))
         }
+    }
+
+    public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
+        if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = initService().timeStampSignerInfoVerifier
+        return timeStampSignerInfoVerifier
     }
 
 }
