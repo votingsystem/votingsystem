@@ -23,7 +23,7 @@ environments {
     development {
         dataSource {
             dbCreate = "update" // one of 'create', 'create-drop','update'
-            url="jdbc:postgresql://localhost:5432/TimeStampServer"
+            url="jdbc:postgresql://192.168.1.8:5432/TimeStampServer"
         }
     }
     test {
