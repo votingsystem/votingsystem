@@ -163,7 +163,6 @@ class SignatureVSService {
     }
 
 	public ResponseVS getEventTrustedAnchors(EventVS event, Locale locale) {
-		log.debug("getEventTrustedAnchors")
 		if(!event) return new ResponseVS(ResponseVS.SC_ERROR)
 		Set<TrustAnchor> eventTrustAnchors = eventTrustedAnchorsHashMap.get(event.id)
 		ResponseVS responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, data:eventTrustAnchors)
@@ -472,7 +471,6 @@ class SignatureVSService {
 
 	public ResponseVS validateSMIMEVote(
 		SMIMEMessageWrapper messageWrapper, Locale locale) {
-		log.debug("validateSMIMEVote -")
 		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
 		if(messageSMIME) {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',

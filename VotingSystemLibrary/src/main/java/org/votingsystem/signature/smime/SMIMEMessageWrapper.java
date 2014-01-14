@@ -178,7 +178,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
         try {
         	if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
         			ContextVS.PROVIDER).build(cert))){
-                logger.debug("signature verified");
                 result = true;
             } else {logger.debug("signature failed!");}
         } catch(CMSVerifierCertificateNotValidException ex) {
