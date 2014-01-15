@@ -10,16 +10,19 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputFilter;
+import android.text.Layout;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -43,6 +46,9 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
 	
 	public static final String TAG = "RepresentativeDelegationActivity";
 
+    public static final String ANONYMOUS_SELECTED_KEY  = "ANONYMOUS_SELECTED_KEY";
+    public static final String PUBLIC_SELECTED_KEY     = "PUBLIC_SELECTED_KEY";
+
     private View progressContainer;
     private Button acceptButton;
     private CheckBox anonymousCheckBox;
@@ -53,17 +59,16 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            if(pin != null) launchSignAndSendService(pin);
-            else {
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                "intent.getExtras(): " + intent.getExtras());
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        if(pin != null) launchSignAndSendService(pin);
+        else {
 
-            }
+        }
         }
     };
-
 
     private void launchSignAndSendService(String pin) {
         Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
@@ -105,12 +110,14 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         progressContainer = findViewById(R.id.progressContainer);
         acceptButton = (Button) findViewById(R.id.accept_button);
         anonymousCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
-        publicCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
+        publicCheckBox = (CheckBox) findViewById(R.id.public_delegation_checkbox);
 
         EditText et = (EditText) findViewById(R.id.weeks_delegation);
-        et.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "52")});
+        et.setFilters(new InputFilter[]{
+                new InputFilterMinMax(1, ContextVS.MAX_WEEKS_ANONYMOUS_DELEGATION)});
 
-        String editorFileName = "delegation_message_" + Locale.getDefault().getLanguage().toLowerCase() + ".html";
+        String editorFileName = "delegation_message_" +
+                Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
             if(!Arrays.asList(getResources().getAssets().list("")).contains(editorFileName)) {
                 Log.d(TAG + ".loadEditor(...)", "missing editorFileName: " + editorFileName);
@@ -121,9 +128,26 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         }
         WebView webView = (WebView)findViewById(R.id.representative_description);
         webView.loadUrl("file:///android_asset/" + editorFileName);
+        webView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                showProgress(false, true);
+            }
+        });
+        showProgress(true, true);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));
+        if(savedInstanceState != null) {
+            int selectedCheckBoxId = -1;
+            if(savedInstanceState.getBoolean(ANONYMOUS_SELECTED_KEY, false)) {
+                selectedCheckBoxId = R.id.anonymous_delegation_checkbox;
+                anonymousCheckBox.setChecked(true);
+            } else if(savedInstanceState.getBoolean(PUBLIC_SELECTED_KEY, false))  {
+                selectedCheckBoxId = R.id.public_delegation_checkbox;
+                publicCheckBox.setChecked(true);
+            }
+            if(selectedCheckBoxId > 0) onCheckboxClicked(selectedCheckBoxId);
+        }
     }
 
     private void showMessage(Integer statusCode, String caption, String message) {
@@ -177,7 +201,11 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
 
 
     public void onCheckboxClicked(View view) {
-        switch(view.getId()) {
+        onCheckboxClicked(view.getId());
+    }
+
+    public void onCheckboxClicked(int selectedBoxId) {
+        switch(selectedBoxId) {
             case R.id.anonymous_delegation_checkbox:
                 publicCheckBox.setChecked(false);
                 break;
@@ -185,9 +213,14 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                 anonymousCheckBox.setChecked(false);
                 break;
         }
+        if(anonymousCheckBox.isChecked())
+            ((LinearLayout)findViewById(R.id.weeks_delegation_layout)).setVisibility(View.VISIBLE);
+        else ((LinearLayout)findViewById(R.id.weeks_delegation_layout)).setVisibility(View.GONE);
         if(anonymousCheckBox.isChecked() || publicCheckBox.isChecked()) {
             acceptButton.setEnabled(true);
         } else acceptButton.setEnabled(false);
+        Log.d(TAG + ".onCheckboxClicked(...) ", "anonymousCheckBox.isChecked(): " + anonymousCheckBox.isChecked() +
+                " - publicCheckBox.isChecked(): " + publicCheckBox.isChecked());
     }
 
     public void onButtonClicked(View view) {
@@ -236,5 +269,9 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+        outState.putBoolean(ANONYMOUS_SELECTED_KEY, anonymousCheckBox.isChecked());
+        outState.putBoolean(PUBLIC_SELECTED_KEY, publicCheckBox.isChecked());
+
     }
+
 }

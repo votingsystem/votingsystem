@@ -6,13 +6,16 @@ import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.List;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class ResponseVS<T> {
+public class ResponseVS<T> implements Serializable {
+
+    public static final long serialVersionUID = 1L;
     
 	private static Logger logger = Logger.getLogger(ResponseVS.class);
     

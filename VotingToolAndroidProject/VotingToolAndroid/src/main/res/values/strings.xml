@@ -341,5 +341,6 @@
     <string name="representative_delegation_lbl">Delegar en representante</string>
     <string name="anonymous_delegation_lbl">Delegar de forma anónima</string>
     <string name="public_delegation_lbl">Delegar de forma pública</string>
+    <string name="anonymous_delegation_time_msg">Indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
 
 </resources>

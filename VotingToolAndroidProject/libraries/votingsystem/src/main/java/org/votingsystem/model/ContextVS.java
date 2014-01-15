@@ -91,6 +91,8 @@ public class ContextVS {
     public static final Integer REPRESENTATIVE_PAGE_SIZE = 20;
     public static final Integer EVENTVS_PAGE_SIZE = 20;
 
+    //Num. max of weeks for anonymous delegations. 52 -> one year
+    public static final int MAX_WEEKS_ANONYMOUS_DELEGATION = 52;
 
     //loader IDs
     public static final int RECEIPT_LOADER_ID = 1;
