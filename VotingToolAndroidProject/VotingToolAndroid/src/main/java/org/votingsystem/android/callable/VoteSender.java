@@ -146,7 +146,8 @@ public class VoteSender implements Callable<ResponseVS> {
             String subject = context.getString(R.string.cancel_vote_msg_subject);
             String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
             JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
+            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
+                    contextVS.getAccessControl().getNameNormalized(), serviceURL,
                     cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     subject,  keyStoreBytes, password,
                     contextVS.getAccessControl().getCertificate(), context);

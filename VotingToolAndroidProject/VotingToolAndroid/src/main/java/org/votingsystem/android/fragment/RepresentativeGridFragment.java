@@ -40,7 +40,6 @@ import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NewRepresentativeActivity;
-import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
@@ -255,8 +254,6 @@ public class RepresentativeGridFragment extends Fragment
                 getLoaderManager().restartLoader(loaderId, null, this);
                 return true;
             case R.id.cancel_anonymouys_representatioin:
-                Intent intent1 = new Intent(getActivity(), RepresentativeDelegationActivity.class);
-                startActivity(intent1);
                 return true;
             case R.id.new_representative:
                 Intent intent = new Intent(getActivity(), NewRepresentativeActivity.class);

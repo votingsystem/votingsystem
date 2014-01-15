@@ -55,8 +55,10 @@ public class VoteService extends IntentService {
             contextVS = ContextVS.getInstance(getApplicationContext());
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String pin = arguments.getString(ContextVS.PIN_KEY);
-            Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation + " - event: " +
-                    vote.getEventVS().getId());
+            String receiverName = arguments.getString(ContextVS.RECEIVER_KEY);
+            Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation + " - receiverName: " +
+                    receiverName + " - event: " + vote.getEventVS().getId());
+            if(receiverName == null) receiverName = contextVS.getAccessControl().getNameNormalized();
             ControlCenterVS controlCenter = vote.getEventVS().getControlCenter();
             X509Certificate controlCenterCert = contextVS.getCert(controlCenter.getServerURL());
             ResponseVS responseVS = null;
@@ -84,7 +86,7 @@ public class VoteService extends IntentService {
                     break;
                 case CANCEL_VOTE:
                     JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-                    responseVS = processCancellation(pin, cancelDataJSON.toString());
+                    responseVS = processCancellation(receiverName, pin, cancelDataJSON.toString());
                     break;
             }
             showNotification(responseVS, vote.getEventVS().getSubject(), operation, vote);
@@ -148,14 +150,15 @@ public class VoteService extends IntentService {
     }
 
 
-    private ResponseVS processCancellation(String pin, String signatureContent) {
+    private ResponseVS processCancellation(String receiverName, String pin,
+                   String signatureContent) {
         ResponseVS responseVS = null;
         String subject = getString(R.string.cancel_vote_msg_subject);
         String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
         try {
             FileInputStream fis = openFileInput(KEY_STORE_FILE);
             byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
+            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(receiverName, serviceURL,
                     signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     subject, keyStoreBytes, pin.toCharArray(),
                     contextVS.getAccessControl().getCertificate(), getApplicationContext());

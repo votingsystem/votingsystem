@@ -104,13 +104,15 @@ public class RepresentativeFragment extends Fragment {
                 UserContentProvider.getRepresentativeURI(representativeId),
                 null, null, null, null);
         cursor.moveToFirst();
-        UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+        final UserVS representative = (UserVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         rootView = inflater.inflate(R.layout.representative, container, false);
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), RepresentativeDelegationActivity.class);
+                intent.putExtra(ContextVS.NAME_KEY, representative.getFullName());
+                intent.putExtra(ContextVS.NIF_KEY, representative.getNif());
                 startActivityForResult(intent, REPRESENTATIVE_DELEGATION);
             }
         });

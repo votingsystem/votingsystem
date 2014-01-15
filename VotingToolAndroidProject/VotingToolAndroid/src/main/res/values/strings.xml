@@ -202,7 +202,7 @@
     <string name="dialogo_password_text_entry">Introducir contraseña</string>
     <string name="repeat_password_label">Repita la contraseña</string>
     <string name="close_lbl">Cerrar</string>
-    <string name="ok_button">OK</string>
+    <string name="ok_lbl">OK</string>
     <string name="accept_lbl">Aceptar</string>
     <string name="request_certificate_form_lbl">Datos del certificado de usuario</string>
 	<string name="campos_vacios_msg">Debe rellenar todos los campos</string>
@@ -342,5 +342,6 @@
     <string name="anonymous_delegation_lbl">Delegar de forma anónima</string>
     <string name="public_delegation_lbl">Delegar de forma pública</string>
     <string name="anonymous_delegation_time_msg">Indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
-
+    <string name="public_delegation_confirm_msg"><![CDATA[Va a delegar de forma pública en <b>\'%1$s\'<b>]]></string>
+    <string name="anonymous_delegation_confirm_msg"><![CDATA[Va a delegar de forma anónima en <b>\'%1$s\'<b>]]></string>
 </resources>

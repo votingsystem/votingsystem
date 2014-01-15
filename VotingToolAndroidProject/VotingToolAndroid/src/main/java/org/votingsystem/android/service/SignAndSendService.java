@@ -49,6 +49,9 @@ public class SignAndSendService extends IntentService {
             String signatureContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
+            String receiverName = arguments.getString(ContextVS.RECEIVER_KEY);
+            if(receiverName == null) receiverName = contextVS.getAccessControl().
+                    getNameNormalized();
             ContentTypeVS contentType = (ContentTypeVS)intent.getSerializableExtra(
                     ContextVS.CONTENT_TYPE_KEY);
 
@@ -96,8 +99,10 @@ public class SignAndSendService extends IntentService {
                 case SMIME_CLAIM_SIGNATURE:
                 case CLAIM_EVENT:
                 case REPRESENTATIVE_REVOKE:
-                    SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                            signatureContent, contentType, messageSubject, keyStoreBytes,
+                case REPRESENTATIVE_SELECTION:
+                case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                    SMIMESignedSender smimeSignedSender = new SMIMESignedSender(receiverName,
+                            serviceURL, signatureContent, contentType, messageSubject, keyStoreBytes,
                             pin.toCharArray(), contextVS.getAccessControl().getCertificate(),
                             getApplicationContext());
                     responseVS = smimeSignedSender.call();

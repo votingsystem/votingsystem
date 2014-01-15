@@ -125,7 +125,7 @@ public class PublishEventVSFragment extends Fragment {
                     final GroupPosition groupPosition = selectedSubsystem;
                     message = message + " " + getString(R.string.publish_document_OK_sufix_msg);
                     AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(caption).
-                            setMessage(message).setPositiveButton(R.string.ok_button,
+                            setMessage(message).setPositiveButton(R.string.ok_lbl,
                             new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             Intent intent = new Intent(getActivity().getApplicationContext(),

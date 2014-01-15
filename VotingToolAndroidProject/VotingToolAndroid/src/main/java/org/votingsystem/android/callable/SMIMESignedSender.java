@@ -50,15 +50,17 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private char[] password;
     private Context context = null;
     private String serviceURL = null;
+    private String receiverName = null;
     private String subject = null;
     private String signatureContent = null;
     private byte[] keyStoreBytes = null;
     private ContentTypeVS contentType;
 
-    public SMIMESignedSender(String serviceURL, String signatureContent, ContentTypeVS contentType,
-            String subject, byte[] keyStoreBytes, char[] password,
+    public SMIMESignedSender(String receiverName, String serviceURL, String signatureContent,
+            ContentTypeVS contentType, String subject, byte[] keyStoreBytes, char[] password,
             X509Certificate destinationCert, Context context) {
         this.subject = subject;
+        this.receiverName = receiverName;
         this.signatureContent = signatureContent;
         this.contentType = contentType;
         this.keyStoreBytes = keyStoreBytes;
@@ -79,8 +81,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         try {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     keyStoreBytes, USER_CERT_ALIAS, password, SIGNATURE_ALGORITHM);
-            smimeMessage = signedMailGenerator.genMimeMessage(userVS,
-                    ContextVS.getInstance(context).getAccessControl().getNameNormalized(),
+            smimeMessage = signedMailGenerator.genMimeMessage(userVS, receiverName,
                     signatureContent, subject);
             timeStamper = new MessageTimeStamper(smimeMessage, context);
             responseVS = timeStamper.call();

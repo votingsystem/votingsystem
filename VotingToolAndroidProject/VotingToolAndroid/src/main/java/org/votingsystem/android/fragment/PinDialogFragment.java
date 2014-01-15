@@ -127,7 +127,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 msgTextView.setVisibility(View.GONE);
             } else {
                 msgTextView.setVisibility(View.VISIBLE);
-                msgTextView.setText(getArguments().getString(ContextVS.MESSAGE_KEY));
+                msgTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
             }
             withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
             dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);

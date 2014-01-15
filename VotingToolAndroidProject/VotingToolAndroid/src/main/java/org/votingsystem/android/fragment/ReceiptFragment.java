@@ -250,7 +250,7 @@ public class ReceiptFragment extends Fragment {
             case R.id.delete_receipt:
                 dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_receipt_lbl)).
                         setMessage(Html.fromHtml(getString(R.string.delete_receipt_msg,
-                                ((VoteVS)selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_button),
+                                ((VoteVS)selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 getActivity().getContentResolver().delete(ReceiptContentProvider.
@@ -269,7 +269,7 @@ public class ReceiptFragment extends Fragment {
             case R.id.cancel_vote:
                 dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
                         setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
-                                ((VoteVS) selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_button),
+                                ((VoteVS) selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,

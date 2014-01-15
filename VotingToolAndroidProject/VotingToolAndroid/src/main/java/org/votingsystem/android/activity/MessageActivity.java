@@ -62,7 +62,7 @@ public class MessageActivity extends FragmentActivity {
         Log.d(TAG + ".onResume() ", "onResume");
         super.onResume();
         AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(caption).
-                setMessage(Html.fromHtml(message)).setPositiveButton(getString(R.string.ok_button),
+                setMessage(Html.fromHtml(message)).setPositiveButton(getString(R.string.ok_lbl),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         onBackPressed();

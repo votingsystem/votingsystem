@@ -56,7 +56,7 @@ public class CertRequestActivity extends FragmentActivity {
                 AlertDialog dialog= new AlertDialog.Builder(this).setTitle(getString(R.string.
                         request_certificate_menu)).setMessage(Html.fromHtml(
                         getString(R.string.request_cert_again_msg))).setPositiveButton(getString(
-                        R.string.ok_button), new DialogInterface.OnClickListener() {
+                        R.string.ok_lbl), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Intent intent = new Intent(CertRequestActivity.this,
                                 FragmentContainerActivity.class);

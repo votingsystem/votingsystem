@@ -1,20 +1,25 @@
 package org.votingsystem.android.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.text.InputFilter;
 import android.text.Layout;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -24,18 +29,25 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.ObjectUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -50,11 +62,16 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
     public static final String PUBLIC_SELECTED_KEY     = "PUBLIC_SELECTED_KEY";
 
     private View progressContainer;
+    private TypeVS operationType;
     private Button acceptButton;
     private CheckBox anonymousCheckBox;
     private CheckBox publicCheckBox;
+    private EditText weeks_delegation;
     private FrameLayout mainLayout;
+    private ContextVS contextVS = null;
     private String broadCastId = null;
+    private String representativeName = null;
+    private String representativeNif = null;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -73,27 +90,29 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
     private void launchSignAndSendService(String pin) {
         Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
         try {
-            Intent startIntent = new Intent(RepresentativeDelegationActivity.this,
-                    SignAndSendService.class);
+            Intent startIntent = new Intent(this, SignAndSendService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
-            //startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
-            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
-            /*if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
-                startIntent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getEventVSId());
-            } else {
-                startIntent.putExtra(ContextVS.URL_KEY,
-                        contextVS.getAccessControl().getEventVSClaimCollectorURL());
-                startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
-                String messageSubject = getActivity().getString(R.string.signature_msg_subject)
-                        + eventVS.getSubject();
-                startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
-                JSONObject signatureContent = eventVS.getSignatureContentJSON();
-                signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
-            }*/
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
+                    getRepresentativeDelegationServiceURL());
+            String messageSubject = getString(R.string.representative_delegation_lbl);
+            startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
+            startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+            Map signatureDataMap = new HashMap();
+            signatureDataMap.put("operation", operationType.toString());
+            signatureDataMap.put("representativeNif", representativeNif);
+            signatureDataMap.put("representativeName", representativeName);
+            signatureDataMap.put("UUID", UUID.randomUUID().toString());
+            String weeksOperationActive = null;
+            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType)
+                weeksOperationActive = weeks_delegation.getText().toString();
+            signatureDataMap.put("weeksOperationActive", weeksOperationActive);
+            JSONObject signatureContent = new JSONObject(signatureDataMap);
+            startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
             showProgress(true, true);
-            //signAndSendButton.setEnabled(false);
+            ((LinearLayout)findViewById(R.id.buttons_layout)).setVisibility(View.GONE);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -104,6 +123,10 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         broadCastId = this.getClass().getSimpleName();
     	super.onCreate(savedInstanceState);
+        contextVS = contextVS.getInstance(this.getApplicationContext());
+        representativeName = getIntent().getStringExtra(ContextVS.NAME_KEY);
+        representativeNif = getIntent().getStringExtra(ContextVS.NIF_KEY);
+
         setContentView(R.layout.representative_delegation);
         mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
         mainLayout.getForeground().setAlpha(0);
@@ -111,7 +134,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         acceptButton = (Button) findViewById(R.id.accept_button);
         anonymousCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
         publicCheckBox = (CheckBox) findViewById(R.id.public_delegation_checkbox);
-
+        weeks_delegation = (EditText)findViewById(R.id.weeks_delegation);
         EditText et = (EditText) findViewById(R.id.weeks_delegation);
         et.setFilters(new InputFilter[]{
                 new InputFilterMinMax(1, ContextVS.MAX_WEEKS_ANONYMOUS_DELEGATION)});
@@ -138,6 +161,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));
         if(savedInstanceState != null) {
+            operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
             int selectedCheckBoxId = -1;
             if(savedInstanceState.getBoolean(ANONYMOUS_SELECTED_KEY, false)) {
                 selectedCheckBoxId = R.id.anonymous_delegation_checkbox;
@@ -229,13 +253,38 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                 onBackPressed();
                 break;
             case R.id.accept_button:
-
+                String confirmDialogMsg = null;
+                if(anonymousCheckBox.isChecked()) {
+                    if(TextUtils.isEmpty(weeks_delegation.getText())) {
+                        showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                                getString(R.string.anonymous_delegation_time_msg));
+                        return;
+                    }
+                    confirmDialogMsg = getString(
+                            R.string.anonymous_delegation_confirm_msg, representativeName);
+                    operationType = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
+                }  else {
+                    confirmDialogMsg = getString(
+                            R.string.public_delegation_confirm_msg, representativeName);
+                    operationType = TypeVS.REPRESENTATIVE_SELECTION;
+                }
+                final String pinDialogMsg = confirmDialogMsg;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(
+                        getString(R.string.representative_delegation_lbl)).
+                        setMessage(Html.fromHtml(confirmDialogMsg)).setPositiveButton(getString(R.string.ok_lbl),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                PinDialogFragment.showPinScreen(getSupportFragmentManager(),
+                                        broadCastId, pinDialogMsg, false, null);
+                            }
+                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                AlertDialog dialog = builder.show();
+                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 break;
         }
     }
 
-
-    private void sendResult(int result, String message) {
+   private void sendResult(int result, String message) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(ContextVS.MESSAGE_KEY, message);
         setResult(result, resultIntent);
@@ -271,7 +320,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putBoolean(ANONYMOUS_SELECTED_KEY, anonymousCheckBox.isChecked());
         outState.putBoolean(PUBLIC_SELECTED_KEY, publicCheckBox.isChecked());
-
+        outState.putSerializable(ContextVS.TYPEVS_KEY, operationType);
     }
 
 }

@@ -90,7 +90,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
                         if(representativeNif == null) {
                             new AlertDialog.Builder(
                                     NewRepresentativeActivity.this).setTitle(getString(R.string.error_lbl)).
-                                    setMessage(getString(R.string.nif_error)).setPositiveButton(getString(R.string.ok_button),
+                                    setMessage(getString(R.string.nif_error)).setPositiveButton(getString(R.string.ok_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             showNifDialog();
