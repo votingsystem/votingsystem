@@ -65,6 +65,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     private View progressContainer;
     private FrameLayout mainLayout;
     private TextView imageCaption;
+    private UserVS representative;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
     private String representativeImageName = null;
@@ -205,9 +206,9 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     }
 
     private void printRepresentativeData(UserVS representativeData) {
+        this.representative = representativeData;
         editorFragment.setEditorData(representativeData.getDescription());
         setRepresentativeImage(representativeData.getImageBytes(), null);
-        this.menu.setGroupVisible(R.id.general_items, true);
     }
 
     private void loadRepresentativeData(String representativeNif) {
@@ -253,7 +254,8 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         Log.d(TAG + ".onCreateOptionsMenu(...)", "");
         getMenuInflater().inflate(R.menu.editor, menu);
         this.menu = menu;
-        if(operationType == TypeVS.REPRESENTATIVE) this.menu.setGroupVisible(R.id.general_items, false);
+        if(operationType == TypeVS.REPRESENTATIVE && representative == null)
+            this.menu.setGroupVisible(R.id.general_items, false);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -367,6 +369,8 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);
         if (progressVisible.get() && progressContainer != null) {
+            if(TypeVS.REPRESENTATIVE == operationType) ((TextView)findViewById(R.id.progressMessage)).
+                    setText(getString(R.string.updating_representative_data_msg));
             getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
             if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
                     getApplicationContext(), android.R.anim.fade_in));

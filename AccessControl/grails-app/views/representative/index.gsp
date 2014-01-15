@@ -29,7 +29,8 @@
 			<div id="tabs-1">
 				<div style="width: 90%;margin: auto;top: 0; left: 0;right: 0; position:relative;display:table;">
 					<div style="display:table-cell; vertical-align: top; float:left;">
-						<img id="representativeImg" src="${representative.imageURL}" style="text-align:center; width: 200px;"></img>
+						<img id="representativeImg" src="${representative.imageURL}"
+                             style="text-align:center; width: 200px;margin-right: 20px;"></img>
 					</div>
 					<div style="display: table;  margin:0px auto 15px auto; vertical-align: top;">
                         ${raw(representative.description)}

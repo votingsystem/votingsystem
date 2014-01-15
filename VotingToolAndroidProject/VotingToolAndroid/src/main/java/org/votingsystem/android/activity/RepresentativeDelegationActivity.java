@@ -228,7 +228,6 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         }
     }
 
-
     public void onCheckboxClicked(View view) {
         onCheckboxClicked(view.getId());
     }
@@ -265,12 +264,12 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                                 getString(R.string.anonymous_delegation_time_msg));
                         return;
                     }
-                    confirmDialogMsg = getString(
-                            R.string.anonymous_delegation_confirm_msg, representativeName);
+                    confirmDialogMsg = getString(R.string.anonymous_delegation_confirm_msg,
+                            weeks_delegation.getText().toString(), representativeName);
                     operationType = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
                 }  else {
-                    confirmDialogMsg = getString(
-                            R.string.public_delegation_confirm_msg, representativeName);
+                    confirmDialogMsg = getString(R.string.public_delegation_confirm_msg,
+                             representativeName);
                     operationType = TypeVS.REPRESENTATIVE_SELECTION;
                 }
                 final String pinDialogMsg = confirmDialogMsg;
