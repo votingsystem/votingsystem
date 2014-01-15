@@ -76,14 +76,19 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                "intent.getExtras(): " + intent.getExtras());
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(pin != null) launchSignAndSendService(pin);
-        else {
-
-        }
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                        ResponseVS.SC_ERROR);
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+            if(pin != null) launchSignAndSendService(pin);
+            else {
+                showMessage(responseStatusCode, caption, message);
+                showProgress(false, true);
+            }
         }
     };
 
@@ -274,17 +279,20 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                         setMessage(Html.fromHtml(confirmDialogMsg)).setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                        broadCastId, pinDialogMsg, false, null);
+                                showPinScreen(pinDialogMsg);
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
                 AlertDialog dialog = builder.show();
-                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 break;
         }
     }
 
-   private void sendResult(int result, String message) {
+    private void showPinScreen(String pinDialogMsg) {
+        PinDialogFragment.showPinScreen(getSupportFragmentManager(),
+                broadCastId, pinDialogMsg, false, null);
+    }
+
+    private void sendResult(int result, String message) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(ContextVS.MESSAGE_KEY, message);
         setResult(result, resultIntent);

@@ -223,7 +223,6 @@ public class RepresentativeService extends IntentService {
             contentToSignMap.put("UUID", UUID.randomUUID().toString());
             String contentToSign = new JSONObject(contentToSignMap).toString();
 
-
             byte[] keyStoreBytes = null;
             FileInputStream fis = openFileInput(KEY_STORE_FILE);
             keyStoreBytes = FileUtils.getBytesFromInputStream(fis);

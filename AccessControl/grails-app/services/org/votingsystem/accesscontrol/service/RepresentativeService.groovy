@@ -750,7 +750,7 @@ class RepresentativeService {
 			MessageSMIME.withTransaction {
 				messageSMIMEResp.save();
 			}
-			log.error "processRevoke - saved MessageSMIME '${messageSMIMEResp.id}'"
+			log.debug "processRevoke - saved MessageSMIME '${messageSMIMEResp.id}'"
 			msg =  messageSource.getMessage('representativeRevokeMsg',
 				[userVS.getNif()].toArray(), locale)
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, 

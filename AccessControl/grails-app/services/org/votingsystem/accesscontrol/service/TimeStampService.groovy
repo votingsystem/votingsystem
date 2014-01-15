@@ -46,6 +46,7 @@ class TimeStampService {
                     Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
                     x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
                     signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
+                    log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
                 }
             } else {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,
