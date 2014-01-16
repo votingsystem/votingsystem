@@ -1,0 +1,15 @@
+<!DOCTYPE hibernate-configuration SYSTEM
+  "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+
+        <property name="hibernate.generate_statistics">true</property>
+        <mapping class="org.votingsystem.model.ticket.TicketProviderVS" />
+        <mapping class="org.votingsystem.model.ticket.TicketVS" />
+        <mapping class="org.votingsystem.model.ticket.TicketVSBatchRequest" />
+        <mapping class="org.votingsystem.model.ticket.TransactionVS" />
+        <mapping class="org.votingsystem.model.ticket.UserVSAccount" />
+        <mapping class="org.votingsystem.model.UserVS" />
+
+    </session-factory>
+</hibernate-configuration>
