@@ -54,6 +54,8 @@ public enum ContentTypeVS {
 
     VOTE("application/vote;application/pkcs7-signature;application/pkcs7-mime", "vote"),
 
+    TICKET("application/vote;application/pkcs7-signature;application/pkcs7-mime", "ticket"),
+
     X509_CA("application/x509-ca-cert", "crt"),
     X509_USER("application/x509-user-cert", "crt");
 

@@ -54,12 +54,14 @@ public class ContextVS {
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
+    public static final int TICKET_TAG                              = 3;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
+    public static final String TICKET_OID = VOTING_SYSTEM_BASE_OID + TICKET_TAG;
 
     public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
     public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
@@ -72,9 +74,10 @@ public class ContextVS {
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";
 
-    public static final String CSR_FILE_NAME   = "csr";
-    public static final String IMAGE_FILE_NAME   = "image";
+    public static final String CSR_FILE_NAME                 = "csr";
+    public static final String IMAGE_FILE_NAME               = "image";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
+    public static final String TICKET_REQUEST_DATA_FILE_NAME = "ticketRequestData";
 
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
 
