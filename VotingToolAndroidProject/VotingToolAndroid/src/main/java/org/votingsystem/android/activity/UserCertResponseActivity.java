@@ -31,6 +31,7 @@ import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ObjectUtils;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -101,6 +102,13 @@ public class UserCertResponseActivity extends ActionBarActivity {
                 FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
                 fos.write(keyStoreBytes);
                 fos.close();
+
+                byte[] userDataBytes = ObjectUtils.serializeObject(user);
+                FileOutputStream outputStream = openFileOutput(ContextVS.USER_DATA_FILE_NAME,
+                        Context.MODE_PRIVATE);
+                outputStream.write(userDataBytes);
+                outputStream.close();
+
                 contextVS.setState(ContextVS.State.WITH_CERTIFICATE, user.getNif());
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 insertPinButton.setVisibility(View.GONE);

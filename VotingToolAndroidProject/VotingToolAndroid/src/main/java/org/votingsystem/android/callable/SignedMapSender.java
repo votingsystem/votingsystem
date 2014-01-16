@@ -2,10 +2,8 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
-
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -22,7 +20,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import javax.mail.Header;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
@@ -32,32 +32,37 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class SMIMESignedSender implements Callable<ResponseVS> {
+public class SignedMapSender implements Callable<ResponseVS> {
 
-    public static final String TAG = "SMIMESignedSender";
+    public static final String TAG = "SignedMapSender";
 
     private SMIMEMessageWrapper smimeMessage = null;
     private X509Certificate receiverCert = null;
     private char[] password;
     private Context context = null;
-    private String serviceURL = null;
     private String fromUser = null;
     private String toUser = null;
     private String subject = null;
+    private String signedFileName = null;
     private String textToSign = null;
+    private Map<String, Object> mapToSend;
+    private String serviceURL = null;
     private ContentTypeVS contentType;
 
-    public SMIMESignedSender(String fromUser, String toUser, String serviceURL,
-            String textToSign, ContentTypeVS contentType, String subject,
-            char[] password, X509Certificate receiverCert, Context context) {
+    public SignedMapSender(String fromUser, String toUser, String textToSign,
+            Map<String, Object> mapToSend, String subject, Header header, String serviceURL,
+            String signedFileName, ContentTypeVS contentType, char[] password,
+            X509Certificate receiverCert, Context context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;
+        this.mapToSend = mapToSend;
         this.subject = subject;
         this.contentType = contentType;
         this.password = password;
         this.context = context;
         this.serviceURL = serviceURL;
+        this.signedFileName = signedFileName;
         this.receiverCert = receiverCert;
     }
 
@@ -83,7 +88,8 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             if(contentType.isEncrypted())
                 messageToSend = Encryptor.encryptSMIME(smimeMessage, receiverCert);
             else messageToSend = smimeMessage.getBytes();
-            responseVS  = HttpHelper.sendData(messageToSend, contentType, serviceURL);
+            mapToSend.put(signedFileName, messageToSend);
+            responseVS = HttpHelper.sendObjectMap(mapToSend, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 if(responseVS.getContentType() != null &&
                         responseVS.getContentType().isEncrypted()) {
@@ -91,22 +97,22 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                     PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
                     Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
                     PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
-                    SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
-                            responseVS.getMessageBytes(), publicKey, privateKey);
-                    responseVS.setSmimeMessage(signedMessage);
+                    KeyPair keypair = new KeyPair(publicKey, privateKey);
+                    byte[] encryptedData = responseVS.getMessageBytes();
+                    byte[] decryptedData = Encryptor.decryptFile(encryptedData, publicKey,
+                            privateKey);
+                    responseVS.setMessageBytes(decryptedData);
                 }
             }
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
+            responseVS = ResponseVS.getExceptionResponse(context.getString(R.string.pin_error_msg),
+                    context.getString(R.string.exception_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
+            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
+                    context.getString(R.string.exception_lbl));
         } finally {return responseVS;}
-    }
-
-    public SMIMEMessageWrapper getSMIMEMessage() {
-        return smimeMessage;
     }
 
 }

@@ -9,80 +9,50 @@ import java.util.Date;
 public class CommentVS implements Comparable {
 
     private Long id;
-    private Long mensajeMimeId;
+    private Long messageSMIMEId;
     private String content;
     private UserVS userVS;
-    private String userVSName;
     private EventVS eventVS;
     private Date dateCreated;
     private Date lastUpdated;
 
-    /**
-     * @return the content
-     */
+
     public String getContent() {
         return content;
     }
 
-    /**
-     * @param content the content to set
-     */
     public void setContent(String content) {
         this.content = content;
     }
 
-    /**
-     * @return the userVS
-     */
     public UserVS getUserVS() {
         return userVS;
     }
 
-    /**
-     * @param userVS the userVS to set
-     */
     public void setUserVS(UserVS userVS) {
         this.userVS = userVS;
     }
 
-    /**
-     * @return the id
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * @return the dateCreated
-     */
     public Date getDateCreated() {
         return dateCreated;
     }
 
-    /**
-     * @param dateCreated the dateCreated to set
-     */
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    /**
-     * @return the lastUpdated
-     */
     public Date getLastUpdated() {
         return lastUpdated;
     }
 
-    /**
-     * @param lastUpdated the lastUpdated to set
-     */
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
@@ -95,25 +65,16 @@ public class CommentVS implements Comparable {
 		return eventVS;
 	}
 
-	public void setUserName(String userVSName) {
-		this.userVSName = userVSName;
-	}
+    public Long getMessageSMIMEId() {
+        return messageSMIMEId;
+    }
 
-	public String getUserName() {
-		return userVSName;
-	}
+    public void setMessageSMIMEId(Long messageSMIMEId) {
+        this.messageSMIMEId = messageSMIMEId;
+    }
 
-	public void setMensajeMimeId(Long mensajeMimeId) {
-		this.mensajeMimeId = mensajeMimeId;
-	}
-
-	public Long getMensajeMimeId() {
-		return mensajeMimeId;
-	}
-
-	@Override
-	public int compareTo(Object comentario) {
-		return dateCreated.compareTo(((CommentVS)comentario).dateCreated);
-	}
+    @Override public int compareTo(Object comment) {
+        return dateCreated.compareTo(((CommentVS)comment).dateCreated);
+    }
 
 }

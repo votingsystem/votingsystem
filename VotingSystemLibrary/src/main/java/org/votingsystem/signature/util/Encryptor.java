@@ -113,6 +113,9 @@ public class Encryptor {
                     messageContentBytes = Base64.decode((String)messageContent);
                 }
             } else messageContentBytes = messageContent.toString().getBytes();
+        } else {
+            logger.error("messageContent " + messageContent);
+            return new ResponseVS(ResponseVS.SC_ERROR, "Content not found");
         }
         return new ResponseVS(ResponseVS.SC_OK, messageContentBytes);
     }

@@ -7,6 +7,10 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class ActorVS implements java.io.Serializable {
 	
 	public static final String TAG = "ActorVS";

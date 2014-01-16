@@ -111,8 +111,7 @@ public class RepresentativeFragment extends Fragment {
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), RepresentativeDelegationActivity.class);
-                intent.putExtra(ContextVS.NAME_KEY, representative.getFullName());
-                intent.putExtra(ContextVS.NIF_KEY, representative.getNif());
+                intent.putExtra(ContextVS.USER_KEY, representative);
                 startActivityForResult(intent, REPRESENTATIVE_DELEGATION);
             }
         });

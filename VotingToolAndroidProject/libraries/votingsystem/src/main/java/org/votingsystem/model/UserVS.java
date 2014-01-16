@@ -229,7 +229,7 @@ public class UserVS implements Serializable {
 
     public String getFullName() {
         if(fullName != null) return fullName;
-        else return firstName + " " + lastName;
+        else return ((firstName != null)? firstName: "")  + ((lastName != null)? lastName:"");
     }
 
     public void setFullName(String fullName) {

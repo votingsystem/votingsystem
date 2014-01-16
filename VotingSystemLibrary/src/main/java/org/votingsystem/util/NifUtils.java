@@ -12,7 +12,7 @@ public class NifUtils {
     public static String validate(String nif) {
     	if(nif == null) return null;
     	nif  = nif.toUpperCase();
-    	if(nif.length() < 9) {
+    	if(nif.length() <= 9) {
             int numberZeros = 9 - nif.length();
             for(int i = 0; i < numberZeros ; i++) {
                 nif = "0" + nif;

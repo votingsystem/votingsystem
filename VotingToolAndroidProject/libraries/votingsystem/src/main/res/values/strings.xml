@@ -28,5 +28,7 @@
     <string name="pending_manifest_lbl">Pendientes</string>
     <string name="closed_manifest_lbl">Cerrados</string>
     <string name="unknown_event_state_lbl">Evento de tipo desconocido</string>
+    <string name="exception_lbl">Excepción</string>
+    <string name="timestamp_service_error_caption">Error con el sellado de tiempo</string>
 
 </resources>

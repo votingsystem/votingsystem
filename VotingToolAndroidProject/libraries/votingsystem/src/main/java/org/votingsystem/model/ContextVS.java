@@ -8,6 +8,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import com.itextpdf.text.Context_iTextVS;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.ObjectUtils;
+
+import java.io.File;
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
@@ -15,6 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class ContextVS {
 
     public enum State {WITH_CERTIFICATE, WITH_CSR, WITHOUT_CSR}
@@ -26,12 +34,14 @@ public class ContextVS {
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
+    public static final int TICKET_TAG                              = 3;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
+    public static final String TICKET_OID = VOTING_SYSTEM_BASE_OID + TICKET_TAG;
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
@@ -40,16 +50,19 @@ public class ContextVS {
     public static final String IMAGE_FILE_NAME               = "image";
     public static final String ACCESS_REQUEST_FILE_NAME      = "accessRequest";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
+    public static final String USER_DATA_FILE_NAME           = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME      = "smimeMessage.p7m";
     public static final String PROVIDER                      = "BC";
     public static final String SERVER_URL_EXTRA_PROP_NAME    = "serverURL";
 
     //Intent keys
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
+    public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";
     public static final String FORM_DATA_KEY = "FORM_DATA";
     public static final String NIF_KEY = "NIF";
+    public static final String USER_KEY = "USER_KEY";
     public static final String EMAIL_KEY = "EMAIL_KEY";
     public static final String SURNAME_KEY = "SURNAME_KEY";
     public static final String PHONE_KEY = "PHONE_KEY";
@@ -85,7 +98,9 @@ public class ContextVS {
     public static final String RECEIPT_KEY  = "RECEIPT_KEY";
     public static final String STATE_KEY                   = "STATE";
     public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
-    public static final String APPLICATION_ID_KEY          = "idAplicacion";
+    public static final String HASH_CERT_KEY               = "HASH_CERT_KEY";
+    public static final String TIME_KEY                    = "TIME_KEY";
+    public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
 
     //Pages size
     //public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
@@ -99,9 +114,10 @@ public class ContextVS {
     public static final int RECEIPT_LOADER_ID = 1;
 
     //Notifications IDs
-    public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;
-    public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID = 2;
-    public static final int VOTE_SERVICE_NOTIFICATION_ID          = 3;
+    public static final int RSS_SERVICE_NOTIFICATION_ID            = 1;
+    public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID  = 2;
+    public static final int VOTE_SERVICE_NOTIFICATION_ID           = 3;
+    public static final int REPRESENTATIVE_SERVICE_NOTIFICATION_ID = 4;
 
     public static final int NUM_MIN_OPTIONS = 2;
 
@@ -123,7 +139,7 @@ public class ContextVS {
     public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
     //public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA256WithRSA";
-    public static final String USER_CERT_ALIAS = "CertificadoUsuario";
+    public static final String USER_CERT_ALIAS = "USER_CERT_ALIAS";
     public static final String KEY_STORE_FILE = "keyStoreVS.p12";
 
     public static final String TIMESTAMP_USU_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
@@ -205,16 +221,9 @@ public class ContextVS {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(STATE_KEY + "_" + accessControl.getServerURL() , state.toString());
         if(nif != null) editor.putString(NIF_KEY, nif);
+        if(State.WITH_CERTIFICATE == state) loadUser();
         editor.commit();
         this.state = state;
-    }
-
-    public String getUserNif() {
-        if(state != State.WITH_CERTIFICATE) return null;
-        SharedPreferences settings = context.getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String userNif = settings.getString(NIF_KEY, null);
-        return userNif;
     }
 
     public State getState() {
@@ -253,6 +262,21 @@ public class ContextVS {
                 STATE_KEY + "_" + accessControl.getServerURL(), State.WITHOUT_CSR.toString());
         state = State.valueOf(stateStr);
         this.accessControl = accessControl;
+        loadUser();
+    }
+
+    public void loadUser() {
+        try {
+            File representativeDataFile = new File(context.getFilesDir(),
+                    ContextVS.USER_DATA_FILE_NAME);
+            if(representativeDataFile.exists()) {
+                byte[] serializedUserData = FileUtils.getBytesFromFile(
+                        representativeDataFile);
+                userVS = (UserVS) ObjectUtils.deSerializeObject(serializedUserData);
+            } else Log.d(TAG + ".setAccessControlVS(...)", "user data not found");
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public void setControlCenter(ControlCenterVS controlCenter) {

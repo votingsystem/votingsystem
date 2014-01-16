@@ -154,6 +154,14 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() +  "/eventVS/checkDates?id=" + id;
     }
 
+    public String getAnonymousDelegationRequestServiceURL() {
+        return getServerURL() + "/representative/anonymousDelegationRequest";
+    }
+
+    public String getAnonymousDelegationServiceURL() {
+        return getServerURL() + "/representative/anonymousDelegation";
+    }
+
     public static AccessControlVS parse(String actorVSStr) throws Exception {
         JSONObject actorVSJSON = new JSONObject(actorVSStr);
         JSONObject jsonObject = null;

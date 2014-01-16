@@ -20,16 +20,25 @@ import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.android.callable.AnonymousSMIMESender;
 import org.votingsystem.android.callable.MessageTimeStamper;
+import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.android.callable.SignedMapSender;
+import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.UserContentProvider;
+import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.StatusVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSResponse;
+import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
@@ -41,11 +50,14 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.mail.Header;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
@@ -59,15 +71,15 @@ public class RepresentativeService extends IntentService {
 
     public static final String TAG = "RepresentativeService";
 
-    public RepresentativeService() { super(TAG); }
-
     private ContextVS contextVS;
 
+    public RepresentativeService() { super(TAG); }
+
     @Override protected void onHandleIntent(Intent intent) {
+        contextVS = ContextVS.getInstance(getApplicationContext());
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation);
-        contextVS = ContextVS.getInstance(getApplicationContext());
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         if(operation == TypeVS.ITEMS_REQUEST) {
             requestRepresentatives(arguments.getString(ContextVS.URL_KEY), serviceCaller);
@@ -77,7 +89,9 @@ public class RepresentativeService extends IntentService {
             String nif = arguments.getString(ContextVS.NIF_KEY);
             requestRepresentativeByNif(nif, serviceCaller);
         } else if(operation == TypeVS.NEW_REPRESENTATIVE) {
-            newRepresentative(intent.getExtras());
+            newRepresentative(intent.getExtras(), serviceCaller, operation);
+        } else if(operation == TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION) {
+            anonymousDelegation(intent.getExtras(), serviceCaller, operation);
         }
     }
 
@@ -118,7 +132,7 @@ public class RepresentativeService extends IntentService {
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                sendMessage(ResponseVS.SC_ERROR, getString(R.string.alert_exception_caption),
+                sendMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
                         ex.getMessage(), TypeVS.ITEMS_REQUEST, serviceCaller, null);
 
             }
@@ -128,8 +142,7 @@ public class RepresentativeService extends IntentService {
 
 
     private void requestRepresentativeByNif(String nif, String serviceCaller) {
-        String serviceURL = ContextVS.getInstance(this).getAccessControl().
-                getRepresentativeURLByNif(nif);
+        String serviceURL = contextVS.getAccessControl().getRepresentativeURLByNif(nif);
         ResponseVS responseVS = HttpHelper.getData(serviceURL, null);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
@@ -147,9 +160,8 @@ public class RepresentativeService extends IntentService {
     }
 
     private void requestRepresentative(Long representativeId, String serviceCaller) {
-        String serviceURL = ContextVS.getInstance(this).getAccessControl().
-                getRepresentativeURL(representativeId);
-        String imageServiceURL = ContextVS.getInstance(this).getAccessControl().
+        String serviceURL = contextVS.getAccessControl().getRepresentativeURL(representativeId);
+        String imageServiceURL = contextVS.getAccessControl().
                 getRepresentativeImageURL(representativeId);
         byte[] representativeImageBytes = null;
         try {
@@ -188,9 +200,95 @@ public class RepresentativeService extends IntentService {
         }
     }
 
-    private void newRepresentative(Bundle arguments) {
-        String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-        TypeVS operationType = (TypeVS) arguments.getSerializable(ContextVS.TYPEVS_KEY);
+    private void anonymousDelegation(Bundle arguments, String serviceCaller, TypeVS operationType) {
+        X509Certificate destinationCert = contextVS.getAccessControl().getCertificate();
+        String weeksOperationActive = arguments.getString(ContextVS.TIME_KEY);
+        UserVS representative = (UserVS) arguments.getSerializable(ContextVS.USER_KEY);
+        ResponseVS responseVS = null;
+        try {
+            String pin = arguments.getString(ContextVS.PIN_KEY);
+            String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
+            AnonymousDelegationVS anonymousDelegation = new AnonymousDelegationVS(
+                    weeksOperationActive, contextVS.getAccessControl().getServerURL());
+            String fromUser = contextVS.getUserVS().getNif();
+            Map smimeContentMap = new HashMap();
+            smimeContentMap.put("weeksOperationActive", weeksOperationActive);
+            smimeContentMap.put("UUID", UUID.randomUUID().toString());
+            smimeContentMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
+            smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
+            JSONObject requestJSON = new JSONObject(smimeContentMap);
+
+            String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
+
+            byte[] encryptedCSRBytes = Encryptor.encryptMessage(anonymousDelegation.
+                    getCertificationRequest().getCsrPEM(),destinationCert,
+                    anonymousDelegation.getHeader());
+            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
+            Map<String, Object> mapToSend = new HashMap<String, Object>();
+            mapToSend.put(csrFileName, encryptedCSRBytes);
+
+            //request signed with user certificate (data signed without representative data)
+            SignedMapSender signedMapSender = new SignedMapSender(fromUser,
+                    contextVS.getAccessControl().getNameNormalized(),
+                    requestJSON.toString(), mapToSend, messageSubject, null,
+                    contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
+                    representativeDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    pin.toCharArray(), contextVS.getAccessControl().getCertificate(), getApplicationContext());
+            responseVS = signedMapSender.call();
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
+                responseVS.setData(anonymousDelegation.getCertificationRequest());
+
+                String fromAnonymousUser = anonymousDelegation.getHashCertVS();
+                String toUser = contextVS.getAccessControl().getNameNormalized();
+                //delegation signed with anonymous certificate (with representative data)
+                smimeContentMap.put("representativeNif", representative.getNif());
+                smimeContentMap.put("representativeName", representative.getFullName());
+                AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
+                        toUser, new JSONObject(smimeContentMap).toString(), messageSubject, null,
+                        contextVS.getAccessControl().getAnonymousDelegationServiceURL(),
+                        contextVS.getAccessControl().getCertificate(),
+                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                        anonymousDelegation.getCertificationRequest(), getApplicationContext());
+                responseVS = anonymousSender.call();
+                //Encryptor.encryptMessage(base64EncodedKey, userCert);
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    SMIMEMessageWrapper delegationReceipt = Encryptor.decryptSMIMEMessage(
+                            responseVS.getMessageBytes(),
+                            anonymousDelegation.getCertificationRequest().getKeyPair().getPublic(),
+                            anonymousDelegation.getCertificationRequest().getKeyPair().getPrivate());
+
+                    anonymousDelegation.setDelegationReceipt(delegationReceipt);
+                    ContentValues values = new ContentValues();
+                    values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(anonymousDelegation));
+                    values.put(ReceiptContentProvider.TYPE_COL, anonymousDelegation.getType().toString());
+                    values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
+                    values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+                    values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+                    Uri uri = getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
+                    responseVS.setUri(uri);
+                    responseVS.setIconId(R.drawable.system_users_22);
+                    responseVS.setCaption(getString(R.string.anonymous_delegation_caption));
+                    responseVS.setNotificationMessage(getString(R.string.anonymous_delegation_msg,
+                            representative.getFullName(), weeksOperationActive));
+                } else {
+                    Log.d(TAG + ".anonymousDelegation(...)", " _ TODO _ cancel anonymous delegation");
+                }
+            } else {
+                responseVS.setCaption(getString(R.string.error_lbl));
+                responseVS.setNotificationMessage(responseVS.getMessage());
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
+                    getString(R.string.exception_lbl));
+        } finally {
+            sendMessage(responseVS);
+        }
+    }
+
+    private void newRepresentative(Bundle arguments, String serviceCaller, TypeVS operationType) {
         String caption = null;
         String message = null;
         try {
@@ -223,20 +321,14 @@ public class RepresentativeService extends IntentService {
             contentToSignMap.put("UUID", UUID.randomUUID().toString());
             String contentToSign = new JSONObject(contentToSignMap).toString();
 
-            byte[] keyStoreBytes = null;
             FileInputStream fis = openFileInput(KEY_STORE_FILE);
-            keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            String userVS = null;
-            if (ContextVS.getInstance(getApplicationContext()).getUserVS() != null) userVS =
-                    ContextVS.getInstance(getApplicationContext()).getUserVS().getNif();
-
-            String notificationMessage = null;
+            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+            String userVS = contextVS.getUserVS().getNif();
             Log.d(TAG + ".onHandleIntent(...) ", "signing message: " + messageSubject);
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     keyStoreBytes, USER_CERT_ALIAS, pin.toCharArray(), SIGNATURE_ALGORITHM);
             SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS,
-                    ContextVS.getInstance(this).getAccessControl().getNameNormalized(),
-                    contentToSign, messageSubject);
+                    contextVS.getAccessControl().getNameNormalized(),contentToSign, messageSubject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, getApplicationContext());
             ResponseVS responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -332,7 +424,7 @@ public class RepresentativeService extends IntentService {
         clickIntent.putExtra(ContextVS.MESSAGE_KEY, message);
         clickIntent.putExtra(ContextVS.CALLER_KEY, serviceCaller);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+                REPRESENTATIVE_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)
                 .setContentIntent(pendingIntent);
@@ -340,7 +432,7 @@ public class RepresentativeService extends IntentService {
         // hide the notification after its selected
         note.flags |= Notification.FLAG_AUTO_CANCEL;
         //Identifies our service icon in the icon tray.
-        notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
+        notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
     }
 
     private void sendMessage(Integer statusCode, String caption, String message, TypeVS typeVS,
@@ -358,6 +450,33 @@ public class RepresentativeService extends IntentService {
         if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
         if(representativeUri != null) intent.putExtra(ContextVS.URI_KEY, representativeUri);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+
+    private void sendMessage(ResponseVS responseVS) {
+        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
+                " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
+                responseVS.getServiceCaller());
+        Intent intent = new Intent(responseVS.getServiceCaller());
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+
+    private void showNotification(ResponseVS responseVS){
+        NotificationManager notificationManager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+        Intent clickIntent = new Intent(this, MessageActivity.class);
+        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
+                REPRESENTATIVE_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setContentTitle(responseVS.getCaption()).setContentText(
+                        responseVS.getNotificationMessage()).setContentIntent(pendingIntent);
+        if(responseVS.getIconId() != null) builder.setSmallIcon(responseVS.getIconId());
+        Notification note = builder.build();
+        // hide the notification after its selected
+        note.flags |= Notification.FLAG_AUTO_CANCEL;
+        //Identifies our service icon in the icon tray.
+        notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
     }
 
 }

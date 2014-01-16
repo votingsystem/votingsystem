@@ -129,7 +129,7 @@ public class VoteService extends IntentService {
             sendMessage(responseVS.getStatusCode(), caption, message, serviceCaller, operation, vote);
         } catch(Exception ex) {
             ex.printStackTrace();
-            sendMessage(ResponseVS.SC_ERROR,getString(R.string.alert_exception_caption),
+            sendMessage(ResponseVS.SC_ERROR,getString(R.string.exception_lbl),
                     ex.getMessage(), serviceCaller, operation, vote);
         }
     }
@@ -150,24 +150,21 @@ public class VoteService extends IntentService {
     }
 
 
-    private ResponseVS processCancellation(String receiverName, String pin,
-                   String signatureContent) {
+    private ResponseVS processCancellation(String toUser, String pin, String signatureContent) {
         ResponseVS responseVS = null;
         String subject = getString(R.string.cancel_vote_msg_subject);
         String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
         try {
-            FileInputStream fis = openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(receiverName, serviceURL,
-                    signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    subject, keyStoreBytes, pin.toCharArray(),
+            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
+                    contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject, pin.toCharArray(),
                     contextVS.getAccessControl().getCertificate(), getApplicationContext());
             responseVS = smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-        }
-        return responseVS;
+            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
+                    getString(R.string.exception_lbl));
+        } finally { return responseVS; }
     }
 
     private void showNotification(ResponseVS responseVS, String eventSubject, TypeVS operation,

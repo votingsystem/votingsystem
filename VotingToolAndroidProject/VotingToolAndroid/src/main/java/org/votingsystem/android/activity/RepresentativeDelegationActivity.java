@@ -1,25 +1,21 @@
 package org.votingsystem.android.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.InputFilter;
-import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -31,9 +27,9 @@ import android.widget.LinearLayout;
 
 import org.json.JSONObject;
 import org.votingsystem.android.R;
-import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
+import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -41,7 +37,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.InputFilterMinMax;
-import org.votingsystem.util.ObjectUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -70,52 +65,63 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
     private FrameLayout mainLayout;
     private ContextVS contextVS = null;
     private String broadCastId = null;
-    private String representativeName = null;
-    private String representativeNif = null;
+    private UserVS representative = null;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                        ResponseVS.SC_ERROR);
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-            if(pin != null) launchSignAndSendService(pin);
-            else {
-                showMessage(responseStatusCode, caption, message);
-                showProgress(false, true);
-            }
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                "intent.getExtras(): " + intent.getExtras());
+        int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                    ResponseVS.SC_ERROR);
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
+        String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+        if(pin != null) launchSignAndSendService(pin);
+        else {
+            showMessage(responseStatusCode, caption, message);
+            showProgress(false, true);
+        }
         }
     };
 
     private void launchSignAndSendService(String pin) {
         Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
         try {
-            Intent startIntent = new Intent(this, SignAndSendService.class);
+            Intent startIntent = null;
+            String serviceURL = null;
+            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType) {
+                serviceURL = contextVS.getAccessControl().
+                        getAnonymousDelegationRequestServiceURL();
+                startIntent = new Intent(this, RepresentativeService.class);
+                startIntent.putExtra(ContextVS.USER_KEY, representative);
+                startIntent.putExtra(ContextVS.TIME_KEY, weeks_delegation.getText().toString());
+            } else {
+                serviceURL = contextVS.getAccessControl().
+                        getRepresentativeDelegationServiceURL();
+                startIntent = new Intent(this, SignAndSendService.class);
+                Map signatureDataMap = new HashMap();
+                signatureDataMap.put("operation", operationType.toString());
+                signatureDataMap.put("UUID", UUID.randomUUID().toString());
+                signatureDataMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
+                signatureDataMap.put("representativeNif", representative.getNif());
+                signatureDataMap.put("representativeName", representative.getFullName());
+                JSONObject signatureContent = new JSONObject(signatureDataMap);
+                startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
+            }
+
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
-                    getRepresentativeDelegationServiceURL());
+            startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
             String messageSubject = getString(R.string.representative_delegation_lbl);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
-            Map signatureDataMap = new HashMap();
-            signatureDataMap.put("operation", operationType.toString());
-            signatureDataMap.put("representativeNif", representativeNif);
-            signatureDataMap.put("representativeName", representativeName);
-            signatureDataMap.put("UUID", UUID.randomUUID().toString());
-            String weeksOperationActive = null;
-            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType)
-                weeksOperationActive = weeks_delegation.getText().toString();
-            signatureDataMap.put("weeksOperationActive", weeksOperationActive);
-            JSONObject signatureContent = new JSONObject(signatureDataMap);
-            startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
+
+
+            startIntent.putExtra(ContextVS.USER_KEY, representative);
             showProgress(true, true);
             ((LinearLayout)findViewById(R.id.buttons_layout)).setVisibility(View.GONE);
             startService(startIntent);
@@ -129,9 +135,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         broadCastId = this.getClass().getSimpleName();
     	super.onCreate(savedInstanceState);
         contextVS = contextVS.getInstance(this.getApplicationContext());
-        representativeName = getIntent().getStringExtra(ContextVS.NAME_KEY);
-        representativeNif = getIntent().getStringExtra(ContextVS.NIF_KEY);
-
+        representative = (UserVS) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
         mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
         mainLayout.getForeground().setAlpha(0);
@@ -265,11 +269,11 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                         return;
                     }
                     confirmDialogMsg = getString(R.string.anonymous_delegation_confirm_msg,
-                            weeks_delegation.getText().toString(), representativeName);
+                           representative.getFullName(),  weeks_delegation.getText().toString());
                     operationType = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
                 }  else {
                     confirmDialogMsg = getString(R.string.public_delegation_confirm_msg,
-                             representativeName);
+                             representative.getFullName());
                     operationType = TypeVS.REPRESENTATIVE_SELECTION;
                 }
                 final String pinDialogMsg = confirmDialogMsg;

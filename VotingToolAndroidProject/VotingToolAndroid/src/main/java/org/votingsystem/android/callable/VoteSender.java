@@ -49,15 +49,14 @@ public class VoteSender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() {
-        Log.d(TAG + ".processVote(...)", "call - event subject: " + vote.getEventVS().getSubject());
+        Log.d(TAG + ".call()", "Event subject: " + vote.getEventVS().getSubject());
         ResponseVS responseVS = null;
         try {
             vote.genVote();
             String serviceURL = contextVS.getControlCenter().getVoteServiceURL();
             String subject = context.getString(R.string.request_msg_subject,
                     vote.getEventVS().getEventVSId());
-            String userVS = null;
-            if (contextVS.getUserVS() != null) userVS = contextVS.getUserVS().getNif();
+            String userVS = contextVS.getUserVS().getNif();
 
             KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
             PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
@@ -76,15 +75,15 @@ public class VoteSender implements Callable<ResponseVS> {
             responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             JSONObject voteJSON = new JSONObject(vote.getVoteDataMap());
-            CertificationRequestVS certificationRequest = accessRequestDataSender.getPKCS10WrapperClient();
+            CertificationRequestVS certificationRequest =
+                    accessRequestDataSender.getCertificationRequest();
             SMIMEMessageWrapper signedVote = certificationRequest.genMimeMessage(
                     vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getNameNormalized(),
                     voteJSON.toString(), context.getString(R.string.vote_msg_subject), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, context);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                //AccesRequest OK and Vote error -> Cancel access request
-                cancelAccessRequest(signedMailGenerator, userVS);
+                responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
                 return responseVS;
             }
             signedVote = timeStamper.getSmimeMessage();
@@ -106,7 +105,7 @@ public class VoteSender implements Callable<ResponseVS> {
                 byte[] base64EncodedKey = Base64.encode(
                         certificationRequest.getPrivateKey().getEncoded());
                 byte[] encryptedKey = Encryptor.encryptMessage(base64EncodedKey, userCert);
-                vote.setPkcs10WrapperClient(certificationRequest);
+                vote.setCertificationRequest(certificationRequest);
                 vote.setEncryptedKey(encryptedKey);
                 responseVS.setData(vote);
             } else {//AccesRequest OK and Vote error -> Cancel access request
@@ -131,12 +130,14 @@ public class VoteSender implements Callable<ResponseVS> {
             Log.d(TAG + ".getSolicitudAcceso(...)", " - contentDigest: " + contentDigest);*/
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            return new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
+            responseVS = ResponseVS.getExceptionResponse(context.getString(R.string.pin_error_msg),
+                    context.getString(R.string.exception_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();
+            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
+                    context.getString(R.string.exception_lbl));
             return new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
-        }
-        return responseVS;
+        } finally { return responseVS;}
     }
 
 
@@ -147,14 +148,14 @@ public class VoteSender implements Callable<ResponseVS> {
             String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
             JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
-                    contextVS.getAccessControl().getNameNormalized(), serviceURL,
-                    cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    subject,  keyStoreBytes, password,
-                    contextVS.getAccessControl().getCertificate(), context);
+                    contextVS.getUserVS().getNif(),contextVS.getAccessControl().getNameNormalized(),
+                    serviceURL, cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    subject, password, contextVS.getAccessControl().getCertificate(), context);
             return smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            return ResponseVS.getExceptionResponse(ex.getMessage(),
+                    context.getString(R.string.exception_lbl));
         }
     }
 

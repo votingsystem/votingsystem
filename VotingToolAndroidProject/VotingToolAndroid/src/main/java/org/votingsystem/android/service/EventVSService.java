@@ -144,7 +144,7 @@ public class EventVSService extends IntentService {
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    sendMessage(ResponseVS.SC_ERROR, getString(R.string.alert_exception_caption),
+                    sendMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
                             ex.getMessage(), serviceCaller);
 
                 }

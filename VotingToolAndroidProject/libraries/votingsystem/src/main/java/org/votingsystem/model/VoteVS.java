@@ -248,7 +248,7 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
 		return certificationRequest;
 	}
 
-	public void setPkcs10WrapperClient(CertificationRequestVS certificationRequest) {
+	public void setCertificationRequest(CertificationRequestVS certificationRequest) {
 		this.certificationRequest = certificationRequest;
 	}
 

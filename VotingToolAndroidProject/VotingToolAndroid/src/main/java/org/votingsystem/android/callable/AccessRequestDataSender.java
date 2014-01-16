@@ -86,7 +86,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
         }
     }
     
-    public CertificationRequestVS getPKCS10WrapperClient() {
+    public CertificationRequestVS getCertificationRequest() {
         return certificationRequest;
     }
     

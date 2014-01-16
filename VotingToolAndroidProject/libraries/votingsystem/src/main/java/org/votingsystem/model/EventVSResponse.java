@@ -4,12 +4,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventVSResponse {
-	
+public class EventVSResponse implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
 	public static final String TAG = "EventVSResponse";
 
     private Integer numEventsVSManifest;

@@ -35,11 +35,13 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.PDF_CMSSignedGenerator;
+import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -56,6 +58,7 @@ import java.util.concurrent.Callable;
 import javax.mail.Header;
 import javax.mail.internet.MimeBodyPart;
 
+import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
@@ -75,34 +78,27 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private String location;
     private String reason;
     private Context context;
-    private byte[] keyStoreBytes;
     private char[] password;
     byte[] pdfBytes = null;
     private String serviceURL = null;
 
-    public PDFSignedSender(byte[] pdfBytes, String serviceURL, byte[] keyStoreBytes,
-           char[] password, String reason, String location, Context context) {
+    public PDFSignedSender(byte[] pdfBytes, String serviceURL, char[] password, String reason,
+            String location, Context context) {
         this.pdfBytes = pdfBytes;
         this.serviceURL = serviceURL;
         this.context = context;
         this.reason = reason;
         this.location = location;
-        this.keyStoreBytes = keyStoreBytes;
         this.password = password;
     }
 
     @Override public ResponseVS call() {
         ResponseVS responseVS = null;
         try {
-            KeyStore keyStore = null;
-            PrivateKey signerPrivatekey = null;
-            try {
-                keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-                signerPrivatekey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                return new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
-            }
+            FileInputStream fis = context.openFileInput(KEY_STORE_FILE);
+            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+            PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
             //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(USER_CERT_ALIAS);
             Certificate[] signerCertChain = keyStore.getCertificateChain(USER_CERT_ALIAS);
             X509Certificate signerCert = (X509Certificate) signerCertChain[0];
@@ -119,11 +115,13 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             baos.close();
             responseVS = HttpHelper.sendData(bytesToSend, ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED,
                     serviceURL);
-        }catch (Exception ex) {
+        } catch(VotingSystemKeyStoreException ex) {
+            ex.printStackTrace();
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
+        } catch (Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-        }
-        return responseVS;
+        } finally { return responseVS; }
     }
 
     public byte[] signWithTimestamp(PdfReader pdfReader, X509Certificate signerCert,
@@ -135,21 +133,21 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfStamper stp = PdfStamper.createSignature(pdfReader, baos, '\0');
         stp.setEncryption(null, null, PdfWriter.ALLOW_PRINTING, false);
-        final PdfSignatureAppearance sap = stp.getSignatureAppearance();
-        sap.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);
+        final PdfSignatureAppearance signatureAppearance = stp.getSignatureAppearance();
+        signatureAppearance.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);
 
-        if(location != null) sap.setLocation(location);
-        sap.setCrypto(null, signerCertChain, null, PdfSignatureAppearance.WINCER_SIGNED);
-        if(reason != null) sap.setReason(reason);
+        if(location != null) signatureAppearance.setLocation(location);
+        signatureAppearance.setCrypto(null, signerCertChain, null, PdfSignatureAppearance.WINCER_SIGNED);
+        if(reason != null) signatureAppearance.setReason(reason);
         //java.util.Calendar cal = java.util.Calendar.getInstance();
-        //sap.setSignDate(cal);
-        //sap.setContact("This is the Contact");
-        sap.setAcro6Layers(true);
+        //signatureAppearance.setSignDate(cal);
+        //signatureAppearance.setContact("This is the Contact");
+        signatureAppearance.setAcro6Layers(true);
         final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, PDF_SIGNATURE_NAME);
-        //dic.setDate(new PdfDate(sap.getSignDate()));
+        //dic.setDate(new PdfDate(signatureAppearance.getSignDate()));
         dic.setName(PdfPKCS7.getSubjectFields(signerCert).getField("CN"));
         Log.d(TAG, "signWithTimestamp - UserVS: " + PdfPKCS7.getSubjectFields(signerCert).getField("CN"));
-        sap.setCryptoDictionary(dic);
+        signatureAppearance.setCryptoDictionary(dic);
         int csize = 10000;
         HashMap exc = new HashMap();
         //Nota del javadoc -> due to the hex string coding this size should be byte_size*2+2.
@@ -160,8 +158,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             signerVS = signerVS.replace("(FIRMA)", "");
         } else signerVS = getUserNIF(signerCert);
 
-
-        sap.setLayer2Text(context.getString(R.string.pdf_signed_by_lbl) + ":\n" + signerVS);
+        signatureAppearance.setLayer2Text(context.getString(R.string.pdf_signed_by_lbl) + ":\n" + signerVS);
 
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
@@ -205,10 +202,10 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             }
         };
 
-        dic.setDate(new PdfDate(sap.getSignDate()));
-        sap.preClose(exc);
+        dic.setDate(new PdfDate(signatureAppearance.getSignDate()));
+        signatureAppearance.preClose(exc);
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
-        byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
+        byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(signatureAppearance.getRangeStream()));
 
         CMSSignedData signedData = signedGenerator.genSignedData(
                 signatureHash, unsAttr);
@@ -231,7 +228,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         PdfDictionary dic2 = new PdfDictionary();
         System.arraycopy(pk, 0, outc, 0, pk.length);
         dic2.put(PdfName.CONTENTS, new PdfString(outc).setHexWriting(true));
-        sap.close(dic2);
+        signatureAppearance.close(dic2);
         byte[] result = baos.toByteArray();
         baos.close();
         return result;
@@ -243,8 +240,8 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         PdfStamper stp = PdfStamper.createSignature(reader, outputStream, '\0');
         PdfSignatureAppearance signatureAppearance = stp.getSignatureAppearance();
         signatureAppearance.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
-        //sap.setReason("Support this");
-        //sap.setLocation("Higueruela");
+        //signatureAppearance.setReason("Support this");
+        //signatureAppearance.setLocation("Higueruela");
         signatureAppearance.setSignDate( new GregorianCalendar() );
         signatureAppearance.setVisibleSignature(new Rectangle(50, 40, 300, 140), 1, null);
         stp.close();
