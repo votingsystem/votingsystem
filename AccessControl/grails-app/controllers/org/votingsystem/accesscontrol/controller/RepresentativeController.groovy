@@ -222,7 +222,7 @@ class RepresentativeController {
 	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
 	 *                     por el usuario que está eligiendo el representante.
 	 * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
-	 * @return Recibo que consiste en el documento enviado por el usuario con la signatureVS añadida del servidor.
+	 * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
 	 */
 	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
@@ -380,6 +380,28 @@ class RepresentativeController {
                 return [responseVS:csrValidationResponse, receiverPublicKey:csrValidationResponse.data.requestPublicKey]
             } else return [responseVS:csrValidationResponse]
         } else return [responseVS:responseVS]
+    }
+
+    /**
+     * Servicio que cancela delegaciones anónimas de representantes.
+     *
+     * @httpMethod [POST]
+     * @serviceURL [/representative/cancelAnonymousDelegation]
+     * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
+     *                     por el usuario en el que figuran los datos de la cancelación.
+     * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
+     * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
+     */
+    def cancelAnonymousDelegation() {
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
+        }
+        ResponseVS responseVS = representativeDelegationService.cancelAnonymousDelegation(messageSMIME, request.getLocale())
+        if (ResponseVS.SC_OK == responseVS.statusCode){
+            responseVS.setContentType(ContentTypeVS.SIGNED)
+        }
+        return [responseVS : responseVS]
     }
 
 }

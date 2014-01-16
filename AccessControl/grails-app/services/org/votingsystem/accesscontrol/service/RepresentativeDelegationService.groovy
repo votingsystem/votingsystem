@@ -206,6 +206,22 @@ class RepresentativeDelegationService {
         }
     }
 
+    public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
+        SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+        UserVS userVS = messageSMIMEReq.getUserVS()
+        String msg
+        MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
+                userVS:userVS)
+        if(!userDelegation) {
+            return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:messageSource.
+                    getMessage('userWithoutAnonymousDelegationErrorMsg',
+                    [userVS.nif].toArray(), locale))
+        }
+        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+
+        TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED
+    }
+
 	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
 		RepresentationDocumentVS.withTransaction {
 			RepresentationDocumentVS representationDocument = RepresentationDocumentVS.

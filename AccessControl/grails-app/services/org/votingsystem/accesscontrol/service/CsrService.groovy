@@ -62,14 +62,50 @@ class CsrService {
             if(userVS?.type == UserVS.Type.REPRESENTATIVE) certificate.setUserVS(userVS)
 			certificate.save()
 			byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
-			Map data = [requestPublicKey:requestPublicKey, issuedCert:issuedCertPEMBytes]
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:data)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK,
+                    data:[requestPublicKey:requestPublicKey, issuedCert:issuedCertPEMBytes])
 		}
 	}
 
+    private ResponseVS validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS, Locale locale) {
+        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        if(!csr) {
+            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
+            log.error("validateCSRVote - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
+        }
+        CertificationRequestInfo info = csr.getCertificationRequestInfo();
+        Enumeration csrAttributes = info.getAttributes().getObjects()
+        def voteCertDataJSON
+        while(csrAttributes.hasMoreElements()) {
+            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
+            switch(attribute.getTagNo()) {
+                case ContextVS.VOTE_TAG:
+                    voteCertDataJSON = JSON.parse(((DERUTF8String)attribute.getObject()).getString())
+                    break;
+            }
+        }
+        String eventId = voteCertDataJSON.eventId
+        log.debug("validateCSRVote - accessControlURL: ${voteCertDataJSON.accessControlURL} - " +
+                "eventId: ${voteCertDataJSON.eventId} - hashCertVS: ${voteCertDataJSON.hashCertVS}")
+        if (!eventId.equals(String.valueOf(eventVS.getId()))) {
+            String msg = messageSource.getMessage('csrRequestError', null, locale)
+            log.error("- validateCSRVote - ERROR - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
+        }
+        String accessControlURL = StringUtils.checkURL(voteCertDataJSON.accessControlURL)
+        String serverURL = grailsApplication.config.grails.serverURL
+        if (!serverURL.equals(accessControlURL)) {
+            String msg = messageSource.getMessage('accessControlURLError',[serverURL,accessControlURL].toArray(),locale)
+            log.error("- validateCSRVote - ERROR - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
+        }
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_REQUEST,
+                data:[publicKey:csr.getPublicKey(), hashCertVSBase64:voteCertDataJSON.hashCertVS])
+    }
+
     public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes, String weeksOperationActive,
             Locale locale) {
-        log.debug("signAnonymousDelegationCert");
         PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         if(!csr) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
@@ -119,14 +155,72 @@ class CsrService {
                     state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
                     validTo: certValidTo)
             certificate.save()
-            log.error("signAnonymousDelegationCert - expended anonymous CertificateVS '${certificate.id}'")
+            log.debug("signAnonymousDelegationCert - expended CertificateVS '${certificate.id}'")
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
             Map data = [requestPublicKey:csr.getPublicKey()]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
                     data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
         }
     }
-		
+
+    public synchronized ResponseVS signTicket (byte[] csrPEMBytes, Locale locale) {
+        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        if(!csr) {
+            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
+            log.error("signTicket - msg:  ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
+        }
+        CertificationRequestInfo info = csr.getCertificationRequestInfo();
+        Enumeration csrAttributes = info.getAttributes().getObjects()
+        def certAttributeJSON
+        while(csrAttributes.hasMoreElements()) {
+            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
+            switch(attribute.getTagNo()) {
+                case ContextVS.TICKET_OID:
+                    String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString()
+                    certAttributeJSON = JSON.parse(certAttributeJSONStr)
+                    break;
+            }
+        }
+        if(!certAttributeJSON) {
+            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
+            log.error("signTicket - missing certAttributeJSON")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
+        }
+        String amount = certAttributeJSON.amount
+        String serverURL = grailsApplication.config.grails.serverURL
+        String ticketProviderURL = StringUtils.checkURL(certAttributeJSON.ticketProviderURL)
+        if (!serverURL.equals(ticketProviderURL) || !certAttributeJSON.hashCertVS) {
+            String msg = messageSource.getMessage('accessControlURLError',
+                    [serverURL, ticketProviderURL].toArray(),locale)
+            log.error("- signTicket - ERROR - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
+        }
+        //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
+        String hashCertVSBase64 = certAttributeJSON.hashCertVS
+        Date certValidFrom = Calendar.getInstance().getTime()
+        Calendar today_plus_day = Calendar.getInstance();
+        today_plus_day.add(Calendar.DATE, 1);
+        Date certValidTo = today_plus_day.getTime()
+        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, certValidTo)
+        if (!issuedCert) {
+            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
+            log.error("signTicket - error signing cert")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
+        } else {
+            CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
+                    content:issuedCert.getEncoded(), type:CertificateVS.Type.TICKET,
+                    state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
+                    validTo: certValidTo).save()
+            log.debug("signTicket - expended CertificateVS '${certificate.id}'")
+            byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
+            Map data = [requestPublicKey:csr.getPublicKey(), amount:amount, ticketProviderURL:ticketProviderURL]
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TICKET_REQUEST,
+                    data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
+        }
+    }
+
 	public X509Certificate getVoteCert(byte[] pemCertCollection) throws Exception {
 		Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(pemCertCollection);
 		for (X509Certificate certificate : certificates) {
@@ -146,43 +240,7 @@ class CsrService {
 		}
 		return null
 	}
-		
-    private ResponseVS validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS, Locale locale) {
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-		if(!csr) {
-			String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-			log.error("validateCSRVote - msg: ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
-		}
-        CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        Enumeration csrAttributes = info.getAttributes().getObjects()
-        def voteCertDataJSON
-        while(csrAttributes.hasMoreElements()) {
-            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-            switch(attribute.getTagNo()) {
-                case ContextVS.VOTE_TAG:
-                    voteCertDataJSON = JSON.parse(((DERUTF8String)attribute.getObject()).getString())
-                    break;
-            }
-        }
-        String eventId = voteCertDataJSON.eventId
-        log.debug("validateCSRVote - accessControlURL: ${voteCertDataJSON.accessControlURL} - " +
-                "eventId: ${voteCertDataJSON.eventId} - hashCertVS: ${voteCertDataJSON.hashCertVS}")
-        if (!eventId.equals(String.valueOf(eventVS.getId()))) {
-            String msg = messageSource.getMessage('csrRequestError', null, locale)
-            log.error("- validateCSRVote - ERROR - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
-        }
-        String accessControlURL = StringUtils.checkURL(voteCertDataJSON.accessControlURL)
-        String serverURL = grailsApplication.config.grails.serverURL
-        if (!serverURL.equals(accessControlURL)) {
-            String msg = messageSource.getMessage('accessControlURLError',[serverURL,accessControlURL].toArray(),locale)
-            log.error("- validateCSRVote - ERROR - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
-        }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_REQUEST,
-                data:[publicKey:csr.getPublicKey(), hashCertVSBase64:voteCertDataJSON.hashCertVS])
-    }
+
 
     /*  C=ES, ST=State or Province, L=locality name, O=organization name, OU=org unit, CN=common name,
         emailAddress=user@votingsystem.org, SERIALNUMBER=1234, mobilePhone=555555555, deviceId=4321, SN=surname,

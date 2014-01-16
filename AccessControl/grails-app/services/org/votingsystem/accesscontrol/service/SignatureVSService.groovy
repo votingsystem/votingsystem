@@ -141,7 +141,7 @@ class SignatureVSService {
 			type:CertificateVS.Type.VOTEVS_ROOT)
 		if(!eventVSCertificateVS) {
 			String msg = messageSource.getMessage('eventWithoutCAErrorMsg', [event.id].toArray(), locale)
-			log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
+			log.error ("getEventTrustedCerts - ERROR EVENT CA CERT -> '${msg}'")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,
                     type:TypeVS.VOTE_ERROR, eventVS:event)
 		}

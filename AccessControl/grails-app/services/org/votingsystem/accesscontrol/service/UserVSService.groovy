@@ -15,7 +15,7 @@ class UserVSService {
 	
 	static transactional = true
 	
-	List<String> administradoresSistema
+	List<String> systemAdmins
 	def grailsApplication
 
 	public Map getUserVS(Date fromDate){
@@ -44,11 +44,11 @@ class UserVSService {
 	}
 	
 	boolean isUserAdmin(String nif) {
-		if(!administradoresSistema) {
-			administradoresSistema = Arrays.asList(
+		if(!systemAdmins) {
+			systemAdmins = Arrays.asList(
 			"${grailsApplication.config.VotingSystem.adminsDNI}".split(","))
 		}
-		return administradoresSistema.contains(nif)
+		return systemAdmins.contains(nif)
 	}
 }
 

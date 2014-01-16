@@ -23,7 +23,7 @@ class EventVSClaimCollectorController {
 	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. 
 	 *                     documento SMIME firmado con la reclamación.
 	 * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
-	 * @return  Recibo que consiste en el documento recibido con la signatureVS añadida del servidor.
+	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
 	 */
 	def index() {
 		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
