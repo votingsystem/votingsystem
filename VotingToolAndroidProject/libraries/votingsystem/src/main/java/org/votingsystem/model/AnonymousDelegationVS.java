@@ -67,7 +67,7 @@ public class AnonymousDelegationVS implements java.io.Serializable, ReceiptConta
     }
 
     @Override public TypeVS getType() {
-        return TypeVS.ANONYMOUS_DELEGATION;
+        return TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
     }
 
     public void setType(TypeVS type) {

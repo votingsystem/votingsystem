@@ -215,7 +215,7 @@ public class RepresentativeService extends IntentService {
             smimeContentMap.put("weeksOperationActive", weeksOperationActive);
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
-            smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
+            smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());
             JSONObject requestJSON = new JSONObject(smimeContentMap);
 
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
@@ -253,6 +253,7 @@ public class RepresentativeService extends IntentService {
                 //delegation signed with anonymous certificate (with representative data)
                 smimeContentMap.put("representativeNif", representative.getNif());
                 smimeContentMap.put("representativeName", representative.getFullName());
+                smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
                         toUser, new JSONObject(smimeContentMap).toString(), messageSubject, null,
                         contextVS.getAccessControl().getAnonymousDelegationServiceURL(),

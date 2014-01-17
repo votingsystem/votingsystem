@@ -130,7 +130,7 @@ class RepresentativeDelegationService {
             def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
             TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
             if (!messageJSON.accessControlURL || !messageJSON.weeksOperationActive ||
-                    (TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operationType)) {
+                    (TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST != operationType)) {
                 msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
                 log.error("validateAnonymousRequest - msg: ${msg} - ${messageJSON}")
                 return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,

@@ -366,6 +366,7 @@ class RepresentativeController {
      */
     def processAnonymousDelegationRequestFileMap() {
         MessageSMIME messageSMIMEReq = params[ContextVS.REPRESENTATIVE_DATA_FILE_NAME]
+        request.messageSMIMEReq = messageSMIMEReq
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
