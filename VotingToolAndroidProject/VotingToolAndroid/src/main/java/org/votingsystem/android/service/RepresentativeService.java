@@ -234,9 +234,17 @@ public class RepresentativeService extends IntentService {
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
                     representativeDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    pin.toCharArray(), contextVS.getAccessControl().getCertificate(), getApplicationContext());
+                    pin.toCharArray(), contextVS.getAccessControl().getCertificate(),
+                    anonymousDelegation.getCertificationRequest().getPublicKey(),
+                    anonymousDelegation.getCertificationRequest().getPrivateKey(),
+                    getApplicationContext());
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+
+
+
+
+
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                 responseVS.setData(anonymousDelegation.getCertificationRequest());
 

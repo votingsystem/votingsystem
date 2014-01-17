@@ -26,6 +26,7 @@ import javax.mail.Header;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
+import static org.votingsystem.model.ContextVS.TAG;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
@@ -48,11 +49,14 @@ public class SignedMapSender implements Callable<ResponseVS> {
     private Map<String, Object> mapToSend;
     private String serviceURL = null;
     private ContentTypeVS contentType;
+    private PublicKey decriptorPublicKey;
+    private PrivateKey decriptorPrivateKey;
 
     public SignedMapSender(String fromUser, String toUser, String textToSign,
             Map<String, Object> mapToSend, String subject, Header header, String serviceURL,
             String signedFileName, ContentTypeVS contentType, char[] password,
-            X509Certificate receiverCert, Context context) {
+            X509Certificate receiverCert, PublicKey decriptorPublicKey,
+            PrivateKey decriptorPrivateKey, Context context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;
@@ -63,6 +67,8 @@ public class SignedMapSender implements Callable<ResponseVS> {
         this.context = context;
         this.serviceURL = serviceURL;
         this.signedFileName = signedFileName;
+        this.decriptorPublicKey = decriptorPublicKey;
+        this.decriptorPrivateKey = decriptorPrivateKey;
         this.receiverCert = receiverCert;
     }
 
@@ -93,14 +99,9 @@ public class SignedMapSender implements Callable<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 if(responseVS.getContentType() != null &&
                         responseVS.getContentType().isEncrypted()) {
-                    KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-                    PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
-                    Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
-                    PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
-                    KeyPair keypair = new KeyPair(publicKey, privateKey);
                     byte[] encryptedData = responseVS.getMessageBytes();
-                    byte[] decryptedData = Encryptor.decryptFile(encryptedData, publicKey,
-                            privateKey);
+                    byte[] decryptedData = Encryptor.decryptFile(encryptedData, decriptorPublicKey,
+                            decriptorPrivateKey);
                     responseVS.setMessageBytes(decryptedData);
                 }
             }

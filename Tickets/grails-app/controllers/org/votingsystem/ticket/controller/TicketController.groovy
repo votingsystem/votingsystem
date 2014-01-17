@@ -38,7 +38,8 @@ class TicketController {
                     responseVS.data.amount, request.getLocale())
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
                 csrValidationResponse.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
-                return [responseVS:csrValidationResponse, receiverPublicKey:csrValidationResponse.data.requestPublicKey]
+                return [responseVS:csrValidationResponse,
+                        receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
             } else return [responseVS:csrValidationResponse]
         } else return [responseVS:responseVS]
     }

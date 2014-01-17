@@ -303,7 +303,7 @@ public class ResponseVS<T> implements Parcelable {
             parcel.writeByteArray(messageBytes);
         } else {
             parcel.writeInt(0);
-            parcel.writeByteArray(null);
+            parcel.writeByteArray(new byte[0]);
         }
         if(smimeMessage != null) {
             try {
@@ -315,7 +315,7 @@ public class ResponseVS<T> implements Parcelable {
             }
         } else {
             parcel.writeInt(0);
-            parcel.writeByteArray(null);
+            parcel.writeByteArray(new byte[0]);
         }
         parcel.writeParcelable(uri, flags);
     }

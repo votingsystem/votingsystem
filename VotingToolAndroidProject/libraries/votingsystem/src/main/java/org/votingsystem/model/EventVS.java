@@ -292,7 +292,7 @@ public class EventVS implements Serializable {
         map.put("UUID", UUID.randomUUID().toString());
         map.put("URL", URL);
         if(TypeVS.CLAIM_EVENT == typeVS) {
-            map.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
+            map.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE.toString());
         }
         JSONObject jsonObject = new JSONObject(map);
         if (fieldEventVSSet != null) {

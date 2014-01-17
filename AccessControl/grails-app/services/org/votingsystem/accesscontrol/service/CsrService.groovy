@@ -163,6 +163,10 @@ class CsrService {
         }
     }
 
+
+
+    ///return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_REQUEST, data:[publicKey:csr.getPublicKey(), hashCertVSBase64:voteCertDataJSON.hashCertVS])
+
     public synchronized ResponseVS signTicket (byte[] csrPEMBytes, Locale locale) {
         PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         if(!csr) {

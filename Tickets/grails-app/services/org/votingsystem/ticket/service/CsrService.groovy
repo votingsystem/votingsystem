@@ -75,7 +75,7 @@ class CsrService {
                     validTo: certValidTo).save()
             log.debug("signTicket - expended CertificateVS '${certificate.id}'")
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
-            Map data = [requestPublicKey:csr.getPublicKey(), amount:amount, ticketProviderURL:ticketProviderURL]
+            Map data = [amount:amount, ticketProviderURL:ticketProviderURL]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TICKET_REQUEST,
                     data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
         }

@@ -95,6 +95,8 @@ public class HttpHelper {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()));
             }
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
         } catch(ConnectTimeoutException ex) {
             responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
         } catch(Exception ex) {
@@ -169,6 +171,8 @@ public class HttpHelper {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()));
             }
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
         } catch(ConnectTimeoutException ex) {
             responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
         }  catch(Exception ex) {
@@ -205,11 +209,14 @@ public class HttpHelper {
              httpPost.setEntity(reqEntity);
              response = httpclient.execute(httpPost);     
              Log.d(TAG + ".sendObjectMap" ,"----------------------------------------");
-             Log.d(TAG + ".sendObjectMap" ,response.getStatusLine().toString());
+             Log.d(TAG + ".sendObjectMap" ,response.getStatusLine().toString() + " - " +
+                     response.getFirstHeader("Content-Type"));
              Log.d(TAG + ".sendObjectMap" ,"----------------------------------------");
              byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
              responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                      new String(responseBytes), responseBytes);
+             Header header = response.getFirstHeader("Content-Type");
+             if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
              //EntityUtils.consume(response.getEntity());
          } catch(ConnectTimeoutException ex) {
              responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());

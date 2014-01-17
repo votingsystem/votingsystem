@@ -88,7 +88,7 @@ public enum ContentTypeVS {
     }
 
     public boolean isEncrypted() {
-        return name.contains("application/pkcs7-mime");
+        return (name.contains("application/pkcs7-mime") || name.contains("multipart/encrypted"));
     }
 
     public boolean isSignedAndEncrypted() {

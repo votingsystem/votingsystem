@@ -106,6 +106,7 @@ public class SignAndSendService extends IntentService {
                             R.string.operation_unknown_error_msg, operationType.toString()));
                     break;
             }
+            ResponseVS notificationResponse = new ResponseVS();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 caption = getString(R.string.operation_ok_msg);
                 message = getString(R.string.operation_ok_msg);
@@ -117,7 +118,7 @@ public class SignAndSendService extends IntentService {
             }
             responseVS.setTypeVS(operationType);
             responseVS.setServiceCaller(serviceCaller);
-            showNotification(responseVS);
+            showNotification(notificationResponse);
             sendMessage(responseVS.getStatusCode(),operationType, caption, message,serviceCaller);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -128,7 +129,6 @@ public class SignAndSendService extends IntentService {
 
     private void showNotification(ResponseVS responseVS){
         String title = null;
-        ResponseVS notificationResponse = new ResponseVS();
         String message = null;
         int resultIcon = R.drawable.cancel_22;
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -143,14 +143,15 @@ public class SignAndSendService extends IntentService {
                 default:
                     message = getString(R.string.signature_ok_notification_msg);
             }
+        } else {
+            responseVS.setCaption(getString(R.string.signature_error_notification_msg));
         }
-        else notificationResponse.setCaption(getString(R.string.signature_error_notification_msg));
-        notificationResponse.setIconId(resultIcon);
+        responseVS.setIconId(resultIcon);
         responseVS.setMessage(message);
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         Intent clickIntent = new Intent(this, MessageActivity.class);
-        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, notificationResponse);
+        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
                 SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)

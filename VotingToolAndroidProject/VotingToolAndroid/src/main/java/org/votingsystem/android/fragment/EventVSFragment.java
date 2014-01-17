@@ -28,6 +28,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import org.json.JSONObject;
@@ -312,11 +313,15 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
         Log.d(TAG + ".addFormField(...)", "field: " + label);
         TextView textView = new TextView(getActivity().getApplicationContext());
-        textView.setLayoutParams(getDefaultParams(true));
+        TableLayout.LayoutParams params = new TableLayout.LayoutParams();
+        params.setMargins(5, 5, 5, 5);
+        textView.setLayoutParams(params);
+        textView.setTextSize(getResources().getDimension(R.dimen.claim_field_text_size));
         textView.setText(label);
         EditText fieldText = new EditText(getActivity().getApplicationContext());
         fieldText.setLayoutParams(getDefaultParams(false));
         fieldText.setTextColor(Color.BLACK);
+
         // setting an unique id is important in order to save the state
         // (content) of this view across screen configuration changes
         fieldText.setId(id);
