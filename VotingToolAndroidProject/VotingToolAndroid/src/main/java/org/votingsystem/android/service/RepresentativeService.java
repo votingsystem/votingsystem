@@ -240,17 +240,11 @@ public class RepresentativeService extends IntentService {
                     getApplicationContext());
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-
-
-
-
-
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                 X509Certificate anonymousCert = anonymousDelegation.getCertificationRequest().
                         getCertificate();
                 anonymousDelegation.setValidFrom(anonymousCert.getNotBefore());
                 anonymousDelegation.setValidTo(anonymousCert.getNotAfter());
-
 
                 responseVS.setData(anonymousDelegation.getCertificationRequest());
 

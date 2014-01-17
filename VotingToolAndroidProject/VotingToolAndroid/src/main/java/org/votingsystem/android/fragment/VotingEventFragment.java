@@ -342,7 +342,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message + " - htmlMessage: " + htmlMessage);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message, htmlMessage);
+                message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
         showProgress(false, true);
     }

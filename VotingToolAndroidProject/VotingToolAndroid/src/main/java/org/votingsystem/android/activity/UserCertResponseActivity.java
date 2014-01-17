@@ -115,8 +115,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
                 requestCertButton.setVisibility(View.GONE);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                        getString(R.string.pin_error_msg), null);
+                showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl), getString(R.string.pin_error_msg));
             }
         }
         goAppButton.setVisibility(View.VISIBLE);
@@ -261,11 +260,11 @@ public class UserCertResponseActivity extends ActionBarActivity {
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    private void showMessage(Integer statusCode,String caption,String message, String htmlMessage) {
+    private void showMessage(Integer statusCode,String caption,String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message, htmlMessage);
+                message);
         newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
     }
 
@@ -305,7 +304,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
                 String certificationAddresses = contextVS.getAccessControl().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
             } else showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.request_user_cert_error_msg), null);
+                    getString(R.string.request_user_cert_error_msg));
             goAppButton.setVisibility(View.VISIBLE);
         }
     }

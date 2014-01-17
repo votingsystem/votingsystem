@@ -60,7 +60,6 @@ public class NewFieldDialogFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.new_field_dialog, null);
         caption = getArguments().getString(ContextVS.CAPTION_KEY);
         message = getArguments().getString(ContextVS.MESSAGE_KEY);
-        String htmlMessage = getArguments().getString(ContextVS.HTML_MESSAGE_KEY);
         dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity());
@@ -72,8 +71,7 @@ public class NewFieldDialogFragment extends DialogFragment {
                     ContextVS.ERROR_PANEL_KEY, View.GONE));
         }
         if(caption != null) builder.setTitle(caption);
-        if(htmlMessage != null) messageTextView.setText(Html.fromHtml(htmlMessage));
-        else if(message != null) messageTextView.setText(message);
+        else if(message != null) messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setPositiveButton(getString(R.string.accept_lbl), null)
                 .setNegativeButton(R.string.cancel_lbl, new DialogInterface.OnClickListener() {

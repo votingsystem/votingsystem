@@ -72,15 +72,13 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                 "intent.getExtras(): " + intent.getExtras());
-        int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                    ResponseVS.SC_ERROR);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-        String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
         if(pin != null) launchSignAndSendService(pin);
         else {
-            showMessage(responseStatusCode, caption, message);
+            showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage());
             showProgress(false, true);
         }
         }

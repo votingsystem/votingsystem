@@ -113,7 +113,7 @@ class RepresentativeDelegationService {
         String msg
         try {
             if(userVS.getDelegationFinish() != null) {
-                MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
+                MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
                         userVS:userVS)
                 String userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${userDelegation?.id}"
                 msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
@@ -143,7 +143,7 @@ class RepresentativeDelegationService {
                     Integer.valueOf(messageJSON.weeksOperationActive) * 7)
             userVS.setDelegationFinish(delegationFinish)
             userVS.save()
-            return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
+            return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
                     userVS:userVS, data:[weeksOperationActive:messageJSON.weeksOperationActive])
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
@@ -218,8 +218,6 @@ class RepresentativeDelegationService {
                     [userVS.nif].toArray(), locale))
         }
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
-
-        TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED
     }
 
 	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
