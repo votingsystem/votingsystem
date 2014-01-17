@@ -108,8 +108,10 @@ public class Encryptor {
 		Session session = Session.getDefaultInstance(props, null);
 		MimeMessage mimeMessage = new MimeMessage(session);
 		mimeMessage.setText(new String(text));
-        for(Header header:headers) {
-            mimeMessage.setHeader(header.getName(), header.getValue());
+        if (headers != null) {
+            for(Header header : headers) {
+                if(header != null) mimeMessage.setHeader(header.getName(), header.getValue());
+            }
         }
 		// set the Date: header
 		//mimeMessage.setSentDate(new Date());
@@ -152,19 +154,6 @@ public class Encryptor {
                 CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
         return encryptedPart;
     }
-    
-	/**
-	 * Method to decrypt SMIME signed messages
-	 */
-	public static SMIMEMessageWrapper decryptSMIMEMessage(byte[] encryptedMessageBytes, 
-			X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
-		Log.d(TAG + ".decryptSMIMEMessage(...) ", " #### decryptSMIMEMessage ");
-		byte[] messageContentBytes = decryptMessage(encryptedMessageBytes, 
-				receiverCert, receiverPrivateKey);
-		SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null, 
-				new ByteArrayInputStream(messageContentBytes), null);
-		return smimeMessage;
-	}
 	
     /**
     * Method to decrypt SMIME signed messages
@@ -215,7 +204,8 @@ public class Encryptor {
         RecipientId recId = null;
         if(receiverCert != null) 
             recId = new JceKeyTransRecipientId(receiverCert);
-		Recipient recipient = new JceKeyTransEnvelopedRecipient(receiverPrivateKey).setProvider("BC");
+		Recipient recipient = new JceKeyTransEnvelopedRecipient(receiverPrivateKey).
+                setProvider(ContextVS.PROVIDER);
 		MimeMessage msg = new MimeMessage(null, 
 				new ByteArrayInputStream(encryptedMessageBytes));
 		SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
@@ -241,20 +231,14 @@ public class Encryptor {
 		return  recipientInfo.getContent(recipient);
     }
 	
-    public static byte[] decryptFile (byte[] encryptedFile, 
-            PublicKey publicKey, PrivateKey receiverPrivateKey) 
-            throws Exception {
+    public static byte[] decryptFile (byte[] encryptedFile, PublicKey publicKey,
+            PrivateKey receiverPrivateKey) throws Exception {
 		Log.d(TAG + ".decryptFile(...) ", " #### decryptFile ");
         RecipientId recId = new KeyTransRecipientId(publicKey.getEncoded());
-        
         Recipient recipient = new JceKeyTransEnvelopedRecipient(
-                receiverPrivateKey).setProvider("BC");
-        
-        MimeMessage msg = new MimeMessage(null, 
-                new ByteArrayInputStream(encryptedFile));
-        
+                receiverPrivateKey).setProvider(ContextVS.PROVIDER);
+        MimeMessage msg = new MimeMessage(null, new ByteArrayInputStream(encryptedFile));
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-        
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
         RecipientInformation        recipientInfo = null;
         recipientInfo = recipients.get(recId);
@@ -272,25 +256,25 @@ public class Encryptor {
     
 	
 	public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
-			X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
+            PublicKey publicKey, PrivateKey receiverPrivateKey) throws Exception {
 		byte[] messageBytes = null;
 		switch(encryptedBundleVS.getType()) {
 			case FILE:
 				messageBytes = decryptFile(encryptedBundleVS.getEncryptedMessageBytes(),
-						receiverCert.getPublicKey(), receiverPrivateKey);
+                        publicKey, receiverPrivateKey);
 				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
 				encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
 				break;
 			case SMIME_MESSAGE:
 				SMIMEMessageWrapper smimeMessageWrapper = decryptSMIMEMessage(
 						encryptedBundleVS.getEncryptedMessageBytes(),
-						receiverCert, receiverPrivateKey);
+                        publicKey, receiverPrivateKey);
 				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
 				encryptedBundleVS.setDecryptedSMIMEMessage(smimeMessageWrapper);
 				break;
 			case TEXT:
 				messageBytes = decryptFile(encryptedBundleVS.getEncryptedMessageBytes(),
-						receiverCert.getPublicKey(), receiverPrivateKey);
+                        publicKey, receiverPrivateKey);
 				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
 				encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
 				break;
@@ -299,12 +283,12 @@ public class Encryptor {
 	}
 	
 	public List<EncryptedBundleVS> decryptEncryptedBundleList(
-			List<EncryptedBundleVS> encryptedBundleVSList, X509Certificate receiverCert,
+			List<EncryptedBundleVS> encryptedBundleVSList, PublicKey publicKey,
 			PrivateKey receiverPrivateKey) throws Exception {
 		List<EncryptedBundleVS> result = new ArrayList<EncryptedBundleVS>();
 		for(EncryptedBundleVS encryptedBundleVS : encryptedBundleVSList) {
 			result.add(decryptEncryptedBundle(encryptedBundleVS,
-					receiverCert, receiverPrivateKey));
+                    publicKey, receiverPrivateKey));
 		}
 		return result;
 	}

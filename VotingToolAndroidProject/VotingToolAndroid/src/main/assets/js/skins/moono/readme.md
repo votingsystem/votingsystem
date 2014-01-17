@@ -1,5 +1,5 @@
 "Moono" Skin
-====================
+-------------------
 
 This skin has been chosen for the **default skin** of CKEditor 4.x, elected from the CKEditor
 [skin contest](http://ckeditor.com/blog/new_ckeditor_4_skin) and further shaped by

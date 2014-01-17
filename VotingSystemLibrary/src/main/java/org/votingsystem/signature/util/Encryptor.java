@@ -74,7 +74,7 @@ public class Encryptor {
         RecipientId messageRecipientId = null;
         if(recipientInfo != null && recipientInfo.getRID() != null) {
             messageRecipientId = recipientInfo.getRID();
-            logger.debug(" -- messageRecipientId.getSerialNumber(): " + messageRecipientId.getSerialNumber());
+            logger.debug("messageRecipientId.getSerialNumber(): " + messageRecipientId.getSerialNumber());
         } else {
             logger.error("No message found for recipientId: " + recipientId.getSerialNumber());
             return new ResponseVS(ResponseVS.SC_ERROR, "No message found for recipientId: " +
@@ -103,19 +103,14 @@ public class Encryptor {
         } else if(messageContent instanceof String) {
             //log.debug(" messageContent: ${messageContent}")
             String[] votingHeaders = mimeMessage.getHeader("votingSystemMessageType");
-            String votingSystemFile = null;
+            String encodedContentType = null;
             if(votingHeaders != null && votingHeaders.length > 0)
-                votingSystemFile = mimeMessage.getHeader("votingSystemMessageType")[0];
-            if(votingSystemFile != null) {
-                if("voteCsr".equals(votingSystemFile)) {
-                    messageContentBytes = ((String)messageContent).getBytes();
-                } else if("SignedPDF".equals(votingSystemFile)) {
+                encodedContentType = mimeMessage.getHeader("votingSystemMessageType")[0];
+            if(encodedContentType != null) {
+                if(ContextVS.BASE64_ENCODED_CONTENT_TYPE.equals(encodedContentType)) {
                     messageContentBytes = Base64.decode((String)messageContent);
-                }
+                } else logger.error("### unknown  votingSystemMessageType: " + encodedContentType);
             } else messageContentBytes = messageContent.toString().getBytes();
-        } else {
-            logger.error("messageContent " + messageContent);
-            return new ResponseVS(ResponseVS.SC_ERROR, "Content not found");
         }
         return new ResponseVS(ResponseVS.SC_OK, messageContentBytes);
     }
@@ -288,6 +283,11 @@ public class Encryptor {
         mimeMessage.setText(new String(text));
         // set the Date: header
         //mimeMessage.setSentDate(new Date());
+        if (headers != null) {
+            for(Header header : headers) {
+                if(header != null) mimeMessage.setHeader(header.getName(), header.getValue());
+            }
+        }
         SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
         encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
                 receiverCert).setProvider(ContextVS.PROVIDER));

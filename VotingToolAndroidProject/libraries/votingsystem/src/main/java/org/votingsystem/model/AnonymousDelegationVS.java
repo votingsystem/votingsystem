@@ -54,7 +54,6 @@ public class AnonymousDelegationVS implements java.io.Serializable, ReceiptConta
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive);
-        header = new Header("votingSystemMessageType", "anonymousDelegationCsr");
     }
 
     @Override public String getSubject() {

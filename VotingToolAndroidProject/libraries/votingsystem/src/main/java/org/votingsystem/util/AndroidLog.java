@@ -1,5 +1,4 @@
 package org.votingsystem.util;
-//========================================================================
 //$Id$
 //Copyright 2008 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
@@ -12,7 +11,6 @@ package org.votingsystem.util;
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-//========================================================================
 
 
 //        import org.eclipse.jetty.util.log.Logger;

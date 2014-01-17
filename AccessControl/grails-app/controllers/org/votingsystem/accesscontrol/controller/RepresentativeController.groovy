@@ -372,7 +372,6 @@ class RepresentativeController {
                 messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            log.debug("======== csrRequest: ${csrRequest}")
             ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest,
                     responseVS.data.weeksOperationActive, request.getLocale())
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {

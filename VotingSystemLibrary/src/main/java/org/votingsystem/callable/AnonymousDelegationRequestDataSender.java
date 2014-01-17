@@ -55,8 +55,7 @@ public class AnonymousDelegationRequestDataSender implements Callable<ResponseVS
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
             smimeMessage.setTimeStampToken(timeStampToken);
-            Header header = new Header("votingSystemMessageType", "anonymousDelegationCsr");
-            byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert,header);
+            byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert, null);
             byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +

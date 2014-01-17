@@ -105,7 +105,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             PdfReader pdfReader = new PdfReader(pdfBytes);
             byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader,
                     signerCert, signerPrivatekey, signerCertChain);
-            Header header = new Header(ContextVS.VOTING_HEADER_LABEL,"SignedPDF");
+            Header header = new Header(ContextVS.VOTING_HEADER_LABEL, ContextVS.BASE64_ENCODED_CONTENT_TYPE);
             MimeBodyPart mimeBodyPart = Encryptor.encryptBase64Message(
                     timeStampedSignedPDF, ContextVS.getInstance(context).getAccessControl().
                     getCertificate(), header);

@@ -127,6 +127,8 @@ public class ContextVS {
     public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";
 
 
+    public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
+
     //For tests environments
     private static final String ROOT_ALIAS = "rootAlias";
     public static final String END_ENTITY_ALIAS = "endEntityAlias";

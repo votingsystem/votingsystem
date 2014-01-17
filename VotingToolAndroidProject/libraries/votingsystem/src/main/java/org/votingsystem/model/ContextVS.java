@@ -146,6 +146,7 @@ public class ContextVS {
     public static final String TIMESTAMP_VOTE_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
 
     public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
+    public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
 
     private State state = State.WITHOUT_CSR;
 

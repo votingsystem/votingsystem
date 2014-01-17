@@ -57,9 +57,8 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             accessRequest = timeStamper.getSmimeMessage();
 
-            Header header = new Header("votingSystemMessageType", "voteCsr");
             byte[] csrEncryptedBytes = Encryptor.encryptMessage(certificationRequest.
-            		getCsrPEM(), destinationCert, header);
+            		getCsrPEM(), destinationCert, null);
 
             byte[] csrEncryptedAccessRequestBytes = Encryptor.encryptSMIME(
                     accessRequest, destinationCert);

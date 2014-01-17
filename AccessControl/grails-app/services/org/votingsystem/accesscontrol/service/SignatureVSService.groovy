@@ -1,8 +1,17 @@
 package org.votingsystem.accesscontrol.service
 
 import org.bouncycastle.asn1.DERTaggedObject
+import org.bouncycastle.cms.Recipient
+import org.bouncycastle.cms.RecipientId
+import org.bouncycastle.cms.RecipientInformation
+import org.bouncycastle.cms.RecipientInformationStore
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.mail.smime.SMIMEEnveloped
+import org.bouncycastle.mail.smime.SMIMEUtil
+import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EnvironmentVS
@@ -22,9 +31,12 @@ import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.StringUtils
 
+import javax.mail.BodyPart
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
+import javax.mail.internet.MimeMultipart
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -608,7 +620,7 @@ class SignatureVSService {
      * Method to decrypt files attached to SMIME (not signed) messages
      */
     public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug " - decryptMessage ${new String(encryptedFile)}"
+        log.debug " - decryptMessage}"
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
