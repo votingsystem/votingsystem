@@ -47,6 +47,9 @@ public class MessageSMIME implements Serializable {
     @Column(name="base64ContentDigest", unique=true) 
     private String base64ContentDigest;
 
+    @Column(name="reason")
+    private String reason;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23, insertable=true)
     private Date lastUpdated;
@@ -175,5 +178,13 @@ public class MessageSMIME implements Serializable {
 
     public void setAnonymousSigner(UserVS anonymousSigner) {
         this.anonymousSigner = anonymousSigner;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

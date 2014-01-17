@@ -383,6 +383,17 @@ public class VoteVS implements java.io.Serializable, ReceiptContainer {
         return voteVS;
     }
 
+    public SMIMEMessageWrapper getReceipt() {
+        switch(type) {
+            case CANCEL_VOTE:
+            case VOTEVS_CANCELLED:
+                return cancelVoteReceipt;
+            case VOTEVS:
+                return voteReceipt;
+            default: return null;
+        }
+    }
+
     public String getAccessControlURL() {
         return accessControlURL;
     }

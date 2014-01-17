@@ -114,7 +114,7 @@ public class DateUtils {
     }
         
     public static String getSpanishFormattedStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("dd MMM yyyy' 'HH:mm:ss");
+        DateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy' 'HH:mm");
     	return formatter.format(date);
     }
     

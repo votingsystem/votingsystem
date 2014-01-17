@@ -117,14 +117,18 @@ class RepresentativeDelegationService {
                         userVS:userVS)
                 String userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${userDelegation?.id}"
                 msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
-                        userVS.delegationFinish].toArray(), locale)
+                        userVS.delegationFinish.format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
                 log.error(msg)
-                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, contentType: ContentTypeVS.JSON,
+                messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
+                messageSMIMEReq.setReason(msg)
+                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED, contentType: ContentTypeVS.JSON,
                         data:[message:msg, URL:userDelegationURL])
             }
             if(UserVS.Type.REPRESENTATIVE == userVS.type) {
                 msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
                 log.error "validateAnonymousRequest - ${msg}"
+                messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
+                messageSMIMEReq.setReason(msg)
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
             }
             def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
@@ -133,6 +137,8 @@ class RepresentativeDelegationService {
                     (TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST != operationType)) {
                 msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
                 log.error("validateAnonymousRequest - msg: ${msg} - ${messageJSON}")
+                messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
+                messageSMIMEReq.setReason(msg)
                 return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                         contentType:ContentTypeVS.JSON,data:[message:msg])
             }
@@ -143,6 +149,7 @@ class RepresentativeDelegationService {
                     Integer.valueOf(messageJSON.weeksOperationActive) * 7)
             userVS.setDelegationFinish(delegationFinish)
             userVS.save()
+            messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST);
             return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
                     userVS:userVS, data:[weeksOperationActive:messageJSON.weeksOperationActive])
         } catch(Exception ex) {

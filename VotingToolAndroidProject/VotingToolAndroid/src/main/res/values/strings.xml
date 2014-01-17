@@ -347,4 +347,5 @@
     <string name="anonymous_delegation_confirm_msg"><![CDATA[Va a delegar de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
     <string name="anonymous_delegation_msg"><![CDATA[Ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
     <string name="updating_representative_data_msg">Actualizando datos del representante</string>
+    <string name="download_lbl">Descarcar copia</string>
 </resources>

@@ -88,7 +88,7 @@ public class RepresentativeFragment extends Fragment {
     public static Fragment newInstance(Long representativeId) {
         RepresentativeFragment fragment = new RepresentativeFragment();
         Bundle args = new Bundle();
-        args.putLong(ContextVS.ITEM_ID_KEY, representativeId);
+        args.putLong(ContextVS.USER_KEY, representativeId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -99,7 +99,7 @@ public class RepresentativeFragment extends Fragment {
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-        representativeId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
+        representativeId =  getArguments().getLong(ContextVS.USER_KEY);
         Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
                 UserContentProvider.getRepresentativeURI(representativeId),
                 null, null, null, null);
@@ -171,7 +171,8 @@ public class RepresentativeFragment extends Fragment {
             });
         }
         if(representative.getDescription() != null) {
-            String representativeDescription = "<html style='background-color:#eeeeee;'>" +
+            String representativeDescription =
+                    "<html style='background-color:#eeeeee;margin: 5px 10px 10px 10px;'>" +
                     representative.getDescription() + "</html>";
             ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
                     representativeDescription, "text/html", "utf-8");

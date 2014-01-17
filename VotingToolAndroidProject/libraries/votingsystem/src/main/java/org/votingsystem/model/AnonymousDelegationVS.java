@@ -98,6 +98,10 @@ public class AnonymousDelegationVS implements java.io.Serializable, ReceiptConta
         this.localId = localId;
     }
 
+    @Override public SMIMEMessageWrapper getReceipt() {
+        return delegationReceipt;
+    }
+
     public String getOriginHashCertVS() {
         return originHashCertVS;
     }

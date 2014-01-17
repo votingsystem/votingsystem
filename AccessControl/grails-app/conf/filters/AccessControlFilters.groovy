@@ -171,8 +171,7 @@ class AccessControlFilters {
                         messageSMIMEReq = messageSMIMEReq.merge()
                         messageSMIMEReq.eventVS = responseVS.eventVS
                         messageSMIMEReq.metaInf = responseVS.message
-                        messageSMIMEReq.type = responseVS.type
-                        messageSMIMEReq.userVS = responseVS.userVS
+                        if(!messageSMIMEReq.type) messageSMIMEReq.type = responseVS.type
                         messageSMIMEReq.save(flush:true)
                     }
                     log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"

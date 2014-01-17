@@ -1,7 +1,9 @@
 package org.votingsystem.model;
 
 import org.votingsystem.signature.smime.CMSUtils;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
@@ -16,10 +18,15 @@ public class TicketVS implements java.io.Serializable, ReceiptContainer {
 
     public static final String TAG = "TicketVS";
 
+    private Long localId = -1L;
+    private transient SMIMEMessageWrapper receipt;
+    private byte[] receiptBytes;
     private String originHashCertVS;
     private String hashCertVSBase64;
     private BigDecimal amount;
     private TypeVS typeVS;
+    private String subject;
+    private String url;
 
     public TicketVS(BigDecimal amount, TypeVS typeVS) {
         this.setAmount(amount);
@@ -33,29 +40,38 @@ public class TicketVS implements java.io.Serializable, ReceiptContainer {
     }
 
     @Override public String getSubject() {
-        return null;
+        return subject;
     }
 
     @Override public TypeVS getType() {
-        return null;
+        return typeVS;
     }
 
     @Override public Date getValidFrom() {
-        return null;
+        return receipt.getSigner().getCertificate().getNotBefore();
     }
 
     @Override public Date getValidTo() {
-        return null;
+        return receipt.getSigner().getCertificate().getNotAfter();
     }
 
     @Override public Long getLocalId() {
-        return null;
+        return localId;
     }
 
     @Override public void setLocalId(Long localId) {
-
+        this.localId = localId;
     }
 
+    @Override public SMIMEMessageWrapper getReceipt() {
+        return receipt;
+    }
+
+    public void setReceiptBytes(byte[] receiptBytes) throws Exception {
+        this.receiptBytes = receiptBytes;
+        receipt = new SMIMEMessageWrapper(null, new ByteArrayInputStream(receiptBytes), null);
+        subject = receipt.getSubject();
+    }
 
     public String getOriginHashCertVS() {
         return originHashCertVS;
@@ -88,4 +104,5 @@ public class TicketVS implements java.io.Serializable, ReceiptContainer {
     public void setTypeVS(TypeVS typeVS) {
         this.typeVS = typeVS;
     }
+
 }

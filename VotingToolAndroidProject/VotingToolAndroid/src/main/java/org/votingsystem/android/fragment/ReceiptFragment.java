@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -30,13 +31,16 @@ import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.GenericReceiptContainer;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
+import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -91,6 +95,9 @@ public class ReceiptFragment extends Fragment {
     private ReceiptContainer selectedReceipt;
     private View progressContainer;
     private FrameLayout mainLayout;
+    private Menu menu;
+    private TextView receiptSubject;
+    private TextView receipt_content;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SMIMEMessageWrapper selectedReceiptSMIME;
     private String broadCastId = null;
@@ -104,34 +111,51 @@ public class ReceiptFragment extends Fragment {
         return fragment;
     }
 
+    public static Fragment newInstance(String receiptURL, TypeVS type) {
+        ReceiptFragment fragment = new ReceiptFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(ContextVS.TYPEVS_KEY, type);
+        args.putString(ContextVS.URL_KEY, receiptURL);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
-        Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                ReceiptContentProvider.CONTENT_URI, null, null, null, null);
-        cursor.moveToPosition(cursorPosition);
-        byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
-                ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-        Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
-        String typeStr = cursor.getString(cursor.getColumnIndex(ReceiptContentProvider.TYPE_COL));
         View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.receipt_data_container);
-        try {
-            selectedReceipt = (ReceiptContainer) ObjectUtils.deSerializeObject(serializedReceiptContainer);
-            selectedReceipt.setLocalId(receiptId);
-            initReceiptScreen(selectedReceipt, inflater, receiptDataContainer);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
+        String receiptURL = getArguments().getString(ContextVS.URL_KEY);
+        if(receiptURL != null) {
+            selectedReceipt = new GenericReceiptContainer(type, receiptURL);
+            ReceiptDownloader getDataTask = new ReceiptDownloader();
+            getDataTask.execute(receiptURL);
+        } else {
+            int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+            broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
+            Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+                    ReceiptContentProvider.CONTENT_URI, null, null, null, null);
+            cursor.moveToPosition(cursorPosition);
+            byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
+                    ReceiptContentProvider.SERIALIZED_OBJECT_COL));
+            Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
+            String typeStr = cursor.getString(cursor.getColumnIndex(ReceiptContentProvider.TYPE_COL));
+
+            try {
+                selectedReceipt = (ReceiptContainer) ObjectUtils.deSerializeObject(serializedReceiptContainer);
+                selectedReceipt.setLocalId(receiptId);
+                initReceiptScreen(selectedReceipt);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
-        TextView receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
-        receiptSubject.setText(selectedReceipt.getSubject());
-        Log.d(TAG + ".onCreateView(...)", "receiptSubject: " + selectedReceipt.getSubject());
+        receipt_content = (TextView)rootView.findViewById(R.id.receipt_content);
+        receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -139,28 +163,25 @@ public class ReceiptFragment extends Fragment {
         return rootView;
     }
 
-    private void initReceiptScreen (ReceiptContainer receipt, LayoutInflater inflater,
-            LinearLayout receiptDataContainer) {
+
+    private void initReceiptScreen (ReceiptContainer receipt) {
         Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getType());
-        switch(receipt.getType()) {
-            case CANCEL_VOTE:
-            case VOTEVS_CANCELLED:
-                selectedReceiptSMIME = ((VoteVS)receipt).getCancelVoteReceipt();
-                break;
-            case VOTEVS:
-                selectedReceiptSMIME = ((VoteVS)receipt).getVoteReceipt();
-                break;
-            default: Log.d(TAG + ".initReceiptScreen(...)", "unprocessed type: " +
-                    receipt.getType());
-        }
+        selectedReceiptSMIME = receipt.getReceipt();
+        receiptSubject.setText(selectedReceipt.getSubject());
+        receipt_content.setText(selectedReceiptSMIME.getSignedContent());
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected receipt type:" +
                 selectedReceipt.getType());
+        menuInflater.inflate(R.menu.receipt_fragment, menu);
+        this.menu = menu;
+        if(selectedReceipt != null) setOptionsMenu();
+    }
+
+    private void setOptionsMenu() {
         switch(selectedReceipt.getType()) {
             case VOTEVS:
-                menuInflater.inflate(R.menu.receipt_vote, menu);
                 if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
@@ -168,7 +189,6 @@ public class ReceiptFragment extends Fragment {
                 break;
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
-                menuInflater.inflate(R.menu.receipt_vote, menu);
                 MenuItem checkReceiptMenuItem = menu.findItem(R.id.check_receipt);
                 checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
                 menu.removeItem(R.id.cancel_vote);
@@ -334,6 +354,38 @@ public class ReceiptFragment extends Fragment {
                     return false;
                 }
             });
+        }
+    }
+
+    public class ReceiptDownloader extends AsyncTask<String, String, ResponseVS> {
+
+        public ReceiptDownloader() { }
+
+        @Override protected void onPreExecute() {showProgress(true, true); }
+
+        @Override protected ResponseVS doInBackground(String... urls) {
+            String receiptURL = urls[0];
+            return HttpHelper.getData(receiptURL, null);
+        }
+
+        @Override  protected void onProgressUpdate(String... progress) { }
+
+        @Override  protected void onPostExecute(ResponseVS responseVS) {
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                try {
+                    ((GenericReceiptContainer)selectedReceipt).setReceiptBytes(
+                            responseVS.getMessageBytes());
+                    initReceiptScreen(selectedReceipt);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
+                            ex.getMessage());
+                }
+            } else {
+                showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                        responseVS.getMessage());
+            }
+            showProgress(false, true);
         }
     }
 

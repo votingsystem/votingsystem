@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 
 import org.json.JSONObject;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.DownloadReceiptDialogFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.RepresentativeService;
@@ -77,8 +78,20 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(pin != null) launchSignAndSendService(pin);
         else {
-            showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage());
+            String notificationMessage = null;
+            if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                try {
+                    JSONObject responseJSON = new JSONObject(responseVS.getNotificationMessage());
+                    DownloadReceiptDialogFragment newFragment = DownloadReceiptDialogFragment.newInstance(
+                            responseVS.getStatusCode(), getString(R.string.error_lbl),
+                            responseJSON.getString("message"), responseJSON.getString("URL"));
+                    newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
+                    return;
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else notificationMessage = responseVS.getNotificationMessage();
+            showMessage(responseVS.getStatusCode(), responseVS.getCaption(), notificationMessage);
             showProgress(false, true);
         }
         }
@@ -121,7 +134,6 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
 
             startIntent.putExtra(ContextVS.USER_KEY, representative);
             showProgress(true, true);
-            ((LinearLayout)findViewById(R.id.buttons_layout)).setVisibility(View.GONE);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -193,6 +205,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);
         if (progressVisible.get() && progressContainer != null) {
+            ((LinearLayout)findViewById(R.id.form_layout)).setVisibility(View.GONE);
             getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
@@ -211,6 +224,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                 }
             });
         } else {
+            ((LinearLayout)findViewById(R.id.form_layout)).setVisibility(View.VISIBLE);
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(this,
                         android.R.anim.fade_out));
@@ -264,6 +278,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                     if(TextUtils.isEmpty(weeks_delegation.getText())) {
                         showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                                 getString(R.string.anonymous_delegation_time_msg));
+                        ((EditText)findViewById(R.id.weeks_delegation)).requestFocus();
                         return;
                     }
                     confirmDialogMsg = getString(R.string.anonymous_delegation_confirm_msg,

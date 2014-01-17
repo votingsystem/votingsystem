@@ -106,6 +106,7 @@
             android:theme="@style/Theme.AppCompat.Light"/>
 
         <activity android:name=".activity.RepresentativeDelegationActivity"
+            android:icon="@drawable/system_users_22"
             android:label="@string/representative_delegation_lbl" android:theme="@style/Theme.AppCompat.Light"/>
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->

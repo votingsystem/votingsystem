@@ -31,11 +31,12 @@
         android:icon="@android:drawable/btn_plus"
         android:title="@string/delete_receipt_lbl"/>
 
-
-    <item android:id="@+id/cancel_vote"
-        android:orderInCategory="5"
-        android:showAsAction="never"
-        android:icon="@android:drawable/btn_plus"
-        android:title="@string/cancel_vote_lbl"/>
+    <group android:id="@+id/vote_items">
+        <item android:id="@+id/cancel_vote"
+            android:orderInCategory="5"
+            android:showAsAction="never"
+            android:icon="@android:drawable/btn_plus"
+            android:title="@string/cancel_vote_lbl"/>
+    </group>
 
 </menu>
