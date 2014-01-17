@@ -295,7 +295,7 @@ public class RepresentativeService extends IntentService {
         } finally {
             responseVS.setServiceCaller(serviceCaller);
             responseVS.setTypeVS(operationType);
-            sendMessage(responseVS);
+            sendMessage(responseVS, TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST);
         }
     }
 
@@ -463,12 +463,13 @@ public class RepresentativeService extends IntentService {
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
-    private void sendMessage(ResponseVS responseVS) {
+    private void sendMessage(ResponseVS responseVS, TypeVS typeVS) {
         Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
         Intent intent = new Intent(responseVS.getServiceCaller());
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 

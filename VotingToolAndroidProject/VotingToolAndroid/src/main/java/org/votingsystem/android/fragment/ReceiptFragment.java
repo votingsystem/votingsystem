@@ -124,36 +124,13 @@ public class ReceiptFragment extends Fragment {
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.receipt_data_container);
-        TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        String receiptURL = getArguments().getString(ContextVS.URL_KEY);
-        if(receiptURL != null) {
-            selectedReceipt = new GenericReceiptContainer(type, receiptURL);
-            ReceiptDownloader getDataTask = new ReceiptDownloader();
-            getDataTask.execute(receiptURL);
-        } else {
-            int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-            broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
-            Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                    ReceiptContentProvider.CONTENT_URI, null, null, null, null);
-            cursor.moveToPosition(cursorPosition);
-            byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
-                    ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-            Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
-            String typeStr = cursor.getString(cursor.getColumnIndex(ReceiptContentProvider.TYPE_COL));
-
-            try {
-                selectedReceipt = (ReceiptContainer) ObjectUtils.deSerializeObject(serializedReceiptContainer);
-                selectedReceipt.setLocalId(receiptId);
-                initReceiptScreen(selectedReceipt);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
         receipt_content = (TextView)rootView.findViewById(R.id.receipt_content);
         receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
@@ -163,12 +140,39 @@ public class ReceiptFragment extends Fragment {
         return rootView;
     }
 
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
+        String receiptURL = getArguments().getString(ContextVS.URL_KEY);
+        if(receiptURL != null) {
+            selectedReceipt = new GenericReceiptContainer(type, receiptURL);
+            ReceiptDownloader getDataTask = new ReceiptDownloader();
+            getDataTask.execute(receiptURL);
+        } else {
+            int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+            Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+                    ReceiptContentProvider.CONTENT_URI, null, null, null, null);
+            cursor.moveToPosition(cursorPosition);
+            byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
+                    ReceiptContentProvider.SERIALIZED_OBJECT_COL));
+            Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
+            try {
+                selectedReceipt = (ReceiptContainer) ObjectUtils.
+                        deSerializeObject(serializedReceiptContainer);
+                selectedReceipt.setLocalId(receiptId);
+                initReceiptScreen(selectedReceipt);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 
     private void initReceiptScreen (ReceiptContainer receipt) {
         Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getType());
         selectedReceiptSMIME = receipt.getReceipt();
         receiptSubject.setText(selectedReceipt.getSubject());
         receipt_content.setText(selectedReceiptSMIME.getSignedContent());
+        setOptionsMenu();
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -176,7 +180,6 @@ public class ReceiptFragment extends Fragment {
                 selectedReceipt.getType());
         menuInflater.inflate(R.menu.receipt_fragment, menu);
         this.menu = menu;
-        if(selectedReceipt != null) setOptionsMenu();
     }
 
     private void setOptionsMenu() {

@@ -42,7 +42,7 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
         String certificateInfo = null;
         SignerId signerId = timeStampToken.getSID();
         BigInteger cert_serial_number = signerId.getSerialNumber();
-        String dateInfoStr = DateUtils.getSpanishStringFromDate(tsInfo.getGenTime());
+        String dateInfoStr = DateUtils.getLongSpanishStringFromDate(tsInfo.getGenTime());
         CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
         Collection<X509CertificateHolder> matches = store.getMatches(null);
 

@@ -84,7 +84,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                     JSONObject responseJSON = new JSONObject(responseVS.getNotificationMessage());
                     DownloadReceiptDialogFragment newFragment = DownloadReceiptDialogFragment.newInstance(
                             responseVS.getStatusCode(), getString(R.string.error_lbl),
-                            responseJSON.getString("message"), responseJSON.getString("URL"));
+                            responseJSON.getString("message"), responseJSON.getString("URL"), typeVS);
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
                     return;
                 } catch(Exception ex) {
