@@ -246,6 +246,12 @@ public class RepresentativeService extends IntentService {
 
 
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
+                X509Certificate anonymousCert = anonymousDelegation.getCertificationRequest().
+                        getCertificate();
+                anonymousDelegation.setValidFrom(anonymousCert.getNotBefore());
+                anonymousDelegation.setValidTo(anonymousCert.getNotAfter());
+
+
                 responseVS.setData(anonymousDelegation.getCertificationRequest());
 
                 String fromAnonymousUser = anonymousDelegation.getHashCertVS();
@@ -292,6 +298,8 @@ public class RepresentativeService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
                     getString(R.string.exception_lbl));
         } finally {
+            responseVS.setServiceCaller(serviceCaller);
+            responseVS.setTypeVS(operationType);
             sendMessage(responseVS);
         }
     }

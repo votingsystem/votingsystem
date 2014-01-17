@@ -141,10 +141,10 @@ class CsrService {
         //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
         String hashCertVSBase64 = certAttributeJSON.hashCertVS
         Date certValidFrom = Calendar.getInstance().getTime()
-        Calendar today_plus_day = Calendar.getInstance();
-        today_plus_day.add(Calendar.DATE, 1);
-        Date certValidTo = today_plus_day.getTime()
-        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, certValidTo)
+        Calendar validToCalendar = Calendar.getInstance();
+        int daysDelegationActive = Integer.valueOf(weeksOperationActive) * 7
+        validToCalendar.add(Calendar.DATE, daysDelegationActive);
+        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, validToCalendar.getTime())
         if (!issuedCert) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
             log.error("signAnonymousDelegationCert - error signing cert")
@@ -153,7 +153,7 @@ class CsrService {
             CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
                     content:issuedCert.getEncoded(), type:CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION,
                     state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
-                    validTo: certValidTo)
+                    validTo: validToCalendar.getTime())
             certificate.save()
             log.debug("signAnonymousDelegationCert - expended CertificateVS '${certificate.id}'")
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);

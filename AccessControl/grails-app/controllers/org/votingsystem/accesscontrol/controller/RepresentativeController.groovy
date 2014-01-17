@@ -343,15 +343,16 @@ class RepresentativeController {
      * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
      */
     def anonymousDelegation() {
-        MessageSMIME messageSMIME = request.messageSMIMEReq
-        if(!messageSMIME) {
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+        if(!messageSMIMEReq) {
             return [responseVS: new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
         }
-        ResponseVS responseVS = representativeDelegationService.saveAnonymousDelegation(messageSMIME, request.getLocale())
+        ResponseVS responseVS = representativeDelegationService.saveAnonymousDelegation(
+                messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode){
-            responseVS.setContentType(ContentTypeVS.SIGNED)
+            responseVS.setContentType(ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
         }
-        return [responseVS : responseVS]
+        return [responseVS : responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }
 
     /**
@@ -372,7 +373,6 @@ class RepresentativeController {
                 messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            log.debug("======== csrRequest: ${new String()}")
             ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest,
                     responseVS.data.weeksOperationActive, request.getLocale())
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
@@ -399,7 +399,7 @@ class RepresentativeController {
         }
         ResponseVS responseVS = representativeDelegationService.cancelAnonymousDelegation(messageSMIME, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode){
-            responseVS.setContentType(ContentTypeVS.SIGNED)
+            responseVS.setContentType(ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
         }
         return [responseVS : responseVS]
     }

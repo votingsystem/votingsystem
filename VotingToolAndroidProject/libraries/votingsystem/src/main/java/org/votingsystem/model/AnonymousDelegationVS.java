@@ -1,5 +1,8 @@
 package org.votingsystem.model;
 
+import android.util.Log;
+
+import org.apache.harmony.misc.SystemUtils;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
@@ -23,6 +26,9 @@ public class AnonymousDelegationVS implements java.io.Serializable, ReceiptConta
 
     public static final String TAG = "AnonymousDelegationVS";
 
+    private Long localId = -1L;
+    private transient SMIMEMessageWrapper delegationReceipt;
+    private transient byte[] delegationReceiptBytes;
     private String originHashCertVS;
     private String hashCertVSBase64;
     private String weeksOperationActive;
@@ -30,8 +36,8 @@ public class AnonymousDelegationVS implements java.io.Serializable, ReceiptConta
     private CertificationRequestVS certificationRequest;
     private Header header;
     private TypeVS type;
-    private transient SMIMEMessageWrapper delegationReceipt;
-    private transient byte[] delegationReceiptBytes;
+    private Date validFrom;
+    private Date validTo;
 
     public SMIMEMessageWrapper getCancelVoteReceipt() {
         if(delegationReceipt == null && delegationReceiptBytes != null) {
@@ -69,19 +75,27 @@ public class AnonymousDelegationVS implements java.io.Serializable, ReceiptConta
     }
 
     @Override public Date getValidFrom() {
-        return null;
+        return validFrom;
+    }
+
+    public void setValidFrom(Date validFrom) {
+        this.validFrom = validFrom;
     }
 
     @Override public Date getValidTo() {
-        return null;
+        return validTo;
+    }
+
+    public void setValidTo(Date validTo) {
+        this.validTo = validTo;
     }
 
     @Override public Long getLocalId() {
-        return null;
+        return localId;
     }
 
     @Override public void setLocalId(Long localId) {
-
+        this.localId = localId;
     }
 
     public String getOriginHashCertVS() {

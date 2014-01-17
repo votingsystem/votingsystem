@@ -12,7 +12,10 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -32,16 +35,20 @@ import javax.security.auth.x500.X500Principal;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class CertificationRequestVS {
+public class CertificationRequestVS implements java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
     
 	public static final String TAG = "CertificationRequestVS";
-    private PKCS10CertificationRequest csr;
+    private transient PKCS10CertificationRequest csr;
+    private transient SignedMailGenerator signedMailGenerator;
     private KeyPair keyPair;
     private String signatureMechanism;
     private X509Certificate certificate;
-    private SignedMailGenerator signedMailGenerator;
+    private byte[] signedCsr;
 
-    private CertificationRequestVS(KeyPair keyPair, PKCS10CertificationRequest csr, String signatureMechanism) {
+    private CertificationRequestVS(KeyPair keyPair, PKCS10CertificationRequest csr,
+            String signatureMechanism) {
         this.keyPair = keyPair;
         this.csr = csr;
         this.signatureMechanism = signatureMechanism;
@@ -122,12 +129,13 @@ public class CertificationRequestVS {
 
     public void initSigner (byte[] signedCsr) throws Exception {
         Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
-        Log.d(TAG + "-initSigner-", " - Num certs: " + certificates.size());
+        Log.d(TAG + "-initSigner-", "Num certs: " + certificates.size());
         if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
         certificate = certificates.iterator().next();
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
         certificates.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
+        this.signedCsr = signedCsr;
     }
 
     public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser,
@@ -153,11 +161,48 @@ public class CertificationRequestVS {
     }
 
     public byte[] getCsrDER() {
-        return csr.getEncoded();
+        if(getCsr() == null && signedCsr != null) {
+            csr = getCsr();
+        }
+        return getCsr().getEncoded();
     }
 
     public byte[] getCsrPEM() throws Exception {
-        return CertUtil.getPEMEncoded(csr);
+        return CertUtil.getPEMEncoded(getCsr());
+    }
+
+    public byte[] getSignedCsr() {
+        return signedCsr;
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(certificate != null) s.writeObject(certificate.getEncoded());
+            else s.writeObject(null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        byte[] certificateBytes = (byte[]) s.readObject();
+        if(certificateBytes != null) {
+            try {
+                ByteArrayInputStream bais = new ByteArrayInputStream(certificateBytes);
+                certificate = CertUtil.loadCertificateFromStream (bais);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    private PKCS10CertificationRequest getCsr() {
+        if(csr == null && signedCsr != null) {
+            csr = new PKCS10CertificationRequest(signedCsr);
+        }
+        return csr;
     }
 
 }
