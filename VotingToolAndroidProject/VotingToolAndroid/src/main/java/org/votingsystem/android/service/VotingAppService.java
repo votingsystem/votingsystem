@@ -32,8 +32,6 @@ import java.util.UUID;
 
 import static org.votingsystem.model.ContextVS.ACCESS_CONTROL_URL_KEY;
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
-import static org.votingsystem.model.ContextVS.CAPTION_KEY;
-import static org.votingsystem.model.ContextVS.MESSAGE_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.URI_KEY;

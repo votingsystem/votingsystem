@@ -54,6 +54,7 @@ public class DownloadReceiptDialogFragment extends DialogFragment {
                 intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
                 startActivity(intent);
+                dismiss();
             }
         });
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity());

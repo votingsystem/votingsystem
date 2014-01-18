@@ -2,11 +2,13 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -41,7 +43,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
@@ -185,14 +186,6 @@ public class ReceiptFragment extends Fragment {
         receipt_content.setText(Html.fromHtml(getReceiptContentFormatted(selectedReceipt)));
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected receipt type:" +
-                selectedReceipt.getType());
-        menuInflater.inflate(R.menu.receipt_fragment, menu);
-        this.menu = menu;
-        setActionBar();
-    }
-
     private void setActionBar() {
         if(selectedReceipt == null) return;
         String subTitle = null;
@@ -219,7 +212,9 @@ public class ReceiptFragment extends Fragment {
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
                     selectedReceipt.getType());
         }
-        if(selectedReceipt.getLocalId() < 0)menu.removeItem(R.id.delete_receipt);
+        if(selectedReceipt.getLocalId() < 0) {
+            menu.removeItem(R.id.delete_receipt);
+        } else menu.removeItem(R.id.save_receipt);
         if(getActivity() instanceof FragmentContainerActivity) {
             ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.receipt_lbl),
                     subTitle, R.drawable.receipt_22);
@@ -263,6 +258,14 @@ public class ReceiptFragment extends Fragment {
                 unregisterReceiver(broadcastReceiver);
     }
 
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected receipt type:" +
+                selectedReceipt.getType());
+        menuInflater.inflate(R.menu.receipt_fragment, menu);
+        this.menu = menu;
+        setActionBar();
+    }
+
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         AlertDialog dialog = null;
@@ -294,6 +297,18 @@ public class ReceiptFragment extends Fragment {
                     ex.printStackTrace();
                 }
                 return true;
+            case R.id.save_receipt:
+                ContentValues values = new ContentValues();
+                values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
+                        ObjectUtils.serializeObject(selectedReceipt));
+                values.put(ReceiptContentProvider.TYPE_COL, selectedReceipt.getType().toString());
+                values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
+                values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+                values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+                Uri uri = getActivity().getContentResolver().insert(
+                        ReceiptContentProvider.CONTENT_URI, values);
+                menu.removeItem(R.id.save_receipt);
+                break;
             case R.id.check_receipt:
                 return true;
             case R.id.delete_receipt:

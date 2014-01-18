@@ -87,6 +87,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                             responseVS.getStatusCode(), getString(R.string.error_lbl),
                             responseJSON.getString("message"), responseJSON.getString("URL"), typeVS);
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
+                    showProgress(false, true);
                     return;
                 } catch(Exception ex) {
                     ex.printStackTrace();
@@ -196,10 +197,10 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
     private void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
+        showProgress(false, true);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-        showProgress(false, true);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {

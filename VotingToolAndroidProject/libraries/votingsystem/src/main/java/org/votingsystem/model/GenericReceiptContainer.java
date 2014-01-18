@@ -1,9 +1,7 @@
 package org.votingsystem.model;
 
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-
 import java.io.ByteArrayInputStream;
-import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -38,6 +36,14 @@ public class GenericReceiptContainer extends ReceiptContainer {
     }
 
     public SMIMEMessageWrapper getReceipt() {
+        if(receipt == null && receiptBytes != null) {
+            try {
+                receipt = new SMIMEMessageWrapper(
+                        null, new ByteArrayInputStream(receiptBytes), null);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         return receipt;
     }
 
@@ -50,11 +56,11 @@ public class GenericReceiptContainer extends ReceiptContainer {
     }
 
     @Override public Date getValidFrom() {
-        return receipt.getSigner().getCertificate().getNotBefore();
+        return getReceipt().getSigner().getCertificate().getNotBefore();
     }
 
     @Override public Date getValidTo() {
-        return receipt.getSigner().getCertificate().getNotAfter();
+        return getReceipt().getSigner().getCertificate().getNotAfter();
     }
 
     @Override public Long getLocalId() {
@@ -62,6 +68,7 @@ public class GenericReceiptContainer extends ReceiptContainer {
     }
 
     @Override public void setLocalId(Long localId) {
-        this.setLocalId(localId);
+        this.localId = localId;
     }
+
 }

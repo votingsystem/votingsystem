@@ -1,6 +1,5 @@
 package org.votingsystem.android.callable;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.itextpdf.text.Rectangle;
