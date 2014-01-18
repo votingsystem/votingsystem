@@ -13,6 +13,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.MainActivity;
@@ -72,7 +73,7 @@ public class VotingAppService extends Service {
                         //We don't pass all eventvs data on uri because content can be very large
                         responseVS = HttpHelper.getData(operationVS.getEventVS().getURL(), null);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            EventVS selectedEvent = EventVS.parse(responseVS.getMessage());
+                            EventVS selectedEvent = EventVS.parse(new JSONObject(responseVS.getMessage()));
                             Log.d(TAG + ".onStartCommand(...)", " _ TODO _ Fetch option selected");
                             operationVS.setEventVS(selectedEvent);
                             processOperation(operationVS);

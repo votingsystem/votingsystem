@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import android.content.Context;
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -310,11 +311,6 @@ public class EventVS implements Serializable {
         return jsonObject;
     }
 
-    public static EventVS parse(String eventoStr) throws ParseException, JSONException  {
-        Log.d(TAG + ".parse(...)", eventoStr);
-        return parse(new JSONObject(eventoStr));
-    }
-
     public static EventVS parse(JSONObject jsonData) throws ParseException, JSONException {
         JSONArray jsonArray;
         JSONObject jsonObject;
@@ -400,9 +396,9 @@ public class EventVS implements Serializable {
         if(state != null) jsonObject.put("state", state.toString());
         if(URL != null) jsonObject.put("URL", URL);
         if(dateBegin != null)
-            jsonObject.put("dateBegin",DateUtils.getStringFromDate(dateBegin));
+            jsonObject.put("dateBegin",DateUtils.getDateStr(dateBegin));
         if(dateFinish != null)
-            jsonObject.put("dateFinish", DateUtils.getStringFromDate(dateFinish));
+            jsonObject.put("dateFinish", DateUtils.getDateStr(dateFinish));
         if (typeVS != null) jsonObject.put("typeVS", typeVS.toString());
         if (id != null) jsonObject.put("id", eventId);
         if (eventId != null) jsonObject.put("eventId", eventId);

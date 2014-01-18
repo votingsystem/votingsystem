@@ -31,4 +31,10 @@
     <string name="exception_lbl">Excepción</string>
     <string name="timestamp_service_error_caption">Error con el sellado de tiempo</string>
 
+    <string name="years_lbl">años</string>
+    <string name="days_lbl">días</string>
+    <string name="hours_lbl">horas</string>
+    <string name="minutes_lbl">minutos</string>
+    <string name="seconds_lbl">segundos</string>
+
 </resources>

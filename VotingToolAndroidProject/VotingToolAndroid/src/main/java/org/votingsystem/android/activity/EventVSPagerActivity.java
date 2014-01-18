@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
+import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.fragment.EventVSFragment;
@@ -77,7 +78,7 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 EventVSContentProvider.JSON_DATA_COL));
         EventVS event = null;
         try {
-            event = EventVS.parse(eventJSON);
+            event = EventVS.parse(new JSONObject(eventJSON));
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -88,30 +89,30 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.manifest_open_lbl,
-                                DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
+                                DateUtils.getElpasedTimeStr(event.getDateFinish())));
                         break;
                     case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.manifest_pendind_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getDate_Es(event.getDateFinish());
                         break;
                     case CANCELLED:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ")");
                         subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateFinish()) +
+                                DateUtils.getDate_Es(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
                     case TERMINATED:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getDate_Es(event.getDateFinish());
                         break;
                     default:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
@@ -122,30 +123,30 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.claim_open_lbl,
-                                DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
+                                DateUtils.getElpasedTimeStr(event.getDateFinish())));
                         break;
                     case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.claim_pending_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getDate_Es(event.getDateFinish());
                         break;
                     case CANCELLED:
                         getSupportActionBar().setTitle(getString(R.string.claim_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ")");
                         subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateFinish()) +
+                                DateUtils.getDate_Es(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
                     case TERMINATED:
                         setTitle(getString(R.string.claim_closed_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getDate_Es(event.getDateFinish());
                     default:
                         getSupportActionBar().setTitle(getString(R.string.claim_closed_lbl));
                 }
@@ -155,14 +156,14 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.voting_open_lbl,
-                                DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
+                                DateUtils.getElpasedTimeStr(event.getDateFinish())));
                         break;
                     case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.voting_pending_lbl));
                         subtTitle = getString(R.string.init_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateBegin()) + " - " +
+                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getSpanishStringFromDate(event.getDateFinish());
+                                DateUtils.getDate_Es(event.getDateFinish());
                         break;
                     default:
                         getSupportActionBar().setTitle(getString(R.string.voting_closed_lbl));

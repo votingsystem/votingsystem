@@ -1,5 +1,9 @@
 package org.votingsystem.util;
 
+import android.content.Context;
+
+import org.votingsystem.android.R;
+
 import java.io.File;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -40,7 +44,7 @@ public class DateUtils {
     }
     
     public static Date getTodayRoundedDate () {
-	    Calendar calendar = Calendar.getInstance(); // today
+	    Calendar calendar = Calendar.getInstance();
 	    Calendar gregorianCalendar = new GregorianCalendar(); 
 	    calendar.clear();
 	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
@@ -50,7 +54,7 @@ public class DateUtils {
     }
 
     public static Date getNextDayRoundedDate (int nextDayFromToday) {
-	    Calendar calendar = Calendar.getInstance(); // today
+	    Calendar calendar = Calendar.getInstance();
 	    Calendar gregorianCalendar = new GregorianCalendar(); 
 	    calendar.clear();
 	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
@@ -76,6 +80,18 @@ public class DateUtils {
     }
 
     /**
+     * Método que devuelve un String con formato "yyyy/MM/dd HH:mm:ss a partir de un Date"
+     *
+     * @param Date fecha en formato Date
+     * @return dateString fecha en formato String
+     * @throws import java.text.ParseException;
+     */
+    public static String getDateStr (Date date) {
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    	return formatter.format(date);
+    }
+
+    /**
      * Método que devuelve un Date a partir de un String con formato "yyyy/MM/dd'T'HH:mm:ss"
      *
      * @param dateString fecha en formato String
@@ -84,31 +100,7 @@ public class DateUtils {
      */
     public static Date getDateFromString (String dateString) throws ParseException {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
-    	return formatter.parse(dateString);
-    }
-
-    /**
-     * Método que devuelve un String con formato "yyyy/MM/dd HH:mm:ss a partir de un Date"
-     *
-     * @param Date fecha en formato Date
-     * @return dateString fecha en formato String
-     * @throws import java.text.ParseException;
-     */
-    public static String getStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    	return formatter.format(date);
-    }
-
-    /**
-     * Método que devuelve un String con formato HH:mm:ss:SSS a partir de un Date"
-     *
-     * @param Date fecha en formato Date
-     * @return dateString fecha en formato String
-     * @throws import java.text.ParseException;
-     */
-    public static String getTimeFromDate (Date date) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-    	return formatter.format(date);
+        return formatter.parse(dateString);
     }
 
     /**
@@ -131,39 +123,31 @@ public class DateUtils {
         return (today);
     }
     
-    public static String getYearDayHourMinuteSecondElapsedTime (Date date1, Date date2) {
+    public static String getDayHourElapsedTime (Date date1, Date date2, Context context) {
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
         cal1.setTime(date1);
         cal2.setTime(date2);
-        return getYearDayHourMinuteSecondElapsedTime(cal1, cal2);
+        return getDayHourElapsedTime(cal1, cal2, context);
     }
     
-    public static String getDayHourElapsedTime (Date date1, Date date2) {
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
-        cal1.setTime(date1);
-        cal2.setTime(date2);
-        return getDayHourElapsedTime(cal1, cal2);
-    }
-    
-    public static String getSpanishStringFromDate (Date date) {
+    public static String getDate_Es (Date date) {
     	SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy");
     	return formatter.format(date);
     }
 
-    public static String getLongSpanishStringFromDate (Date date) {
+    public static String getLongDate_Es (Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
         return formatter.format(date);
     }
 
-    public static String getElpasedTimeHoursFromNow(Date end) {
+    public static String getElpasedTimeStr(Date end) {
     	Float hours = (end.getTime() -DateUtils.getTodayDate().getTime())/(60*60*1000F);
     	return Integer.valueOf(hours.intValue()).toString();
     }
     
-    public static String getYearDayHourMinuteSecondElapsedTime (Calendar cal1, Calendar cal2) {
-            
+    public static String getYearDayHourMinuteSecondElapsedTime (Calendar cal1, Calendar cal2,
+            Context context) {
         long l1 = cal1.getTimeInMillis();
         long l2 = cal2.getTimeInMillis();
         long diff = l2 - l1;
@@ -184,16 +168,30 @@ public class DateUtils {
         diff = diff % minuteInMillis;
         long elapsedSeconds = diff / secondInMillis;
 
-        StringBuilder duracion = new StringBuilder();
-        if (elapsedYears > 0) duracion.append(elapsedYears + ", años");
-        if (elapsedDays > 0) duracion.append(elapsedDays + ", días");
-        if (elapsedHours > 0) duracion.append(elapsedHours + ", horas");
-        if (elapsedMinutes > 0) duracion.append(elapsedMinutes + ", minutos");
-        if (elapsedSeconds > 0) duracion.append(elapsedSeconds + ", segundos");
-        return duracion.toString();
+        StringBuilder result = new StringBuilder();
+        if (elapsedYears > 0) result.append(elapsedYears + ", "
+                + context.getString(R.string.years_lbl));
+        if (elapsedDays > 0) result.append(elapsedDays + ", "
+                + context.getString(R.string.days_lbl));
+        if (elapsedHours > 0) result.append(elapsedHours + ", "
+                + context.getString(R.string.hours_lbl));
+        if (elapsedMinutes > 0) result.append(elapsedMinutes + ", "
+                + context.getString(R.string.minutes_lbl));
+        if (elapsedSeconds > 0) result.append(elapsedSeconds + ", "
+                + context.getString(R.string.seconds_lbl));
+        return result.toString();
+    }
+
+    public static String getYearDayHourMinuteSecondElapsedTime (Date date1, Date date2,
+        Context context) {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(date1);
+        cal2.setTime(date2);
+        return getYearDayHourMinuteSecondElapsedTime(cal1, cal2, context);
     }
     
-    public static String getDayHourElapsedTime (Calendar cal1, Calendar cal2) {
+    public static String getDayHourElapsedTime (Calendar cal1, Calendar cal2, Context context) {
             
         long l1 = cal1.getTimeInMillis();
         long l2 = cal2.getTimeInMillis();
@@ -210,10 +208,10 @@ public class DateUtils {
         long elapsedHours = diff / hourInMillis;
         diff = diff % hourInMillis;
 
-        StringBuilder duracion = new StringBuilder();
-        if (elapsedDays > 0) duracion.append(elapsedDays + " días");
-        if (elapsedHours > 0) duracion.append(elapsedHours + ", horas");
-        return duracion.toString();
+        StringBuilder result = new StringBuilder();
+        if (elapsedDays > 0) result.append(elapsedDays + " " + context.getString(R.string.days_lbl));
+        if (elapsedHours > 0) result.append(elapsedHours + ", " + context.getString(R.string.hours_lbl));
+        return result.toString();
     }
 
 }

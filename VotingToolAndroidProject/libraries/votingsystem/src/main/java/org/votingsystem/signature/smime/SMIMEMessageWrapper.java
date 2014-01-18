@@ -349,7 +349,7 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
                 Log.d(TAG, "checkTimeStampToken - timeStampToken - fecha: " 
-                        +  DateUtils.getStringFromDate(cal.getTime()));
+                        +  DateUtils.getDateStr(cal.getTime()));
                 Log.d(TAG, "checkTimeStampToken - digestStr: " + digestStr);
                 Log.d(TAG, "checkTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
                 return timeStampToken;

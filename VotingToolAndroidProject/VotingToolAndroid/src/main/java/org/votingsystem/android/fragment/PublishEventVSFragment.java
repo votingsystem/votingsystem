@@ -168,7 +168,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                 }
                 dateFinishCalendar = newCalendar;
-                dateFinishEditText.setText(DateUtils.getSpanishStringFromDate(
+                dateFinishEditText.setText(DateUtils.getDate_Es(
                         dateFinishCalendar.getTime()));
             }
         }
@@ -196,7 +196,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                 }
                 dateBeginCalendar = newCalendar;
-                dateBeginEditText.setText(DateUtils.getSpanishStringFromDate(
+                dateBeginEditText.setText(DateUtils.getDate_Es(
                         dateBeginCalendar.getTime()));
             }
         }

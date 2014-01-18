@@ -441,26 +441,26 @@ public class EventVSGridFragment extends Fragment
                             imgView.setImageResource(R.drawable.open);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().
                                     getString(R.string.remain_lbl, DateUtils.
-                                            getElpasedTimeHoursFromNow(eventVS.getDateFinish()))  +"</b>";
+                                            getElpasedTimeStr(eventVS.getDateFinish()))  +"</b>";
                             break;
                         case AWAITING:
                             imgView.setImageResource(R.drawable.pending);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.init_lbl) + "</b>: " +
-                                    DateUtils.getSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
+                                    DateUtils.getDate_Es(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.finish_lbl) + "</b>: " +
-                                    DateUtils.getSpanishStringFromDate(eventVS.getDateFinish());
+                                    DateUtils.getDate_Es(eventVS.getDateFinish());
                             break;
                         case CANCELLED:
                         case TERMINATED:
                             imgView.setImageResource(R.drawable.closed);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.init_lbl) + "</b>: " +
-                                    DateUtils.getSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
+                                    DateUtils.getDate_Es(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.finish_lbl) + "</b>: " +
-                                    DateUtils.getSpanishStringFromDate(eventVS.getDateFinish());
+                                    DateUtils.getDate_Es(eventVS.getDateFinish());
                             break;
                         default:
                             Log.d(TAG +  ".bindView(...)", "unknown event state: " +

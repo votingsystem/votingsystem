@@ -171,14 +171,14 @@ public class TicketGridFragment extends Fragment implements
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getString(R.string.init_lbl) + "</b>: " +
-                            DateUtils.getSpanishStringFromDate(
+                            DateUtils.getDate_Es(
                                     receiptContainer.getValidFrom()) + " - " +
                             "<b>" + getString(R.string.finish_lbl) + "</b>: " +
-                            DateUtils.getSpanishStringFromDate(receiptContainer.getValidTo());
+                            DateUtils.getDate_Es(receiptContainer.getValidTo());
                 } else {
                     imgView.setImageResource(R.drawable.open);
                     dateInfoStr = "<b>" + getString(R.string.remain_lbl, DateUtils.
-                            getElpasedTimeHoursFromNow(receiptContainer.getValidTo()))  +"</b>";
+                            getElpasedTimeStr(receiptContainer.getValidTo()))  +"</b>";
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);

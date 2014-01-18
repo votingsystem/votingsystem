@@ -183,7 +183,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
 
                     final Calendar cal = new GregorianCalendar();
                     cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                    Log.d(TAG, "*** TimeStamp: " + DateUtils.getStringFromDate(cal.getTime()));
+                    Log.d(TAG, "*** TimeStamp: " + DateUtils.getDateStr(cal.getTime()));
 
                     obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
                     // Creates the signatureTimestampToken attribute
