@@ -124,8 +124,6 @@ class RepresentativeDelegationService {
         if(userDelegation) {
             msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
                     userVS.delegationFinish.format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
-            return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED, contentType: ContentTypeVS.JSON,
-                    message:msg)
         }
         int statusCode = userDelegation? ResponseVS.SC_ERROR_REQUEST_REPEATED:ResponseVS.SC_OK
         return new ResponseVS(statusCode:statusCode, data:userDelegation, message: msg);
@@ -139,7 +137,7 @@ class RepresentativeDelegationService {
         try {
             ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
             String userDelegationURL = null
-            if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.statusCode) {
+            if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.statusCode) {
                 userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${responseVS.data.id}"
             }
             if(ResponseVS.SC_OK != responseVS.statusCode) {
