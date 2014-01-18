@@ -26,6 +26,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.DownloadReceiptDialogFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -64,7 +65,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
     private CheckBox publicCheckBox;
     private EditText weeks_delegation;
     private FrameLayout mainLayout;
-    private ContextVS contextVS = null;
+    private AppContextVS contextVS = null;
     private String broadCastId = null;
     private UserVS representative = null;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
@@ -144,7 +145,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         broadCastId = this.getClass().getSimpleName();
     	super.onCreate(savedInstanceState);
-        contextVS = contextVS.getInstance(this.getApplicationContext());
+        contextVS = (AppContextVS) getApplicationContext();
         representative = (UserVS) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
         mainLayout = (FrameLayout)findViewById(R.id.mainLayout);

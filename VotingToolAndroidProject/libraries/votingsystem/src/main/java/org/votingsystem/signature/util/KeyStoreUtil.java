@@ -1,5 +1,7 @@
 package org.votingsystem.signature.util;
 
+import org.votingsystem.model.ContextVS;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -21,7 +23,7 @@ public class KeyStoreUtil {
     public static KeyStore getKeyStoreFromBytes(byte[] keyStore, char[] password) 
     		throws VotingSystemKeyStoreException {
     	try {
-    		KeyStore store = KeyStore.getInstance("PKCS12");
+    		KeyStore store = KeyStore.getInstance(ContextVS.KEYSTORE_TYPE);
         	store.load(new ByteArrayInputStream(keyStore), password);
             return store;
     	} catch(Exception ex) {
@@ -30,7 +32,7 @@ public class KeyStoreUtil {
     }
     
     public static KeyStore getKeyStoreFromStream(InputStream keyStoreInputStream, char[] password) throws Exception {
-        KeyStore store = KeyStore.getInstance("PKCS12");
+        KeyStore store = KeyStore.getInstance(ContextVS.KEYSTORE_TYPE);
         store.load(keyStoreInputStream, password);
         return store;
     }

@@ -5,9 +5,9 @@ import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -24,6 +24,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
+import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
@@ -36,16 +37,14 @@ public class VoteSender implements Callable<ResponseVS> {
 
     private VoteVS vote;
     private char[] password;
-    private Context context = null;
-    private ContextVS contextVS = null;
+    private AppContextVS contextVS = null;
     private byte[] keyStoreBytes = null;
 
-    public VoteSender(VoteVS vote, byte[] keyStoreBytes, char[] password, Context context) {
+    public VoteSender(VoteVS vote, byte[] keyStoreBytes, char[] password, AppContextVS context) {
         this.vote = vote;
         this.keyStoreBytes = keyStoreBytes;
         this.password = password;
-        this.context = context;
-        contextVS = ContextVS.getInstance(context);
+        this.contextVS = context;
     }
 
     @Override public ResponseVS call() {
@@ -54,7 +53,7 @@ public class VoteSender implements Callable<ResponseVS> {
         try {
             vote.genVote();
             String serviceURL = contextVS.getControlCenter().getVoteServiceURL();
-            String subject = context.getString(R.string.request_msg_subject,
+            String subject = contextVS.getString(R.string.request_msg_subject,
                     vote.getEventVS().getEventVSId());
             String userVS = contextVS.getUserVS().getNif();
 
@@ -63,7 +62,7 @@ public class VoteSender implements Callable<ResponseVS> {
             Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
             X509Certificate userCert = (X509Certificate) chain[0];
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    privateKey, chain, ContextVS.SIGNATURE_ALGORITHM);
+                    privateKey, chain, SIGNATURE_ALGORITHM);
 
             JSONObject accessRequestJSON = new JSONObject(vote.getAccessRequestDataMap());
             SMIMEMessageWrapper accessRequest = signedMailGenerator.genMimeMessage(
@@ -71,7 +70,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     accessRequestJSON.toString(), subject);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(accessRequest,
                     vote, contextVS.getAccessControl().getCertificate(),
-                    contextVS.getAccessControl().getAccessServiceURL(),context);
+                    contextVS.getAccessControl().getAccessServiceURL(),contextVS);
             responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             JSONObject voteJSON = new JSONObject(vote.getVoteDataMap());
@@ -79,8 +78,8 @@ public class VoteSender implements Callable<ResponseVS> {
                     accessRequestDataSender.getCertificationRequest();
             SMIMEMessageWrapper signedVote = certificationRequest.genMimeMessage(
                     vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getNameNormalized(),
-                    voteJSON.toString(), context.getString(R.string.vote_msg_subject), null);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, context);
+                    voteJSON.toString(), contextVS.getString(R.string.vote_msg_subject), null);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, contextVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
@@ -100,7 +99,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     ex.printStackTrace();
                     cancelAccessRequest(signedMailGenerator, userVS);
                     return new ResponseVS(ResponseVS.SC_ERROR,
-                            context.getString(R.string.vote_option_mismatch));
+                            contextVS.getString(R.string.vote_option_mismatch));
                 }
                 byte[] base64EncodedKey = Base64.encode(
                         certificationRequest.getPrivateKey().getEncoded());
@@ -130,12 +129,12 @@ public class VoteSender implements Callable<ResponseVS> {
             Log.d(TAG + ".getSolicitudAcceso(...)", " - contentDigest: " + contentDigest);*/
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(context.getString(R.string.pin_error_msg),
-                    context.getString(R.string.exception_lbl));
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.pin_error_msg),
+                    contextVS.getString(R.string.exception_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
-                    context.getString(R.string.exception_lbl));
+                    contextVS.getString(R.string.exception_lbl));
             return new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
         } finally { return responseVS;}
     }
@@ -144,18 +143,18 @@ public class VoteSender implements Callable<ResponseVS> {
     private ResponseVS cancelAccessRequest(SignedMailGenerator signedMailGenerator, String userVS) {
         Log.d(TAG + ".cancelAccessRequest(...)", "");
         try {
-            String subject = context.getString(R.string.cancel_vote_msg_subject);
+            String subject = contextVS.getString(R.string.cancel_vote_msg_subject);
             String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
             JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                     contextVS.getUserVS().getNif(),contextVS.getAccessControl().getNameNormalized(),
                     serviceURL, cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    subject, password, contextVS.getAccessControl().getCertificate(), context);
+                    subject, password, contextVS.getAccessControl().getCertificate(), contextVS);
             return smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();
             return ResponseVS.getExceptionResponse(ex.getMessage(),
-                    context.getString(R.string.exception_lbl));
+                    contextVS.getString(R.string.exception_lbl));
         }
     }
 

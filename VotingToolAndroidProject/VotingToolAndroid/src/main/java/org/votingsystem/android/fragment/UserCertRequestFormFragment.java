@@ -33,11 +33,11 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.service.UserCertRequestService;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.NifUtils;
 
@@ -45,6 +45,17 @@ import java.text.Normalizer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.votingsystem.model.ContextVS.CALLER_KEY;
+import static org.votingsystem.model.ContextVS.CAPTION_KEY;
+import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
+import static org.votingsystem.model.ContextVS.EMAIL_KEY;
+import static org.votingsystem.model.ContextVS.MESSAGE_KEY;
+import static org.votingsystem.model.ContextVS.NAME_KEY;
+import static org.votingsystem.model.ContextVS.NIF_KEY;
+import static org.votingsystem.model.ContextVS.PHONE_KEY;
+import static org.votingsystem.model.ContextVS.PIN_KEY;
+import static org.votingsystem.model.ContextVS.RESPONSE_STATUS_KEY;
+import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 
 /**
  * @author jgzornoza
@@ -64,7 +75,7 @@ public class UserCertRequestFormFragment extends Fragment {
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
-    private ContextVS contextVS;
+    private AppContextVS appContextVS;
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -74,13 +85,13 @@ public class UserCertRequestFormFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            String pin = intent.getStringExtra(PIN_KEY);
             if(pin != null) launchUserCertRequestService(pin);
             else {
-                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
+                int responseStatusCode = intent.getIntExtra(RESPONSE_STATUS_KEY,
                         ResponseVS.SC_ERROR);
-                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
+                String caption = intent.getStringExtra(CAPTION_KEY);
+                String message = intent.getStringExtra(MESSAGE_KEY);
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     Intent resultIntent = new Intent(getActivity().getApplicationContext(),
                             UserCertResponseActivity.class);
@@ -103,7 +114,7 @@ public class UserCertRequestFormFragment extends Fragment {
            Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "progressVisible: " + progressVisible);
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        appContextVS = ((AppContextVS)getActivity().getApplicationContext());
         View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         getActivity().setTitle(getString(R.string.request_certificate_form_lbl));
@@ -284,14 +295,14 @@ public class UserCertRequestFormFragment extends Fragment {
         Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 UserCertRequestService.class);
-        startIntent.putExtra(ContextVS.PIN_KEY, pin);
-        startIntent.putExtra(ContextVS.DEVICE_ID_KEY, deviceId);
-        startIntent.putExtra(ContextVS.PHONE_KEY, phone);
-        startIntent.putExtra(ContextVS.NAME_KEY, givenname);
-        startIntent.putExtra(ContextVS.SURNAME_KEY, surname);
-        startIntent.putExtra(ContextVS.NIF_KEY, nif);
-        startIntent.putExtra(ContextVS.EMAIL_KEY, email);
-        startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+        startIntent.putExtra(PIN_KEY, pin);
+        startIntent.putExtra(DEVICE_ID_KEY, deviceId);
+        startIntent.putExtra(PHONE_KEY, phone);
+        startIntent.putExtra(NAME_KEY, givenname);
+        startIntent.putExtra(SURNAME_KEY, surname);
+        startIntent.putExtra(NIF_KEY, nif);
+        startIntent.putExtra(EMAIL_KEY, email);
+        startIntent.putExtra(CALLER_KEY, this.getClass().getName());
         getActivity().startService(startIntent);
         showProgress(true, true);
     }

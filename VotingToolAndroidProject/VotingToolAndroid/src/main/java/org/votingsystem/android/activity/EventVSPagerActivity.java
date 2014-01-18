@@ -14,16 +14,19 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.fragment.EventVSFragment;
 import org.votingsystem.android.fragment.VotingEventFragment;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
-
+import static org.votingsystem.model.ContextVS.CURSOR_POSITION_KEY;
+import static org.votingsystem.model.ContextVS.EVENT_STATE_KEY;
+import static org.votingsystem.model.ContextVS.PIN_KEY;
+import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -32,13 +35,12 @@ public class EventVSPagerActivity extends ActionBarActivity {
 
     public static final String TAG = "EventVSPagerActivity";
 
-    private ContextVS contextVS;
     private Cursor cursor = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)", "intentExtras:" + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            String pin = intent.getStringExtra(PIN_KEY);
         }
     };
 
@@ -46,11 +48,10 @@ public class EventVSPagerActivity extends ActionBarActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getBaseContext());
         setContentView(R.layout.pager_activity);
-        Integer cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
-        String eventStateStr = getIntent().getStringExtra(ContextVS.EVENT_STATE_KEY);
-        String eventTypeStr = getIntent().getStringExtra(ContextVS.TYPEVS_KEY);
+        Integer cursorPosition = getIntent().getIntExtra(CURSOR_POSITION_KEY, -1);
+        String eventStateStr = getIntent().getStringExtra(EVENT_STATE_KEY);
+        String eventTypeStr = getIntent().getStringExtra(TYPEVS_KEY);
 
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
@@ -171,6 +172,10 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 break;
         }
         if(subtTitle != null) getSupportActionBar().setSubtitle(subtTitle);
+    }
+
+    @Override public AppContextVS getApplicationContext() {
+        return (AppContextVS) super.getApplicationContext();
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

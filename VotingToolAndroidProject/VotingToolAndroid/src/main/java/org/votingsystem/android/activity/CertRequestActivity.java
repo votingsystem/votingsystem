@@ -11,9 +11,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
-import org.votingsystem.model.ContextVS;
+
+import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
 /**
  * @author jgzornoza
@@ -23,12 +25,12 @@ public class CertRequestActivity extends FragmentActivity {
 	
 	public static final String TAG = "CertRequestActivity";
 
-    ContextVS contextVS;
+    private AppContextVS appContextVS;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getApplicationContext());
-        Log.d(TAG + ".onCreate(...)", "contextVS.getState(): " + contextVS.getState() +
+        appContextVS = getApplicationContext();
+        Log.d(TAG + ".onCreate(...)", "appContextVS.getState(): " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.cert_request_activity);
         Button cancelButton = (Button) findViewById(R.id.cancel_lbl);
@@ -43,12 +45,12 @@ public class CertRequestActivity extends FragmentActivity {
         requestButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, UserCertRequestFormFragment.class.getName());
+                intent.putExtra(FRAGMENT_KEY, UserCertRequestFormFragment.class.getName());
                 startActivity(intent);
             }
         });
 
-        switch(contextVS.getState()) {
+        switch(appContextVS.getState()) {
             case WITH_CSR:
                 startActivity(new Intent(this, UserCertResponseActivity.class));
                 break;
@@ -60,8 +62,7 @@ public class CertRequestActivity extends FragmentActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Intent intent = new Intent(CertRequestActivity.this,
                                 FragmentContainerActivity.class);
-                        intent.putExtra(ContextVS.FRAGMENT_KEY,
-                                UserCertRequestFormFragment.class.getName());
+                        intent.putExtra(FRAGMENT_KEY, UserCertRequestFormFragment.class.getName());
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }
@@ -75,6 +76,10 @@ public class CertRequestActivity extends FragmentActivity {
                 dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 break;
         }
+    }
+
+    @Override public AppContextVS getApplicationContext() {
+        return (AppContextVS) super.getApplicationContext();
     }
 
 }

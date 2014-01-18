@@ -3,9 +3,9 @@ package org.votingsystem.android.callable;
 import android.content.Context;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -16,7 +16,6 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
 import java.io.FileInputStream;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -39,7 +38,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private SMIMEMessageWrapper smimeMessage = null;
     private X509Certificate receiverCert = null;
     private char[] password;
-    private Context context = null;
+    private AppContextVS contextVS = null;
     private String serviceURL = null;
     private String fromUser = null;
     private String toUser = null;
@@ -49,14 +48,14 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
 
     public SMIMESignedSender(String fromUser, String toUser, String serviceURL,
             String textToSign, ContentTypeVS contentType, String subject,
-            char[] password, X509Certificate receiverCert, Context context) {
+            char[] password, X509Certificate receiverCert, AppContextVS context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;
         this.subject = subject;
         this.contentType = contentType;
         this.password = password;
-        this.context = context;
+        this.contextVS = context;
         this.serviceURL = serviceURL;
         this.receiverCert = receiverCert;
     }
@@ -65,16 +64,16 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         Log.d(TAG + ".call()", "serviceURL: " + serviceURL);
         ResponseVS responseVS = null;
         try {
-            FileInputStream fis = context.openFileInput(KEY_STORE_FILE);
+            FileInputStream fis = contextVS.openFileInput(KEY_STORE_FILE);
             byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     keyStoreBytes, USER_CERT_ALIAS, password, SIGNATURE_ALGORITHM);
             smimeMessage = signedMailGenerator.genMimeMessage(fromUser, toUser,textToSign, subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, context);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
-                responseVS.setCaption(context.getString(R.string.timestamp_service_error_caption));
+                responseVS.setCaption(contextVS.getString(R.string.timestamp_service_error_caption));
                 responseVS.setNotificationMessage(responseVS.getMessage());
                 return responseVS;
             }
@@ -98,7 +97,8 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             }
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                    contextVS.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());

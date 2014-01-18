@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.fragment.ReceiptFragment;
@@ -27,13 +28,13 @@ public class ReceiptPagerActivity extends ActionBarActivity {
 
     public static final String TAG = "ReceiptPagerActivity";
 
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getBaseContext());
+        contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

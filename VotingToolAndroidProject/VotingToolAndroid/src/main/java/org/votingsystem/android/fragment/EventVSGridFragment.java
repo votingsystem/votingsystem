@@ -33,9 +33,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSPagerActivity;
-import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
@@ -70,7 +70,7 @@ public class EventVSGridFragment extends Fragment
     private GroupPosition groupPosition = GroupPosition.VOTING;
     private ChildPosition childPosition = null;
     private String queryStr = null;
-    private ContextVS contextVS = null;
+    private AppContextVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private int loaderId = -1;
@@ -111,11 +111,7 @@ public class EventVSGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
-        if(contextVS.getAccessControl() == null) {
-            Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-        }
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         if (getArguments() != null) {
             eventState = (EventVS.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
             groupPosition = (GroupPosition) getArguments().getSerializable(ContextVS.TYPEVS_KEY);

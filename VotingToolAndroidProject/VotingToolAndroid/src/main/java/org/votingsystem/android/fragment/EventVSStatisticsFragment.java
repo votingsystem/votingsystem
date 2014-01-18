@@ -32,6 +32,7 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContentTypeVS;
@@ -49,7 +50,7 @@ public class EventVSStatisticsFragment extends Fragment {
 
     private View rootView;
     private EventVS eventVS;
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
@@ -67,7 +68,7 @@ public class EventVSStatisticsFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         Long eventId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
                 EventVSContentProvider.getEventURI(eventId), null, null, null, null);
         cursor.moveToFirst();

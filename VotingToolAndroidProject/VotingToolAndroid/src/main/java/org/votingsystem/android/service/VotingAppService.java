@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.MainActivity;
@@ -21,7 +22,6 @@ import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
@@ -30,7 +30,14 @@ import org.votingsystem.util.StringUtils;
 
 import java.util.UUID;
 
+import static org.votingsystem.model.ContextVS.ACCESS_CONTROL_URL_KEY;
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
+import static org.votingsystem.model.ContextVS.CAPTION_KEY;
+import static org.votingsystem.model.ContextVS.MESSAGE_KEY;
+import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
+import static org.votingsystem.model.ContextVS.State;
+import static org.votingsystem.model.ContextVS.URI_KEY;
+import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 /**
  * @author jgzornoza
@@ -40,10 +47,10 @@ public class VotingAppService extends Service {
 
     public static final String TAG = "VotingAppService";
 
-    private ContextVS contextVS;
+    private AppContextVS appContextVS;
 
     @Override public void onCreate(){
-        contextVS = ContextVS.getInstance(getApplicationContext());
+        appContextVS = (AppContextVS) getApplicationContext();
         Log.i(TAG + ".onCreate(...) ", "VotingAppService created");
     }
 
@@ -54,19 +61,18 @@ public class VotingAppService extends Service {
                 getServerInfoURL(accessControlURL), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
-            intent.putExtra(ContextVS.CAPTION_KEY, getString(R.string.connection_error_msg));
-            String message = responseVS.getMessage();
+            responseVS.setCaption(getString(R.string.connection_error_msg));
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())
-                message = getString(R.string.conn_timeout_msg);
-            intent.putExtra(ContextVS.MESSAGE_KEY, message);
+                responseVS.setNotificationMessage(getString(R.string.conn_timeout_msg));
+            intent.putExtra(RESPONSEVS_KEY, responseVS);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } else {
             try {
                 AccessControlVS accessControl = AccessControlVS.parse(responseVS.getMessage());
-                contextVS.setAccessControlVS(accessControl);
+                appContextVS.setAccessControlVS(accessControl);
                 if(operationStr != null  &&
-                        ContextVS.State.WITH_CERTIFICATE == contextVS.getState()){
+                        State.WITH_CERTIFICATE == appContextVS.getState()){
                     OperationVS operationVS = OperationVS.parse(operationStr);
                     Log.d(TAG + ".onStartCommand(...)", "operationVS: " + operationVS.getTypeVS());
                     if(operationVS.getEventVS() != null) {
@@ -82,8 +88,8 @@ public class VotingAppService extends Service {
                 } else {
                     Intent intent = null;
                     SharedPreferences settings =  getSharedPreferences(
-                            ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-                    switch (contextVS.getState()) {
+                            VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                    switch (appContextVS.getState()) {
                         case WITHOUT_CSR:
                             String applicationID = settings.getString(APPLICATION_ID_KEY, null);
                             if (applicationID == null || applicationID.isEmpty()) {
@@ -115,7 +121,7 @@ public class VotingAppService extends Service {
 
     private void processOperation(OperationVS operationVS) {
         Log.d(TAG + ".processOperation(...)", "====_ TODO _==== operationVS: " +
-                operationVS.getTypeVS() + " - state: " + contextVS.getState());
+                operationVS.getTypeVS() + " - state: " + appContextVS.getState());
         switch(operationVS.getTypeVS()) {
             case SEND_SMIME_VOTE:
                 break;
@@ -134,8 +140,8 @@ public class VotingAppService extends Service {
         super.onStartCommand(intent, flags, startId);
         Bundle arguments = intent.getExtras();
         if(arguments != null) {
-            final String accessControlURL = arguments.getString(ContextVS.ACCESS_CONTROL_URL_KEY);
-            Uri uriData = (Uri) arguments.getParcelable(ContextVS.URI_KEY);
+            final String accessControlURL = arguments.getString(ACCESS_CONTROL_URL_KEY);
+            Uri uriData = (Uri) arguments.getParcelable(URI_KEY);
             String operationStr = null;
             if(uriData != null) {
                 String encodedMsg = uriData.getQueryParameter("msg");

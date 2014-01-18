@@ -3,6 +3,7 @@ package org.votingsystem.android.callable;
 import android.content.Context;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -16,8 +17,6 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import javax.mail.Header;
 
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
 import static org.votingsystem.model.ContextVS.PROVIDER;
@@ -36,14 +35,15 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     private CertificationRequestVS certificationRequest;
     private X509Certificate destinationCert = null;
     private String serviceURL = null;
-    private Context context = null;
+    private AppContextVS contextVS = null;
 
     public AccessRequestDataSender(SMIMEMessageWrapper accessRequest, VoteVS vote,
-            X509Certificate destinationCert, String serviceURL, Context context) throws Exception {
+            X509Certificate destinationCert, String serviceURL,
+            AppContextVS context) throws Exception {
         this.accessRequest = accessRequest;
         this.serviceURL = serviceURL;
         this.destinationCert = destinationCert;
-        this.context = context;
+        this.contextVS = context;
         this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME,
                VOTE_SIGN_MECHANISM, PROVIDER, vote.getEventVS().getAccessControl().getServerURL(),
                 vote.getEventVS().getEventVSId().toString(), vote.getHashCertVSBase64());
@@ -52,13 +52,13 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() {
         Log.d(TAG + ".call", " - urlAccessRequest: " + serviceURL);
         try {
-            MessageTimeStamper timeStamper = new MessageTimeStamper(accessRequest, context);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(accessRequest, contextVS);
             ResponseVS responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             accessRequest = timeStamper.getSmimeMessage();
 
             byte[] csrEncryptedBytes = Encryptor.encryptMessage(certificationRequest.
-            		getCsrPEM(), destinationCert, null);
+            		getCsrPEM(), destinationCert);
 
             byte[] csrEncryptedAccessRequestBytes = Encryptor.encryptSMIME(
                     accessRequest, destinationCert);

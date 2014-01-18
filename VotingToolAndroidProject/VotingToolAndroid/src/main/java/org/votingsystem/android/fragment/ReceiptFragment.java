@@ -26,6 +26,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
@@ -40,7 +41,6 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -91,7 +91,7 @@ public class ReceiptFragment extends Fragment {
         getActivity().startService(startIntent);
     }
 
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private ReceiptContainer selectedReceipt;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -123,7 +123,7 @@ public class ReceiptFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +

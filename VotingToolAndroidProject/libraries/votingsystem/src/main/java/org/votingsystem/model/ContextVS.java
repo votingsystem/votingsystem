@@ -27,8 +27,6 @@ public class ContextVS {
 
     public enum State {WITH_CERTIFICATE, WITH_CSR, WITHOUT_CSR}
 
-    public static final String TAG = "ContextVS";
-
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
     public static final int VOTE_TAG                                = 0;
@@ -53,7 +51,7 @@ public class ContextVS {
     public static final String USER_DATA_FILE_NAME           = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME      = "smimeMessage.p7m";
     public static final String PROVIDER                      = "BC";
-    public static final String SERVER_URL_EXTRA_PROP_NAME    = "serverURL";
+    public static final String SERVER_URL_KEY    = "serverURL";
 
     //Intent keys
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
@@ -134,7 +132,7 @@ public class ContextVS {
     public static final String VOTING_DATA_DIGEST = "SHA256";
     public static final String SIG_NAME = "RSA";
     /** Random Number Generator algorithm. */
-    private static final String ALGORITHM_RNG = "SHA1PRNG";
+    public static final String ALGORITHM_RNG = "SHA1PRNG";
     public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
     //public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA256WithRSA";
@@ -147,144 +145,6 @@ public class ContextVS {
     public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
 
-    private State state = State.WITHOUT_CSR;
-
-    private AccessControlVS accessControl;
-    private ControlCenterVS controlCenter;
-    private UserVS userVS;
-    private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
-    private OperationVS operationVS = null;
-    private static ContextVS INSTANCE;
-    private Context context = null;
-
-    private static PropertyResourceBundle resourceBundle;
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-
-        }};
-
-    private ContextVS(Context context) {
-        System.setProperty("android.os.Build.ID", android.os.Build.ID);
-        this.context = context;
-        try {
-            Context_iTextVS.init(context);
-            VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-            InputStream inputStream = context.getAssets().open("messages_es.properties");
-            resourceBundle = new PropertyResourceBundle(inputStream);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public static ContextVS getInstance(Context context) {
-        if(INSTANCE == null) {
-            Log.d(TAG + ".getInstance(...)", "getInstance -  android.os.Build.ID: " +
-                    android.os.Build.ID);
-            INSTANCE = new ContextVS(context);
-        }
-        return INSTANCE;
-    }
-
-    public static String getMessage(String key, Object... arguments) {
-        try {
-            String pattern = resourceBundle.getString(key);
-            if(arguments != null && arguments.length > 0)
-                return MessageFormat.format(pattern, arguments);
-            else return pattern;
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            Log.d(TAG + "getMessage(...)", "### Value not found for key: " + key);
-            return "---" + key + "---";
-        }
-    }
-
-    public String getHostID() {
-        return android.os.Build.ID;
-    }
-
-    public OperationVS getOperationVS() {
-        return operationVS;
-    }
-
-    public void setOperationVS(OperationVS operationVS) {
-        if(operationVS == null) Log.d(TAG + ".setOperationVS(...)", "- removing pending operationVS");
-        else Log.d(TAG + ".setOperationVS(...)", "- operationVS: " + operationVS.getTypeVS());
-        this.operationVS = operationVS;
-    }
-
-    public void setState(State state, String nif) {
-        Log.d(TAG + ".setState(...)", STATE_KEY + "_" + accessControl.getServerURL() +
-                " - state: " + state.toString());
-        SharedPreferences settings = context.getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(STATE_KEY + "_" + accessControl.getServerURL() , state.toString());
-        if(nif != null) editor.putString(NIF_KEY, nif);
-        if(State.WITH_CERTIFICATE == state) loadUser();
-        editor.commit();
-        this.state = state;
-    }
-
-    public State getState() {
-        return state;
-    }
-
-    public X509Certificate getCert(String serverURL) {
-        Log.d(TAG + ".getCert(...)", " - getCert - serverURL: " + serverURL);
-        if(serverURL == null) return null;
-        return certsMap.get(serverURL);
-    }
-
-    public void putCert(String serverURL, X509Certificate cert) {
-        Log.d(TAG + ".putCert(...)", " serverURL: " + serverURL);
-        certsMap.put(serverURL, cert);
-    }
-
-    public UserVS getUserVS() {
-        return userVS;
-    }
-
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
-    }
-
-    public AccessControlVS getAccessControl() {
-        return accessControl;
-    }
-
-    public void setAccessControlVS(AccessControlVS accessControl) {
-        Log.d(TAG + ".setAccessControlURL() ", " - setAccessControlURL: " +
-                accessControl.getServerURL());
-        SharedPreferences settings = context.getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String stateStr = settings.getString(
-                STATE_KEY + "_" + accessControl.getServerURL(), State.WITHOUT_CSR.toString());
-        state = State.valueOf(stateStr);
-        this.accessControl = accessControl;
-        loadUser();
-    }
-
-    public void loadUser() {
-        try {
-            File representativeDataFile = new File(context.getFilesDir(),
-                    ContextVS.USER_DATA_FILE_NAME);
-            if(representativeDataFile.exists()) {
-                byte[] serializedUserData = FileUtils.getBytesFromFile(
-                        representativeDataFile);
-                userVS = (UserVS) ObjectUtils.deSerializeObject(serializedUserData);
-            } else Log.d(TAG + ".setAccessControlVS(...)", "user data not found");
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void setControlCenter(ControlCenterVS controlCenter) {
-        this.controlCenter = controlCenter;
-    }
-
-    public ControlCenterVS getControlCenter() {
-        return controlCenter;
-    }
+    public static final String KEYSTORE_TYPE = "PKCS12";
 
 }

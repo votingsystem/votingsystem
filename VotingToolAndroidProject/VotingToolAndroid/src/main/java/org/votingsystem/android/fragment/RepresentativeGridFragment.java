@@ -37,8 +37,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NewRepresentativeActivity;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -69,7 +69,7 @@ public class RepresentativeGridFragment extends Fragment
     private AtomicBoolean hasHTTPConnection = new AtomicBoolean(true);
     private RepresentativeListAdapter adapter = null;
     private String queryStr = null;
-    private ContextVS contextVS = null;
+    private AppContextVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private View progressContainer;
@@ -90,12 +90,15 @@ public class RepresentativeGridFragment extends Fragment
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
                 hasHTTPConnection.set(false);
             }
+            ResponseVS responseVS = (ResponseVS) intent.getSerializableExtra(
+                    ContextVS.RESPONSEVS_KEY);
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-            if(operationType == TypeVS.REPRESENTATIVE_REVOKE) {
+            if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
                 showProgress(false, true);
-            }
-            showMessage(responseStatusCode, caption, message);
+                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage());
+            } else  showMessage(responseStatusCode, caption, message);
         }
         }
     };
@@ -137,12 +140,8 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = contextVS.getInstance(getActivity().getApplicationContext());
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         broadCastId = this.getClass().getName();
-        if(contextVS.getAccessControl() == null) {
-            Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-        }
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);

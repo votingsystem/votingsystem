@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -13,7 +12,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,11 +28,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
-import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -55,7 +53,7 @@ public class RepresentativeFragment extends Fragment {
 
     private View rootView;
     private String broadCastId = null;
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private Button selectButton;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -98,7 +96,7 @@ public class RepresentativeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         representativeId =  getArguments().getLong(ContextVS.USER_KEY);
         Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
                 UserContentProvider.getRepresentativeURI(representativeId),

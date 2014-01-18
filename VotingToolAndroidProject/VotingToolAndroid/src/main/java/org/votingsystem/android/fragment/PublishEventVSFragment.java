@@ -31,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.service.SignAndSendService;
@@ -64,7 +65,7 @@ public class PublishEventVSFragment extends Fragment {
 
 	private TypeVS formType;
     private EditorFragment editorFragment;
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private TextView progressMessage;
     private EditText dateFinishEditText;
     private EditText dateBeginEditText;
@@ -256,7 +257,7 @@ public class PublishEventVSFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         broadCastId = this.getClass().getSimpleName();
         formType = (TypeVS)getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         switch(formType) {

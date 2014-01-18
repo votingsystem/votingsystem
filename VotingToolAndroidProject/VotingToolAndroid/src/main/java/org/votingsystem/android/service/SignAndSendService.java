@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.PDFSignedSender;
@@ -18,13 +19,9 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
-import java.io.FileInputStream;
 import java.util.List;
-
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 
 /**
  * @author jgzornoza
@@ -36,14 +33,16 @@ public class SignAndSendService extends IntentService {
 
     public SignAndSendService() { super(TAG); }
 
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
 
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        ResponseVS responseVS = null;
+        int resultIcon = R.drawable.cancel_22;
         try {
-            contextVS = ContextVS.getInstance(getApplicationContext());
+            contextVS = (AppContextVS) getApplicationContext();
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String pin = arguments.getString(ContextVS.PIN_KEY);
             String signatureContent = arguments.getString(ContextVS.MESSAGE_KEY);
@@ -54,9 +53,7 @@ public class SignAndSendService extends IntentService {
                     getNameNormalized();
             ContentTypeVS contentType = (ContentTypeVS)intent.getSerializableExtra(
                     ContextVS.CONTENT_TYPE_KEY);
-            ResponseVS responseVS = null;
             String caption = null;
-            String message = null;
             byte[] pdfBytes = null;
             String notificationMessage = null;
             Log.d(TAG + ".onHandleIntent(...) ", "operationType: " + operationType +
@@ -71,7 +68,8 @@ public class SignAndSendService extends IntentService {
                         pdfBytes = responseVS.getMessageBytes();
                         serviceURL = serviceURL + "/" + manifestId;
                         PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes, serviceURL,
-                                pin.toCharArray(), null, null, getApplicationContext());
+                                pin.toCharArray(), null, null,
+                                (AppContextVS)getApplicationContext());
                         responseVS = pdfSignedSender.call();
                     }
                     break;
@@ -83,7 +81,8 @@ public class SignAndSendService extends IntentService {
                         pdfBytes = responseVS.getMessageBytes();
                         PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes,
                                 contextVS.getAccessControl().getEventVSManifestCollectorURL(eventId),
-                                pin.toCharArray(), null, null, getApplicationContext());
+                                pin.toCharArray(), null, null,
+                                (AppContextVS)getApplicationContext());
                         responseVS = pdfSignedSender.call();
                     }
                     break;
@@ -98,7 +97,8 @@ public class SignAndSendService extends IntentService {
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                             contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
                             contentType, messageSubject, pin.toCharArray(),
-                            contextVS.getAccessControl().getCertificate(), getApplicationContext());
+                            contextVS.getAccessControl().getCertificate(),
+                            (AppContextVS)getApplicationContext());
                     responseVS = smimeSignedSender.call();
                     break;
                 default:
@@ -106,48 +106,41 @@ public class SignAndSendService extends IntentService {
                             R.string.operation_unknown_error_msg, operationType.toString()));
                     break;
             }
-            ResponseVS notificationResponse = new ResponseVS();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                switch(operationType) {
+                    case CLAIM_PUBLISHING:
+                        notificationMessage = getString(R.string.claim_published_ok_msg);
+                        break;
+                    case VOTING_PUBLISHING:
+                        notificationMessage = getString(R.string.election_published_ok_msg);
+                        break;
+                    case REPRESENTATIVE_REVOKE:
+                        notificationMessage = getString(R.string.representative_revoke_ok_msg);
+                        break;
+                    default:
+                        notificationMessage = getString(R.string.signature_ok_notification_msg);
+                }
                 caption = getString(R.string.operation_ok_msg);
-                message = getString(R.string.operation_ok_msg);
-                if(operationType == TypeVS.REPRESENTATIVE_REVOKE)
-                    responseVS.setMessage(getString(R.string.representative_revoke_ok_msg));
+                resultIcon = R.drawable.signature_ok_32;
             } else {
-                caption = getString(R.string.operation_error_msg);
-                message = responseVS.getMessage();
+                caption = getString(R.string.signature_error_notification_msg);
+                notificationMessage = responseVS.getMessage();
             }
-            responseVS.setTypeVS(operationType);
-            responseVS.setServiceCaller(serviceCaller);
-            showNotification(notificationResponse);
-            sendMessage(responseVS.getStatusCode(),operationType, caption, message,serviceCaller);
+            responseVS.setCaption(caption);
+            responseVS.setNotificationMessage(notificationMessage);
         } catch(Exception ex) {
             ex.printStackTrace();
-            sendMessage(ResponseVS.SC_ERROR,operationType ,
-                    getString(R.string.exception_lbl), ex.getMessage(), serviceCaller);
+            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
+                    getString(R.string.exception_lbl));
+        } finally {
+            responseVS.setIconId(resultIcon);
+            responseVS.setTypeVS(operationType);
+            responseVS.setServiceCaller(serviceCaller);
+            sendMessage(responseVS);
         }
     }
 
     private void showNotification(ResponseVS responseVS){
-        String title = null;
-        String message = null;
-        int resultIcon = R.drawable.cancel_22;
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            resultIcon = R.drawable.signature_ok_32;
-            switch(responseVS.getTypeVS()) {
-                case CLAIM_PUBLISHING:
-                    message = getString(R.string.claim_published_ok_msg);
-                    break;
-                case VOTING_PUBLISHING:
-                    message = getString(R.string.election_published_ok_msg);
-                    break;
-                default:
-                    message = getString(R.string.signature_ok_notification_msg);
-            }
-        } else {
-            responseVS.setCaption(getString(R.string.signature_error_notification_msg));
-        }
-        responseVS.setIconId(resultIcon);
-        responseVS.setMessage(message);
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         Intent clickIntent = new Intent(this, MessageActivity.class);
@@ -155,7 +148,8 @@ public class SignAndSendService extends IntentService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
                 SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(title).setContentText(message).setSmallIcon(resultIcon)
+                .setContentTitle(responseVS.getCaption()).setContentText(
+                        responseVS.getNotificationMessage()).setSmallIcon(responseVS.getIconId())
                 .setContentIntent(pendingIntent);
         Notification note = builder.build();
         // hide the notification after its selected
@@ -164,16 +158,14 @@ public class SignAndSendService extends IntentService {
         notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
     }
 
-    private void sendMessage(Integer statusCode, TypeVS operationType, String caption,
-             String message, String serviceCaller) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
-                serviceCaller +" - caption: " + caption  + " - message: " + message);
-        Intent intent = new Intent(serviceCaller);
-        intent.putExtra(ContextVS.TYPEVS_KEY, operationType);
-        if(statusCode != null)
-            intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());
-        if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
-        if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
+    private void sendMessage(ResponseVS responseVS) {
+        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
+                " - serviceCaller: " + responseVS.getServiceCaller() +
+                " - caption: " + responseVS.getCaption()  + " - message: " +
+                responseVS.getNotificationMessage());
+        showNotification(responseVS);
+        Intent intent = new Intent(responseVS.getServiceCaller());
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 

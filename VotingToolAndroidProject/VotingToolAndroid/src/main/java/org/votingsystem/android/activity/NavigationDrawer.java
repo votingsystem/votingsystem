@@ -35,6 +35,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ExpandableListView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
@@ -61,7 +62,7 @@ public class NavigationDrawer extends ActionBarActivity {
     private DrawerLayout mDrawerLayout;
     private ViewPager mViewPager;
     private ActionBarDrawerToggle mDrawerToggle;
-    private ContextVS contextVS = null;
+    private AppContextVS contextVS = null;
 
     //private RepresentativeNavigationPagerAdapter representativePagerAdapter;
     private SingleOptionPagerAdapter singleOptionPagerAdapter;
@@ -87,7 +88,7 @@ public class NavigationDrawer extends ActionBarActivity {
                 updateActionBarTitle();
             }
         });
-        contextVS = ContextVS.getInstance(getBaseContext());
+        contextVS = (AppContextVS) getApplicationContext();
         expListView = (ExpandableListView) findViewById(R.id.left_drawer);
         listAdapter = new NavigatorDrawerOptionsAdapter(this);
         expListView.setAdapter(listAdapter);

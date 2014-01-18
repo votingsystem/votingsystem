@@ -12,15 +12,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.service.VotingAppService;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 
 import java.io.IOException;
 import java.util.Properties;
 
-import static org.votingsystem.model.ContextVS.SERVER_URL_EXTRA_PROP_NAME;
+import static org.votingsystem.model.ContextVS.SERVER_URL_KEY;
 
 //import org.eclipse.jetty.websocket.WebSocket;
 //import org.eclipse.jetty.websocket.WebSocketClient;
@@ -33,7 +35,7 @@ public class MainActivity extends FragmentActivity {
 	
 	public static final String TAG = "MainActivity";
 
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private ProgressDialog progressDialog = null;
     private String accessControlURL = null;
     private AlertDialog alertDialog;
@@ -48,7 +50,7 @@ public class MainActivity extends FragmentActivity {
             Log.d(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
             return;
         }
-        contextVS = ContextVS.getInstance(getBaseContext());
+        contextVS = (AppContextVS) getApplicationContext();
         Uri uriData = null;
         if(Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             //getIntent().getCategories().contains(Intent.CATEGORY_BROWSABLE);
@@ -56,8 +58,8 @@ public class MainActivity extends FragmentActivity {
             if(uriData != null) Log.d(TAG + ".onCreate(...)", "uriData - host:" + uriData.getHost()+
                     " - path: " + uriData.getPath() + " - userInfo: " + uriData.getUserInfo());
             accessControlURL = uriData.getQueryParameter("serverURL");
-        } else if(getIntent().getStringExtra(SERVER_URL_EXTRA_PROP_NAME) != null) {
-            accessControlURL = getIntent().getStringExtra(SERVER_URL_EXTRA_PROP_NAME);
+        } else if(getIntent().getStringExtra(SERVER_URL_KEY) != null) {
+            accessControlURL = getIntent().getStringExtra(SERVER_URL_KEY);
         } else {
             Properties props = new Properties();
             try {
@@ -73,9 +75,9 @@ public class MainActivity extends FragmentActivity {
                     getString(R.string.loading_data_msg));
         }
         if (savedInstanceState != null) return;
-        String caption = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
-        String message = getIntent().getStringExtra(ContextVS.MESSAGE_KEY);
-        if(caption != null && message != null) showMessage(null, caption, message);
+        ResponseVS responseVS = (ResponseVS) getIntent().getSerializableExtra(ContextVS.RESPONSEVS_KEY);
+        if(responseVS != null) showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                responseVS.getNotificationMessage());
         else if(uriData != null || contextVS.getAccessControl() == null) runAppService(uriData);
         else if(contextVS.getAccessControl() != null) {
             Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
@@ -93,10 +95,6 @@ public class MainActivity extends FragmentActivity {
         }
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
     }
-
-    /*@Override public void onBackPressed() {
-        Log.d(TAG +  ".onBackPressed(...)", "");
-    }*/
 
     private void runAppService(Uri uriData) {
         showProgressDialog(getString(R.string.connecting_caption),

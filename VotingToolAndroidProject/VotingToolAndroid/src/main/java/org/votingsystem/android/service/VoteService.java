@@ -12,6 +12,7 @@ import android.text.Html;
 import android.util.Log;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
@@ -44,7 +45,7 @@ public class VoteService extends IntentService {
 
     public VoteService() { super(TAG); }
 
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
 
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
@@ -52,7 +53,7 @@ public class VoteService extends IntentService {
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         try {
-            contextVS = ContextVS.getInstance(getApplicationContext());
+            contextVS = (AppContextVS) getApplicationContext();
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String pin = arguments.getString(ContextVS.PIN_KEY);
             String receiverName = arguments.getString(ContextVS.RECEIVER_KEY);
@@ -140,7 +141,7 @@ public class VoteService extends IntentService {
             FileInputStream fis = openFileInput(KEY_STORE_FILE);
             byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
             VoteSender voteSender = new VoteSender(vote, keyStoreBytes, pin.toCharArray(),
-                    getApplicationContext());
+                    (AppContextVS)getApplicationContext());
             responseVS = voteSender.call();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -158,7 +159,8 @@ public class VoteService extends IntentService {
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                     contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject, pin.toCharArray(),
-                    contextVS.getAccessControl().getCertificate(), getApplicationContext());
+                    contextVS.getAccessControl().getCertificate(),
+                    (AppContextVS)getApplicationContext());
             responseVS = smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();

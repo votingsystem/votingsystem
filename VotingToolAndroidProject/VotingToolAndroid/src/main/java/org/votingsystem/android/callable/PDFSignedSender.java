@@ -28,6 +28,7 @@ import org.bouncycastle2.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignedDataGenerator;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -77,16 +78,16 @@ public class PDFSignedSender implements Callable<ResponseVS> {
 
     private String location;
     private String reason;
-    private Context context;
+    private AppContextVS contextVS;
     private char[] password;
     byte[] pdfBytes = null;
     private String serviceURL = null;
 
     public PDFSignedSender(byte[] pdfBytes, String serviceURL, char[] password, String reason,
-            String location, Context context) {
+            String location, AppContextVS context) {
         this.pdfBytes = pdfBytes;
         this.serviceURL = serviceURL;
-        this.context = context;
+        this.contextVS = context;
         this.reason = reason;
         this.location = location;
         this.password = password;
@@ -95,7 +96,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() {
         ResponseVS responseVS = null;
         try {
-            FileInputStream fis = context.openFileInput(KEY_STORE_FILE);
+            FileInputStream fis = contextVS.openFileInput(KEY_STORE_FILE);
             byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
             KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
             PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
@@ -107,7 +108,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     signerCert, signerPrivatekey, signerCertChain);
             Header header = new Header(ContextVS.VOTING_HEADER_LABEL, ContextVS.BASE64_ENCODED_CONTENT_TYPE);
             MimeBodyPart mimeBodyPart = Encryptor.encryptBase64Message(
-                    timeStampedSignedPDF, ContextVS.getInstance(context).getAccessControl().
+                    timeStampedSignedPDF, contextVS.getAccessControl().
                     getCertificate(), header);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.writeTo(baos);
@@ -117,7 +118,8 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     serviceURL);
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                    contextVS.getString(R.string.pin_error_msg));
         } catch (Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
@@ -158,7 +160,8 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             signerVS = signerVS.replace("(FIRMA)", "");
         } else signerVS = getUserNIF(signerCert);
 
-        signatureAppearance.setLayer2Text(context.getString(R.string.pdf_signed_by_lbl) + ":\n" + signerVS);
+        signatureAppearance.setLayer2Text(
+                contextVS.getString(R.string.pdf_signed_by_lbl) + ":\n" + signerVS);
 
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
@@ -172,7 +175,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     byte[] digest = d.digest(signatureBytes);
 
                     MessageTimeStamper messageTimeStamper =
-                            new MessageTimeStamper(TIMESTAMP_PDF_HASH, digest, context);
+                            new MessageTimeStamper(TIMESTAMP_PDF_HASH, digest, contextVS);
                     ResponseVS responseVS = messageTimeStamper.call();
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                         Log.d(TAG + ".signWithTimestamp(...)", " - Error timestamping: " +

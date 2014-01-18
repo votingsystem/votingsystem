@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.EditorFragment;
@@ -60,7 +61,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
 
     private TypeVS operationType;
     private EditorFragment editorFragment;
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
     private TextView imageCaption;
@@ -151,7 +152,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getApplicationContext());
+        contextVS = (AppContextVS) getApplicationContext();
         broadCastId = this.getClass().getSimpleName();
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         Log.d(TAG + ".onCreate(...)", "operationType: " + operationType +

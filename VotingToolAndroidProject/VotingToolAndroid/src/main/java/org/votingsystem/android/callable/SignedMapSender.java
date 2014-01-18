@@ -2,31 +2,29 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
+
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
 import java.io.FileInputStream;
-import java.security.KeyPair;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import javax.mail.Header;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
-import static org.votingsystem.model.ContextVS.TAG;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
@@ -40,7 +38,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
     private SMIMEMessageWrapper smimeMessage = null;
     private X509Certificate receiverCert = null;
     private char[] password;
-    private Context context = null;
+    private AppContextVS contextVS = null;
     private String fromUser = null;
     private String toUser = null;
     private String subject = null;
@@ -56,7 +54,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
             Map<String, Object> mapToSend, String subject, Header header, String serviceURL,
             String signedFileName, ContentTypeVS contentType, char[] password,
             X509Certificate receiverCert, PublicKey decriptorPublicKey,
-            PrivateKey decriptorPrivateKey, Context context) {
+            PrivateKey decriptorPrivateKey, AppContextVS context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;
@@ -64,7 +62,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
         this.subject = subject;
         this.contentType = contentType;
         this.password = password;
-        this.context = context;
+        this.contextVS = context;
         this.serviceURL = serviceURL;
         this.signedFileName = signedFileName;
         this.decriptorPublicKey = decriptorPublicKey;
@@ -76,16 +74,16 @@ public class SignedMapSender implements Callable<ResponseVS> {
         Log.d(TAG + ".call()", "serviceURL: " + serviceURL);
         ResponseVS responseVS = null;
         try {
-            FileInputStream fis = context.openFileInput(KEY_STORE_FILE);
+            FileInputStream fis = contextVS.openFileInput(KEY_STORE_FILE);
             byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     keyStoreBytes, USER_CERT_ALIAS, password, SIGNATURE_ALGORITHM);
             smimeMessage = signedMailGenerator.genMimeMessage(fromUser, toUser,textToSign, subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, context);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
-                responseVS.setCaption(context.getString(R.string.timestamp_service_error_caption));
+                responseVS.setCaption(contextVS.getString(R.string.timestamp_service_error_caption));
                 responseVS.setNotificationMessage(responseVS.getMessage());
                 return responseVS;
             }
@@ -107,12 +105,12 @@ public class SignedMapSender implements Callable<ResponseVS> {
             }
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(context.getString(R.string.pin_error_msg),
-                    context.getString(R.string.exception_lbl));
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.pin_error_msg),
+                    contextVS.getString(R.string.exception_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
-                    context.getString(R.string.exception_lbl));
+                    contextVS.getString(R.string.exception_lbl));
         } finally {return responseVS;}
     }
 

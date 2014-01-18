@@ -18,11 +18,11 @@ import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.AnonymousSMIMESender;
 import org.votingsystem.android.callable.MessageTimeStamper;
-import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -31,14 +31,11 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.StatusVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSResponse;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
@@ -57,8 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.mail.Header;
-
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
@@ -71,12 +66,12 @@ public class RepresentativeService extends IntentService {
 
     public static final String TAG = "RepresentativeService";
 
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
 
     public RepresentativeService() { super(TAG); }
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = ContextVS.getInstance(getApplicationContext());
+        contextVS = (AppContextVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation);
@@ -237,7 +232,7 @@ public class RepresentativeService extends IntentService {
                     pin.toCharArray(), contextVS.getAccessControl().getCertificate(),
                     anonymousDelegation.getCertificationRequest().getPublicKey(),
                     anonymousDelegation.getCertificationRequest().getPrivateKey(),
-                    getApplicationContext());
+                    (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
@@ -259,7 +254,8 @@ public class RepresentativeService extends IntentService {
                         contextVS.getAccessControl().getAnonymousDelegationServiceURL(),
                         contextVS.getAccessControl().getCertificate(),
                         ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                        anonymousDelegation.getCertificationRequest(), getApplicationContext());
+                        anonymousDelegation.getCertificationRequest(),
+                        (AppContextVS)getApplicationContext());
                 responseVS = anonymousSender.call();
                 //Encryptor.encryptMessage(base64EncodedKey, userCert);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -307,7 +303,7 @@ public class RepresentativeService extends IntentService {
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
             String editorContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
-            //Uri imageUri = (Uri) arguments.getParcelable(ContextVS.URI_KEY);
+            //Uri imageUri = (Uri) arguments.getParcelable(AppContextVS.URI_KEY);
             //reduceImageFileSize(imageUri);
             byte[] imageBytes = null;
             try {
@@ -340,7 +336,8 @@ public class RepresentativeService extends IntentService {
                     keyStoreBytes, USER_CERT_ALIAS, pin.toCharArray(), SIGNATURE_ALGORITHM);
             SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS,
                     contextVS.getAccessControl().getNameNormalized(),contentToSign, messageSubject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, getApplicationContext());
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
+                    (AppContextVS)getApplicationContext());
             ResponseVS responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 caption = getString(R.string.timestamp_service_error_caption);

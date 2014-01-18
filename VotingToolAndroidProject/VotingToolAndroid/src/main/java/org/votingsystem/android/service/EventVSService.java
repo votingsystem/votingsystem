@@ -1,14 +1,13 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.content.ContentProvider;
-import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContentTypeVS;
@@ -34,9 +33,11 @@ public class EventVSService extends IntentService {
 
     public EventVSService() { super(TAG); }
 
+    AppContextVS contextVS = null;
+
     public void checkDates(EventVS eventVS) {
         Date todayDate = Calendar.getInstance().getTime();
-        final String checkURL = ContextVS.getInstance(this).getAccessControl().
+        final String checkURL = contextVS.getAccessControl().
                 getCheckDatesServiceURL(eventVS.getId());
         Runnable runnable = null;
         if(eventVS.getState() == EventVS.State.ACTIVE) {
@@ -57,6 +58,7 @@ public class EventVSService extends IntentService {
 
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
+        contextVS = (AppContextVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.TYPEVS_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
@@ -64,7 +66,7 @@ public class EventVSService extends IntentService {
             EventVS.State eventState = (EventVS.State) arguments.getSerializable(ContextVS.STATE_KEY);
             TypeVS eventType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
-            String serviceURL = ContextVS.getInstance(this).getAccessControl().getEventVSURL(
+            String serviceURL = contextVS.getAccessControl().getEventVSURL(
                     eventState, EventVS.getURLPart(eventType),
                     ContextVS.EVENTS_PAGE_SIZE, offset);
             ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);

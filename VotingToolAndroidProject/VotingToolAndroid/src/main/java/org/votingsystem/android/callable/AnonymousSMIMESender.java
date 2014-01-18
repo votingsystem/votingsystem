@@ -3,6 +3,7 @@ package org.votingsystem.android.callable;
 import android.content.Context;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -25,9 +26,8 @@ import javax.mail.Header;
 public class AnonymousSMIMESender implements Callable<ResponseVS> {
 
     public static final String TAG = "AnonymousSMIMESender";
-
-    private Context context;
-    private ContextVS contextVS;
+;
+    private AppContextVS contextVS;
     private CertificationRequestVS certificationRequest;
     private String fromUser;
     private String toUser;
@@ -40,7 +40,8 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
 
     public AnonymousSMIMESender(String fromUser, String toUser, String textToSign, String subject,
             Header header, String serviceURL, X509Certificate receiverCert,
-            ContentTypeVS contentType,CertificationRequestVS certificationRequest,Context context) {
+            ContentTypeVS contentType,CertificationRequestVS certificationRequest,
+            AppContextVS context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;
@@ -48,10 +49,10 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         this.header = header;
         this.serviceURL = serviceURL;
         this.receiverCert = receiverCert;
-        this.context = context;
+        this.contextVS = context;
         this.contentType = contentType;
         this.certificationRequest = certificationRequest;
-        contextVS = ContextVS.getInstance(context);
+        contextVS = context;
     }
 
     @Override public ResponseVS call() {
@@ -60,7 +61,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         try {
             SMIMEMessageWrapper signedMessage = certificationRequest.genMimeMessage(fromUser, toUser,
                     textToSign, subject, header);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(signedMessage, context);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(signedMessage, contextVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
@@ -78,11 +79,11 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
-                    context.getString(R.string.exception_lbl));
+                    contextVS.getString(R.string.exception_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
-                    context.getString(R.string.exception_lbl));
+                    contextVS.getString(R.string.exception_lbl));
         } finally { return responseVS; }
     }
 

@@ -19,12 +19,12 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtil;
@@ -42,8 +42,12 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
+import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.PIN_KEY;
+import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.USER_DATA_FILE_NAME;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 /**
@@ -65,14 +69,14 @@ public class UserCertResponseActivity extends ActionBarActivity {
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
-    private ContextVS contextVS;
+    private AppContextVS appContextVS;
     private String broadCastId;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            String pin = intent.getStringExtra(PIN_KEY);
             if(pin != null) updateKeyStore(pin);
         }
     };
@@ -104,12 +108,12 @@ public class UserCertResponseActivity extends ActionBarActivity {
                 fos.close();
 
                 byte[] userDataBytes = ObjectUtils.serializeObject(user);
-                FileOutputStream outputStream = openFileOutput(ContextVS.USER_DATA_FILE_NAME,
+                FileOutputStream outputStream = openFileOutput(USER_DATA_FILE_NAME,
                         Context.MODE_PRIVATE);
                 outputStream.write(userDataBytes);
                 outputStream.close();
 
-                contextVS.setState(ContextVS.State.WITH_CERTIFICATE, user.getNif());
+                appContextVS.setState(State.WITH_CERTIFICATE, user.getNif());
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 insertPinButton.setVisibility(View.GONE);
                 requestCertButton.setVisibility(View.GONE);
@@ -124,9 +128,9 @@ public class UserCertResponseActivity extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.user_cert_response_activity);
-        contextVS = ContextVS.getInstance(getBaseContext());
+        appContextVS = (AppContextVS) getApplicationContext();
         broadCastId = this.getClass().getName();
-        Log.d(TAG + ".onCreate(...) ", "state: " + contextVS.getState() +
+        Log.d(TAG + ".onCreate(...) ", "state: " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -151,15 +155,14 @@ public class UserCertResponseActivity extends ActionBarActivity {
         requestCertButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(contextVS.getState()) {
+          	  	switch(appContextVS.getState()) {
 			    	case WITHOUT_CSR:
 			    		intent = new Intent(getBaseContext(), CertRequestActivity.class);
 			    		break;
 			    	case WITH_CSR:
 			    	case WITH_CERTIFICATE:
 			    		intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-                        intent.putExtra(ContextVS.FRAGMENT_KEY,
-                                UserCertRequestFormFragment.class.getName());
+                        intent.putExtra(FRAGMENT_KEY, UserCertRequestFormFragment.class.getName());
 			    		break;
           	  	}
           	  	if(intent != null) {
@@ -175,7 +178,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
     }
     
     private void checkCertState () {
-  	  	switch(contextVS.getState()) {
+  	  	switch(appContextVS.getState()) {
 	    	case WITHOUT_CSR:
 	    		Intent intent = new Intent(getBaseContext(), CertRequestActivity.class);
 	    		startActivity(intent);
@@ -187,7 +190,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
 	        	Log.d(TAG + ".checkCertState() ", "csrRequestId: " + csrRequestId);
                 GetDataTask getDataTask = new GetDataTask(null);
-                getDataTask.execute(contextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
+                getDataTask.execute(appContextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
   	  	}
     }
 
@@ -301,7 +304,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
                 insertPinButton.setVisibility(View.VISIBLE);
                 isCertStateChecked.set(true);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                String certificationAddresses = contextVS.getAccessControl().getCertificationCentersURL();
+                String certificationAddresses = appContextVS.getAccessControl().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
             } else showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.request_user_cert_error_msg));

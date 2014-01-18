@@ -29,6 +29,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
@@ -63,7 +64,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     private List<Button> optionButtonList;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private View rootView;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -149,7 +150,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
             if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
                 eventVS = EventVS.parse(new JSONObject(getArguments().getString(

@@ -35,6 +35,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.UserCertResponseActivity;
@@ -93,9 +94,10 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateDialog(...) ", "savedInstanceState: " + savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        ContextVS contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
+        final ContextVS.State appState = contextVS.getState();
         if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) && isWithCertValidation) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(
                     getString(R.string.cert_not_found_caption)).setMessage(
@@ -103,7 +105,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                     R.string.request_certificate_menu, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialogInterface, int i) {
                     Intent intent = null;
-                    switch(ContextVS.getInstance(getActivity().getApplicationContext()).getState()) {
+                    switch(appState) {
                         case WITH_CSR:
                             intent = new Intent(getActivity().getApplicationContext(),
                                     UserCertResponseActivity.class);

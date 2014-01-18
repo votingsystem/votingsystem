@@ -11,12 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
-
-import java.security.cert.CertPathBuilder;
 
 /**
  * @author jgzornoza

@@ -35,10 +35,11 @@ public class MessageActivity extends FragmentActivity {
             return;
         }
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
-                ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
+                AppContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
         ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(responseVS.getCaption());
-        if(responseVS.getMessage() != null) builder.setMessage(Html.fromHtml(responseVS.getMessage())).
+        if(responseVS.getMessage() != null) builder.setMessage(Html.fromHtml(
+                responseVS.getNotificationMessage())).
                 setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {

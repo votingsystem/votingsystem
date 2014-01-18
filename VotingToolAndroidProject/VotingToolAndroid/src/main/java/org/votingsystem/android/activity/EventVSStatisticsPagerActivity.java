@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.fragment.EventVSStatisticsFragment;
@@ -27,12 +28,12 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
 
     public static final String TAG = "EventVSStatisticsPagerActivity";
 
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getBaseContext());
+        contextVS = (AppContextVS) getApplicationContext();
         Integer cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         EventVS.State eventState = (EventVS.State)getIntent().getSerializableExtra(ContextVS.EVENT_STATE_KEY);
         TypeVS eventType = (TypeVS)getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);

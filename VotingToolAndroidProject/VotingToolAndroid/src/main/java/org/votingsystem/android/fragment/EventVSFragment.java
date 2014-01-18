@@ -32,6 +32,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import org.json.JSONObject;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.service.SignAndSendService;
@@ -59,7 +60,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private Button signAndSendButton;
     private EventVS eventVS;
-    private ContextVS contextVS;
+    private AppContextVS contextVS;
     private Map<Integer, EditText> fieldsMap;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -82,12 +83,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             if(pin != null) launchSignAndSendService(pin);
             else {
-                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                        ResponseVS.SC_ERROR);
-                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-                showMessage(responseStatusCode, caption, message);
-                if(ResponseVS.SC_OK != responseStatusCode) signAndSendButton.setEnabled(true);
+                ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(
+                        ContextVS.RESPONSEVS_KEY);
+                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage());
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) signAndSendButton.setEnabled(true);
                 showProgress(false, true);
             }
         }
@@ -126,7 +126,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
             if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
                 eventVS = EventVS.parse(new JSONObject(getArguments().getString(
@@ -313,9 +313,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
         Log.d(TAG + ".addFormField(...)", "field: " + label);
         TextView textView = new TextView(getActivity().getApplicationContext());
-        TableLayout.LayoutParams params = new TableLayout.LayoutParams();
-        params.setMargins(5, 5, 5, 5);
-        textView.setLayoutParams(params);
         textView.setTextSize(getResources().getDimension(R.dimen.claim_field_text_size));
         textView.setText(label);
         EditText fieldText = new EditText(getActivity().getApplicationContext());
