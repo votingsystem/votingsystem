@@ -41,7 +41,7 @@ public class RssContentProvider extends ContentProvider {
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME = "voting_system_rss.db";
-    static final String TABLE_RSS = "rss";
+    static final String TABLE_NAME = "rss";
 
     public static final String ID_COL = "_id";
     public static final String URL_COL = "url";
@@ -101,7 +101,7 @@ public class RssContentProvider extends ContentProvider {
         String groupBy = null;
         String having = null;
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
-        qBuilder.setTables(TABLE_RSS);
+        qBuilder.setTables(TABLE_NAME);
         // If the query ends in a specific record number, we're
         // being asked for a specific record, so set the
         // WHERE clause in our query.
@@ -124,7 +124,7 @@ public class RssContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        int updateCount = database.update(TABLE_RSS, values, whereClause, whereArgs);
+        int updateCount = database.update(TABLE_NAME, values, whereClause, whereArgs);
         // Notify any listeners and return the updated row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;
@@ -133,9 +133,12 @@ public class RssContentProvider extends ContentProvider {
     @Override public Uri insert(Uri requestUri, ContentValues initialValues) {
         // NOTE Argument checking code omitted. Check your parameters! Check that
         // your row addition request succeeded!
-        long rowId = -1;
-        rowId = database.insert(TABLE_RSS, null, initialValues);
-        Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
+        Uri newUri = null;
+        if(initialValues != null) {
+            long rowId = -1;
+            rowId = database.insert(TABLE_NAME, null, initialValues);
+            newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
+        }
         // Notify any listeners and return the URI of the new row.
         getContext().getContentResolver().notifyChange(CONTENT_URI, null);
         return newUri;
@@ -143,7 +146,7 @@ public class RssContentProvider extends ContentProvider {
 
     @Override public int delete(Uri uri, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        int rowCount = database.delete(TABLE_RSS, ID_COL + " = ?",
+        int rowCount = database.delete(TABLE_NAME, ID_COL + " = ?",
                 new String[]{String.valueOf(ContentUris.parseId(uri))});
         // Notify any listeners and return the deleted row count.
         getContext().getContentResolver().notifyChange(uri, null);
@@ -154,7 +157,7 @@ public class RssContentProvider extends ContentProvider {
 
         public static final String TAG = "DatabaseHelper";
 
-        private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_RSS + "(" +
+        private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 URL_COL + " TEXT," +
                 TITLE_COL + " TEXT," +
@@ -172,7 +175,7 @@ public class RssContentProvider extends ContentProvider {
             // Don't have any upgrades yet, so if this gets called for some reason we'll
             // just drop the existing table, and recreate the database with the
             // standard method.
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_RSS + ";");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME + ";");
         }
 
 

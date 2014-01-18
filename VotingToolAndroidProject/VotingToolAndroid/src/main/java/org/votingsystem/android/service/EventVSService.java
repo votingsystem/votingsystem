@@ -1,6 +1,8 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
+import android.content.ContentProvider;
+import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;

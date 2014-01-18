@@ -125,20 +125,23 @@ public class UserContentProvider extends ContentProvider {
         // your row addition request succeeded!
         long rowId = -1;
         boolean replace = false;
-        if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
-            replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
-            // Clone the values object, so we don't modify the original.
-            // This is not strictly necessary, but depends on your needs
-            //values = new ContentValues( values );
-            // Remove the key, so we don't pass that on to db.insert() or db.replace()
-            values.remove( SQL_INSERT_OR_REPLACE );
+        Uri newUri = null;
+        if(values != null) {
+            if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
+                replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
+                // Clone the values object, so we don't modify the original.
+                // This is not strictly necessary, but depends on your needs
+                //values = new ContentValues( values );
+                // Remove the key, so we don't pass that on to db.insert() or db.replace()
+                values.remove( SQL_INSERT_OR_REPLACE );
+            }
+            if ( replace ) {
+                rowId = database.replace(TABLE_NAME, null, values);
+            } else {
+                rowId = database.insert(TABLE_NAME, null, values);
+            }
+            newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
-        if ( replace ) {
-            rowId = database.replace(TABLE_NAME, null, values);
-        } else {
-            rowId = database.insert(TABLE_NAME, null, values);
-        }
-        Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         // Notify any listeners and return the URI of the new row.
         getContext().getContentResolver().notifyChange(CONTENT_URI, null);
         return newUri;

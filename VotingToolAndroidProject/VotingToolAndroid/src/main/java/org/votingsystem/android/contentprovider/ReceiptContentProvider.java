@@ -125,9 +125,12 @@ public class ReceiptContentProvider extends ContentProvider {
     @Override public Uri insert(Uri requestUri, ContentValues initialValues) {
         // NOTE Argument checking code omitted. Check your parameters! Check that
         // your row addition request succeeded!
-        long rowId = -1;
-        rowId = database.insert(TABLE_NAME, null, initialValues);
-        Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
+        Uri newUri = null;
+        if(initialValues != null) {
+            long rowId = -1;
+            rowId = database.insert(TABLE_NAME, null, initialValues);
+            newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
+        }
         // Notify any listeners and return the URI of the new row.
         getContext().getContentResolver().notifyChange(CONTENT_URI, null);
         return newUri;
