@@ -38,12 +38,12 @@ class RepresentativeDelegationService {
 		RepresentationDocumentVS representationDocument = null
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		String msg = null
-		try { 
-			if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-				msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
-				log.error "saveDelegation - ERROR - user '${userVS.nif}' is REPRESENTATIVE - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
+		try {
+            ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
+			if(ResponseVS.SC_OK != responseVS.statusCode) {
+                log.error(responseVS.message)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
+                        type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 			}
 			def messageJSON = JSON.parse(smimeMessage.getSignedContent())
 			String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
@@ -106,36 +106,48 @@ class RepresentativeDelegationService {
 		}
 	}
 
+    private ResponseVS checkUserDelegationStatus(UserVS userVS, Locale locale) {
+        String msg = null
+        if(UserVS.Type.REPRESENTATIVE == userVS.type) {
+            msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
+        }
+        MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
+                userVS:userVS)
+        if(userDelegation && Calendar.getInstance(locale).getTime().after(userVS.getDelegationFinish())) {
+            userDelegation.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_USED)
+            userDelegation.save()
+            userVS.setDelegationFinish(null)
+            userVS.save(flush: true)
+            userDelegation = null;
+        }
+        if(userDelegation) {
+            msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
+                    userVS.delegationFinish.format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
+            return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED, contentType: ContentTypeVS.JSON,
+                    message:msg)
+        }
+        int statusCode = userDelegation? ResponseVS.SC_ERROR_REQUEST_REPEATED:ResponseVS.SC_OK
+        return new ResponseVS(statusCode:statusCode, data:userDelegation, message: msg);
+    }
+
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
         log.debug("validateAnonymousRequest")
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
         try {
-            MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
-                    userVS:userVS)
-            if(userDelegation && Calendar.getInstance(locale).getTime().after(userVS.getDelegationFinish())) {
-                userDelegation.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_USED)
-                userDelegation.save()
-                userVS.setDelegationFinish(null)
-                userVS.save(flush: true)
+            ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
+            String userDelegationURL = null
+            if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.statusCode) {
+                userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${responseVS.data.id}"
             }
-            if(userDelegation && userVS.getDelegationFinish() != null) {
-                String userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${userDelegation?.id}"
-                msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
-                        userVS.delegationFinish.format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
-                log.error(msg)
+            if(ResponseVS.SC_OK != responseVS.statusCode) {
+                log.error(responseVS.message)
                 messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
-                messageSMIMEReq.setReason(msg)
-                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED, contentType: ContentTypeVS.JSON,
-                        data:[message:msg, URL:userDelegationURL])
-            }
-            if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-                msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
-                log.error "validateAnonymousRequest - ${msg}"
-                messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
-                messageSMIMEReq.setReason(msg)
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
+                messageSMIMEReq.setReason(responseVS.message)
+                return new ResponseVS(statusCode: responseVS.statusCode, contentType: ContentTypeVS.JSON,
+                        data:[message:responseVS.message, URL:userDelegationURL])
             }
             def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
             TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
