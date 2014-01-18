@@ -1,8 +1,5 @@
 package org.votingsystem.model;
 
-import android.util.Log;
-
-import org.apache.harmony.misc.SystemUtils;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
@@ -20,7 +17,7 @@ import javax.mail.Header;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class AnonymousDelegationVS implements java.io.Serializable, ReceiptContainer {
+public class AnonymousDelegationVS extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 

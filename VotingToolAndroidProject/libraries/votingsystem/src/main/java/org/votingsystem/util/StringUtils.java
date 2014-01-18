@@ -3,6 +3,7 @@ package org.votingsystem.util;
 import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Base64;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 
 import java.io.ByteArrayInputStream;

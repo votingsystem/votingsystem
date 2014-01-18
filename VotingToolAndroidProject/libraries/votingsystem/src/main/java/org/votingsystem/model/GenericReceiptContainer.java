@@ -10,7 +10,7 @@ import java.util.Date;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class GenericReceiptContainer implements Serializable, ReceiptContainer {
+public class GenericReceiptContainer extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 

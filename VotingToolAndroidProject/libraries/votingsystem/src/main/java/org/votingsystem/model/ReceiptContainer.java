@@ -1,24 +1,31 @@
 package org.votingsystem.model;
 
-
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public interface ReceiptContainer {
+public abstract class ReceiptContainer implements Serializable {
 
     public enum State {ACTIVE, CANCELLED}
 
-    public String getSubject();
-    public TypeVS getType();
-    public Date getValidFrom();
-    public Date getValidTo();
-    public Long getLocalId();
-    public void setLocalId(Long localId);
-    public SMIMEMessageWrapper getReceipt();
+
+    public abstract String getSubject();
+
+    public abstract TypeVS getType() ;
+
+    public abstract Date getValidFrom();
+
+    public abstract Date getValidTo();
+
+    public abstract Long getLocalId();
+
+    public abstract void setLocalId(Long localId);
+
+    public abstract SMIMEMessageWrapper getReceipt();
 
 }

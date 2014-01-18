@@ -12,7 +12,6 @@ import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
-import java.io.NotActiveException;
 import java.security.cert.X509Certificate;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,7 +30,7 @@ import java.util.UUID;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VoteVS implements java.io.Serializable, ReceiptContainer {
+public class VoteVS extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 

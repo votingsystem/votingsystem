@@ -87,13 +87,13 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                             responseVS.getStatusCode(), getString(R.string.error_lbl),
                             responseJSON.getString("message"), responseJSON.getString("URL"), typeVS);
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
+                    showProgress(false, true);
                     return;
                 } catch(Exception ex) {
                     ex.printStackTrace();
                 }
             } else notificationMessage = responseVS.getNotificationMessage();
             showMessage(responseVS.getStatusCode(), responseVS.getCaption(), notificationMessage);
-            showProgress(false, true);
         }
         }
     };

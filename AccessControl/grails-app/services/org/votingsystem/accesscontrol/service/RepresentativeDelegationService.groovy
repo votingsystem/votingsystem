@@ -112,9 +112,15 @@ class RepresentativeDelegationService {
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
         try {
-            if(userVS.getDelegationFinish() != null) {
-                MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
-                        userVS:userVS)
+            MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
+                    userVS:userVS)
+            if(userDelegation && Calendar.getInstance(locale).getTime().after(userVS.getDelegationFinish())) {
+                userDelegation.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_USED)
+                userDelegation.save()
+                userVS.setDelegationFinish(null)
+                userVS.save(flush: true)
+            }
+            if(userDelegation && userVS.getDelegationFinish() != null) {
                 String userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${userDelegation?.id}"
                 msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
                         userVS.delegationFinish.format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)

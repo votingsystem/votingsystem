@@ -8,32 +8,35 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/mainLayout"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:foreground="@drawable/shape_window_dim" >
 
 
         <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/scroller"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:fillViewport="true">
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/receipt_data_container"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:padding="10dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
                 android:orientation="vertical">
                 <TextView
                     android:id="@+id/receipt_subject"
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="wrap_content"
                     android:textColor="@color/event_subject"
-                    android:textSize="25sp"
+                    android:textSize="22sp"
                     android:layout_weight="1.0"/>
                 <TextView
                     android:id="@+id/receipt_content"
+                    android:layout_marginTop="10dp"
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
                     android:textSize="15sp"
                     android:layout_weight="1.0"/>

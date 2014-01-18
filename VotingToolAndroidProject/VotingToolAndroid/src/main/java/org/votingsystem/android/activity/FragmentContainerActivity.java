@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EditorFragment;
@@ -57,7 +58,26 @@ public class FragmentContainerActivity extends ActionBarActivity {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
+
     }
+
+    public void setTitle(String title, String subTitle, Integer iconId) {
+        getSupportActionBar().setTitle(title);
+        if(subTitle != null) getSupportActionBar().setSubtitle(subTitle);
+        if(iconId != null) getSupportActionBar().setLogo(iconId);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                super.onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +

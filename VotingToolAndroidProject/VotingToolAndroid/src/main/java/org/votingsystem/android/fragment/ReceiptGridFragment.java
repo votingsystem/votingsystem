@@ -151,7 +151,7 @@ public class ReceiptGridFragment extends Fragment implements
             if(cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-                ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
+                ReceiptContainer receiptContainerInterface = (ReceiptContainer) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
                 String stateStr = cursor.getString(cursor.getColumnIndex(
                         ReceiptContentProvider.STATE_COL));
@@ -164,21 +164,21 @@ public class ReceiptGridFragment extends Fragment implements
                 TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
 
-                subject.setText(receiptContainer.getSubject());
+                subject.setText(receiptContainerInterface.getSubject());
                 String dateInfoStr = null;
                 ImageView imgView = (ImageView)view.findViewById(R.id.event_state_icon);
-                if(DateUtils.getTodayDate().after(receiptContainer.getValidTo())) {
+                if(DateUtils.getTodayDate().after(receiptContainerInterface.getValidTo())) {
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getString(R.string.init_lbl) + "</b>: " +
                             DateUtils.getDate_Es(
-                                    receiptContainer.getValidFrom()) + " - " +
+                                    receiptContainerInterface.getValidFrom()) + " - " +
                             "<b>" + getString(R.string.finish_lbl) + "</b>: " +
-                            DateUtils.getDate_Es(receiptContainer.getValidTo());
+                            DateUtils.getDate_Es(receiptContainerInterface.getValidTo());
                 } else {
                     imgView.setImageResource(R.drawable.open);
                     dateInfoStr = "<b>" + getString(R.string.remain_lbl, DateUtils.
-                            getElpasedTimeStr(receiptContainer.getValidTo()))  +"</b>";
+                            getElpasedTimeStr(receiptContainerInterface.getValidTo()))  +"</b>";
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
@@ -189,7 +189,7 @@ public class ReceiptGridFragment extends Fragment implements
                     receiptState.setVisibility(View.GONE);
                 }
                 typeTextView.setText(Html.fromHtml(ReceiptContentProvider.getDescription(
-                        getActivity().getApplicationContext(), receiptContainer.getType())));
+                        getActivity().getApplicationContext(), receiptContainerInterface.getType())));
             }
         }
     }

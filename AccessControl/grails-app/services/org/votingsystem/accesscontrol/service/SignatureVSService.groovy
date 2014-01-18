@@ -296,7 +296,7 @@ class SignatureVSService {
 					}
 					file.delete();
 				} else if (fileName.endsWith("PEM")) {
-					log.debug ("--- cancelando PEM -> " + fileName)
+					log.debug ("--- cancel PEM -> " + fileName)
 					Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
 						FileUtils.getBytesFromFile(file))
 					for (X509Certificate cert :certificates) {

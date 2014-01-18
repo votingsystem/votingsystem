@@ -12,7 +12,7 @@ import java.util.UUID;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class TicketVS implements java.io.Serializable, ReceiptContainer {
+public class TicketVS extends ReceiptContainer {
 
     private static final long serialVersionUID = 1L;
 

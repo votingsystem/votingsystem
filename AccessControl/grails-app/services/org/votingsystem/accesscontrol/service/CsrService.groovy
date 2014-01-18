@@ -131,8 +131,9 @@ class CsrService {
         }
         String serverURL = grailsApplication.config.grails.serverURL
         String accessControlURL = StringUtils.checkURL(certAttributeJSON.accessControlURL)
+        int weeksDelegation = Integer.valueOf(weeksOperationActive)
         if (!serverURL.equals(accessControlURL) || !weeksOperationActive.equals(certAttributeJSON.weeksOperationActive) ||
-            !certAttributeJSON.hashCertVS) {
+            !certAttributeJSON.hashCertVS || !(weeksDelegation > 0)) {
             String msg = messageSource.getMessage('accessControlURLError',[serverURL,accessControlURL].toArray(),locale)
             log.error("- signAnonymousDelegationCert - ERROR - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
@@ -142,7 +143,7 @@ class CsrService {
         String hashCertVSBase64 = certAttributeJSON.hashCertVS
         Date certValidFrom = Calendar.getInstance().getTime()
         Calendar validToCalendar = Calendar.getInstance();
-        int daysDelegationActive = Integer.valueOf(weeksOperationActive) * 7
+        int daysDelegationActive = weeksDelegation * 7
         validToCalendar.add(Calendar.DATE, daysDelegationActive);
         X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, validToCalendar.getTime())
         if (!issuedCert) {
