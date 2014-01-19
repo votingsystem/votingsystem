@@ -24,6 +24,46 @@ public class TicketVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
+    public CertificateVS getCertificateVS() {
+        return certificateVS;
+    }
+
+    public void setCertificateVS(CertificateVS certificateVS) {
+        this.certificateVS = certificateVS;
+    }
+
+    public MessageSMIME getCancelMessage() {
+        return cancelMessage;
+    }
+
+    public void setCancelMessage(MessageSMIME cancelMessage) {
+        this.cancelMessage = cancelMessage;
+    }
+
+    public MessageSMIME getMessageSMIME() {
+        return messageSMIME;
+    }
+
+    public void setMessageSMIME(MessageSMIME messageSMIME) {
+        this.messageSMIME = messageSMIME;
+    }
+
+    public Date getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(Date validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public Date getValidTo() {
+        return validTo;
+    }
+
+    public void setValidTo(Date validTo) {
+        this.validTo = validTo;
+    }
+
     public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
