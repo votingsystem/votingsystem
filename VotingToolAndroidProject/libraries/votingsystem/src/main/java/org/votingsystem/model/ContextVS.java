@@ -51,7 +51,6 @@ public class ContextVS {
     public static final String USER_DATA_FILE_NAME           = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME      = "smimeMessage.p7m";
     public static final String PROVIDER                      = "BC";
-    public static final String SERVER_URL_KEY    = "serverURL";
 
     //Intent keys
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";

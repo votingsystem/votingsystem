@@ -26,31 +26,17 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
            	<intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.7"/>
+		       	<data android:scheme="http" android:host="controlcenter.org"/>
 	       	    <data android:path="/ControlCenter/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
-		    <intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.7"/>
-	       	    <data android:path="/AccessControl/app/androidClient"/>
-		        <action android:name="android.intent.action.VIEW" />
-		        <category android:name="android.intent.category.DEFAULT"/>  
-     		    <category android:name="android.intent.category.BROWSABLE" />
-	        </intent-filter>
+
        		<intent-filter>    
 		       	<data android:scheme="http" android:host="sistemavotacion.org"/>
-	       	    <data android:path="/app/androidClient"/>
-		        <action android:name="android.intent.action.VIEW" />
-		        <category android:name="android.intent.category.DEFAULT"/>  
-     		    <category android:name="android.intent.category.BROWSABLE" />
-	        </intent-filter>
-		    <intent-filter>    
-		       	<data android:scheme="http" android:host="sistemavotacion.org"/>
-	       	    <data android:path="/app/androidClient"/>
+	       	    <data android:path="/AccessControl/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
      		    <category android:name="android.intent.category.BROWSABLE" />

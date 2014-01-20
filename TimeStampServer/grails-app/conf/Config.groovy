@@ -89,12 +89,12 @@ environments {
 
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "http://192.168.1.5:8080/TimeStampServer"
+        grails.serverURL = "http://timestampserver.org:8080/TimeStampServer"
     }
 
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://192.168.1.8:8080/TimeStampServer"
+        grails.serverURL = "http://timestampserver.org:8080/TimeStampServer"
     }
 
 }

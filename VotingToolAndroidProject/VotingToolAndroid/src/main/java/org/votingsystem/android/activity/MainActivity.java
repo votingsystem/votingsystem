@@ -22,8 +22,6 @@ import org.votingsystem.model.ResponseVS;
 import java.io.IOException;
 import java.util.Properties;
 
-import static org.votingsystem.model.ContextVS.SERVER_URL_KEY;
-
 //import org.eclipse.jetty.websocket.WebSocket;
 //import org.eclipse.jetty.websocket.WebSocketClient;
 //import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -58,13 +56,11 @@ public class MainActivity extends FragmentActivity {
             if(uriData != null) Log.d(TAG + ".onCreate(...)", "uriData - host:" + uriData.getHost()+
                     " - path: " + uriData.getPath() + " - userInfo: " + uriData.getUserInfo());
             accessControlURL = uriData.getQueryParameter("serverURL");
-        } else if(getIntent().getStringExtra(SERVER_URL_KEY) != null) {
-            accessControlURL = getIntent().getStringExtra(SERVER_URL_KEY);
         } else {
             Properties props = new Properties();
             try {
                 props.load(getAssets().open("VotingSystem.properties"));
-                accessControlURL = props.getProperty("ACCESS_CONTROL_URL");
+                accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -101,7 +97,7 @@ public class MainActivity extends FragmentActivity {
                 getString(R.string.loading_data_msg));
         Intent startIntent = new Intent(getApplicationContext(), VotingAppService.class);
         if(uriData != null) startIntent.putExtra(ContextVS.URI_KEY, uriData);
-        startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
+        startIntent.putExtra(ContextVS.URL_KEY, accessControlURL);
         startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
         startService(startIntent);
     }

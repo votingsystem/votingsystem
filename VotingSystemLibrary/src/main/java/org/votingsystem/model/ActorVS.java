@@ -310,7 +310,7 @@ public class ActorVS implements Serializable {
         }
         if(actorVSMap.containsKey("urlTimeStampServer")) {
             String urlTimeStampServer = StringUtils.checkURL((String) actorVSMap.get("urlTimeStampServer"));
-            actorVS.setUrlTimeStampServer((String) actorVSMap.get("urlTimeStampServer"));
+            actorVS.setUrlTimeStampServer(urlTimeStampServer);
         }
         return actorVS;
     }

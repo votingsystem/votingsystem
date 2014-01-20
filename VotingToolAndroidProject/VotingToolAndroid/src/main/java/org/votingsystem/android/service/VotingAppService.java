@@ -29,12 +29,11 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
 import java.util.UUID;
-
-import static org.votingsystem.model.ContextVS.ACCESS_CONTROL_URL_KEY;
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.URI_KEY;
+import static org.votingsystem.model.ContextVS.URL_KEY;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 /**
@@ -138,7 +137,7 @@ public class VotingAppService extends Service {
         super.onStartCommand(intent, flags, startId);
         Bundle arguments = intent.getExtras();
         if(arguments != null) {
-            final String accessControlURL = arguments.getString(ACCESS_CONTROL_URL_KEY);
+            final String accessControlURL = arguments.getString(URL_KEY);
             Uri uriData = (Uri) arguments.getParcelable(URI_KEY);
             String operationStr = null;
             if(uriData != null) {

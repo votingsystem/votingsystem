@@ -43,7 +43,7 @@ public class ResponseVS<T> implements Parcelable {
 
 
     private int statusCode;
-    private Integer iconId;
+    private Integer iconId = -1;
     private StatusVS<?> status;
     private EventVSResponse eventQueryResponse;
     private String caption;

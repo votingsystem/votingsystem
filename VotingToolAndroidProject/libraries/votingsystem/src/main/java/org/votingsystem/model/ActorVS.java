@@ -149,7 +149,7 @@ public class ActorVS implements java.io.Serializable {
     }
 
     public void setUrlTimeStampServer(String urlTimeStampServer) {
-        this.urlTimeStampServer = urlTimeStampServer;
+        this.urlTimeStampServer = StringUtils.checkURL(urlTimeStampServer);
     }
 
     public X509Certificate getTimeStampCert() {

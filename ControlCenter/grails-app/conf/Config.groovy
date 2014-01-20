@@ -1,6 +1,5 @@
 import org.apache.log4j.net.SMTPAppender
 import org.apache.log4j.Level
-import org.votingsystem.util.HttpHelper
 
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
@@ -97,19 +96,15 @@ environments {
     development {
         grails.logging.jul.usebridge = true
 		grails.resources.debug = true// -> rendering problems
-		String localIP = HttpHelper.getLocalIP();
-		println("Setting test development to: ${localIP}")
-        grails.serverURL = "http://${localIP}:8081/${appName}"
+        grails.serverURL = "http://www.controlcenter.org:8081/ControlCenter"
     }
 	production {
 		grails.logging.jul.usebridge = false
-		grails.serverURL = "http://192.168.1.4:8081/ControlCenter"
+		grails.serverURL = "http://www.controlcenter.org:8081/ControlCenter"
 	}
     test {
-		grails.logging.jul.usebridge = true	
-		String localIP = HttpHelper.getLocalIP();
-		println("Setting test address to: ${localIP}")
-        grails.serverURL = "http://${localIP}:8081/${appName}"
+		grails.logging.jul.usebridge = true
+        grails.serverURL = "http://www.controlcenter.org:8081/ControlCenter"
     }
 }
 
@@ -186,7 +181,7 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://192.168.1.8:8080/TimeStampServer'
+VotingSystem.urlTimeStampServer='http://timestampserver.org:8080/TimeStampServer'
 VotingSystem.backupCopyPath='./VotingSystem/backup'
 VotingSystem.eventsMetaInfBaseDir='./VotingSystem/EventVS_MetaInf'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'

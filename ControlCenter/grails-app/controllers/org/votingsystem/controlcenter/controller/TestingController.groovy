@@ -8,8 +8,6 @@ class TestingController {
 	def grailsApplication
 	
     def index() { }
-	
-
 
 
 }
