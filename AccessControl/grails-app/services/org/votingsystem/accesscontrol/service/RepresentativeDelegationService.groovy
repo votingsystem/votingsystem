@@ -1,18 +1,12 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
-import org.apache.commons.lang.time.DateUtils
-import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
-
-import java.security.MessageDigest
 import java.security.cert.X509Certificate
-import java.text.DateFormat
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
 
 class RepresentativeDelegationService {
 	
@@ -106,27 +100,28 @@ class RepresentativeDelegationService {
 		}
 	}
 
+    RepresentativeDelegationService() {
+        super()
+    }
+
     private ResponseVS checkUserDelegationStatus(UserVS userVS, Locale locale) {
         String msg = null
         if(UserVS.Type.REPRESENTATIVE == userVS.type) {
             msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
         }
-        MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
-                userVS:userVS)
-        if(userDelegation && Calendar.getInstance(locale).getTime().after(userVS.getDelegationFinish())) {
-            userDelegation.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_USED)
-            userDelegation.save()
-            userVS.setDelegationFinish(null)
-            userVS.save(flush: true)
-            userDelegation = null;
+        int statusCode = ResponseVS.SC_OK
+        AnonymousDelegation anonymousDelegation = AnonymousDelegation.findWhere(userVS:userVS,
+                status:AnonymousDelegation.Status.OK)
+        if(anonymousDelegation && Calendar.getInstance().getTime().after(anonymousDelegation.getDateTo())) {
+            anonymousDelegation.setStatus(AnonymousDelegation.Status.FINISHED)
         }
-        if(userDelegation) {
+        if(anonymousDelegation && AnonymousDelegation.Status.OK == anonymousDelegation.getStatus()) {
+            statusCode = ResponseVS.SC_ERROR_REQUEST_REPEATED
             msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
-                    userVS.delegationFinish.format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
+                    anonymousDelegation.getDateTo().format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
         }
-        int statusCode = userDelegation? ResponseVS.SC_ERROR_REQUEST_REPEATED:ResponseVS.SC_OK
-        return new ResponseVS(statusCode:statusCode, data:userDelegation, message: msg);
+        return new ResponseVS(statusCode:statusCode, data:anonymousDelegation, message: msg);
     }
 
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -134,11 +129,13 @@ class RepresentativeDelegationService {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
+        AnonymousDelegation anonymousDelegation
         try {
             ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
             String userDelegationURL = null
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.statusCode) {
-                userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${responseVS.data.id}"
+                anonymousDelegation = responseVS.data
+                userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${anonymousDelegation.delegationSMIME.id}"
             }
             if(ResponseVS.SC_OK != responseVS.statusCode) {
                 log.error(responseVS.message)
@@ -158,16 +155,13 @@ class RepresentativeDelegationService {
                 return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                         contentType:ContentTypeVS.JSON,data:[message:msg])
             }
-            // _ TODO _ round dates to avoid tracking
-            //Date nearestMinute = DateUtils.round(now, Calendar.MINUTE);
-            //??? Date nearestMonday = DateUtils.round(now, Calendar.MONDAY);
-            Date delegationFinish = DateUtils.addDays(Calendar.getInstance().getTime(),
-                    Integer.valueOf(messageJSON.weeksOperationActive) * 7)
-            userVS.setDelegationFinish(delegationFinish)
-            userVS.save()
             messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST);
+            Date dateFrom = DateUtils.getDateFromLongDateStr_Es(messageJSON.dateFrom)
+            Date dateTo = DateUtils.getDateFromLongDateStr_Es(messageJSON.dateTo)
+            anonymousDelegation = new AnonymousDelegation(status:AnonymousDelegation.Status.OK,
+                    delegationSMIME:messageSMIMEReq, userVS:userVS, dateFrom:dateFrom, dateTo:dateTo).save();
             return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
-                    userVS:userVS, data:[weeksOperationActive:messageJSON.weeksOperationActive])
+                    userVS:userVS)
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.ERROR,

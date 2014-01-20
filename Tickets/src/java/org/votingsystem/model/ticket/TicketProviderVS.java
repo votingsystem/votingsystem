@@ -1,4 +1,4 @@
-package org.votingsystem.model;
+package org.votingsystem.model.ticket;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ActorVS;

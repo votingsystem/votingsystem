@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.votingsystem.util.DateUtils;
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -255,7 +256,7 @@ public class EventVS implements Serializable {
     }
 
     public boolean isActive() {
-        Date todayDate = DateUtils.getTodayDate();
+        Date todayDate = java.util.Calendar.getInstance().getTime();
         if (todayDate.after(dateBegin) && todayDate.before(dateFinish)) return true;
         else return false;
     }

@@ -38,9 +38,13 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
+import org.votingsystem.util.NifUtils;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -69,6 +73,8 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
     private String broadCastId = null;
     private UserVS representative = null;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private Date anonymousDelegationFromDate;
+    private Date anonymousDelegationToDate;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -107,6 +113,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                 serviceURL = contextVS.getAccessControl().
                         getAnonymousDelegationRequestServiceURL();
                 startIntent = new Intent(this, RepresentativeService.class);
+                Map dataData = new HashMap();
                 startIntent.putExtra(ContextVS.USER_KEY, representative);
                 startIntent.putExtra(ContextVS.TIME_KEY, weeks_delegation.getText().toString());
             } else {
@@ -283,31 +290,33 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                         ((EditText)findViewById(R.id.weeks_delegation)).requestFocus();
                         return;
                     }
+                    Calendar calendar = DateUtils.getNextMonday(Calendar.getInstance().getTime());
+                    anonymousDelegationFromDate = calendar.getTime();
+                    Integer weeksDelegation = Integer.valueOf(weeks_delegation.getText().toString());
+                    calendar.add(Calendar.DAY_OF_YEAR, weeksDelegation*7);
+                    anonymousDelegationToDate = calendar.getTime();
                     confirmDialogMsg = getString(R.string.anonymous_delegation_confirm_msg,
-                           representative.getFullName(),  weeks_delegation.getText().toString());
+                            representative.getFullName(),  weeks_delegation.getText().toString(),
+                            DateUtils.getLongDate_Es(anonymousDelegationFromDate),
+                            DateUtils.getLongDate_Es(anonymousDelegationToDate));
                     operationType = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
                 }  else {
                     confirmDialogMsg = getString(R.string.public_delegation_confirm_msg,
                              representative.getFullName());
                     operationType = TypeVS.REPRESENTATIVE_SELECTION;
                 }
-                final String pinDialogMsg = confirmDialogMsg;
                 AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(
                         getString(R.string.representative_delegation_lbl)).
                         setMessage(Html.fromHtml(confirmDialogMsg)).setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                showPinScreen(pinDialogMsg);
+                                PinDialogFragment.showPinScreen(getSupportFragmentManager(),
+                                        broadCastId, null, false, null);
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
                 AlertDialog dialog = builder.show();
                 break;
         }
-    }
-
-    private void showPinScreen(String pinDialogMsg) {
-        PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                broadCastId, pinDialogMsg, false, null);
     }
 
     private void sendResult(int result, String message) {

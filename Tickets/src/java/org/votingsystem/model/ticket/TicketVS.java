@@ -6,7 +6,6 @@ import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
@@ -69,7 +68,6 @@ public class TicketVS implements Serializable  {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
 
-    @NotNull
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @Column(name="hashCertVS") private String hashCertVS;
     @Column(name="originHashCertVS") private String originHashCertVS;

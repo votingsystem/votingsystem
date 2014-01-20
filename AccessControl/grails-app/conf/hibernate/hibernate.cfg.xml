@@ -13,6 +13,7 @@
         <mapping class="org.votingsystem.model.ActorVS" />
         <mapping class="org.votingsystem.model.AddressVS" />
         <mapping class="org.votingsystem.model.AccessControlVS" />
+        <mapping class="org.votingsystem.model.AnonymousDelegation"/>
         <mapping class="org.votingsystem.model.BackupRequestVS" />
         <mapping class="org.votingsystem.model.CertificateVS" />
         <mapping class="org.votingsystem.model.ControlCenterVS" />

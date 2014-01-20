@@ -66,8 +66,8 @@ public class TimeStampCertPanel extends JPanel {
     public static String getCertInfo (X509Certificate certificate) {
         return ContextVS.getInstance().getMessage("certInfoFormattedMsg",certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),certificate.getSerialNumber().toString(),
-                DateUtils.getSpanishFormattedStringFromDate(certificate.getNotBefore()),
-                DateUtils.getSpanishFormattedStringFromDate(certificate.getNotAfter()));
+                DateUtils.getLongDate_Es(certificate.getNotBefore()),
+                DateUtils.getLongDate_Es(certificate.getNotAfter()));
     }
 
 }

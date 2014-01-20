@@ -98,6 +98,10 @@ public class ContextVS {
     public static final String TIME_KEY                    = "TIME_KEY";
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
 
+    public static final String RSS_LAST_CHECKED_KEY = "RSS_LAST_CHECKED_KEY";
+    public static final String PENDING_OPERATIONS_LAST_CHECKED_KEY =
+            "PENDING_OPERATIONS_LAST_CHECKED_KEY";
+
     //Pages size
     //public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
     public static final Integer REPRESENTATIVE_PAGE_SIZE = 20;

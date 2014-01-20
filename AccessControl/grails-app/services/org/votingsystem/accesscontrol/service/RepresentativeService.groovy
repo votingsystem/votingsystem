@@ -583,8 +583,9 @@ class RepresentativeService {
 				sessionFactory.currentSession.clear()
 			}
 		}
-		def metaInfMap = [dateFrom: getStringFromDate(dateFrom), dateTo:getStringFromDate(dateTo), numVotes:numVotes,
-			representativeURL:"${grailsApplication.config.grails.serverURL}/representative/${representative.id}"]
+		def metaInfMap = [numVotes:numVotes,
+                dateFrom: DateUtils.getStringFromDate(dateFrom), dateTo:DateUtils.getStringFromDate(dateTo),
+			    representativeURL:"${grailsApplication.config.grails.serverURL}/representative/${representative.id}"]
 		String metaInfJSONStr = metaInfMap as JSON
 		metaInfFile = new File("${basedir}/meta.inf")
 		metaInfFile.write(metaInfJSONStr)
@@ -796,35 +797,30 @@ class RepresentativeService {
 				   type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 		   }
 			runAsync {
-					ResponseVS backupGenResponseVS = getAccreditationsBackup(
-						representative, selectedDate ,locale)
+					ResponseVS backupGenResponseVS = getAccreditationsBackup( representative, selectedDate ,locale)
 					if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
-						File archivoCopias = backupGenResponseVS.file
-						BackupRequestVS solicitudCopia = new BackupRequestVS(
-							filePath:archivoCopias.getAbsolutePath(),
-							type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
-							representative:representative,
+						File backupFile = backupGenResponseVS.file
+						BackupRequestVS backupRequest = new BackupRequestVS(filePath:backupFile.getAbsolutePath(),
+							type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representative:representative,
 							messageSMIME:messageSMIMEReq, email:messageJSON.email)
 						BackupRequestVS.withTransaction {
-							if (!solicitudCopia.save()) {
-								solicitudCopia.errors.each {
-									log.error("processAccreditationsRequest - ERROR solicitudCopia - ${it}")}
+							if (!backupRequest.save()) {
+								backupRequest.errors.each {
+									log.error("processAccreditationsRequest - ERROR backupRequest - ${it}")}
 							}
 						}
-						log.debug("processAccreditationsRequest - saved BackupRequestVS '${solicitudCopia.id}'");
+						log.debug("processAccreditationsRequest - saved BackupRequestVS '${backupRequest.id}'");
 						mailSenderService.sendRepresentativeAccreditations(
-							solicitudCopia, messageJSON.selectedDate, locale)
+                                backupRequest, messageJSON.selectedDate, locale)
 					} else log.error("processAccreditationsRequest - ERROR creating backup");
 			}
-			msg = messageSource.getMessage('backupRequestOKMsg',
-				[messageJSON.email].toArray(), locale)
+			msg = messageSource.getMessage('backupRequestOKMsg', [messageJSON.email].toArray(), locale)
 			new ResponseVS(statusCode:ResponseVS.SC_OK,	message:msg,
 				type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage('representativeAccreditationRequestErrorMsg', null, locale)
-			return new ResponseVS(message:msg,
-				statusCode:ResponseVS.SC_ERROR,
+			return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR,
 				type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 		}
 	}

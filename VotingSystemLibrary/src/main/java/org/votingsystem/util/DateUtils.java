@@ -8,6 +8,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import static java.util.Calendar.DAY_OF_WEEK;
+import static java.util.Calendar.MONDAY;
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -47,26 +50,7 @@ public class DateUtils {
     	cal.set(Calendar.DAY_OF_MONTH, todayDay-1);
         return cal.getTime();
     }
-    
-    public static Date getTodayRoundedDate () {
-	    Calendar calendar = Calendar.getInstance(); // today
-	    Calendar gregorianCalendar = new GregorianCalendar(); 
-	    calendar.clear();
-	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
-	    		gregorianCalendar.get(Calendar.MONTH),
-	    		gregorianCalendar.get(Calendar.DAY_OF_MONTH));
-        return calendar.getTime();
-    }
 
-    public static Date getNextDayRoundedDate (int nextDayFromToday) {
-	    Calendar calendar = Calendar.getInstance(); // today
-	    Calendar gregorianCalendar = new GregorianCalendar(); 
-	    calendar.clear();
-	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
-	    		gregorianCalendar.get(Calendar.MONTH),
-	    		gregorianCalendar.get(Calendar.DAY_OF_MONTH) + nextDayFromToday);
-        return calendar.getTime();
-    }
     /**
      * Método que devuelve una ruta del sistema de ficheros con formato
      * /aaaa/mm/dd en función de la fecha que se le pase como argumento.
@@ -80,8 +64,7 @@ public class DateUtils {
         NumberFormat format = new DecimalFormat("00");
         return File.separator + format.format(calendar.get(Calendar.YEAR)) +
             File.separator + format.format((calendar.get(Calendar.MONTH) + 1)) +
-            File.separator + format.format(calendar.get(Calendar.DAY_OF_MONTH)) +
-            File.separator;
+            File.separator + format.format(calendar.get(Calendar.DAY_OF_MONTH)) + File.separator;
     }
 
     /**
@@ -112,12 +95,22 @@ public class DateUtils {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
     	return formatter.format(date);
     }
-        
-    public static String getSpanishFormattedStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy' 'HH:mm");
-    	return formatter.format(date);
+
+    public static String getDate_Es (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy");
+        return formatter.format(date);
     }
-    
+
+    public static String getLongDate_Es (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
+        return formatter.format(date);
+    }
+
+    public static Date getDateFromLongDateStr_Es (String dateStr) throws ParseException {
+        DateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
+        return formatter.parse(dateStr);
+    }
+
     public static String getDirStringFromDate (Date date) {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd_HH-mm-ss");
     	return formatter.format(date);
@@ -125,18 +118,6 @@ public class DateUtils {
     
     public static String getShortStringFromDate (Date date) {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-    	return formatter.format(date);
-    }
-
-    /**
-     * Método que devuelve un String con formato HH:mm:ss:SSS a partir de un Date"
-     *
-     * @param Date fecha en formato Date
-     * @return dateString fecha en formato String
-     * @throws import java.text.ParseException;
-     */
-    public static String getTimeFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
     	return formatter.format(date);
     }
 
@@ -152,6 +133,18 @@ public class DateUtils {
         String hours = String.format(format, elapsedTime / 3600);
         String time =  hours + ":" + minutes + ":" + seconds;
         return time;
+    }
+
+    private Calendar getNextMonday(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+        } else calendar.set(DAY_OF_WEEK, MONDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar;
     }
     
     /**
@@ -170,16 +163,5 @@ public class DateUtils {
         return time;
     }
 
-    public static final String getFechaYYYYMMDD () {
-        Date date = new Date();
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-        return formatter.format(date);
-    }
-
-    public static Calendar xDiasAntes(int numDias) {
-        Calendar today = Calendar.getInstance();
-        today.add(Calendar.DATE, - numDias);
-        return (today);
-    }
 
 }

@@ -51,7 +51,6 @@ public class RssService extends Service  implements Runnable {
     private Cursor cursor;                        // RSS content provider cursor.
     private GregorianCalendar lastCheckedTime; // Time we last checked our feeds.
 
-    private final String LAST_CHECKED_KEY = "LAST_CHECKED_KEY";
     static final int UPDATE_FREQUENCY_IN_MINUTES = 60;
 
     @Override public void onCreate(){
@@ -75,7 +74,8 @@ public class RssService extends Service  implements Runnable {
         SharedPreferences pref = getSharedPreferences(
                 ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         lastCheckedTime = new GregorianCalendar();
-        lastCheckedTime.setTimeInMillis(pref.getLong(LAST_CHECKED_KEY, 0));
+        lastCheckedTime.setTimeInMillis(pref.getLong(
+                ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY, 0));
 
         /*Services run in the main thread of their hosting process. This means that, if
         * it's going to do any CPU intensive (such as networking) operations, it should

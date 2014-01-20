@@ -232,8 +232,8 @@ class EventVSService {
 			backupAvailable:eventVSItem.backupAvailable, state:eventVSItem.state.toString(),
 			voteVSInfoURL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSItem.id}/voteVSInfo",
 			dateBegin:eventVSItem.getDateBegin(), dateFinish:eventVSItem.getDateFinish(),
-            dateBeginStr:DateUtils.getSpanishFormattedStringFromDate(eventVSItem.getDateBegin()),
-            dateFinishStr:DateUtils.getSpanishFormattedStringFromDate(eventVSItem.getDateFinish())]
+            dateBeginStr:DateUtils.getLongDate_Es(eventVSItem.getDateBegin()),
+            dateFinishStr:DateUtils.getLongDate_Es(eventVSItem.getDateFinish())]
 		if(eventVSItem.userVS) eventVSMap.userVS = "${eventVSItem.userVS?.name} ${eventVSItem.userVS?.firstName}"
 		def accessControlMap = [serverURL:grailsApplication.config.grails.serverURL,
 				name:grailsApplication.config.VotingSystem.serverName]
@@ -262,8 +262,8 @@ class EventVSService {
 			backupAvailable:eventVSItem.backupAvailable,
 			dateBegin:eventVSItem.getDateBegin(),
 			dateFinish:eventVSItem.getDateFinish(),
-            dateBeginStr:DateUtils.getSpanishFormattedStringFromDate(eventVSItem.getDateBegin()),
-            dateFinishStr:DateUtils.getSpanishFormattedStringFromDate(eventVSItem.getDateFinish())]
+            dateBeginStr:DateUtils.getLongDate_Es(eventVSItem.getDateBegin()),
+            dateFinishStr:DateUtils.getLongDate_Es(eventVSItem.getDateFinish())]
 		if(eventVSItem.userVS) eventVSMap.userVS = "${eventVSItem.userVS?.name} ${eventVSItem.userVS?.firstName}"
 		eventVSMap.numSignatures = PDFDocumentVS.countByEventVSAndState(eventVSItem,
 			PDFDocumentVS.State.MANIFEST_SIGNATURE_VALIDATED)
@@ -286,8 +286,8 @@ class EventVSService {
 			state:eventVSItem.state.toString(),
 			dateBegin:eventVSItem.getDateBegin(),
 			dateFinish:eventVSItem.getDateFinish(),
-            dateBeginStr:DateUtils.getSpanishFormattedStringFromDate(eventVSItem.getDateBegin()),
-            dateFinishStr:DateUtils.getSpanishFormattedStringFromDate(eventVSItem.getDateFinish())]
+            dateBeginStr:DateUtils.getLongDate_Es(eventVSItem.getDateBegin()),
+            dateFinishStr:DateUtils.getLongDate_Es(eventVSItem.getDateFinish())]
 		if(eventVSItem.userVS) eventVSMap.userVS = "${eventVSItem.userVS?.name} ${eventVSItem.userVS?.firstName}"
 		SignatureVS.withTransaction {
 			eventVSMap.numSignatures = SignatureVS.countByEventVS(eventVSItem)

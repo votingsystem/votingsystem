@@ -37,6 +37,7 @@ import org.votingsystem.model.UserVSResponse;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
@@ -49,6 +50,8 @@ import java.io.FileOutputStream;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +201,13 @@ public class RepresentativeService extends IntentService {
     private void anonymousDelegation(Bundle arguments, String serviceCaller, TypeVS operationType) {
         X509Certificate destinationCert = contextVS.getAccessControl().getCertificate();
         String weeksOperationActive = arguments.getString(ContextVS.TIME_KEY);
+
+        Calendar calendar = DateUtils.getNextMonday(Calendar.getInstance().getTime());
+        Date anonymousDelegationFromDate = calendar.getTime();
+        Integer weeksDelegation = Integer.valueOf(weeksOperationActive);
+        calendar.add(Calendar.DAY_OF_YEAR, weeksDelegation*7);
+        Date anonymousDelegationToDate = calendar.getTime();
+
         UserVS representative = (UserVS) arguments.getSerializable(ContextVS.USER_KEY);
         ResponseVS responseVS = null;
         try {
@@ -208,6 +218,8 @@ public class RepresentativeService extends IntentService {
             String fromUser = contextVS.getUserVS().getNif();
             Map smimeContentMap = new HashMap();
             smimeContentMap.put("weeksOperationActive", weeksOperationActive);
+            smimeContentMap.put("dateFrom", DateUtils.getLongDate_Es(anonymousDelegationFromDate));
+            smimeContentMap.put("dateTo", DateUtils.getLongDate_Es(anonymousDelegationToDate));
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
             smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());

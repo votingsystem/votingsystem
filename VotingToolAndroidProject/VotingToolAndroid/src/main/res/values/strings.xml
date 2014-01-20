@@ -343,14 +343,18 @@
     <string name="public_delegation_lbl">Delegar de forma pública</string>
     <string name="anonymous_delegation_time_msg">Indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
     <string name="public_delegation_confirm_msg"><![CDATA[Va a delegar de forma pública en <b>\'%1$s\'</b>]]></string>
-    <string name="anonymous_delegation_confirm_msg"><![CDATA[Va a delegar de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
+    <string name="anonymous_delegation_confirm_msg"><![CDATA[Va a delegar de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas.
+        <br/>Por su seguridad la operación será efectiva a partir del <b>\'%3$s\'</b> y terminará el
+        <b>\'%4$s\'</b>]]></string>
     <string name="anonymous_delegation_msg"><![CDATA[Ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
     <string name="updating_representative_data_msg">Actualizando datos del representante</string>
     <string name="download_lbl">Descarcar copia</string>
 
     <string name="smime_subject_msg">Asunto: \'%1$s\'</string>
     <string name="anonymous_representative_request_formatted"><![CDATA[
-    Duración de la delegación: \'%1$s\' semanas<br/><br/>URL de servidor: <a href=\'%2$s\'>%2$s</a>]]></string>
+    Delegación activa desde: \'%1$s\' semanas<br/><br/>Fecha de inicio de la delegación: \'%2$s\'
+    <br/><br/>Fecha fin de la delegación: \'%3$s\'<br/>
+    <br/>URL de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
     <string name="receipt_vote_subtitle">Voto</string>
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
     <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>

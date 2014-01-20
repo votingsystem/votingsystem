@@ -136,6 +136,8 @@ public class ContextVS {
     private static final long CERT_VALID_FROM = System.currentTimeMillis();
     private static final long ROOT_KEYSTORE_PERIOD = 20000000000L;
     private static final long USER_KEYSTORE_PERIOD = 20000000000L;
+    public static final int DAYS_ANONYMOUS_DELEGATION_DURATION = 10;
+
 
 
     private UserVS userTest;

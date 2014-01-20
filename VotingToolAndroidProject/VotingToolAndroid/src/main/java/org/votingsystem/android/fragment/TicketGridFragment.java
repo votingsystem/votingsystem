@@ -37,6 +37,7 @@ import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TicketGridFragment extends Fragment implements
@@ -167,7 +168,7 @@ public class TicketGridFragment extends Fragment implements
                 subject.setText(receiptContainerInterface.getSubject());
                 String dateInfoStr = null;
                 ImageView imgView = (ImageView)view.findViewById(R.id.event_state_icon);
-                if(DateUtils.getTodayDate().after(receiptContainerInterface.getValidTo())) {
+                if(Calendar.getInstance().getTime().after(receiptContainerInterface.getValidTo())) {
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getString(R.string.init_lbl) + "</b>: " +

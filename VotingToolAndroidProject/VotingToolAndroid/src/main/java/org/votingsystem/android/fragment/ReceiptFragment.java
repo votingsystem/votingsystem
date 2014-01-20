@@ -443,6 +443,8 @@ public class ReceiptFragment extends Fragment {
                     JSONObject dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
                     result = getString(R.string.anonymous_representative_request_formatted,
                             dataJSON.getString("weeksOperationActive"),
+                            dataJSON.getString("dateFrom"),
+                            dataJSON.getString("dateTo"),
                             dataJSON.getString("accessControlURL"));
                     break;
                 default: return selectedReceipt.getReceipt().getSignedContent();

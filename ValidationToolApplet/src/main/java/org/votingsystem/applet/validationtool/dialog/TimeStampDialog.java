@@ -56,7 +56,7 @@ public class TimeStampDialog extends JDialog {
 
         JLabel timeStampDateLabel = createBoldLabel(ContextVS.getMessage("dateGeneratedLbl"));
         container.add(timeStampDateLabel, "width 250::");
-        JTextField timeStampTextField =new JTextField(DateUtils.getSpanishFormattedStringFromDate(tsInfo.getGenTime()));
+        JTextField timeStampTextField =new JTextField(DateUtils.getLongDate_Es(tsInfo.getGenTime()));
         timeStampTextField.setEditable(false);
         container.add(timeStampTextField, "width 250::, wrap");
 

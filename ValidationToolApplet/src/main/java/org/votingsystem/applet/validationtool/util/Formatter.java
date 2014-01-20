@@ -35,9 +35,9 @@ public class Formatter {
                 certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),
                 certificate.getSerialNumber().toString(),
-                DateUtils.getSpanishFormattedStringFromDate(
+                DateUtils.getLongDate_Es(
                         certificate.getNotBefore()),
-                DateUtils.getSpanishFormattedStringFromDate(
+                DateUtils.getLongDate_Es(
                         certificate.getNotAfter()));
     }
 

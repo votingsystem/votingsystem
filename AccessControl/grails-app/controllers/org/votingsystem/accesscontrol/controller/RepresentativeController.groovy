@@ -374,8 +374,7 @@ class RepresentativeController {
                 messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest,
-                    responseVS.data.weeksOperationActive, request.getLocale())
+            ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest, request.getLocale())
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
                 csrValidationResponse.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
                 return [responseVS:csrValidationResponse, receiverPublicKey:csrValidationResponse.data.requestPublicKey]

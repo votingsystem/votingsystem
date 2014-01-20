@@ -104,8 +104,7 @@ class CsrService {
                 data:[publicKey:csr.getPublicKey(), hashCertVSBase64:voteCertDataJSON.hashCertVS])
     }
 
-    public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes, String weeksOperationActive,
-            Locale locale) {
+    public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes, Locale locale) {
         PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         if(!csr) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
@@ -131,9 +130,7 @@ class CsrService {
         }
         String serverURL = grailsApplication.config.grails.serverURL
         String accessControlURL = StringUtils.checkURL(certAttributeJSON.accessControlURL)
-        int weeksDelegation = Integer.valueOf(weeksOperationActive)
-        if (!serverURL.equals(accessControlURL) || !weeksOperationActive.equals(certAttributeJSON.weeksOperationActive) ||
-            !certAttributeJSON.hashCertVS || !(weeksDelegation > 0)) {
+        if (!serverURL.equals(accessControlURL) || !certAttributeJSON.hashCertVS ) {
             String msg = messageSource.getMessage('accessControlURLError',[serverURL,accessControlURL].toArray(),locale)
             log.error("- signAnonymousDelegationCert - ERROR - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
@@ -141,11 +138,10 @@ class CsrService {
         //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
         String hashCertVSBase64 = certAttributeJSON.hashCertVS
-        Date certValidFrom = Calendar.getInstance().getTime()
-        Calendar validToCalendar = Calendar.getInstance();
-        int daysDelegationActive = weeksDelegation * 7
-        validToCalendar.add(Calendar.DATE, daysDelegationActive);
-        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, validToCalendar.getTime())
+        Calendar calendar = Calendar.getInstance();
+        Date certValidFrom = calendar.getTime()
+        calendar.add(Calendar.DATE, ContextVS.DAYS_ANONYMOUS_DELEGATION_DURATION);
+        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, calendar.getTime())
         if (!issuedCert) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
             log.error("signAnonymousDelegationCert - error signing cert")
@@ -154,7 +150,7 @@ class CsrService {
             CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
                     content:issuedCert.getEncoded(), type:CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION,
                     state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
-                    validTo: validToCalendar.getTime())
+                    validTo: calendar.getTime())
             certificate.save()
             log.debug("signAnonymousDelegationCert - expended CertificateVS '${certificate.id}'")
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);

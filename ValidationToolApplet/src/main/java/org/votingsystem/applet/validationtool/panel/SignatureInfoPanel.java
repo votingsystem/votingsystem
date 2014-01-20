@@ -57,7 +57,7 @@ public class SignatureInfoPanel extends JPanel {
             add(signatureAlgorithmValueLabel);
             JLabel signatureDateLabel = createBoldLabel(ContextVS.getMessage("signatureDateLbl") + ": ");
             add(signatureDateLabel, "gapleft 50");
-            JLabel signatureDateValueLabel = new JLabel(DateUtils.getSpanishFormattedStringFromDate(
+            JLabel signatureDateValueLabel = new JLabel(DateUtils.getLongDate_Es(
                     signer.getSignatureDate()));
             add(signatureDateValueLabel, "split 2");
             JButton timeStampButton = new JButton(ContextVS.getMessage("timeStampButtonLbl"));

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -22,12 +23,14 @@ import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
+import java.util.GregorianCalendar;
 import java.util.UUID;
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
@@ -40,14 +43,18 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class VotingAppService extends Service {
+public class VotingAppService extends Service implements Runnable {
 
     public static final String TAG = "VotingAppService";
 
     private AppContextVS appContextVS;
+    private GregorianCalendar lastCheckedTime; // Time we last checked our feeds.
+    private Handler handler;
+    private static final int UPDATE_FREQUENCY_IN_MINUTES = 60;
 
     @Override public void onCreate(){
         appContextVS = (AppContextVS) getApplicationContext();
+        handler = new Handler();
         Log.i(TAG + ".onCreate(...) ", "VotingAppService created");
     }
 
@@ -56,6 +63,10 @@ public class VotingAppService extends Service {
             " - operationStr: " + operationStr);
         ResponseVS responseVS = HttpHelper.getData(AccessControlVS.
                 getServerInfoURL(accessControlURL), ContentTypeVS.JSON);
+        SharedPreferences pref = getSharedPreferences(
+                ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        lastCheckedTime = new GregorianCalendar();
+        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY, 0));
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
             responseVS.setCaption(getString(R.string.connection_error_msg));
@@ -172,5 +183,25 @@ public class VotingAppService extends Service {
             return super.onTransact(code, data, reply, flags);
         }
     };
+
+    private void checkForPendingOperations() {
+        Log.d(TAG + ".checkForPendingOperations()", "");
+        GregorianCalendar nextCheckTime = new GregorianCalendar();
+        nextCheckTime = (GregorianCalendar) lastCheckedTime.clone();
+        nextCheckTime.add(GregorianCalendar.MINUTE, UPDATE_FREQUENCY_IN_MINUTES);
+        Log.d(TAG + ".checkForPendingOperations() ", "last checked time:" +
+                lastCheckedTime.toString() + " - Next checked time: " + nextCheckTime.toString());
+
+        if(lastCheckedTime.before(nextCheckTime)) runPendingOperations();
+        else handler.postDelayed(this, 1000 * 60 * UPDATE_FREQUENCY_IN_MINUTES);
+    }
+
+    private void runPendingOperations() {
+        Log.d(TAG + ".checkForPendingOperations(...) ", "");
+    }
+
+    @Override public void run() {
+        checkForPendingOperations();
+    }
 
 }

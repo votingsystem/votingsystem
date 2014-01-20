@@ -39,29 +39,6 @@ public class DateUtils {
         return calendar.get(Calendar.YEAR);
     }
 
-    public static Date getTodayDate () {
-        return new Date(System.currentTimeMillis());
-    }
-    
-    public static Date getTodayRoundedDate () {
-	    Calendar calendar = Calendar.getInstance();
-	    Calendar gregorianCalendar = new GregorianCalendar(); 
-	    calendar.clear();
-	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
-	    		gregorianCalendar.get(Calendar.MONTH),
-	    		gregorianCalendar.get(Calendar.DAY_OF_MONTH));
-        return calendar.getTime();
-    }
-
-    public static Date getNextDayRoundedDate (int nextDayFromToday) {
-	    Calendar calendar = Calendar.getInstance();
-	    Calendar gregorianCalendar = new GregorianCalendar(); 
-	    calendar.clear();
-	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
-	    		gregorianCalendar.get(Calendar.MONTH),
-	    		gregorianCalendar.get(Calendar.DAY_OF_MONTH) + nextDayFromToday);
-        return calendar.getTime();
-    }
     /**
      * Método que devuelve una ruta del sistema de ficheros con formato
      * /aaaa/mm/dd en función de la fecha que se le pase como argumento.
@@ -142,7 +119,7 @@ public class DateUtils {
     }
 
     public static String getElpasedTimeStr(Date end) {
-    	Float hours = (end.getTime() -DateUtils.getTodayDate().getTime())/(60*60*1000F);
+    	Float hours = (end.getTime() - Calendar.getInstance().getTime().getTime())/(60*60*1000F);
     	return Integer.valueOf(hours.intValue()).toString();
     }
     
@@ -192,7 +169,6 @@ public class DateUtils {
     }
     
     public static String getDayHourElapsedTime (Calendar cal1, Calendar cal2, Context context) {
-            
         long l1 = cal1.getTimeInMillis();
         long l2 = cal2.getTimeInMillis();
         long diff = l2 - l1;
@@ -212,6 +188,18 @@ public class DateUtils {
         if (elapsedDays > 0) result.append(elapsedDays + " " + context.getString(R.string.days_lbl));
         if (elapsedHours > 0) result.append(elapsedHours + ", " + context.getString(R.string.hours_lbl));
         return result.toString();
+    }
+
+    public static Calendar getNextMonday(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+        } else calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar;
     }
 
 }

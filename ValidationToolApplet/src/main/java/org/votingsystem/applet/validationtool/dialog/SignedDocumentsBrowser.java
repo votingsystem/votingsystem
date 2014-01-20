@@ -279,7 +279,7 @@ public class SignedDocumentsBrowser extends JDialog {
 
     public String getSignatureMessage (Date date) {
         return "<html><b>" + ContextVS.getMessage("signatureDateLbl") +
-                DateUtils.getSpanishFormattedStringFromDate(date) + "</html>";
+                DateUtils.getLongDate_Es(date) + "</html>";
     }
 
     public void setVisible(String decompressedBackupBaseDir) {
