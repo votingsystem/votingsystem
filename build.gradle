@@ -232,22 +232,6 @@ def runCommand(project, targetDir, commands) {
 	}
 }
 
-def getLocalIP() {
-    Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-    for (NetworkInterface netint : Collections.list(nets)){
-        Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-        for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-            if(inetAddress.isSiteLocalAddress()) {
-                String inetAddressStr = inetAddress.toString();
-                while(inetAddressStr.startsWith("/"))
-                    inetAddressStr = inetAddressStr.substring(1)
-                return inetAddressStr
-            }
-
-        }
-    }
-}
-
 // This is a task that generates the gradlew scripts, allowing users to run gradle without having gradle installed
 // on their system.
 // This task should be run by "build master" and the resulting output committed to source control.  Its outputs include:
