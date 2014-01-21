@@ -252,8 +252,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         values.put(ReceiptContentProvider.URL_COL, vote.getMessageId());
         values.put(ReceiptContentProvider.TYPE_COL, vote.getType().toString());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
-        values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         Uri uri = getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
         Log.d(TAG + ".saveVote(...)", "uri: " + uri.toString());
         saveReceiptButton.setEnabled(false);
@@ -397,8 +395,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         values.put(ReceiptContentProvider.TYPE_COL, TypeVS.CANCEL_VOTE.toString());
         values.put(ReceiptContentProvider.URL_COL, vote.getMessageId());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
-        values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
         showMessage(null, getString(R.string.msg_lbl),
                 getString(R.string.saved_cancel_vote_recepit_msg), null);

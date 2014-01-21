@@ -5,7 +5,7 @@
         android:id="@+id/reload"
         votingSystem:showAsAction="ifRoom"
         android:icon="@drawable/navigation_refresh"
-        android:title="@string/menu_actualizar">
+        android:title="@string/update_lbl">
     </item>
 
 </menu> 

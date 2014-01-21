@@ -147,9 +147,7 @@
     <string name="receipt_error_msg">Error validando recibo de voto</string>
     <string name="cert_not_found_caption">Falta certificado</string>
 
-    <string name="lanzarServicio">Lanzar Servicio</string>
-    <string name="eventos_no_encontrados_message">No se han encontrado eventos</string>
-    <string name="menu_actualizar">Actualizar</string>
+    <string name="update_lbl">Actualizar</string>
     <string name="request_certificate_menu">Solicitar certificado</string>
     <string name="receipts_lbl">Recibos</string>
     <string name="receipt_lbl">Recibo</string>
@@ -263,8 +261,6 @@
     <string name="cancel_vote_error_notification_msg">Error cancelando voto</string>
     <string name="send_vote_caption">Enviando voto</string>
     <string name="vote_option_mismatch">Problemas graves en el servicio de voto. Por favor, Inténtelo mas tarde</string>
-    <string name="receipt_vote_lbl">Recibo de voto</string>
-    <string name="receipt_cancel_vote_page_lbl">Recibo de cancelación de voto</string>
 
     <string name="cert_info_formated_msg"><![CDATA[<html><b>Asunto: </b>%1$s<br/><b>Emisor del certificado: </b> %2$s <br/> \n \
     <b>Num. serie del certificado: </b> %3$s <br/><b>Valido desde: </b> %4$s<br/> \n \
@@ -358,5 +354,6 @@
     <string name="receipt_vote_subtitle">Voto</string>
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
     <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
+    <string name="last_updated_msg">Ultima actualización <b>\'%1$s\'</b></string>
 
 </resources>

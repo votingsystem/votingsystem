@@ -109,6 +109,7 @@ public class ReceiptContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
+        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         int updateCount = database.update(TABLE_NAME, values,
                 whereClause, whereArgs);
         // Notify any listeners and return the updated row count.
@@ -124,13 +125,15 @@ public class ReceiptContentProvider extends ContentProvider {
     //PrivateKey certPrivKey = kf.generatePrivate(keySpec);
     //vote.setCertVotePrivateKey(certPrivKey);
 
-    @Override public Uri insert(Uri requestUri, ContentValues initialValues) {
+    @Override public Uri insert(Uri requestUri, ContentValues values) {
         // NOTE Argument checking code omitted. Check your parameters! Check that
         // your row addition request succeeded!
         Uri newUri = null;
-        if(initialValues != null) {
+        if(values != null) {
             long rowId = -1;
-            rowId = database.insert(TABLE_NAME, null, initialValues);
+            values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+            values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+            rowId = database.insert(TABLE_NAME, null, values);
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
         // Notify any listeners and return the URI of the new row.
@@ -146,20 +149,6 @@ public class ReceiptContentProvider extends ContentProvider {
         Log.d(TAG + ".delete(...)", "receipt id: " + idColStr);
         getContext().getContentResolver().notifyChange(uri, null);
         return rowCount;
-    }
-
-    public static String getDescription(Context context, TypeVS type) {
-        String title = context.getString(R.string.receipt_lbl);
-        switch(type) {
-            case VOTEVS:
-                title = context.getString(R.string.receipt_vote_lbl);
-                break;
-            case VOTEVS_CANCELLED:
-            case CANCEL_VOTE:
-                title = context.getString(R.string.receipt_cancel_vote_page_lbl);
-                break;
-        }
-        return title;
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {

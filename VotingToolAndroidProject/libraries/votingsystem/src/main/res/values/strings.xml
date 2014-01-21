@@ -37,5 +37,9 @@
     <string name="minutes_lbl">minutos</string>
     <string name="seconds_lbl">segundos</string>
 
+    <string name="receipt_vote_subtitle">Voto</string>
+    <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
+    <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
+    <string name="receipt_lbl">Recibo</string>
 
 </resources>

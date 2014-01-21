@@ -38,6 +38,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReceiptGridFragment extends Fragment implements
@@ -152,10 +153,17 @@ public class ReceiptGridFragment extends Fragment implements
             if(cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-                ReceiptContainer receiptContainerInterface = (ReceiptContainer) ObjectUtils.
+                ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
                 String stateStr = cursor.getString(cursor.getColumnIndex(
                         ReceiptContentProvider.STATE_COL));
+
+                Long lastUpdatedMillis = cursor.getLong(cursor.getColumnIndex(
+                        ReceiptContentProvider.TIMESTAMP_UPDATED_COL));
+                Date lastUpdated = new Date(lastUpdatedMillis);
+                String dateInfoStr = context.getString(R.string.last_updated_msg,
+                        DateUtils.getLongDate_Es(lastUpdated));
+
                 ReceiptContainer.State state =  ReceiptContainer.State.valueOf(stateStr);
 
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
@@ -165,22 +173,12 @@ public class ReceiptGridFragment extends Fragment implements
                 TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
 
-                subject.setText(receiptContainerInterface.getSubject());
-                String dateInfoStr = null;
-                ImageView imgView = (ImageView)view.findViewById(R.id.event_state_icon);
-                if(Calendar.getInstance().getTime().after(receiptContainerInterface.getValidTo())) {
-                    imgView.setImageResource(R.drawable.closed);
-                    dateInfoStr = "<b>" + getString(R.string.closed_upper_lbl) + "</b> - " +
-                            "<b>" + getString(R.string.init_lbl) + "</b>: " +
-                            DateUtils.getDate_Es(
-                                    receiptContainerInterface.getValidFrom()) + " - " +
-                            "<b>" + getString(R.string.finish_lbl) + "</b>: " +
-                            DateUtils.getDate_Es(receiptContainerInterface.getValidTo());
-                } else {
-                    imgView.setImageResource(R.drawable.open);
-                    dateInfoStr = "<b>" + getString(R.string.remain_lbl, DateUtils.
-                            getElpasedTimeStr(receiptContainerInterface.getValidTo()))  +"</b>";
-                }
+                subject.setText(receiptContainer.getSubject());
+                typeTextView.setText(receiptContainer.getTypeDescription(context));
+
+                ((ImageView) view.findViewById(R.id.receipt_icon)).setImageResource(
+                        receiptContainer.getLogoId());
+
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
                 if(state == ReceiptContainer.State.CANCELLED) {
@@ -189,8 +187,6 @@ public class ReceiptGridFragment extends Fragment implements
                 } else {
                     receiptState.setVisibility(View.GONE);
                 }
-                typeTextView.setText(Html.fromHtml(ReceiptContentProvider.getDescription(
-                        getActivity().getApplicationContext(), receiptContainerInterface.getType())));
             }
         }
     }

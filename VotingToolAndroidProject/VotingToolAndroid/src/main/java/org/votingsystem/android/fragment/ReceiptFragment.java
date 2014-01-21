@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -212,27 +213,23 @@ public class ReceiptFragment extends Fragment {
 
     private void setActionBar() {
         if(selectedReceipt == null) return;
-        String subTitle = null;
         switch(selectedReceipt.getType()) {
             case VOTEVS:
                 if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
-                subTitle = getString(R.string.receipt_vote_subtitle);
                 break;
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
                 MenuItem checkReceiptMenuItem = menu.findItem(R.id.check_receipt);
                 checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
                 menu.removeItem(R.id.cancel_vote);
-                subTitle = getString(R.string.receipt_cancel_vote_subtitle);
                 break;
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 menu.removeItem(R.id.cancel_vote);
                 menu.removeItem(R.id.check_receipt);
-                subTitle = getString(R.string.receipt_anonimous_representative_request_subtitle);
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
                     selectedReceipt.getType());
@@ -240,9 +237,11 @@ public class ReceiptFragment extends Fragment {
         if(selectedReceipt.getLocalId() < 0) {
             menu.removeItem(R.id.delete_receipt);
         } else menu.removeItem(R.id.save_receipt);
-        if(getActivity() instanceof FragmentContainerActivity) {
-            ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.receipt_lbl),
-                    subTitle, R.drawable.receipt_22);
+        if(getActivity() instanceof ActionBarActivity) {
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
+                    selectedReceipt.getTypeDescription(getActivity()));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(R.drawable.receipt_22);
         }
     }
 
@@ -329,8 +328,6 @@ public class ReceiptFragment extends Fragment {
                 values.put(ReceiptContentProvider.TYPE_COL, selectedReceipt.getType().toString());
                 values.put(ReceiptContentProvider.URL_COL, selectedReceipt.getMessageId());
                 values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
-                values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-                values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
                 Uri uri = getActivity().getContentResolver().insert(
                         ReceiptContentProvider.CONTENT_URI, values);
                 menu.removeItem(R.id.save_receipt);

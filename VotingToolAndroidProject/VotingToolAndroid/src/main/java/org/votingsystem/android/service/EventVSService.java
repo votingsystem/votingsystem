@@ -131,10 +131,6 @@ public class EventVSService extends IntentService {
                         values.put(EventVSContentProvider.JSON_DATA_COL, eventVS.toJSON().toString());
                         values.put(EventVSContentProvider.TYPE_COL, eventVS.getTypeVS().toString());
                         values.put(EventVSContentProvider.STATE_COL, eventVSState.toString());
-                        values.put(EventVSContentProvider.TIMESTAMP_CREATED_COL,
-                                System.currentTimeMillis());
-                        values.put(EventVSContentProvider.TIMESTAMP_UPDATED_COL,
-                                System.currentTimeMillis());
                         contentValuesList.add(values);
                     }
                     if(!contentValuesList.isEmpty()) {

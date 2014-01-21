@@ -152,7 +152,7 @@ public class TicketGridFragment extends Fragment implements
             if(cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-                ReceiptContainer receiptContainerInterface = (ReceiptContainer) ObjectUtils.
+                ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
                 String stateStr = cursor.getString(cursor.getColumnIndex(
                         ReceiptContentProvider.STATE_COL));
@@ -165,21 +165,21 @@ public class TicketGridFragment extends Fragment implements
                 TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
 
-                subject.setText(receiptContainerInterface.getSubject());
+                subject.setText(receiptContainer.getSubject());
                 String dateInfoStr = null;
-                ImageView imgView = (ImageView)view.findViewById(R.id.event_state_icon);
-                if(Calendar.getInstance().getTime().after(receiptContainerInterface.getValidTo())) {
+                ImageView imgView = (ImageView)view.findViewById(R.id.receipt_icon);
+                if(Calendar.getInstance().getTime().after(receiptContainer.getValidTo())) {
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getString(R.string.init_lbl) + "</b>: " +
                             DateUtils.getDate_Es(
-                                    receiptContainerInterface.getValidFrom()) + " - " +
+                                    receiptContainer.getValidFrom()) + " - " +
                             "<b>" + getString(R.string.finish_lbl) + "</b>: " +
-                            DateUtils.getDate_Es(receiptContainerInterface.getValidTo());
+                            DateUtils.getDate_Es(receiptContainer.getValidTo());
                 } else {
                     imgView.setImageResource(R.drawable.open);
                     dateInfoStr = "<b>" + getString(R.string.remain_lbl, DateUtils.
-                            getElpasedTimeStr(receiptContainerInterface.getValidTo()))  +"</b>";
+                            getElpasedTimeStr(receiptContainer.getValidTo()))  +"</b>";
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
@@ -189,8 +189,7 @@ public class TicketGridFragment extends Fragment implements
                 } else {
                     receiptState.setVisibility(View.GONE);
                 }
-                typeTextView.setText(Html.fromHtml(ReceiptContentProvider.getDescription(
-                        getActivity().getApplicationContext(), receiptContainerInterface.getType())));
+                typeTextView.setText(receiptContainer.getTypeDescription(getActivity()));
             }
         }
     }

@@ -150,6 +150,7 @@ public class EventVSContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
+        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         int updateCount = database.update(TABLE_NAME, values,
                 whereClause, whereArgs);
         // Notify any listeners and return the updated row count.
@@ -157,13 +158,15 @@ public class EventVSContentProvider extends ContentProvider {
         return updateCount;
     }
 
-    @Override public Uri insert(Uri requestUri, ContentValues initialValues) {
+    @Override public Uri insert(Uri requestUri, ContentValues values) {
         // NOTE Argument checking code omitted. Check your parameters! Check that
         // your row addition request succeeded!
         Uri newUri = null;
-        if(initialValues != null) {
+        if(values != null) {
             long rowId = -1;
-            rowId = database.insert(TABLE_NAME, null, initialValues);
+            values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+            values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+            rowId = database.insert(TABLE_NAME, null, values);
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
         // Notify any listeners and return the URI of the new row.

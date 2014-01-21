@@ -47,47 +47,8 @@ public class ReceiptPagerActivity extends ActionBarActivity {
         cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,null, null, null,
                 null);
         cursor.moveToPosition(cursorPosition);
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override public void onPageSelected(int position) {
-                cursor.moveToPosition(position);
-                updateActionBarTitle();
-            }
-        });
         mViewPager.setCurrentItem(cursorPosition);
         getSupportActionBar().setLogo(R.drawable.receipt_32);
-        updateActionBarTitle();
-    }
-
-    private void updateActionBarTitle() {
-        String subtitle = "";
-        String typeStr = cursor.getString(cursor.getColumnIndex(
-                ReceiptContentProvider.TYPE_COL));
-        TypeVS type = TypeVS.valueOf(typeStr);
-        String title = ReceiptContentProvider.getDescription(this.getApplicationContext(), type);
-        Date dateCreated = null;
-        Date dateUpdated = null;
-        Long timestampCreated = cursor.getLong(cursor.getColumnIndex(
-                ReceiptContentProvider.TIMESTAMP_CREATED_COL));
-        if(timestampCreated != null) dateCreated = new Date(timestampCreated);
-        Long timestampUpdated = cursor.getLong(cursor.getColumnIndex(
-                ReceiptContentProvider.TIMESTAMP_UPDATED_COL));
-        if(timestampUpdated != null) dateUpdated = new Date(timestampUpdated);
-        if(dateCreated != null) {
-            subtitle = getString(R.string.date_saved_lbl) + " " + DateUtils.
-                    getDate_Es(dateCreated);
-        }
-        if(dateUpdated != null) {
-            if(timestampCreated != timestampUpdated)
-            subtitle = getString(R.string.date_updated_lbl) + " " + DateUtils.
-                    getDate_Es(dateCreated);
-        }
-        getSupportActionBar().setTitle(title);
-        getSupportActionBar().setSubtitle(subtitle);
-    }
-
-    public void setActionBarTitle(String title, String subtitle) {
-        getSupportActionBar().setTitle(title);
-        getSupportActionBar().setSubtitle(subtitle);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

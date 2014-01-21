@@ -114,10 +114,6 @@ public class RepresentativeService extends IntentService {
                     values.put(UserContentProvider.NIF_COL, representative.getNif());
                     values.put(UserContentProvider.NUM_REPRESENTATIONS_COL,
                             representative.getNumRepresentations());
-                    values.put(UserContentProvider.TIMESTAMP_CREATED_COL,
-                            System.currentTimeMillis());
-                    values.put(UserContentProvider.TIMESTAMP_UPDATED_COL,
-                            System.currentTimeMillis());
                     contentValuesList.add(values);
                 }
                 if(!contentValuesList.isEmpty()) {
@@ -184,8 +180,6 @@ public class RepresentativeService extends IntentService {
                 values.put(UserContentProvider.NIF_COL, representative.getNif());
                 values.put(UserContentProvider.NUM_REPRESENTATIONS_COL,
                         representative.getNumRepresentations());
-                values.put(UserContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-                values.put(UserContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
                 getContentResolver().insert(UserContentProvider.CONTENT_URI, values);
                 sendMessage(responseVS.getStatusCode(), null, null, TypeVS.ITEM_REQUEST,
                         serviceCaller, representativeURI);
@@ -282,8 +276,6 @@ public class RepresentativeService extends IntentService {
                     values.put(ReceiptContentProvider.URL_COL, anonymousDelegation.getMessageId());
                     values.put(ReceiptContentProvider.TYPE_COL, anonymousDelegation.getType().toString());
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
-                    values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-                    values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
                     Uri uri = getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
                     responseVS.setUri(uri);
                     responseVS.setIconId(R.drawable.system_users_22);

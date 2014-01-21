@@ -113,8 +113,8 @@ public class UserContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        int updateCount = database.update(TABLE_NAME, values,
-                whereClause, whereArgs);
+        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        int updateCount = database.update(TABLE_NAME, values, whereClause, whereArgs);
         // Notify any listeners and return the updated row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;
@@ -127,6 +127,8 @@ public class UserContentProvider extends ContentProvider {
         boolean replace = false;
         Uri newUri = null;
         if(values != null) {
+            values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+            values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
             if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
                 replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
                 // Clone the values object, so we don't modify the original.
