@@ -83,23 +83,24 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(pin != null) launchSignAndSendService(pin);
         else {
-            String notificationMessage = null;
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                 try {
-                    JSONObject responseJSON = new JSONObject(responseVS.getNotificationMessage());
                     DownloadReceiptDialogFragment newFragment = DownloadReceiptDialogFragment.newInstance(
                             responseVS.getStatusCode(), getString(R.string.error_lbl),
-                            responseJSON.getString("message"), responseJSON.getString("URL"), typeVS);
+                            responseVS.getNotificationMessage(), (String) responseVS.getData(),
+                            typeVS);
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
                     showProgress(false, true);
                     return;
                 } catch(Exception ex) {
                     ex.printStackTrace();
                 }
-            } else notificationMessage = responseVS.getNotificationMessage();
-            showMessage(responseVS.getStatusCode(), responseVS.getCaption(), notificationMessage);
+            }
+            showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage());
         }
         }
     };

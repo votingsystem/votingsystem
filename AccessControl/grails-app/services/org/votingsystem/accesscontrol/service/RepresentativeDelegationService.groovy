@@ -36,8 +36,8 @@ class RepresentativeDelegationService {
             ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
                 log.error(responseVS.message)
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
-                        type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
+                responseVS.type = TypeVS.REPRESENTATIVE_SELECTION_ERROR
+				return responseVS
 			}
 			def messageJSON = JSON.parse(smimeMessage.getSignedContent())
 			String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
@@ -111,6 +111,7 @@ class RepresentativeDelegationService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
         }
         int statusCode = ResponseVS.SC_OK
+        String userDelegationURL = null
         AnonymousDelegation anonymousDelegation = AnonymousDelegation.findWhere(userVS:userVS,
                 status:AnonymousDelegation.Status.OK)
         if(anonymousDelegation && Calendar.getInstance().getTime().after(anonymousDelegation.getDateTo())) {
@@ -120,8 +121,10 @@ class RepresentativeDelegationService {
             statusCode = ResponseVS.SC_ERROR_REQUEST_REPEATED
             msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
                     anonymousDelegation.getDateTo().format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
+            userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${anonymousDelegation.delegationSMIME.id}"
         }
-        return new ResponseVS(statusCode:statusCode, data:anonymousDelegation, message: msg);
+        Map responseDataMap = [message:msg, URL:userDelegationURL]
+        return new ResponseVS(statusCode:statusCode,data:responseDataMap, message: msg, contentType:ContentTypeVS.JSON);
     }
 
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -132,17 +135,11 @@ class RepresentativeDelegationService {
         AnonymousDelegation anonymousDelegation
         try {
             ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
-            String userDelegationURL = null
-            if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.statusCode) {
-                anonymousDelegation = responseVS.data
-                userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${anonymousDelegation.delegationSMIME.id}"
-            }
             if(ResponseVS.SC_OK != responseVS.statusCode) {
                 log.error(responseVS.message)
                 messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
                 messageSMIMEReq.setReason(responseVS.message)
-                return new ResponseVS(statusCode: responseVS.statusCode, contentType: ContentTypeVS.JSON,
-                        data:[message:responseVS.message, URL:userDelegationURL])
+                return responseVS
             }
             def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
             TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
@@ -265,7 +262,7 @@ class RepresentativeDelegationService {
 		try {
 			messageJSON = JSON.parse(smimeMessage.getSignedContent())
 			String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-			Date selectedDate = getDateFromString(messageJSON.selectedDate)
+			Date selectedDate = DateUtils.getDateFromString(messageJSON.selectedDate)
 			if(!requestValidatedNIF || !messageJSON.operation || 
 				(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != TypeVS.valueOf(messageJSON.operation))||
 				!selectedDate || !messageJSON.email || !messageJSON.UUID ){
@@ -274,11 +271,9 @@ class RepresentativeDelegationService {
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
 					type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 			}
-			UserVS representative = UserVS.findWhere(nif:requestValidatedNIF,
-							type:UserVS.Type.REPRESENTATIVE)
+			UserVS representative = UserVS.findWhere(nif:requestValidatedNIF, type:UserVS.Type.REPRESENTATIVE)
 			if(!representative) {
-			   msg = messageSource.getMessage('representativeNifErrorMsg',
-				   [requestValidatedNIF].toArray(), locale)
+			   msg = messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale)
 			   log.error "processAccreditationsRequest - ERROR REPRESENTATIVE - ${msg}"
 			   return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
 				   type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)

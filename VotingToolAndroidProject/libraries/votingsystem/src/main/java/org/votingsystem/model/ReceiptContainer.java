@@ -26,6 +26,8 @@ public abstract class ReceiptContainer implements Serializable {
 
     public abstract void setLocalId(Long localId);
 
-    public abstract SMIMEMessageWrapper getReceipt();
+    public abstract SMIMEMessageWrapper getReceipt() throws Exception;
+
+    public abstract String getMessageId();
 
 }

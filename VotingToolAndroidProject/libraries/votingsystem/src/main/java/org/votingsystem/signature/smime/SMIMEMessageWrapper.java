@@ -73,6 +73,7 @@ import javax.activation.FileDataSource;
 import javax.activation.MailcapCommandMap;
 import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
@@ -212,18 +213,16 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
         super.saveChanges();
         initSMIMEMessage();
     }
-    
 
-    @Override
-    public void updateMessageID() throws MessagingException {
-            setHeader("Message-ID", messageId);
+    public void setMessageID(String messageId) throws MessagingException {
+        setHeader("Message-ID", messageId);
     }
 
-    public void updateMessageID(String nifUsuario) throws MessagingException {
-        messageId = getFileName() + "@" + nifUsuario;
-        Address[] addresses = {new InternetAddress(nifUsuario)};
-        addFrom(addresses);
-        updateMessageID();
+    public String getMessageID() throws MessagingException {
+        String result = null;
+        String[] headers = getHeader("Message-ID");
+        if(headers != null && headers.length > 0) result = headers[0];
+        return result;
     }
 
     public String getSignedContent() {

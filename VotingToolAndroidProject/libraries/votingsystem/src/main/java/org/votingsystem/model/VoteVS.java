@@ -299,6 +299,38 @@ public class VoteVS extends ReceiptContainer {
         return voteVS;
     }
 
+    public static VoteVS populate (JSONObject voteJSON) {
+        VoteVS voteVS = null;
+        try {
+            voteVS = new VoteVS();
+            EventVS eventVS = new EventVS();
+            if(voteJSON.has("eventId")) {
+                eventVS.setId(((Integer) voteJSON.get("eventId")).longValue());
+            }
+            if(voteJSON.has("UUID")) {
+                voteVS.setVoteUUID((String) voteJSON.get("UUID"));
+            }
+            if(voteJSON.has("eventURL")) eventVS.setURL((String) voteJSON.get("eventURL"));
+            if(voteJSON.has("hashAccessRequestBase64")) voteVS.setHashAccessRequestBase64(
+                    (String) voteJSON.get("hashAccessRequestBase64"));
+            if(voteJSON.has("optionSelectedId")) {
+                FieldEventVS optionSelected = new FieldEventVS();
+                optionSelected.setId(((Integer) voteJSON.get("optionSelectedId")).longValue());
+                if(voteJSON.has("optionSelectedContent")) {
+                    optionSelected.setContent((String) voteJSON.get("optionSelectedContent"));
+                }
+                voteVS.setOptionSelected(optionSelected);
+            }
+            if(voteJSON.has("optionSelected")) {
+                voteVS.setOptionSelected(FieldEventVS.populate((Map) voteJSON.get("optionSelected")));
+            }
+            voteVS.setEventVS(eventVS);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return voteVS;
+    }
+
     private void setTimeStampToken(TimeStampToken timeStampToken) {
         this.timeStampToken = timeStampToken;
     }
@@ -391,6 +423,20 @@ public class VoteVS extends ReceiptContainer {
                 return voteReceipt;
             default: return null;
         }
+    }
+
+    public String getMessageId() {
+        String result = null;
+        SMIMEMessageWrapper receipt = getReceipt();
+        if(receipt != null) {
+            try {
+                String[] headers = receipt.getHeader("Message-ID");
+                if(headers != null && headers.length >0) return headers[0];
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return result;
     }
 
     public String getAccessControlURL() {

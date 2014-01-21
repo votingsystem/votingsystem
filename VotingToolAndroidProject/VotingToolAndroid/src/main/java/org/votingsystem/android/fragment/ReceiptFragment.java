@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ReceiptFragment extends Fragment {
 
-	public static final String TAG = "ReceiptFragment";
+    public static final String TAG = "ReceiptFragment";
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -126,7 +126,7 @@ public class ReceiptFragment extends Fragment {
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-           Bundle savedInstanceState) {
+                                       Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
@@ -180,10 +180,15 @@ public class ReceiptFragment extends Fragment {
     }
 
     private void initReceiptScreen (ReceiptContainer receipt) {
-        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getType());
-        selectedReceiptSMIME = receipt.getReceipt();
-        receiptSubject.setText(getString(R.string.smime_subject_msg, selectedReceipt.getSubject()));
-        receipt_content.setText(Html.fromHtml(getReceiptContentFormatted(selectedReceipt)));
+        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getType() + " - messageId: " +
+            receipt.getMessageId());
+        try {
+            selectedReceiptSMIME = receipt.getReceipt();
+            receiptSubject.setText(getString(R.string.smime_subject_msg, selectedReceipt.getSubject()));
+            receipt_content.setText(Html.fromHtml(getReceiptContentFormatted(selectedReceipt)));
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void setActionBar() {
@@ -204,6 +209,7 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.cancel_vote);
                 subTitle = getString(R.string.receipt_cancel_vote_subtitle);
                 break;
+            case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 menu.removeItem(R.id.cancel_vote);
                 menu.removeItem(R.id.check_receipt);
@@ -222,8 +228,8 @@ public class ReceiptFragment extends Fragment {
     }
 
     @Override public void onStart() {
-    	Log.d(TAG + ".onStart(...) ", "");
-    	super.onStart();
+        Log.d(TAG + ".onStart(...) ", "");
+        super.onStart();
     }
 
 
@@ -266,8 +272,8 @@ public class ReceiptFragment extends Fragment {
         setActionBar();
     }
 
-	@Override public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         AlertDialog dialog = null;
         switch (item.getItemId()) {
             case R.id.show_signers_info:
@@ -348,9 +354,9 @@ public class ReceiptFragment extends Fragment {
                 //to avoid avoid dissapear on screen orientation change
                 dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 return true;
-		}
+        }
         return super.onOptionsItemSelected(item);
-	}
+    }
 
     private void showMessage(Integer statusCode,String caption,String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
@@ -439,6 +445,7 @@ public class ReceiptFragment extends Fragment {
         String result = null;
         try {
             switch(selectedReceipt.getType()) {
+                case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_REPRESENTATIVE_REQUEST:
                     JSONObject dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
                     result = getString(R.string.anonymous_representative_request_formatted,

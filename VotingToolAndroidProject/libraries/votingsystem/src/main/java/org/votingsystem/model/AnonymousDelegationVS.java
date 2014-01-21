@@ -99,6 +99,18 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         return delegationReceipt;
     }
 
+    @Override public String getMessageId() {
+        String result = null;
+        try {
+            SMIMEMessageWrapper receipt = getReceipt();
+            String[] headers = receipt.getHeader("Message-ID");
+            if(headers != null && headers.length >0) return headers[0];
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return result;
+    }
+
     public String getOriginHashCertVS() {
         return originHashCertVS;
     }

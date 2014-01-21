@@ -32,6 +32,7 @@ public class ReceiptContentProvider extends ContentProvider {
 
     public static final String ID_COL                = "_id";
     public static final String TYPE_COL              = "type";
+    public static final String URL_COL               = "url";
     public static final String STATE_COL             = "state";
     public static final String SERIALIZED_OBJECT_COL = "serializedObject";
     public static final String TIMESTAMP_CREATED_COL = "timestampCreated";
@@ -166,6 +167,7 @@ public class ReceiptContentProvider extends ContentProvider {
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 ID_COL                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 TYPE_COL              + " TEXT," +
+                URL_COL               + " TEXT," +
                 STATE_COL             + " TEXT," +
                 SERIALIZED_OBJECT_COL + " blob, " +
                 TIMESTAMP_UPDATED_COL + " INTEGER DEFAULT 0, " +

@@ -35,6 +35,19 @@ public class GenericReceiptContainer extends ReceiptContainer {
         subject = receipt.getSubject();
     }
 
+    public String getMessageId() {
+        String result = null;
+        if(receipt != null) {
+            try {
+                String[] headers = receipt.getHeader("Message-ID");
+                if(headers != null && headers.length >0) return headers[0];
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return result;
+    }
+
     public SMIMEMessageWrapper getReceipt() {
         if(receipt == null && receiptBytes != null) {
             try {

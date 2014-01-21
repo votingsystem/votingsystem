@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
 import javax.persistence.*;
@@ -18,12 +19,14 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity @Table(name="MessageSMIME")
 public class MessageSMIME implements Serializable {
 
+    private static Logger logger = Logger.getLogger(MessageSMIME.class);
+
     private static final long serialVersionUID = 1L;
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)
     private Long id;
-    @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private TypeVS type;
+    @Column(name="type") @Enumerated(EnumType.STRING) private TypeVS type;
     @Column(name="content") @Lob private byte[] content;
     
     @ManyToOne(fetch=FetchType.LAZY)
@@ -187,4 +190,5 @@ public class MessageSMIME implements Serializable {
     public void setReason(String reason) {
         this.reason = reason;
     }
+
 }

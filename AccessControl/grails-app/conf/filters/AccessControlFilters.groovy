@@ -169,6 +169,9 @@ class AccessControlFilters {
                 if(messageSMIMEReq && responseVS){
                     MessageSMIME.withTransaction {
                         messageSMIMEReq = messageSMIMEReq.merge()
+                        messageSMIMEReq.getSmimeMessage().setMessageID(
+                                "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
+                        messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
                         messageSMIMEReq.eventVS = responseVS.eventVS
                         messageSMIMEReq.metaInf = responseVS.message
                         if(!messageSMIMEReq.type) messageSMIMEReq.type = responseVS.type
@@ -217,6 +220,7 @@ class AccessControlFilters {
                     case ContentTypeVS.TEXT:
                         return printOutput(response, responseVS)
                     case ContentTypeVS.JSON:
+                        response.setContentType(ContentTypeVS.JSON.getName())
                         response.status = responseVS.statusCode
                         render responseVS.getData() as JSON
                         return false
@@ -297,7 +301,7 @@ class AccessControlFilters {
                         anonymousSigner:certValidationResponse.data?.anonymousSigner,
                         userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
                         eventVS:certValidationResponse.eventVS, type:TypeVS.OK,
-                        content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr())
+                        base64ContentDigest:smimeMessageReq.getContentDigestStr())
                 MessageSMIME.withTransaction {messageSMIME.save()}
             }
             return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)

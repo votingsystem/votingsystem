@@ -352,7 +352,7 @@
 
     <string name="smime_subject_msg">Asunto: \'%1$s\'</string>
     <string name="anonymous_representative_request_formatted"><![CDATA[
-    Delegación activa desde: \'%1$s\' semanas<br/><br/>Fecha de inicio de la delegación: \'%2$s\'
+    Duración de la delegación: \'%1$s\' semanas<br/><br/>Delegación activa desde: \'%2$s\'
     <br/><br/>Fecha fin de la delegación: \'%3$s\'<br/>
     <br/>URL de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
     <string name="receipt_vote_subtitle">Voto</string>

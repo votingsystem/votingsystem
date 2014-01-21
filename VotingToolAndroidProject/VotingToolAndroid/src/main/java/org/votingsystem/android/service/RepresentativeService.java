@@ -294,7 +294,18 @@ public class RepresentativeService extends IntentService {
                 }
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
-                responseVS.setNotificationMessage(responseVS.getMessage());
+                if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                    try {
+                        JSONObject responseJSON = new JSONObject(responseVS.getNotificationMessage());
+                        responseVS.setNotificationMessage(responseJSON.getString("message"));
+                        responseVS.setData(responseJSON.getString("URL"));
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    responseVS.setNotificationMessage(responseVS.getMessage());
+                }
+
             }
         } catch(Exception ex) {
             ex.printStackTrace();

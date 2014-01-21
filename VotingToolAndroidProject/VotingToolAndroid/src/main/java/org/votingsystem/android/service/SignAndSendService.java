@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
@@ -125,6 +126,15 @@ public class SignAndSendService extends IntentService {
             } else {
                 caption = getString(R.string.signature_error_notification_msg);
                 notificationMessage = responseVS.getMessage();
+                if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                    try {
+                        JSONObject responseJSON = new JSONObject(responseVS.getNotificationMessage());
+                        notificationMessage = responseJSON.getString("message");
+                        responseVS.setData(responseJSON.getString("URL"));
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
             responseVS.setCaption(caption);
             responseVS.setNotificationMessage(notificationMessage);

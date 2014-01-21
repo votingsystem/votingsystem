@@ -49,7 +49,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     private static Logger logger = Logger.getLogger(SMIMEMessageWrapper.class);
 
-    private String messageId;
     private String contentType;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
@@ -138,14 +137,9 @@ public class SMIMEMessageWrapper extends MimeMessage {
     	super.saveChanges();
     	init();
     }
-    
-    public void updateMessageID() throws MessagingException {
-            setHeader("Message-ID", messageId);
-    }
 
     public void setMessageID(String messageId) throws MessagingException {
-    	this.messageId = messageId;
-    	updateMessageID();
+        setHeader("Message-ID", messageId);
     }
 
     /**

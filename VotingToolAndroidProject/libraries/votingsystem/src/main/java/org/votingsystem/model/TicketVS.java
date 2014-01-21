@@ -63,14 +63,26 @@ public class TicketVS extends ReceiptContainer {
         this.localId = localId;
     }
 
-    @Override public SMIMEMessageWrapper getReceipt() {
+    @Override public SMIMEMessageWrapper getReceipt() throws Exception {
+        if(receipt == null && receiptBytes != null) receipt =
+                new SMIMEMessageWrapper(null, new ByteArrayInputStream(receiptBytes), null);
         return receipt;
     }
 
-    public void setReceiptBytes(byte[] receiptBytes) throws Exception {
+    public void setReceiptBytes(byte[] receiptBytes) {
         this.receiptBytes = receiptBytes;
-        receipt = new SMIMEMessageWrapper(null, new ByteArrayInputStream(receiptBytes), null);
-        subject = receipt.getSubject();
+    }
+
+    @Override public String getMessageId() {
+        String result = null;
+        try {
+            SMIMEMessageWrapper receipt = getReceipt();
+            String[] headers = receipt.getHeader("Message-ID");
+            if(headers != null && headers.length >0) return headers[0];
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return result;
     }
 
     public String getOriginHashCertVS() {

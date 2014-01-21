@@ -152,6 +152,9 @@ class AccessControlFilters {
                 if(messageSMIMEReq && responseVS){
                     MessageSMIME.withTransaction {
                         messageSMIMEReq = messageSMIMEReq.merge()
+                        messageSMIMEReq.getSmimeMessage().setMessageID(
+                                "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
+                        messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
                         messageSMIMEReq.save(flush:true)
                     }
                     log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"
