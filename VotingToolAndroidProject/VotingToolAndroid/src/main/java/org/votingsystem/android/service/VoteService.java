@@ -119,7 +119,7 @@ public class VoteService extends IntentService {
                             values.put(ReceiptContentProvider.TYPE_COL, vote.getType().toString());
                             values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL,
                                     System.currentTimeMillis());
-                            getContentResolver().update(ReceiptContentProvider.getreceiptURI(
+                            getContentResolver().update(ReceiptContentProvider.getReceiptURI(
                                     vote.getLocalId()), values, null, null);
                         }
                     } else {

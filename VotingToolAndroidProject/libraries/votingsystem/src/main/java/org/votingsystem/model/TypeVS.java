@@ -38,5 +38,7 @@ public enum TypeVS {
     MANIFEST_PUBLISHING,
     VOTING_PUBLISHING,
 
+    TICKET,
+
     RECEIPT;
 }

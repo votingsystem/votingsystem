@@ -355,5 +355,11 @@
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
     <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
     <string name="last_updated_msg">Ultima actualización <b>\'%1$s\'</b></string>
+    <string name="tickets_drop_down_lbl">Tickets</string>
+    <string name="tickets_list_lbl">Ultimos movimientos</string>
+    <string name="ticket_lbl">Tickets</string>
+    <string name="save_ticket_lbl">Guardar Ticket</string>
+    <string name="delete_ticket_lbl">Borrar Ticket</string>
+    <string name="share_ticket_lbl">Compartir Ticket</string>
 
 </resources>

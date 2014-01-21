@@ -38,7 +38,6 @@ import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.GenericReceiptContainer;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -157,7 +156,7 @@ public class ReceiptFragment extends Fragment {
             initReceiptScreen(selectedReceipt);
         } else {
             if(receiptURL != null) {
-                selectedReceipt = new GenericReceiptContainer(type, receiptURL);
+                selectedReceipt = new ReceiptContainer(type, receiptURL);
                 String selection = ReceiptContentProvider.URL_COL + "=? ";
                 String[] selectionArgs = new String[]{receiptURL};
                 Cursor cursor = getActivity().getContentResolver().query(
@@ -241,7 +240,7 @@ public class ReceiptFragment extends Fragment {
             ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
                     selectedReceipt.getTypeDescription(getActivity()));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(R.drawable.receipt_22);
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(R.drawable.receipt_32);
         }
     }
 
@@ -341,7 +340,7 @@ public class ReceiptFragment extends Fragment {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 getActivity().getContentResolver().delete(ReceiptContentProvider.
-                                        getreceiptURI(selectedReceipt.getLocalId()), null, null);
+                                        getReceiptURI(selectedReceipt.getLocalId()), null, null);
                                 getActivity().onBackPressed();
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl),
@@ -440,8 +439,7 @@ public class ReceiptFragment extends Fragment {
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    ((GenericReceiptContainer)selectedReceipt).setReceiptBytes(
-                            responseVS.getMessageBytes());
+                    selectedReceipt.setReceiptBytes(responseVS.getMessageBytes());
                     initReceiptScreen(selectedReceipt);
                     setActionBar();
                 } catch (Exception ex) {

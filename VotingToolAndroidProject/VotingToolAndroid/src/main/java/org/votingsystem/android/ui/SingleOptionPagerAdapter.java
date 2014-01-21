@@ -13,6 +13,7 @@ import android.util.Log;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.ReceiptGridFragment;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
+import org.votingsystem.android.fragment.TicketGridFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 
@@ -47,6 +48,9 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
             case RECEIPTS:
                 selectedFragment = new ReceiptGridFragment();
                 break;
+            case TICKETS:
+                selectedFragment = new TicketGridFragment();
+                break;
         }
         Bundle args = new Bundle();
         args.putString(SearchManager.QUERY, searchQuery);
@@ -59,6 +63,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         switch(selectedGroup) {
             case REPRESENTATIVES: return context.getString(R.string.representatives_list_lbl);
             case RECEIPTS: return context.getString(R.string.receipt_list_lbl);
+            case TICKETS: return context.getString(R.string.tickets_list_lbl);
         }
         return context.getString(R.string.unknown_drop_down_lbl);
     }
@@ -67,6 +72,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         switch(selectedGroup) {
             case REPRESENTATIVES: return GroupPosition.REPRESENTATIVES.getDescription(context);
             case RECEIPTS: return GroupPosition.RECEIPTS.getDescription(context);
+            case TICKETS: return GroupPosition.TICKETS.getDescription(context);
         }
         return context.getString(R.string.unknown_drop_down_lbl);
     }
@@ -96,7 +102,8 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
     public Drawable getLogo(Context context) {
         switch(selectedGroup) {
             case REPRESENTATIVES: return context.getResources().getDrawable(R.drawable.system_users_22);
-            case RECEIPTS: return context.getResources().getDrawable(R.drawable.receipt_22);
+            case RECEIPTS: return context.getResources().getDrawable(R.drawable.receipt_32);
+            case TICKETS: return context.getResources().getDrawable(R.drawable.euro_32);
         }
         return context.getResources().getDrawable(R.drawable.mail_mark_unread_22);
     }

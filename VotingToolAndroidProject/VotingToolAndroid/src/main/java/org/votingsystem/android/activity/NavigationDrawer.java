@@ -199,6 +199,7 @@ public class NavigationDrawer extends ActionBarActivity {
                     mViewPager.setAdapter(pagerAdapter);
                 }
                 break;
+            case TICKETS:
             case RECEIPTS:
             case REPRESENTATIVES:
                 if(singleOptionPagerAdapter == null) singleOptionPagerAdapter=

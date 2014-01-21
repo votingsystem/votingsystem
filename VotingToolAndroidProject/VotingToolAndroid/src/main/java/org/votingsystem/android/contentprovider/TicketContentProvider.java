@@ -14,21 +14,18 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.votingsystem.android.R;
-import org.votingsystem.model.TypeVS;
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class ReceiptContentProvider extends ContentProvider {
+public class TicketContentProvider extends ContentProvider {
 
-    public static final String TAG = "ReceiptContentProvider";
+    public static final String TAG = "TicketContentProvider";
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DB_NAME = "voting_system_receipt.db";
-    private static final String TABLE_NAME = "receipt";
-    public static final String AUTHORITY = "votingsystem.org.receipt";
+    private static final String DB_NAME       = "voting_system_ticket.db";
+    private static final String TABLE_NAME    = "ticket";
+    public static final String AUTHORITY      = "votingsystem.org.ticket";
 
     public static final String ID_COL                = "_id";
     public static final String TYPE_COL              = "type";
@@ -44,7 +41,7 @@ public class ReceiptContentProvider extends ContentProvider {
     private static final int ALL_ITEMS = 1;
     private static final int SPECIFIC_ITEM = 2;
 
-    private static final String BASE_PATH = "receipt";
+    private static final String BASE_PATH = "ticket";
 
     private static final UriMatcher URI_MATCHER;
     static{
@@ -58,7 +55,7 @@ public class ReceiptContentProvider extends ContentProvider {
     //        AUTHORITY + "/" + BASE_PATH);
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getReceiptURI(Long receipt) {
+    public static Uri getTicketURI(Long receipt) {
         return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + receipt);
     }
 
@@ -81,9 +78,9 @@ public class ReceiptContentProvider extends ContentProvider {
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
-                return "vnd.android.cursor.dir/receipts"; // List of items.
+                return "vnd.android.cursor.dir/tickets"; // List of items.
             case SPECIFIC_ITEM:
-                return "vnd.android.cursor.item/receipt"; // Specific item.
+                return "vnd.android.cursor.item/ticket"; // Specific item.
             default:
                 return null;
         }
@@ -109,7 +106,7 @@ public class ReceiptContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        values.put(TicketContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         int updateCount = database.update(TABLE_NAME, values,
                 whereClause, whereArgs);
         // Notify any listeners and return the updated row count.
@@ -131,8 +128,8 @@ public class ReceiptContentProvider extends ContentProvider {
         Uri newUri = null;
         if(values != null) {
             long rowId = -1;
-            values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-            values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+            values.put(TicketContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+            values.put(TicketContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
             rowId = database.insert(TABLE_NAME, null, values);
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }

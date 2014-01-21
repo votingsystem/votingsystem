@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
-import org.votingsystem.android.contentprovider.ReceiptContentProvider;
+import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.TypeVS;
@@ -102,17 +102,17 @@ public class TicketGridFragment extends Fragment implements
         String selection = null;
         String[] selectionArgs = null;
         if(receiptType != null) {
-            selection = ReceiptContentProvider.TYPE_COL + "=? ";
+            selection = TicketContentProvider.TYPE_COL + "=? ";
             selectionArgs = new String[]{receiptType.toString()};
         }
         Cursor cursor = getActivity().getContentResolver().query(
-                ReceiptContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
+                TicketContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
         getLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
                 deliverResult(cursor);
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(getActivity(), ReceiptContentProvider.CONTENT_URI, null, null, null, null);
+        return new CursorLoader(getActivity(), TicketContentProvider.CONTENT_URI, null, null, null, null);
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
@@ -151,11 +151,11 @@ public class TicketGridFragment extends Fragment implements
         @Override public void bindView(View view, Context context, Cursor cursor) {
             if(cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
-                        ReceiptContentProvider.SERIALIZED_OBJECT_COL));
+                        TicketContentProvider.SERIALIZED_OBJECT_COL));
                 ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
                 String stateStr = cursor.getString(cursor.getColumnIndex(
-                        ReceiptContentProvider.STATE_COL));
+                        TicketContentProvider.STATE_COL));
                 ReceiptContainer.State state =  ReceiptContainer.State.valueOf(stateStr);
 
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);

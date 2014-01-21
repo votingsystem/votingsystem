@@ -48,6 +48,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int CLAIMS_GROUP_POSITION          = 2;
     public static final int REPRESENTATIVES_GROUP_POSITION = 3;
     public static final int RECEIPTS_GROUP_POSITION        = 4;
+    public static final int TICKETS_GROUP_POSITION         = 5;
 
     public static final int OPEN_CHILD_POSITION            = 0;
     public static final int PENDING_CHILD_POSITION         = 1;
@@ -63,8 +64,10 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
         REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, R.drawable.system_users_22,
                 SubSystemVS.REPRESENTATIVES, TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
-        RECEIPTS(RECEIPTS_GROUP_POSITION, R.drawable.receipt_22, SubSystemVS.RECEIPTS,
-                TypeVS.RECEIPT, new ArrayList<ChildPosition>());
+        RECEIPTS(RECEIPTS_GROUP_POSITION, R.drawable.receipt_32, SubSystemVS.RECEIPTS,
+                TypeVS.RECEIPT, new ArrayList<ChildPosition>()),
+        TICKETS(TICKETS_GROUP_POSITION, R.drawable.euro_24, SubSystemVS.TICKETS,
+                 TypeVS.TICKET, new ArrayList<ChildPosition>());
 
         int position;
         int logo;
@@ -87,6 +90,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 case CLAIMS_GROUP_POSITION: return CLAIMS;
                 case REPRESENTATIVES_GROUP_POSITION: return REPRESENTATIVES;
                 case RECEIPTS_GROUP_POSITION: return RECEIPTS;
+                case TICKETS_GROUP_POSITION: return TICKETS;
                 default: return null;
             }
         }
@@ -128,6 +132,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 case CLAIMS: return context.getString(R.string.claims_drop_down_lbl);
                 case REPRESENTATIVES: return context.getString(R.string.representatives_drop_down_lbl);
                 case RECEIPTS: return context.getString(R.string.receipts_drop_down_lbl);
+                case TICKETS: return context.getString(R.string.tickets_drop_down_lbl);
                 default: return context.getString(R.string.unknown_drop_down_lbl);
             }
         }
@@ -245,6 +250,8 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 context.getString(R.string.representatives_drop_down_lbl));
         listDataHeader.add(GroupPosition.RECEIPTS.getPosition(),
                 context.getString(R.string.receipts_drop_down_lbl));
+        listDataHeader.add(GroupPosition.TICKETS.getPosition(),
+                context.getString(R.string.tickets_drop_down_lbl));
 
         List<String> voting = new ArrayList<String>();
         voting.add(context.getString(R.string.open_voting_lbl));
@@ -269,6 +276,8 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         listDataChild.put(listDataHeader.get(GroupPosition.REPRESENTATIVES.getPosition()),
                 new ArrayList<String>());
         listDataChild.put(listDataHeader.get(GroupPosition.RECEIPTS.getPosition()),
+                new ArrayList<String>());
+        listDataChild.put(listDataHeader.get(GroupPosition.TICKETS.getPosition()),
                 new ArrayList<String>());
     }
 

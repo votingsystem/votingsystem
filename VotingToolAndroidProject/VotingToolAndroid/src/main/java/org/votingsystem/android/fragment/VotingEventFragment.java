@@ -89,14 +89,13 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     message = getString(R.string.vote_ok_msg, eventVS.getSubject(),
                             vote.getOptionSelected().getContent());
-                    showMessage(responseStatusCode, getString(R.string.operation_ok_msg),
-                            message, null);
+                    showMessage(responseStatusCode, getString(R.string.operation_ok_msg), message);
                     setReceiptScreen(vote);
                 } else {
                     if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseStatusCode){
                         setOptionButtonsEnabled(true);
-                        showMessage(responseStatusCode, caption, message, null);
-                    } else showMessage(responseStatusCode, caption, null, message);
+                        showMessage(responseStatusCode, caption, message);
+                    } else showMessage(responseStatusCode, caption, message);
                 }
             } else if(resultOperation == TypeVS.CANCEL_VOTE){
                 if(ResponseVS.SC_OK == responseStatusCode) {
@@ -113,7 +112,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                     dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
                     cancelVoteButton.setEnabled(true);
-                    showMessage(responseStatusCode, caption, message, null);
+                    showMessage(responseStatusCode, caption, message);
                 }
             }
         }
@@ -325,8 +324,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         Log.d(TAG + ".onClickSubject(...)", "");
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
-            showMessage(null, getActivity().getString(R.string.subject_lbl),
-                    eventVS.getSubject(), null);
+            showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
         }
     }
 
@@ -337,10 +335,9 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    private void showMessage(Integer statusCode, String caption, String message,
-                 String htmlMessage) {
+    private void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message + " - htmlMessage: " + htmlMessage);
+                " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
@@ -396,8 +393,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         values.put(ReceiptContentProvider.URL_COL, vote.getMessageId());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
         getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
-        showMessage(null, getString(R.string.msg_lbl),
-                getString(R.string.saved_cancel_vote_recepit_msg), null);
+        showMessage(null, getString(R.string.msg_lbl), getString(R.string.saved_cancel_vote_recepit_msg));
     }
 
 }

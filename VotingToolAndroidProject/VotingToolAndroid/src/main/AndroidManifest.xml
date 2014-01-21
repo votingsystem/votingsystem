@@ -110,6 +110,9 @@
         <provider android:name=".contentprovider.EventVSContentProvider"
             android:exported="false" android:authorities="votingsystem.org.eventvs"/>
 
+        <provider android:name=".contentprovider.TicketContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.ticket"/>
+
         <provider android:name=".contentprovider.ReceiptContentProvider"
             android:exported="false" android:authorities="votingsystem.org.receipt"/>
 
