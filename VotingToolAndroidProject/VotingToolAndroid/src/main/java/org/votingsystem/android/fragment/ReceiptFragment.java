@@ -157,8 +157,27 @@ public class ReceiptFragment extends Fragment {
         } else {
             if(receiptURL != null) {
                 selectedReceipt = new GenericReceiptContainer(type, receiptURL);
-                ReceiptDownloader getDataTask = new ReceiptDownloader();
-                getDataTask.execute(receiptURL);
+                String selection = ReceiptContentProvider.URL_COL + "=? ";
+                String[] selectionArgs = new String[]{receiptURL};
+                Cursor cursor = getActivity().getContentResolver().query(
+                        ReceiptContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
+                if(cursor.getCount() > 0 ) {
+                    cursor.moveToFirst();
+                    byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
+                            ReceiptContentProvider.SERIALIZED_OBJECT_COL));
+                    Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
+                    try {
+                        selectedReceipt = (ReceiptContainer) ObjectUtils.
+                                deSerializeObject(serializedReceiptContainer);
+                        selectedReceipt.setLocalId(receiptId);
+                        initReceiptScreen(selectedReceipt);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    ReceiptDownloader getDataTask = new ReceiptDownloader();
+                    getDataTask.execute(receiptURL);
+                }
             } else {
                 int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
                 Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
@@ -308,6 +327,7 @@ public class ReceiptFragment extends Fragment {
                 values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
                         ObjectUtils.serializeObject(selectedReceipt));
                 values.put(ReceiptContentProvider.TYPE_COL, selectedReceipt.getType().toString());
+                values.put(ReceiptContentProvider.URL_COL, selectedReceipt.getMessageId());
                 values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
                 values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
                 values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());

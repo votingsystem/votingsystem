@@ -279,6 +279,7 @@ public class RepresentativeService extends IntentService {
                     anonymousDelegation.setDelegationReceipt(delegationReceipt);
                     ContentValues values = new ContentValues();
                     values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(anonymousDelegation));
+                    values.put(ReceiptContentProvider.URL_COL, anonymousDelegation.getMessageId());
                     values.put(ReceiptContentProvider.TYPE_COL, anonymousDelegation.getType().toString());
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
                     values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());

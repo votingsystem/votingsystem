@@ -113,6 +113,7 @@ public class VoteService extends IntentService {
                         if(vote.getLocalId() > 0) {//Update local receipt database
                             ContentValues values = new ContentValues();
                             vote.setType(TypeVS.VOTEVS_CANCELLED);
+                            values.put(ReceiptContentProvider.URL_COL, cancelReceipt.getMessageID());
                             values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
                                     ObjectUtils.serializeObject(vote));
                             values.put(ReceiptContentProvider.TYPE_COL, vote.getType().toString());
