@@ -18,7 +18,7 @@
                 </votingSystem:simpleButton>
 
                 <votingSystem:simpleButton id="makeDepositButton"
-                        onclick="alert('hola');"
+                        onclick="openWindow('${createLink(controller: 'ticket', action:'deposit', absolute:true)}')"
                         style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="makeDepositButton"/>
                 </votingSystem:simpleButton>

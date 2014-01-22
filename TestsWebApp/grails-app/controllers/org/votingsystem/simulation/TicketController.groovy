@@ -4,6 +4,8 @@ class TicketController {
 
     def index() {}
 
+    def deposit() {}
+
     def initUserBaseData() {}
 
 }

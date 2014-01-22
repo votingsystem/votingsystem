@@ -8,7 +8,7 @@
     <r:layoutResources />
 </head>
 <body style="overflow-y: scroll;">
-<div id="electionProtocolSinulationDataDialog"
+<div id="electionProtocolSimulationDataDialog"
      style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -22,9 +22,9 @@
         </div>
     </div>
     <div id="formDataDiv">
-        <form id="electionProtocolSinulationDataForm">
+        <form id="electionProtocolSimulationDataForm">
             <input type="hidden" autofocus="autofocus" />
-            <input id="resetElectionProtocolSinulationDataForm" type="reset" style="display:none;">
+            <input id="resetElectionProtocolSimulationDataForm" type="reset" style="display:none;">
             <fieldset id="userBaseData">
                 <legend style="font-size: 1.2em"><g:message code="userBaseDataCaption"/></legend>
                 <div style="display: block; margin: 0px 0px 5px 0px;">
@@ -216,7 +216,7 @@ $('#eventStateOnFinishSelect').on('change', function (e) {
 });
 
 
-//$("#resetElectionProtocolSinulationDataForm").click()
+//$("#resetElectionProtocolSimulationDataForm").click()
 //This is for number validation in Firefox
 var allNumberFields = document.getElementsByClassName('userBaseDataInputNumber');
 for (var inputElement in allNumberFields) {
@@ -299,7 +299,7 @@ electionEditorDivButton = $("#addElectionFieldButton");
 allFields = $( [] ).add(dateFinish).add(electionEditorDiv).add(electionEditorDivButton);
 
 
-$('#electionProtocolSinulationDataForm').submit(function(event){
+$('#electionProtocolSimulationDataForm').submit(function(event){
 	event.preventDefault();
  	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
@@ -481,8 +481,8 @@ function addElectionField (electionFieldText) {
 }
 
 function showErrorMsg(errorMsg) {
-	$("#electionProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#electionProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#electionProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#electionProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 
 </r:script>

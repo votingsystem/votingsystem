@@ -196,4 +196,4 @@ VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 VotingSystem.requestTimeOut = 500
 VotingSystem.serverName='Voting System Ticket Server'
 //_ TODO _
-VotingSystem.adminsDNI='07553172H'
+VotingSystem.adminsDNI='07553172H,08888888D'

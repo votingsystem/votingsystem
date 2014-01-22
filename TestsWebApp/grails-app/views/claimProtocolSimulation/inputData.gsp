@@ -8,7 +8,7 @@
 	<r:layoutResources />
 </head>
 <body style="overflow-y: scroll;">
-<div id="claimProtocolSinulationDataDialog" title="<g:message code="initClaimProtocolSimulationButton"/>"
+<div id="claimProtocolSimulationDataDialog" title="<g:message code="initClaimProtocolSimulationButton"/>"
      style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -21,9 +21,9 @@
         </div>
     </div>
     <div id="formDataDiv">
-        <form id="claimProtocolSinulationDataForm" onsubmit="return submitForm(this);">
+        <form id="claimProtocolSimulationDataForm" onsubmit="return submitForm(this);">
             <input type="hidden" autofocus="autofocus" />
-            <input id="resetClaimProtocolSinulationDataForm" type="reset" style="display:none;">
+            <input id="resetClaimProtocolSimulationDataForm" type="reset" style="display:none;">
 
             <div style="display: block;">
                 <label><g:message code="numRequestsProjectedLbl"/></label>
@@ -262,8 +262,8 @@ function addClaimField (claimFieldText) {
 }
 
 function showErrorMsg(errorMsg) {
-	$("#claimProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#claimProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#claimProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#claimProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
 </r:script>

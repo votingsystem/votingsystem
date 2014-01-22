@@ -6,7 +6,7 @@
    	<r:require modules="application"/>
 	<r:layoutResources />
 </head>
-<div id="multiSignProtocolSinulationDataDialog" title="<g:message code="initMultiSignProtocolSimulationButton"/>"
+<div id="multiSignProtocolSimulationDataDialog" title="<g:message code="initMultiSignProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -19,9 +19,9 @@
         </div>
     </div>
   	<div id="formDataDiv">
-   		<form id="multiSignProtocolSinulationDataForm">
+   		<form id="multiSignProtocolSimulationDataForm">
 			<input type="hidden" autofocus="autofocus" />
-			<input id="resetMultiSignProtocolSinulationDataForm" type="reset" style="display:none;">
+			<input id="resetMultiSignProtocolSimulationDataForm" type="reset" style="display:none;">
 
             <div style="display: block;">
                 <label><g:message code="numRequestsProjectedLbl"/></label>
@@ -117,7 +117,7 @@ $("#testButton").click(function () {
     showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
 });
 
-$('#multiSignProtocolSinulationDataForm').submit(function(event){
+$('#multiSignProtocolSimulationDataForm').submit(function(event){
 	 event.preventDefault();
 
     var timer = {active:$("#isWithTimer").is(':checked'),
@@ -156,8 +156,8 @@ function isValidForm() {
 }
 
 function showErrorMsg(errorMsg) {
-	$("#multiSignProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#multiSignProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#multiSignProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#multiSignProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
 </r:script>

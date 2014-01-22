@@ -42,13 +42,16 @@ class UserVSService {
 			serverURL:controlCenter.serverURL, id:controlCenter.id, 
 			serverType:ActorVS.Type.CONTROL_CENTER.toString()]
 	}
-	
-	boolean isUserAdmin(String nif) {
-		if(!systemAdmins) {
-			systemAdmins = Arrays.asList(
-			"${grailsApplication.config.VotingSystem.adminsDNI}".split(","))
-		}
-		return systemAdmins.contains(nif)
-	}
+
+    boolean isUserAdmin(String nif) {
+        if(!systemAdmins) {
+            systemAdmins = new ArrayList<String>();
+            "${grailsApplication.config.VotingSystem.adminsDNI}".split(",")?.each {
+                systemAdmins.add(it.trim())
+            }
+        }
+        return systemAdmins.contains(nif)
+    }
+
 }
 

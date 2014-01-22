@@ -12,7 +12,7 @@
         display:inline-block;
     }
 </style>
-<div id="mailProtocolSinulationDataDialog" title="<g:message code="initMailProtocolSimulationButton"/>"
+<div id="mailProtocolSimulationDataDialog" title="<g:message code="initMailProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -25,9 +25,9 @@
         </div>
     </div>
   	<div id="formDataDiv">
-   		<form id="mailProtocolSinulationDataForm">
+   		<form id="mailProtocolSimulationDataForm">
 			<input type="hidden" autofocus="autofocus" />
-			<input id="resetMailProtocolSinulationDataForm" type="reset" style="display:none;">
+			<input id="resetMailProtocolSimulationDataForm" type="reset" style="display:none;">
 
             <div style="display: block;">
                 <label><g:message code="numRequestsProjectedLbl"/></label>
@@ -165,7 +165,7 @@ $("#testButton").click(function () {
     showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
 });
 
-$('#mailProtocolSinulationDataForm').submit(function(event){
+$('#mailProtocolSimulationDataForm').submit(function(event){
 	 event.preventDefault();
 
     var timer = {active:$("#isWithTimer").is(':checked'),
@@ -192,8 +192,8 @@ function isValidForm() {
 }
 
 function showErrorMsg(errorMsg) {
-	$("#mailProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#mailProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#mailProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#mailProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
 </r:script>

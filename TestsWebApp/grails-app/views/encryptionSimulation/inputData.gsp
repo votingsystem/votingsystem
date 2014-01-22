@@ -6,7 +6,7 @@
    	<r:require modules="application"/>
 	<r:layoutResources />
 </head>
-<div id="encryptionProtocolSinulationDataDialog" title="<g:message code="initEncryptionProtocolSimulationButton"/>"
+<div id="encryptionProtocolSimulationDataDialog" title="<g:message code="initEncryptionProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -19,9 +19,9 @@
         </div>
     </div>
   	<div id="formDataDiv">
-   		<form id="encryptionProtocolSinulationDataForm">
+   		<form id="encryptionProtocolSimulationDataForm">
 			<input type="hidden" autofocus="autofocus" />
-			<input id="resetEncryptionProtocolSinulationDataForm" type="reset" style="display:none;">
+			<input id="resetEncryptionProtocolSimulationDataForm" type="reset" style="display:none;">
 
             <div style="display: block;">
                 <label><g:message code="numRequestsProjectedLbl"/></label>
@@ -118,7 +118,7 @@ $("#testButton").click(function () {
     showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
 });
 
-$('#encryptionProtocolSinulationDataForm').submit(function(event){
+$('#encryptionProtocolSimulationDataForm').submit(function(event){
 	event.preventDefault();
 
     var timer = {active:$("#isWithTimer").is(':checked'),
@@ -158,8 +158,8 @@ function isValidForm() {
 }
 
 function showErrorMsg(errorMsg) {
-	$("#encryptionProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#encryptionProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#encryptionProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#encryptionProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
 </r:script>

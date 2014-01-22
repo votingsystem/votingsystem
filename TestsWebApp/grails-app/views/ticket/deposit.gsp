@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><g:message code="ticketUserBaseDataSimulationCaption"/></title>
+    <title><g:message code="ticketDepositSimulationCaption"/></title>
     <r:external uri="/images/euro_16.png"/>
     <r:require modules="application"/>
     <r:require modules="textEditorPC"/>
     <r:layoutResources />
 </head>
 <body style="overflow-y: scroll;">
-<div id="ticketUserBaseDataSimulationDataDialog"
+<div id="ticketDepositSimulationDataDialog"
      style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
         <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #48802c;
         text-align:center;vertical-align: middle;width: 80%;">
-            <g:message code="initTicketUserBaseDataSimulationMsg"/>
+            <g:message code="initTicketDepositSimulationMsg"/>
         </div>
         <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
             <votingSystem:simpleButton id="testButton" style="margin:0px 0px 0px 30px;">
@@ -22,46 +22,33 @@
         </div>
     </div>
     <div id="formDataDiv">
-        <form id="ticketUserBaseDataSimulationDataForm">
+        <form id="ticketDepositSimulationDataForm">
             <input type="hidden" autofocus="autofocus" />
-            <input id="resetticketUserBaseDataSimulationDataForm" type="reset" style="display:none;">
-            <fieldset id="userBaseData">
-                <legend style="font-size: 1.2em"><g:message code="userBaseDataCaption"/></legend>
+            <input id="resetticketDepositSimulationDataForm" type="reset" style="display:none;">
+            <fieldset id="Deposit">
+                <legend style="font-size: 1.2em"><g:message code="depositCaption"/></legend>
                 <div style="display: block; margin: 0px 0px 5px 0px;">
-                    <label><g:message code="firstUserIndexMsg"/></label>
-                    <input type="number" id="firstUserIndex" min="1" value="1" readonly required
-                           class="userBaseDataInputNumber"
-                           style="width:120px;margin:10px 20px 0px 7px;"
-                           title="<g:message code="firstUserIndexMsg"/>"
-                           placeholder="<g:message code="firstUserIndexMsg"/>"
+                    <label><g:message code="depositAmount"/></label>
+                    <input type="number" id="depositAmount" min="0" value="1" required
+                           class="DepositInputNumber"
+                           style="width:150px;margin:10px 20px 0px 7px;"
+                           title="<g:message code="depositAmount"/>"
+                           placeholder="<g:message code="depositAmount"/>"
                            oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
                            onchange="this.setCustomValidity('')">
-
+                    <input type="url" id="ticketServerURL" style="width:280px; margin:10px 20px 0 20px;" required
+                           value="http://tickets:8080/Tickets/" title="<g:message code="ticketServerURLMsg"/>"
+                           placeholder="<g:message code="ticketServerURLMsg"/>"
+                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                           onchange="this.setCustomValidity('')"/>
                 </div>
-                <div style="display: block; margin: 0px 0px 5px 0px;">
-                    <label><g:message code="numUsersMsg"/></label>
-                    <input type="number" id="numUsers" min="0" value="1" required
-                           class="userBaseDataInputNumber"
-                           style="width:120px;margin:10px 20px 0px 7px;"
-                           title="<g:message code="numRepresentativesMsg"/>"
-                           placeholder="<g:message code="numRepresentativesMsg"/>"
-                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                           onchange="this.setCustomValidity('')">
-
-                </div>
-
-                <input type="url" id="ticketServerURL" style="width:280px; margin:20px 20px 0 20px;" required
-                       value="http://tickets:8080/Tickets/" title="<g:message code="ticketServerURLMsg"/>"
-                       placeholder="<g:message code="ticketServerURLMsg"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')"/>
             </fieldset>
 
 
             <div style="position: relative; overflow:hidden; ">
                 <votingSystem:simpleButton id="submitButton" isSubmitButton='true' style="margin:15px 20px 20px 0px;
                         width:450px; float:right;">
-                    <g:message code="initTicketuserBaseDataButton"/>
+                    <g:message code="initTicketDepositButton"/>
                 </votingSystem:simpleButton>
             </div>
 
@@ -78,9 +65,9 @@
 </html>
 <r:script>
 
-//$("#resetticketUserBaseDataSimulationDataForm").click()
+//$("#resetticketDepositSimulationDataForm").click()
 //This is for number validation in Firefox
-var allNumberFields = document.getElementsByClassName('userBaseDataInputNumber');
+var allNumberFields = document.getElementsByClassName('DepositInputNumber');
 for (var inputElement in allNumberFields) {
     if(allNumberFields[inputElement] instanceof HTMLInputElement) {
         allNumberFields[inputElement].addEventListener('change', function(event) {
@@ -105,18 +92,12 @@ function setInvalidMsg(event) {
 var electionEditorDiv = $("#electionEditorDiv")
 
 
-$('#ticketUserBaseDataSimulationDataForm').submit(function(event){
+$('#ticketDepositSimulationDataForm').submit(function(event){
 	event.preventDefault();
  	$(".errorMsgWrapper").fadeOut()
 
-
-     var userBaseData = {userIndex:$('#firstUserIndex').val(),
-        numUsers: $('#numUsers').val() }
-
-	 var simulationData = {service:"ticketUserBaseDataSimulationService", status:"INIT_SIMULATION",
-	 		 serverURL:$('#ticketServerURL').val()}
-
-	 simulationData.userBaseData = userBaseData
+	 var simulationData = {service:"ticketDepositSimulationService", status:"INIT_SIMULATION",
+	 		 serverURL:$('#ticketServerURL').val(),  depositAmount: $('#depositAmount').val()}
 
      showListenerDiv(true)
      showSimulationProgress(simulationData)
@@ -124,7 +105,6 @@ $('#ticketUserBaseDataSimulationDataForm').submit(function(event){
 });
 
 function isValidForm() {
-	//numRepresentativesMsg"/></label>numRepresentativesWithVote numUsersWithRepresentativeMsg numUsersWithRepresentativeWithVote
 
 
 	if(!document.getElementById('ticketServerURL').validity.valid) {
@@ -155,13 +135,13 @@ function showListenerDiv(isListening) {
         $("#testButton").text("<g:message code="goToFormViewMsg"/>")
         $('#formDataDiv').fadeOut()
         $('#simulationListenerDiv').fadeIn()
-        $('#pageTitle').text('<g:message code="listeningtTicketUserBaseDataSimulationMsg"/>')
+        $('#pageTitle').text('<g:message code="listeningtTicketDepositSimulationMsg"/>')
     } else {
         $("#testButton").text("<g:message code="goToResultViewMsg"/>")
         $('#simulationListenerDiv').fadeOut()
         $('#formDataDiv').fadeIn()
         SimulationService.close()
-        $('#pageTitle').text('<g:message code="initTicketUserBaseDataSimulationMsg"/>')
+        $('#pageTitle').text('<g:message code="initTicketDepositSimulationMsg"/>')
     }
 }
 
@@ -171,8 +151,8 @@ $("#testButton").click(function () {
 });
 
 function showErrorMsg(errorMsg) {
-	$("#ticketUserBaseDataSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#ticketUserBaseDataSimulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#ticketDepositSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#ticketDepositSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 
 </r:script>

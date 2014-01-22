@@ -26,7 +26,6 @@ class UserVSController {
 	 * 
 	 */
 	def save() {
-        log.debug "===============${ApplicationContextHolder.getEnvironment()}=================== "
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}

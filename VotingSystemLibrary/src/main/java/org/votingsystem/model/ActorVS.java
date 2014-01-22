@@ -299,6 +299,9 @@ public class ActorVS implements Serializable {
                     actorVS.setControlCenters(controlCenters);
                 }
                 break;
+            case TICKETS:
+                actorVS = new TicketServer();
+                break;
             default:
                 actorVS = new ActorVS();
                 actorVS.setType(serverType);

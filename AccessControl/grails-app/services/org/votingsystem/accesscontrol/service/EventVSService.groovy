@@ -25,7 +25,7 @@ class EventVSService {
 		
 	static transactional = true
 	
-	List<String> administradoresSistema
+	List<String> systemAdmins
 	def messageSource
 	def subscriptionVSService
 	def grailsApplication
@@ -82,11 +82,11 @@ class EventVSService {
 	}
 	
 	boolean isUserAdmin(String nif) {
-		if(!administradoresSistema) {
-			administradoresSistema = Arrays.asList(
+		if(!systemAdmins) {
+			systemAdmins = Arrays.asList(
 			"${grailsApplication.config.VotingSystem.adminsDNI}".split(","))
 		}
-		return administradoresSistema.contains(nif)
+		return systemAdmins.contains(nif)
 	}
    
 	//{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","state":"CANCELLED","UUID":"..."}

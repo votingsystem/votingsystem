@@ -6,7 +6,7 @@
    	<r:require modules="application"/>
 	<r:layoutResources />
 </head>
-<div id="timeStampProtocolSinulationDataDialog" title="<g:message code="initTimeStampProtocolSimulationButton"/>"
+<div id="timeStampProtocolSimulationDataDialog" title="<g:message code="initTimeStampProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -20,9 +20,9 @@
         </div>
     </div>
   	<div id="formDataDiv">
-   		<form id="timeStampProtocolSinulationDataForm">
+   		<form id="timeStampProtocolSimulationDataForm">
 			<input type="hidden" autofocus="autofocus" />
-			<input id="resetTimeStampProtocolSinulationDataForm" type="reset" style="display:none;">
+			<input id="resetTimeStampProtocolSimulationDataForm" type="reset" style="display:none;">
 
             <div style="display: block;">
                 <label><g:message code="numRequestsProjectedLbl"/></label>
@@ -97,7 +97,7 @@ $("#testButton").click(function () {
 });
 
 
-$('#timeStampProtocolSinulationDataForm').submit(function(event){
+$('#timeStampProtocolSimulationDataForm').submit(function(event){
 	 event.preventDefault();
 
 	 var simulationData = {service:"timeStampSimulationService", status:"INIT_SIMULATION",
@@ -132,8 +132,8 @@ function isValidForm() {
 }
 
 function showErrorMsg(errorMsg) {
-	$("#timeStampProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#timeStampProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#timeStampProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#timeStampProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
 </r:script>

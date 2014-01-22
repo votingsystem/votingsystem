@@ -32,7 +32,7 @@ $("#simulationRunningDialog").dialog({
         		text:"<g:message code="acceptLbl"/>",
                	icons: { primary: "ui-icon-check"},
              	click:function() {
- 			   				$("#submitManifestProtocolSinulationDataForm").click() 	   	   			   				
+ 			   				$("#submitManifestProtocolSimulationDataForm").click()
  			        	}},
            {text:"<g:message code="cancelLbl"/>",
                	icons: { primary: "ui-icon-closethick"},

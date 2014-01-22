@@ -27,10 +27,11 @@ public class ServerInitializer implements Callable<ResponseVS> {
         this.serverType = serverType;
         this.serverURL = serverURL;
     }
-        
+
     @Override public ResponseVS call() throws Exception {
         logger.debug("call - serverType: " + serverType.toString());
-		ResponseVS responseVS =HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),ContentTypeVS.JSON);
+        ResponseVS responseVS = null;
+		responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             ActorVS actorVS = ActorVS.populate(new JSONObject(responseVS.getMessage()));
             if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
@@ -55,6 +56,14 @@ public class ServerInitializer implements Callable<ResponseVS> {
                         return new ResponseVS(ResponseVS.SC_ERROR, msg);
                     }
                     break;
+                case ActorVS.Type.TICKETS:
+                    responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+                            actorVS.getUrlTimeStampServer()),ContentTypeVS.JSON);
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                    ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+                    ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());
+                    break;
+
             }
             byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
             responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA,

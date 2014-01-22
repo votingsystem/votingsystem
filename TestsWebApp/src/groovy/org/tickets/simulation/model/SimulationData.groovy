@@ -38,6 +38,7 @@ class SimulationData {
 
     private String durationStr = null;
     private String backupRequestEmail = null;
+    private BigDecimal depositAmount;
 
     private UserBaseSimulationData userBaseSimulationData;
 
@@ -97,6 +98,9 @@ class SimulationData {
         }
         if (!dataJSON.isNull("eventId")) {
             simulationData.setEventId(dataJSON.getLong("eventId"));
+        }
+        if (dataJSON.containsKey("depositAmount")) {
+            simulationData.setDepositAmount(new BigDecimal(dataJSON.getLong("depositAmount")));
         }
 
         if (!dataJSON.isNull("backupRequestEmail")) {
@@ -294,4 +298,12 @@ class SimulationData {
         this.eventId = eventId;
     }
 
+
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
+    }
+
+    public void setDepositAmount(BigDecimal depositAmount) {
+        this.depositAmount = depositAmount;
+    }
 }

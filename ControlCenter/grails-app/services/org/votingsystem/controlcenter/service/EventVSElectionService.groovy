@@ -35,7 +35,7 @@ class EventVSElectionService {
 	def tagVSService
 	def signatureVSService
 	
-	List<String> administradoresSistema
+	List<String> systemAdmins
 	
 	ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
         log.debug("- saveEvent")
@@ -285,10 +285,10 @@ class EventVSElectionService {
 	
 	boolean isUserAdmin(String nif) {
 		log.debug("isUserAdmin - nif: ${nif}")
-		if(!administradoresSistema) {
-			administradoresSistema = Arrays.asList("${grailsApplication.config.VotingSystem.adminsDNI}".split(","))
+		if(!systemAdmins) {
+			systemAdmins = Arrays.asList("${grailsApplication.config.VotingSystem.adminsDNI}".split(","))
 		}
-		return administradoresSistema.contains(nif)
+		return systemAdmins.contains(nif)
 	}
 
 }

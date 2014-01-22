@@ -7,7 +7,7 @@
    	<r:require modules="textEditorPC"/>
 	<r:layoutResources />
 </head>
-<div id="manifestProtocolSinulationDataDialog" title="<g:message code="initManifestProtocolSimulationButton"/>"
+<div id="manifestProtocolSimulationDataDialog" title="<g:message code="initManifestProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -21,9 +21,9 @@
         </div>
     </div>
   	<div id="formDataDiv">
-   		<form id="manifestProtocolSinulationDataForm">
+   		<form id="manifestProtocolSimulationDataForm">
 			<input type="hidden" autofocus="autofocus" />
-			<input id="resetManifestProtocolSinulationDataForm" type="reset" style="display:none;">
+			<input id="resetManifestProtocolSimulationDataForm" type="reset" style="display:none;">
 
             <div style="display: block;">
                 <label><g:message code="numRequestsProjectedLbl"/></label>
@@ -140,12 +140,12 @@ allFields = $( [] ).add(dateFinish).add(manifestEditorDiv);
 var callerCallback
 
 
-function showManifestProtocolSinulationDataDialog(callback) {
-	$("#manifestProtocolSinulationDataDialog").dialog("open");
+function showManifestProtocolSimulationDataDialog(callback) {
+	$("#manifestProtocolSimulationDataDialog").dialog("open");
 	callerCallback = callback	
 }
 
-$('#manifestProtocolSinulationDataForm').submit(function(event){
+$('#manifestProtocolSimulationDataForm').submit(function(event){
 	event.preventDefault();
 
  	allFields.removeClass("formFieldError");   
@@ -216,8 +216,8 @@ function isValidForm() {
 }
 
 function showErrorMsg(errorMsg) {
-	$("#manifestProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#manifestProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#manifestProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#manifestProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
 </r:script>
