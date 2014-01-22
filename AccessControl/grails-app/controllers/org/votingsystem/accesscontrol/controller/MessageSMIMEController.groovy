@@ -1,6 +1,5 @@
 package org.votingsystem.accesscontrol.controller
 
-import org.servidordnie.persistencia.modelo.*
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS

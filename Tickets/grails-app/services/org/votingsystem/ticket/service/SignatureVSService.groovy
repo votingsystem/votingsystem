@@ -2,6 +2,7 @@ package org.votingsystem.ticket.service
 
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
+import org.votingsystem.model.ticket.MessageSMIME
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator

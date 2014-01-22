@@ -1,10 +1,6 @@
 package org.votingsystem.ticket.service
 
-import org.apache.xerces.parsers.DOMParser
-import org.apache.xerces.xni.parser.XMLDocumentFilter
-import org.cyberneko.html.HTMLConfiguration
-import org.cyberneko.html.filters.ElementRemover
-import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.ticket.MessageSMIME
 import org.votingsystem.model.ResponseVS
 
 /**

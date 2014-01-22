@@ -4,8 +4,11 @@
     <session-factory>
 
         <property name="hibernate.generate_statistics">true</property>
+
+        <mapping class="org.votingsystem.model.ticket.MessageSMIME" />
         <mapping class="org.votingsystem.model.ticket.TicketVS" />
         <mapping class="org.votingsystem.model.ticket.TicketVSBatchRequest" />
+        <mapping class="org.votingsystem.model.ticket.TicketVSProvider" />
         <mapping class="org.votingsystem.model.ticket.TransactionVS" />
         <mapping class="org.votingsystem.model.ticket.UserVSAccount" />
         <mapping class="org.votingsystem.model.UserVS" />

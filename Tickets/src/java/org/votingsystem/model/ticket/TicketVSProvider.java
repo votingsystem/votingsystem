@@ -14,11 +14,11 @@ import static javax.persistence.GenerationType.IDENTITY;
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 @Entity
-@Table(name="TicketProviderVS")
-@DiscriminatorValue("TicketProviderVS")
-public class TicketProviderVS extends ActorVS implements Serializable {
+@Table(name="TicketVSProvider")
+@DiscriminatorValue("TicketVSProvider")
+public class TicketVSProvider extends ActorVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(TicketProviderVS.class);
+    private static Logger log = Logger.getLogger(TicketVSProvider.class);
 
     public static final long serialVersionUID = 1L;
 
@@ -29,7 +29,7 @@ public class TicketProviderVS extends ActorVS implements Serializable {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    public static final String TAG = "TicketProviderVS";
+    public static final String TAG = "TicketVSProvider";
 
     public String getTicketRequestServiceURL() {
         return getServerURL() + "/ticket/request";

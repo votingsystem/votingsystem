@@ -3,7 +3,7 @@ package org.votingsystem.model.ticket;
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.ticket.MessageSMIME;
 
 import javax.persistence.*;
 import java.io.Serializable;
