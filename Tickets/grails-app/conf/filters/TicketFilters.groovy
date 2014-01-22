@@ -3,7 +3,7 @@ package filters
 import grails.converters.JSON
 import org.apache.http.HttpResponse
 import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ticket.MessageSMIME
+import org.votingsystem.model.MessageSMIME
 
 import javax.servlet.http.HttpServletResponseWrapper
 import java.security.cert.X509Certificate;

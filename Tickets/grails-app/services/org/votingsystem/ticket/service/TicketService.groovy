@@ -1,6 +1,6 @@
 package org.votingsystem.ticket.service
 
-import org.votingsystem.model.ticket.MessageSMIME
+import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 
 /**

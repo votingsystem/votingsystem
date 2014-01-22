@@ -183,6 +183,7 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
+VotingSystem.urlTimeStampServer='http://timestampserver.org:8080/TimeStampServer'
 VotingSystem.backupCopyPath='./VotingSystem/backups'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
 VotingSystem.keyStorePath='WEB-INF/cms/TicketServer.jks'

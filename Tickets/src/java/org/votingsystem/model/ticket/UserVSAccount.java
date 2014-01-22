@@ -5,7 +5,6 @@ import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.UserVS;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -29,7 +28,7 @@ public class UserVSAccount implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
 
 
-    @NotNull @NumberFormat(style= NumberFormat.Style.CURRENCY)
+    @NumberFormat(style= NumberFormat.Style.CURRENCY)
     private BigDecimal balance = null;
 
     @ManyToOne(fetch=FetchType.LAZY)

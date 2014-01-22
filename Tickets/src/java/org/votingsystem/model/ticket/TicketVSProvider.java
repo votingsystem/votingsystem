@@ -31,12 +31,6 @@ public class TicketVSProvider extends ActorVS implements Serializable {
 
     public static final String TAG = "TicketVSProvider";
 
-    public String getTicketRequestServiceURL() {
-        return getServerURL() + "/ticket/request";
-    }
 
-    public String getTicketDepositServiceURL() {
-        return getServerURL() + "/ticket/deposit";
-    }
 
 }

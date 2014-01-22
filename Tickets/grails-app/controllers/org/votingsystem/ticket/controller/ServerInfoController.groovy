@@ -2,6 +2,9 @@ package org.votingsystem.ticket.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.ActorVS
+import org.votingsystem.signature.util.CertUtil
+
+import java.security.cert.X509Certificate
 
 /**
  * @infoController Información de la aplicación
@@ -13,6 +16,7 @@ import org.votingsystem.model.ActorVS
 class ServerInfoController {
 
 	def timeStampService
+    def signatureVSService
     
 	/**
 	 * @httpMethod [GET]
@@ -21,7 +25,9 @@ class ServerInfoController {
 	 */
 	def index() {
         HashMap serverInfo = new HashMap()
-        serverInfo.certChainPEM = new String(timeStampService.getSigningCertChainPEMBytes())
+        X509Certificate serverCert = signatureVSService.getServerCert()
+        byte[] serverCertPEMBytes = CertUtil.getPEMEncoded (serverCert)
+        serverInfo.certChainPEM = new String(serverCertPEMBytes)
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.TIMESTAMP_SERVER.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"

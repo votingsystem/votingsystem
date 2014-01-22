@@ -1,4 +1,4 @@
-package org.votingsystem.controlcenter.service
+package org.votingsystem.ticket.service
 
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DERObject
@@ -14,12 +14,7 @@ import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.ActorVS
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils

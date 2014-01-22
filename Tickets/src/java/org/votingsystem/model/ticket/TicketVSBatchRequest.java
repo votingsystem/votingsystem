@@ -1,7 +1,7 @@
 package org.votingsystem.model.ticket;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.model.ticket.MessageSMIME;
+import org.votingsystem.model.MessageSMIME;
 
 import javax.persistence.*;
 import java.io.Serializable;

@@ -234,6 +234,14 @@ public class ActorVS implements Serializable {
         return serverURL + "/serverInfo";
     }
 
+    @Transient public String getTicketRequestServiceURL() {
+        return getServerURL() + "/ticket/request";
+    }
+
+    @Transient public String getTicketDepositServiceURL() {
+        return getServerURL() + "/ticket/deposit";
+    }
+
     @Transient public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();

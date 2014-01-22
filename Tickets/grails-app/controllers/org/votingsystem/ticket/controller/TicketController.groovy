@@ -2,7 +2,7 @@ package org.votingsystem.ticket.controller
 
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
-import org.votingsystem.model.ticket.MessageSMIME
+import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 
 class TicketController {
