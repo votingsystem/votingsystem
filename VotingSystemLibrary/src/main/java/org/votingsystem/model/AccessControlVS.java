@@ -55,14 +55,6 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/backupVS";
     }
 
-    @Transient public String getUserCertServiceURL() {
-        return getServerURL() + "/userVS";
-    }
-
-    @Transient public String getUserBaseInitServiceURL() {
-        return getServerURL() + "/userVS/prepareUserBaseData";
-    }
-
     @Transient public String getDownloadServiceURL(String param) {
         return getServerURL() + "/backupVS/download/" + param;
     }

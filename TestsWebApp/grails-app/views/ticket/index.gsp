@@ -12,7 +12,7 @@
 			<div style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">
 
                 <votingSystem:simpleButton id="initUserBaseDataButton"
-                        onclick="openWindow('${createLink(controller: 'electionProtocolSimulation', action:'inputData', absolute:true)}')"
+                        onclick="openWindow('${createLink(controller: 'ticket', action:'initUserBaseData', absolute:true)}')"
                         style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="initUserBaseDataButton"/>
                 </votingSystem:simpleButton>

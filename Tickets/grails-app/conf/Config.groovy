@@ -85,16 +85,18 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+VotingSystemEnvironment="DEVELOPMENT"
+
 environments {
 
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "http://192.168.1.5:8080/TicketServer"
+        grails.serverURL = "http://tickets:8080/Tickets"
     }
 
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://192.168.1.8:8080/TicketServer"
+        grails.serverURL = "http://tickets:8080/Tickets"
     }
 
 }

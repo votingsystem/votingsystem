@@ -15,5 +15,16 @@ class UrlMappings {
             controller = "ticket"
             action = [POST:"processRequestFileMap"]
         }
+
+        "/certificateVS/ticket/hashHex/$hashHex" {
+            controller = "certificateVS"
+            action = "voteVS"
+        }
+
+        "/userVS" {
+            controller = "userVS"
+            action = [POST:"save"]
+        }
+
 	}
 }

@@ -98,7 +98,8 @@ class WebSocketService {
 	 * references to services from grailsApplication to avoid circular references
 	 */
 	public void processRequest(JSONObject messageJSON) {
-		if(messageJSON.service) {
+		String message = null;
+        if(messageJSON.service) {
 			Object targetService = grailsApplication.mainContext.getBean(messageJSON.service)
 			if(!targetService.metaClass.respondsTo(targetService, 'processRequest').isEmpty()) {
 				try {
@@ -106,8 +107,20 @@ class WebSocketService {
 				} catch(Exception ex) {
 					log.error(ex.getMessage() + messageJSON.toString(), ex);
 				}
-			} else log.error("Target service '${messageJSON.service}' doesn't implements 'processRequest'")
-		} else log.error("Message without target service '${messageJSON.service}'")
+			} else {
+                message = "Target service '${messageJSON.service}' doesn't implements 'processRequest'"
+                log.error(message)
+                messageJSON.status = ResponseVS.SC_ERROR
+                messageJSON.message = message
+                processResponse(messageJSON)
+            }
+		} else {
+            message = "Message without target service '${messageJSON.service}'"
+            log.error(message)
+            messageJSON.status = ResponseVS.SC_ERROR
+            messageJSON.message = message
+            processResponse(messageJSON)
+        }
 	}
 
 	public void processResponse(JSONObject messageJSON) {

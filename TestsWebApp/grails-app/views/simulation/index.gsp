@@ -12,37 +12,44 @@
 			<div style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">
 
                 <votingSystem:simpleButton id="initElectionProtocolSimulationButton"
-                                style="margin:15px 20px 0px 0px; width:400px;">
+                        onclick="openWindow('${createLink(controller: 'electionProtocolSimulation', action:'inputData', absolute:true)}')"
+                        style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="initElectionProtocolSimulationButton"/>
                 </votingSystem:simpleButton>
 
                 <votingSystem:simpleButton id="initManifestProtocolSimulationButton"
-					            style="margin:15px 20px 0px 0px; width:400px;">
+                        onclick="openWindow('${createLink(controller: 'manifestProtocolSimulation', action:'inputData', absolute:true)}')"
+                        style="margin:15px 20px 0px 0px; width:400px;">
 						<g:message code="initManifestProtocolSimulationButton"/>
 				</votingSystem:simpleButton>
 				
 				<votingSystem:simpleButton id="initClaimProtocolSimulationButton"
-					            style="margin:15px 20px 0px 0px; width:400px;">
+                        onclick="openWindow('${createLink(controller: 'claimProtocolSimulation', action:'inputData', absolute:true)}')"
+                        style="margin:15px 20px 0px 0px; width:400px;">
 						<g:message code="initClaimProtocolSimulationButton"/>
 				</votingSystem:simpleButton>
 
                 <votingSystem:simpleButton id="initTimeStampProtocolSimulationButton"
-                               style="margin:15px 20px 0px 0px; width:400px;">
+                        onclick="openWindow('${createLink(controller: 'timeStampSimulation', action:'inputData', absolute:true)}')"
+                        style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="initTimeStampProtocolSimulationButton"/>
                 </votingSystem:simpleButton>
 
                 <votingSystem:simpleButton id="initMultiSignProtocolSimulationButton"
-                               style="margin:15px 20px 0px 0px; width:400px;">
+                        onclick="openWindow('${createLink(controller: 'multiSignSimulation', action:'inputData', absolute:true)}')"
+                        style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="initMultiSignProtocolSimulationButton"/>
                 </votingSystem:simpleButton>
 
                 <votingSystem:simpleButton id="initEncryptionProtocolSimulationButton"
-                               style="margin:15px 20px 0px 0px; width:400px;">
+                        onclick="openWindow('${createLink(controller: 'encryptionSimulation', action:'inputData', absolute:true)}')"
+                        style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="initEncryptionProtocolSimulationButton"/>
                 </votingSystem:simpleButton>
 
 
-				<votingSystem:simpleButton id="simulationRunningButton" style="margin:15px 20px 0px 0px; width:400px;">
+				<votingSystem:simpleButton id="simulationRunningButton" style="margin:15px 20px 0px 0px; width:400px;"
+                        onclick="showSimulationRunningDialog('Mensaje de la página principal');">
 						TEST
 				</votingSystem:simpleButton>
 				
@@ -55,67 +62,19 @@
 	</body>
 	<r:script>
 
+		$(function() { });
 
-		$(function() {
+        function openWindow(targetURL) {
+            var width = 1000
+            var height = 800
+            var left = (screen.width/2) - (width/2);
+            var top = (screen.height/2) - (height/2);
+            var title = ''
 
-		    $("#initElectionProtocolSimulationButton").click(function() {
-				console.log("initElectionProtocolSimulationButton.click")
-				var targetURL = "${createLink(controller: 'electionProtocolSimulation', action:'inputData', absolute:true)}"
-				openWindow(targetURL)
-			 })
+            var newWindow =  window.open(targetURL, title, 'toolbar=no, scrollbars=yes, resizable=yes, '  +
+                    'width='+ width +
+                    ', height='+ height  +', top='+ top +', left='+ left + '');
+        }
 
-			$("#initManifestProtocolSimulationButton").click(function() {	
-				console.log("initManifestProtocolSimulationButton.click")
-				var targetURL = "${createLink(controller: 'manifestProtocolSimulation',  action:'inputData', absolute:true)}"
- 				openWindow(targetURL)
-			 })
-			 
- 			$("#initClaimProtocolSimulationButton").click(function() {	
-				console.log("initClaimProtocolSimulationButton.click")
-				var targetURL = "${createLink(controller: 'claimProtocolSimulation', action:'inputData', absolute:true)}"
-				openWindow(targetURL)
-			 })
-
-
-            $("#initTimeStampProtocolSimulationButton").click(function() {
-				console.log("initTimeStampProtocolSimulationButton.click")
-				var targetURL = "${createLink(controller: 'timeStampSimulation', action:'inputData', absolute:true)}"
-				openWindow(targetURL)
-			 })
-
-
-            $("#initMultiSignProtocolSimulationButton").click(function() {
-				console.log("initTimeStampProtocolSimulationButton.click")
-				var targetURL = "${createLink(controller: 'multiSignSimulation', action:'inputData', absolute:true)}"
-				openWindow(targetURL)
-			 })
-
-            $("#initEncryptionProtocolSimulationButton").click(function() {
-				console.log("initEncryptionProtocolSimulationButton.click")
-				var targetURL = "${createLink(controller: 'encryptionSimulation', action:'inputData', absolute:true)}"
-				openWindow(targetURL)
-			 })
-
-
-
-
-            function openWindow(targetURL) {
-                var width = 1000
-  				var height = 800
-				var left = (screen.width/2) - (width/2);
-  				var top = (screen.height/2) - (height/2);
-  				var title = ''
-
-  				var newWindow =  window.open(targetURL, title, 'toolbar=no, scrollbars=yes, resizable=yes, '  +
-  					'width='+ width +
-  					', height='+ height  +', top='+ top +', left='+ left + '');
-            }
-
- 			$("#simulationRunningButton").click(function() {	
-				console.log("simulationRunningButton")	 	
-				showSimulationRunningDialog("Mensaje de la página principal");
-			 })
-			 
-		});
 	</r:script>
 </html>

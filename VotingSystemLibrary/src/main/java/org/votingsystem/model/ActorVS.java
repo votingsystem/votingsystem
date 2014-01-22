@@ -27,7 +27,7 @@ public class ActorVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, TIMESTAMP_SERVER;}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, TICKETS, TIMESTAMP_SERVER;}
 
     public enum State { SUSPENDED, RUNNING, PAUSED;}
 
@@ -240,6 +240,14 @@ public class ActorVS implements Serializable {
 
     @Transient public String getTicketDepositServiceURL() {
         return getServerURL() + "/ticket/deposit";
+    }
+
+    @Transient public String getUserCertServiceURL() {
+        return getServerURL() + "/userVS";
+    }
+
+    @Transient public String getUserBaseInitServiceURL() {
+        return getServerURL() + "/userVS/prepareUserBaseData";
     }
 
     @Transient public Map getDataMap() {

@@ -50,7 +50,7 @@ class RepresentativeController {
 		String nif = NifUtils.validate(params.nif)
 		if(!nif) {
             return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'nifWithErrors', args:[params.nif]))]
+                    message(code: 'NIFWithErrorsMsg', args:[params.nif]))]
 		} else {
             UserVS representative
             UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }
@@ -135,7 +135,7 @@ class RepresentativeController {
 		String nif = NifUtils.validate(params.nif)
 		if(!nif) {
             return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'nifWithErrors', args:[params.nif]))]
+                    message(code: 'NIFWithErrorsMsg', args:[params.nif]))]
 		}
 		UserVS representative
 		UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }

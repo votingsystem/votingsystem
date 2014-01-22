@@ -167,14 +167,14 @@ class  SignatureVSService {
 				fileSystemCerts.addAll(CertUtil.fromPEMToX509CertCollection(FileUtils.getBytesFromFile(caFile)));
 			}
 			for(X509Certificate x509Certificate:fileSystemCerts) {
-				long numSerie = x509Certificate.getSerialNumber().longValue()
-				log.debug "initCertAuthorities - checking - ${x509Certificate?.getSubjectDN()} --- numSerie:${numSerie}"
+				long serialNumber = x509Certificate.getSerialNumber().longValue()
+				log.debug "initCertAuthorities - checking - ${x509Certificate?.getSubjectDN()} --- serialNumber:${serialNumber}"
                 CertificateVS certificate = null
-				CertificateVS.withTransaction { certificate = CertificateVS.findBySerialNumber(numSerie)}
+				CertificateVS.withTransaction { certificate = CertificateVS.findBySerialNumber(serialNumber)}
 				if(!certificate) {
 					boolean isRoot = CertUtil.isSelfSigned(x509Certificate)
 					certificate = new CertificateVS(isRoot:isRoot, type:CertificateVS.Type.CERTIFICATE_AUTHORITY,
-						state:CertificateVS.State.OK, content:x509Certificate.getEncoded(), serialNumber:numSerie,
+						state:CertificateVS.State.OK, content:x509Certificate.getEncoded(), serialNumber:serialNumber,
                         validFrom:x509Certificate.getNotBefore(), validTo:x509Certificate.getNotAfter())
 					certificate.save()
 					log.debug "initCertAuthorities - ADDED NEW CA CERT certificateVS.id:'${certificate?.id}'"
@@ -246,10 +246,10 @@ class  SignatureVSService {
 		}
 	}
 	
-	private void cancelCert(long numSerieCert) {
-		log.debug "cancelCert - numSerieCert: ${numSerieCert}"
+	private void cancelCert(long serialNumberCert) {
+		log.debug "cancelCert - serialNumberCert: ${serialNumberCert}"
 		CertificateVS.withTransaction {
-			CertificateVS certificate = CertificateVS.findWhere(serialNumber:numSerieCert)
+			CertificateVS certificate = CertificateVS.findWhere(serialNumber:serialNumberCert)
 			if(certificate) {
 				log.debug "Comprobando certificateVS.id '${certificate?.id}'  --- "
 				if(CertificateVS.State.OK == certificate.state) {
@@ -258,7 +258,7 @@ class  SignatureVSService {
 					certificate.save()
 					log.debug "cancelado certificateVS '${certificate?.id}'"
 				} else log.debug "El certificateVS.id '${certificate?.id}' ya estaba cancelado"
-			} else log.debug "No hay ningún certificateVS con num. serie '${numSerieCert}'"
+			} else log.debug "No hay ningún certificateVS con num. serie '${serialNumberCert}'"
 		}
 	}
 	
@@ -345,9 +345,9 @@ class  SignatureVSService {
 		}
 	}
 	
-	public CertificateVS getCACertificate(long numSerie) {
-		log.debug("getCACertificate - numSerie: '${numSerie}'")
-		return trustedCertsHashMap.get(numSerie)
+	public CertificateVS getCACertificate(long serialNumber) {
+		log.debug("getCACertificate - serialNumber: '${serialNumber}'")
+		return trustedCertsHashMap.get(serialNumber)
 	}
 		
 	public ResponseVS validateSMIME(SMIMEMessageWrapper messageWrapper, Locale locale) {
