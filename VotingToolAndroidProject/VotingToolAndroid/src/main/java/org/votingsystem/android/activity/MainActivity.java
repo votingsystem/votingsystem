@@ -71,7 +71,7 @@ public class MainActivity extends FragmentActivity {
                     getString(R.string.loading_data_msg));
         }
         if (savedInstanceState != null) return;
-        ResponseVS responseVS = (ResponseVS) getIntent().getSerializableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(responseVS != null) showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                 responseVS.getNotificationMessage());
         else if(uriData != null || contextVS.getAccessControl() == null) runAppService(uriData);
