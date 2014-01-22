@@ -17,7 +17,7 @@ import org.votingsystem.signature.smime.*
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-class AccessControlFilters {
+class TicketFilters {
 
     def signatureVSService
     def grailsApplication
@@ -61,7 +61,7 @@ class AccessControlFilters {
                         if(contentTypeVS == null) {
                             return printOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                                     messageSource.getMessage('unknownContentType', [keySplitted[1]].toArray(),
-                                    request.getLocale())))
+                                            request.getLocale())))
                         }
                         ResponseVS responseVS = null
                         SMIMEMessageWrapper smimeMessageReq = null
@@ -255,7 +255,7 @@ class AccessControlFilters {
     }
 
     private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType,
-            Map params, HttpServletRequest request) {
+                                           Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
             log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale());

@@ -1,4 +1,4 @@
-package org.votingsystem.accesscontrol.controller
+package org.votingsystem.ticket.controller
 
 import org.servidordnie.persistencia.modelo.*
 import org.votingsystem.model.ContentTypeVS

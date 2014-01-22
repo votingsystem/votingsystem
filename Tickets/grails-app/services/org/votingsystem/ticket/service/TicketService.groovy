@@ -1,4 +1,4 @@
-package org.votingsystem.accesscontrol.service
+package org.votingsystem.ticket.service
 
 import org.apache.xerces.parsers.DOMParser
 import org.apache.xerces.xni.parser.XMLDocumentFilter
