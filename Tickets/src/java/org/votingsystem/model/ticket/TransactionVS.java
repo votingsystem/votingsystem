@@ -1,11 +1,13 @@
 package org.votingsystem.model.ticket;
 
 import org.apache.log4j.Logger;
+import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -22,25 +24,27 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-
-    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT;}
+    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-
-    @Column(name="IBAN") private String IBAN;
-
+    @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;
 
     @OneToOne private MessageSMIME cancellationSMIME;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="transactionParent") private TransactionVS transactionParent;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
+
+    @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -52,14 +56,6 @@ public class TransactionVS  implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getIBAN() {
-        return IBAN;
-    }
-
-    public void setIBAN(String IBAN) {
-        this.IBAN = IBAN;
     }
 
     public MessageSMIME getMessageSMIME() {
@@ -108,6 +104,30 @@ public class TransactionVS  implements Serializable {
 
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public TransactionVS getTransactionParent() {
+        return transactionParent;
+    }
+
+    public void setTransactionParent(TransactionVS transactionParent) {
+        this.transactionParent = transactionParent;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
 }

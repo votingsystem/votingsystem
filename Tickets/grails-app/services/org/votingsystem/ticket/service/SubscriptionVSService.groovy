@@ -19,7 +19,7 @@ class SubscriptionVSService {
         CertificateVS certificate = null;
 		if(!userVS.getNif()) {
 			msg = messageSource.getMessage('userDataWithErrors', null, locale)
-			log.error("- checkUser - ${msg}")
+			log.error("checkUser - ${msg}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR)
 		}
 		X509Certificate x509Cert = userVS.getCertificate()

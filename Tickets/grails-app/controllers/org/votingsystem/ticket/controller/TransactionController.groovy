@@ -1,11 +1,13 @@
 package org.votingsystem.ticket.controller
 
+import grails.converters.JSON
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 
 class TransactionController {
 
     def userVSService
+    def transactionVSService
 
     /**
      * Servicio que recibe los asignaciones de los usuarios en documentos SMIME
@@ -22,8 +24,7 @@ class TransactionController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        boolean isUserAdmin = userVSService.isUserAdmin(messageSMIMEReq.getUserVS().getNif())
-
+        return [responseVS:transactionVSService.processDeposit(messageSMIMEReq, request.locale)]
     }
 
 }

@@ -155,6 +155,8 @@ class TicketFilters {
                         messageSMIMEReq.getSmimeMessage().setMessageID(
                                 "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
                         messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
+                        if(responseVS.type) messageSMIMEReq.type = responseVS.type
+                        if(ResponseVS.SC_OK != responseVS.statusCode) messageSMIMEReq.reason = responseVS.message
                         messageSMIMEReq.save(flush:true)
                     }
                     log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"
@@ -258,7 +260,7 @@ class TicketFilters {
                                            Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
             log.debug "processSMIMERequest - isValidSignature"
-            ResponseVS certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale());
+            ResponseVS certValidationResponse = null;
             switch(contenType) {
                 case ContentTypeVS.TICKET:
                     certValidationResponse = signatureVSService.validateSMIMETicket(smimeMessageReq, request.getLocale())

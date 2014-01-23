@@ -24,26 +24,6 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity @Table(name="UserVS") @DiscriminatorValue("UserVS")
 public class UserVS implements Serializable {
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 	
     private static final long serialVersionUID = 1L;
@@ -54,6 +34,8 @@ public class UserVS implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
 	@Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
     @Column(name="nif", nullable=false) private String nif;
+
+    @Column(name="IBAN") private String IBAN;
 
     @Column(name="name") private String name;
 
@@ -94,6 +76,14 @@ public class UserVS implements Serializable {
     @Transient private KeyStore keyStore;
 
     public UserVS() {}
+
+    public String getIBAN() {
+        return IBAN;
+    }
+
+    public void setIBAN(String IBAN) {
+        this.IBAN = IBAN;
+    }
 
     public UserVS(String nif) { this.nif = nif; }
 
@@ -256,6 +246,26 @@ public class UserVS implements Serializable {
     
     public void setSignerInformation(SignerInformation signer) {
         this.signerInformation = signer;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Transient public String getSignatureBase64() {

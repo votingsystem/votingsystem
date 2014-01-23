@@ -32,7 +32,12 @@ public class TicketVS implements Serializable  {
     @Column(name="originHashCertVS") private String originHashCertVS;
     @Column(name="ticketProviderURL") private String ticketProviderURL;
 
-    @OneToOne private CertificateVS certificateVS;
+    @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
+    @Column(name="content", nullable=false) @Lob private byte[] content;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
+
     @OneToOne private MessageSMIME cancelMessage;
     @OneToOne private MessageSMIME messageSMIME;
 
@@ -82,14 +87,6 @@ public class TicketVS implements Serializable  {
         this.originHashCertVS = originHashCertVS;
     }
 
-    public CertificateVS getCertificateVS() {
-        return certificateVS;
-    }
-
-    public void setCertificateVS(CertificateVS certificateVS) {
-        this.certificateVS = certificateVS;
-    }
-
     public MessageSMIME getCancelMessage() {
         return cancelMessage;
     }
@@ -121,5 +118,46 @@ public class TicketVS implements Serializable  {
     public void setValidTo(Date validTo) {
         this.validTo = validTo;
     }
+
+    public Long getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(Long serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public CertificateVS getAuthorityCertificateVS() {
+        return authorityCertificateVS;
+    }
+
+    public void setAuthorityCertificateVS(CertificateVS authorityCertificateVS) {
+        this.authorityCertificateVS = authorityCertificateVS;
+    }
+
 
 }
