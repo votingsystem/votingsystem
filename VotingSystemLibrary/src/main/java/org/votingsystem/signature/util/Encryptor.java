@@ -63,6 +63,32 @@ public class Encryptor {
         return new ResponseVS(ResponseVS.SC_OK, result);
     }
 
+    public static byte[] encryptMessage(byte[] text, X509Certificate receiverCert,
+                                        Header... headers) throws Exception {
+        logger.debug(" - encryptMessage(...) - ");
+        MimeMessage mimeMessage = new MimeMessage(ContextVS.MAIL_SESSION);
+        mimeMessage.setText(new String(text));
+        // set the Date: header
+        //mimeMessage.setSentDate(new Date());
+        if (headers != null) {
+            for(Header header : headers) {
+                if(header != null) mimeMessage.setHeader(header.getName(), header.getValue());
+            }
+        }
+        SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+        encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+                receiverCert).setProvider(ContextVS.PROVIDER));
+        /* Encrypt the message */
+        MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+                new JceCMSContentEncryptorBuilder(
+                        CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        encryptedPart.writeTo(baos);
+        byte[] result = baos.toByteArray();
+        baos.close();
+        return result;
+    }
+
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
@@ -275,32 +301,6 @@ public class Encryptor {
                 encryptedMessageBytes, publicKey, receiverPrivateKey));
         return new SMIMEMessageWrapper(inputStream);
    }
-    
-    public static byte[] encryptMessage(byte[] text, X509Certificate receiverCert, 
-            Header... headers) throws Exception {
-        logger.debug(" - encryptMessage(...) - ");
-        MimeMessage mimeMessage = new MimeMessage(ContextVS.MAIL_SESSION);
-        mimeMessage.setText(new String(text));
-        // set the Date: header
-        //mimeMessage.setSentDate(new Date());
-        if (headers != null) {
-            for(Header header : headers) {
-                if(header != null) mimeMessage.setHeader(header.getName(), header.getValue());
-            }
-        }
-        SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-        encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-                receiverCert).setProvider(ContextVS.PROVIDER));
-        /* Encrypt the message */
-        MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
-                new JceCMSContentEncryptorBuilder(
-                CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        encryptedPart.writeTo(baos);
-        byte[] result = baos.toByteArray();
-        baos.close();
-        return result;
-    }
 
     /**
      * helper method to decrypt SMIME signed messages

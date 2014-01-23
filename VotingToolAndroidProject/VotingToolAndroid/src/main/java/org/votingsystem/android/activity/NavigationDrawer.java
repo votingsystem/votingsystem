@@ -42,6 +42,7 @@ import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
 import org.votingsystem.android.ui.SingleOptionPagerAdapter;
+import org.votingsystem.android.ui.TicketPagerAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ScreenUtils;
@@ -67,6 +68,7 @@ public class NavigationDrawer extends ActionBarActivity {
     //private RepresentativeNavigationPagerAdapter representativePagerAdapter;
     private SingleOptionPagerAdapter singleOptionPagerAdapter;
     private EventNavigationPagerAdapter pagerAdapter;
+    private TicketPagerAdapter ticketAdapter;
 
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -199,7 +201,6 @@ public class NavigationDrawer extends ActionBarActivity {
                     mViewPager.setAdapter(pagerAdapter);
                 }
                 break;
-            case TICKETS:
             case RECEIPTS:
             case REPRESENTATIVES:
                 if(singleOptionPagerAdapter == null) singleOptionPagerAdapter=
@@ -210,6 +211,14 @@ public class NavigationDrawer extends ActionBarActivity {
                 /*if(mViewPager.getAdapter() instanceof EventNavigationPagerAdapter) {
                     mViewPager.setAdapter(representativePagerAdapter);
                 }*/
+                break;
+            case TICKETS:
+                if(childPosition == null) return;
+                if(ticketAdapter == null) ticketAdapter = new TicketPagerAdapter(
+                        getSupportFragmentManager(), mViewPager);
+                if(!(mViewPager.getAdapter() instanceof  TicketPagerAdapter)) {
+                    mViewPager.setAdapter(ticketAdapter);
+                }
                 break;
         }
         mDrawerLayout.closeDrawer(expListView);

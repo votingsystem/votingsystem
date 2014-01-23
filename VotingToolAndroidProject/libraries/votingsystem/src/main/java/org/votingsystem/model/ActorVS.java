@@ -1,8 +1,10 @@
 package org.votingsystem.model;
 
+import android.util.Log;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.StringUtils;
-
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
@@ -17,11 +19,20 @@ public class ActorVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Type {CONTROL_CENTER, ACCESS_CONTROL}
+    public EnvironmentVS getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(EnvironmentVS environment) {
+        this.environment = environment;
+    }
+
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, TICKETS, TIMESTAMP_SERVER;}
 
     public enum State {CANCELLED, ACTIVE, PAUSED, RUNNING}
 
     private Long id;
+    private EnvironmentVS environment;
     private String serverURL;
     private String name;
     private String urlTimeStampServer;
@@ -156,4 +167,49 @@ public class ActorVS implements java.io.Serializable {
     	return timeStampCert;
     }
 
+    public static String getServerInfoURL (String serverURL) {
+        return StringUtils.checkURL(serverURL) + "/serverInfo";
+    }
+
+    public static ActorVS parse(JSONObject actorVSJSON) throws Exception {
+        JSONObject jsonObject = null;
+        JSONArray jsonArray;
+        Type serverType = Type.valueOf(actorVSJSON.getString("serverType"));
+        ActorVS actorVS = null;
+        switch(serverType) {
+            case ACCESS_CONTROL:
+                actorVS = new AccessControlVS();
+                break;
+            case CONTROL_CENTER:
+                actorVS = new ControlCenterVS();
+                break;
+            case TICKETS:
+                actorVS = new TicketServer();
+                break;
+            case TIMESTAMP_SERVER:
+                actorVS = new ActorVS();
+                break;
+        }
+        actorVS.setType(serverType);
+        if (actorVSJSON.has("urlBlog")) actorVS.setUrlBlog(actorVSJSON.getString("urlBlog"));
+        if (actorVSJSON.has("serverURL")) actorVS.setServerURL(actorVSJSON.getString("serverURL"));
+        if (actorVSJSON.has("name")) actorVS.setName(actorVSJSON.getString("name"));
+        if (actorVSJSON.has("urlTimeStampServer")) actorVS.setUrlTimeStampServer(
+                actorVSJSON.getString("urlTimeStampServer"));
+        if (actorVSJSON.has("environmentMode")) actorVS.setEnvironment(EnvironmentVS.valueOf(
+                actorVSJSON.getString("environmentMode")));
+        if (actorVSJSON.has("certChainPEM")) {
+            Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
+                    actorVSJSON.getString("certChainPEM").getBytes());
+            actorVS.setCertChain(certChain);
+            X509Certificate serverCert = certChain.iterator().next();
+            Log.d(TAG + ".getActorConIP(..) ", " - actorVS Cert: " +
+                    serverCert.getSubjectDN().toString());
+            actorVS.setCertificate(serverCert);
+        }
+        if (actorVSJSON.has("timeStampCertPEM")) {
+            actorVS.setTimeStampCertPEM(actorVSJSON.getString("timeStampCertPEM"));
+        }
+        return actorVS;
+    }
 }

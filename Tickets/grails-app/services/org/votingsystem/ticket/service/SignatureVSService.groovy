@@ -453,6 +453,18 @@ class  SignatureVSService {
         }
     }
 
+    public ResponseVS encryptMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
+        log.debug("--- - encryptMessage(...) - ");
+        try {
+            return getEncryptor().encryptMessage(bytesToEncrypt, receiverCert);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */

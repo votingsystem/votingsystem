@@ -39,4 +39,11 @@ public class TicketServer extends ActorVS implements Serializable {
         return getServerURL() + "/transaction/deposit";
     }
 
+    public String getTicketRequestServiceURL() {
+        return getServerURL() + "/ticket/request";
+    }
+
+    public String getTicketDepositServiceURL() {
+        return getServerURL() + "/ticket/deposit";
+    }
 }

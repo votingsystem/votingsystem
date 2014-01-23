@@ -54,6 +54,9 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int PENDING_CHILD_POSITION         = 1;
     public static final int CLOSED_CHILD_POSITION          = 2;
 
+    public static final int TICKET_USER_INFO_POSITION      = 0;
+    public static final int TICKET_LIST_POSITION           = 1;
+
     public enum GroupPosition {
         VOTING(VOTING_GROUP_POSITION, R.drawable.poll_22, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
@@ -67,7 +70,8 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         RECEIPTS(RECEIPTS_GROUP_POSITION, R.drawable.receipt_32, SubSystemVS.RECEIPTS,
                 TypeVS.RECEIPT, new ArrayList<ChildPosition>()),
         TICKETS(TICKETS_GROUP_POSITION, R.drawable.euro_24, SubSystemVS.TICKETS,
-                 TypeVS.TICKET, new ArrayList<ChildPosition>());
+                TypeVS.TICKET, Arrays.asList(ChildPosition.TICKET_USER_INFO,
+                ChildPosition.TICKET_LIST));
 
         int position;
         int logo;
@@ -148,7 +152,11 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     }
 
     public enum ChildPosition{OPEN(OPEN_CHILD_POSITION), PENDING(PENDING_CHILD_POSITION),
-        CLOSED(CLOSED_CHILD_POSITION);
+        CLOSED(CLOSED_CHILD_POSITION), TICKET_USER_INFO(TICKET_USER_INFO_POSITION),
+        TICKET_LIST(TICKET_LIST_POSITION);
+
+        //public static final int TICKET_USER_INFO_POSITION
+        //public static final int TICKET_LIST_POSITION
 
         int position;
 
@@ -258,7 +266,6 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         voting.add(context.getString(R.string.pending_voting_lbl));
         voting.add(context.getString(R.string.closed_voting_lbl));
 
-
         List<String> manifests = new ArrayList<String>();
         manifests.add(context.getString(R.string.open_manifest_lbl));
         manifests.add(context.getString(R.string.pending_manifest_lbl));
@@ -269,6 +276,9 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         claims.add(context.getString(R.string.pending_claim_lbl));
         claims.add(context.getString(R.string.closed_claim_lbl));
 
+        List<String> tickets = new ArrayList<String>();
+        tickets.add(context.getString(R.string.ticket_user_info_lbl));
+        tickets.add(context.getString(R.string.tickets_list_lbl));
 
         listDataChild.put(listDataHeader.get(GroupPosition.VOTING.getPosition()), voting);
         listDataChild.put(listDataHeader.get(GroupPosition.MANIFESTS.getPosition()), manifests);
@@ -277,8 +287,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 new ArrayList<String>());
         listDataChild.put(listDataHeader.get(GroupPosition.RECEIPTS.getPosition()),
                 new ArrayList<String>());
-        listDataChild.put(listDataHeader.get(GroupPosition.TICKETS.getPosition()),
-                new ArrayList<String>());
+        listDataChild.put(listDataHeader.get(GroupPosition.TICKETS.getPosition()), tickets);
     }
 
 }

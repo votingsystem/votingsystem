@@ -361,5 +361,15 @@
     <string name="save_ticket_lbl">Guardar Ticket</string>
     <string name="delete_ticket_lbl">Borrar Ticket</string>
     <string name="share_ticket_lbl">Compartir Ticket</string>
+    <string name="ticket_user_info_lbl">Información del usuario</string>
+    <string name="transaction_button">Relaizar transacción</string>
+    <string name="empty_ticket_user_info_caption">Faltan los datos del usuario</string>
+    <string name="empty_ticket_user_info">Para ver los datos de usuario debe hacer una consulta en el sistema</string>
+    <string name="update_signers_info_lbl">Actualizar datos</string>
+    <string name="send_message_lbl">Enviar mensaje</string>
+    <string name="update_user_info_pin_msg">Para obtener los datos necesita enviar una solicitud firmada</string>
+    <string name="ticket_user_info_request_msg_subject">Solicitud de información de cuentas</string>
+    <string name="ticket_account_amount_info_lbl"><![CDATA[Dispone de <b>\'%1$s\'euros</b> en caja]]></string>
+    <string name="ticket_cash_amount_info_lbl"><![CDATA[Dispone de <b>\'%1$s\'euros</b> en efectivo en su móvil]]></string>
 
 </resources>

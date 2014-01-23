@@ -278,7 +278,7 @@ public class EventVS implements Serializable {
     }
 
     public JSONObject getSignatureContentJSON() throws JSONException {
-        Log.d(TAG + ".getSignatureData(...)", "");
+
         Map<String, Object> map = new HashMap<String, Object>();
         if(accessControl != null) {
             Map<String, Object> accessControlMap = new HashMap<String, Object>();

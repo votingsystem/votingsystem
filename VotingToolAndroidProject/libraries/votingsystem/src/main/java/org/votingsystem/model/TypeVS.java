@@ -39,6 +39,7 @@ public enum TypeVS {
     VOTING_PUBLISHING,
 
     TICKET,
+    TICKET_USER_INFO,
 
     RECEIPT;
 }

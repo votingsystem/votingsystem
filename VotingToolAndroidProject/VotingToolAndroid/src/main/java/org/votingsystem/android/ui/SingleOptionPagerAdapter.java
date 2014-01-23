@@ -48,9 +48,6 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
             case RECEIPTS:
                 selectedFragment = new ReceiptGridFragment();
                 break;
-            case TICKETS:
-                selectedFragment = new TicketGridFragment();
-                break;
         }
         Bundle args = new Bundle();
         args.putString(SearchManager.QUERY, searchQuery);

@@ -155,26 +155,11 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
     }
 
     public Drawable getLogo(Context context) {
-        switch (selectedGroup) {
-            case CLAIMS: return context.getResources().getDrawable(R.drawable.filenew_22);
-            case MANIFESTS: return context.getResources().getDrawable(R.drawable.manifest_22);
-            case VOTING: return context.getResources().getDrawable(R.drawable.poll_22);
-            case REPRESENTATIVES:
-                return context.getResources().getDrawable(R.drawable.system_users_22);
-            default:
-                return context.getResources().getDrawable(R.drawable.mail_mark_unread_22);
-        }
+        return context.getResources().getDrawable(selectedGroup.getLogo());
     }
 
     @Override public int getCount() {
-        switch(selectedGroup) {
-            case CLAIMS: return GroupPosition.CLAIMS.getChildList().size();
-            case MANIFESTS: return GroupPosition.MANIFESTS.getChildList().size();
-            case VOTING:return GroupPosition.VOTING.getChildList().size();
-            default:
-                Log.d(TAG + ".getCount(...)", " system without pages: " + selectedGroup);
-                return 0;
-        }
+        return selectedGroup.getChildList().size();
     }
 
 }

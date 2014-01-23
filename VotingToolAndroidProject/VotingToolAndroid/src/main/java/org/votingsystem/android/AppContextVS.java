@@ -8,17 +8,21 @@ import android.util.Log;
 import com.itextpdf.text.Context_iTextVS;
 
 import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
@@ -39,8 +43,10 @@ public class AppContextVS extends Application {
     public static final String TAG = "AppContextVS";
 
     private State state = State.WITHOUT_CSR;
+    private String ticketServerURL;
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
+    private TicketServer ticketServer;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private OperationVS operationVS = null;
@@ -52,11 +58,18 @@ public class AppContextVS extends Application {
         try {
             Context_iTextVS.init(getApplicationContext());
             VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+            Properties props = new Properties();
+            props.load(getAssets().open("VotingSystem.properties"));
+            ticketServerURL = props.getProperty(ContextVS.TICKET_SERVER_URL);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
 	}
 
+
+    public String getTicketServerURL() {
+        return ticketServerURL;
+    }
 
     public String getHostID() {
         return android.os.Build.ID;
@@ -141,4 +154,11 @@ public class AppContextVS extends Application {
         return controlCenter;
     }
 
+    public TicketServer getTicketServer() {
+        return ticketServer;
+    }
+
+    public void setTicketServer(TicketServer ticketServer) {
+        this.ticketServer = ticketServer;
+    }
 }

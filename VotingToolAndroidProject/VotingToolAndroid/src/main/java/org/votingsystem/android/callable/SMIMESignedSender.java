@@ -5,6 +5,7 @@ import android.util.Log;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -89,9 +90,15 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                     PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
                     Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
                     PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
-                    SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
-                            responseVS.getMessageBytes(), publicKey, privateKey);
-                    responseVS.setSmimeMessage(signedMessage);
+                    if(responseVS.getContentType().isSigned()) {
+                        SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
+                                responseVS.getMessageBytes(), publicKey, privateKey);
+                        responseVS.setSmimeMessage(signedMessage);
+                    } else {
+                        byte[] decryptedMessageBytes = Encryptor.decryptFile(
+                                responseVS.getMessageBytes(), publicKey, privateKey);
+                        responseVS.setMessageBytes(decryptedMessageBytes);
+                    }
                 }
             }
         } catch(VotingSystemKeyStoreException ex) {

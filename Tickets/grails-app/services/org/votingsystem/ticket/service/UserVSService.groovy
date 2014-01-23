@@ -25,6 +25,10 @@ class UserVSService {
 		return [totalNumUsu:numUsers]
 	}
 
+    public Map getUserVSDataMap(UserVS userVS){
+
+    }
+
 	boolean isUserAdmin(String nif) {
 		if(!systemAdmins) {
             systemAdmins = new ArrayList<String>();

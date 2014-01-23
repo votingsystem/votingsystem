@@ -115,10 +115,6 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/representative/delegation";
     }
 
-    public static String getServerInfoURL (String serverURL) {
-        return StringUtils.checkURL(serverURL) + "/serverInfo";
-    }
-
     public String getEventVSURL (EventVS.State eventState, String eventTypePartURL,
             int max, Long offset) {
         return getServerURL() + eventTypePartURL + "?max="+ max + "&offset=" + offset  +

@@ -91,12 +91,12 @@ environments {
 
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "http://tickets:8080/Tickets"
+        grails.serverURL = "http://tickets:8083/Tickets"
     }
 
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://tickets:8080/Tickets"
+        grails.serverURL = "http://tickets:8083/Tickets"
     }
 
 }

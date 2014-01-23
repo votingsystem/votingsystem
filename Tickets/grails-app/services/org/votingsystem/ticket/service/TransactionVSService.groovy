@@ -21,6 +21,7 @@ class TransactionVSService {
     def messageSource
     def userVSService
     def sessionFactory
+    def grailsLinkGenerator
 
     public ResponseVS processDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
@@ -105,6 +106,38 @@ class TransactionVSService {
         BigDecimal result = totalInputs.add(totalOutputs.negate())
         log.debug("getUserBalance - totalInputs: ${totalInputs} - totalOutputs: ${totalOutputs} - Balance: ${result}")
         return new ResponseVS(statusCode: ResponseVS.SC_OK, data:result)
+    }
+
+    public Map getTransactionMap(TransactionVS transaction) {
+        Map transactionMap = [:]
+        String fromUserVSName = "${transaction.fromUserVS.firstName} ${transaction.fromUserVS.lastName} "
+        transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:fromUserVSName]
+        transactionMap.dateCreated = transaction.dateCreated
+        transactionMap.type = transaction.getType()
+        transactionMap.amount = transaction.amount
+        transactionMap.messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.getMessageSMIME().id}"
+        return transactionMap
+    }
+
+    public Map getUserInfoMap(UserVS userVS) {
+        def userInputTransactions = TransactionVS.findAllByTypeOrType(TransactionVS.Type.USER_INPUT,
+                TransactionVS.Type.USER_OUTPUT)
+        Map resultMap = [:]
+        List transactionList = []
+        BigDecimal totalInputs = new BigDecimal(0)
+        BigDecimal totalOutputs = new BigDecimal(0)
+        userInputTransactions.each {
+            if(TransactionVS.Type.USER_INPUT == it.type) {
+                totalInputs = totalInputs.add(it.amount)
+            } else if(TransactionVS.Type.USER_OUTPUT == it.type) {
+                totalOutputs = totalOutputs.add(it.amount)
+            }
+            transactionList.add(getTransactionMap(it))
+        }
+        resultMap.totalInputs = totalInputs
+        resultMap.totalOutputs = totalOutputs
+        resultMap.transactions = transactionList
+        return resultMap
     }
 
 }

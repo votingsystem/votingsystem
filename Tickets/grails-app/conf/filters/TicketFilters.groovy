@@ -177,10 +177,22 @@ class TicketFilters {
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
                         } else {
-                            messageSMIME.metaInf = encryptResponse.message
+                            messageSMIME.reason = encryptResponse.message
                             messageSMIME.save()
                             return printOutput(response, encryptResponse)
                         }
+                    case ContentTypeVS.JSON_ENCRYPTED:
+                        ResponseVS encryptResponse =  signatureVSService.encryptMessage(
+                                responseVS.getMessageBytes(), model.receiverCert)
+                        if(ResponseVS.SC_OK == encryptResponse.statusCode) {
+                            encryptResponse.setContentType(responseVS.getContentType())
+                            return printOutputStream(response, encryptResponse)
+                        } else {
+                            messageSMIME.reason = encryptResponse.message
+                            messageSMIME.save()
+                            return printOutput(response, encryptResponse)
+                        }
+                        break;
                     case ContentTypeVS.JSON_SIGNED:
                     case ContentTypeVS.SIGNED:
                         if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)

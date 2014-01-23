@@ -1,9 +1,13 @@
 package org.votingsystem.ticket.controller
 
+import grails.converters.JSON
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EnvironmentVS
+import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.RepresentationDocumentVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ApplicationContextHolder
 
@@ -12,14 +16,58 @@ import java.security.cert.X509Certificate
 class UserVSController {
 	
 	def subscriptionVSService
+    def transactionVSService
 
-	
+
+    /**
+     * Servicio que sirve para añadir usuarios de pruebas.
+     * SOLO DISPONIBLES EN ENTORNOS DE DESARROLLO.
+     *
+     * @httpMethod [GET]
+     * @serviceURL [/userVS]
+     * @param [userCert] Certificado de usuario en formato PEM
+     *
+     * @requestContentType [application/x-x509-ca-cert]
+     *
+     */
+    /**
+     * Servicio que envía información del estado de las cuentas
+     *
+     * @httpMethod [POST]
+     * @serviceURL [/userVS/userInfo]
+     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
+     *                     documento SMIME firmado con datos del usuario que solicita la información.
+     * @responseContentType [application/json;application/pkcs7-mime]. Documento JSON cifrado con datos de
+     *                      la cuenta del usuario.
+     * @return
+     */
+    def userInfo() {
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+        if(!messageSMIMEReq) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        }
+        SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        UserVS userVS = messageSMIMEReq.getUserVS()
+        if(!messageJSON.NIF.equals(userVS.getNif())) {
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, message(code:'nifMisMatchErrorMsg',
+                    args: [userVS.getNif(), messageJSON.NIF]))
+            responseVS.setContentType(ContentTypeVS.TEXT)
+            return [responseVS:responseVS]
+        }
+        Map responseMap = transactionVSService.getUserInfoMap(userVS)
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, "${responseMap as JSON}")
+        responseVS.setContentType(ContentTypeVS.JSON_ENCRYPTED)
+        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+    }
+
+
 	/**
 	 * Servicio que sirve para añadir usuarios de pruebas.
 	 * SOLO DISPONIBLES EN ENTORNOS DE DESARROLLO.
 	 *
 	 * @httpMethod [POST]
-	 * @serviceURL [/user]
+	 * @serviceURL [/userVS]
 	 * @param [userCert] Certificado de usuario en formato PEM
 	 * 
 	 * @requestContentType [application/x-x509-ca-cert]
