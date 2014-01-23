@@ -227,6 +227,7 @@ public class NavigationDrawer extends ActionBarActivity {
         mViewPager.setCurrentItem(childPosition, true);
     }
 
+
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
         MenuInflater inflater = getMenuInflater();

@@ -41,10 +41,13 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -64,6 +67,8 @@ public class TicketUserInfoFragment extends Fragment {
     private View progressContainer;
     private TextView ticket_account_info;
     private TextView ticket_cash_info;
+    private TextView last_request_date;
+    private TextView time_remaining_info;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
 
@@ -103,13 +108,14 @@ public class TicketUserInfoFragment extends Fragment {
         rootView = inflater.inflate(R.layout.ticket_user_info, container, false);
         ticket_account_info = (TextView)rootView.findViewById(R.id.ticket_account_info);
         ticket_cash_info = (TextView)rootView.findViewById(R.id.ticket_cash_info);
+        last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
+        time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
         transactionButton = (Button) rootView.findViewById(R.id.transaction_button);
         transactionButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
 
             }
         });
-        transactionButton.setVisibility(View.GONE);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -127,10 +133,20 @@ public class TicketUserInfoFragment extends Fragment {
                 byte[] serializedTicketUserInfo = FileUtils.getBytesFromFile(ticketUserInfoDataFile);
                 TicketAccount ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
                         serializedTicketUserInfo);
+                last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
+                        DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
                 ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
                         ticketUserInfo.getAccountBalance())));
                 ticket_cash_info.setText(Html.fromHtml(getString(R.string.ticket_cash_amount_info_lbl,
                         ticketUserInfo.getCashBalance())));
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DAY_OF_YEAR, 7);
+                time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
+                        DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
+                if (!(ticketUserInfo.getAccountBalance().intValue() > 0)) {
+                    transactionButton.setVisibility(View.GONE);
+                }
             } else {
                 Log.d(TAG + ".onCreateView(...)", "ticketUserInfoDataFile doesn't exist");
                 showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_ticket_user_info_caption),
@@ -159,33 +175,6 @@ public class TicketUserInfoFragment extends Fragment {
         }
     }
 
-    private void printRepresentativeData(UserVS representative) {
-        if(representative.getImageBytes() != null) {
-            final Bitmap bmp = BitmapFactory.decodeByteArray(representative.getImageBytes(), 0,
-                    representative.getImageBytes().length);
-            ImageView image = (ImageView) rootView.findViewById(R.id.representative_image);
-            image.setImageBitmap(bmp);
-            image.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    ImageView imageView = new ImageView(getActivity());
-                    imageView.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT));
-                    imageView.setImageBitmap(bmp);
-                    new AlertDialog.Builder(getActivity()).setView(imageView).show();
-                }
-            });
-        }
-        if(representative.getDescription() != null) {
-            String representativeDescription =
-                    "<html style='background-color:#eeeeee;margin: 5px 10px 10px 10px;'>" +
-                    representative.getDescription() + "</html>";
-            ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
-                    representativeDescription, "text/html", "utf-8");
-        }
-        transactionButton.setVisibility(View.VISIBLE);
-    }
-
     private void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
@@ -197,6 +186,7 @@ public class TicketUserInfoFragment extends Fragment {
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.ticket_user_info, menu);
         menu.setGroupVisible(R.id.general_items, false);
+        menu.removeItem(R.id.search_item);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -213,7 +203,6 @@ public class TicketUserInfoFragment extends Fragment {
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
     private void launchUpdateUserInfoService(String pin) {
         Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");

@@ -41,6 +41,7 @@ public class TransactionVS  implements Serializable {
 
     private Type type;
 
+    private Date validTo;
     private Date dateCreated;
     private Date lastUpdated;
 
@@ -165,6 +166,14 @@ public class TransactionVS  implements Serializable {
         this.cancellationSMIMEBytes = cancellationSMIMEBytes;
     }
 
+    public Date getValidTo() {
+        return validTo;
+    }
+
+    public void setValidTo(Date validTo) {
+        this.validTo = validTo;
+    }
+
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
@@ -194,6 +203,8 @@ public class TransactionVS  implements Serializable {
             transactionVS.setFromUserVS(fromUserVS);
         }
         transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated")));
+        if(jsonData.has("validTo")) transactionVS.setValidTo(
+                DateUtils.getDateFromString(jsonData.getString("validTo")));
         transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         transactionVS.setMessageSMIMEURL(jsonData.getString("messageSMIMEURL"));

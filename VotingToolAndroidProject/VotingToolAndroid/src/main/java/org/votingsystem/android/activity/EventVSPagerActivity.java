@@ -90,7 +90,7 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.manifest_open_lbl,
-                                DateUtils.getElpasedTimeStr(event.getDateFinish())));
+                                DateUtils.getElapsedTimeStr(event.getDateFinish())));
                         break;
                     case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.manifest_pendind_lbl));
@@ -124,7 +124,7 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.claim_open_lbl,
-                                DateUtils.getElpasedTimeStr(event.getDateFinish())));
+                                DateUtils.getElapsedTimeStr(event.getDateFinish())));
                         break;
                     case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.claim_pending_lbl));
@@ -157,7 +157,7 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.voting_open_lbl,
-                                DateUtils.getElpasedTimeStr(event.getDateFinish())));
+                                DateUtils.getElapsedTimeStr(event.getDateFinish())));
                         break;
                     case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.voting_pending_lbl));

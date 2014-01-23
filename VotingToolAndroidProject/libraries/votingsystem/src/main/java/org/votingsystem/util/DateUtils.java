@@ -81,10 +81,23 @@ public class DateUtils {
     }
 
     /**
-     *  elapsed time in hours/minutes/seconds
+     *  elapsed time in hours/minutes
      * @return String
      */
     public static String getElapsedTimeHoursMinutesFromMilliseconds(long milliseconds) {
+        String format = String.format("%%0%dd", 2);
+        long elapsedTime = milliseconds / 1000;
+        String minutes = String.format(format, (elapsedTime % 3600) / 60);
+        String hours = String.format(format, elapsedTime / 3600);
+        String time =  hours + ":" + minutes;
+        return time;
+    }
+
+    /**
+     *  elapsed time in hours/minutes/seconds
+     * @return String
+     */
+    public static String getElapsedTimeHoursMinutesSecondsFromMilliseconds(long milliseconds) {
         String format = String.format("%%0%dd", 2);
         long elapsedTime = milliseconds / 1000;
         String seconds = String.format(format, elapsedTime % 60);
@@ -118,7 +131,7 @@ public class DateUtils {
         return formatter.format(date);
     }
 
-    public static String getElpasedTimeStr(Date end) {
+    public static String getElapsedTimeStr(Date end) {
     	Float hours = (end.getTime() - Calendar.getInstance().getTime().getTime())/(60*60*1000F);
     	return Integer.valueOf(hours.intValue()).toString();
     }

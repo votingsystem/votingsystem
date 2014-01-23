@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.util.DateUtils;
+
 import android.util.Log;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -24,6 +26,7 @@ public class TicketAccount implements Serializable {
     private BigDecimal totalInputs = new BigDecimal(0);
     private BigDecimal totalOutputs = new BigDecimal(0);
     private BigDecimal cashBalance = new BigDecimal(0);
+    private Date lastRequestDate;
 
 
     public UserVS getUserVS() {
@@ -62,6 +65,14 @@ public class TicketAccount implements Serializable {
         return totalInputs.add(totalOutputs.negate());
     }
 
+    public Date getLastRequestDate() {
+        return lastRequestDate;
+    }
+
+    public void setLastRequestDate(Date lastRequestDate) {
+        this.lastRequestDate = lastRequestDate;
+    }
+
     public BigDecimal getCashBalance() {
         return cashBalance;
     }
@@ -77,12 +88,16 @@ public class TicketAccount implements Serializable {
         BigDecimal totalOutputs = null;
         TicketAccount ticketAccount = new TicketAccount();
         if(jsonData.has("totalInputs")) {
-            totalInputs = new BigDecimal(jsonData.getDouble("totalInputs"));
+            totalInputs = new BigDecimal(jsonData.getString("totalInputs"));
             ticketAccount.setTotalInputs(totalInputs);
         }
         if(jsonData.has("totalOutputs")) {
-            totalOutputs = new BigDecimal(jsonData.getDouble("totalOutputs"));
-            ticketAccount.setTotalInputs(totalOutputs);
+            totalOutputs = new BigDecimal(jsonData.getString("totalOutputs"));
+            ticketAccount.setTotalOutputs(totalOutputs);
+        }
+        if(jsonData.has("date")){
+            ticketAccount.setLastRequestDate(DateUtils.getDateFromString(
+                    jsonData.getString("date")));
         }
         if(jsonData.has("transactions")) {
             jsonArray = jsonData.getJSONArray("transactions");

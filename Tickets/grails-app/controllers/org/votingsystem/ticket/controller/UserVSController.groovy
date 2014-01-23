@@ -59,10 +59,6 @@ class UserVSController {
         Map responseMap = transactionVSService.getUserInfoMap(userVS)
         String result = new JSONObject(responseMap).toString()
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, result)
-
-        log.debug("=============== result: ${result}")
-
-
         responseVS.setContentType(ContentTypeVS.JSON_ENCRYPTED)
         return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }

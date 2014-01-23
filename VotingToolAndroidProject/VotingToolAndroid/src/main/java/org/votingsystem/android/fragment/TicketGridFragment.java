@@ -15,6 +15,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,6 +84,11 @@ public class TicketGridFragment extends Fragment implements
         return rootView;
     }
 
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.ticket_user_info, menu);
+        menu.setGroupVisible(R.id.general_items, false);
+        menu.removeItem(R.id.search_item);
+    }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
@@ -179,7 +185,7 @@ public class TicketGridFragment extends Fragment implements
                 } else {
                     imgView.setImageResource(R.drawable.open);
                     dateInfoStr = "<b>" + getString(R.string.remain_lbl, DateUtils.
-                            getElpasedTimeStr(receiptContainer.getValidTo()))  +"</b>";
+                            getElapsedTimeStr(receiptContainer.getValidTo()))  +"</b>";
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);

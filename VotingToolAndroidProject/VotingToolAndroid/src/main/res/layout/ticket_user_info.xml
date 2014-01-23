@@ -9,18 +9,35 @@
         android:layout_height="fill_parent"
         android:foreground="@drawable/shape_window_dim" >
         <LinearLayout android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
             android:orientation="vertical">
+            <TextView android:id="@+id/last_request_date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:layout_weight="1"/>
             <TextView android:id="@+id/ticket_account_info"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center" />
+                android:textSize="20sp"
+                android:layout_marginLeft="15dip"
+                android:layout_weight="1"/>
             <TextView android:id="@+id/ticket_cash_info"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center" />
+                android:textSize="20sp"
+                android:layout_marginLeft="15dip"
+                android:layout_weight="1"/>
+
+            <TextView android:id="@+id/time_remaining_info"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="15dip"
+                android:layout_marginBottom="15dip"
+                android:layout_marginLeft="15dip"
+                android:layout_weight="1"/>
 
             <Button android:id="@+id/transaction_button"
                 android:layout_width="wrap_content"
@@ -30,7 +47,9 @@
                 android:layout_gravity="center"
                 android:layout_weight="0"
                 android:textStyle="bold"
-                android:text="@string/transaction_button" />
+                android:text="@string/withdrawal_button" />
+
+
         </LinearLayout>
     </FrameLayout>
 
