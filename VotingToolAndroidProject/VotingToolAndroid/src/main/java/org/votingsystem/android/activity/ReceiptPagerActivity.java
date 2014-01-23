@@ -15,10 +15,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.fragment.ReceiptFragment;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.DateUtils;
-
-import java.util.Date;
 
 /**
  * @author jgzornoza

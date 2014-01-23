@@ -33,7 +33,6 @@ import android.widget.TextView;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.model.ContentTypeVS;

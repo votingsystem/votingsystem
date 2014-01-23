@@ -18,7 +18,6 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;

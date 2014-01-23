@@ -37,7 +37,6 @@ import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 

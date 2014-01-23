@@ -2,13 +2,13 @@ package org.votingsystem.ticket.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.EventVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.util.DateUtils
 
 import java.math.RoundingMode
 
@@ -77,12 +77,7 @@ class TransactionVSService {
                     log.debug("processed ${usersToDeposit.getRowNumber()}/${numUsers} user allocation for transaction ${transactionParent.id}");
                 }
             }
-
-
-
-
             return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", type:TypeVS.TICKET_USER_ALLOCATION)
-
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             msg = messageSource.getMessage('depositDataError', null, locale)
@@ -112,7 +107,10 @@ class TransactionVSService {
         Map transactionMap = [:]
         String fromUserVSName = "${transaction.fromUserVS.firstName} ${transaction.fromUserVS.lastName} "
         transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:fromUserVSName]
-        transactionMap.dateCreated = transaction.dateCreated
+        transactionMap.dateCreated = DateUtils.getStringFromDate(transaction.dateCreated)
+        if(transaction.validTo) transactionMap.validTo = DateUtils.getStringFromDate(transaction.validTo)
+        transactionMap.id = transaction.id
+        transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount
         String messageSMIMEURL = null
@@ -147,6 +145,7 @@ class TransactionVSService {
             }
             transactionList.add(getTransactionMap(transactionVS))
         }
+        resultMap.date = DateUtils.getStringFromDate(Calendar.getInstance().getTime())
         resultMap.totalInputs = totalInputs
         resultMap.totalOutputs = totalOutputs
         resultMap.transactions = transactionList

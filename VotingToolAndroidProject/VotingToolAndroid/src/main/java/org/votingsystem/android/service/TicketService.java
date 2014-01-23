@@ -23,7 +23,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 

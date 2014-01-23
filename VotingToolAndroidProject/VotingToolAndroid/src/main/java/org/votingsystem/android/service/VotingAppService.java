@@ -32,6 +32,7 @@ import org.votingsystem.util.StringUtils;
 
 import java.util.GregorianCalendar;
 import java.util.UUID;
+
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
 import static org.votingsystem.model.ContextVS.State;

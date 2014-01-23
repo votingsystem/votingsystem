@@ -51,7 +51,7 @@
                 </div>
 
                 <input type="url" id="ticketServerURL" style="width:280px; margin:20px 20px 0 20px;" required
-                       value="http://tickets:8080/Tickets/" title="<g:message code="ticketServerURLMsg"/>"
+                       value="http://tickets:8083/Tickets/" title="<g:message code="ticketServerURLMsg"/>"
                        placeholder="<g:message code="ticketServerURLMsg"/>"
                        oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
                        onchange="this.setCustomValidity('')"/>
