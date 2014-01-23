@@ -1,6 +1,7 @@
 package org.votingsystem.ticket.controller
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.MessageSMIME
@@ -56,7 +57,12 @@ class UserVSController {
             return [responseVS:responseVS]
         }
         Map responseMap = transactionVSService.getUserInfoMap(userVS)
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, "${responseMap as JSON}")
+        String result = new JSONObject(responseMap).toString()
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, result)
+
+        log.debug("=============== result: ${result}")
+
+
         responseVS.setContentType(ContentTypeVS.JSON_ENCRYPTED)
         return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }

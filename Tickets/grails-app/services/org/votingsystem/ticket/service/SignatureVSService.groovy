@@ -1,8 +1,11 @@
 package org.votingsystem.ticket.service
 
 import org.bouncycastle.asn1.DERTaggedObject
+import org.bouncycastle.cms.CMSAlgorithm
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
 import org.bouncycastle.jce.PKCS10CertificationRequest
-
+import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
@@ -14,6 +17,7 @@ import org.votingsystem.util.FileUtils
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -453,17 +457,17 @@ class  SignatureVSService {
         }
     }
 
-    public ResponseVS encryptMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
-        log.debug("--- - encryptMessage(...) - ");
+    public ResponseVS encryptMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
+        log.debug("encryptMessage(...)");
         try {
-            return getEncryptor().encryptMessage(bytesToEncrypt, receiverCert);
+            byte[] result = getEncryptor().encryptMessage(bytesToEncrypt, receiverCert);
+            new ResponseVS(ResponseVS.SC_OK, result);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
-
 
     /**
      * Method to decrypt files attached to SMIME (not signed) messages

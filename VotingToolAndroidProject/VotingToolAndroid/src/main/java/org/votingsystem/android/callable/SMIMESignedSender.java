@@ -97,7 +97,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                     } else {
                         byte[] decryptedMessageBytes = Encryptor.decryptFile(
                                 responseVS.getMessageBytes(), publicKey, privateKey);
-                        responseVS.setMessageBytes(decryptedMessageBytes);
+                        responseVS = new ResponseVS(ResponseVS.SC_OK, decryptedMessageBytes);
                     }
                 }
             }

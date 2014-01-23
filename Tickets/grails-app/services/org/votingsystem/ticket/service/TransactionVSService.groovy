@@ -113,26 +113,39 @@ class TransactionVSService {
         String fromUserVSName = "${transaction.fromUserVS.firstName} ${transaction.fromUserVS.lastName} "
         transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:fromUserVSName]
         transactionMap.dateCreated = transaction.dateCreated
-        transactionMap.type = transaction.getType()
+        transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount
-        transactionMap.messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.getMessageSMIME().id}"
+        String messageSMIMEURL = null
+        if(transaction.transactionParent) {
+            messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.transactionParent.getMessageSMIME()?.id}"
+        } else messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.getMessageSMIME()?.id}"
+        transactionMap.messageSMIMEURL = messageSMIMEURL
         return transactionMap
     }
 
     public Map getUserInfoMap(UserVS userVS) {
-        def userInputTransactions = TransactionVS.findAllByTypeOrType(TransactionVS.Type.USER_INPUT,
-                TransactionVS.Type.USER_OUTPUT)
+        def criteria = TransactionVS.createCriteria()
+        def userTransactions = criteria.scroll {
+            eq("toUserVS", userVS)
+            or {
+                eq("type", TransactionVS.Type.USER_INPUT)
+                eq("type", TransactionVS.Type.USER_OUTPUT)
+            }
+        }
+
         Map resultMap = [:]
         List transactionList = []
         BigDecimal totalInputs = new BigDecimal(0)
         BigDecimal totalOutputs = new BigDecimal(0)
-        userInputTransactions.each {
-            if(TransactionVS.Type.USER_INPUT == it.type) {
-                totalInputs = totalInputs.add(it.amount)
-            } else if(TransactionVS.Type.USER_OUTPUT == it.type) {
-                totalOutputs = totalOutputs.add(it.amount)
+
+        while (userTransactions.next()) {
+            TransactionVS transactionVS = (TransactionVS) userTransactions.get(0);
+            if(TransactionVS.Type.USER_INPUT == transactionVS.type) {
+                totalInputs = totalInputs.add(transactionVS.amount)
+            } else if(TransactionVS.Type.USER_OUTPUT == transactionVS.type) {
+                totalOutputs = totalOutputs.add(transactionVS.amount)
             }
-            transactionList.add(getTransactionMap(it))
+            transactionList.add(getTransactionMap(transactionVS))
         }
         resultMap.totalInputs = totalInputs
         resultMap.totalOutputs = totalOutputs
@@ -141,4 +154,3 @@ class TransactionVSService {
     }
 
 }
-

@@ -82,8 +82,9 @@ public class TicketService extends IntentService {
                     msgSubject, pin.toCharArray(), ticketServer.getCertificate(), contextVS);
             responseVS = smimeSignedSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                TicketAccount ticketAccount = TicketAccount.parse(
-                        new JSONObject(responseVS.getMessage()));
+                String responseStr = responseVS.getMessage();
+                responseStr = responseStr.substring(responseStr.indexOf('{'), responseStr.length());
+                TicketAccount ticketAccount = TicketAccount.parse(new JSONObject(responseStr));
                 byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(ticketAccount);
                 FileOutputStream outputStream;
                 try {

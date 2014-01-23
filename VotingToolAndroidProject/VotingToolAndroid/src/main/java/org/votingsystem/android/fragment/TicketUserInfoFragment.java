@@ -77,7 +77,8 @@ public class TicketUserInfoFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 loadUserInfo();
-            }
+            } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage());
             showProgress(false, false);
         }
         }

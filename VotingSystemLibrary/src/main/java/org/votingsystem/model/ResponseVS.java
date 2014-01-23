@@ -143,6 +143,7 @@ public class ResponseVS<T> implements Serializable {
     }
 
     public byte[] getMessageBytes() {
+        if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;
     }
 
