@@ -34,6 +34,7 @@ class  SignatureVSService {
 	static HashMap<Long, CertificateVS> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
     private PrivateKey serverPrivateKey;
+    private CertificateVS serverCertificateVS
     private Encryptor encryptor;
 	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsHashMap =  new HashMap<Long, Set<TrustAnchor>>();
 	private static HashMap<Long, Set<TrustAnchor>> controlCenterTrustedAnchorsHashMap =
@@ -92,6 +93,15 @@ class  SignatureVSService {
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
 		}
 		localServerCertSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
+
+        serverCertificateVS = CertificateVS.findWhere(serialNumber:localServerCertSigner.getSerialNumber().longValue());
+        if(!serverCertificateVS) {
+            serverCertificateVS = new CertificateVS(isRoot:true, type:CertificateVS.Type.CERTIFICATE_AUTHORITY,
+                    state:CertificateVS.State.OK, content:localServerCertSigner.getEncoded(),
+                    serialNumber:localServerCertSigner.getSerialNumber().longValue(),
+                    validFrom:localServerCertSigner.getNotBefore(), validTo:localServerCertSigner.getNotAfter()).save()
+            log.debug "Adding local server cert to database  - serverCertificateVS: '${serverCertificateVS.id}'"
+        }
         serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
 		trustedCerts.add(localServerCertSigner)
 		File certChainFile = grailsApplication.mainContext.getResource(
@@ -101,12 +111,18 @@ class  SignatureVSService {
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
 		initCertAuthorities();
         return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, trustedCerts:trustedCerts,
+                serverCertificateVS:serverCertificateVS,
                 localServerCertSigner:localServerCertSigner, serverPrivateKey:serverPrivateKey];
 	}
 
     public X509Certificate getServerCert() {
         if(localServerCertSigner == null) localServerCertSigner = initService().localServerCertSigner
         return localServerCertSigner
+    }
+
+    public CertificateVS getServerCertificateVS() {
+        if(!serverCertificateVS) serverCertificateVS = initService().serverCertificateVS
+        return serverCertificateVS
     }
 
     private PrivateKey getServerPrivateKey() {
@@ -441,7 +457,7 @@ class  SignatureVSService {
 
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
-        log.debug(" - encryptToCMS")
+        log.debug("encryptToCMS")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 

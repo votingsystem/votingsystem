@@ -46,9 +46,7 @@ class CsrService {
                         break;
                 }
             }
-
-            log.debug("============ info.subject: ${info.subject}")
-
+            log.debug(" ==== info.subject: ${info.subject}")
             // X500Principal subject = new X500Principal("CN=ticketProviderURL:" + ticketProviderURL +"AMOUNT=" + amount + "CURRENCY=" + currency + ", OU=DigitalCurrency");
             if(!certAttributeJSON) throw new ExceptionVS(messageSource.getMessage(
                     'csrMissingDERTaggedObjectErrorMsg', null, locale))
@@ -72,6 +70,8 @@ class CsrService {
             else {
                 TicketVS ticketVS = new TicketVS(serialNumber:issuedCert.getSerialNumber().longValue(),
                         content:issuedCert.getEncoded(), state:TicketVS.State.OK, hashCertVS:hashCertVSBase64,
+                        ticketProviderURL: ticketProviderURL, amount:amount,
+                        authorityCertificateVS:signatureVSService.getServerCertificateVS(),
                         validFrom:certValidFrom, validTo: certValidTo).save()
                 log.debug("signTicket - expended TicketVS '${ticketVS.id}'")
                 byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
@@ -126,7 +126,8 @@ class CsrService {
             if(expectedAmount.compareTo(batchAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
                     'ticketBatchRequestAmountErrorMsg', ["${expectedAmount.toString()} ${expectedCurrency}",
                     "${batchAmount.toString()} ${expectedCurrency}"], locale))
-            return new ResponseVS(statusCode:  ResponseVS.SC_OK, data:issuedTicketCertList);
+            return new ResponseVS(statusCode: ResponseVS.SC_OK, messageBytes:
+                    "${[issuedTickets:issuedTicketCertList] as JSON}".getBytes());
         } catch(ExceptionVS ex) {
             log.error(ex.getMessage(), ex);
             cancelTickets(issuedTicketList, ex.getMessage())

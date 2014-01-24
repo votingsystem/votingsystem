@@ -600,7 +600,7 @@ class SignatureVSService {
 
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
-        log.debug(" - encryptToCMS")
+        log.debug(" - encryptToCMS ${new String(dataToEncrypt)}")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 

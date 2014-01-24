@@ -3,6 +3,8 @@ package org.votingsystem.signature.util;
 import android.util.Log;
 
 import org.bouncycastle2.cms.CMSAlgorithm;
+import org.bouncycastle2.cms.CMSEnvelopedDataParser;
+import org.bouncycastle2.cms.CMSTypedStream;
 import org.bouncycastle2.cms.KeyTransRecipientId;
 import org.bouncycastle2.cms.Recipient;
 import org.bouncycastle2.cms.RecipientId;
@@ -40,8 +42,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -253,7 +257,32 @@ public class Encryptor {
         byte[] result = recipientInfo.getContent(recipient);
         return result;
     }
-    
+
+    public static byte[] decryptCMS(PrivateKey privateKey, byte[] base64EncryptedData)
+            throws Exception {
+        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+        CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+        Collection c = recipients.getRecipients();
+        Iterator it = c.iterator();
+        byte[] result = null;
+        if (it.hasNext()) {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+            //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+            CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.PROVIDER));
+            InputStream           dataStream = recData.getContentStream();
+            ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+            byte[]                buf = new byte[4096];
+            int len = 0;
+            while ((len = dataStream.read(buf)) >= 0) {
+                dataOut.write(buf, 0, len);
+            }
+            dataOut.close();
+            result = dataOut.toByteArray();
+            //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
+        }
+        return result;
+    }
 	
 	public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
             PublicKey publicKey, PrivateKey receiverPrivateKey) throws Exception {

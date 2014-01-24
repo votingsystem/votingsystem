@@ -214,8 +214,8 @@ public class HttpHelper {
              Log.d(TAG + ".sendObjectMap" ,response.getStatusLine().toString() + " - " +
                      response.getFirstHeader("Content-Type"));
              Log.d(TAG + ".sendObjectMap" ,"----------------------------------------");
-             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                     EntityUtils.toString(response.getEntity()));
+             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
              Header header = response.getFirstHeader("Content-Type");
              if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
              //EntityUtils.consume(response.getEntity());

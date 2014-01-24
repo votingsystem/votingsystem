@@ -105,14 +105,22 @@ class TransactionVSService {
 
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
-        String fromUserVSName = "${transaction.fromUserVS.firstName} ${transaction.fromUserVS.lastName} "
-        transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:fromUserVSName]
+        if(transaction.fromUserVS) {
+            String fromUserVSName = "${transaction.fromUserVS.firstName} ${transaction.fromUserVS.lastName}"
+            transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:fromUserVSName]
+        }
+        if(transaction.toUserVS) {
+            String toUserVSName = "${transaction.toUserVS.firstName} ${transaction.toUserVS.lastName}"
+            transactionMap.toUserVS = [nif:transaction.toUserVS.nif, name:toUserVSName]
+        }
         transactionMap.dateCreated = DateUtils.getStringFromDate(transaction.dateCreated)
         if(transaction.validTo) transactionMap.validTo = DateUtils.getStringFromDate(transaction.validTo)
         transactionMap.id = transaction.id
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount
+        transactionMap.currency = transaction.currency
+
         String messageSMIMEURL = null
         if(transaction.transactionParent) {
             messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.transactionParent.getMessageSMIME()?.id}"
@@ -122,13 +130,16 @@ class TransactionVSService {
     }
 
     public Map getUserInfoMap(UserVS userVS) {
-        def criteria = TransactionVS.createCriteria()
-        def userTransactions = criteria.scroll {
+        def inputCriteria = TransactionVS.createCriteria()
+        def userInputTransactions = inputCriteria.scroll {
             eq("toUserVS", userVS)
-            or {
-                eq("type", TransactionVS.Type.USER_INPUT)
-                eq("type", TransactionVS.Type.USER_OUTPUT)
-            }
+            eq("type", TransactionVS.Type.USER_INPUT)
+        }
+
+        def outputCriteria = TransactionVS.createCriteria()
+        def userOutputTransactions = outputCriteria.scroll {
+            eq("fromUserVS", userVS)
+            eq("type", TransactionVS.Type.USER_OUTPUT)
         }
 
         Map resultMap = [:]
@@ -136,15 +147,19 @@ class TransactionVSService {
         BigDecimal totalInputs = new BigDecimal(0)
         BigDecimal totalOutputs = new BigDecimal(0)
 
-        while (userTransactions.next()) {
-            TransactionVS transactionVS = (TransactionVS) userTransactions.get(0);
-            if(TransactionVS.Type.USER_INPUT == transactionVS.type) {
-                totalInputs = totalInputs.add(transactionVS.amount)
-            } else if(TransactionVS.Type.USER_OUTPUT == transactionVS.type) {
-                totalOutputs = totalOutputs.add(transactionVS.amount)
-            }
+        while (userInputTransactions.next()) {
+            TransactionVS transactionVS = (TransactionVS) userInputTransactions.get(0);
+            totalInputs = totalInputs.add(transactionVS.amount)
             transactionList.add(getTransactionMap(transactionVS))
         }
+
+        while (userOutputTransactions.next()) {
+            TransactionVS transactionVS = (TransactionVS) userOutputTransactions.get(0);
+            totalOutputs = totalOutputs.add(transactionVS.amount)
+            transactionList.add(getTransactionMap(transactionVS))
+        }
+
+
         resultMap.date = DateUtils.getStringFromDate(Calendar.getInstance().getTime())
         resultMap.totalInputs = totalInputs
         resultMap.totalOutputs = totalOutputs

@@ -182,8 +182,8 @@ class TicketFilters {
                             return printOutput(response, encryptResponse)
                         }
                     case ContentTypeVS.JSON_ENCRYPTED:
-                        ResponseVS encryptResponse =  signatureVSService.encryptMessage(
-                                responseVS.getMessage().getBytes(), model.receiverCert, request.getLocale())
+                        ResponseVS encryptResponse =  signatureVSService.encryptToCMS(
+                                responseVS.getMessage().getBytes(), model.receiverCert)
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)

@@ -96,10 +96,15 @@ public class SignedMapSender implements Callable<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 if(responseVS.getContentType() != null &&
                         responseVS.getContentType().isEncrypted()) {
-                    byte[] encryptedData = responseVS.getMessageBytes();
-                    byte[] decryptedData = Encryptor.decryptFile(encryptedData, decriptorPublicKey,
-                            decriptorPrivateKey);
-                    responseVS.setMessageBytes(decryptedData);
+                    if(responseVS.getContentType().isSigned()) {
+                        SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
+                                responseVS.getMessageBytes(), decriptorPublicKey, decriptorPrivateKey);
+                        responseVS.setSmimeMessage(signedMessage);
+                    } else {
+                        byte[] decryptedMessageBytes = Encryptor.decryptCMS(decriptorPrivateKey,
+                                responseVS.getMessageBytes());
+                        responseVS.setMessageBytes(decryptedMessageBytes);
+                    }
                 }
             }
         } catch(VotingSystemKeyStoreException ex) {

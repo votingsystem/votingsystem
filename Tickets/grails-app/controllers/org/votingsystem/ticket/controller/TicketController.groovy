@@ -4,6 +4,8 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.UserVS
+import org.votingsystem.model.ticket.TransactionVS
 
 class TicketController {
 
@@ -33,17 +35,18 @@ class TicketController {
         ResponseVS responseVS = ticketService.processRequest(messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-
-            ResponseVS csrValidationResponse = csrService.signTicketBatchRequest(csrRequest,
+            ResponseVS ticketGenBatchResponse = csrService.signTicketBatchRequest(csrRequest,
                     responseVS.data.amount, responseVS.data.currency,request.getLocale())
+            if (ResponseVS.SC_OK == ticketGenBatchResponse.statusCode) {
+                ticketGenBatchResponse.setContentType(ContentTypeVS.JSON_ENCRYPTED)
 
-            //    public synchronized ResponseVS signTicketBatchRequest (byte[] ticketBatchRequest, BigDecimal amount, String currency, Locale locale)
+                UserVS userVS = messageSMIMEReq.userVS
+                TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
+                        fromUserVS: userVS, type:TransactionVS.Type.USER_OUTPUT).save()
 
-            if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
-                csrValidationResponse.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
-                return [responseVS:csrValidationResponse,
+                return [responseVS:ticketGenBatchResponse,
                         receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
-            } else return [responseVS:csrValidationResponse]
+            } else return [responseVS:ticketGenBatchResponse]
         } else return [responseVS:responseVS]
     }
 }

@@ -11,6 +11,9 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -27,6 +30,7 @@ import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.DateUtils;
@@ -43,6 +47,7 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +95,7 @@ public class TicketService extends IntentService {
     private ResponseVS ticketRequest(BigDecimal withdrawalAmount, String pin) {
         ResponseVS responseVS = null;
         TicketServer ticketServer = contextVS.getTicketServer();
+        Map<String, TicketVS> ticketsMap = new HashMap<String, TicketVS>();
         try {
             if(ticketServer == null) {
                 responseVS = initTicketServer();
@@ -103,17 +109,18 @@ public class TicketService extends IntentService {
                 TicketVS ticketVS = new TicketVS(ticketServer.getServerURL(),
                         ticketsValue, ContextVS.CURRENCY_EURO, TypeVS.TICKET);
                 ticketList.add(ticketVS);
+                ticketsMap.put(ticketVS.getHashCertVSBase64(), ticketVS);
             }
 
             String messageSubject = getString(R.string.ticket_withdrawal_msg_subject);
             String fromUser = contextVS.getUserVS().getNif();
 
-            Map ticketsMap = new HashMap();
-            ticketsMap.put("numTickets", numTickets.intValue());
-            ticketsMap.put("ticketValue", ticketsValue.intValue());
+            Map requestTicketMap = new HashMap();
+            requestTicketMap.put("numTickets", numTickets.intValue());
+            requestTicketMap.put("ticketValue", ticketsValue.intValue());
 
             List ticketsMapList = new ArrayList();
-            ticketsMapList.add(ticketsMap);
+            ticketsMapList.add(requestTicketMap);
 
             Map smimeContentMap = new HashMap();
             smimeContentMap.put("totalAmount", withdrawalAmount.toString());
@@ -153,13 +160,34 @@ public class TicketService extends IntentService {
             PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
 
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
-                    contextVS.getAccessControl().getNameNormalized(),
+                    ticketServer.getNameNormalized(),
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     ticketServer.getTicketRequestServiceURL(),
                     withdrawalDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     pin.toCharArray(), ticketServer.getCertificate(),
                     publicKey, privateKey, (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                JSONObject issuedTicketsJSON = new JSONObject(new String(
+                        responseVS.getMessageBytes(), "UTF-8"));
+                JSONArray issuedTicketsArray = issuedTicketsJSON.getJSONArray("issuedTickets");
+                Log.d(TAG + "ticketRequest(...)", "Num IssuedTickets: " + issuedTicketsArray.length());
+                for(int i = 0; i < issuedTicketsArray.length(); i++) {
+                    Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
+                            issuedTicketsArray.getString(i).getBytes());
+                    if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
+                    X509Certificate x509Certificate = certificates.iterator().next();
+                    byte[] ticketExtensionValue = x509Certificate.getExtensionValue(ContextVS.TICKET_OID);
+                    DERTaggedObject ticketCertDataDER = (DERTaggedObject)
+                            X509ExtensionUtil.fromExtensionValue(ticketExtensionValue);
+                    JSONObject ticketCertData = new JSONObject(((DERUTF8String)
+                            ticketCertDataDER.getObject()).toString());
+                    String hashCertVS = ticketCertData.getString("hashCertVS");
+                    Log.d(TAG + "ticketRequest(...)", "hashCertVS: " + hashCertVS + " - ticket: " +  ticketsMap.get(hashCertVS));
+
+                }
+            }
+
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(
@@ -193,7 +221,7 @@ public class TicketService extends IntentService {
             responseVS = smimeSignedSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String responseStr = responseVS.getMessage();
-                responseStr = responseStr.substring(responseStr.indexOf('{'), responseStr.length());
+                //responseStr = responseStr.substring(responseStr.indexOf('{'), responseStr.length());
                 TicketAccount ticketAccount = TicketAccount.parse(new JSONObject(responseStr));
                 byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(ticketAccount);
                 FileOutputStream outputStream;

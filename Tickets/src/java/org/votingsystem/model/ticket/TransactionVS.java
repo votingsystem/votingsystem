@@ -24,22 +24,6 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public Date getValidTo() {
-        return validTo;
-    }
-
-    public void setValidTo(Date validTo) {
-        this.validTo = validTo;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
     public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION;}
 
     public enum State { OK, REPEATED, CANCELLED;}
@@ -48,6 +32,8 @@ public class TransactionVS  implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
 
     @Column(name="subject") private String subject;
+
+    @Column(name="currency") private String currency;
 
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;
@@ -148,6 +134,30 @@ public class TransactionVS  implements Serializable {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public Date getValidTo() {
+        return validTo;
+    }
+
+    public void setValidTo(Date validTo) {
+        this.validTo = validTo;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
 }
