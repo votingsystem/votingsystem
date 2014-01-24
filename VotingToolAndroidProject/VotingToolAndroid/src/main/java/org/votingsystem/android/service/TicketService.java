@@ -117,6 +117,7 @@ public class TicketService extends IntentService {
 
             Map smimeContentMap = new HashMap();
             smimeContentMap.put("totalAmount", withdrawalAmount.toString());
+            smimeContentMap.put("currency", ContextVS.CURRENCY_EURO);
             smimeContentMap.put("tickets", ticketsMapList);
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("serverURL", contextVS.getTicketServer().getServerURL());
@@ -126,9 +127,13 @@ public class TicketService extends IntentService {
             String withdrawalDataFileName = ContextVS.TICKET_REQUEST_DATA_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
 
-            List<String> ticketCSRList = new ArrayList<String>();
+            List<Map> ticketCSRList = new ArrayList<Map>();
             for(TicketVS ticket : ticketList) {
-                ticketCSRList.add(new String(ticket.getCertificationRequest().getCsrPEM(),"UTF-8"));
+                Map csrTicketMap = new HashMap();
+                csrTicketMap.put("currency", ContextVS.CURRENCY_EURO);
+                csrTicketMap.put("ticketValue", ticketsValue);
+                csrTicketMap.put("csr", new String(ticket.getCertificationRequest().getCsrPEM(),"UTF-8"));
+                ticketCSRList.add(csrTicketMap);
             }
             Map csrRequestMap = new HashMap();
             csrRequestMap.put("ticketCSR", ticketCSRList);

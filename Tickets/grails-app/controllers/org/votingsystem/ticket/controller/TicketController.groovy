@@ -33,9 +33,12 @@ class TicketController {
         ResponseVS responseVS = ticketService.processRequest(messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            log.debug("======== csrRequest: ${new String(csrRequest)}")
-            ResponseVS csrValidationResponse = csrService.signTicketRequest(csrRequest,
-                    responseVS.data.amount, request.getLocale())
+
+            ResponseVS csrValidationResponse = csrService.signTicketBatchRequest(csrRequest,
+                    responseVS.data.amount, responseVS.data.currency,request.getLocale())
+
+            //    public synchronized ResponseVS signTicketBatchRequest (byte[] ticketBatchRequest, BigDecimal amount, String currency, Locale locale)
+
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
                 csrValidationResponse.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
                 return [responseVS:csrValidationResponse,

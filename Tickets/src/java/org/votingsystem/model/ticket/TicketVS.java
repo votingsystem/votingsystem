@@ -23,6 +23,14 @@ public class TicketVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
     public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -31,9 +39,11 @@ public class TicketVS implements Serializable  {
     @Column(name="hashCertVS") private String hashCertVS;
     @Column(name="originHashCertVS") private String originHashCertVS;
     @Column(name="ticketProviderURL") private String ticketProviderURL;
+    @Column(name="reason") private String reason;
 
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
     @Column(name="content", nullable=false) @Lob private byte[] content;
+    @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
@@ -159,5 +169,12 @@ public class TicketVS implements Serializable  {
         this.authorityCertificateVS = authorityCertificateVS;
     }
 
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
 
 }

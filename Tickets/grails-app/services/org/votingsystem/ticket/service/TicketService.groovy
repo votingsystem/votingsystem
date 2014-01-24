@@ -40,6 +40,8 @@ class TicketService {
                     "operationMismatchErrorMsg", [TypeVS.TICKET_REQUEST.toString(), operation.toString()].toArray(),
                     locale));
 
+            String requestCurrency = dataRequestJSON.currency
+
             Map userInfoMap = transactionVSService.getUserInfoMap(signer)
 
             BigDecimal totalAmount = new BigDecimal(dataRequestJSON.totalAmount)
@@ -55,13 +57,13 @@ class TicketService {
                 Integer ticketsValue = it.ticketValue
                 numTotalTickets = numTotalTickets + it.numTickets
                 ticketsAmount = ticketsAmount.add(new BigDecimal(numTickets * ticketsValue))
-                log.debug("${numTickets} tickets of ${ticketsValue} euros")
+                log.debug("batch of '${numTickets}' tickets of '${ticketsValue}' euros")
             }
             log.debug("numTotalTickets: ${numTotalTickets} - ticketsAmount: ${ticketsAmount}")
             if(totalAmount.compareTo(ticketsAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
                     "ticketRequestAmountErrorMsg", [totalAmount, ticketsAmount].toArray(), locale));
 
-            Map resultMap = [amount:totalAmount, userInfoMap:userInfoMap]
+            Map resultMap = [amount:totalAmount, currency:requestCurrency, userInfoMap:userInfoMap]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.TICKET_REQUEST)
         } catch(ExceptionVS ex) {
             log.error(ex.getMessage(), ex);
@@ -69,8 +71,8 @@ class TicketService {
                     type:TypeVS.TICKET_REQUEST_ERROR)
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            msg = messageSource.getMessage('ticketWithdrawalDataError', null, locale)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.TICKET_REQUEST_ERROR)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.TICKET_REQUEST_ERROR,
+                    message:messageSource.getMessage('ticketWithdrawalDataError', null, locale))
         }
     }
 

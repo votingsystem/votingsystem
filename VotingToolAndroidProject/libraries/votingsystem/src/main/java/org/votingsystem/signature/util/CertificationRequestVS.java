@@ -98,7 +98,7 @@ public class CertificationRequestVS implements java.io.Serializable {
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=ticketProviderURL:" + ticketProviderURL +
-                 "AMOUNT=" + amount + "CURRENCY=" + currency + ", OU=DigitalCurrency");
+                ", OU=AMOUNT:" + amount + ", OU=CURRENCY:" + currency +", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
         delegationDataMap.put("ticketProviderURL", ticketProviderURL);

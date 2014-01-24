@@ -19,7 +19,8 @@ import java.util.Set;
 public class CertExtensionCheckerVS extends PKIXCertPathChecker {
 
     public enum ExtensionVS {VOTE(ContextVS.VOTE_OID), REPRESENTATIVE_VOTE(ContextVS.REPRESENTATIVE_VOTE_OID),
-        ANONYMOUS_REPRESENTATIVE_DELEGATION(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID);
+        ANONYMOUS_REPRESENTATIVE_DELEGATION(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID),
+        TICKET(ContextVS.TICKET_OID);
 
         String OID = null;
         ExtensionVS(String OID) { this.OID = OID; }
@@ -32,41 +33,43 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
             if(ContextVS.REPRESENTATIVE_VOTE_OID.equals(extensionVS_OID)) return REPRESENTATIVE_VOTE;
             if(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID.equals(extensionVS_OID))
                 return ANONYMOUS_REPRESENTATIVE_DELEGATION;
+            if(ContextVS.TICKET_OID.equals(extensionVS_OID)) return TICKET;
             return null;
         }
 
     }
 
-	private Set<String> supportedExtensions;
+    private Set<String> supportedExtensions;
     private Set<ExtensionVS> extensionsVS;
-	
-	public CertExtensionCheckerVS() {
-		supportedExtensions = new HashSet<String>();
+
+    public CertExtensionCheckerVS() {
+        supportedExtensions = new HashSet<String>();
         extensionsVS = new HashSet<ExtensionVS>();
-		supportedExtensions.add(X509Extensions.ExtendedKeyUsage.toString());
+        supportedExtensions.add(X509Extensions.ExtendedKeyUsage.toString());
         supportedExtensions.add(ExtensionVS.VOTE.getOID());
         supportedExtensions.add(ExtensionVS.REPRESENTATIVE_VOTE.getOID());
         supportedExtensions.add(ExtensionVS.ANONYMOUS_REPRESENTATIVE_DELEGATION.getOID());
-	}
-	
-	public void init(boolean forward) throws CertPathValidatorException {
-	 //To change body of implemented methods use File | Settings | File Templates.
+        supportedExtensions.add(ExtensionVS.TICKET.getOID());
     }
 
-	public boolean isForwardCheckingSupported(){
-		return true;
-	}
+    public void init(boolean forward) throws CertPathValidatorException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean isForwardCheckingSupported(){
+        return true;
+    }
 
     public Set<ExtensionVS> getSupportedExtensionsVS()	{
         return extensionsVS;
     }
 
 
-	public Set getSupportedExtensions()	{
-		return null;
-	}
+    public Set getSupportedExtensions()	{
+        return null;
+    }
 
-	public void check(Certificate cert, Collection<String> unresolvedCritExts) throws CertPathValidatorException {
+    public void check(Certificate cert, Collection<String> unresolvedCritExts) throws CertPathValidatorException {
         while(unresolvedCritExts.iterator().hasNext()) {
             String ext = unresolvedCritExts.iterator().next();
             if(supportedExtensions.contains(ext)) {
@@ -76,6 +79,6 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
                 if(extensionVS != null) extensionsVS.add(extensionVS);
             }
         }
-	}
+    }
 
 }

@@ -134,18 +134,6 @@ public class DateUtils {
         String time =  hours + ":" + minutes + ":" + seconds;
         return time;
     }
-
-    private Calendar getNextMonday(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-            calendar.add(Calendar.DAY_OF_YEAR, 7);
-        } else calendar.set(DAY_OF_WEEK, MONDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        return calendar;
-    }
     
     /**
      *  elapsed time in hours/minutes/seconds/milliseconds
@@ -163,5 +151,16 @@ public class DateUtils {
         return time;
     }
 
+    public static Calendar getNextMonday(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+        } else calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar;
+    }
 
 }
