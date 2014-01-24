@@ -270,7 +270,7 @@ class SignatureVSService {
 		String accessControlURL = voteVS.accessControlURL
 		AccessControlVS accessControl = AccessControlVS.findWhere(serverURL:accessControlURL)
 		if (!accessControl) {
-			msg = messageSource.getMessage('voteAccessControlUnknownErrorMSg', null, locale)
+			msg = messageSource.getMessage('voteAccessControlUnknownErrorMsg', null, locale)
 			log.error ("validateVoteCerts - ERROR SERVER URL - ${msg}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VOTE_ERROR)
 		} 
@@ -417,7 +417,7 @@ class SignatureVSService {
 				log.error(ex.getMessage(), ex)
 				log.error(" --- Error with certificate: ${userVS.getCertificate().getSubjectDN()}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					message:messageSource.getMessage('unknownCAErrorMSg', null, locale))
+					message:messageSource.getMessage('unknownCAErrorMsg', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())

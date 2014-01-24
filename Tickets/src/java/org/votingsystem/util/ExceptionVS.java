@@ -5,4 +5,8 @@ package org.votingsystem.util;
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class ExceptionVS extends Exception {
+
+    public ExceptionVS(String message) {
+        super(message);
+    }
 }

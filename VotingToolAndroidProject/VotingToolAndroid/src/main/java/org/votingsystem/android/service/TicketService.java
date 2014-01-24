@@ -79,7 +79,7 @@ public class TicketService extends IntentService {
                 sendMessage(responseVS);
                 break;
             case TICKET_REQUEST:
-                responseVS = ticketWithdrawal(value, pin);
+                responseVS = ticketRequest(value, pin);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 sendMessage(responseVS);
@@ -87,7 +87,7 @@ public class TicketService extends IntentService {
         }
     }
 
-    private ResponseVS ticketWithdrawal(BigDecimal withdrawalAmount, String pin) {
+    private ResponseVS ticketRequest(BigDecimal withdrawalAmount, String pin) {
         ResponseVS responseVS = null;
         TicketServer ticketServer = contextVS.getTicketServer();
         try {
@@ -112,9 +112,12 @@ public class TicketService extends IntentService {
             ticketsMap.put("numTickets", numTickets.intValue());
             ticketsMap.put("ticketValue", ticketsValue.intValue());
 
+            List ticketsMapList = new ArrayList();
+            ticketsMapList.add(ticketsMap);
+
             Map smimeContentMap = new HashMap();
             smimeContentMap.put("totalAmount", withdrawalAmount.toString());
-            smimeContentMap.put("tickets", ticketsMap);
+            smimeContentMap.put("tickets", ticketsMapList);
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("serverURL", contextVS.getTicketServer().getServerURL());
             smimeContentMap.put("operation", TypeVS.TICKET_REQUEST.toString());
@@ -144,14 +147,14 @@ public class TicketService extends IntentService {
             Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
             PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
 
-            //request signed with user certificate (data signed without representative data)
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
                     contextVS.getAccessControl().getNameNormalized(),
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     ticketServer.getTicketRequestServiceURL(),
                     withdrawalDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    pin.toCharArray(), contextVS.getAccessControl().getCertificate(),
+                    pin.toCharArray(), ticketServer.getCertificate(),
                     publicKey, privateKey, (AppContextVS)getApplicationContext());
+            responseVS = signedMapSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(

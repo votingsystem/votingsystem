@@ -412,7 +412,7 @@ class  SignatureVSService {
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-					messageSource.getMessage('unknownCAErrorMSg', null, locale))
+					messageSource.getMessage('unknownCAErrorMsg', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
 				return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR)

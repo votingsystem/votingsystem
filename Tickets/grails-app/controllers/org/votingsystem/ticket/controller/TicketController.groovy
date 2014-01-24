@@ -33,7 +33,7 @@ class TicketController {
         ResponseVS responseVS = ticketService.processRequest(messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            //log.debug("======== csrRequest: ${new String(csrRequest)}")
+            log.debug("======== csrRequest: ${new String(csrRequest)}")
             ResponseVS csrValidationResponse = csrService.signTicketRequest(csrRequest,
                     responseVS.data.amount, request.getLocale())
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {

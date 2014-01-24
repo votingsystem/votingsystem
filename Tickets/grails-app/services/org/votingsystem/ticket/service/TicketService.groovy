@@ -1,5 +1,6 @@
 package org.votingsystem.ticket.service
 
+import grails.converters.JSON
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import org.votingsystem.model.MessageSMIME
@@ -28,15 +29,16 @@ class TicketService {
         UserVS signer = messageSMIMEReq.userVS
         String msg;
         try {
-            JSONObject dataRequestJSON = new JSONObject(smimeMessageReq.getSignedContent())
+            def dataRequestJSON = JSON.parse(smimeMessageReq.getSignedContent())
             String ticketServerURL = StringUtils.checkURL(dataRequestJSON.serverURL)
             String serverURL = grailsApplication.config.grails.serverURL
             if(!serverURL.equals(ticketServerURL)) throw new ExceptionVS(messageSource.getMessage("serverMismatchErrorMsg",
                     [serverURL, ticketServerURL].toArray(), locale));
 
             TypeVS operation = TypeVS.valueOf(dataRequestJSON.operation)
-            if(TypeVS.TICKET_REQUEST != null) throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
-                    [TypeVS.TICKET_REQUEST.toString(), operation.toString()].toArray(), locale));
+            if(TypeVS.TICKET_REQUEST != operation) throw new ExceptionVS(messageSource.getMessage(
+                    "operationMismatchErrorMsg", [TypeVS.TICKET_REQUEST.toString(), operation.toString()].toArray(),
+                    locale));
 
             Map userInfoMap = transactionVSService.getUserInfoMap(signer)
 
@@ -46,8 +48,7 @@ class TicketService {
                     [totalAmount, userInfoMap.available].toArray(), locale));
 
             Integer numTotalTickets = 0
-
-            JSONArray ticketsArray =  dataRequestJSON.getJSONArray("tickets")
+            def ticketsArray = dataRequestJSON.tickets
             BigDecimal ticketsAmount = new BigDecimal(0)
             ticketsArray.each {
                 Integer numTickets = it.numTickets
@@ -60,7 +61,7 @@ class TicketService {
             if(totalAmount.compareTo(ticketsAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
                     "ticketRequestAmountErrorMsg", [totalAmount, ticketsAmount].toArray(), locale));
 
-            Map resultMap = [amount:dataRequestJSON.totalAmount, userInfoMap:userInfoMap]
+            Map resultMap = [amount:totalAmount, userInfoMap:userInfoMap]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.TICKET_REQUEST)
         } catch(ExceptionVS ex) {
             log.error(ex.getMessage(), ex);
