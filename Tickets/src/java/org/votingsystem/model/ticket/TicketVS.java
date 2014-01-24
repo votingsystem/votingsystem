@@ -177,4 +177,18 @@ public class TicketVS implements Serializable  {
         this.state = state;
     }
 
+    public static Map checkSubject(String subjectDN) {
+        String currency = null;
+        String amount = null;
+        String ticketProviderURL = null;
+        if (subjectDN.contains("CURRENCY:")) currency = subjectDN.split("CURRENCY:")[1].split(",")[0];
+        if (subjectDN.contains("AMOUNT:")) amount = subjectDN.split("AMOUNT:")[1].split(",")[0];
+        if (subjectDN.contains("ticketProviderURL:")) ticketProviderURL = subjectDN.split("ticketProviderURL:")[1].split(",")[0];
+        Map resultMap = new HashMap();
+        resultMap.put("currency", currency);
+        resultMap.put("amount", amount);
+        resultMap.put("ticketProviderURL", ticketProviderURL);
+        return resultMap;
+    }
+
 }

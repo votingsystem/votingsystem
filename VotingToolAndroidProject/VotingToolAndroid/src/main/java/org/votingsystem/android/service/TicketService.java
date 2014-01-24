@@ -183,8 +183,8 @@ public class TicketService extends IntentService {
                     JSONObject ticketCertData = new JSONObject(((DERUTF8String)
                             ticketCertDataDER.getObject()).toString());
                     String hashCertVS = ticketCertData.getString("hashCertVS");
-                    Log.d(TAG + "ticketRequest(...)", "hashCertVS: " + hashCertVS + " - ticket: " +  ticketsMap.get(hashCertVS));
-
+                    TicketVS ticket = ticketsMap.get(hashCertVS);
+                    ticket.getCertificationRequest().initSigner(issuedTicketsArray.getString(i).getBytes());
                 }
             }
 

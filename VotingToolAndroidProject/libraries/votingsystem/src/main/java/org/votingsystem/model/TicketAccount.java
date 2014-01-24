@@ -23,6 +23,7 @@ public class TicketAccount implements Serializable {
 
     private UserVS userVS;
     private List<TransactionVS> transactionList;
+    private List<TicketVS> ticketList;
     private BigDecimal totalInputs = new BigDecimal(0);
     private BigDecimal totalOutputs = new BigDecimal(0);
     private BigDecimal cashBalance = new BigDecimal(0);
@@ -126,4 +127,11 @@ public class TicketAccount implements Serializable {
         return ticketAccount;
     }
 
+    public List<TicketVS> getTicketList() {
+        return ticketList;
+    }
+
+    public void setTicketList(List<TicketVS> ticketList) {
+        this.ticketList = ticketList;
+    }
 }

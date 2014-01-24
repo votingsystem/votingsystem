@@ -28,4 +28,12 @@ class TestingController {
         return false
     }
 
+    def subject() {
+        Map resultMap = checkSubject("OU=DigitalCurrency,OU=AMOUNT:10,CN=ticketProviderURL:http://tickets:8083/Tickets, OU=CURRENCY:euro")
+
+        render resultMap as JSON
+        return false
+    }
+
+
 }

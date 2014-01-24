@@ -28,6 +28,17 @@ class CsrService {
     def signatureVSService
 
 
+    private Map checkSubject(String subjectDN) {
+        // OU=DigitalCurrency,OU=CURRENCY:euro,OU=AMOUNT:10,CN=ticketProviderURL:http://tickets:8083/Tickets
+        String currency
+        String amount
+        String ticketProviderURL
+        if (subjectDN.contains("CURRENCY:")) currency = subjectDN.split("CURRENCY:")[1].split(",")[0];
+        if (subjectDN.contains("AMOUNT:")) amount = subjectDN.split("AMOUNT:")[1].split(",")[0];
+        if (subjectDN.contains("ticketProviderURL:")) ticketProviderURL = subjectDN.split("ticketProviderURL:")[1].split(",")[0];
+        return [ticketProviderURL:ticketProviderURL,amount:amount,currency:currency]
+    }
+
     public synchronized ResponseVS signTicket (byte[] csrPEMBytes, String ticketAmount,
            String ticketCurrency, Locale locale) {
         PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
@@ -46,7 +57,7 @@ class CsrService {
                         break;
                 }
             }
-            log.debug(" ==== info.subject: ${info.subject}")
+            Map subjectDataMap = TicketVS.checkSubject(info.subject.toString());
             // X500Principal subject = new X500Principal("CN=ticketProviderURL:" + ticketProviderURL +"AMOUNT=" + amount + "CURRENCY=" + currency + ", OU=DigitalCurrency");
             if(!certAttributeJSON) throw new ExceptionVS(messageSource.getMessage(
                     'csrMissingDERTaggedObjectErrorMsg', null, locale))
@@ -54,6 +65,16 @@ class CsrService {
             String hashCertVSBase64 = certAttributeJSON.hashCertVS
             String amount = certAttributeJSON.amount
             String currency = certAttributeJSON.currency
+            if(!currency.equals(subjectDataMap.get("currency")) || !amount.equals(subjectDataMap.get("amount")) ||
+                    !ticketProviderURL.equals(subjectDataMap.get("ticketProviderURL"))) throw new ExceptionVS(
+                    messageSource.getMessage('csrTicketSubjectDNErrorMsg',
+                            ["${ticketProviderURL} ${amount} ${currency}",
+                            "${subjectDataMap.get("ticketProviderURL")} ${subjectDataMap.get("amount")} ${subjectDataMap.get("currency")}"].toArray(), locale))
+
+
+
+
+
             if(!ticketAmount.equals(amount) || !ticketCurrency.equals(currency)) throw new ExceptionVS(
                     messageSource.getMessage('csrTicketValueErrorMsg',
                     ["${ticketAmount} ${ticketCurrency}", "${amount} ${currency}"].toArray(), locale))
