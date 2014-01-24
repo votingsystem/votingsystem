@@ -94,16 +94,17 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getTicketRequest(int keySize, String keyName,
            String signatureMechanism, String provider, String ticketProviderURL, String hashCertVS,
-           String amount) throws NoSuchAlgorithmException,
+           String amount, String currency) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=ticketProviderURL:" + ticketProviderURL +
-                ", OU=DigitalCurrency");
+                 "AMOUNT=" + amount + "CURRENCY=" + currency + ", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
         delegationDataMap.put("ticketProviderURL", ticketProviderURL);
         delegationDataMap.put("hashCertVS", hashCertVS);
         delegationDataMap.put("amount", amount);
+        delegationDataMap.put("currency", currency);
         JSONObject jsonObject = new JSONObject(delegationDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.TICKET_TAG,
                 new DERUTF8String(jsonObject.toString())));

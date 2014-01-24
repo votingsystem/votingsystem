@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.util.CertificationRequestVS;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -19,24 +20,49 @@ public class TicketVS extends ReceiptContainer {
     public static final String TAG = "TicketVS";
 
     private Long localId = -1L;
+    private TransactionVS transaction;
     private transient SMIMEMessageWrapper receipt;
+    private CertificationRequestVS certificationRequest;
     private byte[] receiptBytes;
     private String originHashCertVS;
     private String hashCertVSBase64;
     private BigDecimal amount;
     private TypeVS typeVS;
     private String subject;
+    private String currency;
     private String url;
+    private String ticketServerURL;
 
-    public TicketVS(BigDecimal amount, TypeVS typeVS) {
-        this.setAmount(amount);
-        this.setTypeVS(typeVS);
+    public TicketVS(String ticketServerURL, BigDecimal amount, String currency, TypeVS typeVS) {
+        this.amount = amount;
+        this.typeVS = typeVS;
+        this.ticketServerURL = ticketServerURL;
+        this.currency = currency;
         try {
             setOriginHashCertVS(UUID.randomUUID().toString());
             setHashCertVSBase64(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
+            certificationRequest = CertificationRequestVS.getTicketRequest(
+                    ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
+                    ContextVS.PROVIDER, ticketServerURL, hashCertVSBase64, amount.toString(), currency);
+
+
+            //public static CertificationRequestVS getTicketRequest(int keySize, String keyName, String signatureMechanism, String provider, String ticketProviderURL, String hashCertVS, String amount)
+
         } catch(Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public CertificationRequestVS getCertificationRequest() {
+        return certificationRequest;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     @Override public String getSubject() {
@@ -117,4 +143,11 @@ public class TicketVS extends ReceiptContainer {
         this.typeVS = typeVS;
     }
 
+    public TransactionVS getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(TransactionVS transaction) {
+        this.transaction = transaction;
+    }
 }

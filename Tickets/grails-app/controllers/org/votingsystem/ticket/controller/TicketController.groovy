@@ -34,7 +34,7 @@ class TicketController {
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
             //log.debug("======== csrRequest: ${new String(csrRequest)}")
-            ResponseVS csrValidationResponse = csrService.signTicket(csrRequest,
+            ResponseVS csrValidationResponse = csrService.signTicketRequest(csrRequest,
                     responseVS.data.amount, request.getLocale())
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
                 csrValidationResponse.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)

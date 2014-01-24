@@ -49,9 +49,13 @@ public class ContextVS {
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest";
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
     public static final String TICKET_USER_INFO_DATA_FILE_NAME = "ticketUserInfo";
+    public static final String TICKET_REQUEST_DATA_FILE_NAME   = "ticketRequestData";
     public static final String USER_DATA_FILE_NAME             = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
+
+    //Currencies
+    public static final String CURRENCY_EURO = "euro";
 
     //Intent keys
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
@@ -76,6 +80,7 @@ public class ContextVS {
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
     public static final String CERT_VALIDATION_KEY = "CERT_VALIDATION_KEY";
     public static final String TYPEVS_KEY = "TYPEVS_KEY";
+    public static final String VALUE_KEY = "VALUE_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
     public static final String OFFSET_KEY = "OFFSET";

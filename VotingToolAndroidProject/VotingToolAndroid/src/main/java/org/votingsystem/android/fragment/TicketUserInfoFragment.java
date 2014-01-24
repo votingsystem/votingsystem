@@ -35,6 +35,7 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,32 +47,55 @@ public class TicketUserInfoFragment extends Fragment {
 
 	public static final String TAG = "TicketUserInfoFragment";
 
-    private static final int REPRESENTATIVE_DELEGATION   = 1;
-
+    private BigDecimal withdrawalAmount;
     private View rootView;
     private String broadCastId = null;
     private AppContextVS contextVS;
-    private Button transactionButton;
+    private Button withdrawal_button;
     private View progressContainer;
     private TextView ticket_account_info;
     private TextView ticket_cash_info;
     private TextView last_request_date;
     private TextView time_remaining_info;
     private FrameLayout mainLayout;
+    private TicketAccount ticketUserInfo;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(pin != null) launchUpdateUserInfoService(pin);
-        else {
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                loadUserInfo();
-            } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(pin != null) {
+            switch(responseVS.getTypeVS()) {
+                case TICKET_USER_INFO:
+                    launchUpdateUserInfoService(pin);
+                    break;
+                case TICKET_REQUEST_DIALOG:
+                    launchTicketWithdrawal(pin);
+                    break;
+            }
+
+        } else {
+            switch(responseVS.getTypeVS()) {
+                case TICKET_REQUEST:
+                    showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                            responseVS.getNotificationMessage());
+                    break;
+                case TICKET_REQUEST_DIALOG:
+                    Log.d(TAG + ".broadcastReceiver.onReceive(...)", "TICKET_REQUEST_DIALOG: " + responseVS.getData());
+                    withdrawalAmount = (BigDecimal) responseVS.getData();
+                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                            getString(R.string.ticket_request_pin_msg, withdrawalAmount), false,
+                            TypeVS.TICKET_REQUEST_DIALOG);
+                    break;
+                case TICKET_USER_INFO:
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        loadUserInfo();
+                    } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                            responseVS.getNotificationMessage());
+                    break;
+            }
             showProgress(false, false);
         }
         }
@@ -89,6 +113,7 @@ public class TicketUserInfoFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        broadCastId = this.getClass().getSimpleName();
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
@@ -98,17 +123,19 @@ public class TicketUserInfoFragment extends Fragment {
         ticket_cash_info = (TextView)rootView.findViewById(R.id.ticket_cash_info);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
-        transactionButton = (Button) rootView.findViewById(R.id.transaction_button);
-        transactionButton.setOnClickListener(new OnClickListener() {
+        withdrawal_button = (Button) rootView.findViewById(R.id.withdrawal_button);
+        withdrawal_button.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-
+                CashWithdrawalDialogFragment.showDialog(getFragmentManager(), broadCastId,
+                        getString(R.string.cash_withdrawal_dialog_caption),
+                        getString(R.string.cash_withdrawal_dialog_msg, ticketUserInfo.getAccountBalance()),
+                        ticketUserInfo.getAccountBalance(), null);
             }
         });
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
-        broadCastId = this.getClass().getSimpleName();
         loadUserInfo();
         return rootView;
     }
@@ -119,7 +146,7 @@ public class TicketUserInfoFragment extends Fragment {
                     ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
             if(ticketUserInfoDataFile.exists()) {
                 byte[] serializedTicketUserInfo = FileUtils.getBytesFromFile(ticketUserInfoDataFile);
-                TicketAccount ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
+                ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
                         serializedTicketUserInfo);
                 last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
                         DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
@@ -133,7 +160,7 @@ public class TicketUserInfoFragment extends Fragment {
                 time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
                         DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
                 if (!(ticketUserInfo.getAccountBalance().intValue() > 0)) {
-                    transactionButton.setVisibility(View.GONE);
+                    withdrawal_button.setVisibility(View.GONE);
                 }
             } else {
                 Log.d(TAG + ".onCreateView(...)", "ticketUserInfoDataFile doesn't exist");
@@ -206,6 +233,24 @@ public class TicketUserInfoFragment extends Fragment {
             ex.printStackTrace();
         }
     }
+
+    private void launchTicketWithdrawal(String pin) {
+        Log.d(TAG + ".launchTicketWithdrawal(...) ", "amount: " + withdrawalAmount);
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    TicketService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_REQUEST);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.VALUE_KEY, withdrawalAmount);
+            showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
     public void showProgress(boolean showProgress, boolean animate) {
         if (progressVisible.get() == showProgress)  return;
         progressVisible.set(showProgress);

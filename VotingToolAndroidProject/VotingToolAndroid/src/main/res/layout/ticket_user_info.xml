@@ -15,8 +15,10 @@
             <TextView android:id="@+id/last_request_date"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:layout_weight="1"/>
+                android:textSize="12sp"
+                android:layout_weight="1"
+                android:layout_marginBottom="15dip"
+                android:gravity="center"/>
             <TextView android:id="@+id/ticket_account_info"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -39,10 +41,11 @@
                 android:layout_marginLeft="15dip"
                 android:layout_weight="1"/>
 
-            <Button android:id="@+id/transaction_button"
+            <Button android:id="@+id/withdrawal_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop ="7dp"
+                android:layout_marginBottom="7dp"
                 android:layout_marginRight ="7dp"
                 android:layout_gravity="center"
                 android:layout_weight="0"

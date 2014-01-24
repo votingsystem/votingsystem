@@ -69,7 +69,7 @@
     <string name="statusCodeNotFoundErrorMsg">Falta código de estado</string>
     <string name="errorEmail">Debe proporcionar una dirección de correo válida</string>
     <string name="eventVsCancellationDataErrorMsg">Error en los datos de cancelación de evento</string>
-    <string name="receiverNotFoundErrorMSg">Falta el name de destinatario del documento firmado</string>
+    <string name="receiverNotFoundErrorMsg">Falta el name de destinatario del documento firmado</string>
 
 
     <string name="unknown_lbl">... UNKNOWN ...</string>
@@ -203,7 +203,7 @@
     <string name="ok_lbl">OK</string>
     <string name="accept_lbl">Aceptar</string>
     <string name="request_certificate_form_lbl">Datos del certificado de usuario</string>
-	<string name="campos_vacios_msg">Debe rellenar todos los campos</string>
+	<string name="empty_fields_msg">Debe rellenar todos los campos</string>
 	<string name="password_error_msg">Las contraseñas no coinciden</string>
 	<string name="claim_fields_dialog_caption">Rellenar los campos</string>
 	<string name="error_lbl">Error</string>   
@@ -371,8 +371,13 @@
     <string name="ticket_user_info_request_msg_subject">Solicitud de información de cuentas</string>
     <string name="ticket_account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> euros en caja]]></string>
     <string name="ticket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> euros en efectivo en su móvil]]></string>
-    <string name="ticket_last_request_info_lbl"><![CDATA[Ultima consulta el <u><b>\'%1$s\'</b></u>.<br/> Dispone de:]]></string>
+    <string name="ticket_last_request_info_lbl"><![CDATA[Ultima consulta el <u><b>\'%1$s\'</b></u>]]></string>
     <string name="time_remaining_info_lbl"><![CDATA[Lo que no gastes antes del <b>\'%1$s\'</b> se repartirá
         entre el resto de usuarios]]></string>
+    <string name="cash_withdrawal_dialog_caption">Retirar efectivo</string>
+    <string name="cash_withdrawal_dialog_msg"><![CDATA[Seleccione un importe inferior a <b>\'%1$s\'</b> euros]]></string>
+    <string name="min_withdrawal_msg">El importe debe ser mayor que cero</string>
+    <string name="ticket_withdrawal_msg_subject">Retirada de Tickets</string>
+    <string name="ticket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> euros en efectivo]]></string>
 
 </resources>

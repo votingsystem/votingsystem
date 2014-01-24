@@ -124,6 +124,11 @@ public class ResponseVS<T> implements Parcelable {
     public ResponseVS(int statusCode) {
         this.statusCode = statusCode;
     }
+    public ResponseVS(TypeVS typeVS, T data) {
+        this.typeVS = typeVS;
+        this.data = data;
+    }
+
 
     public static ResponseVS getExceptionResponse(String message, String caption) {
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);

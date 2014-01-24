@@ -11,25 +11,45 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
+import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.math.BigDecimal;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -49,15 +69,98 @@ public class TicketService extends IntentService {
         TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         String pin = arguments.getString(ContextVS.PIN_KEY);
+        BigDecimal value = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
+        ResponseVS responseVS = null;
         switch(operationType) {
             case TICKET_USER_INFO:
-                ResponseVS responseVS = updateUserInfo(pin);
+                responseVS = updateUserInfo(pin);
+                responseVS.setTypeVS(operationType);
+                responseVS.setServiceCaller(serviceCaller);
+                sendMessage(responseVS);
+                break;
+            case TICKET_REQUEST:
+                responseVS = ticketWithdrawal(value, pin);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 sendMessage(responseVS);
                 break;
         }
     }
+
+    private ResponseVS ticketWithdrawal(BigDecimal withdrawalAmount, String pin) {
+        ResponseVS responseVS = null;
+        TicketServer ticketServer = contextVS.getTicketServer();
+        try {
+            if(ticketServer == null) {
+                responseVS = initTicketServer();
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                else ticketServer = contextVS.getTicketServer();
+            }
+            BigDecimal numTickets = withdrawalAmount.divide(new BigDecimal(10));
+            BigDecimal ticketsValue = new BigDecimal(10);
+            List<TicketVS> ticketList = new ArrayList<TicketVS>();
+            for(int i = 0; i < numTickets.intValue(); i++) {
+                TicketVS ticketVS = new TicketVS(ticketServer.getServerURL(),
+                        ticketsValue, ContextVS.CURRENCY_EURO, TypeVS.TICKET);
+                ticketList.add(ticketVS);
+            }
+
+            String messageSubject = getString(R.string.ticket_withdrawal_msg_subject);
+            String fromUser = contextVS.getUserVS().getNif();
+
+            Map ticketsMap = new HashMap();
+            ticketsMap.put("numTickets", numTickets.intValue());
+            ticketsMap.put("ticketValue", ticketsValue.intValue());
+
+            Map smimeContentMap = new HashMap();
+            smimeContentMap.put("totalAmount", withdrawalAmount.toString());
+            smimeContentMap.put("tickets", ticketsMap);
+            smimeContentMap.put("UUID", UUID.randomUUID().toString());
+            smimeContentMap.put("serverURL", contextVS.getTicketServer().getServerURL());
+            smimeContentMap.put("operation", TypeVS.TICKET_REQUEST.toString());
+            JSONObject requestJSON = new JSONObject(smimeContentMap);
+
+            String withdrawalDataFileName = ContextVS.TICKET_REQUEST_DATA_FILE_NAME + ":" +
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
+
+            List<String> ticketCSRList = new ArrayList<String>();
+            for(TicketVS ticket : ticketList) {
+                ticketCSRList.add(new String(ticket.getCertificationRequest().getCsrPEM(),"UTF-8"));
+            }
+            Map csrRequestMap = new HashMap();
+            csrRequestMap.put("ticketCSR", ticketCSRList);
+            JSONObject csrRequestJSON = new JSONObject(csrRequestMap);
+
+            byte[] encryptedCSRBytes = Encryptor.encryptMessage(csrRequestJSON.toString().getBytes(),
+                    ticketServer.getCertificate());
+            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
+            Map<String, Object> mapToSend = new HashMap<String, Object>();
+            mapToSend.put(csrFileName, encryptedCSRBytes);
+
+            FileInputStream fis = contextVS.openFileInput(KEY_STORE_FILE);
+            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, pin.toCharArray());
+            PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, pin.toCharArray());
+            Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
+            PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
+
+            //request signed with user certificate (data signed without representative data)
+            SignedMapSender signedMapSender = new SignedMapSender(fromUser,
+                    contextVS.getAccessControl().getNameNormalized(),
+                    requestJSON.toString(), mapToSend, messageSubject, null,
+                    ticketServer.getTicketRequestServiceURL(),
+                    withdrawalDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    pin.toCharArray(), contextVS.getAccessControl().getCertificate(),
+                    publicKey, privateKey, (AppContextVS)getApplicationContext());
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = ResponseVS.getExceptionResponse(
+                    ex.getMessage(), getString(R.string.exception_lbl));
+        } finally {
+            return responseVS;
+        }
+    }
+
 
     private ResponseVS updateUserInfo(String pin) {
         ResponseVS responseVS = null;

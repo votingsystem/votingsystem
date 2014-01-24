@@ -1,6 +1,7 @@
 package org.votingsystem.ticket.service
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
@@ -81,5 +82,13 @@ class CsrService {
         }
     }
 
+
+    public synchronized ResponseVS signTicketRequest (byte[] ticketRequest, BigDecimal amount, Locale locale) {
+        ResponseVS responseVS = null;
+        //array from ticketCSR
+        JSONObject requestDataJSON = new JSONObject(new String(ticketRequest, "UTF-8"));
+        log.debug("signTicketRequest - erequestDataJSON:  ${requestDataJSON}")
+        return responseVS;
+    }
 
 }

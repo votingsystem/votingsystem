@@ -40,7 +40,6 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
-import org.votingsystem.util.NifUtils;
 
 import java.util.Arrays;
 import java.util.Calendar;

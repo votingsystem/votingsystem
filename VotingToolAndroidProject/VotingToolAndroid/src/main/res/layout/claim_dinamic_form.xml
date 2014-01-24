@@ -21,7 +21,7 @@
             android:layout_marginBottom="10dp"
             android:gravity="center_vertical|center_horizontal"
             android:textColor="@color/empty_field_form"
-            android:text="@string/campos_vacios_msg"
+            android:text="@string/empty_fields_msg"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 	</LinearLayout>
 </ScrollView>

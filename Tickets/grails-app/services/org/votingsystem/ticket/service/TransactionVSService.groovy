@@ -148,6 +148,7 @@ class TransactionVSService {
         resultMap.date = DateUtils.getStringFromDate(Calendar.getInstance().getTime())
         resultMap.totalInputs = totalInputs
         resultMap.totalOutputs = totalOutputs
+        resultMap.available = totalInputs.add(totalOutputs.negate())
         resultMap.transactions = transactionList
         return resultMap
     }

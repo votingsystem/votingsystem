@@ -13,7 +13,6 @@ import android.util.Log;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.ReceiptGridFragment;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
-import org.votingsystem.android.fragment.TicketGridFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 

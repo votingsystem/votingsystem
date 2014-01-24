@@ -13,6 +13,10 @@ import org.votingsystem.model.EnvironmentVS;
 import javax.servlet.ServletContext;
 import java.util.Locale;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class ApplicationContextHolder implements ApplicationContextAware {
 
     private static Logger logger = Logger.getLogger(ApplicationContextHolder.class);
