@@ -116,6 +116,7 @@ class TicketFilters {
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                     switch(contentTypeVS) {
+                        case ContentTypeVS.TICKET:
                         case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
@@ -274,9 +275,9 @@ class TicketFilters {
             log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = null;
             switch(contenType) {
-                case ContentTypeVS.TICKET:
+                /*case ContentTypeVS.TICKET:
                     certValidationResponse = signatureVSService.validateSMIMETicket(smimeMessageReq, request.getLocale())
-                    break;
+                    break;*/
                 default:
                     certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale());
             }

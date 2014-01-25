@@ -30,7 +30,7 @@ class TransactionController {
         if(ContentTypeVS.TICKET == contentTypeVS) {
             responseVS = transactionVSService.processTicketDeposit(messageSMIMEReq, request.locale)
         } else responseVS = transactionVSService.processDeposit(messageSMIMEReq, request.locale)
-        return [responseVS:responseVS]
+        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }
 
 }

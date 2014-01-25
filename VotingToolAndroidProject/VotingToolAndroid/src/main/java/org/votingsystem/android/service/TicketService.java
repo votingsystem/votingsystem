@@ -149,10 +149,11 @@ public class TicketService extends IntentService {
             mapToSend.put("IBAN", IBAN);
             mapToSend.put("currency", currencyVS.toString());
             mapToSend.put("amount", ticketAmount.toString());
-            String textToSign = new JSONObject(mapToSend).toString();
-            Log.d(TAG + "", "ticketSend: " + textToSign);
+
             List<TicketVS> sendedTickets = new ArrayList<TicketVS>();
             for(TicketVS ticketVS : ticketsToSend) {
+                mapToSend.put("UUID", UUID.randomUUID().toString());
+                String textToSign = new JSONObject(mapToSend).toString();
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(
                         ticketVS.getHashCertVSBase64(), StringUtils.getNormalized(receptor),
                         textToSign, subject, null, ticketServer.getDepositURL(),
@@ -163,6 +164,15 @@ public class TicketService extends IntentService {
                     sendedTickets.add(ticketVS);
                 } else break;
              }
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                iconId = R.drawable.receipt_22;
+                caption = getString(R.string.ticket_send_ok_caption);
+                message = getString(R.string.ticket_send_ok_msg, requestAmount.toString(),
+                        currencyVS.toString(), subject, receptor);
+            } else {
+                caption = getString(R.string.ticket_send_error_caption);
+                message = getString(R.string.ticket_send_error_msg, responseVS.getMessage());
+            }
         } catch(Exception ex) {
             ex.printStackTrace();
             message = ex.getMessage();

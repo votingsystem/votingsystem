@@ -375,7 +375,7 @@ class  SignatureVSService {
 		if(messageSMIME) {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
-			log.error("validateSMIME - ${message}")
+			log.error("validateSMIME - ${message} - messageSMIME.id: ${messageSMIME.id}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message)
 		}
 		return validateSignersCertificate(messageWrapper, locale)
@@ -445,14 +445,14 @@ class  SignatureVSService {
 		if(messageSMIME) {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
-			log.error("validateSMIMETicket - ${msg}")
+			log.error("validateSMIMETicket - ${msg} - messageSMIME.id: ${messageSMIME.id}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		return validateTicketCerts(messageWrapper, locale)
 	}
 
 	public ResponseVS validateTicketCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
-        log.debug("validateTicketCerts - ${msg}")
+        log.debug("validateTicketCerts")
 	}
 
 

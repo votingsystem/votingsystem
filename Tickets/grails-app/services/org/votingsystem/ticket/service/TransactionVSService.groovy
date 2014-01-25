@@ -2,6 +2,7 @@ package org.votingsystem.ticket.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
@@ -29,7 +30,7 @@ class TransactionVSService {
 
     public ResponseVS processTicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        UserVS signer = messageSMIMEReq.userVS
+        //messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         String msg;
         try {
             log.debug(smimeMessageReq.getSignedContent())
@@ -43,7 +44,8 @@ class TransactionVSService {
 
             MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                     content:smimeMessageResp.getBytes()).save()
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.TICKET, data:messageSMIMEResp)
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.TICKET, data:messageSMIMEResp,
+                contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             msg = messageSource.getMessage('depositDataError', null, locale)
