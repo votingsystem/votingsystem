@@ -190,8 +190,10 @@ public class TicketService extends IntentService {
 
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(
-                    ex.getMessage(), getString(R.string.exception_lbl));
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
         } finally {
             return responseVS;
         }
@@ -225,21 +227,17 @@ public class TicketService extends IntentService {
                 TicketAccount ticketAccount = TicketAccount.parse(new JSONObject(responseStr));
                 byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(ticketAccount);
                 FileOutputStream outputStream;
-                try {
-                    outputStream = openFileOutput(ContextVS.TICKET_USER_INFO_DATA_FILE_NAME,
-                            Context.MODE_PRIVATE);
-                    outputStream.write(ticketUserInfoBytes);
-                    outputStream.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    responseVS = ResponseVS.getExceptionResponse(
-                            ex.getMessage(), getString(R.string.exception_lbl));
-                }
+                outputStream = openFileOutput(ContextVS.TICKET_USER_INFO_DATA_FILE_NAME,
+                        Context.MODE_PRIVATE);
+                outputStream.write(ticketUserInfoBytes);
+                outputStream.close();
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(
-                    ex.getMessage(), getString(R.string.exception_lbl));
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
         } finally {
             return responseVS;
         }
@@ -258,8 +256,10 @@ public class TicketService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(
-                    ex.getMessage(), getString(R.string.exception_lbl));
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
         } finally {
             responseVS.setData(ticketServer);
             return responseVS;

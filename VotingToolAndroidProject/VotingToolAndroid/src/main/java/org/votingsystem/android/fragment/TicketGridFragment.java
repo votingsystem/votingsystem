@@ -120,22 +120,18 @@ public class TicketGridFragment extends Fragment implements
                 deliverResult(cursor);
     }
 
-
     @Override public Loader<List<TransactionVS>> onCreateLoader(int i, Bundle bundle) {
         return new TransactionVSLoader(getActivity());
     }
 
     @Override
     public void onLoadFinished(Loader<List<TransactionVS>> listLoader, List<TransactionVS> data) {
-        Log.d(TAG, "+++ onLoadFinished() called! +++");
+        Log.d(TAG + "onLoadFinished(...)", "");
         adapter.setData(data);
     }
 
-
-
     @Override public void onLoaderReset(Loader<List<TransactionVS>> cursorLoader) {
         Log.d(TAG + ".onLoaderReset(...)", "");
-        ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
     @Override public void onScrollStateChanged(AbsListView absListView, int i) { }

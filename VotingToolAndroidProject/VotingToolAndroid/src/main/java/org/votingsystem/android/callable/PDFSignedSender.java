@@ -117,11 +117,14 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     serviceURL);
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     contextVS.getString(R.string.pin_error_msg));
         } catch (Exception ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
         } finally { return responseVS; }
     }
 

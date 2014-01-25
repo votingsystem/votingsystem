@@ -130,7 +130,7 @@ public class ResponseVS<T> implements Parcelable {
     }
 
 
-    public static ResponseVS getExceptionResponse(String message, String caption) {
+    public static ResponseVS getExceptionResponse(String caption, String message) {
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         responseVS.setCaption(caption);
         responseVS.setNotificationMessage(message);

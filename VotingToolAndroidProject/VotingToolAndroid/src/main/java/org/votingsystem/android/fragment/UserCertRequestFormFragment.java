@@ -281,9 +281,9 @@ public class UserCertRequestFormFragment extends Fragment {
     	//IMSI
     	//phone = telephonyManager.getSubscriberId();
     	deviceId = telephonyManager.getDeviceId();
-    	if(deviceId == null || "".equals(deviceId.trim())) {
+    	if(deviceId == null || deviceId.trim().isEmpty()) {
     		deviceId = android.os.Build.SERIAL;
-    		if(deviceId == null || "".equals(deviceId.trim())) {
+    		if(deviceId == null || deviceId.trim().isEmpty()) {
     			deviceId = UUID.randomUUID().toString();
     		}
     	}

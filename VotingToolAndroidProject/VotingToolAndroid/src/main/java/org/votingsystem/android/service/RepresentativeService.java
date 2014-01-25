@@ -302,8 +302,10 @@ public class RepresentativeService extends IntentService {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
-                    getString(R.string.exception_lbl));
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
         } finally {
             responseVS.setServiceCaller(serviceCaller);
             responseVS.setTypeVS(operationType);

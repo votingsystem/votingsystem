@@ -105,11 +105,11 @@ public class SignedMailGenerator {
                 if (header != null) body.setHeader(header.getName(), header.getValue());
             }
         }
-        if (fromUser != null && !"".equals(fromUser)) {
+        if (fromUser != null && !fromUser.isEmpty()) {
         	Address fromUserAddress = new InternetAddress(fromUser);
         	body.setFrom(fromUserAddress);
         }
-        if (toUser != null && !"".equals(toUser)) {
+        if (toUser != null && !toUser.isEmpty()) {
         	Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
         	body.setRecipient(Message.RecipientType.TO, toUserAddress);
         }

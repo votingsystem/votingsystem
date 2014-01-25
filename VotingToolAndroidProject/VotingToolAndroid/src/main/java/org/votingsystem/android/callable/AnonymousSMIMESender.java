@@ -76,12 +76,14 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
             } else return responseVS;
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
-                    contextVS.getString(R.string.exception_lbl));
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    contextVS.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(ex.getMessage(),
-                    contextVS.getString(R.string.exception_lbl));
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
         } finally { return responseVS; }
     }
 

@@ -293,7 +293,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 for (FieldEventVS field : fields) {
                     EditText editText = fieldsMap.get(field.getId().intValue());
                     String fieldValue = editText.getText().toString();
-                    if ("".equals(fieldValue)) {
+                    if (fieldValue.isEmpty()) {
                         errorMsgTextView.setVisibility(View.VISIBLE);
                         return;
                     } else field.setValue(fieldValue);
