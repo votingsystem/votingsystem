@@ -192,7 +192,7 @@ public class TicketService extends IntentService {
                     TicketVS ticket = ticketsMap.get(hashCertVS);
                     ticket.getCertificationRequest().initSigner(issuedTicketsArray.getString(i).getBytes());
                 }
-                ticketsMap.v
+                contextVS.updateTickets(ticketsMap.values());
             }
 
         } catch(Exception ex) {
