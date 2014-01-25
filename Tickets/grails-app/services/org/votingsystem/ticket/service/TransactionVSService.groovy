@@ -170,7 +170,7 @@ class TransactionVSService {
                 currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
                 resultMap.put(currencyVS.toString(), currencyMap)
             }
-            currencyMap.totalOutputs = totalOutputs.add(transactionVS.amount)
+            currencyMap.totalOutputs = currencyMap.totalOutputs.add(transactionVS.amount)
             currencyMap.transactionList.add(getTransactionMap(transactionVS))
         }
         resultMap.date = DateUtils.getStringFromDate(Calendar.getInstance().getTime())

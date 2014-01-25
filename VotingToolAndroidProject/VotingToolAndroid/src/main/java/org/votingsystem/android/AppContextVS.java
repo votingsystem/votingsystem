@@ -205,11 +205,21 @@ public class AppContextVS extends Application {
     }
 
     public void updateTickets(Collection<TicketVS> tickets) {
-        TicketAccount ticketAccount = getTicketAccount();
-        for(TicketVS ticketVS : tickets) {
-            Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
-            CurrencyData currencyData = currencyMap.get(ticketVS.getCurrency());
-            currencyData.addTicket(ticketVS);
+        try {
+            TicketAccount ticketAccount = getTicketAccount();
+            for(TicketVS ticketVS : tickets) {
+                Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
+                CurrencyData currencyData = currencyMap.get(ticketVS.getCurrency());
+                currencyData.addTicket(ticketVS);
+            }
+            byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(ticketAccount);
+            FileOutputStream outputStream;
+            outputStream = openFileOutput(ContextVS.TICKET_USER_INFO_DATA_FILE_NAME,
+                    Context.MODE_PRIVATE);
+            outputStream.write(ticketUserInfoBytes);
+            outputStream.close();
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
     }
 

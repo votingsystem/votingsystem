@@ -245,7 +245,6 @@ public class TicketService extends IntentService {
         }
     }
 
-
     private ResponseVS initTicketServer() {
         ResponseVS responseVS = null;
         TicketServer ticketServer = null;
