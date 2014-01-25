@@ -174,20 +174,22 @@ public class AppContextVS extends Application {
             TicketAccount ticketAccount = getTicketAccount();
             if(ticketAccount != null) {
                 Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
-                Set<CurrencyVS> keySet = currencyMap.keySet();
-                Map<CurrencyVS, CurrencyData> newCurrencyMap = updatedTicketAccount.getCurrencyMap();
-                for(CurrencyVS currencyVS : keySet) {
-                    if(newCurrencyMap.containsKey(currencyVS)) {
-                        newCurrencyMap.get(currencyVS).setTicketList(currencyMap.get(currencyVS).getTicketList());
-                    } else {
-                        Log.e(TAG + ".setTicketAccount(...)", "updatedTicketAccount " +
-                                "missing currency data" + currencyVS.toString());
-                        CurrencyData currencyData = currencyMap.get(currencyVS);
-                        currencyData.setTransactionList(null);
-                        currencyData.setTotalInputs(new BigDecimal(0));
-                        currencyData.setTotalOutputs(new BigDecimal(0));
-                        currencyData.setLastRequestDate(updatedTicketAccount.getLastRequestDate());
-                        newCurrencyMap.put(currencyVS, currencyData);
+                if(currencyMap != null) {
+                    Set<CurrencyVS> keySet = currencyMap.keySet();
+                    Map<CurrencyVS, CurrencyData> newCurrencyMap = updatedTicketAccount.getCurrencyMap();
+                    for(CurrencyVS currencyVS : keySet) {
+                        if(newCurrencyMap.containsKey(currencyVS)) {
+                            newCurrencyMap.get(currencyVS).setTicketList(currencyMap.get(currencyVS).getTicketList());
+                        } else {
+                            Log.e(TAG + ".setTicketAccount(...)", "updatedTicketAccount " +
+                                    "missing currency data" + currencyVS.toString());
+                            CurrencyData currencyData = currencyMap.get(currencyVS);
+                            currencyData.setTransactionList(null);
+                            currencyData.setTotalInputs(new BigDecimal(0));
+                            currencyData.setTotalOutputs(new BigDecimal(0));
+                            currencyData.setLastRequestDate(updatedTicketAccount.getLastRequestDate());
+                            newCurrencyMap.put(currencyVS, currencyData);
+                        }
                     }
                 }
             }

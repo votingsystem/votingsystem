@@ -152,20 +152,24 @@ public class TicketUserInfoFragment extends Fragment {
                     getString(R.string.empty_ticket_user_info));
             return;
         }
-        CurrencyData currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
+        CurrencyData currencyData = null;
+        if(ticketUserInfo.getCurrencyMap() != null) {
+            currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
+        }
+        if(currencyData != null) {
+            last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
+                    DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
+            ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
+                    currencyData.getAccountBalance())));
+            ticket_cash_info.setText(Html.fromHtml(getString(R.string.ticket_cash_amount_info_lbl,
+                    currencyData.getCashBalance())));
 
-        last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
-                DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
-        ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
-                currencyData.getAccountBalance())));
-        ticket_cash_info.setText(Html.fromHtml(getString(R.string.ticket_cash_amount_info_lbl,
-                currencyData.getCashBalance())));
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 7);
-        time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
-        if (!(currencyData.getAccountBalance().intValue() > 0)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+            time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
+                    DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
+        }
+        if (currencyData == null || !(currencyData.getAccountBalance().intValue() > 0)) {
             withdrawal_button.setVisibility(View.GONE);
         }
     }
