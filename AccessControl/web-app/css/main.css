@@ -190,18 +190,6 @@ img {
 	text-indent: 25px;
 }
 
-.nav a.home {
-	background-image: url(../images/skin/house.png);
-}
-
-.nav a.list {
-	background-image: url(../images/skin/database_table.png);
-}
-
-.nav a.create {
-	background-image: url(../images/skin/database_add.png);
-}
-
 /* CREATE/EDIT FORMS AND SHOW PAGES */
 
 fieldset,
