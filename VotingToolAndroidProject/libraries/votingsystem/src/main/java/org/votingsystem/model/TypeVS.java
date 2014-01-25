@@ -43,5 +43,7 @@ public enum TypeVS {
     TICKET_REQUEST_DIALOG,
     TICKET_USER_INFO,
 
+    TRANSACTION,
+
     RECEIPT;
 }

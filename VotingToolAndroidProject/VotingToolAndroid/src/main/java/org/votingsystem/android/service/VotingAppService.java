@@ -18,15 +18,18 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
+import org.votingsystem.android.fragment.TicketUserInfoFragment;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
@@ -59,9 +62,8 @@ public class VotingAppService extends Service implements Runnable {
         Log.i(TAG + ".onCreate(...) ", "VotingAppService created");
     }
 
-    private void processOperation (String accessControlURL, String operationStr) {
-        Log.d(TAG + ".processOperation(...)", "accessControlURL: " + accessControlURL + " - " +
-            " - operationStr: " + operationStr);
+    private void processOperation (String accessControlURL, OperationVS operationVS) {
+        Log.d(TAG + ".processOperation(...)", "accessControlURL: " + accessControlURL);
         ResponseVS responseVS = HttpHelper.getData(AccessControlVS.
                 getServerInfoURL(accessControlURL), ContentTypeVS.JSON);
         SharedPreferences pref = getSharedPreferences(
@@ -80,9 +82,7 @@ public class VotingAppService extends Service implements Runnable {
             try {
                 AccessControlVS accessControl = AccessControlVS.parse(responseVS.getMessage());
                 appContextVS.setAccessControlVS(accessControl);
-                if(operationStr != null  &&
-                        State.WITH_CERTIFICATE == appContextVS.getState()){
-                    OperationVS operationVS = OperationVS.parse(operationStr);
+                if(operationVS != null  && State.WITH_CERTIFICATE == appContextVS.getState()){
                     Log.d(TAG + ".onStartCommand(...)", "operationVS: " + operationVS.getTypeVS());
                     if(operationVS.getEventVS() != null) {
                         //We don't pass all eventvs data on uri because content can be very large
@@ -93,6 +93,12 @@ public class VotingAppService extends Service implements Runnable {
                             operationVS.setEventVS(selectedEvent);
                             processOperation(operationVS);
                         }
+                    } else if(operationVS.getTypeVS() == TypeVS.TRANSACTION) {
+                        Intent newIntent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+                        newIntent.putExtra(ContextVS.FRAGMENT_KEY, TicketUserInfoFragment.class.getName());
+                        newIntent.putExtra(ContextVS.URI_KEY, operationVS.getUriData());
+                        newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(newIntent);
                     }
                 } else {
                     Intent intent = null;
@@ -148,28 +154,35 @@ public class VotingAppService extends Service implements Runnable {
         Log.i(TAG + ".onStartCommand(...) ", "");
         super.onStartCommand(intent, flags, startId);
         Bundle arguments = intent.getExtras();
-        if(arguments != null) {
-            final String accessControlURL = arguments.getString(URL_KEY);
-            Uri uriData = (Uri) arguments.getParcelable(URI_KEY);
-            String operationStr = null;
-            if(uriData != null) {
+        final String accessControlURL = arguments.getString(URL_KEY);
+        Uri uriData = (Uri) arguments.getParcelable(URI_KEY);
+        OperationVS operationVS = null;
+        if(uriData != null) {
+            String operationStr = uriData.getQueryParameter("operation");
+            if(operationStr != null) {
+                operationVS = new OperationVS(TypeVS.valueOf(operationStr), uriData);
+            } else {
                 String encodedMsg = uriData.getQueryParameter("msg");
                 if(encodedMsg != null) {
-                    operationStr = StringUtils.decodeString(encodedMsg);
+                    try {
+                        operationVS = OperationVS.parse(StringUtils.decodeString(encodedMsg));
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
-            final String operationStrFinal = operationStr;
-            Runnable runnable = new Runnable() {
-                @Override public void run() {
-                    processOperation(accessControlURL, operationStrFinal);
-                }
-            };
+        }
+        final OperationVS operationFinal = operationVS;
+        Runnable runnable = new Runnable() {
+            @Override public void run() {
+                processOperation(accessControlURL, operationFinal);
+            }
+        };
             /*Services run in the main thread of their hosting process. This means that, if
             * it's going to do any CPU intensive (such as networking) operations, it should
             * spawn its own thread in which to do that work.*/
-            Thread thr = new Thread(null, runnable, "voting_app_service_thread");
-            thr.start();
-        }
+        Thread thr = new Thread(null, runnable, "voting_app_service_thread");
+        thr.start();
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
     }

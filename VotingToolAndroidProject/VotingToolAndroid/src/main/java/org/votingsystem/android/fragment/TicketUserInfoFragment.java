@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -117,8 +118,6 @@ public class TicketUserInfoFragment extends Fragment {
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
 
-
-
         rootView = inflater.inflate(R.layout.ticket_user_info, container, false);
         ticket_account_info = (TextView)rootView.findViewById(R.id.ticket_account_info);
         ticket_cash_info = (TextView)rootView.findViewById(R.id.ticket_cash_info);
@@ -133,6 +132,15 @@ public class TicketUserInfoFragment extends Fragment {
         return rootView;
     }
 
+    @Override public void onStart() {
+        Log.d(TAG + ".onStart()", "onStart");
+        super.onStart();
+        Uri uriData = getArguments().getParcelable(ContextVS.URI_KEY);
+        if(uriData != null) {
+            String amount = uriData.getQueryParameter("amount");
+            Log.d(TAG + ".onCreateView(...)", "amount: " + amount);
+        }
+    }
     private void loadUserInfo() {
         ticketUserInfo = ((AppContextVS)getActivity().getApplicationContext()).getTicketAccount();
         if(ticketUserInfo == null) {

@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import android.net.Uri;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +28,7 @@ public class OperationVS {
     private JSONObject signedContent;
     private EventVS eventVS;
     private String sessionId;
+    private Uri uriData;
     private String[] args;
 
     
@@ -38,7 +41,12 @@ public class OperationVS {
     public OperationVS(TypeVS typeVS) {
         this.typeVS = typeVS;
     }
-    
+
+    public OperationVS(TypeVS typeVS, Uri uriData) {
+        this.typeVS = typeVS;
+        this.uriData = uriData;
+    }
+
     public OperationVS(String typeVS) {
         this.typeVS = TypeVS.valueOf(typeVS);
     }
@@ -217,6 +225,14 @@ public class OperationVS {
 
     public void setServiceURL(String serviceURL) {
         this.serviceURL = serviceURL;
+    }
+
+    public Uri getUriData() {
+        return uriData;
+    }
+
+    public void setUriData(Uri uriData) {
+        this.uriData = uriData;
     }
 }
 

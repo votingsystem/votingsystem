@@ -15,9 +15,11 @@ import android.view.MenuItem;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.TicketUserInfoFragment;
 import org.votingsystem.android.service.VotingAppService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -49,22 +51,14 @@ public class MainActivity extends FragmentActivity {
             return;
         }
         contextVS = (AppContextVS) getApplicationContext();
-        Uri uriData = null;
-        if(Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-            //getIntent().getCategories().contains(Intent.CATEGORY_BROWSABLE);
-            uriData = getIntent().getData();
-            if(uriData != null) Log.d(TAG + ".onCreate(...)", "uriData - host:" + uriData.getHost()+
-                    " - path: " + uriData.getPath() + " - userInfo: " + uriData.getUserInfo());
-            accessControlURL = uriData.getQueryParameter("serverURL");
-        } else {
-            Properties props = new Properties();
-            try {
-                props.load(getAssets().open("VotingSystem.properties"));
-                accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        Properties props = new Properties();
+        try {
+            props.load(getAssets().open("VotingSystem.properties"));
+            accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
+        Uri uriData = getIntent().getData();
         if(savedInstanceState != null && savedInstanceState.getBoolean(
                 ContextVS.LOADING_KEY, false)) {
             showProgressDialog(getString(R.string.connecting_caption),

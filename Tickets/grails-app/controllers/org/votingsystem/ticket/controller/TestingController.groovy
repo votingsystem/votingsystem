@@ -18,6 +18,10 @@ class TestingController {
     def grailsApplication
     def transactionVSService
 
+    def accounts() {
+
+    }
+
     def index() {
         UserVS userVS = UserVS.get(12)
 

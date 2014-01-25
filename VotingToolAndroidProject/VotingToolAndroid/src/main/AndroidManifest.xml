@@ -41,6 +41,14 @@
 		        <category android:name="android.intent.category.DEFAULT"/>  
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
+
+            <intent-filter>
+                <data android:scheme="http" android:host="tickets"/>
+                <data android:path="/Tickets/app/androidClient"/>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
      	</activity>
 
         <meta-data
