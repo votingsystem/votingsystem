@@ -74,10 +74,6 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
                         certificationRequest.getKeyPair().getPrivate());
                 responseVS.setSmimeMessage(receipt);
             } else return responseVS;
-        } catch(VotingSystemKeyStoreException ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
-                    contextVS.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
             String message = ex.getMessage();

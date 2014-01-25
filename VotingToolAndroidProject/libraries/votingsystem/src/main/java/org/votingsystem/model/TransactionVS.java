@@ -25,6 +25,7 @@ public class TransactionVS  implements Serializable {
 
     private Long id;
     private String messageSMIMEURL;
+    private String subject;
     private BigDecimal amount = null;
 
     private transient SMIMEMessageWrapper messageSMIME;
@@ -115,6 +116,14 @@ public class TransactionVS  implements Serializable {
 
     public void setCurrencyVS(CurrencyVS currencyVS) {
         this.currencyVS = currencyVS;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     public SMIMEMessageWrapper getMessageSMIME() {

@@ -23,9 +23,11 @@
 
         function initTransaction(transactionSubject) {
             var encodedIBAN = encodeURIComponent("ESkk bbbb gggg xxcc cccc cccc")
-            var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(transactionSubject) +
-				"&operation=TRANSACTION&amount=1234&currency=Euro&IBAN=" + encodedIBAN
-			window.location.href = redirectURL.replace("\n","")
+            var encodedSubject = encodeURIComponent(transactionSubject)
+            var encodedReceptor = encodeURIComponent("Burrum Burrrum bUrrrum")
+            var uriData = "${createLink(controller:'app', action:'androidClient')}?operation=TRANSACTION&amount=20&currency=Euro&" +
+                "IBAN=" + encodedIBAN + "&subject=" + encodedSubject + "&receptor=" + encodedReceptor
+			window.location.href = uriData.replace("\n","")
             return false
         }
 

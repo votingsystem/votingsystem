@@ -54,7 +54,7 @@ public enum ContentTypeVS {
 
     VOTE("application/vote;application/pkcs7-signature;application/pkcs7-mime", "vote"),
 
-    TICKET("application/vote;application/pkcs7-signature;application/pkcs7-mime", "ticket"),
+    TICKET("application/ticket;application/pkcs7-signature;application/pkcs7-mime", "ticket"),
 
     X509_CA("application/x509-ca-cert", "crt"),
     X509_USER("application/x509-user-cert", "crt");
@@ -129,6 +129,8 @@ public enum ContentTypeVS {
         if(contentTypeStr.contains(TIMESTAMP_RESPONSE.getName())) result = TIMESTAMP_RESPONSE;
 
         if(contentTypeStr.contains(VOTE.getName())) result = VOTE;
+
+        if(contentTypeStr.contains(TICKET.getName())) result = TICKET;
 
         return result;
     }

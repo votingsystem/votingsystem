@@ -1,6 +1,7 @@
 package org.votingsystem.ticket.controller
 
 import grails.converters.JSON
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 
@@ -24,7 +25,12 @@ class TransactionController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        return [responseVS:transactionVSService.processDeposit(messageSMIMEReq, request.locale)]
+        ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
+        ResponseVS responseVS = null
+        if(ContentTypeVS.TICKET == contentTypeVS) {
+            responseVS = transactionVSService.processTicketDeposit(messageSMIMEReq, request.locale)
+        } else responseVS = transactionVSService.processDeposit(messageSMIMEReq, request.locale)
+        return [responseVS:responseVS]
     }
 
 }

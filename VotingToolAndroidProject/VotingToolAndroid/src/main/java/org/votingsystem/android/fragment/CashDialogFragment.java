@@ -42,9 +42,9 @@ import org.votingsystem.model.TypeVS;
 
 import java.math.BigDecimal;
 
-public class CashWithdrawalDialogFragment extends DialogFragment {
+public class CashDialogFragment extends DialogFragment {
 
-    public static final String TAG = "CashWithdrawalDialogFragment";
+    public static final String TAG = "CashDialogFragment";
 
     public static final String MAX_VALUE_KEY = "MAX_VALUE_KEY";
 
@@ -58,16 +58,16 @@ public class CashWithdrawalDialogFragment extends DialogFragment {
     public static void showDialog(FragmentManager fragmentManager, String broadCastId,
              String caption, String message, BigDecimal maxValue,TypeVS type) {
         boolean isWithCertValidation = true;
-        CashWithdrawalDialogFragment pinDialog = CashWithdrawalDialogFragment.newInstance(caption,
+        CashDialogFragment pinDialog = CashDialogFragment.newInstance(caption,
                 message, maxValue, isWithCertValidation, broadCastId, type);
-        pinDialog.show(fragmentManager, CashWithdrawalDialogFragment.TAG);
+        pinDialog.show(fragmentManager, CashDialogFragment.TAG);
 
     }
 
 
-    public static CashWithdrawalDialogFragment newInstance(String caption, String msg,
+    public static CashDialogFragment newInstance(String caption, String msg,
            BigDecimal maxValue, boolean isWithCertValidation, String caller, TypeVS type) {
-        CashWithdrawalDialogFragment dialog = new CashWithdrawalDialogFragment();
+        CashDialogFragment dialog = new CashDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.CAPTION_KEY, caption);
         args.putString(ContextVS.MESSAGE_KEY, msg);
@@ -116,7 +116,7 @@ public class CashWithdrawalDialogFragment extends DialogFragment {
             }).setNegativeButton(R.string.cancel_lbl, null);
             return builder.create();
         } else {
-            View view = inflater.inflate(R.layout.cash_withdrawal_dialog_fragment, null);
+            View view = inflater.inflate(R.layout.cash_dialog_fragment, null);
             msgTextView = (TextView) view.findViewById(R.id.msg);
             horizontal_number_picker = (HorizontalNumberPicker)view.findViewById(R.id.horizontal_number_picker);
             errorMsgTextView = (TextView) view.findViewById(R.id.errorMsg);
@@ -155,8 +155,8 @@ public class CashWithdrawalDialogFragment extends DialogFragment {
         if(horizontal_number_picker.getValue().compareTo(new BigDecimal(0)) > 0) {
             if(dialogCaller != null) {
                 Intent intent = new Intent(dialogCaller);
-                ResponseVS responseVS = new ResponseVS(TypeVS.TICKET_REQUEST_DIALOG,
-                        horizontal_number_picker.getValue());
+                ResponseVS responseVS = new ResponseVS(typeVS, horizontal_number_picker.getValue());
+                responseVS.setStatusCode(ResponseVS.SC_PROCESSING);
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
             }

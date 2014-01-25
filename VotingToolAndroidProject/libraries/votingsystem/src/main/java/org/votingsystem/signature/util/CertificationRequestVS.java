@@ -128,21 +128,27 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public void initSigner (byte[] signedCsr) throws Exception {
-        Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
-        Log.d(TAG + "-initSigner-", "Num certs: " + certificates.size());
-        if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
-        certificate = certificates.iterator().next();
-        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
-        certificates.toArray(arrayCerts);
-        signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
+    public void initSigner (byte[] signedCsr) {
         this.signedCsr = signedCsr;
     }
 
     public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser,
           String textToSign, String subject, Header header) throws Exception {
-        if (signedMailGenerator == null) throw new Exception (" --- SignedMailGenerator null --- ");
-        return signedMailGenerator.genMimeMessage(fromUser, toUser, textToSign, subject);
+        return getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject);
+    }
+
+    private SignedMailGenerator getSignedMailGenerator() throws Exception {
+        if (signedMailGenerator == null) {
+            Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
+            Log.d(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
+            if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
+            certificate = certificates.iterator().next();
+            X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
+            certificates.toArray(arrayCerts);
+            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
+            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
+        }
+        return signedMailGenerator;
     }
 
     public X509Certificate getCertificate() {

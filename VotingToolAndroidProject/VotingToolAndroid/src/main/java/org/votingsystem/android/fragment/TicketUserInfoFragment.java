@@ -23,7 +23,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.TicketService;
@@ -46,11 +45,16 @@ public class TicketUserInfoFragment extends Fragment {
 
 	public static final String TAG = "TicketUserInfoFragment";
 
-    private BigDecimal withdrawalAmount;
+    private BigDecimal amount;
+    private CurrencyVS currencyVS = CurrencyVS.Euro;
+    private Uri uriData;
+    private String IBAN;
+    private String subject;
+    private String receptor;
     private View rootView;
     private String broadCastId = null;
     private AppContextVS contextVS;
-    private Button withdrawal_button;
+    private Button request_button;
     private View progressContainer;
     private TextView ticket_account_info;
     private TextView ticket_cash_info;
@@ -70,24 +74,33 @@ public class TicketUserInfoFragment extends Fragment {
                 case TICKET_USER_INFO:
                     launchUpdateUserInfoService(pin);
                     break;
-                case TICKET_REQUEST_DIALOG:
-                    launchTicketWithdrawal(pin);
+                case TICKET_REQUEST:
+                    launchTicketRequest(pin);
+                    break;
+                case TICKET_SEND:
+                    launchTicketSend(pin);
                     break;
             }
 
         } else {
             switch(responseVS.getTypeVS()) {
                 case TICKET_REQUEST:
+                    if(ResponseVS.SC_PROCESSING == responseVS.getStatusCode()) {
+                        amount = (BigDecimal) responseVS.getData();
+                        PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                                getString(R.string.ticket_request_pin_msg, amount,
+                                currencyVS.toString()), false,
+                                TypeVS.TICKET_REQUEST);
+                    } else {
+                        showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                                responseVS.getNotificationMessage());
+                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) loadUserInfo();
+                    }
+                    break;
+                case TICKET_SEND:
                     showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) loadUserInfo();
-                    break;
-                case TICKET_REQUEST_DIALOG:
-                    Log.d(TAG + ".broadcastReceiver.onReceive(...)", "TICKET_REQUEST_DIALOG: " + responseVS.getData());
-                    withdrawalAmount = (BigDecimal) responseVS.getData();
-                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                            getString(R.string.ticket_request_pin_msg, withdrawalAmount), false,
-                            TypeVS.TICKET_REQUEST_DIALOG);
                     break;
                 case TICKET_USER_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -100,7 +113,6 @@ public class TicketUserInfoFragment extends Fragment {
         }
         }
     };
-
 
     public static Fragment newInstance(Long representativeId) {
         TicketUserInfoFragment fragment = new TicketUserInfoFragment();
@@ -123,22 +135,45 @@ public class TicketUserInfoFragment extends Fragment {
         ticket_cash_info = (TextView)rootView.findViewById(R.id.ticket_cash_info);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
-        withdrawal_button = (Button) rootView.findViewById(R.id.withdrawal_button);
+        request_button = (Button) rootView.findViewById(R.id.request_button);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         loadUserInfo();
+        if(savedInstanceState != null) {
+            currencyVS = (CurrencyVS) savedInstanceState.getSerializable(ContextVS.CURRENCY_KEY);
+            amount = (BigDecimal) savedInstanceState.getSerializable(ContextVS.VALUE_KEY);
+            IBAN = savedInstanceState.getString(ContextVS.IBAN_KEY);
+        }
         return rootView;
     }
 
     @Override public void onStart() {
         Log.d(TAG + ".onStart()", "onStart");
         super.onStart();
-        Uri uriData = getArguments().getParcelable(ContextVS.URI_KEY);
+        uriData = getArguments().getParcelable(ContextVS.URI_KEY);
         if(uriData != null) {
-            String amount = uriData.getQueryParameter("amount");
-            Log.d(TAG + ".onCreateView(...)", "amount: " + amount);
+            amount = new BigDecimal(uriData.getQueryParameter("amount"));
+            currencyVS = CurrencyVS.valueOf(uriData.getQueryParameter("currency"));
+            subject = uriData.getQueryParameter("subject");
+            receptor = uriData.getQueryParameter("receptor");
+            Log.d(TAG + ".onStart(...)", "amount: " + amount + " - subject: " + subject +
+                    " - receptor: " + receptor);
+            BigDecimal cashAvailable = new BigDecimal(0);
+            if(ticketUserInfo!= null && ticketUserInfo.getCurrencyMap() != null) {
+                CurrencyData currencyData = ticketUserInfo.getCurrencyMap().get(currencyVS);
+                cashAvailable = currencyData.getCashBalance();
+            }
+            if(cashAvailable != null && cashAvailable.compareTo(amount) > 0) {
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        getString(R.string.ticket_send_pin_msg, amount,
+                                currencyVS.toString(), receptor, subject), false, TypeVS.TICKET_SEND);
+            } else {
+                showMessage(ResponseVS.SC_ERROR, getString(R.string.insufficient_cash_caption),
+                        getString(R.string.insufficient_cash_msg, currencyVS.toString(),
+                                amount.toString(), cashAvailable.toString()));
+            }
         }
     }
     private void loadUserInfo() {
@@ -153,23 +188,22 @@ public class TicketUserInfoFragment extends Fragment {
             currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
         } else currencyData = null;
 
-
         if(currencyData != null) {
-            withdrawal_button.setOnClickListener(new OnClickListener() {
+            request_button.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
-                    CashWithdrawalDialogFragment.showDialog(getFragmentManager(), broadCastId,
-                            getString(R.string.cash_withdrawal_dialog_caption),
-                            getString(R.string.cash_withdrawal_dialog_msg, currencyData.getAccountBalance(),
-                                    CurrencyVS.Euro.toString()),
+                    CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
+                            getString(R.string.cash_request_dialog_caption),
+                            getString(R.string.cash_dialog_msg,
+                                    currencyData.getAccountBalance(), CurrencyVS.Euro.toString()),
                             currencyData.getAccountBalance(), null);
                 }
             });
             last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
                     DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
             ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
-                    currencyData.getAccountBalance())));
+                    currencyData.getAccountBalance(), currencyVS.toString())));
             ticket_cash_info.setText(Html.fromHtml(getString(R.string.ticket_cash_amount_info_lbl,
-                    currencyData.getCashBalance())));
+                    currencyData.getCashBalance(), currencyVS.toString())));
 
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 7);
@@ -177,7 +211,7 @@ public class TicketUserInfoFragment extends Fragment {
                     DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
         }
         if (currencyData == null || !(currencyData.getAccountBalance().intValue() > 0)) {
-            withdrawal_button.setVisibility(View.GONE);
+            request_button.setVisibility(View.GONE);
         }
     }
 
@@ -243,15 +277,32 @@ public class TicketUserInfoFragment extends Fragment {
         }
     }
 
-    private void launchTicketWithdrawal(String pin) {
-        Log.d(TAG + ".launchTicketWithdrawal(...) ", "amount: " + withdrawalAmount);
+    private void launchTicketRequest(String pin) {
+        Log.d(TAG + ".launchTicketRequest(...) ", "amount: " + amount);
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     TicketService.class);
             startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_REQUEST);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.VALUE_KEY, withdrawalAmount);
+            startIntent.putExtra(ContextVS.VALUE_KEY, amount);
+            startIntent.putExtra(ContextVS.CURRENCY_KEY, currencyVS);
+            showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void launchTicketSend(String pin) {
+        Log.d(TAG + ".launchTicketSend(...) ", "amount: " + amount);
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    TicketService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_SEND);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.URI_KEY, uriData);
             showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
@@ -318,6 +369,9 @@ public class TicketUserInfoFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+        outState.putSerializable(ContextVS.CURRENCY_KEY, currencyVS);
+        outState.putSerializable(ContextVS.VALUE_KEY, amount);
+        outState.putSerializable(ContextVS.IBAN_KEY, IBAN);
     }
 
 }

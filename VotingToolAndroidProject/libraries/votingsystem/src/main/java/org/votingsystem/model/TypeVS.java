@@ -40,7 +40,7 @@ public enum TypeVS {
 
     TICKET,
     TICKET_REQUEST,
-    TICKET_REQUEST_DIALOG,
+    TICKET_SEND,
     TICKET_USER_INFO,
 
     TRANSACTION,

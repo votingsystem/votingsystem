@@ -20,10 +20,36 @@ import java.math.RoundingMode
 */
 class TransactionVSService {
 
+    def signatureVSService
     def messageSource
     def userVSService
     def sessionFactory
     def grailsLinkGenerator
+    def grailsApplication
+
+    public ResponseVS processTicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
+        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        UserVS signer = messageSMIMEReq.userVS
+        String msg;
+        try {
+            log.debug(smimeMessageReq.getSignedContent())
+
+            String fromUser = grailsApplication.config.VotingSystem.serverName
+            String toUser = smimeMessageReq.getFrom().toString()
+            String subject = messageSource.getMessage('ticketReceiptSubject', null, locale)
+
+            SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                    smimeMessageReq, subject)
+
+            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
+                    content:smimeMessageResp.getBytes()).save()
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.TICKET, data:messageSMIMEResp)
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            msg = messageSource.getMessage('depositDataError', null, locale)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.TICKET_DEPOSIT_ERROR)
+        }
+    }
 
     public ResponseVS processDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()

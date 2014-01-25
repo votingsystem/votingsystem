@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -20,12 +21,14 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.android.callable.AnonymousSMIMESender;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
@@ -33,12 +36,14 @@ import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.StringUtils;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -54,6 +59,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.mail.Header;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
@@ -76,7 +83,9 @@ public class TicketService extends IntentService {
         TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         String pin = arguments.getString(ContextVS.PIN_KEY);
-        BigDecimal value = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
+        Uri uriData =  arguments.getParcelable(ContextVS.URI_KEY);;
+        BigDecimal amount = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
+        CurrencyVS currencyVS = (CurrencyVS) arguments.getSerializable(ContextVS.CURRENCY_KEY);
         ResponseVS responseVS = null;
         switch(operationType) {
             case TICKET_USER_INFO:
@@ -86,7 +95,19 @@ public class TicketService extends IntentService {
                 sendMessage(responseVS);
                 break;
             case TICKET_REQUEST:
-                responseVS = ticketRequest(value, pin);
+                responseVS = ticketRequest(amount, currencyVS, pin);
+                responseVS.setTypeVS(operationType);
+                responseVS.setServiceCaller(serviceCaller);
+                showNotification(responseVS);
+                sendMessage(responseVS);
+                break;
+            case TICKET_SEND:
+                amount = new BigDecimal(uriData.getQueryParameter("amount"));
+                currencyVS = CurrencyVS.valueOf(uriData.getQueryParameter("currency"));
+                String subject = uriData.getQueryParameter("subject");
+                String receptor = uriData.getQueryParameter("receptor");
+                String IBAN = uriData.getQueryParameter("IBAN");
+                responseVS = ticketSend(amount, currencyVS, subject, receptor, IBAN, pin);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 showNotification(responseVS);
@@ -95,7 +116,68 @@ public class TicketService extends IntentService {
         }
     }
 
-    private ResponseVS ticketRequest(BigDecimal withdrawalAmount, String pin) {
+    private ResponseVS ticketSend(BigDecimal requestAmount, CurrencyVS currencyVS,
+            String subject, String receptor, String IBAN, String pin) {
+        ResponseVS responseVS = null;
+        String message = null;
+        String caption = null;
+        Integer iconId = R.drawable.cancel_22;
+        try {
+            CurrencyData availableCurrencyData = contextVS.getTicketAccount().getCurrencyMap().
+                    get(currencyVS);
+            BigDecimal available = availableCurrencyData.getCashBalance();
+            if(available.compareTo(requestAmount) < 0) {
+                throw new Exception(getString(R.string.insufficient_cash_msg, currencyVS.toString(),
+                        requestAmount.toString(), available.toString()));
+            }
+            TicketServer ticketServer = contextVS.getTicketServer();
+            if(ticketServer == null) {
+                responseVS = initTicketServer();
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                else ticketServer = contextVS.getTicketServer();
+            }
+
+            BigDecimal ticketAmount = new BigDecimal(10);
+            int numTickets = requestAmount.divide(ticketAmount).intValue();
+            List<TicketVS> ticketsToSend = new ArrayList<TicketVS>();
+            for(int i = 0; i < numTickets; i++) {
+                ticketsToSend.add(availableCurrencyData.getTicketList().remove(0));
+            }
+            Map mapToSend = new HashMap();
+            mapToSend.put("receptor", receptor);
+            mapToSend.put("subject", subject);
+            mapToSend.put("IBAN", IBAN);
+            mapToSend.put("currency", currencyVS.toString());
+            mapToSend.put("amount", ticketAmount.toString());
+            String textToSign = new JSONObject(mapToSend).toString();
+            Log.d(TAG + "", "ticketSend: " + textToSign);
+            List<TicketVS> sendedTickets = new ArrayList<TicketVS>();
+            for(TicketVS ticketVS : ticketsToSend) {
+                AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(
+                        ticketVS.getHashCertVSBase64(), StringUtils.getNormalized(receptor),
+                        textToSign, subject, null, ticketServer.getDepositURL(),
+                        ticketServer.getCertificate(), ContentTypeVS.TICKET,
+                        ticketVS.getCertificationRequest(), contextVS);
+                responseVS = anonymousSender.call();
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    sendedTickets.add(ticketVS);
+                } else break;
+             }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
+        } finally {
+            responseVS.setIconId(iconId);
+            responseVS.setCaption(caption);
+            responseVS.setNotificationMessage(message);
+            return responseVS;
+        }
+    }
+
+    private ResponseVS ticketRequest(BigDecimal requestAmount, CurrencyVS currencyVS, String pin) {
         ResponseVS responseVS = null;
         TicketServer ticketServer = contextVS.getTicketServer();
         Map<String, TicketVS> ticketsMap = new HashMap<String, TicketVS>();
@@ -108,17 +190,17 @@ public class TicketService extends IntentService {
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 else ticketServer = contextVS.getTicketServer();
             }
-            BigDecimal numTickets = withdrawalAmount.divide(new BigDecimal(10));
+            BigDecimal numTickets = requestAmount.divide(new BigDecimal(10));
             BigDecimal ticketsValue = new BigDecimal(10);
             List<TicketVS> ticketList = new ArrayList<TicketVS>();
             for(int i = 0; i < numTickets.intValue(); i++) {
                 TicketVS ticketVS = new TicketVS(ticketServer.getServerURL(),
-                        ticketsValue, CurrencyVS.Euro, TypeVS.TICKET);
+                        ticketsValue, currencyVS, TypeVS.TICKET);
                 ticketList.add(ticketVS);
                 ticketsMap.put(ticketVS.getHashCertVSBase64(), ticketVS);
             }
 
-            String messageSubject = getString(R.string.ticket_withdrawal_msg_subject);
+            String messageSubject = getString(R.string.ticket_request_msg_subject);
             String fromUser = contextVS.getUserVS().getNif();
 
             Map requestTicketMap = new HashMap();
@@ -129,21 +211,21 @@ public class TicketService extends IntentService {
             ticketsMapList.add(requestTicketMap);
 
             Map smimeContentMap = new HashMap();
-            smimeContentMap.put("totalAmount", withdrawalAmount.toString());
-            smimeContentMap.put("currency", CurrencyVS.Euro.toString());
+            smimeContentMap.put("totalAmount", requestAmount.toString());
+            smimeContentMap.put("currency", currencyVS.toString());
             smimeContentMap.put("tickets", ticketsMapList);
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("serverURL", contextVS.getTicketServer().getServerURL());
             smimeContentMap.put("operation", TypeVS.TICKET_REQUEST.toString());
             JSONObject requestJSON = new JSONObject(smimeContentMap);
 
-            String withdrawalDataFileName = ContextVS.TICKET_REQUEST_DATA_FILE_NAME + ":" +
+            String requestDataFileName = ContextVS.TICKET_REQUEST_DATA_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
 
             List<Map> ticketCSRList = new ArrayList<Map>();
             for(TicketVS ticket : ticketList) {
                 Map csrTicketMap = new HashMap();
-                csrTicketMap.put("currency", CurrencyVS.Euro.toString());
+                csrTicketMap.put("currency", currencyVS.toString());
                 csrTicketMap.put("ticketValue", ticketsValue);
                 csrTicketMap.put("csr", new String(ticket.getCertificationRequest().getCsrPEM(),"UTF-8"));
                 ticketCSRList.add(csrTicketMap);
@@ -169,7 +251,7 @@ public class TicketService extends IntentService {
                     ticketServer.getNameNormalized(),
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     ticketServer.getTicketRequestServiceURL(),
-                    withdrawalDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    requestDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     pin.toCharArray(), ticketServer.getCertificate(),
                     publicKey, privateKey, (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
@@ -199,8 +281,8 @@ public class TicketService extends IntentService {
                 }
                 contextVS.updateTickets(ticketsMap.values());
                 caption = getString(R.string.ticket_request_ok_caption);
-                message = getString(R.string.ticket_request_ok_msg, withdrawalAmount.toString(),
-                        CurrencyVS.Euro.toString());
+                message = getString(R.string.ticket_request_ok_msg, requestAmount.toString(),
+                        currencyVS.toString());
                 iconId = R.drawable.euro_24;
             } else {
                 caption = getString(R.string.ticket_request_error_caption);

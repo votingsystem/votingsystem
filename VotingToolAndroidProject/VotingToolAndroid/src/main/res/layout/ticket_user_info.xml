@@ -41,7 +41,7 @@
                 android:layout_marginLeft="15dip"
                 android:layout_weight="1"/>
 
-            <Button android:id="@+id/withdrawal_button"
+            <Button android:id="@+id/request_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop ="7dp"
@@ -50,7 +50,7 @@
                 android:layout_gravity="center"
                 android:layout_weight="0"
                 android:textStyle="bold"
-                android:text="@string/withdrawal_button" />
+                android:text="@string/request_button" />
 
 
         </LinearLayout>
