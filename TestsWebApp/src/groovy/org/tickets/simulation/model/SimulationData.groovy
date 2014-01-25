@@ -2,6 +2,7 @@ package org.tickets.simulation.model
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.StringUtils
@@ -37,8 +38,10 @@ class SimulationData {
     private Long eventId;
 
     private String durationStr = null;
+    private String subject = null;
     private String backupRequestEmail = null;
     private BigDecimal depositAmount;
+    private CurrencyVS currency;
 
     private UserBaseSimulationData userBaseSimulationData;
 
@@ -51,6 +54,22 @@ class SimulationData {
 
     public SimulationData() {}
 
+
+    public CurrencyVS getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(CurrencyVS currency) {
+        this.currency = currency;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
     public boolean isRunning() {
         return (ResponseVS.SC_PROCESSING == getStatusCode());
@@ -81,7 +100,7 @@ class SimulationData {
     }
 
     public static SimulationData parse (JSONObject dataJSON) throws Exception {
-        logger.debug(" --- parse - json ");
+        logger.debug(" ------ parse - json ");
         SimulationData simulationData = new SimulationData();
         if (dataJSON.containsKey("serverURL")) {
             simulationData.setServerURL(dataJSON.getString("serverURL"));
@@ -101,6 +120,12 @@ class SimulationData {
         }
         if (dataJSON.containsKey("depositAmount")) {
             simulationData.setDepositAmount(new BigDecimal(dataJSON.getLong("depositAmount")));
+        }
+        if (dataJSON.containsKey("currency")) {
+            simulationData.setCurrency(CurrencyVS.valueOf(dataJSON.getString("currency")));
+        }
+        if (dataJSON.containsKey("subject")) {
+            simulationData.setSubject(dataJSON.getString("subject"));
         }
 
         if (!dataJSON.isNull("backupRequestEmail")) {

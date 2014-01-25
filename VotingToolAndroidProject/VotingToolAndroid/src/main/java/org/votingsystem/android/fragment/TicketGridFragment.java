@@ -33,6 +33,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
@@ -260,7 +261,8 @@ public class TicketGridFragment extends Fragment implements
                     byte[] serializedTicketUserInfo = FileUtils.getBytesFromFile(ticketUserInfoDataFile);
                     TicketAccount ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
                             serializedTicketUserInfo);
-                    transactions = ticketUserInfo.getTransactionList();
+                    transactions = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro).
+                            getTransactionList();
                 }
             }catch(Exception ex) {
                 ex.printStackTrace();

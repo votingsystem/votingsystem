@@ -1,18 +1,12 @@
 package org.votingsystem.model;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.votingsystem.android.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
 
 /**

@@ -2,6 +2,7 @@ package org.votingsystem.ticket.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -59,22 +60,23 @@ class TransactionVSService {
             }
             int numUsers = UserVS.countByType(UserVS.Type.USER)
             BigDecimal numUsersBigDecimal = new BigDecimal(numUsers)
-            String currency = messageJSON.currency
+            CurrencyVS currency = CurrencyVS.valueOf(messageJSON.currency)
+            String subject = messageJSON.subject
             BigDecimal amount = new BigDecimal(messageJSON.amount)
             BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
             BigDecimal totalUsers = userPart.multiply(numUsersBigDecimal)
-            log.debug("processUserAllocation - amount: ${amount} - currency: ${currency} -  numUsers: ${numUsers} " +
-                    "- userPart: ${userPart} - totalUsers: ${totalUsers}")
+            log.debug("processUserAllocation - ${messageJSON}")
             if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
             TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
-                    fromUserVS:signer, currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
+                    subject:subject, fromUserVS:signer, currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
 
             def criteria = UserVS.createCriteria()
             def usersToDeposit = criteria.scroll { eq("type", UserVS.Type.USER) }
             while (usersToDeposit.next()) {
                 UserVS userVS = (UserVS) usersToDeposit.get(0);
                 TransactionVS userTransaction = new TransactionVS(transactionParent:transactionParent, amount:userPart,
-                        fromUserVS: signer, toUserVS:userVS, type:TransactionVS.Type.USER_INPUT).save()
+                        subject:subject, fromUserVS: signer, toUserVS:userVS, currency:currency,
+                        type:TransactionVS.Type.USER_INPUT).save()
                 if((usersToDeposit.getRowNumber() % 100) == 0) {
                     sessionFactory.currentSession.flush()
                     sessionFactory.currentSession.clear()
@@ -123,7 +125,7 @@ class TransactionVSService {
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount
-        transactionMap.currency = transaction.currency
+        transactionMap.currency = transaction.currency.toString()
 
         String messageSMIMEURL = null
         if(transaction.transactionParent) {
@@ -147,28 +149,31 @@ class TransactionVSService {
         }
 
         Map resultMap = [:]
-        List transactionList = []
-        BigDecimal totalInputs = new BigDecimal(0)
-        BigDecimal totalOutputs = new BigDecimal(0)
 
         while (userInputTransactions.next()) {
             TransactionVS transactionVS = (TransactionVS) userInputTransactions.get(0);
-            totalInputs = totalInputs.add(transactionVS.amount)
-            transactionList.add(getTransactionMap(transactionVS))
+            CurrencyVS currencyVS = transactionVS.getCurrency()
+            Map currencyMap = resultMap.get(currencyVS.toString())
+            if(!currencyMap) {
+                currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
+                resultMap.put(currencyVS.toString(), currencyMap)
+            }
+            currencyMap.totalInputs = currencyMap.totalInputs.add(transactionVS.amount)
+            currencyMap.transactionList.add(getTransactionMap(transactionVS))
         }
 
         while (userOutputTransactions.next()) {
             TransactionVS transactionVS = (TransactionVS) userOutputTransactions.get(0);
-            totalOutputs = totalOutputs.add(transactionVS.amount)
-            transactionList.add(getTransactionMap(transactionVS))
+            CurrencyVS currencyVS = transactionVS.getCurrency()
+            Map currencyMap = resultMap.get(currencyVS.toString())
+            if(!currencyMap) {
+                currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
+                resultMap.put(currencyVS.toString(), currencyMap)
+            }
+            currencyMap.totalOutputs = totalOutputs.add(transactionVS.amount)
+            currencyMap.transactionList.add(getTransactionMap(transactionVS))
         }
-
-
         resultMap.date = DateUtils.getStringFromDate(Calendar.getInstance().getTime())
-        resultMap.totalInputs = totalInputs
-        resultMap.totalOutputs = totalOutputs
-        resultMap.available = totalInputs.add(totalOutputs.negate())
-        resultMap.transactions = transactionList
         return resultMap
     }
 

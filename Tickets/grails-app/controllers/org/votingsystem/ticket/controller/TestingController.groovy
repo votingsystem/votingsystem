@@ -19,7 +19,7 @@ class TestingController {
     def transactionVSService
 
     def index() {
-        UserVS userVS = UserVS.get(1)
+        UserVS userVS = UserVS.get(12)
 
         render transactionVSService.getUserInfoMap(userVS) as JSON
         //def userInputTransactions = TransactionVS.findAllWhere(toUserVS: userVS, type:TransactionVS.Type.USER_INPUT)

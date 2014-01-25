@@ -45,11 +45,17 @@ class TicketService {
             CurrencyVS requestCurrency = CurrencyVS.valueOf(dataRequestJSON.currency)
 
             Map userInfoMap = transactionVSService.getUserInfoMap(signer)
+            Map currencyMap = userInfoMap.get(requestCurrency.toString())
+            if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
+                    [requestCurrency.toString()].toArray(), locale));
+
+            BigDecimal currencyAvailable = ((BigDecimal)currencyMap.totalInputs).add(
+                    ((BigDecimal)currencyMap.totalOutputs).negate())
 
             BigDecimal totalAmount = new BigDecimal(dataRequestJSON.totalAmount)
-            if(((BigDecimal)userInfoMap.available).compareTo(totalAmount) < 0) throw new ExceptionVS(
+            if(currencyAvailable.compareTo(totalAmount) < 0) throw new ExceptionVS(
                     messageSource.getMessage("ticketRequestAvailableErrorMsg",
-                    [totalAmount, userInfoMap.available].toArray(), locale));
+                    [totalAmount, currencyAvailable,requestCurrency.toString()].toArray(), locale));
 
             Integer numTotalTickets = 0
             def ticketsArray = dataRequestJSON.tickets

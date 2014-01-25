@@ -41,6 +41,12 @@
                         <option value="<g:message code="euroLbl"/>"> - <g:message code="euroLbl"/> - </option>
                     </select>
 
+                    <input type="text" id="subject" style="width:280px; margin:10px 20px 0 20px;" required
+                           title="<g:message code="transactionSubjectMsg"/>"
+                           placeholder="<g:message code="transactionSubjectMsg"/>"
+                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                           onchange="this.setCustomValidity('')"/>
+
                     <input type="url" id="ticketServerURL" style="width:280px; margin:10px 20px 0 20px;" required
                            value="http://tickets:8083/Tickets/" title="<g:message code="ticketServerURLMsg"/>"
                            placeholder="<g:message code="ticketServerURLMsg"/>"
@@ -103,7 +109,7 @@ $('#ticketDepositSimulationDataForm').submit(function(event){
 
 	 var simulationData = {service:"ticketDepositSimulationService", status:"INIT_SIMULATION",
 	 		 serverURL:$('#ticketServerURL').val(),  depositAmount: $('#depositAmount').val(),
-	 		 currency:$( "#currencySelect option:selected").val()}
+	 		 subject:$('#subject').val(), currency:$( "#currencySelect option:selected").val()}
 
      showListenerDiv(true)
      showSimulationProgress(simulationData)

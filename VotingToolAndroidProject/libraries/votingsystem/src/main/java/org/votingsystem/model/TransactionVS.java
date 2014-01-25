@@ -1,9 +1,7 @@
 package org.votingsystem.model;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 
@@ -35,6 +33,7 @@ public class TransactionVS  implements Serializable {
     private byte[] cancellationSMIMEBytes;
 
     private TransactionVS transactionParent;
+    private CurrencyVS currencyVS;
 
     private UserVS fromUserVS;
     private UserVS toUserVS;
@@ -108,6 +107,14 @@ public class TransactionVS  implements Serializable {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public CurrencyVS getCurrencyVS() {
+        return currencyVS;
+    }
+
+    public void setCurrencyVS(CurrencyVS currencyVS) {
+        this.currencyVS = currencyVS;
     }
 
     public SMIMEMessageWrapper getMessageSMIME() {
@@ -202,6 +209,15 @@ public class TransactionVS  implements Serializable {
             fromUserVS.setNif(fromUserVSJSON.getString("nif"));
             transactionVS.setFromUserVS(fromUserVS);
         }
+        if(jsonData.has("toUserVS")) {
+            JSONObject toUserVSJSON = jsonData.getJSONObject("toUserVS");
+            UserVS toUserVS = new UserVS();
+            toUserVS.setFullName(toUserVSJSON.getString("name"));
+            toUserVS.setNif(toUserVSJSON.getString("nif"));
+            transactionVS.setToUserVS(toUserVS);
+        }
+
+        transactionVS.setCurrencyVS(CurrencyVS.valueOf(jsonData.getString("currency")));
         transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated")));
         if(jsonData.has("validTo")) transactionVS.setValidTo(
                 DateUtils.getDateFromString(jsonData.getString("validTo")));

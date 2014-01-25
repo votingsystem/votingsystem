@@ -3,16 +3,15 @@ package org.votingsystem.model;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 
-import android.util.Log;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 
 public class TicketAccount implements Serializable {
@@ -22,11 +21,7 @@ public class TicketAccount implements Serializable {
     public static final long serialVersionUID = 1L;
 
     private UserVS userVS;
-    private List<TransactionVS> transactionList;
-    private List<TicketVS> ticketList;
-    private BigDecimal totalInputs = new BigDecimal(0);
-    private BigDecimal totalOutputs = new BigDecimal(0);
-    private BigDecimal cashBalance = new BigDecimal(0);
+    private Map<CurrencyVS, CurrencyData> currencyMap;
     private Date lastRequestDate;
 
 
@@ -38,34 +33,6 @@ public class TicketAccount implements Serializable {
         this.userVS = userVS;
     }
 
-    public List<TransactionVS> getTransactionList() {
-        return transactionList;
-    }
-
-    public void setTransactionList(List<TransactionVS> transactionList) {
-        this.transactionList = transactionList;
-    }
-
-    public BigDecimal getTotalInputs() {
-        return totalInputs;
-    }
-
-    public void setTotalInputs(BigDecimal totalInputs) {
-        this.totalInputs = totalInputs;
-    }
-
-    public BigDecimal getTotalOutputs() {
-        return totalOutputs;
-    }
-
-    public void setTotalOutputs(BigDecimal totalOutputs) {
-        this.totalOutputs = totalOutputs;
-    }
-
-    public BigDecimal getAccountBalance() {
-        return totalInputs.add(totalOutputs.negate());
-    }
-
     public Date getLastRequestDate() {
         return lastRequestDate;
     }
@@ -74,13 +41,6 @@ public class TicketAccount implements Serializable {
         this.lastRequestDate = lastRequestDate;
     }
 
-    public BigDecimal getCashBalance() {
-        return cashBalance;
-    }
-
-    public void setCashBalance(BigDecimal cashBalance) {
-        this.cashBalance = cashBalance;
-    }
 
     public static TicketAccount parse(JSONObject jsonData) throws ParseException, JSONException {
         JSONArray jsonArray;
@@ -88,50 +48,29 @@ public class TicketAccount implements Serializable {
         BigDecimal totalInputs = null;
         BigDecimal totalOutputs = null;
         TicketAccount ticketAccount = new TicketAccount();
-        if(jsonData.has("totalInputs")) {
-            totalInputs = new BigDecimal(jsonData.getString("totalInputs"));
-            ticketAccount.setTotalInputs(totalInputs);
-        }
-        if(jsonData.has("totalOutputs")) {
-            totalOutputs = new BigDecimal(jsonData.getString("totalOutputs"));
-            ticketAccount.setTotalOutputs(totalOutputs);
-        }
-        if(jsonData.has("date")){
-            ticketAccount.setLastRequestDate(DateUtils.getDateFromString(
-                    jsonData.getString("date")));
-        }
-        if(jsonData.has("transactions")) {
-            jsonArray = jsonData.getJSONArray("transactions");
-            List<TransactionVS> transactionList = new ArrayList<TransactionVS>();
-            BigDecimal totalInputsTransactions = new BigDecimal(0);
-            BigDecimal totalOutputsTransactions = new BigDecimal(0);
-            for (int i = 0; i< jsonArray.length(); i++) {
-                TransactionVS transaction = TransactionVS.parse(jsonArray.getJSONObject(i));
-                if(transaction.getType() == TransactionVS.Type.USER_INPUT) {
-                    totalInputsTransactions = totalInputsTransactions.add(transaction.getAmount());
-                } else if(transaction.getType() == TransactionVS.Type.USER_OUTPUT) {
-                    totalOutputsTransactions = totalOutputsTransactions.add(transaction.getAmount());
-                }
-                transactionList.add(transaction);
+        Iterator currencyIterator = jsonData.keys();
+        Map<CurrencyVS, CurrencyData> currencyMap = new HashMap<CurrencyVS, CurrencyData>();
+        Date requestDate = DateUtils.getDateFromString(jsonData.getString("date"));
+        ticketAccount.setLastRequestDate(requestDate);
+        while(currencyIterator.hasNext()) {
+            String keyStr = (String) currencyIterator.next();
+            if(!"date".equals(keyStr)) {
+                CurrencyVS currencyVS = CurrencyVS.valueOf(keyStr);
+                CurrencyData currencyData = CurrencyData.parse(jsonData.getJSONObject(keyStr));
+                currencyData.setCurrencyVS(currencyVS);
+                currencyData.setLastRequestDate(requestDate);
+                currencyMap.put(currencyVS, currencyData);
+                ticketAccount.setCurrencyMap(currencyMap);
             }
-            if(!totalInputs.equals(totalInputsTransactions)) {
-                Log.d(TAG + ".parse(...)", "ERROR - totalInputs: " + totalInputs +
-                        " - totalInputsTransactions: " + totalInputsTransactions);
-            }
-            if(!totalOutputs.equals(totalOutputsTransactions)) {
-                Log.d(TAG + ".parse(...)", "ERROR - totalOutputs: " + totalOutputs +
-                        " - totalOutputsTransactions: " + totalOutputsTransactions);
-            }
-            ticketAccount.setTransactionList(transactionList);
         }
         return ticketAccount;
     }
 
-    public List<TicketVS> getTicketList() {
-        return ticketList;
+    public Map<CurrencyVS, CurrencyData> getCurrencyMap() {
+        return currencyMap;
     }
 
-    public void setTicketList(List<TicketVS> ticketList) {
-        this.ticketList = ticketList;
+    public void setCurrencyMap(Map<CurrencyVS, CurrencyData> currencyMap) {
+        this.currencyMap = currencyMap;
     }
 }

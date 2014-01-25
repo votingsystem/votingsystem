@@ -27,14 +27,12 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.TicketService;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CurrencyData;
+import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.ObjectUtils;
-
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -118,20 +116,27 @@ public class TicketUserInfoFragment extends Fragment {
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
 
+        final CurrencyData currencyData;
+        if(ticketUserInfo!= null && ticketUserInfo.getCurrencyMap() != null) {
+            currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
+        } else currencyData = null;
+
         rootView = inflater.inflate(R.layout.ticket_user_info, container, false);
         ticket_account_info = (TextView)rootView.findViewById(R.id.ticket_account_info);
         ticket_cash_info = (TextView)rootView.findViewById(R.id.ticket_cash_info);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
         withdrawal_button = (Button) rootView.findViewById(R.id.withdrawal_button);
-        withdrawal_button.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                CashWithdrawalDialogFragment.showDialog(getFragmentManager(), broadCastId,
-                        getString(R.string.cash_withdrawal_dialog_caption),
-                        getString(R.string.cash_withdrawal_dialog_msg, ticketUserInfo.getAccountBalance()),
-                        ticketUserInfo.getAccountBalance(), null);
-            }
-        });
+        if(currencyData != null) {
+            withdrawal_button.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    CashWithdrawalDialogFragment.showDialog(getFragmentManager(), broadCastId,
+                            getString(R.string.cash_withdrawal_dialog_caption),
+                            getString(R.string.cash_withdrawal_dialog_msg, currencyData.getAccountBalance()),
+                            currencyData.getAccountBalance(), null);
+                }
+            });
+        }
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -141,34 +146,27 @@ public class TicketUserInfoFragment extends Fragment {
     }
 
     private void loadUserInfo() {
-        try {
-            File ticketUserInfoDataFile = new File(getActivity().getApplicationContext().getFilesDir(),
-                    ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
-            if(ticketUserInfoDataFile.exists()) {
-                byte[] serializedTicketUserInfo = FileUtils.getBytesFromFile(ticketUserInfoDataFile);
-                ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
-                        serializedTicketUserInfo);
-                last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
-                        DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
-                ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
-                        ticketUserInfo.getAccountBalance())));
-                ticket_cash_info.setText(Html.fromHtml(getString(R.string.ticket_cash_amount_info_lbl,
-                        ticketUserInfo.getCashBalance())));
+        ticketUserInfo = ((AppContextVS)getActivity().getApplicationContext()).getTicketAccount();
+        if(ticketUserInfo == null) {
+            showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_ticket_user_info_caption),
+                    getString(R.string.empty_ticket_user_info));
+            return;
+        }
+        CurrencyData currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.DAY_OF_YEAR, 7);
-                time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                        DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
-                if (!(ticketUserInfo.getAccountBalance().intValue() > 0)) {
-                    withdrawal_button.setVisibility(View.GONE);
-                }
-            } else {
-                Log.d(TAG + ".onCreateView(...)", "ticketUserInfoDataFile doesn't exist");
-                showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_ticket_user_info_caption),
-                        getString(R.string.empty_ticket_user_info));
-            }
-        }catch(Exception ex) {
-            ex.printStackTrace();
+        last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
+                DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
+        ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
+                currencyData.getAccountBalance())));
+        ticket_cash_info.setText(Html.fromHtml(getString(R.string.ticket_cash_amount_info_lbl,
+                currencyData.getCashBalance())));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 7);
+        time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
+                DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
+        if (!(currencyData.getAccountBalance().intValue() > 0)) {
+            withdrawal_button.setVisibility(View.GONE);
         }
     }
 

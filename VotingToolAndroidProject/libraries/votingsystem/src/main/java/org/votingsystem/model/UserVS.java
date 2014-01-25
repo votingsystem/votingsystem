@@ -2,17 +2,13 @@ package org.votingsystem.model;
 
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
-import org.bouncycastle2.util.encoders.Base64;
-import org.bouncycastle2.util.encoders.Hex;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.signature.smime.CMSUtils;
 
 import java.io.Serializable;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 

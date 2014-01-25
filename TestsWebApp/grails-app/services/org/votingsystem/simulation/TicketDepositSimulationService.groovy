@@ -85,7 +85,7 @@ class TicketDepositSimulationService {
     }
 
     private void initSimulation(JSONObject simulationDataJSON) {
-        log.debug("initSimulation ### Enter status INIT_SIMULATION")
+        log.debug(" initSimulation ### Enter status INIT_SIMULATION")
         ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}/" +
                 "ticket_user_base_data_" + simulationCounter.getAndIncrement());
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
@@ -110,7 +110,7 @@ class TicketDepositSimulationService {
     }
 
     private void makeDeposit() {
-        log.debug("makeDeposit ### Enter status MAKE_DEPOSIT - Amount:" + simulationData.getDepositAmount().toString());
+        log.debug("makeDeposit ### Enter status MAKE_DEPOSIT");
         ResponseVS responseVS = null;
         try {
             String userNif = NifUtils.getNif(8888888);
@@ -122,10 +122,13 @@ class TicketDepositSimulationService {
                     ContextVS.DNIe_SIGN_MECHANISM);
             String msgSubject =  messageSource.getMessage("depositMsgSubject", null, locale)
             Map signatureContentMap = [amount:simulationData.getDepositAmount().toString(),
-                    "UUID": UUID.randomUUID().toString(),
+                    "UUID": UUID.randomUUID().toString(), currency:simulationData.getCurrency().toString(),
+                    subject:simulationData.getSubject(),
                     typeVS:TypeVS.TICKET_USER_ALLOCATION, IBAN:"ESkk bbbb gggg xxcc cccc cccc"]
+            String signatureContentStr = new JSONObject(signatureContentMap).toString()
+            log.debug("makeDeposit ${signatureContentStr}")
             SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(userNif,
-                    ticketServer.getNameNormalized(), new JSONObject(signatureContentMap).toString(), msgSubject);
+                    ticketServer.getNameNormalized(),signatureContentStr , msgSubject);
             SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, ticketServer.getDepositURL(),
                     ticketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
             responseVS = signedSender.call();

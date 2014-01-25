@@ -10,18 +10,26 @@ import com.itextpdf.text.Context_iTextVS;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
+import org.votingsystem.model.CurrencyData;
+import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
+import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
@@ -142,6 +150,64 @@ public class AppContextVS extends Application {
             } else Log.d(TAG + ".setAccessControlVS(...)", "user data not found");
         } catch(Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public TicketAccount getTicketAccount() {
+        File ticketUserInfoDataFile = new File(getApplicationContext().getFilesDir(),
+                ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
+        TicketAccount ticketUserInfo = null;
+        try {
+            if(ticketUserInfoDataFile.exists()) {
+                byte[] serializedTicketUserInfo = FileUtils.getBytesFromFile(ticketUserInfoDataFile);
+                ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
+                        serializedTicketUserInfo);
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return ticketUserInfo;
+    }
+
+    public void setTicketAccount(TicketAccount updatedTicketAccount) {
+        try {
+            TicketAccount ticketAccount = getTicketAccount();
+            if(ticketAccount != null) {
+                Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
+                Set<CurrencyVS> keySet = currencyMap.keySet();
+                Map<CurrencyVS, CurrencyData> newCurrencyMap = updatedTicketAccount.getCurrencyMap();
+                for(CurrencyVS currencyVS : keySet) {
+                    if(newCurrencyMap.containsKey(currencyVS)) {
+                        newCurrencyMap.get(currencyVS).setTicketList(currencyMap.get(currencyVS).getTicketList());
+                    } else {
+                        Log.e(TAG + ".setTicketAccount(...)", "updatedTicketAccount " +
+                                "missing currency data" + currencyVS.toString());
+                        CurrencyData currencyData = currencyMap.get(currencyVS);
+                        currencyData.setTransactionList(null);
+                        currencyData.setTotalInputs(new BigDecimal(0));
+                        currencyData.setTotalOutputs(new BigDecimal(0));
+                        currencyData.setLastRequestDate(updatedTicketAccount.getLastRequestDate());
+                        newCurrencyMap.put(currencyVS, currencyData);
+                    }
+                }
+            }
+            byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(updatedTicketAccount);
+            FileOutputStream outputStream;
+            outputStream = openFileOutput(ContextVS.TICKET_USER_INFO_DATA_FILE_NAME,
+                    Context.MODE_PRIVATE);
+            outputStream.write(ticketUserInfoBytes);
+            outputStream.close();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void updateTickets(Collection<TicketVS> tickets) {
+        TicketAccount ticketAccount = getTicketAccount();
+        for(TicketVS ticketVS : tickets) {
+            Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
+            CurrencyData currencyData = currencyMap.get(ticketVS.getCurrency());
+            currencyData.addTicket(ticketVS);
         }
     }
 

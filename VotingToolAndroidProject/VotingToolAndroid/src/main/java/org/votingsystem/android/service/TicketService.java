@@ -173,6 +173,11 @@ public class TicketService extends IntentService {
                         responseVS.getMessageBytes(), "UTF-8"));
                 JSONArray issuedTicketsArray = issuedTicketsJSON.getJSONArray("issuedTickets");
                 Log.d(TAG + "ticketRequest(...)", "Num IssuedTickets: " + issuedTicketsArray.length());
+                if(issuedTicketsArray.length() != ticketList.size()) {
+                    Log.e(TAG + "ticketRequest(...)", "ERROR - Num tickets requested: " +
+                            ticketList.size() + " - num. tickets received: " +
+                            issuedTicketsArray.length());
+                }
                 for(int i = 0; i < issuedTicketsArray.length(); i++) {
                     Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
                             issuedTicketsArray.getString(i).getBytes());
@@ -187,6 +192,7 @@ public class TicketService extends IntentService {
                     TicketVS ticket = ticketsMap.get(hashCertVS);
                     ticket.getCertificationRequest().initSigner(issuedTicketsArray.getString(i).getBytes());
                 }
+                ticketsMap.v
             }
 
         } catch(Exception ex) {
@@ -199,7 +205,6 @@ public class TicketService extends IntentService {
             return responseVS;
         }
     }
-
 
     private ResponseVS updateUserInfo(String pin) {
         ResponseVS responseVS = null;
@@ -224,14 +229,8 @@ public class TicketService extends IntentService {
             responseVS = smimeSignedSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String responseStr = responseVS.getMessage();
-                //responseStr = responseStr.substring(responseStr.indexOf('{'), responseStr.length());
                 TicketAccount ticketAccount = TicketAccount.parse(new JSONObject(responseStr));
-                byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(ticketAccount);
-                FileOutputStream outputStream;
-                outputStream = openFileOutput(ContextVS.TICKET_USER_INFO_DATA_FILE_NAME,
-                        Context.MODE_PRIVATE);
-                outputStream.write(ticketUserInfoBytes);
-                outputStream.close();
+                contextVS.setTicketAccount(ticketAccount);
             }
         } catch(Exception ex) {
             ex.printStackTrace();

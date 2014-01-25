@@ -29,7 +29,7 @@ public class TicketVS extends ReceiptContainer {
     private BigDecimal amount;
     private TypeVS typeVS;
     private String subject;
-    private String currency;
+    private CurrencyVS currency;
     private String url;
     private String ticketServerURL;
 
@@ -58,11 +58,11 @@ public class TicketVS extends ReceiptContainer {
         return certificationRequest;
     }
 
-    public String getCurrency() {
+    public CurrencyVS getCurrency() {
         return currency;
     }
 
-    public void setCurrency(String currency) {
+    public void setCurrency(CurrencyVS currency) {
         this.currency = currency;
     }
 

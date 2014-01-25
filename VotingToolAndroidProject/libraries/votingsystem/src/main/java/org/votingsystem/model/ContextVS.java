@@ -1,24 +1,5 @@
 package org.votingsystem.model;
 
-import android.app.FragmentManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.util.Log;
-import com.itextpdf.text.Context_iTextVS;
-import org.votingsystem.signature.util.VotingSystemKeyGenerator;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.ObjectUtils;
-
-import java.io.File;
-import java.io.InputStream;
-import java.security.cert.X509Certificate;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PropertyResourceBundle;
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

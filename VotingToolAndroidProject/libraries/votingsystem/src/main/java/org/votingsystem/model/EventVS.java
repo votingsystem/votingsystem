@@ -1,14 +1,12 @@
 package org.votingsystem.model;
 
-import android.content.Context;
-import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.util.DateUtils;
+
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
