@@ -116,10 +116,7 @@ public class TicketUserInfoFragment extends Fragment {
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
 
-        final CurrencyData currencyData;
-        if(ticketUserInfo!= null && ticketUserInfo.getCurrencyMap() != null) {
-            currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
-        } else currencyData = null;
+
 
         rootView = inflater.inflate(R.layout.ticket_user_info, container, false);
         ticket_account_info = (TextView)rootView.findViewById(R.id.ticket_account_info);
@@ -127,16 +124,6 @@ public class TicketUserInfoFragment extends Fragment {
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
         withdrawal_button = (Button) rootView.findViewById(R.id.withdrawal_button);
-        if(currencyData != null) {
-            withdrawal_button.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    CashWithdrawalDialogFragment.showDialog(getFragmentManager(), broadCastId,
-                            getString(R.string.cash_withdrawal_dialog_caption),
-                            getString(R.string.cash_withdrawal_dialog_msg, currencyData.getAccountBalance()),
-                            currencyData.getAccountBalance(), null);
-                }
-            });
-        }
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -152,11 +139,21 @@ public class TicketUserInfoFragment extends Fragment {
                     getString(R.string.empty_ticket_user_info));
             return;
         }
-        CurrencyData currencyData = null;
-        if(ticketUserInfo.getCurrencyMap() != null) {
+        final CurrencyData currencyData;
+        if(ticketUserInfo!= null && ticketUserInfo.getCurrencyMap() != null) {
             currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
-        }
+        } else currencyData = null;
+
+
         if(currencyData != null) {
+            withdrawal_button.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    CashWithdrawalDialogFragment.showDialog(getFragmentManager(), broadCastId,
+                            getString(R.string.cash_withdrawal_dialog_caption),
+                            getString(R.string.cash_withdrawal_dialog_msg, currencyData.getAccountBalance()),
+                            currencyData.getAccountBalance(), null);
+                }
+            });
             last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
                     DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
             ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,

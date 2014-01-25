@@ -24,22 +24,6 @@ public class TicketVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public CurrencyVS getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(CurrencyVS currency) {
-        this.currency = currency;
-    }
-
     public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -186,6 +170,23 @@ public class TicketVS implements Serializable  {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public CurrencyVS getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(CurrencyVS currency) {
+        this.currency = currency;
     }
 
     public static Map checkSubject(String subjectDN) {

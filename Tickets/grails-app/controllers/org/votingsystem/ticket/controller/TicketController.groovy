@@ -39,11 +39,10 @@ class TicketController {
                     responseVS.data.amount, responseVS.data.currency,request.getLocale())
             if (ResponseVS.SC_OK == ticketGenBatchResponse.statusCode) {
                 ticketGenBatchResponse.setContentType(ContentTypeVS.JSON_ENCRYPTED)
-
                 UserVS userVS = messageSMIMEReq.userVS
                 TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
-                        fromUserVS: userVS, type:TransactionVS.Type.USER_OUTPUT).save()
-
+                        fromUserVS: userVS, currency:responseVS.data.currency,
+                        type:TransactionVS.Type.USER_OUTPUT).save()
                 return [responseVS:ticketGenBatchResponse,
                         receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
             } else return [responseVS:ticketGenBatchResponse]
