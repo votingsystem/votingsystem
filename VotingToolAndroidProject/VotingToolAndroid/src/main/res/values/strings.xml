@@ -375,9 +375,12 @@
     <string name="time_remaining_info_lbl"><![CDATA[Lo que no gastes antes del <b>\'%1$s\'</b> se repartirá
         entre el resto de usuarios]]></string>
     <string name="cash_withdrawal_dialog_caption">Retirar efectivo</string>
-    <string name="cash_withdrawal_dialog_msg"><![CDATA[Seleccione un importe inferior a <b>\'%1$s\'</b> euros]]></string>
+    <string name="cash_withdrawal_dialog_msg"><![CDATA[Seleccione un importe inferior a <b>\'%1$s\'</b> %2$ss]]></string>
     <string name="min_withdrawal_msg">El importe debe ser mayor que cero</string>
     <string name="ticket_withdrawal_msg_subject">Retirada de Tickets</string>
     <string name="ticket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> euros en efectivo]]></string>
+    <string name="ticket_request_ok_caption">Retirada de efectivo con éxito</string>
+    <string name="ticket_request_error_caption">Error retirando efectivo</string>
+    <string name="ticket_request_ok_msg"><![CDATA[Su disponible se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
 
 </resources>

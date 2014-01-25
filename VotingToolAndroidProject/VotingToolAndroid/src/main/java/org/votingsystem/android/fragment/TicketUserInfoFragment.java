@@ -79,6 +79,7 @@ public class TicketUserInfoFragment extends Fragment {
                 case TICKET_REQUEST:
                     showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) loadUserInfo();
                     break;
                 case TICKET_REQUEST_DIALOG:
                     Log.d(TAG + ".broadcastReceiver.onReceive(...)", "TICKET_REQUEST_DIALOG: " + responseVS.getData());
@@ -150,7 +151,8 @@ public class TicketUserInfoFragment extends Fragment {
                 public void onClick(View v) {
                     CashWithdrawalDialogFragment.showDialog(getFragmentManager(), broadCastId,
                             getString(R.string.cash_withdrawal_dialog_caption),
-                            getString(R.string.cash_withdrawal_dialog_msg, currencyData.getAccountBalance()),
+                            getString(R.string.cash_withdrawal_dialog_msg, currencyData.getAccountBalance(),
+                                    CurrencyVS.Euro.toString()),
                             currencyData.getAccountBalance(), null);
                 }
             });

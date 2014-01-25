@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
 import android.util.Log;
 
 import org.bouncycastle2.asn1.DERTaggedObject;
@@ -88,6 +89,7 @@ public class TicketService extends IntentService {
                 responseVS = ticketRequest(value, pin);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
+                showNotification(responseVS);
                 sendMessage(responseVS);
                 break;
         }
@@ -97,6 +99,9 @@ public class TicketService extends IntentService {
         ResponseVS responseVS = null;
         TicketServer ticketServer = contextVS.getTicketServer();
         Map<String, TicketVS> ticketsMap = new HashMap<String, TicketVS>();
+        String caption = null;
+        String message = null;
+        int iconId = R.drawable.cancel_22;
         try {
             if(ticketServer == null) {
                 responseVS = initTicketServer();
@@ -193,17 +198,23 @@ public class TicketService extends IntentService {
                     ticket.getCertificationRequest().initSigner(issuedTicketsArray.getString(i).getBytes());
                 }
                 contextVS.updateTickets(ticketsMap.values());
+                caption = getString(R.string.ticket_request_ok_caption);
+                message = getString(R.string.ticket_request_ok_msg, withdrawalAmount.toString(),
+                        CurrencyVS.Euro.toString());
+                iconId = R.drawable.euro_24;
             } else {
-
+                caption = getString(R.string.ticket_request_error_caption);
             }
-
         } catch(Exception ex) {
             ex.printStackTrace();
-            String message = ex.getMessage();
+            message = ex.getMessage();
             if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     message);
         } finally {
+            responseVS.setIconId(iconId);
+            responseVS.setCaption(caption);
+            responseVS.setNotificationMessage(message);
             return responseVS;
         }
     }
@@ -275,8 +286,8 @@ public class TicketService extends IntentService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
                 TICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(responseVS.getCaption()).setContentText(
-                responseVS.getNotificationMessage()).setSmallIcon(responseVS.getIconId())
+                .setContentTitle(responseVS.getCaption()).setContentText(Html.fromHtml(
+                responseVS.getNotificationMessage())).setSmallIcon(responseVS.getIconId())
                 .setContentIntent(pendingIntent);
         Notification note = builder.build();
         // hide the notification after its selected
