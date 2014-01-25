@@ -88,6 +88,7 @@ public class PublishEventVSFragment extends Fragment {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             if(pin != null) launchSignAndSendService(pin);
             else {
@@ -139,8 +140,8 @@ public class PublishEventVSFragment extends Fragment {
                     //to avoid avoid dissapear on screen orientation change
                     dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
-                    caption = getString(R.string.publish_document_ERROR_msg);
-                    showMessage(responseStatusCode, caption, Html.fromHtml(message).toString());
+                    showMessage(responseStatusCode, getString(R.string.publish_document_ERROR_msg),
+                            Html.fromHtml(responseVS.getNotificationMessage()).toString());
                 }
             }
         }
@@ -169,8 +170,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                 }
                 dateFinishCalendar = newCalendar;
-                dateFinishEditText.setText(DateUtils.getDate_Es(
-                        dateFinishCalendar.getTime()));
+                dateFinishEditText.setText(DateUtils.getDate_Es(dateFinishCalendar.getTime()));
             }
         }
     };

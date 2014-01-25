@@ -3,10 +3,12 @@ package org.votingsystem.ticket.service
 import grails.converters.JSON
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
+import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.ticket.CurrencyVS
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.ExceptionVS
@@ -40,7 +42,7 @@ class TicketService {
                     "operationMismatchErrorMsg", [TypeVS.TICKET_REQUEST.toString(), operation.toString()].toArray(),
                     locale));
 
-            String requestCurrency = dataRequestJSON.currency
+            CurrencyVS requestCurrency = CurrencyVS.valueOf(dataRequestJSON.currency)
 
             Map userInfoMap = transactionVSService.getUserInfoMap(signer)
 

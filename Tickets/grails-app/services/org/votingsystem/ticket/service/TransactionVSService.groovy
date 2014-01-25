@@ -9,6 +9,7 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 
 import java.math.RoundingMode
 
@@ -58,12 +59,15 @@ class TransactionVSService {
             }
             int numUsers = UserVS.countByType(UserVS.Type.USER)
             BigDecimal numUsersBigDecimal = new BigDecimal(numUsers)
+            String currency = messageJSON.currency
             BigDecimal amount = new BigDecimal(messageJSON.amount)
             BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
             BigDecimal totalUsers = userPart.multiply(numUsersBigDecimal)
-            log.debug("processUserAllocation - amount: ${amount} -  numUsers: ${numUsers} - userPart: ${userPart} - totalUsers: ${totalUsers}")
+            log.debug("processUserAllocation - amount: ${amount} - currency: ${currency} -  numUsers: ${numUsers} " +
+                    "- userPart: ${userPart} - totalUsers: ${totalUsers}")
+            if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
             TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
-                    fromUserVS:signer, type:TransactionVS.Type.USER_ALLOCATION).save()
+                    fromUserVS:signer, currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
 
             def criteria = UserVS.createCriteria()
             def usersToDeposit = criteria.scroll { eq("type", UserVS.Type.USER) }

@@ -22,20 +22,18 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
-import static org.votingsystem.model.ContextVS.CAPTION_KEY;
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
 import static org.votingsystem.model.ContextVS.EMAIL_KEY;
 import static org.votingsystem.model.ContextVS.KEYSTORE_TYPE;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
-import static org.votingsystem.model.ContextVS.MESSAGE_KEY;
 import static org.votingsystem.model.ContextVS.NAME_KEY;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PHONE_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.PROVIDER;
-import static org.votingsystem.model.ContextVS.RESPONSE_STATUS_KEY;
+import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
@@ -57,8 +55,9 @@ public class UserCertRequestService extends IntentService {
         final Bundle arguments = intent.getExtras();
         Log.d(TAG + ".onHandleIntent(...) ", "arguments: " + arguments);
         AppContextVS appContextVS = (AppContextVS) getApplicationContext();
+        String serviceCaller = arguments.getString(CALLER_KEY);
+        ResponseVS responseVS = null;
         try {
-            String serviceCaller = arguments.getString(CALLER_KEY);
             String nif = arguments.getString(NIF_KEY);
             String email = arguments.getString(EMAIL_KEY);
             String phone = arguments.getString(PHONE_KEY);
@@ -81,7 +80,7 @@ public class UserCertRequestService extends IntentService {
             FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
             fos.write(keyStoreBytes);
             fos.close();
-            ResponseVS responseVS = HttpHelper.sendData(csrBytes, null,
+            responseVS = HttpHelper.sendData(csrBytes, null,
                     appContextVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SharedPreferences settings = getApplicationContext().getSharedPreferences(
@@ -96,21 +95,26 @@ public class UserCertRequestService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 caption = getString(R.string.operation_ok_msg);
             } else caption = getString(R.string.operation_error_msg);
-            sendMessage(responseVS.getStatusCode(), caption, responseVS.getMessage(),serviceCaller);
-        } catch(Exception ex) {
+            responseVS.setCaption(caption);
+        } catch (Exception ex){
             ex.printStackTrace();
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
+                    message);
+        } finally {
+            responseVS.setServiceCaller(serviceCaller);
+            sendMessage(responseVS);
         }
     }
 
-    private void sendMessage(Integer statusCode, String caption, String message,
-                             String serviceCaller) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - caption: " +
-                caption  + " - message: " + message);
-        Intent intent = new Intent(serviceCaller);
-        if(statusCode != null)
-            intent.putExtra(RESPONSE_STATUS_KEY, statusCode.intValue());
-        if(caption != null) intent.putExtra(CAPTION_KEY, caption);
-        if(message != null) intent.putExtra(MESSAGE_KEY, message);
+    private void sendMessage(ResponseVS responseVS) {
+        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
+                " - caption: " + responseVS.getCaption()  + " - message: " +
+                responseVS.getNotificationMessage());
+        Intent intent = new Intent(responseVS.getServiceCaller());
+        intent.putExtra(RESPONSEVS_KEY, responseVS);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
+
 }

@@ -25,6 +25,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
@@ -107,7 +108,7 @@ public class TicketService extends IntentService {
             List<TicketVS> ticketList = new ArrayList<TicketVS>();
             for(int i = 0; i < numTickets.intValue(); i++) {
                 TicketVS ticketVS = new TicketVS(ticketServer.getServerURL(),
-                        ticketsValue, ContextVS.CURRENCY_EURO, TypeVS.TICKET);
+                        ticketsValue, CurrencyVS.Euro, TypeVS.TICKET);
                 ticketList.add(ticketVS);
                 ticketsMap.put(ticketVS.getHashCertVSBase64(), ticketVS);
             }
@@ -124,7 +125,7 @@ public class TicketService extends IntentService {
 
             Map smimeContentMap = new HashMap();
             smimeContentMap.put("totalAmount", withdrawalAmount.toString());
-            smimeContentMap.put("currency", ContextVS.CURRENCY_EURO);
+            smimeContentMap.put("currency", CurrencyVS.Euro.toString());
             smimeContentMap.put("tickets", ticketsMapList);
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("serverURL", contextVS.getTicketServer().getServerURL());
@@ -137,7 +138,7 @@ public class TicketService extends IntentService {
             List<Map> ticketCSRList = new ArrayList<Map>();
             for(TicketVS ticket : ticketList) {
                 Map csrTicketMap = new HashMap();
-                csrTicketMap.put("currency", ContextVS.CURRENCY_EURO);
+                csrTicketMap.put("currency", CurrencyVS.Euro.toString());
                 csrTicketMap.put("ticketValue", ticketsValue);
                 csrTicketMap.put("csr", new String(ticket.getCertificationRequest().getCsrPEM(),"UTF-8"));
                 ticketCSRList.add(csrTicketMap);

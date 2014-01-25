@@ -62,6 +62,7 @@ public class ReceiptFragment extends Fragment {
                     "intent.getExtras(): " + intent.getExtras());
             String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(pin != null) {
                 switch(typeVS) {
                     case CANCEL_VOTE:
@@ -69,17 +70,13 @@ public class ReceiptFragment extends Fragment {
                         break;
                 }
             } else {
-                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                        ResponseVS.SC_ERROR);
-                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-                TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-                if(resultOperation == TypeVS.CANCEL_VOTE){
-                    if(ResponseVS.SC_OK == responseStatusCode) { }
+                if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
                     getActivity().onBackPressed();
                 }
                 showProgress(false, true);
-                showMessage(responseStatusCode, caption, message);
+                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage());
             }
         }
     };
@@ -373,7 +370,7 @@ public class ReceiptFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void showMessage(Integer statusCode,String caption,String message) {
+    private void showMessage(Integer statusCode, String caption,String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,

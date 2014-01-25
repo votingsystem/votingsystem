@@ -138,8 +138,6 @@ public class ContextVS {
     private static final long USER_KEYSTORE_PERIOD = 20000000000L;
     public static final int DAYS_ANONYMOUS_DELEGATION_DURATION = 10;
 
-
-
     private UserVS userTest;
     private X509Certificate rootCACert;
     private X509Certificate timeStampCACert;

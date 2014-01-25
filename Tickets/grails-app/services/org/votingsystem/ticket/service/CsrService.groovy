@@ -10,8 +10,10 @@ import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContextVS
+import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.model.ticket.CurrencyVS
 import org.votingsystem.model.ticket.TicketVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
@@ -122,7 +124,7 @@ class CsrService {
     }
 
     public synchronized ResponseVS signTicketBatchRequest (byte[] ticketBatchRequest, BigDecimal expectedAmount,
-            String expectedCurrency, Locale locale){
+            CurrencyVS expectedCurrency, Locale locale){
         ResponseVS responseVS = null;
         String msg = null;
         List<TicketVS> issuedTicketList = new ArrayList<TicketVS>()
@@ -133,9 +135,10 @@ class CsrService {
             BigDecimal batchAmount = new BigDecimal(0)
             ticketsArray.each {
                 String csr = it.csr
-                String ticketCurrency = it.currency
-                if(!ticketCurrency.equals(expectedCurrency)) throw new ExceptionVS(messageSource.getMessage(
-                        'ticketBatchRequestCurrencyErrorMsg', [expectedCurrency, ticketCurrency].toArray(), locale));
+                CurrencyVS ticketCurrency = CurrencyVS.valueOf(it.currency)
+                if(ticketCurrency != expectedCurrency) throw new ExceptionVS(messageSource.getMessage(
+                        'ticketBatchRequestCurrencyErrorMsg', [expectedCurrency.toString(),
+                        ticketCurrency.toString()].toArray(), locale));
                 String ticketAmount = it.ticketValue
                 batchAmount = batchAmount.add(new BigDecimal(ticketAmount))
                 responseVS = signTicket(csr.getBytes(), ticketAmount, ticketCurrency, locale)

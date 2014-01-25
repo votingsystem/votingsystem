@@ -94,7 +94,7 @@ public class CertUtil {
         PublicKey requestPublicKey = csr.getPublicKey();
         X509Principal x509Principal = new X509Principal(strSubjectDN);
         certGen.setSerialNumber(VotingSystemKeyGenerator.INSTANCE.getSerno());
-        logger.debug("generateV3EndEntityCertFromCsr - SubjectX500Principal(): " + caCert.getSubjectX500Principal());
+//        logger.debug("generateV3EndEntityCertFromCsr - SubjectX500Principal(): " + caCert.getSubjectX500Principal());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(dateBegin);
         certGen.setNotAfter(dateFinish);

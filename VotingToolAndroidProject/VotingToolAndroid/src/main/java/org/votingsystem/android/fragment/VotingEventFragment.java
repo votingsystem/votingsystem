@@ -77,31 +77,26 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)", "intentExtras:" + intent.getExtras());
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(pin != null) launchVoteService(pin);
         else {
-            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                    ResponseVS.SC_ERROR);
-            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
             TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             if(resultOperation == TypeVS.VOTEVS) {
-                if(ResponseVS.SC_OK == responseStatusCode) {
-                    message = getString(R.string.vote_ok_msg, eventVS.getSubject(),
-                            vote.getOptionSelected().getContent());
-                    showMessage(responseStatusCode, getString(R.string.operation_ok_msg), message);
-                    setReceiptScreen(vote);
-                } else {
-                    if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseStatusCode){
+                if(ResponseVS.SC_OK == responseVS.getStatusCode())  setReceiptScreen(vote);
+                else {
+                    if(ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()){
                         setOptionButtonsEnabled(true);
-                        showMessage(responseStatusCode, caption, message);
-                    } else showMessage(responseStatusCode, caption, message);
+                    }
                 }
+                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage());
             } else if(resultOperation == TypeVS.CANCEL_VOTE){
-                if(ResponseVS.SC_OK == responseStatusCode) {
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     setEventScreen(eventVS);
                     AlertDialog dialog  = new AlertDialog.Builder(getActivity()).setTitle(
-                            getString(R.string.msg_lbl)).setMessage(Html.fromHtml(message)).
+                            getString(R.string.msg_lbl)).setMessage(Html.fromHtml(
+                            responseVS.getNotificationMessage())).
                             setPositiveButton(R.string.save_receipt_lbl,
                                     new DialogInterface.OnClickListener() {
                                         @Override
@@ -112,7 +107,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                     dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
                     cancelVoteButton.setEnabled(true);
-                    showMessage(responseStatusCode, caption, message);
+                    showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                            responseVS.getNotificationMessage());
                 }
             }
         }

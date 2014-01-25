@@ -2,6 +2,7 @@ package org.votingsystem.model.ticket;
 
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
+import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 
@@ -33,7 +34,7 @@ public class TransactionVS  implements Serializable {
 
     @Column(name="subject") private String subject;
 
-    @Column(name="currency") private String currency;
+    @Column(name="currency", nullable=false) @Enumerated(EnumType.STRING) private CurrencyVS currency;
 
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;
@@ -152,11 +153,11 @@ public class TransactionVS  implements Serializable {
         this.subject = subject;
     }
 
-    public String getCurrency() {
+    public CurrencyVS getCurrency() {
         return currency;
     }
 
-    public void setCurrency(String currency) {
+    public void setCurrency(CurrencyVS currency) {
         this.currency = currency;
     }
 

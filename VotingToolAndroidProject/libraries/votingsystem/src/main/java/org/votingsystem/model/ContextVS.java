@@ -54,9 +54,6 @@ public class ContextVS {
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
 
-    //Currencies
-    public static final String CURRENCY_EURO = "euro";
-
     //Intent keys
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";

@@ -3,6 +3,7 @@ package org.votingsystem.model.ticket;
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.MessageSMIME;
 
 import javax.persistence.*;
@@ -31,11 +32,21 @@ public class TicketVS implements Serializable  {
         this.reason = reason;
     }
 
+    public CurrencyVS getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(CurrencyVS currency) {
+        this.currency = currency;
+    }
+
     public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
+    @Column(name="currency", nullable=false) @Enumerated(EnumType.STRING) private CurrencyVS currency;
+
     @Column(name="hashCertVS") private String hashCertVS;
     @Column(name="originHashCertVS") private String originHashCertVS;
     @Column(name="ticketProviderURL") private String ticketProviderURL;
