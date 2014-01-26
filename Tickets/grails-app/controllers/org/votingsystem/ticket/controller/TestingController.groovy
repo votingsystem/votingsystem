@@ -1,6 +1,7 @@
 package org.votingsystem.ticket.controller
 
 import grails.converters.JSON
+import org.apache.avro.generic.GenericData
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.ticket.TransactionVS

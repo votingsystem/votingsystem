@@ -50,7 +50,6 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         this.contextVS = context;
         this.contentType = contentType;
         this.certificationRequest = certificationRequest;
-        contextVS = context;
     }
 
     @Override public ResponseVS call() {

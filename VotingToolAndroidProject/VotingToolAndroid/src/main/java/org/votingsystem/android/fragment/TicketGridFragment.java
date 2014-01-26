@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
@@ -122,7 +123,7 @@ public class TicketGridFragment extends Fragment implements
     }
 
     @Override public Loader<List<TransactionVS>> onCreateLoader(int i, Bundle bundle) {
-        return new TransactionVSLoader(getActivity());
+        return new TransactionVSLoader((AppContextVS) getActivity().getApplicationContext());
     }
 
     @Override
@@ -238,14 +239,11 @@ public class TicketGridFragment extends Fragment implements
 
     public static class TransactionVSLoader extends AsyncTaskLoader<List<TransactionVS>> {
 
-        List<TransactionVS> transactionList;
+        TicketAccount ticketAccount;
 
-        File ticketUserInfoDataFile;
-
-        public TransactionVSLoader(Context context) {
-            super(context);
-            ticketUserInfoDataFile = new File(context.getFilesDir(),
-                    ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
+        public TransactionVSLoader(AppContextVS contextVS) {
+            super(contextVS);
+            ticketAccount = contextVS.getTicketAccount();
         }
 
         /**
@@ -256,16 +254,8 @@ public class TicketGridFragment extends Fragment implements
         @Override public List<TransactionVS> loadInBackground() {
             // Retrieve all known applications.
             List<TransactionVS> transactions = null;
-            try {
-                if(ticketUserInfoDataFile.exists()) {
-                    byte[] serializedTicketUserInfo = FileUtils.getBytesFromFile(ticketUserInfoDataFile);
-                    TicketAccount ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
-                            serializedTicketUserInfo);
-                    transactions = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro).
-                            getTransactionList();
-                }
-            }catch(Exception ex) {
-                ex.printStackTrace();
+            if(ticketAccount != null) {
+                transactions = ticketAccount.getCurrencyMap().get(CurrencyVS.Euro).getTransactionList();
             }
             return transactions;
         }

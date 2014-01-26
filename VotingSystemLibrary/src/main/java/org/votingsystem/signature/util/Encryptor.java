@@ -40,8 +40,10 @@ public class Encryptor {
 
     private Recipient recipient;
     private RecipientId recipientId;
+    private PrivateKey privateKey;
 
     public Encryptor(X509Certificate localCert, PrivateKey localPrivateKey) {
+        this.privateKey = localPrivateKey;
         recipientId = new JceKeyTransRecipientId(localCert);
         recipient = new JceKeyTransEnvelopedRecipient(localPrivateKey).setProvider(ContextVS.PROVIDER);
     }
@@ -215,9 +217,9 @@ public class Encryptor {
         return responseVS;
     }
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate reciCert) throws Exception {
+    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
         CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
-        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(reciCert).
+        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receptorCert).
                 setProvider(ContextVS.PROVIDER));
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
         OutputStream out = dataStreamGen.open(bOut,
@@ -230,8 +232,22 @@ public class Encryptor {
         return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes);
     }
 
+    public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
+        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
+        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator("".getBytes(), receptorPublicKey).
+                setProvider(ContextVS.PROVIDER));
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        OutputStream out = dataStreamGen.open(bOut,
+                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
+                        setProvider(ContextVS.PROVIDER).build());
+        out.write(dataToEncrypt);
+        out.close();
+        byte[] result = bOut.toByteArray();
+        byte[] base64EncryptedDataBytes = Base64.encode(result);
+        return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes);
+    }
 
-    public byte[] decryptCMS(PrivateKey privateKey, byte[] base64EncryptedData) throws Exception {
+    public byte[] decryptCMS(byte[] base64EncryptedData) throws Exception {
         byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
         CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
@@ -354,26 +370,6 @@ public class Encryptor {
         return result;
     }
 
-    public static byte[] decryptCMS(SecretKey privateKey, 
-            byte[] cmsEncryptedData) throws Exception {
-        CMSEnvelopedData ed = new CMSEnvelopedData(cmsEncryptedData);
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
-        //assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-        Collection  c = recipients.getRecipients();
-        Iterator    it = c.iterator();
-        byte[] result = null;
-        if (it.hasNext()) {
-            RecipientInformation   recipientInfo = (RecipientInformation)it.next();
-            //Recipient recipient;
-            //recipient = new JceKeyTransEnvelopedRecipient(privateKey);
-            result = recipientInfo.getContent(privateKey, ContextVS.PROVIDER);
-            //assertEquals(recipient.getKeyEncryptionAlgOID(), NISTObjectIdentifiers.id_aes128_wrap.getId());
-            //result = recipient.getContent(secretKey, SMIMEContext.PROVIDER);
-            //recipient.getContent(Recipient recipient)
-        }
-        return result;
-    }
-
     public static byte[] decryptCMSStream(PrivateKey privateKey, byte[] cmsEncryptedData) throws Exception {
         CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
@@ -399,10 +395,10 @@ public class Encryptor {
         return result;
     }
         
-    public static byte[] encryptCMS(byte[] dataToEncrypt, X509Certificate reciCert) throws Exception {
+    public static byte[] encryptCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-        		reciCert).setProvider(ContextVS.PROVIDER));
+        		receptorCert).setProvider(ContextVS.PROVIDER));
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
         OutputStream out = edGen.open(bOut, new JceCMSContentEncryptorBuilder(
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(

@@ -1,11 +1,13 @@
 package org.votingsystem.ticket.controller
 
+import grails.converters.JSON
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.ticket.TransactionVS
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
 class TicketController {
 
@@ -16,7 +18,9 @@ class TicketController {
     def request() {}
 
 
-    def cancel() {}
+    def cancel() {
+        //check id cancellation data is ok and increment user account with the cancelled amount
+    }
 
     /**
      * Servicio que valida las solicitudes de tickets de los usuarios.

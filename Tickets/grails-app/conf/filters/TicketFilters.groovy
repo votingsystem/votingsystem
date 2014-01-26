@@ -84,12 +84,12 @@ class TicketFilters {
                                 } catch(Exception ex) {
                                     log.error(ex.getMessage(), ex)
                                     return printOutputStream(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                                            messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
+                                        messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
                                 }
                                 break;
                         }
                         if(smimeMessageReq) {
-                            responseVS = processSMIMERequest(smimeMessageReq, contentTypeVS, params, request)
+                            responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, contentTypeVS, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.data
                             else params[fileName] = null
                         }
@@ -121,19 +121,20 @@ class TicketFilters {
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                                responseVS = processSMIMERequest(responseVS.smimeMessage,contentTypeVS, params, request)
+                                responseVS = signatureVSService.processSMIMERequest(
+                                        responseVS.smimeMessage,contentTypeVS, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
                         case ContentTypeVS.JSON_ENCRYPTED:
                         case ContentTypeVS.ENCRYPTED:
-                            responseVS =  signatureVSService.decryptMessage(requestBytes, request.getLocale())
+                            responseVS =  signatureVSService.decryptCMS(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 params.requestBytes = responseVS.messageBytes
                             break;
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
-                            responseVS = processSMIMERequest(new SMIMEMessageWrapper(
-                                    new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
+                            responseVS = signatureVSService.processSMIMERequest(new SMIMEMessageWrapper(
+                                    new ByteArrayInputStream(requestBytes)), contentTypeVS, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
                         default: return;
@@ -175,6 +176,7 @@ class TicketFilters {
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
                                 responseVS.getMessageBytes(), model.receiverCert, request.getLocale())
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
+                            encryptResponse.setStatusCode(responseVS.getStatusCode())
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
                         } else {
@@ -183,9 +185,16 @@ class TicketFilters {
                             return printOutput(response, encryptResponse)
                         }
                     case ContentTypeVS.JSON_ENCRYPTED:
-                        ResponseVS encryptResponse =  signatureVSService.encryptToCMS(
-                                responseVS.getMessage().getBytes(), model.receiverCert)
+                        ResponseVS encryptResponse
+                        if(model.receiverPublicKey) {
+                            encryptResponse =  signatureVSService.encryptToCMS(
+                                    responseVS.getMessage().getBytes(), model.receiverPublicKey)
+                        } else if(model.receiverCert) {
+                            encryptResponse =  signatureVSService.encryptToCMS(
+                                    responseVS.getMessage().getBytes(), model.receiverCert)
+                        }
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
+                            encryptResponse.setStatusCode(responseVS.getStatusCode())
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
                         } else {
@@ -267,42 +276,6 @@ class TicketFilters {
         outputStream.close();
         inputStream.close();
         return outputStream.toByteArray();
-    }
-
-    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType,
-                                           Map params, HttpServletRequest request) {
-        if (smimeMessageReq?.isValidSignature()) {
-            log.debug "processSMIMERequest - isValidSignature"
-            ResponseVS certValidationResponse = null;
-            switch(contenType) {
-                /*case ContentTypeVS.TICKET:
-                    certValidationResponse = signatureVSService.validateSMIMETicket(smimeMessageReq, request.getLocale())
-                    break;*/
-                default:
-                    certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale());
-            }
-            MessageSMIME messageSMIME
-            if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
-                messageSMIME = new MessageSMIME(metaInf:certValidationResponse.message, type:TypeVS.ERROR,
-                        content:smimeMessageReq.getBytes())
-                MessageSMIME.withTransaction { messageSMIME.save() }
-                log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
-                        " - message: ${certValidationResponse.message}"
-                return certValidationResponse
-            } else {
-                messageSMIME = new MessageSMIME(signers:certValidationResponse.data?.checkedSigners,
-                        anonymousSigner:certValidationResponse.data?.anonymousSigner,
-                        userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
-                        eventVS:certValidationResponse.eventVS, type:TypeVS.OK,
-                        content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr())
-                MessageSMIME.withTransaction {messageSMIME.save()}
-            }
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
-        } else if(smimeMessageReq) {
-            log.error "**** Filter - processSMIMERequest - signature ERROR - "
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    message:messageSource.getMessage('signatureErrorMsg', null, request.getLocale()))
-        }
     }
 
 }

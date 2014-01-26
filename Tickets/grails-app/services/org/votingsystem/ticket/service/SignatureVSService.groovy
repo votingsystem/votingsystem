@@ -2,10 +2,17 @@ package org.votingsystem.ticket.service
 
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.cms.CMSAlgorithm
+import org.bouncycastle.cms.CMSEnvelopedData
+import org.bouncycastle.cms.CMSEnvelopedDataParser
+import org.bouncycastle.cms.CMSTypedStream
+import org.bouncycastle.cms.RecipientInformation
+import org.bouncycastle.cms.RecipientInformationStore
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
+import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
@@ -19,6 +26,7 @@ import javax.mail.Header
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
+import javax.servlet.http.HttpServletRequest
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -439,6 +447,41 @@ class  SignatureVSService {
                 extensionChecker:extensionChecker])
 	}
 
+    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType, Locale locale) {
+        if (smimeMessageReq?.isValidSignature()) {
+            log.debug "processSMIMERequest - isValidSignature"
+            ResponseVS certValidationResponse = null;
+            switch(contenType) {
+                /*case ContentTypeVS.TICKET:
+                    certValidationResponse = validateSMIMETicket(smimeMessageReq, locale)
+                    break;*/
+                default:
+                    certValidationResponse = validateSMIME(smimeMessageReq, locale);
+            }
+            MessageSMIME messageSMIME
+            if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
+                messageSMIME = new MessageSMIME(metaInf:certValidationResponse.message, type:TypeVS.ERROR,
+                        content:smimeMessageReq.getBytes())
+                MessageSMIME.withTransaction { messageSMIME.save() }
+                log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
+                        " - message: ${certValidationResponse.message}"
+                return certValidationResponse
+            } else {
+                messageSMIME = new MessageSMIME(signers:certValidationResponse.data?.checkedSigners,
+                        anonymousSigner:certValidationResponse.data?.anonymousSigner,
+                        userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
+                        eventVS:certValidationResponse.eventVS, type:TypeVS.OK,
+                        content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr())
+                MessageSMIME.withTransaction {messageSMIME.save()}
+            }
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
+        } else if(smimeMessageReq) {
+            log.error "**** Filter - processSMIMERequest - signature ERROR - "
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    message:messageSource.getMessage('signatureErrorMsg', null, locale))
+        }
+    }
+
 	public ResponseVS validateSMIMETicket(
 		SMIMEMessageWrapper messageWrapper, Locale locale) {
 		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
@@ -498,6 +541,49 @@ class  SignatureVSService {
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
+    /**
+     * Method to decrypt files attached to SMIME (not signed) messages
+     */
+    /*public ResponseVS decryptCMS (byte[] encryptedFile, Locale locale) {
+        log.debug " - decryptCMS"
+        try {
+            return getEncryptor().decryptCMS(serverPrivateKey, encryptedFile)
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }*/
+
+
+
+    public ResponseVS decryptCMS (byte[] base64EncryptedData, Locale locale) {
+        log.debug " - decryptCMS"
+        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+        Collection                 c = recipients.getRecipients();
+        Iterator                   it = c.iterator();
+        byte[] result = null;
+        if (it.hasNext()) {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+            //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+            CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(getServerPrivateKey()).setProvider(ContextVS.PROVIDER));
+            InputStream           dataStream = recData.getContentStream();
+            ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+            byte[]                buf = new byte[4096];
+            int len = 0;
+            while ((len = dataStream.read(buf)) >= 0) {
+                dataOut.write(buf, 0, len);
+            }
+            dataOut.close();
+            result = dataOut.toByteArray();
+            //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
+        }
+        new ResponseVS(ResponseVS.SC_OK, result);
+    }
+
+
 
     /**
      * Method to encrypt SMIME signed messages

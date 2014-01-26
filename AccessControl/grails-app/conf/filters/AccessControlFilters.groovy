@@ -193,6 +193,7 @@ class AccessControlFilters {
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
                                 responseVS.getMessageBytes(), model.receiverCert, request.getLocale())
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
+                            encryptResponse.setStatusCode(responseVS.getStatusCode())
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
                         } else {
@@ -206,12 +207,14 @@ class AccessControlFilters {
                         else return printOutput(response, responseVS)
                     case ContentTypeVS.MULTIPART_ENCRYPTED:
                         if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
+                            int statusCode = responseVS.getStatusCode()
                             if(model.receiverPublicKey) {
                                 responseVS =  signatureVSService.encryptMessage(
                                         responseVS.messageBytes, model.receiverPublicKey)
                             } else if(model.receiverCert) {
                                 responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,model.receiverCert)
                             }
+                            responseVS.setStatusCode(statusCode)
                             responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
                             if (ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response,responseVS)
                         } else log.error("missing params - messageBytes && (receiverCert ||receiverPublicKey)")

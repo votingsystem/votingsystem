@@ -12,7 +12,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 public class TransactionVS  implements Serializable {
@@ -39,6 +41,7 @@ public class TransactionVS  implements Serializable {
     private UserVS fromUserVS;
     private UserVS toUserVS;
 
+    private List<TicketVS> ticketsToSend;
     private Type type;
 
     private Date validTo;
@@ -124,6 +127,14 @@ public class TransactionVS  implements Serializable {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public List<TicketVS> getTicketsToSend() {
+        return ticketsToSend;
+    }
+
+    public void setTicketsToSend(List<TicketVS> ticketsToSend) {
+        this.ticketsToSend = ticketsToSend;
     }
 
     public SMIMEMessageWrapper getMessageSMIME() {

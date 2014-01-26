@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedDataParser;
+import org.bouncycastle2.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle2.cms.CMSTypedStream;
 import org.bouncycastle2.cms.KeyTransRecipientId;
 import org.bouncycastle2.cms.Recipient;
@@ -30,6 +31,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -157,6 +159,22 @@ public class Encryptor {
                 new JceCMSContentEncryptorBuilder(
                 CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
         return encryptedPart;
+    }
+
+    public static byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate reciCert)
+            throws Exception {
+        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
+        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(reciCert).
+                setProvider(ContextVS.PROVIDER));
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        OutputStream out = dataStreamGen.open(bOut,
+                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
+                        setProvider(ContextVS.PROVIDER).build());
+        out.write(dataToEncrypt);
+        out.close();
+        byte[] result = bOut.toByteArray();
+        byte[] base64EncryptedDataBytes = Base64.encode(result);
+        return base64EncryptedDataBytes;
     }
 	
     /**

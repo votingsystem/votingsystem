@@ -15,6 +15,7 @@ import android.util.Log;
 
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,6 +23,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.AnonymousSMIMESender;
+import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.model.ActorVS;
@@ -35,6 +37,7 @@ import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
@@ -44,10 +47,12 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.TimestampException;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -116,12 +121,38 @@ public class TicketService extends IntentService {
         }
     }
 
+    private ResponseVS cancelTickets(List<TicketVS> sendedTickets) {
+        ResponseVS responseVS = null;
+        String message = null;
+        String caption = null;
+        Integer iconId = R.drawable.cancel_22;
+        try {
+            for(TicketVS ticket : sendedTickets) {
+
+            }
+
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+                    message);
+        } finally {
+            responseVS.setIconId(iconId);
+            responseVS.setCaption(caption);
+            responseVS.setNotificationMessage(message);
+            return responseVS;
+        }
+    }
+
     private ResponseVS ticketSend(BigDecimal requestAmount, CurrencyVS currencyVS,
             String subject, String receptor, String IBAN, String pin) {
         ResponseVS responseVS = null;
         String message = null;
         String caption = null;
         Integer iconId = R.drawable.cancel_22;
+        List<TicketVS> sendedTickets = new ArrayList<TicketVS>();
         try {
             CurrencyData availableCurrencyData = contextVS.getTicketAccount().getCurrencyMap().
                     get(currencyVS);
@@ -150,36 +181,63 @@ public class TicketService extends IntentService {
             mapToSend.put("currency", currencyVS.toString());
             mapToSend.put("amount", ticketAmount.toString());
 
-            List<TicketVS> sendedTickets = new ArrayList<TicketVS>();
+            List<String> smimeTicketList = new ArrayList<String>();
             for(TicketVS ticketVS : ticketsToSend) {
                 mapToSend.put("UUID", UUID.randomUUID().toString());
                 String textToSign = new JSONObject(mapToSend).toString();
-                AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(
+                SMIMEMessageWrapper smimeMessage = ticketVS.getCertificationRequest().genMimeMessage(
                         ticketVS.getHashCertVSBase64(), StringUtils.getNormalized(receptor),
-                        textToSign, subject, null, ticketServer.getDepositURL(),
-                        ticketServer.getCertificate(), ContentTypeVS.TICKET,
-                        ticketVS.getCertificationRequest(), contextVS);
-                responseVS = anonymousSender.call();
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    sendedTickets.add(ticketVS);
-                } else break;
-             }
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                iconId = R.drawable.receipt_22;
-                caption = getString(R.string.ticket_send_ok_caption);
-                message = getString(R.string.ticket_send_ok_msg, requestAmount.toString(),
-                        currencyVS.toString(), subject, receptor);
-            } else {
-                caption = getString(R.string.ticket_send_error_caption);
-                message = getString(R.string.ticket_send_error_msg, responseVS.getMessage());
+                        textToSign, subject, null);
+                MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
+                responseVS = timeStamper.call();
+                if(ResponseVS.SC_OK != responseVS.getStatusCode())
+                    throw new TimestampException(responseVS.getMessage());
+
+
+                smimeTicketList.add(new String(Base64.encode(smimeMessage.getBytes())));
+                sendedTickets.add(ticketVS);
             }
+            KeyPair keyPair = sendedTickets.iterator().next().getCertificationRequest().getKeyPair();
+            String publicKeyStr = new String(Base64.encode(keyPair.getPublic().getEncoded()));
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                mapToSend.put("amount", requestAmount.toString());
+                mapToSend.put("tickets", smimeTicketList);
+                mapToSend.put("publicKey", publicKeyStr);
+                String textToSign = new JSONObject(mapToSend).toString();
+                byte[] messageToSend = Encryptor.encryptToCMS(textToSign.getBytes(),
+                        ticketServer.getCertificate());
+                responseVS = HttpHelper.sendData(messageToSend, ContentTypeVS.JSON_ENCRYPTED,
+                        ticketServer.getTicketBatchServiceURL());
+                if(responseVS.getContentType()!= null && responseVS.getContentType().isEncrypted()) {
+                    byte[] decryptedMessageBytes = Encryptor.decryptCMS(keyPair.getPrivate(),
+                            responseVS.getMessageBytes());
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        Log.d(TAG + ".responseVS(...) ", "statusCode: " + responseVS.getMessage());
+                    }
+                }
+            }
+        } catch(TimestampException tex) {
+            responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
+            responseVS.setCaption(contextVS.getString(R.string.timestamp_service_error_caption));
+            responseVS.setNotificationMessage(tex.getMessage());
         } catch(Exception ex) {
             ex.printStackTrace();
+            cancelTickets(sendedTickets);
             message = ex.getMessage();
             if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     message);
         } finally {
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                cancelTickets(sendedTickets);
+                caption = getString(R.string.ticket_send_error_caption);
+                message = getString(R.string.ticket_send_error_msg, responseVS.getMessage());
+            } else {
+                iconId = R.drawable.euro_24;
+                caption = getString(R.string.ticket_send_ok_caption);
+                message = getString(R.string.ticket_send_ok_msg, requestAmount.toString(),
+                        currencyVS.toString(), subject, receptor);
+            }
             responseVS.setIconId(iconId);
             responseVS.setCaption(caption);
             responseVS.setNotificationMessage(message);
