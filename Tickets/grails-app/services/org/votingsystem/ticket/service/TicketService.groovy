@@ -10,6 +10,7 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
 
@@ -43,8 +44,11 @@ class TicketService {
 
             CurrencyVS requestCurrency = CurrencyVS.valueOf(dataRequestJSON.currency)
 
-            Map userInfoMap = transactionVSService.getUserInfoMap(signer)
-            Map currencyMap = userInfoMap.get(requestCurrency.toString())
+            Calendar mondayLapse = DateUtils.getMonday(Calendar.getInstance())
+            String dirPath = DateUtils.getDirPath(mondayLapse.getTime())
+            Map userInfoMap = transactionVSService.getUserInfoMap(signer, mondayLapse)
+
+            Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.toString())
             if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
                     [requestCurrency.toString()].toArray(), locale));
 

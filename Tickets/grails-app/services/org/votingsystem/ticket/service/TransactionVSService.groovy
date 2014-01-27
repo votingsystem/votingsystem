@@ -225,29 +225,25 @@ class TransactionVSService {
         return transactionMap
     }
 
-    public Map getUserInfoMap(UserVS userVS, Date mondayLapse) {
+    public Map getUserInfoMap(UserVS userVS, Calendar mondayLapse) {
         def inputCriteria = TransactionVS.createCriteria()
         def userInputTransactions = inputCriteria.scroll {
             eq("toUserVS", userVS)
             eq("type", TransactionVS.Type.USER_INPUT)
-            ge("dateCreated", mondayLapse)
+            ge("dateCreated", mondayLapse.getTime())
         }
 
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(mondayLapse);
-
-        String dirPath = DateUtils.getDirPath(mondayLapse)
+        String dirPath = DateUtils.getDirPath(mondayLapse.getTime())
         //int year =  calendar.get(Calendar.YEAR);
         //int month = calendar.get(Calendar.MONTH) + 1; // Note: zero based!
         //int day = calendar.get(Calendar.DAY_OF_MONTH);
-
 
         def outputCriteria = TransactionVS.createCriteria()
         def userOutputTransactions = outputCriteria.scroll {
             eq("fromUserVS", userVS)
             eq("type", TransactionVS.Type.USER_OUTPUT)
-            ge("dateCreated", mondayLapse)
+            ge("dateCreated", mondayLapse.getTime())
         }
 
         Map resultMap = [:]

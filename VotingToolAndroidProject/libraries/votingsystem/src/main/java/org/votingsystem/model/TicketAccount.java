@@ -69,4 +69,12 @@ public class TicketAccount implements Serializable {
     public void setCurrencyMap(Map<CurrencyVS, CurrencyData> currencyMap) {
         this.currencyMap = currencyMap;
     }
+
+    public Date getWeekLapse() {
+        return weekLapse;
+    }
+
+    public void setWeekLapse(Date weekLapse) {
+        this.weekLapse = weekLapse;
+    }
 }

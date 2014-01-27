@@ -131,9 +131,15 @@ public class DateUtils {
         return formatter.format(date);
     }
 
-    public static Date getDateFromPath (String dateStr) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
-        return formatter.parse(dateStr);
+    public static Date getDateFromDirPath (String dateStr) {
+        Date result = null;
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
+            result = formatter.parse(dateStr);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return result;
     }
 
     public static String getURLPath (Date date) {

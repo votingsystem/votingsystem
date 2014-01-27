@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,7 +30,6 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.activity.TicketPagerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.model.ContextVS;
@@ -40,10 +38,7 @@ import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.ObjectUtils;
 
-import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 

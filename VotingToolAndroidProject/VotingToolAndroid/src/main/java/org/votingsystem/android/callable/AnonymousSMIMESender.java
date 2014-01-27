@@ -9,7 +9,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.cert.X509Certificate;

@@ -1,6 +1,5 @@
 package org.votingsystem.android.ui;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 import org.votingsystem.android.AppContextVS;

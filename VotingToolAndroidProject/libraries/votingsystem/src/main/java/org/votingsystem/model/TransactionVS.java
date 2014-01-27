@@ -1,7 +1,10 @@
 package org.votingsystem.model;
 
+import android.content.Context;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.votingsystem.android.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 
@@ -22,7 +25,8 @@ public class TransactionVS  implements Serializable {
     public static final long serialVersionUID = 1L;
 
     //Retirada efectivo, Ingreso en cuenta, Pago en Tickets
-    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION;}
+    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION,
+        TICKET_PAYCHECK;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -202,6 +206,32 @@ public class TransactionVS  implements Serializable {
         this.validTo = validTo;
     }
 
+    public int getIconId(Context context) {
+        switch(type) {
+            case USER_INPUT:
+                return R.drawable.edit_redo_24;
+            case USER_OUTPUT:
+                return R.drawable.edit_undo_24;
+            case TICKET_PAYCHECK:
+                return R.drawable.euro_24;
+            default:
+                return R.drawable.pending;
+        }
+    }
+
+    public String getDescription(Context context) {
+        switch(type) {
+            case USER_INPUT:
+                return context.getString(R.string.account_input);
+            case USER_OUTPUT:
+                return context.getString(R.string.account_output);
+            case TICKET_PAYCHECK:
+                return context.getString(R.string.ticket_paycheck);
+            default:
+                return type.toString();
+        }
+    }
+
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
@@ -223,6 +253,7 @@ public class TransactionVS  implements Serializable {
 
     public static TransactionVS parse(JSONObject jsonData) throws ParseException, JSONException {
         TransactionVS transactionVS = new TransactionVS();
+        transactionVS.setId(jsonData.getLong("id"));
         if(jsonData.has("fromUserVS")) {
             JSONObject fromUserVSJSON = jsonData.getJSONObject("fromUserVS");
             UserVS fromUserVS = new UserVS();
@@ -237,7 +268,7 @@ public class TransactionVS  implements Serializable {
             toUserVS.setNif(toUserVSJSON.getString("nif"));
             transactionVS.setToUserVS(toUserVS);
         }
-
+        transactionVS.setSubject(jsonData.getString("subject"));
         transactionVS.setCurrencyVS(CurrencyVS.valueOf(jsonData.getString("currency")));
         transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated")));
         if(jsonData.has("validTo")) transactionVS.setValidTo(

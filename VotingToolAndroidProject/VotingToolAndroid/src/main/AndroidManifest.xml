@@ -124,6 +124,9 @@
         <provider android:name=".contentprovider.ReceiptContentProvider"
             android:exported="false" android:authorities="votingsystem.org.receipt"/>
 
+        <provider android:name=".contentprovider.TransactionVSContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.transactionVS"/>
+
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service is only available to this app. -->
         <service android:name=".service.SignAndSendService" android:exported="false"/>

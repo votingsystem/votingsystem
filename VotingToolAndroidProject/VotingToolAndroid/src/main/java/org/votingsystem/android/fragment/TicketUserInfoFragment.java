@@ -23,6 +23,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.service.TicketService;
@@ -33,9 +34,9 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
+
 import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -183,7 +184,8 @@ public class TicketUserInfoFragment extends Fragment {
         ticketUserInfo = ((AppContextVS)getActivity().getApplicationContext()).getTicketAccount();
         if(ticketUserInfo == null) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_ticket_user_info_caption),
-                    getString(R.string.empty_ticket_user_info, contextVS.getLapseWeekLbl()));
+                    getString(R.string.empty_ticket_user_info, contextVS.getLapseWeekLbl(
+                            Calendar.getInstance())));
             return;
         }
         final CurrencyData currencyData;
@@ -198,7 +200,7 @@ public class TicketUserInfoFragment extends Fragment {
                             getString(R.string.cash_request_dialog_caption),
                             getString(R.string.cash_dialog_msg,
                                     currencyData.getAccountBalance(), CurrencyVS.Euro.toString()),
-                            currencyData.getAccountBalance(), null);
+                            currencyData.getAccountBalance(), TypeVS.TICKET_REQUEST);
                 }
             });
             request_button.setVisibility(View.VISIBLE);

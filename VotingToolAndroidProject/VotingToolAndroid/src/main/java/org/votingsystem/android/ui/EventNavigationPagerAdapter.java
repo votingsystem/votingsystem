@@ -1,7 +1,6 @@
 package org.votingsystem.android.ui;
 
 import android.app.SearchManager;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

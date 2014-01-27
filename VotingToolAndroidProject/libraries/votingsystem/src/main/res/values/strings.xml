@@ -41,5 +41,8 @@
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
     <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
     <string name="receipt_lbl">Recibo</string>
+    <string name="account_input">Ingreso en cuenta</string>
+    <string name="account_output">Retirada de efectivo</string>
+    <string name="ticket_paycheck">Pago en Tickets</string>
 
 </resources>

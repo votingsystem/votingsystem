@@ -1,7 +1,6 @@
 package org.votingsystem.android.ui;
 
 import android.app.SearchManager;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,11 +11,10 @@ import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.TicketGridFragment;
 import org.votingsystem.android.fragment.TicketUserInfoFragment;
+import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
-import org.votingsystem.util.DateUtils;
 
 import java.util.Calendar;
 
@@ -50,7 +48,7 @@ public class TicketPagerAdapter extends FragmentStatePagerAdapter
                 selectedFragment = new TicketUserInfoFragment();
                 break;
             case TICKET_LIST:
-                selectedFragment = new TicketGridFragment();
+                selectedFragment = new TransactionVSGridFragment();
                 break;
         }
         Bundle args = new Bundle();
@@ -64,7 +62,7 @@ public class TicketPagerAdapter extends FragmentStatePagerAdapter
     public String getSelectedChildDescription(AppContextVS context) {
         switch(selectedChild) {
             case TICKET_USER_INFO:
-                return context.getLapseWeekLbl();
+                return context.getLapseWeekLbl(Calendar.getInstance());
             case TICKET_LIST:
                 return context.getString(R.string.tickets_list_lbl);
             default:

@@ -396,5 +396,6 @@
     <string name="ticket_send_error_msg"><![CDATA[Problemas realizando el pago. \'%1$s\']]></string>
     <string name="week_lapse_lbl">%1$s al %2$s</string>
     <string name="week_lapse_lbl1"><![CDATA[Semana del <b>\'%1$s\'</b> al <b>\'%2$s\'</b>]]></string>
+    <string name="transactionvs_lbl">Transacciones</string>
 
 </resources>

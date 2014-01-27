@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,12 +21,10 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.MessageActivity;
-import org.votingsystem.android.callable.AnonymousSMIMESender;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.AnonymousDelegationVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CurrencyData;
@@ -39,18 +36,15 @@ import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -67,8 +61,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.mail.Header;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
@@ -409,6 +401,7 @@ public class TicketService extends IntentService {
                     String keyStr = (String) weeksIterator.next();
                     if(currentLapseStr.equals(keyStr)) {
                         ticketAccount = TicketAccount.parse(responseJSON.getJSONObject(keyStr));
+                        ticketAccount.setWeekLapse(currentLapseCalendar.getTime());
                         break;
                     }
                 }
@@ -416,6 +409,8 @@ public class TicketService extends IntentService {
                     ticketAccount.setLastRequestDate(requestDate);
                 } else Log.d(TAG + "updateUserInfo(...)", "Current week data not found");
                 contextVS.setTicketAccount(ticketAccount);
+            } else {
+                responseVS.setCaption(getString(R.string.error_lbl));
             }
         } catch(Exception ex) {
             ex.printStackTrace();

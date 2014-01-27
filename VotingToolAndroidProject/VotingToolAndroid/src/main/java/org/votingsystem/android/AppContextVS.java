@@ -1,12 +1,14 @@
 package org.votingsystem.android;
 
 import android.app.Application;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
 
+import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
@@ -16,6 +18,7 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TicketVS;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.DateUtils;
@@ -24,10 +27,8 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -158,8 +159,7 @@ public class AppContextVS extends Application {
         }
     }
 
-    public String getLapseWeekLbl() {
-        Calendar calendar = Calendar.getInstance();
+    public String getLapseWeekLbl(Calendar calendar) {
         Calendar thisWeekMonday = DateUtils.getMonday(calendar);
         calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
@@ -199,14 +199,15 @@ public class AppContextVS extends Application {
     }
 
     public void setTicketAccount(TicketAccount updatedTicketAccount) {
-        getTicketsAccounts(2014, null);
         try {
             TicketAccount ticketAccount = getTicketAccount();
+            Map<CurrencyVS, CurrencyData> newCurrencyMap = null;
+            Set<CurrencyVS> keySet = null;
             if(ticketAccount != null) {
                 Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
                 if(currencyMap != null) {
-                    Set<CurrencyVS> keySet = currencyMap.keySet();
-                    Map<CurrencyVS, CurrencyData> newCurrencyMap = updatedTicketAccount.getCurrencyMap();
+                    keySet = currencyMap.keySet();
+                    newCurrencyMap = updatedTicketAccount.getCurrencyMap();
                     for(CurrencyVS currencyVS : keySet) {
                         if(newCurrencyMap != null && newCurrencyMap.containsKey(currencyVS)) {
                             newCurrencyMap.get(currencyVS).setTicketList(currencyMap.get(currencyVS).getTicketList());
@@ -222,9 +223,36 @@ public class AppContextVS extends Application {
                             if(newCurrencyMap == null) newCurrencyMap =
                                     new HashMap<CurrencyVS, CurrencyData>();
                             newCurrencyMap.put(currencyVS, currencyData);
+                            updatedTicketAccount.setCurrencyMap(newCurrencyMap);
                         }
                     }
                 }
+            }
+            keySet = updatedTicketAccount.getCurrencyMap().keySet();
+            for(CurrencyVS currencyVS : keySet) {
+                CurrencyData currencyData = updatedTicketAccount.getCurrencyMap().get(currencyVS);
+                for(TransactionVS transactionVS : currencyData.getTransactionList()) {
+                    ContentValues values = new ContentValues();
+                    values.put(TransactionVSContentProvider.SQL_INSERT_OR_REPLACE, true);
+                    values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
+                    values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
+                    values.put(TransactionVSContentProvider.FROM_USER_COL,
+                            transactionVS.getFromUserVS().getNif());
+                    values.put(TransactionVSContentProvider.TO_USER_COL,
+                            transactionVS.getToUserVS().getNif());
+                    values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
+                    values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
+                    values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
+                    values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
+                    values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
+                            ObjectUtils.serializeObject(transactionVS));
+                    values.put(TransactionVSContentProvider.WEEK_LAPSE_COL,
+                            DateUtils.getDirPath(updatedTicketAccount.getWeekLapse()));
+                    values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
+                            transactionVS.getDateCreated().getTime());
+                    getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+                }
+                currencyData.setTransactionList(null);
             }
             byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(updatedTicketAccount);
             String datePrefix =DateUtils.getDirPath(DateUtils.getMonday(

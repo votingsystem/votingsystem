@@ -20,31 +20,20 @@ class TestingController {
     def grailsApplication
     def transactionVSService
 
+    def accounts() {}
+
 
     def index() {
         Date selectedDate = null
         Calendar calendar = Calendar.getInstance()
         if(params.year && params.month && params.day) {
-            log.debug("--------- set calendr")
             calendar = Calendar.getInstance()
             calendar.set(Calendar.YEAR, params.int('year'))
             calendar.set(Calendar.MONTH, params.int('month') - 1) //Zero based
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
-        } else calendar = DateUtils.getMonday(calendar.getTime())
+        } else calendar = DateUtils.getMonday(calendar)
 
-
-
-        calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 2);
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-
-
-
-
-        UserVS userVS = UserVS.get(12)
+        UserVS userVS = UserVS.get(13)
 
 
         //Calendar calendar = Calendar.getInstance();
@@ -68,7 +57,7 @@ class TestingController {
         if(!selectedDate) selectedDate = Calendar.getInstance().getTime()
         log.debug("=========== ${params.year}")
 
-        UserVS userVS = UserVS.get(12)
+        UserVS userVS = UserVS.get(13)
 
 
         //Calendar calendar = Calendar.getInstance();

@@ -15,11 +15,9 @@ import android.view.MenuItem;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
-import org.votingsystem.android.fragment.TicketUserInfoFragment;
 import org.votingsystem.android.service.VotingAppService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
 
 import java.io.IOException;
 import java.util.Properties;
