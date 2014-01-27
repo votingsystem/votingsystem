@@ -4,11 +4,14 @@ import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
 
+import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
@@ -29,8 +32,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +84,6 @@ public class AppContextVS extends Application {
             ex.printStackTrace();
         }
 	}
-
 
     public String getTicketServerURL() {
         return ticketServerURL;
@@ -170,127 +175,108 @@ public class AppContextVS extends Application {
                 thisWeekMonday.getTime()), DateUtils.getDate_Es(calendar.getTime()));
     }
 
-    public TicketAccount getTicketAccount() {
-        String datePrefix =DateUtils.getDirPath(DateUtils.getMonday(
-                Calendar.getInstance()).getTime());
-        File ticketUserInfoDataFile = new File(getApplicationContext().getFilesDir(),
-                datePrefix + ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
-        TicketAccount ticketUserInfo = null;
-        try {
-            if(ticketUserInfoDataFile.exists()) {
-                byte[] serializedTicketUserInfo = FileUtils.getBytesFromFile(ticketUserInfoDataFile);
-                ticketUserInfo = (TicketAccount) ObjectUtils.deSerializeObject(
-                        serializedTicketUserInfo);
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return ticketUserInfo;
+    public void updateTicketAccountLastChecked() {
+        SharedPreferences settings = getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(ContextVS.TICKET_ACCOUNT_LAST_CHECKED_KEY,
+        Calendar.getInstance().getTimeInMillis());
+        editor.commit();
     }
 
-    public void getTicketsAccounts(Integer year, Integer month) {
-        Log.d(TAG + ".getTicketsAccounts(...)", "year: " + year + " - month: " + month);
-        File pathDir = new File(getApplicationContext().getFilesDir(), "/" + year.toString());
-        List<File> ticketsAccountsList = FileUtils.searchFiles(pathDir.getAbsolutePath(),
-                ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
-        for(File account: ticketsAccountsList) {
-            Log.d(TAG + ".getTicketsAccounts(...)", "==== found account: " + account.getAbsolutePath());
-        }
+    public Date getTicketAccountLastChecked() {
+        SharedPreferences pref = getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+                Context.MODE_PRIVATE);
+        GregorianCalendar lastCheckedTime = new GregorianCalendar();
+        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.TICKET_ACCOUNT_LAST_CHECKED_KEY, 0));
+
+        Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
+
+        if(lastCheckedTime.getTime().after(currentLapseCalendar.getTime())) {
+            return lastCheckedTime.getTime();
+        } else return null;
     }
 
     public void setTicketAccount(TicketAccount updatedTicketAccount) {
+        Set<CurrencyVS> keySet = updatedTicketAccount.getCurrencyMap().keySet();
+        for(CurrencyVS currencyVS : keySet) {
+            CurrencyData currencyData = updatedTicketAccount.getCurrencyMap().get(currencyVS);
+            for(TransactionVS transactionVS : currencyData.getTransactionList()) {
+                ContentValues values = new ContentValues();
+                values.put(TransactionVSContentProvider.SQL_INSERT_OR_REPLACE, true);
+                values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
+                values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
+                values.put(TransactionVSContentProvider.FROM_USER_COL,
+                        transactionVS.getFromUserVS().getNif());
+                values.put(TransactionVSContentProvider.TO_USER_COL,
+                        transactionVS.getToUserVS().getNif());
+                values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
+                values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
+                values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
+                values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
+                values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
+                        ObjectUtils.serializeObject(transactionVS));
+                values.put(TransactionVSContentProvider.WEEK_LAPSE_COL,
+                        DateUtils.getDirPath(updatedTicketAccount.getWeekLapse()));
+                values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
+                        transactionVS.getDateCreated().getTime());
+                getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+            }
+            currencyData.setTransactionList(null);
+        }
+        updateTicketAccountLastChecked();
+    }
+
+    public CurrencyData getCurrencyData(CurrencyVS currency) {
+        String selection = TicketContentProvider.WEEK_LAPSE_COL + " =? AND " +
+                TicketContentProvider.CURRENCY_COL + "= ? ";
+        String weekLapseId = getCurrentWeekLapseId();
+        Cursor cursor = getContentResolver().query(TicketContentProvider.CONTENT_URI,null, selection,
+                new String[]{weekLapseId, currency.toString()}, null);
+        cursor.moveToFirst();
+        List<TicketVS> ticketList = new ArrayList<TicketVS>();
+        while(cursor.moveToNext()) {
+            TicketVS ticketVS = (TicketVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(TicketContentProvider.SERIALIZED_OBJECT_COL)));
+            ticketList.add(ticketVS);
+        }
+        selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? AND " +
+                TransactionVSContentProvider.CURRENCY_COL + "= ? ";
+        cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,null, selection,
+                new String[]{weekLapseId, currency.toString()}, null);
+        cursor.moveToFirst();
+        List<TransactionVS> transactionList = new ArrayList<TransactionVS>();
+        while(cursor.moveToNext()) {
+            TransactionVS transactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
+            transactionList.add(transactionVS);
+        }
+        CurrencyData currencyData = null;
         try {
-            TicketAccount ticketAccount = getTicketAccount();
-            Map<CurrencyVS, CurrencyData> newCurrencyMap = null;
-            Set<CurrencyVS> keySet = null;
-            if(ticketAccount != null) {
-                Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
-                if(currencyMap != null) {
-                    keySet = currencyMap.keySet();
-                    newCurrencyMap = updatedTicketAccount.getCurrencyMap();
-                    for(CurrencyVS currencyVS : keySet) {
-                        if(newCurrencyMap != null && newCurrencyMap.containsKey(currencyVS)) {
-                            newCurrencyMap.get(currencyVS).setTicketList(currencyMap.get(currencyVS).getTicketList());
-                        } else {
-                            Log.e(TAG + ".setTicketAccount(...)", "updatedTicketAccount " +
-                                    "missing currency data" + currencyVS.toString());
-                            CurrencyData currencyData = currencyMap.get(currencyVS);
-                            if(currencyData == null) currencyData = new CurrencyData();
-                            currencyData.setTransactionList(null);
-                            currencyData.setTotalInputs(new BigDecimal(0));
-                            currencyData.setTotalOutputs(new BigDecimal(0));
-                            currencyData.setLastRequestDate(updatedTicketAccount.getLastRequestDate());
-                            if(newCurrencyMap == null) newCurrencyMap =
-                                    new HashMap<CurrencyVS, CurrencyData>();
-                            newCurrencyMap.put(currencyVS, currencyData);
-                            updatedTicketAccount.setCurrencyMap(newCurrencyMap);
-                        }
-                    }
-                }
-            }
-            keySet = updatedTicketAccount.getCurrencyMap().keySet();
-            for(CurrencyVS currencyVS : keySet) {
-                CurrencyData currencyData = updatedTicketAccount.getCurrencyMap().get(currencyVS);
-                for(TransactionVS transactionVS : currencyData.getTransactionList()) {
-                    ContentValues values = new ContentValues();
-                    values.put(TransactionVSContentProvider.SQL_INSERT_OR_REPLACE, true);
-                    values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
-                    values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
-                    values.put(TransactionVSContentProvider.FROM_USER_COL,
-                            transactionVS.getFromUserVS().getNif());
-                    values.put(TransactionVSContentProvider.TO_USER_COL,
-                            transactionVS.getToUserVS().getNif());
-                    values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
-                    values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
-                    values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
-                    values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
-                    values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
-                            ObjectUtils.serializeObject(transactionVS));
-                    values.put(TransactionVSContentProvider.WEEK_LAPSE_COL,
-                            DateUtils.getDirPath(updatedTicketAccount.getWeekLapse()));
-                    values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
-                            transactionVS.getDateCreated().getTime());
-                    getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
-                }
-                currencyData.setTransactionList(null);
-            }
-            byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(updatedTicketAccount);
-            String datePrefix =DateUtils.getDirPath(DateUtils.getMonday(
-                    Calendar.getInstance()).getTime());
-            File ticketUserInfoDir = new File(getApplicationContext().getFilesDir(), datePrefix);
-            ticketUserInfoDir.mkdirs();
-            File ticketUserInfoDataFile = new File(getApplicationContext().getFilesDir(),
-                    datePrefix + ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
-            ticketUserInfoDataFile.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(ticketUserInfoDataFile);
-            outputStream.write(ticketUserInfoBytes);
-            outputStream.close();
+            currencyData = new CurrencyData(transactionList);
+            currencyData.setTicketList(ticketList);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
+        return currencyData;
+    }
+
+    public String getCurrentWeekLapseId() {
+        Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
+        return DateUtils.getDirPath(currentLapseCalendar.getTime());
     }
 
     public void updateTickets(Collection<TicketVS> tickets) {
-        try {
-            TicketAccount ticketAccount = getTicketAccount();
-            for(TicketVS ticketVS : tickets) {
-                Map<CurrencyVS, CurrencyData> currencyMap = ticketAccount.getCurrencyMap();
-                CurrencyData currencyData = currencyMap.get(ticketVS.getCurrency());
-                currencyData.addTicket(ticketVS);
-            }
-            byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(ticketAccount);
-            String datePrefix =DateUtils.getDirPath(DateUtils.getMonday(
-                    Calendar.getInstance()).getTime());
-            File ticketUserInfoDir = new File(getApplicationContext().getFilesDir(), datePrefix);
-            ticketUserInfoDir.mkdirs();
-            File ticketUserInfoDataFile = new File(getApplicationContext().getFilesDir(),
-                    datePrefix + ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
-            ticketUserInfoDataFile.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(ticketUserInfoDataFile);
-            outputStream.write(ticketUserInfoBytes);
-            outputStream.close();
-        } catch(Exception ex) {
-            ex.printStackTrace();
+        for(TicketVS ticketVS : tickets) {
+            ContentValues values = new ContentValues();
+            values.put(TicketContentProvider.SQL_INSERT_OR_REPLACE, true);
+            values.put(TicketContentProvider.AMOUNT_COL, ticketVS.getAmount().toPlainString());
+            values.put(TicketContentProvider.CURRENCY_COL, ticketVS.getCurrency().toString());
+            values.put(TicketContentProvider.STATE_COL, ticketVS.getState().toString());
+            values.put(TicketContentProvider.SERIALIZED_OBJECT_COL,
+                    ObjectUtils.serializeObject(ticketVS));
+            values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, getCurrentWeekLapseId());
+            getContentResolver().insert(TicketContentProvider.CONTENT_URI, values);
         }
     }
 
@@ -309,4 +295,5 @@ public class AppContextVS extends Application {
     public void setTicketServer(TicketServer ticketServer) {
         this.ticketServer = ticketServer;
     }
+
 }

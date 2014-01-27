@@ -71,8 +71,8 @@ public class RssService extends Service  implements Runnable {
         handler = new Handler();
         // Load last updated value.
         // We store last updated value in preferences.
-        SharedPreferences pref = getSharedPreferences(
-                ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+                Context.MODE_PRIVATE);
         lastCheckedTime = new GregorianCalendar();
         lastCheckedTime.setTimeInMillis(pref.getLong(
                 ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY, 0));

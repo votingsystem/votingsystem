@@ -19,6 +19,16 @@ public class TicketVS extends ReceiptContainer {
 
     public static final String TAG = "TicketVS";
 
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
+
     private Long localId = -1L;
     private TransactionVS transaction;
     private transient SMIMEMessageWrapper receipt;
@@ -29,6 +39,7 @@ public class TicketVS extends ReceiptContainer {
     private BigDecimal amount;
     private TypeVS typeVS;
     private String subject;
+    private State state;
     private CurrencyVS currency;
     private String url;
     private String ticketServerURL;

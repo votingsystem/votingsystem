@@ -22,6 +22,9 @@ public class TicketContentProvider extends ContentProvider {
 
     public static final String TAG = "TicketContentProvider";
 
+    //from http://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
+    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
+
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME       = "voting_system_ticket.db";
     private static final String TABLE_NAME    = "ticket";
@@ -31,6 +34,9 @@ public class TicketContentProvider extends ContentProvider {
     public static final String TYPE_COL              = "type";
     public static final String URL_COL               = "url";
     public static final String STATE_COL             = "state";
+    public static final String AMOUNT_COL            = "amount";
+    public static final String CURRENCY_COL          = "currency";
+    public static final String WEEK_LAPSE_COL        = "weekLapse";
     public static final String SERIALIZED_OBJECT_COL = "serializedObject";
     public static final String TIMESTAMP_CREATED_COL = "timestampCreated";
     public static final String TIMESTAMP_UPDATED_COL = "timestampUpdated";
@@ -128,9 +134,22 @@ public class TicketContentProvider extends ContentProvider {
         Uri newUri = null;
         if(values != null) {
             long rowId = -1;
+            boolean replace = false;
             values.put(TicketContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
             values.put(TicketContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-            rowId = database.insert(TABLE_NAME, null, values);
+            if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
+                replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
+                // Clone the values object, so we don't modify the original.
+                // This is not strictly necessary, but depends on your needs
+                //values = new ContentValues( values );
+                // Remove the key, so we don't pass that on to db.insert() or db.replace()
+                values.remove( SQL_INSERT_OR_REPLACE );
+            }
+            if ( replace ) {
+                rowId = database.replace(TABLE_NAME, null, values);
+            } else {
+                rowId = database.insert(TABLE_NAME, null, values);
+            }
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
         // Notify any listeners and return the URI of the new row.
@@ -156,6 +175,9 @@ public class TicketContentProvider extends ContentProvider {
                 TYPE_COL              + " TEXT," +
                 URL_COL               + " TEXT," +
                 STATE_COL             + " TEXT," +
+                AMOUNT_COL            + " TEXT," +
+                CURRENCY_COL          + " TEXT," +
+                WEEK_LAPSE_COL        + " TEXT," +
                 SERIALIZED_OBJECT_COL + " blob, " +
                 TIMESTAMP_UPDATED_COL + " INTEGER DEFAULT 0, " +
                 TIMESTAMP_CREATED_COL + " INTEGER DEFAULT 0);";

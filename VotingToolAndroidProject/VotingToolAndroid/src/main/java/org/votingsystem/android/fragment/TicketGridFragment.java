@@ -235,11 +235,9 @@ public class TicketGridFragment extends Fragment implements
 
     public static class TransactionVSLoader extends AsyncTaskLoader<List<TransactionVS>> {
 
-        TicketAccount ticketAccount;
 
         public TransactionVSLoader(AppContextVS contextVS) {
             super(contextVS);
-            ticketAccount = contextVS.getTicketAccount();
         }
 
         /**
@@ -250,10 +248,6 @@ public class TicketGridFragment extends Fragment implements
         @Override public List<TransactionVS> loadInBackground() {
             // Retrieve all known applications.
             List<TransactionVS> transactions = null;
-            if(ticketAccount != null && ticketAccount.getCurrencyMap() != null &&
-                    ticketAccount.getCurrencyMap().get(CurrencyVS.Euro) != null) {
-                transactions = ticketAccount.getCurrencyMap().get(CurrencyVS.Euro).getTransactionList();
-            }
             return transactions;
         }
 

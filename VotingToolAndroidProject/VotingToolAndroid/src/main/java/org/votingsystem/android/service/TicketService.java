@@ -44,6 +44,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
@@ -116,17 +117,16 @@ public class TicketService extends IntentService {
         }
     }
 
-    private ResponseVS cancelTickets(List<TicketVS> sendedTickets) {
+    private ResponseVS cancelTickets(Collection<TicketVS> sendedTickets) {
         ResponseVS responseVS = null;
         String message = null;
         String caption = null;
         Integer iconId = R.drawable.cancel_22;
         try {
             for(TicketVS ticket : sendedTickets) {
-
+                Map dataToSend = new HashMap();
+                //ticket.getOriginHashCertVS()
             }
-
-
         } catch(Exception ex) {
             ex.printStackTrace();
             message = ex.getMessage();
@@ -147,10 +147,9 @@ public class TicketService extends IntentService {
         String message = null;
         String caption = null;
         Integer iconId = R.drawable.cancel_22;
-        List<TicketVS> sendedTickets = new ArrayList<TicketVS>();
+        Map <Long,TicketVS> sendedTicketsMap = new HashMap<Long, TicketVS>();
         try {
-            CurrencyData availableCurrencyData = contextVS.getTicketAccount().getCurrencyMap().
-                    get(currencyVS);
+            CurrencyData availableCurrencyData = contextVS.getCurrencyData(currencyVS);
             BigDecimal available = availableCurrencyData.getCashBalance();
             if(available.compareTo(requestAmount) < 0) {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyVS.toString(),
@@ -177,22 +176,26 @@ public class TicketService extends IntentService {
             mapToSend.put("amount", ticketAmount.toString());
 
             List<String> smimeTicketList = new ArrayList<String>();
+
             for(TicketVS ticketVS : ticketsToSend) {
                 mapToSend.put("UUID", UUID.randomUUID().toString());
                 String textToSign = new JSONObject(mapToSend).toString();
                 SMIMEMessageWrapper smimeMessage = ticketVS.getCertificationRequest().genMimeMessage(
                         ticketVS.getHashCertVSBase64(), StringUtils.getNormalized(receptor),
                         textToSign, subject, null);
+
+                smimeMessage.getSigner().getCertificate().getSerialNumber();
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
                 responseVS = timeStamper.call();
                 if(ResponseVS.SC_OK != responseVS.getStatusCode())
                     throw new TimestampException(responseVS.getMessage());
 
-
                 smimeTicketList.add(new String(Base64.encode(smimeMessage.getBytes())));
-                sendedTickets.add(ticketVS);
+                sendedTicketsMap.put(ticketVS.getCertificationRequest().getCertificate().
+                        getSerialNumber().longValue(), ticketVS);
             }
-            KeyPair keyPair = sendedTickets.iterator().next().getCertificationRequest().getKeyPair();
+            KeyPair keyPair = sendedTicketsMap.values().iterator().next().
+                    getCertificationRequest().getKeyPair();
             String publicKeyStr = new String(Base64.encode(keyPair.getPublic().getEncoded()));
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 mapToSend.put("amount", requestAmount.toString());
@@ -207,7 +210,14 @@ public class TicketService extends IntentService {
                     byte[] decryptedMessageBytes = Encryptor.decryptCMS(keyPair.getPrivate(),
                             responseVS.getMessageBytes());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        Log.d(TAG + ".responseVS(...) ", "statusCode: " + responseVS.getMessage());
+                        JSONObject jsonResponse = new JSONObject(new String(decryptedMessageBytes));
+                        JSONArray jsonArray = jsonResponse.getJSONArray("tickets");
+                        for(int i = 0; i < jsonArray.length(); i ++) {
+                            SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null,
+                                    new ByteArrayInputStream(Base64.decode(jsonArray.getString(i))), null);
+                            sendedTicketsMap.get(smimeMessage.getSigner().getCertificate().
+                                    getSerialNumber().longValue()).setReceiptBytes(smimeMessage.getBytes());
+                        }
                     }
                 }
             }
@@ -217,14 +227,14 @@ public class TicketService extends IntentService {
             responseVS.setNotificationMessage(tex.getMessage());
         } catch(Exception ex) {
             ex.printStackTrace();
-            cancelTickets(sendedTickets);
+            cancelTickets(sendedTicketsMap.values());
             message = ex.getMessage();
             if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     message);
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                cancelTickets(sendedTickets);
+                cancelTickets(sendedTicketsMap.values());
                 caption = getString(R.string.ticket_send_error_caption);
                 message = getString(R.string.ticket_send_error_msg, responseVS.getMessage());
             } else {
@@ -340,6 +350,7 @@ public class TicketService extends IntentService {
                             ticketCertDataDER.getObject()).toString());
                     String hashCertVS = ticketCertData.getString("hashCertVS");
                     TicketVS ticket = ticketsMap.get(hashCertVS);
+                    ticket.setState(TicketVS.State.OK);
                     ticket.getCertificationRequest().initSigner(issuedTicketsArray.getString(i).getBytes());
                 }
                 contextVS.updateTickets(ticketsMap.values());

@@ -146,7 +146,7 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
     
     private void initSMIMEMessage() throws IOException, MessagingException, 
     	CMSException, SMIMEException, Exception{
-     	Log.d("SMIMEMessageWrapper", " -initSMIMEMessage - getContent().getClass(): " + getContent().getClass());
+     	Log.d(TAG + ".initSMIMEMessage()", "content class: " + getContent().getClass());
     	if (getContent() instanceof BASE64DecoderStream) {
              smimeSigned = new SMIMESigned(this); 
              ByteArrayOutputStream baos = new ByteArrayOutputStream();

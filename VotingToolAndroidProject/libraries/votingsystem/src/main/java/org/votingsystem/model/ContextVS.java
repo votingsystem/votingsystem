@@ -70,6 +70,7 @@ public class ContextVS {
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
+    public static final String TICKET_ACCOUNT_LAST_CHECKED_KEY = "TICKET_ACCOUNT_LAST_CHECKED_KEY";
     public static final String CONTENT_TYPE_KEY = "CONTENT_TYPE_KEY";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";

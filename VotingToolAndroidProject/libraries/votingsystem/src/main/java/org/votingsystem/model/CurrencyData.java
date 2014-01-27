@@ -28,6 +28,25 @@ public class CurrencyData implements Serializable {
     private Date lastRequestDate;
     private CurrencyVS currencyVS;
 
+
+    public CurrencyData() {}
+
+    public CurrencyData(List<TransactionVS> transactionList) throws Exception {
+        this.transactionList = transactionList;
+        for (TransactionVS transaction : transactionList) {
+            if(currencyVS == null) currencyVS = transaction.getCurrencyVS();
+            else if(currencyVS != transaction.getCurrencyVS()) throw new Exception(
+                    "Transaction List with mixed currencies " + currencyVS + ", " +
+                    transaction.getCurrencyVS());
+            if(transaction.getType() == TransactionVS.Type.USER_INPUT) {
+                totalInputs = totalInputs.add(transaction.getAmount());
+            } else if(transaction.getType() == TransactionVS.Type.USER_OUTPUT) {
+                totalInputs = totalInputs.add(transaction.getAmount());
+            } else  Log.d(TAG + ".parse(..) ", "Unknown transaction type: " +
+                    transaction.getType().toString());
+        }
+    }
+
     public List<TransactionVS> getTransactionList() {
         return transactionList;
     }
@@ -139,4 +158,5 @@ public class CurrencyData implements Serializable {
     public void setCurrencyVS(CurrencyVS currencyVS) {
         this.currencyVS = currencyVS;
     }
+
 }

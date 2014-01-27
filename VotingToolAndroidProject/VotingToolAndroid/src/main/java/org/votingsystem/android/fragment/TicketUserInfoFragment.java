@@ -37,6 +37,7 @@ import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -64,7 +65,6 @@ public class TicketUserInfoFragment extends Fragment {
     private TextView last_request_date;
     private TextView time_remaining_info;
     private FrameLayout mainLayout;
-    private TicketAccount ticketUserInfo;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -164,11 +164,8 @@ public class TicketUserInfoFragment extends Fragment {
             receptor = uriData.getQueryParameter("receptor");
             Log.d(TAG + ".onStart(...)", "amount: " + amount + " - subject: " + subject +
                     " - receptor: " + receptor);
-            BigDecimal cashAvailable = new BigDecimal(0);
-            if(ticketUserInfo!= null && ticketUserInfo.getCurrencyMap() != null) {
-                CurrencyData currencyData = ticketUserInfo.getCurrencyMap().get(currencyVS);
-                cashAvailable = currencyData.getCashBalance();
-            }
+            CurrencyData currencyData = contextVS.getCurrencyData(currencyVS);
+            BigDecimal cashAvailable = currencyData.getCashBalance();
             if(cashAvailable != null && cashAvailable.compareTo(amount) > 0) {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.ticket_send_pin_msg, amount,
@@ -181,18 +178,14 @@ public class TicketUserInfoFragment extends Fragment {
         }
     }
     private void loadUserInfo() {
-        ticketUserInfo = ((AppContextVS)getActivity().getApplicationContext()).getTicketAccount();
-        if(ticketUserInfo == null) {
+        Date lastCheckedTime = contextVS.getTicketAccountLastChecked();
+        if(lastCheckedTime == null) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_ticket_user_info_caption),
                     getString(R.string.empty_ticket_user_info, contextVS.getLapseWeekLbl(
                             Calendar.getInstance())));
             return;
         }
-        final CurrencyData currencyData;
-        if(ticketUserInfo!= null && ticketUserInfo.getCurrencyMap() != null) {
-            currencyData = ticketUserInfo.getCurrencyMap().get(CurrencyVS.Euro);
-        } else currencyData = null;
-
+        final CurrencyData currencyData = contextVS.getCurrencyData(CurrencyVS.Euro);
         if(currencyData != null) {
             request_button.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -205,7 +198,7 @@ public class TicketUserInfoFragment extends Fragment {
             });
             request_button.setVisibility(View.VISIBLE);
             last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
-                    DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
+                    DateUtils.getLongDate_Es(lastCheckedTime))));
             ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
                     currencyData.getAccountBalance(), currencyVS.toString())));
             ticket_cash_info.setText(Html.fromHtml(getString(R.string.ticket_cash_amount_info_lbl,
