@@ -18,6 +18,7 @@ import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,9 +155,23 @@ public class AppContextVS extends Application {
         }
     }
 
+    public String getLapseWeekLbl() {
+        Calendar calendar = Calendar.getInstance();
+        Calendar thisWeekMonday = DateUtils.getMonday(calendar);
+        calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        return getString(R.string.week_lapse_lbl, DateUtils.getDate_Es(
+                thisWeekMonday.getTime()), DateUtils.getDate_Es(calendar.getTime()));
+    }
+
     public TicketAccount getTicketAccount() {
+        String datePrefix =DateUtils.getDirPath(DateUtils.getMonday(
+                Calendar.getInstance()).getTime());
         File ticketUserInfoDataFile = new File(getApplicationContext().getFilesDir(),
-                ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
+                datePrefix + ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
         TicketAccount ticketUserInfo = null;
         try {
             if(ticketUserInfoDataFile.exists()) {
@@ -194,9 +210,14 @@ public class AppContextVS extends Application {
                 }
             }
             byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(updatedTicketAccount);
-            FileOutputStream outputStream;
-            outputStream = openFileOutput(ContextVS.TICKET_USER_INFO_DATA_FILE_NAME,
-                    Context.MODE_PRIVATE);
+            String datePrefix =DateUtils.getDirPath(DateUtils.getMonday(
+                    Calendar.getInstance()).getTime());
+            File ticketUserInfoDir = new File(getApplicationContext().getFilesDir(), datePrefix);
+            ticketUserInfoDir.mkdirs();
+            File ticketUserInfoDataFile = new File(getApplicationContext().getFilesDir(),
+                    datePrefix + ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
+            ticketUserInfoDataFile.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(ticketUserInfoDataFile);
             outputStream.write(ticketUserInfoBytes);
             outputStream.close();
         } catch(Exception ex) {

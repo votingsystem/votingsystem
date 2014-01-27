@@ -1,6 +1,9 @@
 package org.votingsystem.model;
 
+import org.votingsystem.util.DateUtils;
+
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author jgzornoza
@@ -35,4 +38,7 @@ public class TicketServer extends ActorVS implements Serializable {
     }
 
 
+    public String getDateUserInfoServiceURL(Date date) {
+        return getServerURL() + "/userVS" + DateUtils.getURLPath(date);
+    }
 }

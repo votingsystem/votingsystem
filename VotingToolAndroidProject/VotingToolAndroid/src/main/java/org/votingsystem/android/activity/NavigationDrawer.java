@@ -167,10 +167,11 @@ public class NavigationDrawer extends ActionBarActivity {
 
     private void updateActionBarTitle() {
         getSupportActionBar().setTitle(((PagerAdapterVS)mViewPager.getAdapter()).
-                getSelectedGroupDescription(this));
+                getSelectedGroupDescription((AppContextVS) this.getApplicationContext()));
         getSupportActionBar().setSubtitle(((PagerAdapterVS)mViewPager.getAdapter()).
-                getSelectedChildDescription(this));
-        getSupportActionBar().setLogo(((PagerAdapterVS)mViewPager.getAdapter()).getLogo(this));
+                getSelectedChildDescription((AppContextVS) this.getApplicationContext()));
+        getSupportActionBar().setLogo(((PagerAdapterVS)mViewPager.getAdapter()).getLogo(
+                (AppContextVS) this.getApplicationContext()));
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

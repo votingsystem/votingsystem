@@ -364,14 +364,15 @@
     <string name="ticket_user_info_lbl">Información del usuario</string>
     <string name="request_button">Retirar efectivo</string>
     <string name="empty_ticket_user_info_caption">Faltan los datos del usuario</string>
-    <string name="empty_ticket_user_info">Para ver los datos de usuario debe hacer una consulta en el sistema</string>
+    <string name="empty_ticket_user_info"><![CDATA[Todavía no ha actualizado los datos para el
+    periodo del <b>\'%1$s\'</b>]]></string>
     <string name="update_signers_info_lbl">Actualizar datos</string>
     <string name="send_message_lbl">Enviar mensaje</string>
     <string name="update_user_info_pin_msg">Para obtener los datos necesita firmar una solicitud</string>
     <string name="ticket_user_info_request_msg_subject">Solicitud de información de cuentas</string>
     <string name="ticket_account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en caja]]></string>
     <string name="ticket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en efectivo en su móvil]]></string>
-    <string name="ticket_last_request_info_lbl"><![CDATA[Ultima consulta el <u><b>\'%1$s\'</b></u>]]></string>
+    <string name="ticket_last_request_info_lbl"><![CDATA[Ultima actualización el <u><b>\'%1$s\'</b></u>]]></string>
     <string name="time_remaining_info_lbl"><![CDATA[Lo que no gastes antes del <b>\'%1$s\'</b> se repartirá
         entre el resto de usuarios]]></string>
     <string name="cash_request_dialog_caption">Retirar efectivo</string>
@@ -393,5 +394,7 @@
     concepto de <b>\'%3$s\'</b> a <b>\'%4$s\'</b>]]></string>
     <string name="ticket_send_error_caption">Error realizando pago</string>
     <string name="ticket_send_error_msg"><![CDATA[Problemas realizando el pago. \'%1$s\']]></string>
+    <string name="week_lapse_lbl">%1$s al %2$s</string>
+    <string name="week_lapse_lbl1"><![CDATA[Semana del <b>\'%1$s\'</b> al <b>\'%2$s\'</b>]]></string>
 
 </resources>

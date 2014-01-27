@@ -126,6 +126,21 @@ public class DateUtils {
     	return formatter.format(date);
     }
 
+    public static String getDirPath (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
+        return formatter.format(date);
+    }
+
+    public static Date getDateFromPath (String dateStr) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
+        return formatter.parse(dateStr);
+    }
+
+    public static String getURLPath (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
+        return formatter.format(date);
+    }
+
     public static String getLongDate_Es (Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
         return formatter.format(date);
@@ -203,12 +218,8 @@ public class DateUtils {
         return result.toString();
     }
 
-    public static Calendar getNextMonday(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-            calendar.add(Calendar.DAY_OF_YEAR, 7);
-        } else calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+    public static Calendar getMonday(Calendar calendar) {
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);

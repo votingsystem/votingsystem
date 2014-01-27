@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.ReceiptGridFragment;
 import org.votingsystem.android.fragment.RepresentativeGridFragment;
@@ -55,7 +56,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         return selectedFragment;
     }
 
-    public String getSelectedChildDescription(Context context) {
+    public String getSelectedChildDescription(AppContextVS context) {
         switch(selectedGroup) {
             case REPRESENTATIVES: return context.getString(R.string.representatives_list_lbl);
             case RECEIPTS: return context.getString(R.string.receipt_list_lbl);
@@ -64,7 +65,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         return context.getString(R.string.unknown_drop_down_lbl);
     }
 
-    public String getSelectedGroupDescription(Context context) {
+    public String getSelectedGroupDescription(AppContextVS context) {
         switch(selectedGroup) {
             case REPRESENTATIVES: return GroupPosition.REPRESENTATIVES.getDescription(context);
             case RECEIPTS: return GroupPosition.RECEIPTS.getDescription(context);
@@ -95,7 +96,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         return -1;
     }
 
-    public Drawable getLogo(Context context) {
+    public Drawable getLogo(AppContextVS context) {
         switch(selectedGroup) {
             case REPRESENTATIVES: return context.getResources().getDrawable(R.drawable.system_users_22);
             case RECEIPTS: return context.getResources().getDrawable(R.drawable.receipt_32);

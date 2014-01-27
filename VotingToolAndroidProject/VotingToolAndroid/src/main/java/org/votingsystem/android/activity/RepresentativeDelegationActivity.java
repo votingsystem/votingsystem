@@ -290,7 +290,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                         ((EditText)findViewById(R.id.weeks_delegation)).requestFocus();
                         return;
                     }
-                    Calendar calendar = DateUtils.getNextMonday(Calendar.getInstance().getTime());
+                    Calendar calendar = DateUtils.getMonday(Calendar.getInstance());
                     anonymousDelegationFromDate = calendar.getTime();
                     Integer weeksDelegation = Integer.valueOf(weeks_delegation.getText().toString());
                     calendar.add(Calendar.DAY_OF_YEAR, weeksDelegation*7);

@@ -3,6 +3,8 @@ package org.votingsystem.android.ui;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
+import org.votingsystem.android.AppContextVS;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -13,8 +15,8 @@ public interface PagerAdapterVS {
     public void selectItem(Integer groupPosition, Integer childPosition);
     public int getSelectedGroupPosition();
     public int getSelectedChildPosition();
-    public String getSelectedGroupDescription(Context context);
-    public String getSelectedChildDescription(Context context);
-    public Drawable getLogo(Context context);
+    public String getSelectedGroupDescription(AppContextVS context);
+    public String getSelectedChildDescription(AppContextVS context);
+    public Drawable getLogo(AppContextVS context);
 
 }

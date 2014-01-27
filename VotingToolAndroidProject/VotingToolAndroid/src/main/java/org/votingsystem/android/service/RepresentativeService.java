@@ -196,7 +196,7 @@ public class RepresentativeService extends IntentService {
         X509Certificate destinationCert = contextVS.getAccessControl().getCertificate();
         String weeksOperationActive = arguments.getString(ContextVS.TIME_KEY);
 
-        Calendar calendar = DateUtils.getNextMonday(Calendar.getInstance().getTime());
+        Calendar calendar = DateUtils.getMonday(Calendar.getInstance());
         Date anonymousDelegationFromDate = calendar.getTime();
         Integer weeksDelegation = Integer.valueOf(weeksOperationActive);
         calendar.add(Calendar.DAY_OF_YEAR, weeksDelegation*7);

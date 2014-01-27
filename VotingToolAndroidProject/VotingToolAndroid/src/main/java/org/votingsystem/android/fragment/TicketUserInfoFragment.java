@@ -35,6 +35,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -57,6 +58,7 @@ public class TicketUserInfoFragment extends Fragment {
     private Button request_button;
     private View progressContainer;
     private TextView ticket_account_info;
+    private TextView lapse_info;
     private TextView ticket_cash_info;
     private TextView last_request_date;
     private TextView time_remaining_info;
@@ -135,6 +137,7 @@ public class TicketUserInfoFragment extends Fragment {
         ticket_cash_info = (TextView)rootView.findViewById(R.id.ticket_cash_info);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
+
         request_button = (Button) rootView.findViewById(R.id.request_button);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
@@ -180,7 +183,7 @@ public class TicketUserInfoFragment extends Fragment {
         ticketUserInfo = ((AppContextVS)getActivity().getApplicationContext()).getTicketAccount();
         if(ticketUserInfo == null) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_ticket_user_info_caption),
-                    getString(R.string.empty_ticket_user_info));
+                    getString(R.string.empty_ticket_user_info, contextVS.getLapseWeekLbl()));
             return;
         }
         final CurrencyData currencyData;
@@ -198,6 +201,7 @@ public class TicketUserInfoFragment extends Fragment {
                             currencyData.getAccountBalance(), null);
                 }
             });
+            request_button.setVisibility(View.VISIBLE);
             last_request_date.setText(Html.fromHtml(getString(R.string.ticket_last_request_info_lbl,
                     DateUtils.getLongDate_Es(ticketUserInfo.getLastRequestDate()))));
             ticket_account_info.setText(Html.fromHtml(getString(R.string.ticket_account_amount_info_lbl,
@@ -208,7 +212,7 @@ public class TicketUserInfoFragment extends Fragment {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 7);
             time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                    DateUtils.getLongDate_Es(DateUtils.getNextMonday(calendar.getTime()).getTime()))));
+                    DateUtils.getLongDate_Es(DateUtils.getMonday(calendar).getTime()))));
         }
         if (currencyData == null || !(currencyData.getAccountBalance().intValue() > 0)) {
             request_button.setVisibility(View.GONE);

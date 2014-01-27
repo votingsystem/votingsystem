@@ -10,11 +10,15 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.TicketGridFragment;
 import org.votingsystem.android.fragment.TicketUserInfoFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
+import org.votingsystem.util.DateUtils;
+
+import java.util.Calendar;
 
 /**
  * @author jgzornoza
@@ -57,10 +61,10 @@ public class TicketPagerAdapter extends FragmentStatePagerAdapter
         return selectedFragment;
     }
 
-    public String getSelectedChildDescription(Context context) {
+    public String getSelectedChildDescription(AppContextVS context) {
         switch(selectedChild) {
             case TICKET_USER_INFO:
-                return context.getString(R.string.ticket_user_info_lbl);
+                return context.getLapseWeekLbl();
             case TICKET_LIST:
                 return context.getString(R.string.tickets_list_lbl);
             default:
@@ -68,7 +72,7 @@ public class TicketPagerAdapter extends FragmentStatePagerAdapter
         }
     }
 
-    public String getSelectedGroupDescription(Context context) {
+    public String getSelectedGroupDescription(AppContextVS context) {
         return selectedGroup.getDescription(context);
     }
 
@@ -92,7 +96,7 @@ public class TicketPagerAdapter extends FragmentStatePagerAdapter
         return selectedGroup.getPosition();
     }
 
-    public Drawable getLogo(Context context) {
+    public Drawable getLogo(AppContextVS context) {
         return context.getResources().getDrawable(selectedGroup.getLogo());
     }
 

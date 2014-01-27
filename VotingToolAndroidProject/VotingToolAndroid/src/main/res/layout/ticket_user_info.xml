@@ -17,6 +17,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:layout_weight="1"
+                android:textColor="@color/event_subject"
                 android:layout_marginBottom="15dip"
                 android:gravity="center"/>
             <TextView android:id="@+id/ticket_account_info"
@@ -49,6 +50,7 @@
                 android:layout_marginRight ="7dp"
                 android:layout_gravity="center"
                 android:layout_weight="0"
+                android:visibility="gone"
                 android:textStyle="bold"
                 android:text="@string/request_button" />
 

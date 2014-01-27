@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
@@ -83,7 +84,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
         return position;
     }*/
 
-    public String getSelectedChildDescription(Context context) {
+    public String getSelectedChildDescription(AppContextVS context) {
         switch(selectedGroup) {
             case CLAIMS:
                 switch(selectedChild) {
@@ -123,7 +124,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
         }
     }
 
-    public String getSelectedGroupDescription(Context context) {
+    public String getSelectedGroupDescription(AppContextVS context) {
         return selectedGroup.getDescription(context);
     }
 
@@ -154,7 +155,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
         return selectedGroup.getPosition();
     }
 
-    public Drawable getLogo(Context context) {
+    public Drawable getLogo(AppContextVS context) {
         return context.getResources().getDrawable(selectedGroup.getLogo());
     }
 

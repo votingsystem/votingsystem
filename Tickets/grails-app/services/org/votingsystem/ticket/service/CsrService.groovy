@@ -80,8 +80,10 @@ class CsrService {
                     [serverURL, ticketProviderURL].toArray(), locale));
             //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
             //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
-            Date certValidFrom = Calendar.getInstance().getTime()
-            Date certValidTo = getNextMonday(certValidFrom).getTime()
+            Calendar calendar = Calendar.getInstance()
+            Date certValidFrom = calendar.getTime()
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+            Date certValidTo = DateUtils.getMonday(calendar).getTime()
             X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, certValidTo)
             if (!issuedCert)  throw new ExceptionVS(messageSource.getMessage('csrSigningErrorMsg', null, locale))
             else {
@@ -104,17 +106,6 @@ class CsrService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
                     message:messageSource.getMessage('ticketWithdrawalDataError', null, locale))
         }
-    }
-
-    private Calendar getNextMonday(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.DAY_OF_YEAR, 7);
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        return calendar;
     }
 
     public synchronized ResponseVS signTicketBatchRequest (byte[] ticketBatchRequest, BigDecimal expectedAmount,

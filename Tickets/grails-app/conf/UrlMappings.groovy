@@ -26,5 +26,25 @@ class UrlMappings {
             action = [POST:"save"]
         }
 
+        "/userVS/$year/$month/$day" {
+            controller = "userVS"
+            action = "userInfo"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
+        "/testing/$year/$month/$day" {
+            controller = "testing"
+            action = "index"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
 	}
 }

@@ -11,6 +11,7 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.util.DateUtils
 
 import java.security.cert.X509Certificate
 
@@ -56,6 +57,14 @@ class UserVSController {
             responseVS.setContentType(ContentTypeVS.TEXT)
             return [responseVS:responseVS]
         }
+
+        Calendar calendar = Calendar.getInstance()
+        if(params.year && params.month && params.day) {
+            calendar.set(Calendar.YEAR, params.int('year'))
+            calendar.set(Calendar.MONTH, params.int('month') - 1) //Zero based
+            calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
+        } else calendar = DateUtils.getMonday(calendar)
+
         Map responseMap = transactionVSService.getUserInfoMap(userVS)
         String result = new JSONObject(responseMap).toString()
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, result)

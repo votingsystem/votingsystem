@@ -1,6 +1,7 @@
 package org.votingsystem.ticket.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
@@ -214,35 +215,51 @@ class TransactionVSService {
         transactionMap.currency = transaction.currency.toString()
 
         String messageSMIMEURL = null
-        if(transaction.transactionParent) {
-            messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.transactionParent.getMessageSMIME()?.id}"
-        } else messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.getMessageSMIME()?.id}"
-        transactionMap.messageSMIMEURL = messageSMIMEURL
+        TransactionVS.withTransaction {
+            if(transaction.transactionParent) {
+                messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.transactionParent.messageSMIME?.id}"
+            } else messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.getMessageSMIME()?.id}"
+            transactionMap.messageSMIMEURL = messageSMIMEURL
+        }
         return transactionMap
     }
 
-    public Map getUserInfoMap(UserVS userVS) {
+    public Map getUserInfoMap(UserVS userVS, Date mondayLapse) {
         def inputCriteria = TransactionVS.createCriteria()
         def userInputTransactions = inputCriteria.scroll {
             eq("toUserVS", userVS)
             eq("type", TransactionVS.Type.USER_INPUT)
+            ge("dateCreated", mondayLapse)
         }
+
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(mondayLapse);
+
+        String dirPath = DateUtils.getDirPath(mondayLapse)
+        //int year =  calendar.get(Calendar.YEAR);
+        //int month = calendar.get(Calendar.MONTH) + 1; // Note: zero based!
+        //int day = calendar.get(Calendar.DAY_OF_MONTH);
+
 
         def outputCriteria = TransactionVS.createCriteria()
         def userOutputTransactions = outputCriteria.scroll {
             eq("fromUserVS", userVS)
             eq("type", TransactionVS.Type.USER_OUTPUT)
+            ge("dateCreated", mondayLapse)
         }
 
         Map resultMap = [:]
+        Map dateResultMap = [:]
+
 
         while (userInputTransactions.next()) {
             TransactionVS transactionVS = (TransactionVS) userInputTransactions.get(0);
             CurrencyVS currencyVS = transactionVS.getCurrency()
-            Map currencyMap = resultMap.get(currencyVS.toString())
+            Map currencyMap = dateResultMap.get(currencyVS.toString())
             if(!currencyMap) {
                 currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
-                resultMap.put(currencyVS.toString(), currencyMap)
+                dateResultMap.put(currencyVS.toString(), currencyMap)
             }
             currencyMap.totalInputs = currencyMap.totalInputs.add(transactionVS.amount)
             currencyMap.transactionList.add(getTransactionMap(transactionVS))
@@ -251,15 +268,16 @@ class TransactionVSService {
         while (userOutputTransactions.next()) {
             TransactionVS transactionVS = (TransactionVS) userOutputTransactions.get(0);
             CurrencyVS currencyVS = transactionVS.getCurrency()
-            Map currencyMap = resultMap.get(currencyVS.toString())
+            Map currencyMap = dateResultMap.get(currencyVS.toString())
             if(!currencyMap) {
                 currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
-                resultMap.put(currencyVS.toString(), currencyMap)
+                dateResultMap.put(currencyVS.toString(), currencyMap)
             }
             currencyMap.totalOutputs = currencyMap.totalOutputs.add(transactionVS.amount)
             currencyMap.transactionList.add(getTransactionMap(transactionVS))
         }
         resultMap.date = DateUtils.getStringFromDate(Calendar.getInstance().getTime())
+        resultMap[dirPath] = dateResultMap
         return resultMap
     }
 
