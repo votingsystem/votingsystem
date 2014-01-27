@@ -31,8 +31,8 @@ class TimeStampService {
 	private byte[] signingCertPEMBytes
 
 
-	public synchronized Map initService() {
-		log.debug(" - initService - initService - initService");
+	public synchronized Map init() {
+		log.debug(" - init - init - init");
         try {
             String serverURL = StringUtils.checkURL(grailsApplication.config.VotingSystem.urlTimeStampServer)
             ActorVS timeStampServer = ActorVS.findWhere(serverURL:serverURL)
@@ -91,7 +91,7 @@ class TimeStampService {
     }
 	
 	public byte[] getSigningCertPEMBytes() {
-		if(!signingCertPEMBytes) signingCertPEMBytes = initService()?.signingCertPEMBytes
+		if(!signingCertPEMBytes) signingCertPEMBytes = init()?.signingCertPEMBytes
 		return signingCertPEMBytes
 	}
 
@@ -160,7 +160,7 @@ class TimeStampService {
 	}
 	
 	public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
-		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = initService().timeStampSignerInfoVerifier
+		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = init().timeStampSignerInfoVerifier
 		return timeStampSignerInfoVerifier
 	}
 

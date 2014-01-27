@@ -61,8 +61,8 @@ class SignatureVSService {
 			new HashMap<Long, Set<X509Certificate>>();
 			
 
-	private synchronized Map initService() {
-		log.debug "initService"
+	private synchronized Map init() {
+		log.debug "init"
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
@@ -76,7 +76,7 @@ class SignatureVSService {
 		byte[] pemCertsArray
 		trustedCerts = new HashSet<X509Certificate>()
 		for (int i = 0; i < chain.length; i++) {
-			log.debug " --- initService - Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
+			log.debug " --- init - Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
 			trustedCerts.add(chain[i])
 			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
@@ -518,27 +518,27 @@ class SignatureVSService {
     }
 
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = initService().trustedCerts
+		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = init().trustedCerts
 		return trustedCerts;
 	}
 
     public X509Certificate getServerCert() {
-        if(serverCert == null) serverCert = initService().serverCert
+        if(serverCert == null) serverCert = init().serverCert
         return serverCert
     }
 
     public File getServerCertChain() {
-        if(serverCertChainFile == null) serverCertChainFile = initService().serverCertChainFile;
+        if(serverCertChainFile == null) serverCertChainFile = init().serverCertChainFile;
         return serverCertChainFile;
     }
 
     private Encryptor getEncryptor() {
-        if(encryptor == null) encryptor = initService().encryptor;
+        if(encryptor == null) encryptor = init().encryptor;
         return encryptor;
     }
 
 	private SignedMailGenerator getSignedMailGenerator() {
-        if(signedMailGenerator == null) signedMailGenerator = initService().signedMailGenerator;
+        if(signedMailGenerator == null) signedMailGenerator = init().signedMailGenerator;
 		return signedMailGenerator
 	}
 	

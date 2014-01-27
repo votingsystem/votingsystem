@@ -24,7 +24,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity @Table(name="UserVS") @DiscriminatorValue("UserVS")
 public class UserVS implements Serializable {
 
-    public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
+    public enum Type {USER, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 	
     private static final long serialVersionUID = 1L;
     

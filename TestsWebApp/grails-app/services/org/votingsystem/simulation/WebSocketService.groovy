@@ -29,8 +29,8 @@ class WebSocketService {
 	def grailsApplication
 	
 
-	public void initService() throws Exception {
-		log.debug("--- initService")
+	public void init() throws Exception {
+		log.debug("--- init")
 
 	}
 

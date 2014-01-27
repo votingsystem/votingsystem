@@ -89,7 +89,6 @@ class CertificateVSController {
                     message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		signatureVSService.deleteTestCerts()
 		return [responseVS:signatureVSService.addCertificateAuthority(
 			"${request.getInputStream()}".getBytes(), request.getLocale())]
 	}

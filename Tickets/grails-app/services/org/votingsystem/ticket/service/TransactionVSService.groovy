@@ -155,7 +155,8 @@ class TransactionVSService {
             log.debug("processUserAllocation - ${messageJSON}")
             if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
             TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
-                    subject:subject, fromUserVS:signer, currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
+                    subject:subject, fromUserVS:signer, toUserVS: userVSService.getSystemUser(),
+                    currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
 
             def criteria = UserVS.createCriteria()
             def usersToDeposit = criteria.scroll { eq("type", UserVS.Type.USER) }

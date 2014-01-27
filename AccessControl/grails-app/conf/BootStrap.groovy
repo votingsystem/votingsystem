@@ -19,8 +19,8 @@ class BootStrap {
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
 		ContextVS.init()
 		filesService.init()
-        signatureVSService.initService();
-        timeStampService.initService();
+        signatureVSService.init();
+        timeStampService.init();
 		JSON.registerObjectMarshaller(RepresentativeVS) {
 			def returnMap = [:]
 			returnMap['optionSelectedId'] = it.optionSelectedId

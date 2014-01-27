@@ -84,12 +84,12 @@ class SignatureVSService {
 			}
 			CertificateVS.withTransaction { cert.delete() }
 		}
-        initService();
+        init();
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 
-	public synchronized Map initService() throws Exception {
-		log.debug(" - initService - ")
+	public synchronized Map init() throws Exception {
+		log.debug(" - init - ")
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
@@ -121,12 +121,12 @@ class SignatureVSService {
 	}
 
     public X509Certificate getServerCert() {
-        if(localServerCertSigner == null) localServerCertSigner = initService().localServerCertSigner
+        if(localServerCertSigner == null) localServerCertSigner = init().localServerCertSigner
         return localServerCertSigner
     }
 
     private PrivateKey getServerPrivateKey() {
-        if(serverPrivateKey == null) serverPrivateKey = initService().serverPrivateKey
+        if(serverPrivateKey == null) serverPrivateKey = init().serverPrivateKey
         return serverPrivateKey
     }
 
@@ -142,7 +142,7 @@ class SignatureVSService {
 	}
 	
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = initService().trustedCerts
+		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = init().trustedCerts
 		return trustedCerts;
 	}
 	
@@ -659,12 +659,12 @@ class SignatureVSService {
     }
 
     private Encryptor getEncryptor() {
-        if(encryptor == null) encryptor = initService().encryptor
+        if(encryptor == null) encryptor = init().encryptor
         return encryptor;
     }
 
 	private SignedMailGenerator getSignedMailGenerator() {
-		if(signedMailGenerator == null) signedMailGenerator = initService().signedMailGenerator
+		if(signedMailGenerator == null) signedMailGenerator = init().signedMailGenerator
 		return signedMailGenerator
 	}
 

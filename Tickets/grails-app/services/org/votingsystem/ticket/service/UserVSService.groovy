@@ -13,6 +13,21 @@ class UserVSService {
 	List<String> systemAdmins
 	def grailsApplication
 
+    UserVS systemUser
+
+    public synchronized void init() throws Exception {
+        log.debug("init")
+        systemUser = UserVS.findWhere(type:UserVS.Type.SYSTEM)
+        if(!systemUser) {
+            systemUser = new UserVS(IBAN:"SystemIBAN-AA-BBBB-CCCC", nif:"SYSTEM_NIF", type:UserVS.Type.SYSTEM,
+                firstName: "SYSTEM", lastName: "SYSTEM").save()
+        }
+    }
+
+    public UserVS getSystemUser() {
+        return systemUser;
+    }
+
 	public Map getUserVS(Date fromDate){
 		def usersVS
 		UserVS.withTransaction {

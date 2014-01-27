@@ -72,8 +72,8 @@ class TimeStampService {
 			"SHA512":TSPAlgorithms.SHA512
 		];
 
-	private synchronized Map initService() {
-		log.debug(" - initService - initService - initService");
+	private synchronized Map init() {
+		log.debug(" - init - init - init");
         try {
             File keyStoreFile = grailsApplication.mainContext.getResource(
                     grailsApplication.config.VotingSystem.keyStorePath).getFile()
@@ -112,17 +112,17 @@ class TimeStampService {
 	}
 	
 	private TimeStampResponseGenerator getTimeStampResponseGen() {
-		if(!timeStampResponseGen) timeStampResponseGen = initService()?.timeStampResponseGen
+		if(!timeStampResponseGen) timeStampResponseGen = init()?.timeStampResponseGen
 		return timeStampResponseGen
 	}
 	
 	public byte[] getSigningCertPEMBytes() {
-		if(!signingCertPEMBytes) signingCertPEMBytes = initService()?.signingCertPEMBytes
+		if(!signingCertPEMBytes) signingCertPEMBytes = init()?.signingCertPEMBytes
 		return signingCertPEMBytes
 	}
 
     public byte[] getSigningCertChainPEMBytes() {
-        if(!signingCertChainPEMBytes) signingCertChainPEMBytes = initService()?.signingCertChainPEMBytes
+        if(!signingCertChainPEMBytes) signingCertChainPEMBytes = init()?.signingCertChainPEMBytes
         return signingCertChainPEMBytes
     }
 	
@@ -261,7 +261,7 @@ class TimeStampService {
 	}
 	
 	public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
-		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = initService()?.timeStampSignerInfoVerifier
+		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = init()?.timeStampSignerInfoVerifier
 		return timeStampSignerInfoVerifier
 	}
 			

@@ -17,8 +17,8 @@ class BootStrap {
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init()
 		filesService.init()
-        signatureVSService.initService();
-        timeStampService.initService();
+        signatureVSService.init();
+        timeStampService.init();
     }
 	
     def destroy = { }

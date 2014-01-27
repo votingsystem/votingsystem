@@ -28,8 +28,8 @@ class PdfService {
 	private PrivateKey key;
 	private Certificate[] chain;
 
-	private synchronized void initService() throws Exception {
-		log.debug "initService - initService - initService"
+	private synchronized void init() throws Exception {
+		log.debug "init - init - init"
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
@@ -195,12 +195,12 @@ class PdfService {
 
 
     private Certificate[] getServerCertChain() {
-        if(chain == null) initService();
+        if(chain == null) init();
         return chain;
     }
 
     private PrivateKey getPrivateKey() {
-        if(key == null) initService();
+        if(key == null) init();
         return key;
     }
 
