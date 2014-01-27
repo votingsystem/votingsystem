@@ -504,6 +504,11 @@ class  SignatureVSService {
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
+    public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {
+        log.debug("encryptToCMS")
+        return getEncryptor().encryptToCMS(dataToEncrypt, receptorPublicKey);
+    }
+
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
         log.debug("--- - encryptMessage(...) - ");

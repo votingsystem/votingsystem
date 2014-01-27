@@ -210,7 +210,7 @@ class TicketFilters {
                     case ContentTypeVS.MULTIPART_ENCRYPTED:
                         if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
                             if(model.receiverPublicKey) {
-                                responseVS =  signatureVSService.encryptMessage(
+                                responseVS =  signatureVSService.encryptToCMS(
                                         responseVS.messageBytes, model.receiverPublicKey)
                             } else if(model.receiverCert) {
                                 responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,model.receiverCert)
