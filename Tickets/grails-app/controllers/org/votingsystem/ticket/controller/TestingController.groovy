@@ -40,7 +40,7 @@ class TestingController {
         //calendar.add(Calendar.DAY_OF_YEAR, -7);
         //calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
-        render transactionVSService.getUserInfoMap(userVS, calendar.getTime()) as JSON
+        render transactionVSService.getUserInfoMap(userVS, calendar) as JSON
         //def userInputTransactions = TransactionVS.findAllWhere(toUserVS: userVS, type:TransactionVS.Type.USER_INPUT)
         //ResponseVS responseVS = transactionVSService.getUserBalance(userVS)
         //render responseVS.data

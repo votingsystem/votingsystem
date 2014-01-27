@@ -45,7 +45,7 @@ class TicketController {
                 ticketGenBatchResponse.setContentType(ContentTypeVS.JSON_ENCRYPTED)
                 UserVS userVS = messageSMIMEReq.userVS
                 TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
-                        fromUserVS: userVS, currency:responseVS.data.currency,
+                        fromUserVS: userVS, toUserVS: userVS, currency:responseVS.data.currency,
                         type:TransactionVS.Type.USER_OUTPUT).save()
                 return [responseVS:ticketGenBatchResponse,
                         receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]

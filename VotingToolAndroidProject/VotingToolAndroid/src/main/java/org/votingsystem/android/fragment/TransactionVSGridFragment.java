@@ -51,6 +51,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.mail.Provider;
+
 public class TransactionVSGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
@@ -278,11 +280,14 @@ public class TransactionVSGridFragment extends Fragment
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView subject = (TextView)view.findViewById(R.id.subject);
                 subject.setText(transactionVS.getSubject());
+                if(TransactionVS.Type.USER_OUTPUT == transactionVS.getType()) {
+                    subject.setVisibility(View.GONE);
+                }
                 TextView transaction_type = (TextView) view.findViewById(
                         R.id.transaction_type);
                 transaction_type.setText(transactionVS.getDescription(getActivity().getApplicationContext()));
                 TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
-                week_lapse.setText(contextVS.getLapseWeekLbl(weekLapseCalendar));
+                week_lapse.setText(DateUtils.getLongDate_Es(transactionVS.getDateCreated()));
 
                 TextView amount = (TextView) view.findViewById(R.id.amount);
                 amount.setText(transactionVS.getAmount().toPlainString());
