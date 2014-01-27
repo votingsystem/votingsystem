@@ -23,6 +23,7 @@ public class TicketAccount implements Serializable {
     private UserVS userVS;
     private Map<CurrencyVS, CurrencyData> currencyMap;
     private Date lastRequestDate;
+    private Date weekLapse;
 
 
     public UserVS getUserVS() {
@@ -50,18 +51,13 @@ public class TicketAccount implements Serializable {
         TicketAccount ticketAccount = new TicketAccount();
         Iterator currencyIterator = jsonData.keys();
         Map<CurrencyVS, CurrencyData> currencyMap = new HashMap<CurrencyVS, CurrencyData>();
-        Date requestDate = DateUtils.getDateFromString(jsonData.getString("date"));
-        ticketAccount.setLastRequestDate(requestDate);
         while(currencyIterator.hasNext()) {
             String keyStr = (String) currencyIterator.next();
-            if(!"date".equals(keyStr)) {
-                CurrencyVS currencyVS = CurrencyVS.valueOf(keyStr);
-                CurrencyData currencyData = CurrencyData.parse(jsonData.getJSONObject(keyStr));
-                currencyData.setCurrencyVS(currencyVS);
-                currencyData.setLastRequestDate(requestDate);
-                currencyMap.put(currencyVS, currencyData);
-                ticketAccount.setCurrencyMap(currencyMap);
-            }
+            CurrencyVS currencyVS = CurrencyVS.valueOf(keyStr);
+            CurrencyData currencyData = CurrencyData.parse(jsonData.getJSONObject(keyStr));
+            currencyData.setCurrencyVS(currencyVS);
+            currencyMap.put(currencyVS, currencyData);
+            ticketAccount.setCurrencyMap(currencyMap);
         }
         return ticketAccount;
     }

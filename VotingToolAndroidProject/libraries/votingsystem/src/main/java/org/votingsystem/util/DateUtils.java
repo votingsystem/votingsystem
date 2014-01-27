@@ -141,6 +141,12 @@ public class DateUtils {
         return formatter.format(date);
     }
 
+    public static Date getDateFromURLPath (String dateStr) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
+        return formatter.parse(dateStr);
+    }
+
+
     public static String getLongDate_Es (Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
         return formatter.format(date);

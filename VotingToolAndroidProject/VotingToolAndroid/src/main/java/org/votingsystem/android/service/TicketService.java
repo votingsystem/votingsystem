@@ -59,8 +59,11 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -390,9 +393,28 @@ public class TicketService extends IntentService {
                     userInfoRequestJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     msgSubject, pin.toCharArray(), ticketServer.getCertificate(), contextVS);
             responseVS = smimeSignedSender.call();
+
+            Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
+            String currentLapseStr = DateUtils.getDirPath(currentLapseCalendar.getTime());
+
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String responseStr = responseVS.getMessage();
-                TicketAccount ticketAccount = TicketAccount.parse(new JSONObject(responseStr));
+
+                JSONObject responseJSON = new JSONObject(responseStr);
+                Date requestDate = DateUtils.getDateFromString(responseJSON.getString("date"));
+
+                Iterator weeksIterator = responseJSON.keys();
+                TicketAccount ticketAccount = null;
+                while(weeksIterator.hasNext()) {
+                    String keyStr = (String) weeksIterator.next();
+                    if(currentLapseStr.equals(keyStr)) {
+                        ticketAccount = TicketAccount.parse(responseJSON.getJSONObject(keyStr));
+                        break;
+                    }
+                }
+                if(ticketAccount != null) {
+                    ticketAccount.setLastRequestDate(requestDate);
+                } else Log.d(TAG + "updateUserInfo(...)", "Current week data not found");
                 contextVS.setTicketAccount(ticketAccount);
             }
         } catch(Exception ex) {

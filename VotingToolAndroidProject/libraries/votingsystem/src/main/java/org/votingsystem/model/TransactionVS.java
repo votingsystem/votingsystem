@@ -21,6 +21,7 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
+    //Retirada efectivo, Ingreso en cuenta, Pago en Tickets
     public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION;}
 
     public enum State { OK, REPEATED, CANCELLED;}

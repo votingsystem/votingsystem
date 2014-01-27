@@ -251,7 +251,8 @@ class TransactionVSService {
 
         Map resultMap = [:]
         Map dateResultMap = [:]
-
+        dateResultMap[CurrencyVS.Euro.toString()] = [totalOutputs: new BigDecimal(0),
+                totalInputs:new BigDecimal(0), transactionList:[]]
 
         while (userInputTransactions.next()) {
             TransactionVS transactionVS = (TransactionVS) userInputTransactions.get(0);

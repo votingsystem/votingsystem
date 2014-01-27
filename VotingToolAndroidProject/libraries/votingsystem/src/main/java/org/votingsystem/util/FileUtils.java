@@ -15,6 +15,8 @@ import java.io.OutputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 * @author jgzornoza
@@ -124,6 +126,26 @@ public class FileUtils {
             Log.e(TAG + ".getFile(...)", ex.getMessage(), ex);
         }
         return file;
+    }
+
+    public static List<File> searchFiles(String path, String fileName) {
+        Log.d(TAG + ".searchFiles(...)", "path: " + path + " - fileName: " + fileName);
+        List<File> result = new ArrayList<File>();
+        File root = new File(path);
+        File[] list = root.listFiles();
+        if (list == null) return result;
+        for (File f : list ) {
+            if (f.isDirectory()) {
+                //Log.d(TAG + ".searchFiles(...)", "path: " + f.getAbsoluteFile());
+                result.addAll(searchFiles(f.getAbsolutePath(), fileName));
+            } else {
+                //Log.d(TAG + ".searchFiles(...)", "file: " + f.getAbsoluteFile());
+                if(f.getName().contains(fileName)) {
+                    result.add(f);
+                }
+            }
+        }
+        return result;
     }
 
 }

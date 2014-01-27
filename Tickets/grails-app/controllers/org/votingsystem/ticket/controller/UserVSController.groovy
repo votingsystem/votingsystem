@@ -65,7 +65,7 @@ class UserVSController {
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
         } else calendar = DateUtils.getMonday(calendar)
 
-        Map responseMap = transactionVSService.getUserInfoMap(userVS)
+        Map responseMap = transactionVSService.getUserInfoMap(userVS, calendar.getTime())
         String result = new JSONObject(responseMap).toString()
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, result)
         responseVS.setContentType(ContentTypeVS.JSON_ENCRYPTED)

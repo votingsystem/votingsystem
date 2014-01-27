@@ -32,6 +32,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
+import org.votingsystem.android.activity.TicketPagerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CurrencyVS;
@@ -98,8 +99,8 @@ public class TicketGridFragment extends Fragment implements
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
                 " -id: " + id);
-        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity(),ReceiptPagerActivity.class);
+        TransactionVS transactionVS = ((TransactionVS) gridView.getAdapter().getItem(position));
+        Intent intent = new Intent(getActivity(),TicketPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
@@ -254,7 +255,8 @@ public class TicketGridFragment extends Fragment implements
         @Override public List<TransactionVS> loadInBackground() {
             // Retrieve all known applications.
             List<TransactionVS> transactions = null;
-            if(ticketAccount != null) {
+            if(ticketAccount != null && ticketAccount.getCurrencyMap() != null &&
+                    ticketAccount.getCurrencyMap().get(CurrencyVS.Euro) != null) {
                 transactions = ticketAccount.getCurrencyMap().get(CurrencyVS.Euro).getTransactionList();
             }
             return transactions;

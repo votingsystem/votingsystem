@@ -24,11 +24,14 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -185,7 +188,18 @@ public class AppContextVS extends Application {
         return ticketUserInfo;
     }
 
+    public void getTicketsAccounts(Integer year, Integer month) {
+        Log.d(TAG + ".getTicketsAccounts(...)", "year: " + year + " - month: " + month);
+        File pathDir = new File(getApplicationContext().getFilesDir(), "/" + year.toString());
+        List<File> ticketsAccountsList = FileUtils.searchFiles(pathDir.getAbsolutePath(),
+                ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
+        for(File account: ticketsAccountsList) {
+            Log.d(TAG + ".getTicketsAccounts(...)", "==== found account: " + account.getAbsolutePath());
+        }
+    }
+
     public void setTicketAccount(TicketAccount updatedTicketAccount) {
+        getTicketsAccounts(2014, null);
         try {
             TicketAccount ticketAccount = getTicketAccount();
             if(ticketAccount != null) {
@@ -194,16 +208,19 @@ public class AppContextVS extends Application {
                     Set<CurrencyVS> keySet = currencyMap.keySet();
                     Map<CurrencyVS, CurrencyData> newCurrencyMap = updatedTicketAccount.getCurrencyMap();
                     for(CurrencyVS currencyVS : keySet) {
-                        if(newCurrencyMap.containsKey(currencyVS)) {
+                        if(newCurrencyMap != null && newCurrencyMap.containsKey(currencyVS)) {
                             newCurrencyMap.get(currencyVS).setTicketList(currencyMap.get(currencyVS).getTicketList());
                         } else {
                             Log.e(TAG + ".setTicketAccount(...)", "updatedTicketAccount " +
                                     "missing currency data" + currencyVS.toString());
                             CurrencyData currencyData = currencyMap.get(currencyVS);
+                            if(currencyData == null) currencyData = new CurrencyData();
                             currencyData.setTransactionList(null);
                             currencyData.setTotalInputs(new BigDecimal(0));
                             currencyData.setTotalOutputs(new BigDecimal(0));
                             currencyData.setLastRequestDate(updatedTicketAccount.getLastRequestDate());
+                            if(newCurrencyMap == null) newCurrencyMap =
+                                    new HashMap<CurrencyVS, CurrencyData>();
                             newCurrencyMap.put(currencyVS, currencyData);
                         }
                     }
@@ -234,9 +251,14 @@ public class AppContextVS extends Application {
                 currencyData.addTicket(ticketVS);
             }
             byte[] ticketUserInfoBytes = ObjectUtils.serializeObject(ticketAccount);
-            FileOutputStream outputStream;
-            outputStream = openFileOutput(ContextVS.TICKET_USER_INFO_DATA_FILE_NAME,
-                    Context.MODE_PRIVATE);
+            String datePrefix =DateUtils.getDirPath(DateUtils.getMonday(
+                    Calendar.getInstance()).getTime());
+            File ticketUserInfoDir = new File(getApplicationContext().getFilesDir(), datePrefix);
+            ticketUserInfoDir.mkdirs();
+            File ticketUserInfoDataFile = new File(getApplicationContext().getFilesDir(),
+                    datePrefix + ContextVS.TICKET_USER_INFO_DATA_FILE_NAME);
+            ticketUserInfoDataFile.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(ticketUserInfoDataFile);
             outputStream.write(ticketUserInfoBytes);
             outputStream.close();
         } catch(Exception ex) {
