@@ -8,6 +8,8 @@ import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 
+import java.text.SimpleDateFormat
+
 /**
  * @infoController TestingController
  * @descController Servicios de acceso a la aplicación web principal
@@ -22,8 +24,13 @@ class TestingController {
 
     def accounts() {}
 
-
     def index() {
+        SimpleDateFormat formatter = new SimpleDateFormat("EEEE dd/MMM/yyyy HH:mm");
+        render formatter.format(Calendar.getInstance().getTime());
+        return false
+    }
+
+    def index1() {
         Date selectedDate = null
         Calendar calendar = Calendar.getInstance()
         if(params.year && params.month && params.day) {
@@ -33,7 +40,7 @@ class TestingController {
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
         } else calendar = DateUtils.getMonday(calendar)
 
-        UserVS userVS = UserVS.get(13)
+        UserVS userVS = UserVS.get(2)
 
 
         //Calendar calendar = Calendar.getInstance();

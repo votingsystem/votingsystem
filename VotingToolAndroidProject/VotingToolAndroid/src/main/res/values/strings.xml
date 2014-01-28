@@ -346,7 +346,7 @@
     <string name="updating_representative_data_msg">Actualizando datos del representante</string>
     <string name="download_lbl">Descarcar copia</string>
 
-    <string name="smime_subject_msg">Asunto: \'%1$s\'</string>
+    <string name="smime_subject_msg">Asunto: %1$s</string>
     <string name="anonymous_representative_request_formatted"><![CDATA[
     Duración de la delegación: \'%1$s\' semanas<br/><br/>Delegación activa desde: \'%2$s\'
     <br/><br/>Fecha fin de la delegación: \'%3$s\'<br/>
@@ -397,11 +397,11 @@
     <string name="week_lapse_lbl">%1$s al %2$s</string>
     <string name="transactionv_lbl">Transacción</string>
     <string name="transactionvs_lbl">Transacciones</string>
-    <string name="transactionvs_formatted"><![CDATA[Fecha: \'%1$s\'<br/>
-        <b>Cantidad:</b> %2$s %3$ss - <a href=\'%4$s\'>Justificante</a>]]></string>
+    <string name="transactionvs_formatted"><![CDATA[Fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$ss]]></string>
     <string name="transactionvs_from_user_lbl"><![CDATA[Usuario <b>emisor</b>:<br/><b>NIF:</b> %1$s <br/>
     <b>Nombre:</b> %2$s]]></string>
     <string name="transactionvs_to_user_lbl"><![CDATA[Usuario <b>receptor</b>:<br/><b>NIF:</b> %1$s <br/>
         <b>Nombre:</b> %2$s]]></string>
+    <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>Justificante</a>]]></string>
 
 </resources>

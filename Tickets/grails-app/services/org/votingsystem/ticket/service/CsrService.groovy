@@ -135,14 +135,15 @@ class CsrService {
             if(expectedAmount.compareTo(batchAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
                     'ticketBatchRequestAmountErrorMsg', ["${expectedAmount.toString()} ${expectedCurrency}",
                     "${batchAmount.toString()} ${expectedCurrency}"], locale))
-            return new ResponseVS(statusCode: ResponseVS.SC_OK, data:issuedTicketCertList);
+            return new ResponseVS(statusCode: ResponseVS.SC_OK, data:issuedTicketCertList, type:TypeVS.TICKET_REQUEST);
         } catch(ExceptionVS ex) {
             log.error(ex.getMessage(), ex);
             cancelTickets(issuedTicketList, ex.getMessage())
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(), type:TypeVS.ERROR)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(),
+                    type:TypeVS.TICKET_REQUEST_ERROR)
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.TICKET_REQUEST_ERROR,
                     message:messageSource.getMessage('ticketWithdrawalDataError', null, locale))
         }
     }

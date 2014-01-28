@@ -54,9 +54,7 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         updateActionBarTitle();
     }
 
-    private void updateActionBarTitle() {
-        getSupportActionBar().setLogo(R.drawable.euro_24);
-    }
+    private void updateActionBarTitle() { }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

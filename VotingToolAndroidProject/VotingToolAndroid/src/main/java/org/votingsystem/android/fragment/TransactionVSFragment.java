@@ -52,6 +52,7 @@ public class TransactionVSFragment extends Fragment {
     private TextView transactionvs_content;
     private TextView to_user;
     private TextView from_user;
+    private TextView receipt;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SMIMEMessageWrapper messageSMIME;
     private String broadCastId = null;
@@ -96,6 +97,7 @@ public class TransactionVSFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.transactionvs_fragment, container, false);
         to_user = (TextView)rootView.findViewById(R.id.to_user);
         from_user = (TextView)rootView.findViewById(R.id.from_user);
+        receipt = (TextView)rootView.findViewById(R.id.receipt);
         transactionvs_content = (TextView)rootView.findViewById(R.id.transactionvs_content);
         transactionvs_content.setMovementMethod(LinkMovementMethod.getInstance());
         transactionvsSubject = (TextView)rootView.findViewById(R.id.transactionvs_subject);
@@ -117,28 +119,29 @@ public class TransactionVSFragment extends Fragment {
 
     private void initTransactionVSScreen (TransactionVS transactionvs) {
         Log.d(TAG + ".initTransactionVSScreen(...)", "transactionvsId: " + transactionvs.getId());
-        try {
-            if(transactionvs.getFromUserVS() != null) {
-                from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
-                        transactionvs.getFromUserVS().getNif(),
-                        transactionvs.getFromUserVS().getFullName())));
-                from_user.setVisibility(View.VISIBLE);
-            }
-            if(transactionvs.getToUserVS() != null) {
-                to_user.setText(Html.fromHtml(getString(R.string.transactionvs_to_user_lbl,
-                        transactionvs.getToUserVS().getNif(),
-                        transactionvs.getToUserVS().getFullName())));
-                to_user.setVisibility(View.VISIBLE);
-            }
-            String transactionHtml = getString(R.string.transactionvs_formatted,
-                    DateUtils.getLongDate_Es(transactionvs.getDateCreated()),
-                    transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyVS().toString(),
-                    transactionvs.getMessageSMIMEURL());
-            messageSMIME = transactionvs.getMessageSMIME();
-            transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));
-            transactionvs_content.setText(Html.fromHtml(transactionHtml));
-        } catch(Exception ex) {
-            ex.printStackTrace();
+        if(transactionvs.getFromUserVS() != null) {
+            from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
+                    transactionvs.getFromUserVS().getNif(),
+                    transactionvs.getFromUserVS().getFullName())));
+            from_user.setVisibility(View.VISIBLE);
+        }
+        if(transactionvs.getToUserVS() != null) {
+            to_user.setText(Html.fromHtml(getString(R.string.transactionvs_to_user_lbl,
+                    transactionvs.getToUserVS().getNif(),
+                    transactionvs.getToUserVS().getFullName())));
+            to_user.setVisibility(View.VISIBLE);
+        }
+        String transactionHtml = getString(R.string.transactionvs_formatted,
+                DateUtils.getLongDate_Es(transactionvs.getDateCreated()),
+                transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyVS().toString());
+        messageSMIME = transactionvs.getMessageSMIME();
+        transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));
+        transactionvs_content.setText(Html.fromHtml(transactionHtml));
+        receipt.setText(Html.fromHtml(getString(R.string.transactionvs_receipt_url, transactionvs.getMessageSMIMEURL())));
+        if(TransactionVS.Type.USER_OUTPUT == transactionvs.getType()) {
+            from_user.setVisibility(View.GONE);
+            transactionvsSubject.setVisibility(View.GONE);
+            receipt.setVisibility(View.GONE);
         }
     }
 

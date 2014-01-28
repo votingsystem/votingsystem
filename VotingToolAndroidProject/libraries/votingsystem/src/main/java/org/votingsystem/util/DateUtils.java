@@ -154,7 +154,7 @@ public class DateUtils {
 
 
     public static String getLongDate_Es (Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("EEEE dd/MMM/yyyy HH:mm");
         return formatter.format(date);
     }
 

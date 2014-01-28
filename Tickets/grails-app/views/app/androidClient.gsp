@@ -9,10 +9,8 @@
 <body>
 <div class="pageContent" style="position:relative;">
     <div style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">
-
-        <div style="font-size: 1.5em;margin-bottom: 30px;">
-            Para poder completar la operación debe seleccionar la aplicación <b>Votaciones</b></div>
-        <a href="" onclick="return goBack();" style="font-size: 1.5em;">Volver a intentar</a>
+        <div style="font-size: 1.5em;margin-bottom: 30px;"><g:message code="selectVotingAppAndroidMsg"/></div>
+        <a href="" onclick="return goBack();" style="font-size: 1.5em;"><g:message code="retryLbl"/></a>
     </div>
 </div>
 </body>

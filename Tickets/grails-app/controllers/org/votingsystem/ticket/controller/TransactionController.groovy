@@ -62,6 +62,7 @@ class TransactionController {
             String msg = message(code: "ticketBatchErrorMsg") + "--- ${responseVS.getMessage()}"
             cancelTicketBatchRequest(responseList, batchRequest, TypeVS.TICKET_SIGNATURE_ERROR, msg)
             return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    type: TypeVS.TICKET_SIGNATURE_ERROR,
                     contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
         } else {
             List<ResponseVS> depositResponseList = new ArrayList<ResponseVS>()
@@ -83,9 +84,9 @@ class TransactionController {
                 } else {
                     String msg = message(code: "ticketBatchErrorMsg") + " ${responseVS.getMessage()}"
                     cancelTicketBatchDeposit(depositResponseList, batchRequest,TypeVS.TICKET_BATCH_ERROR, msg)
-                    return [receiverPublicKey:receiverPublic, type:TypeVS.TICKET_BATCH_ERROR,
-                            responseVS:new ResponseVS(statusCode:responseVS.getStatusCode(),
-                                    contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
+                    return [receiverPublicKey:receiverPublic,  responseVS:new ResponseVS(
+                            statusCode:responseVS.getStatusCode(), type:TypeVS.TICKET_BATCH_ERROR,
+                            contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
                 }
             } else {
                 List<String> ticketReceiptList = new ArrayList<String>()

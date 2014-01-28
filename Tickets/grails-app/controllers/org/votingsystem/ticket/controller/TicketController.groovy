@@ -5,6 +5,7 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -34,6 +35,7 @@ class TicketController {
      */
     def processRequestFileMap() {
         MessageSMIME messageSMIMEReq = params[ContextVS.TICKET_REQUEST_DATA_FILE_NAME]
+        request.messageSMIMEReq = messageSMIMEReq
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
@@ -52,7 +54,8 @@ class TicketController {
                 Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
                 Map resultMap = [transactionList:[transactionMap], issuedTickets:ticketGenBatchResponse.data]
 
-                responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, messageBytes:"${resultMap as JSON}".getBytes());
+                responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK,
+                        type:TypeVS.TICKET_REQUEST, messageBytes:"${resultMap as JSON}".getBytes());
                 return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
             } else return [responseVS:ticketGenBatchResponse]
         } else return [responseVS:responseVS]

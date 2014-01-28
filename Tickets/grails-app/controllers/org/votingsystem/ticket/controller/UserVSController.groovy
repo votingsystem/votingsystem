@@ -7,6 +7,7 @@ import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.RepresentationDocumentVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
@@ -69,6 +70,7 @@ class UserVSController {
         String result = new JSONObject(responseMap).toString()
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, result)
         responseVS.setContentType(ContentTypeVS.JSON_ENCRYPTED)
+        responseVS.setType(TypeVS.TICKET_USER_INFO)
         return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }
 

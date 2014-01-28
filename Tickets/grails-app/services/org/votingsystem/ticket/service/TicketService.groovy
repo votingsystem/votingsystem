@@ -125,6 +125,8 @@ class TicketService {
                 ticket.setMessageSMIME(messageSMIMEReq)
                 ticket.state = TicketVS.State.EXPENDED
                 ticket.save()
+                messageSMIMEReq.setType(TypeVS.TICKET);
+                messageSMIMEReq.save()
                 SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                         smimeMessageReq, subject)
                 MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
