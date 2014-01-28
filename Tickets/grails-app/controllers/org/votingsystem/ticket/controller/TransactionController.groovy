@@ -18,6 +18,7 @@ class TransactionController {
     def userVSService
     def transactionVSService
     def signatureVSService
+    def ticketService
 
     /**
      * Servicio que recibe una transacción compuesta por un lote de Tickets
@@ -61,7 +62,7 @@ class TransactionController {
         } else {
             List<ResponseVS> depositResponseList = new ArrayList<ResponseVS>()
             for(ResponseVS response : responseList) {
-                ResponseVS depositResponse = transactionVSService.processTicketDeposit(response.data, request.locale)
+                ResponseVS depositResponse = ticketService.processTicketDeposit(response.data, request.locale)
                 if(ResponseVS.SC_OK == depositResponse.getStatusCode()) {
                     depositResponseList.add(depositResponse);
                 } else {
@@ -81,7 +82,7 @@ class TransactionController {
             } else {
                 List<String> ticketReceiptList = new ArrayList<String>()
                 for(ResponseVS response: depositResponseList) {
-                    ticketReceiptList.add(new String(((MessageSMIME)response.getData()).content, "UTF-8"))
+                    ticketReceiptList.add(new String(Base64.encode(((MessageSMIME)response.getData()).content)))
                 }
                 Map responseMap = [tickets:ticketReceiptList]
                 byte[] responseBytes = "${responseMap as JSON}".getBytes()
@@ -109,7 +110,7 @@ class TransactionController {
         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
         ResponseVS responseVS = null
         if(ContentTypeVS.TICKET == contentTypeVS) {
-            responseVS = transactionVSService.processTicketDeposit(messageSMIMEReq, request.locale)
+            responseVS = ticketService.processTicketDeposit(messageSMIMEReq, request.locale)
         } else responseVS = transactionVSService.processDeposit(messageSMIMEReq, request.locale)
         return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }

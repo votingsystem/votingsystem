@@ -319,11 +319,12 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public String getNotificationMessage() {
-        if(notificationMessage == null) return message;
+        if(notificationMessage == null) return getMessage();
         return notificationMessage;
     }
 
     public void setNotificationMessage(String notificationMessage) {
         this.notificationMessage = notificationMessage;
     }
+    
 }

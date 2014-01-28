@@ -65,51 +65,6 @@ class TransactionVSService {
         }
     }
 
-    public ResponseVS processTicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        X509Certificate ticketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
-        String msg;
-        try {
-            String fromUser = grailsApplication.config.VotingSystem.serverName
-            String toUser = smimeMessageReq.getFrom().toString()
-            String subject = messageSource.getMessage('ticketReceiptSubject', null, locale)
-
-            String hashCertVS = null;
-            byte[] ticketExtensionValue = ticketX509Cert.getExtensionValue(ContextVS.TICKET_OID);
-            if(ticketExtensionValue != null) {
-                DERTaggedObject ticketCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(ticketExtensionValue);
-                def ticketCertData = JSON.parse(((DERUTF8String) ticketCertDataDER.getObject()).toString());
-                hashCertVS = ticketCertData.hashCertVS
-            }
-            TicketVS ticket = TicketVS.findWhere(serialNumber:ticketX509Cert.serialNumber.longValue(),
-                    hashCertVS:hashCertVS)
-            if(!ticket) throw new ExceptionVS(messageSource.getMessage("ticketNotFoundErrorMsg", null, locale))
-            if(TicketVS.State.OK == ticket.state) {
-                ticket.setMessageSMIME(messageSMIMEReq)
-                ticket.state = TicketVS.State.EXPENDED
-                ticket.save()
-                SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
-                        smimeMessageReq, subject)
-                MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                        content:smimeMessageResp.getBytes()).save()
-                return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TICKET, data:messageSMIMEResp)
-            } else if (TicketVS.State.EXPENDED == ticket.state) {
-                Map dataMap = [message:messageSource.getMessage("tickedExpendedErrorMsg", null, locale),
-                        messageSMIME:new String(ticket.messageSMIME.content, "UTF-8")]
-                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
-                        type:TypeVS.TICKET_DEPOSIT_ERROR, message:"${dataMap as JSON}",
-                        contentType:ContentTypeVS.JSON_ENCRYPTED)
-            }
-        } catch(ExceptionVS ex) {
-            log.error(ex.getMessage(), ex);
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(),
-                    type:TypeVS.TICKET_DEPOSIT_ERROR)
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            msg = messageSource.getMessage('depositDataError', null, locale)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.TICKET_DEPOSIT_ERROR)
-        }
-    }
 
 
     public ResponseVS processDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
