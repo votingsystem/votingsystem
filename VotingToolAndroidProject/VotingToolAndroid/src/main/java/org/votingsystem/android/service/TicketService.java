@@ -33,6 +33,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TicketVS;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
@@ -331,6 +332,13 @@ public class TicketService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject issuedTicketsJSON = new JSONObject(new String(
                         responseVS.getMessageBytes(), "UTF-8"));
+
+                JSONArray transactionsArray = issuedTicketsJSON.getJSONArray("transactionList");
+                for(int i = 0; i < transactionsArray.length(); i++) {
+                    TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
+                    contextVS.addTransaction(transaction, null);
+                }
+
                 JSONArray issuedTicketsArray = issuedTicketsJSON.getJSONArray("issuedTickets");
                 Log.d(TAG + "ticketRequest(...)", "Num IssuedTickets: " + issuedTicketsArray.length());
                 if(issuedTicketsArray.length() != ticketList.size()) {

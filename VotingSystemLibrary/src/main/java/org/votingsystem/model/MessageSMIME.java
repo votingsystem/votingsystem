@@ -30,11 +30,14 @@ public class MessageSMIME implements Serializable {
     @Column(name="content") @Lob private byte[] content;
     
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
-    
+    @JoinColumn(name="userVS") private UserVS userVS;cd
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventVS") private EventVS eventVS;
-    
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="batchRequest") private BatchRequest batchRequest;
+
     @OneToOne(mappedBy="messageSMIME") private AccessRequestVS accessRequestVS;
     
     @OneToOne(mappedBy="messageSMIME") private VoteVS voteVS;
@@ -191,4 +194,11 @@ public class MessageSMIME implements Serializable {
         this.reason = reason;
     }
 
+    public BatchRequest getBatchRequest() {
+        return batchRequest;
+    }
+
+    public void setBatchRequest(BatchRequest batchRequest) {
+        this.batchRequest = batchRequest;
+    }
 }

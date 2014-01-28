@@ -135,8 +135,7 @@ class CsrService {
             if(expectedAmount.compareTo(batchAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
                     'ticketBatchRequestAmountErrorMsg', ["${expectedAmount.toString()} ${expectedCurrency}",
                     "${batchAmount.toString()} ${expectedCurrency}"], locale))
-            return new ResponseVS(statusCode: ResponseVS.SC_OK, messageBytes:
-                    "${[issuedTickets:issuedTicketCertList] as JSON}".getBytes());
+            return new ResponseVS(statusCode: ResponseVS.SC_OK, data:issuedTicketCertList);
         } catch(ExceptionVS ex) {
             log.error(ex.getMessage(), ex);
             cancelTickets(issuedTicketList, ex.getMessage())

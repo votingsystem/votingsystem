@@ -3,10 +3,13 @@ package org.votingsystem.ticket.controller
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.bouncycastle.util.encoders.Base64
+import org.votingsystem.model.BatchRequest
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.model.ticket.TicketVS
+import org.votingsystem.model.ticket.TicketVSBatchRequest
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
 import java.security.KeyFactory
@@ -33,11 +36,12 @@ class TransactionController {
         if(!params.requestBytes) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
+        TicketVSBatchRequest batchRequest = new TicketVSBatchRequest(state:BatchRequest.State.OK,
+                content:params.requestBytes).save()
         def requestJSON = JSON.parse(new String(params.requestBytes, "UTF-8"))
         byte[] decodedPK = Base64.decode(requestJSON.publicKey);
         PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
         //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
-
         JSONArray ticketsArray = requestJSON.tickets
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK)
         byte[] bytesResponse
@@ -55,14 +59,15 @@ class TransactionController {
             }
         }
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            String msg = message(code: "ticketBatchErrorMsg") + " ${responseVS.getMessage()}"
-            log.error(msg)
-            return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK,
+            String msg = message(code: "ticketBatchErrorMsg") + "--- ${responseVS.getMessage()}"
+            cancelTicketBatchRequest(responseList, batchRequest, TypeVS.TICKET_SIGNATURE_ERROR, msg)
+            return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
         } else {
             List<ResponseVS> depositResponseList = new ArrayList<ResponseVS>()
             for(ResponseVS response : responseList) {
-                ResponseVS depositResponse = ticketService.processTicketDeposit(response.data, request.locale)
+                ResponseVS depositResponse = ticketService.processTicketDeposit(
+                        response.data, batchRequest, request.locale)
                 if(ResponseVS.SC_OK == depositResponse.getStatusCode()) {
                     depositResponseList.add(depositResponse);
                 } else {
@@ -72,13 +77,16 @@ class TransactionController {
             }
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                    cancelTicketBatchDeposit(depositResponseList, batchRequest,TypeVS.TICKET_BATCH_WITH_ITEMS_REPEATED,
+                            responseVS.data.message)
                     return [receiverPublicKey:receiverPublic, responseVS:responseVS];
+                } else {
+                    String msg = message(code: "ticketBatchErrorMsg") + " ${responseVS.getMessage()}"
+                    cancelTicketBatchDeposit(depositResponseList, batchRequest,TypeVS.TICKET_BATCH_ERROR, msg)
+                    return [receiverPublicKey:receiverPublic, type:TypeVS.TICKET_BATCH_ERROR,
+                            responseVS:new ResponseVS(statusCode:responseVS.getStatusCode(),
+                                    contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
                 }
-                String msg = message(code: "ticketBatchErrorMsg") + " ${responseVS.getMessage()}"
-                //_ TODO _  cancel Tickets
-                log.error(msg)
-                return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK,
-                        contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
             } else {
                 List<String> ticketReceiptList = new ArrayList<String>()
                 for(ResponseVS response: depositResponseList) {
@@ -90,6 +98,41 @@ class TransactionController {
                         contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: responseBytes)]
             }
         }
+    }
+
+    private void cancelTicketBatchDeposit(List<ResponseVS> responseList, TicketVSBatchRequest batchRequest, TypeVS typeVS,
+                                          String reason) {
+        log.error("cancelTicketBatchDeposit - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
+        for(ResponseVS responseVS: responseList) {
+            if(responseVS.data instanceof Map) {
+                ((MessageSMIME)responseVS.data.ticketReceipt).type = typeVS
+                ((MessageSMIME)responseVS.data.ticketReceipt).reason = reason
+                ((MessageSMIME)responseVS.data.ticketReceipt).save()
+                ((TicketVS)responseVS.data.ticket).setState(TicketVS.State.OK)
+                ((TicketVS)responseVS.data.ticket).save()
+            } else log.error("cancelTicketBatch unknown data type ${responseVS.data.getClass().getName()}")
+        }
+        batchRequest.setType(typeVS)
+        batchRequest.setState(BatchRequest.State.ERROR)
+        batchRequest.setReason(reason)
+        batchRequest.save()
+    }
+
+    private void cancelTicketBatchRequest(List<ResponseVS> responseList, TicketVSBatchRequest batchRequest, TypeVS typeVS,
+               String reason) {
+        log.error("cancelTicketBatch - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
+        for(ResponseVS responseVS: responseList) {
+            if(responseVS.data instanceof MessageSMIME) {
+                ((MessageSMIME)responseVS.data).batchRequest = batchRequest
+                ((MessageSMIME)responseVS.data).type = typeVS
+                ((MessageSMIME)responseVS.data).reason = reason
+                ((MessageSMIME)responseVS.data).save()
+            } else log.error("cancelTicketBatch unknown data type ${responseVS.data.getClass().getName()}")
+        }
+        batchRequest.setType(typeVS)
+        batchRequest.setState(BatchRequest.State.ERROR)
+        batchRequest.setReason(reason)
+        batchRequest.save()
     }
 
     /**
@@ -110,7 +153,7 @@ class TransactionController {
         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
         ResponseVS responseVS = null
         if(ContentTypeVS.TICKET == contentTypeVS) {
-            responseVS = ticketService.processTicketDeposit(messageSMIMEReq, request.locale)
+            responseVS = ticketService.processTicketDeposit(messageSMIMEReq, null, request.locale)
         } else responseVS = transactionVSService.processDeposit(messageSMIMEReq, request.locale)
         return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }

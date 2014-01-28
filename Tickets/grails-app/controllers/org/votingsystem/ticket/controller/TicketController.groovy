@@ -14,6 +14,7 @@ class TicketController {
     def ticketService
     def csrService
     def userVSService
+    def transactionVSService
 
     def request() {}
 
@@ -47,8 +48,12 @@ class TicketController {
                 TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
                         fromUserVS: userVS, toUserVS: userVS, currency:responseVS.data.currency,
                         type:TransactionVS.Type.USER_OUTPUT).save()
-                return [responseVS:ticketGenBatchResponse,
-                        receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+
+                Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
+                Map resultMap = [transactionList:[transactionMap], issuedTickets:ticketGenBatchResponse.data]
+
+                responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, messageBytes:"${resultMap as JSON}".getBytes());
+                return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
             } else return [responseVS:ticketGenBatchResponse]
         } else return [responseVS:responseVS]
     }

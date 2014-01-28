@@ -326,5 +326,5 @@ public class ResponseVS<T> implements Parcelable {
     public void setNotificationMessage(String notificationMessage) {
         this.notificationMessage = notificationMessage;
     }
-    
+
 }

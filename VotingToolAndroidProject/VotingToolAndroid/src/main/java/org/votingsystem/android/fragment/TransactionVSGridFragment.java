@@ -37,8 +37,10 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.android.service.TicketService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
@@ -75,11 +77,37 @@ public class TransactionVSGridFragment extends Fragment
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras(): " + intent.getExtras());
         String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-        TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(pin != null) ;
-        else { }
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(pin != null) {
+            switch(responseVS.getTypeVS()) {
+                case TICKET_USER_INFO:
+                    launchUpdateUserInfoService(pin);
+                    break;
+            }
+        } else {
+            switch(responseVS.getTypeVS()) {
+                case TICKET_USER_INFO:
+                    break;
+            }
+            showProgress(false, false);
+        }
         }
     };
+
+    private void launchUpdateUserInfoService(String pin) {
+        Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    TicketService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_USER_INFO);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -157,8 +185,8 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onScroll(AbsListView view, int firstVisibleItem,
                int visibleItemCount, int totalItemCount) { }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG +  ".onCreateOptionsMenu(..)", "onCreateOptionsMenu");
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.ticket_user_info, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
     }
@@ -168,6 +196,10 @@ public class TransactionVSGridFragment extends Fragment
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
             case R.id.reload:
+                return true;
+            case R.id.update_signers_info:
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        getString(R.string.update_user_info_pin_msg), false, TypeVS.TICKET_USER_INFO);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -299,7 +331,6 @@ public class TransactionVSGridFragment extends Fragment
             }
         }
     }
-
 
     @Override public void onStop() {
         super.onStop();

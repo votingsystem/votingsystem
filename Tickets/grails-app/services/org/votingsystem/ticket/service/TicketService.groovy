@@ -14,6 +14,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.ticket.TicketVS
+import org.votingsystem.model.ticket.TicketVSBatchRequest
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
@@ -100,10 +101,11 @@ class TicketService {
     }
 
 
-    public ResponseVS processTicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS processTicketDeposit(MessageSMIME messageSMIMEReq, TicketVSBatchRequest batchRequest, Locale locale) {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         X509Certificate ticketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         String msg;
+        ResponseVS resultResponseVS;
         try {
             String fromUser = grailsApplication.config.VotingSystem.serverName
             String toUser = smimeMessageReq.getFrom().toString()
@@ -127,22 +129,36 @@ class TicketService {
                         smimeMessageReq, subject)
                 MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                         content:smimeMessageResp.getBytes()).save()
-                return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TICKET, data:messageSMIMEResp)
+                Map dataMap = [ticketReceipt:messageSMIMEResp, ticket:ticket]
+                resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TICKET, data:dataMap)
             } else if (TicketVS.State.EXPENDED == ticket.state) {
+                log.error("processTicketDeposit - ticket '${ticket.id}' state ${ticket.state}")
                 Map dataMap = [message:messageSource.getMessage("tickedExpendedErrorMsg", null, locale),
                         messageSMIME:new String(ticket.messageSMIME.content, "UTF-8")]
-                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
-                        type:TypeVS.TICKET_DEPOSIT_ERROR, message:"${dataMap as JSON}",
+                resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
+                        type:TypeVS.TICKET_DEPOSIT_ERROR, message:"${dataMap as JSON}", data:dataMap,
                         contentType:ContentTypeVS.JSON_ENCRYPTED)
             }
         } catch(ExceptionVS ex) {
             log.error(ex.getMessage(), ex);
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(),
+            resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(),
                     type:TypeVS.TICKET_DEPOSIT_ERROR)
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             msg = messageSource.getMessage('depositDataError', null, locale)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.TICKET_DEPOSIT_ERROR)
+            resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.TICKET_DEPOSIT_ERROR)
+        } finally {
+            if(ResponseVS.SC_OK != resultResponseVS.getStatusCode()) {
+                messageSMIMEReq.setType(TypeVS.TICKET_DEPOSIT_ERROR)
+                if(ResponseVS.SC_ERROR_REQUEST_REPEATED == resultResponseVS.getStatusCode()) {
+                    messageSMIMEReq.setReason("TICKET EXPENDED")
+                } else  messageSMIMEReq.setReason(resultResponseVS.getMessage())
+            } else {
+                messageSMIMEReq.setType(TypeVS.TICKET)
+            }
+            if(batchRequest) messageSMIMEReq.batchRequest = batchRequest
+            messageSMIMEReq.save()
+            return resultResponseVS
         }
     }
 

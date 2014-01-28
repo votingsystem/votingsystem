@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
@@ -202,29 +203,34 @@ public class AppContextVS extends Application {
         for(CurrencyVS currencyVS : keySet) {
             CurrencyData currencyData = updatedTicketAccount.getCurrencyMap().get(currencyVS);
             for(TransactionVS transactionVS : currencyData.getTransactionList()) {
-                ContentValues values = new ContentValues();
-                values.put(TransactionVSContentProvider.SQL_INSERT_OR_REPLACE, true);
-                values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
-                values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
-                values.put(TransactionVSContentProvider.FROM_USER_COL,
-                        transactionVS.getFromUserVS().getNif());
-                values.put(TransactionVSContentProvider.TO_USER_COL,
-                        transactionVS.getToUserVS().getNif());
-                values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
-                values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
-                values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
-                values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
-                values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
-                        ObjectUtils.serializeObject(transactionVS));
-                values.put(TransactionVSContentProvider.WEEK_LAPSE_COL,
+                addTransaction(transactionVS,
                         DateUtils.getDirPath(updatedTicketAccount.getWeekLapse()));
-                values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
-                        transactionVS.getDateCreated().getTime());
-                getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
             }
             currencyData.setTransactionList(null);
         }
         updateTicketAccountLastChecked();
+    }
+
+    public Uri addTransaction(TransactionVS transactionVS, String weekLapse) {
+        String weekLapseStr = (weekLapse == null) ? getCurrentWeekLapseId():weekLapse;
+        ContentValues values = new ContentValues();
+        values.put(TransactionVSContentProvider.SQL_INSERT_OR_REPLACE, true);
+        values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
+        values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
+        values.put(TransactionVSContentProvider.FROM_USER_COL,
+                transactionVS.getFromUserVS().getNif());
+        values.put(TransactionVSContentProvider.TO_USER_COL,
+                transactionVS.getToUserVS().getNif());
+        values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
+        values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
+        values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
+        values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
+        values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
+                ObjectUtils.serializeObject(transactionVS));
+        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapseStr);
+        values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
+                transactionVS.getDateCreated().getTime());
+        return getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
     }
 
     public CurrencyData getCurrencyData(CurrencyVS currency) {

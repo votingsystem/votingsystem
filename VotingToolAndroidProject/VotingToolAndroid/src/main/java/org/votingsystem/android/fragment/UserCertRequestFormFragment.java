@@ -33,11 +33,11 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.service.UserCertRequestService;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.NifUtils;
 
@@ -54,6 +54,7 @@ import static org.votingsystem.model.ContextVS.NAME_KEY;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PHONE_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
+import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSE_STATUS_KEY;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 
@@ -75,7 +76,6 @@ public class UserCertRequestFormFragment extends Fragment {
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
-    private AppContextVS appContextVS;
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -83,20 +83,17 @@ public class UserCertRequestFormFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras(): " + intent.getExtras());
             String pin = intent.getStringExtra(PIN_KEY);
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(pin != null) launchUserCertRequestService(pin);
             else {
-                int responseStatusCode = intent.getIntExtra(RESPONSE_STATUS_KEY,
-                        ResponseVS.SC_ERROR);
-                String caption = intent.getStringExtra(CAPTION_KEY);
-                String message = intent.getStringExtra(MESSAGE_KEY);
-                if(ResponseVS.SC_OK == responseStatusCode) {
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     Intent resultIntent = new Intent(getActivity().getApplicationContext(),
                             UserCertResponseActivity.class);
                     startActivity(resultIntent);
-                } else showMessage(responseStatusCode, caption, message);
+                } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getMessage());
             }
         }
     };
@@ -114,7 +111,6 @@ public class UserCertRequestFormFragment extends Fragment {
            Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "progressVisible: " + progressVisible);
         super.onCreate(savedInstanceState);
-        appContextVS = ((AppContextVS)getActivity().getApplicationContext());
         View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         getActivity().setTitle(getString(R.string.request_certificate_form_lbl));
@@ -180,11 +176,6 @@ public class UserCertRequestFormFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-    }
-
-    @Override public void onStop() {
-        super.onStop();
-        Log.d(TAG + ".onStop()", "onStop");
     }
 
     @Override public void onResume() {
