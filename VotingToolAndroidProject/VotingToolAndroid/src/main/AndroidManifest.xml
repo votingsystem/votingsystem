@@ -100,6 +100,9 @@
         <activity android:name=".activity.ConfirmImageActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
 
+        <activity android:name=".activity.TransactionVSPagerActivity"
+            android:theme="@style/Theme.AppCompat.Light"/>
+
         <activity android:name=".activity.RepresentativeDelegationActivity"
             android:icon="@drawable/system_users_22"
             android:label="@string/representative_delegation_lbl" android:theme="@style/Theme.AppCompat.Light"/>

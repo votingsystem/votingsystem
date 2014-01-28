@@ -4,7 +4,9 @@ import grails.converters.JSON
 import org.apache.http.HttpResponse
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
-import org.votingsystem.signature.smime.ValidationResult;
+import org.votingsystem.signature.smime.ValidationResult
+import org.votingsystem.util.FileUtils;
+
 import javax.servlet.http.HttpServletResponseWrapper
 import java.security.cert.X509Certificate;
 import org.votingsystem.model.TypeVS
@@ -111,7 +113,7 @@ class TicketFilters {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
                     log.debug("before - contentType: ${contentTypeVS}")
                     if(!contentTypeVS?.isPKCS7()) return;
-                    byte[] requestBytes = getBytesFromInputStream(request.getInputStream())
+                    byte[] requestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
                     //log.debug "---- pkcs7DocumentsFilter - before  - consulta: ${new String(requestBytes)}"
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
@@ -263,19 +265,6 @@ class TicketFilters {
         response.outputStream <<  responseVS.getMessageBytes()
         response.outputStream.flush()
         return false
-    }
-
-    /**
-     * requestBytes = "${request.getInputStream()}".getBytes() -> problems working with pdf
-     */
-    public byte[] getBytesFromInputStream(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buf =new byte[4096];
-        int len;
-        while((len = inputStream.read(buf)) > 0){ outputStream.write(buf,0,len);}
-        outputStream.close();
-        inputStream.close();
-        return outputStream.toByteArray();
     }
 
 }

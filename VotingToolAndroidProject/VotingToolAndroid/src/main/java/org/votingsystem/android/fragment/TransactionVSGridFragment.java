@@ -53,8 +53,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.mail.Provider;
-
 public class TransactionVSGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 

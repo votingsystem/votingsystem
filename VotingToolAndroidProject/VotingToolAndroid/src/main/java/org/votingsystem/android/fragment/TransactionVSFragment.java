@@ -2,14 +2,10 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -24,27 +20,20 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.contentprovider.ReceiptContentProvider;
-import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -55,33 +44,28 @@ public class TransactionVSFragment extends Fragment {
 
     public static final String TAG = "TransactionVSFragment";
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(pin != null) {
-
-            } else {
-
-            }
-        }
-    };
-
-
-
-    private AppContextVS contextVS;
-    private ReceiptContainer selectedReceipt;
+    private TransactionVS selectedTransactionVS;
     private View progressContainer;
     private FrameLayout mainLayout;
     private Menu menu;
-    private TextView receiptSubject;
-    private TextView receipt_content;
+    private TextView transactionvsSubject;
+    private TextView transactionvs_content;
+    private TextView to_user;
+    private TextView from_user;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private SMIMEMessageWrapper selectedReceiptSMIME;
+    private SMIMEMessageWrapper messageSMIME;
     private String broadCastId = null;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras(): " + intent.getExtras());
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(pin != null) {
+
+        } else { }
+        }
+    };
 
     public static Fragment newInstance(int cursorPosition) {
         TransactionVSFragment fragment = new TransactionVSFragment();
@@ -91,29 +75,30 @@ public class TransactionVSFragment extends Fragment {
         return fragment;
     }
 
-    public static Fragment newInstance(String receiptURL, TypeVS type) {
-        TransactionVSFragment fragment = new TransactionVSFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ContextVS.TYPEVS_KEY, type);
-        args.putString(ContextVS.URL_KEY, receiptURL);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        //String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + "= ? ";
+        Cursor cursor = getActivity().getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,
+                null, null, null, null);
+        cursor.moveToPosition(cursorPosition);
+        selectedTransactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
+        /*String weekLapseStr = cursor.getString(cursor.getColumnIndex(
+                TransactionVSContentProvider.WEEK_LAPSE_COL));
+        String currencyStr = cursor.getString(cursor.getColumnIndex(
+                TransactionVSContentProvider.CURRENCY_COL));
+        Log.d(TAG + ".onCreateView(...)", "weekLapse: " + weekLapseStr + " - currency:" + currencyStr);*/
         broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
-        LinearLayout receiptDataContainer = (LinearLayout) rootView.
-                findViewById(R.id.receipt_data_container);
-        receipt_content = (TextView)rootView.findViewById(R.id.receipt_content);
-        receipt_content.setMovementMethod(LinkMovementMethod.getInstance());
-        receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
+        View rootView = inflater.inflate(R.layout.transactionvs_fragment, container, false);
+        to_user = (TextView)rootView.findViewById(R.id.to_user);
+        from_user = (TextView)rootView.findViewById(R.id.from_user);
+        transactionvs_content = (TextView)rootView.findViewById(R.id.transactionvs_content);
+        transactionvs_content.setMovementMethod(LinkMovementMethod.getInstance());
+        transactionvsSubject = (TextView)rootView.findViewById(R.id.transactionvs_subject);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -123,123 +108,67 @@ public class TransactionVSFragment extends Fragment {
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        String receiptURL = getArguments().getString(ContextVS.URL_KEY);
         if(savedInstanceState != null) {
-            selectedReceipt = (ReceiptContainer) savedInstanceState.getSerializable(
-                    ContextVS.RECEIPT_KEY);
-            initReceiptScreen(selectedReceipt);
-        } else {
-            if(receiptURL != null) {
-                selectedReceipt = new ReceiptContainer(type, receiptURL);
-                String selection = ReceiptContentProvider.URL_COL + "=? ";
-                String[] selectionArgs = new String[]{receiptURL};
-                Cursor cursor = getActivity().getContentResolver().query(
-                        ReceiptContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
-                if(cursor.getCount() > 0 ) {
-                    cursor.moveToFirst();
-                    byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
-                            ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-                    Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
-                    try {
-                        selectedReceipt = (ReceiptContainer) ObjectUtils.
-                                deSerializeObject(serializedReceiptContainer);
-                        selectedReceipt.setLocalId(receiptId);
-                        initReceiptScreen(selectedReceipt);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                } else {
-                    ReceiptDownloader getDataTask = new ReceiptDownloader();
-                    getDataTask.execute(receiptURL);
-                }
-            } else {
-                int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-                Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                        ReceiptContentProvider.CONTENT_URI, null, null, null, null);
-                cursor.moveToPosition(cursorPosition);
-                byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
-                        ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-                Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
-                try {
-                    selectedReceipt = (ReceiptContainer) ObjectUtils.
-                            deSerializeObject(serializedReceiptContainer);
-                    selectedReceipt.setLocalId(receiptId);
-                    initReceiptScreen(selectedReceipt);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
+            selectedTransactionVS = (TransactionVS) savedInstanceState.getSerializable(
+                    ContextVS.MESSAGE_KEY);
         }
+        initTransactionVSScreen(selectedTransactionVS);
     }
 
-    private void initReceiptScreen (ReceiptContainer receipt) {
-        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getType() + " - messageId: " +
-            receipt.getMessageId());
+    private void initTransactionVSScreen (TransactionVS transactionvs) {
+        Log.d(TAG + ".initTransactionVSScreen(...)", "transactionvsId: " + transactionvs.getId());
         try {
-            selectedReceiptSMIME = receipt.getReceipt();
-            receiptSubject.setText(getString(R.string.smime_subject_msg, selectedReceipt.getSubject()));
-            receipt_content.setText(Html.fromHtml(getReceiptContentFormatted(selectedReceipt)));
+            if(transactionvs.getFromUserVS() != null) {
+                from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
+                        transactionvs.getFromUserVS().getNif(),
+                        transactionvs.getFromUserVS().getFullName())));
+                from_user.setVisibility(View.VISIBLE);
+            }
+            if(transactionvs.getToUserVS() != null) {
+                to_user.setText(Html.fromHtml(getString(R.string.transactionvs_to_user_lbl,
+                        transactionvs.getToUserVS().getNif(),
+                        transactionvs.getToUserVS().getFullName())));
+                to_user.setVisibility(View.VISIBLE);
+            }
+            String transactionHtml = getString(R.string.transactionvs_formatted,
+                    DateUtils.getLongDate_Es(transactionvs.getDateCreated()),
+                    transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyVS().toString(),
+                    transactionvs.getMessageSMIMEURL());
+            messageSMIME = transactionvs.getMessageSMIME();
+            transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));
+            transactionvs_content.setText(Html.fromHtml(transactionHtml));
         } catch(Exception ex) {
             ex.printStackTrace();
         }
     }
 
     private void setActionBar() {
-        if(selectedReceipt == null) return;
-        switch(selectedReceipt.getType()) {
-            case VOTEVS:
-                if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
-                        new Date(System.currentTimeMillis()))) {
-                    menu.removeItem(R.id.cancel_vote);
-                }
+        if(selectedTransactionVS == null) return;
+        switch(selectedTransactionVS.getType()) {
+            case USER_INPUT:
+                //menu.removeItem(R.id.cancel_vote);
                 break;
-            case CANCEL_VOTE:
-            case VOTEVS_CANCELLED:
-                MenuItem checkReceiptMenuItem = menu.findItem(R.id.check_receipt);
-                checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
-                menu.removeItem(R.id.cancel_vote);
+            case USER_OUTPUT:
+                //menu.removeItem(R.id.cancel_vote);
                 break;
-            case REPRESENTATIVE_SELECTION:
-            case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                menu.removeItem(R.id.cancel_vote);
-                menu.removeItem(R.id.check_receipt);
+            case TICKET_PAYCHECK:
+                //menu.removeItem(R.id.cancel_vote);
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
-                    selectedReceipt.getType());
+                    selectedTransactionVS.getType());
         }
-        if(selectedReceipt.getLocalId() < 0) {
-            menu.removeItem(R.id.delete_receipt);
-        } else menu.removeItem(R.id.save_receipt);
         if(getActivity() instanceof ActionBarActivity) {
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionv_lbl));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                    selectedReceipt.getTypeDescription(getActivity()));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(R.drawable.receipt_32);
+                    selectedTransactionVS.getDescription(getActivity().getApplicationContext()));
+            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
+                    selectedTransactionVS.getIconId(getActivity().getApplicationContext()));
         }
-    }
-
-    @Override public void onStart() {
-        Log.d(TAG + ".onStart(...) ", "");
-        super.onStart();
-    }
-
-
-    @Override public void onDestroy() {
-        Log.d(TAG + ".onDestroy()", "");
-        super.onDestroy();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(selectedReceipt != null) outState.putSerializable(ContextVS.RECEIPT_KEY, selectedReceipt);
-    }
-
-    @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "");
-        super.onStop();
+        if(selectedTransactionVS != null) outState.putSerializable(ContextVS.MESSAGE_KEY, selectedTransactionVS);
     }
 
     @Override public void onResume() {
@@ -257,9 +186,8 @@ public class TransactionVSFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected receipt type:" +
-                selectedReceipt.getType());
-        menuInflater.inflate(R.menu.receipt_fragment, menu);
+        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected transactionvs type:");
+        menuInflater.inflate(R.menu.transactionvs_fragment, menu);
         this.menu = menu;
         setActionBar();
     }
@@ -269,82 +197,7 @@ public class TransactionVSFragment extends Fragment {
         AlertDialog dialog = null;
         switch (item.getItemId()) {
             case R.id.show_signers_info:
-                try {
-                    SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
-                            selectedReceiptSMIME.getBytes());
-                    newFragment.show(getFragmentManager(), SignersInfoDialogFragment.TAG);
-                }catch (Exception ex) {
-                    ex.printStackTrace();
-                }
                 break;
-            case R.id.show_timestamp_info:
-                TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
-                        selectedReceiptSMIME.getSigner().getTimeStampToken(),
-                        getActivity().getApplicationContext());
-                newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
-                break;
-            case R.id.share_receipt:
-                try {
-                    Intent sendIntent = new Intent();
-                    String receiptStr = new String(selectedReceiptSMIME.getBytes());
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
-                    sendIntent.setType(ContentTypeVS.TEXT.getName());
-                    startActivity(sendIntent);
-                } catch(Exception ex) {
-                    ex.printStackTrace();
-                }
-                return true;
-            case R.id.save_receipt:
-                ContentValues values = new ContentValues();
-                values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
-                        ObjectUtils.serializeObject(selectedReceipt));
-                values.put(ReceiptContentProvider.TYPE_COL, selectedReceipt.getType().toString());
-                values.put(ReceiptContentProvider.URL_COL, selectedReceipt.getMessageId());
-                values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
-                Uri uri = getActivity().getContentResolver().insert(
-                        ReceiptContentProvider.CONTENT_URI, values);
-                menu.removeItem(R.id.save_receipt);
-                break;
-            case R.id.check_receipt:
-                return true;
-            case R.id.delete_receipt:
-                dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_receipt_lbl)).
-                        setMessage(Html.fromHtml(getString(R.string.delete_receipt_msg,
-                                selectedReceipt.getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                getActivity().getContentResolver().delete(ReceiptContentProvider.
-                                        getReceiptURI(selectedReceipt.getLocalId()), null, null);
-                                getActivity().onBackPressed();
-                            }
-                        }).setNegativeButton(getString(R.string.cancel_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                dialog.dismiss();
-                            }
-                        }).show();
-                //to avoid avoid dissapear on screen orientation change
-                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                return true;
-            case R.id.cancel_vote:
-                dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
-                        setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
-                                ((VoteVS) selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                        getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
-                            }
-                        }).setNegativeButton(getString(R.string.cancel_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                dialog.dismiss();
-                            }
-                        }).show();
-                //to avoid avoid dissapear on screen orientation change
-                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -398,58 +251,5 @@ public class TransactionVSFragment extends Fragment {
         }
     }
 
-    public class ReceiptDownloader extends AsyncTask<String, String, ResponseVS> {
-
-        public ReceiptDownloader() { }
-
-        @Override protected void onPreExecute() {showProgress(true, true); }
-
-        @Override protected ResponseVS doInBackground(String... urls) {
-            String receiptURL = urls[0];
-            return HttpHelper.getData(receiptURL, null);
-        }
-
-        @Override  protected void onProgressUpdate(String... progress) { }
-
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                try {
-                    selectedReceipt.setReceiptBytes(responseVS.getMessageBytes());
-                    initReceiptScreen(selectedReceipt);
-                    setActionBar();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    showMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
-                            ex.getMessage());
-                }
-            } else {
-                showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                        responseVS.getMessage());
-            }
-            showProgress(false, true);
-        }
-    }
-
-
-    public String getReceiptContentFormatted(ReceiptContainer selectedReceipt) {
-        String result = null;
-        try {
-            switch(selectedReceipt.getType()) {
-                case REPRESENTATIVE_SELECTION:
-                case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                    JSONObject dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
-                    result = getString(R.string.anonymous_representative_request_formatted,
-                            dataJSON.getString("weeksOperationActive"),
-                            dataJSON.getString("dateFrom"),
-                            dataJSON.getString("dateTo"),
-                            dataJSON.getString("accessControlURL"));
-                    break;
-                default: return selectedReceipt.getReceipt().getSignedContent();
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return result;
-    }
 
 }

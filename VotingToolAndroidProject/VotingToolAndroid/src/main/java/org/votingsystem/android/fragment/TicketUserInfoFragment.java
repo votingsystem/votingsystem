@@ -31,7 +31,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 

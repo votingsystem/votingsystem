@@ -12,7 +12,6 @@ import com.itextpdf.text.Context_iTextVS;
 
 import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
@@ -30,8 +29,6 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -239,7 +236,7 @@ public class AppContextVS extends Application {
         String weekLapseId = getCurrentWeekLapseId();
         Cursor cursor = getContentResolver().query(TicketContentProvider.CONTENT_URI,null, selection,
                 new String[]{weekLapseId, currency.toString()}, null);
-        cursor.moveToFirst();
+        Log.d(TAG + ".getCurrencyData(...)", "TicketContentProvider - cursor.getCount(): " + cursor.getCount());
         List<TicketVS> ticketList = new ArrayList<TicketVS>();
         while(cursor.moveToNext()) {
             TicketVS ticketVS = (TicketVS) ObjectUtils.deSerializeObject(cursor.getBlob(
@@ -250,7 +247,6 @@ public class AppContextVS extends Application {
                 TransactionVSContentProvider.CURRENCY_COL + "= ? ";
         cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,null, selection,
                 new String[]{weekLapseId, currency.toString()}, null);
-        cursor.moveToFirst();
         List<TransactionVS> transactionList = new ArrayList<TransactionVS>();
         while(cursor.moveToNext()) {
             TransactionVS transactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(

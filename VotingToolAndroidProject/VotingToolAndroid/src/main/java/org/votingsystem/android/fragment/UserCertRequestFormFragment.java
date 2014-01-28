@@ -46,16 +46,12 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
-import static org.votingsystem.model.ContextVS.CAPTION_KEY;
 import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
 import static org.votingsystem.model.ContextVS.EMAIL_KEY;
-import static org.votingsystem.model.ContextVS.MESSAGE_KEY;
 import static org.votingsystem.model.ContextVS.NAME_KEY;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PHONE_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
-import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
-import static org.votingsystem.model.ContextVS.RESPONSE_STATUS_KEY;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 
 /**

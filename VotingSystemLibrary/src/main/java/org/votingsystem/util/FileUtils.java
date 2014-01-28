@@ -25,16 +25,16 @@ public class FileUtils {
 
     private static final int  BUFFER_SIZE = 4096;
 
-    public static byte[] getBytesFromInputStream(InputStream entrada) throws IOException {
-        ByteArrayOutputStream salida = new ByteArrayOutputStream();
-        byte[] buf =new byte[BUFFER_SIZE];
+    public static byte[] getBytesFromInputStream(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buf = new byte[BUFFER_SIZE];
         int len;
-        while((len = entrada.read(buf)) > 0){
-            salida.write(buf,0,len);
+        while((len = inputStream.read(buf)) > 0){
+            outputStream.write(buf,0,len);
         }
-        salida.close();
-        entrada.close();
-        return salida.toByteArray();
+        outputStream.close();
+        inputStream.close();
+        return outputStream.toByteArray();
     }
 
     public static byte[] getBytesFromFile(File file) throws IOException {
@@ -55,16 +55,16 @@ public class FileUtils {
         out.close();
     }
 
-    public static File copyStreamToFile(InputStream entrada, File outputFile)
+    public static File copyStreamToFile(InputStream inputStream, File outputFile)
             throws Exception {
-        OutputStream salida = new FileOutputStream(outputFile);
+        OutputStream outputStream = new FileOutputStream(outputFile);
         byte[] buf =new byte[BUFFER_SIZE];
         int len;
-        while((len = entrada.read(buf)) > 0){
-            salida.write(buf,0,len);
+        while((len = inputStream.read(buf)) > 0){
+            outputStream.write(buf,0,len);
         }
-        salida.close();
-        entrada.close();
+        outputStream.close();
+        inputStream.close();
         return outputFile;
     }
 

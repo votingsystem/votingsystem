@@ -33,8 +33,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TicketPagerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.CurrencyVS;
-import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;

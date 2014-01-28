@@ -90,10 +90,9 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".TransactionVSPagerAdapter.getItem(...) ", " - item: " + i);
+            Log.d(TAG + ".TransactionVSPagerAdapter.getItem(...) ", "item: " + i);
             cursor.moveToPosition(i);
-            return TransactionVSFragment.newInstance(cursor.getInt(cursor.getColumnIndex(
-                    TransactionVSContentProvider.ID_COL)));
+            return TransactionVSFragment.newInstance(i);
         }
 
         @Override public int getCount() {
