@@ -37,7 +37,6 @@ public class TicketVS extends ReceiptContainer {
     private String originHashCertVS;
     private String hashCertVSBase64;
     private BigDecimal amount;
-    private TypeVS typeVS;
     private String subject;
     private State state;
     private CurrencyVS currency;
@@ -46,7 +45,7 @@ public class TicketVS extends ReceiptContainer {
 
     public TicketVS(String ticketServerURL, BigDecimal amount, CurrencyVS currency, TypeVS typeVS) {
         this.amount = amount;
-        this.typeVS = typeVS;
+        setTypeVS(typeVS);
         this.ticketServerURL = ticketServerURL;
         this.currency = currency;
         try {
@@ -81,16 +80,12 @@ public class TicketVS extends ReceiptContainer {
         return subject;
     }
 
-    @Override public TypeVS getType() {
-        return typeVS;
-    }
-
     @Override public Date getValidFrom() {
-        return receipt.getSigner().getCertificate().getNotBefore();
+        return certificationRequest.getCertificate().getNotBefore();
     }
 
     @Override public Date getValidTo() {
-        return receipt.getSigner().getCertificate().getNotAfter();
+        return certificationRequest.getCertificate().getNotAfter();
     }
 
     @Override public Long getLocalId() {
@@ -147,13 +142,6 @@ public class TicketVS extends ReceiptContainer {
         this.amount = amount;
     }
 
-    public TypeVS getTypeVS() {
-        return typeVS;
-    }
-
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
-    }
 
     public TransactionVS getTransaction() {
         return transaction;

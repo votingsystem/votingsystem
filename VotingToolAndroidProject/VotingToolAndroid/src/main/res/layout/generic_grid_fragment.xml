@@ -7,8 +7,7 @@
     android:paddingRight="0dp"
     android:background="@color/white_background">
 
-    <TextView
-        android:id="@+id/search_query"
+    <TextView android:id="@+id/search_query"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -33,8 +32,7 @@
         android:layout_height="fill_parent"
         android:foreground="@drawable/shape_window_dim">
 
-        <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/gridview"
+        <GridView android:id="@+id/gridview"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:columnWidth="250dp"

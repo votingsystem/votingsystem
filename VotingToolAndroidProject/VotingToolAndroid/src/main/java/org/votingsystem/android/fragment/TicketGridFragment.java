@@ -1,27 +1,32 @@
 package org.votingsystem.android.fragment;
 
+import android.app.Activity;
+import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.text.Html;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -30,39 +35,103 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.TicketPagerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TransactionVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ObjectUtils;
 
-import java.util.List;
+import java.text.Collator;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TicketGridFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<List<TransactionVS>>, AbsListView.OnScrollListener{
+public class TicketGridFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
     public static final String TAG = "TicketGridFragment";
 
     private View rootView;
-    private ReceiptGridAdapter adapter = null;
-    private VoteVS vote = null;
-    private ContextVS contextVS;
-    private View progressContainer;
-    private FrameLayout mainLayout;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private int menuItemSelected = R.id.all_receipts;
     private GridView gridView;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private TicketListAdapter adapter = null;
+    private String queryStr = null;
+    private AppContextVS contextVS = null;
+    private Long offset = new Long(0);
+    private Integer firstVisiblePosition = null;
+    private View progressContainer;
     private FrameLayout gridContainer;
-    private Menu menu;
+    private String broadCastId;
+    private int loaderId = -1;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras(): " + intent.getExtras());
+        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(pin != null) {
+            switch(responseVS.getTypeVS()) {
+                case TICKET_USER_INFO:
+                    launchUpdateUserInfoService(pin);
+                    break;
+            }
+        } else {
+            switch(responseVS.getTypeVS()) {
+                case TICKET_USER_INFO:
+                    break;
+            }
+            showProgress(false, false);
+        }
+        }
+    };
+
+    private void launchUpdateUserInfoService(String pin) {
+
+    }
+
+    /**
+     * Perform alphabetical comparison of application entry objects.
+     */
+    public static final Comparator<UserVS> ALPHA_COMPARATOR = new Comparator<UserVS>() {
+        private final Collator sCollator = Collator.getInstance();
+        @Override public int compare(UserVS object1, UserVS object2) {
+            return sCollator.compare(object1.getName(), object2.getName());
+        }
+    };
+
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        broadCastId = this.getClass().getName();
+        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.TICKETS.getLoaderId(0);
+        queryStr = getArguments().getString(SearchManager.QUERY);
+        Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
+        setHasOptionsMenu(true);
+    };
+
+    private void showMessage(Integer statusCode, String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
+                " - message: " + message);
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
+                message);
+        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+           Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.receipt_grid_fragment, container, false);
+        ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.ticket_lbl), null,
+                R.drawable.euro_32);
+        rootView = inflater.inflate(R.layout.generic_grid_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        adapter = new ReceiptGridAdapter(getActivity().getApplicationContext());
+        adapter = new TicketListAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -79,23 +148,21 @@ public class TicketGridFragment extends Fragment implements
         progressContainer = rootView.findViewById(R.id.progressContainer);
         gridContainer =  (FrameLayout)rootView.findViewById(R.id.gridContainer);
         gridContainer.getForeground().setAlpha(0);
-        getLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
+        showProgress(true, true);
         return rootView;
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.ticket_user_info, menu);
-        menu.setGroupVisible(R.id.general_items, false);
-        menu.removeItem(R.id.search_item);
-    }
-
-    private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +
-                " -id: " + id);
-        TransactionVS transactionVS = ((TransactionVS) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity(),TicketPagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
-        startActivity(intent);
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
+        super.onActivityCreated(savedInstanceState);
+        //Prepare the loader. Either re-connect with an existing one or start a new one.
+        getLoaderManager().initLoader(loaderId, null, this);
+        if(savedInstanceState != null) {
+            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+            gridView.onRestoreInstanceState(gridState);
+            offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
+        }
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
@@ -103,102 +170,73 @@ public class TicketGridFragment extends Fragment implements
         return true;
     }
 
-    private void filterReceiptList(TypeVS receiptType) {
-        String selection = null;
-        String[] selectionArgs = null;
-        if(receiptType != null) {
-            selection = TicketContentProvider.TYPE_COL + "=? ";
-            selectionArgs = new String[]{receiptType.toString()};
-        }
-        Cursor cursor = getActivity().getContentResolver().query(
-                TicketContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
-        getLoaderManager().getLoader(ContextVS.RECEIPT_LOADER_ID).
-                deliverResult(cursor);
-    }
-
-    @Override public Loader<List<TransactionVS>> onCreateLoader(int i, Bundle bundle) {
-        return new TransactionVSLoader((AppContextVS) getActivity().getApplicationContext());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<TransactionVS>> listLoader, List<TransactionVS> data) {
-        Log.d(TAG + "onLoadFinished(...)", "");
-        adapter.setData(data);
-    }
-
-    @Override public void onLoaderReset(Loader<List<TransactionVS>> cursorLoader) {
-        Log.d(TAG + ".onLoaderReset(...)", "");
-    }
-
     @Override public void onScrollStateChanged(AbsListView absListView, int i) { }
 
     @Override public void onScroll(AbsListView view, int firstVisibleItem,
-           int visibleItemCount, int totalItemCount) { }
+               int visibleItemCount, int totalItemCount) { }
 
-
-    public class ReceiptGridAdapter extends ArrayAdapter<TransactionVS> {
-
-        private LayoutInflater inflater = null;
-
-        public ReceiptGridAdapter(Context ctx) {
-            super(ctx, android.R.layout.simple_list_item_2);
-            inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        @Override public View getView(int position, View convertView, ViewGroup parent) {
-            View view;
-            if (convertView == null) {
-                view = inflater.inflate(R.layout.row_receipt, parent, false);
-            } else {
-                view = convertView;
-            }
-
-            TransactionVS transaction = getItem(position);
-
-
-            LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
-            linearLayout.setBackgroundColor(Color.WHITE);
-            TextView subject = (TextView) view.findViewById(R.id.receipt_subject);
-            TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
-            TextView typeTextView = (TextView) view.findViewById(R.id.receipt_type);
-            TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
-
-            subject.setText(transaction.getFromUserVS().getFullName());
-            String dateInfoStr = null;
-            ImageView imgView = (ImageView)view.findViewById(R.id.receipt_icon);
-
-            if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
-
-            return view;
-        }
-
-        public void setData(List<TransactionVS> data) {
-            clear();
-            if (data != null) {
-                for (int i = 0; i < data.size(); i++) {
-                    add(data.get(i));
-                }
-            }
-        }
-
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.ticket_user_info, menu);
+        menu.setGroupVisible(R.id.general_items, false);
+        menu.removeItem(R.id.search_item);
     }
 
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
+                " - ItemId: " + item.getItemId());
+        switch (item.getItemId()) {
+            case R.id.reload:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
+    private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
+        Log.d(TAG +  ".onListItemClick(...)", "Clicked item - position:" + position +" -id: " + id);
+        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
+        Intent intent = new Intent(getActivity().getApplicationContext(),TicketPagerActivity.class);
+        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
+        startActivity(intent);
+    }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
-        Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putInt(ContextVS.ITEM_ID_KEY, menuItemSelected);
-        Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
+    @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Log.d(TAG + ".onCreateLoader(...)", "");
+        String weekLapse = DateUtils.getDirPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
+        String selection = TicketContentProvider.WEEK_LAPSE_COL + " =? ";
+        CursorLoader loader = new CursorLoader(this.getActivity(), TicketContentProvider.CONTENT_URI,
+                null, selection, new String[]{weekLapse}, null);
+        return loader;
+    }
+
+    @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
+                " - firstVisiblePosition: " + firstVisiblePosition);
+        showProgress(false, true);
+        if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
+        firstVisiblePosition = null;
+        ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
+        if(cursor.getCount() == 0) {
+            rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+        } else rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
+    }
+
+    @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        Log.d(TAG + ".onLoaderReset(...)", "");
+        ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
+    }
+
+    @Override public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Intent intent = activity.getIntent();
+        if(intent != null) {
+            String query = null;
+            if (Intent.ACTION_SEARCH.equals(intent)) {
+                query = intent.getStringExtra(SearchManager.QUERY);
+            }
+            Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
+                    " - query: " + query + " - activity: ");
+        }
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
@@ -230,55 +268,82 @@ public class TicketGridFragment extends Fragment implements
         }
     }
 
+    public class TicketListAdapter  extends CursorAdapter {
 
-    public static class TransactionVSLoader extends AsyncTaskLoader<List<TransactionVS>> {
+        private LayoutInflater inflater = null;
 
-
-        public TransactionVSLoader(AppContextVS contextVS) {
-            super(contextVS);
+        public TicketListAdapter(Context context, Cursor c, boolean autoRequery) {
+            super(context, c, autoRequery);
+            inflater = LayoutInflater.from(context);
         }
 
-        /**
-         * This is where the bulk of our work is done.  This function is
-         * called in a background thread and should generate a new set of
-         * data to be published by the loader.
-         */
-        @Override public List<TransactionVS> loadInBackground() {
-            // Retrieve all known applications.
-            List<TransactionVS> transactions = null;
-            return transactions;
+        @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+            return inflater.inflate(R.layout.row_ticket, viewGroup, false);
         }
 
+        @Override public void bindView(View view, Context context, Cursor cursor) {
+            if(cursor != null) {
+                byte[] serializedTicket = cursor.getBlob(cursor.getColumnIndex(
+                        TicketContentProvider.SERIALIZED_OBJECT_COL));
+                TicketVS ticket = (TicketVS) ObjectUtils.
+                        deSerializeObject(serializedTicket);
+                String weekLapseStr = cursor.getString(cursor.getColumnIndex(
+                        TicketContentProvider.WEEK_LAPSE_COL));
+                Date weekLapse = DateUtils.getDateFromDirPath(weekLapseStr);
+                Calendar weekLapseCalendar = Calendar.getInstance();
+                weekLapseCalendar.setTime(weekLapse);
+                LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
+                linearLayout.setBackgroundColor(Color.WHITE);
+                TextView date_data = (TextView)view.findViewById(R.id.date_data);
+                String dateData = getString(R.string.ticket_data_info_lbl,
+                        DateUtils.getLongDate_Es(ticket.getValidFrom()),
+                        DateUtils.getLongDate_Es(ticket.getValidTo()));
+                date_data.setText(DateUtils.getLongDate_Es(ticket.getValidFrom()));
 
-        /**
-         * Handles a request to start the Loader.
-         */
-        @Override protected void onStartLoading() {
-            forceLoad();
-        }
+                TextView ticket_state = (TextView) view.findViewById(R.id.ticket_state);
+                ticket_state.setText(ticket.getState().toString());
+                TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
+                week_lapse.setText(weekLapseStr);
 
-        /**
-         * Handles a request to stop the Loader.
-         */
-        @Override protected void onStopLoading() {
-            // Attempt to cancel the current load task if possible.
-            cancelLoad();
-        }
+                TextView amount = (TextView) view.findViewById(R.id.amount);
+                amount.setText(ticket.getAmount().toPlainString());
+                TextView currency = (TextView) view.findViewById(R.id.currency);
+                currency.setText(ticket.getCurrency().toString());
 
-        /**
-         * Handles a request to cancel a load.
-         */
-        @Override public void onCanceled(List<TransactionVS> transactions) {
-            super.onCanceled(transactions);
-        }
-
-        /**
-         * Handles a request to completely reset the Loader.
-         */
-        @Override protected void onReset() {
-            super.onReset();
-            onStopLoading();
+            }
         }
     }
 
+    @Override public void onStop() {
+        super.onStop();
+        Log.d(TAG + ".onStop()", " - onStop - ");
+    }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG + ".onDestroy()", "onDestroy");
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(ContextVS.OFFSET_KEY, offset);
+        Parcelable gridState = gridView.onSaveInstanceState();
+        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
+        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
+        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
+    }
+
+    @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
 }

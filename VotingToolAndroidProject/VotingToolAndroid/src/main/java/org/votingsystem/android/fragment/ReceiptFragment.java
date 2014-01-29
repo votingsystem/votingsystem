@@ -195,7 +195,7 @@ public class ReceiptFragment extends Fragment {
     }
 
     private void initReceiptScreen (ReceiptContainer receipt) {
-        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getType() + " - messageId: " +
+        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getTypeVS() + " - messageId: " +
             receipt.getMessageId());
         try {
             selectedReceiptSMIME = receipt.getReceipt();
@@ -208,7 +208,7 @@ public class ReceiptFragment extends Fragment {
 
     private void setActionBar() {
         if(selectedReceipt == null) return;
-        switch(selectedReceipt.getType()) {
+        switch(selectedReceipt.getTypeVS()) {
             case VOTEVS:
                 if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
@@ -227,7 +227,7 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.check_receipt);
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
-                    selectedReceipt.getType());
+                    selectedReceipt.getTypeVS());
         }
         if(selectedReceipt.getLocalId() < 0) {
             menu.removeItem(R.id.delete_receipt);
@@ -258,11 +258,6 @@ public class ReceiptFragment extends Fragment {
         if(selectedReceipt != null) outState.putSerializable(ContextVS.RECEIPT_KEY, selectedReceipt);
     }
 
-    @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "");
-        super.onStop();
-    }
-
     @Override public void onResume() {
         Log.d(TAG + ".onResume() ", "onResume");
         super.onResume();
@@ -279,7 +274,7 @@ public class ReceiptFragment extends Fragment {
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected receipt type:" +
-                selectedReceipt.getType());
+                selectedReceipt.getTypeVS());
         menuInflater.inflate(R.menu.receipt_fragment, menu);
         this.menu = menu;
         setActionBar();
@@ -320,7 +315,7 @@ public class ReceiptFragment extends Fragment {
                 ContentValues values = new ContentValues();
                 values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
                         ObjectUtils.serializeObject(selectedReceipt));
-                values.put(ReceiptContentProvider.TYPE_COL, selectedReceipt.getType().toString());
+                values.put(ReceiptContentProvider.TYPE_COL, selectedReceipt.getTypeVS().toString());
                 values.put(ReceiptContentProvider.URL_COL, selectedReceipt.getMessageId());
                 values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
                 Uri uri = getActivity().getContentResolver().insert(
@@ -455,7 +450,7 @@ public class ReceiptFragment extends Fragment {
     public String getReceiptContentFormatted(ReceiptContainer selectedReceipt) {
         String result = null;
         try {
-            switch(selectedReceipt.getType()) {
+            switch(selectedReceipt.getTypeVS()) {
                 case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_REPRESENTATIVE_REQUEST:
                     JSONObject dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());

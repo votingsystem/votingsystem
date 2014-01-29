@@ -138,7 +138,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.transactionvs_grid_fragment, container, false);
+        rootView = inflater.inflate(R.layout.generic_grid_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new TransactionVSListAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);

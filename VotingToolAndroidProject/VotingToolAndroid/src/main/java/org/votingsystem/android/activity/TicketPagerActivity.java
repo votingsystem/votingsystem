@@ -45,6 +45,7 @@ public class TicketPagerActivity extends ActionBarActivity {
         cursor.moveToPosition(cursorPosition);
         mViewPager.setCurrentItem(cursorPosition);
         getSupportActionBar().setLogo(R.drawable.euro_32);
+        getSupportActionBar().setTitle(getString(R.string.ticket_lbl));
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {

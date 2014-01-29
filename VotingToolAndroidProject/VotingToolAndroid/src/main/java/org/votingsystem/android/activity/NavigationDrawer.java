@@ -38,6 +38,7 @@ import android.widget.ExpandableListView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
+import org.votingsystem.android.fragment.TicketGridFragment;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
@@ -265,6 +266,11 @@ public class NavigationDrawer extends ActionBarActivity {
             case R.id.close_app:
                 finish();
                 System.exit(0);
+                return true;
+            case R.id.open_ticket_grid:
+                Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, TicketGridFragment.class.getName());
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

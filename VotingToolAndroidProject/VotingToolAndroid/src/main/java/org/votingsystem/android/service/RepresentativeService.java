@@ -274,7 +274,7 @@ public class RepresentativeService extends IntentService {
                     ContentValues values = new ContentValues();
                     values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(anonymousDelegation));
                     values.put(ReceiptContentProvider.URL_COL, anonymousDelegation.getMessageId());
-                    values.put(ReceiptContentProvider.TYPE_COL, anonymousDelegation.getType().toString());
+                    values.put(ReceiptContentProvider.TYPE_COL, anonymousDelegation.getTypeVS().toString());
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
                     Uri uri = getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
                     responseVS.setUri(uri);

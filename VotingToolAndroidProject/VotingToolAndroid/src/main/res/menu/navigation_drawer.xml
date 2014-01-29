@@ -22,6 +22,15 @@
             android:title="@string/publish_document_lbl"/>
     </group>
 
+
+    <group android:id="@+id/dev_items">
+        <item android:id="@+id/open_ticket_grid"
+            android:orderInCategory="1"
+            android:showAsAction="never"
+            android:icon="@android:drawable/btn_plus"
+            android:title="@string/open_ticket_grid_menu"/>
+    </group>
+
     <item
         android:id="@+id/close_app"
         android:orderInCategory="4"

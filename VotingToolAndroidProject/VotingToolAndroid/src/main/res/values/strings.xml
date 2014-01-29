@@ -404,5 +404,10 @@
         <b>Nombre:</b> %2$s]]></string>
     <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>Justificante</a>]]></string>
     <string name="ticket_cancellation_msg_subject">Cancelación de Ticket</string>
+    <string name="open_ticket_grid_menu">Ver Tickets</string>
+    <string name="cert_info_lbl">Datos del certificado</string>
+    <string name="ticket_cert_caption">Datos del certificado del Ticket</string>
+    <string name="cancel_ticket_lbl">Cancelar Ticket</string>
+    <string name="ticket_data_info_lbl">Válido desde %1$s hasta %2$s</string>
 
 </resources>

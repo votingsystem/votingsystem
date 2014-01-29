@@ -58,7 +58,6 @@ public class VoteVS extends ReceiptContainer {
     private String hashAccessRequestBase64;
     private Date dateCreated;
     private Date dateUpdated;
-    private TypeVS type;
     private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
 
     public VoteVS () {}
@@ -225,14 +224,6 @@ public class VoteVS extends ReceiptContainer {
 
     @Override public String getSubject() {
         return eventVS.getSubject();
-    }
-
-    @Override public TypeVS getType() {
-        return type;
-    }
-
-    public void setType(TypeVS type) {
-        this.type = type;
     }
 
 	public byte[] getEncryptedKey() {
@@ -415,7 +406,7 @@ public class VoteVS extends ReceiptContainer {
     }
 
     public SMIMEMessageWrapper getReceipt() {
-        switch(type) {
+        switch(getTypeVS()) {
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
                 return cancelVoteReceipt;

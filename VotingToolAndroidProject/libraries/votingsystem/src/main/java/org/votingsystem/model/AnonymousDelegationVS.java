@@ -57,14 +57,11 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive);
+        setTypeVS(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
     }
 
     @Override public String getSubject() {
         return null;
-    }
-
-    @Override public TypeVS getType() {
-        return TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
     }
 
     public void setType(TypeVS type) {

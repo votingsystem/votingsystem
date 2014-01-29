@@ -242,10 +242,10 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     public void saveVote() {
         Log.d(TAG + ".saveVote(...)", "");
         ContentValues values = new ContentValues();
-        vote.setType(TypeVS.VOTEVS);
+        vote.setTypeVS(TypeVS.VOTEVS);
         values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(vote));
         values.put(ReceiptContentProvider.URL_COL, vote.getMessageId());
-        values.put(ReceiptContentProvider.TYPE_COL, vote.getType().toString());
+        values.put(ReceiptContentProvider.TYPE_COL, vote.getTypeVS().toString());
         values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
         Uri uri = getActivity().getContentResolver().insert(ReceiptContentProvider.CONTENT_URI, values);
         Log.d(TAG + ".saveVote(...)", "uri: " + uri.toString());

@@ -152,6 +152,16 @@ public class CertificationRequestVS implements java.io.Serializable {
     }
 
     public X509Certificate getCertificate() {
+        if(certificate == null && signedCsr != null) {
+            try {
+                Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
+                Log.d(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
+                if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
+                certificate = certificates.iterator().next();
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         return certificate;
     }
 

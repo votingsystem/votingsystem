@@ -35,7 +35,7 @@ public class ReceiptContainer implements Serializable {
 
 
     public String getTypeDescription(Context context) {
-        switch(getType()) {
+        switch(getTypeVS()) {
             case VOTEVS:
                 return context.getString(R.string.receipt_vote_subtitle);
             case CANCEL_VOTE:
@@ -50,7 +50,7 @@ public class ReceiptContainer implements Serializable {
     }
 
     public int getLogoId() {
-        switch(getType()) {
+        switch(getTypeVS()) {
             case VOTEVS:
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
@@ -102,8 +102,12 @@ public class ReceiptContainer implements Serializable {
         return subject;
     }
 
-    public TypeVS getType() {
+    public TypeVS getTypeVS() {
         return typeVS;
+    }
+
+    public void setTypeVS(TypeVS typeVS) {
+        this.typeVS = typeVS;
     }
 
     public Date getValidFrom() {

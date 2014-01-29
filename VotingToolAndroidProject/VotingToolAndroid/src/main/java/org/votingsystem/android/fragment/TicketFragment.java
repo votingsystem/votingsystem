@@ -3,6 +3,7 @@ package org.votingsystem.android.fragment;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -28,16 +29,24 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.CertRequestActivity;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
+import java.security.cert.X509Certificate;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
 
 /**
  * @author jgzornoza
@@ -71,12 +80,10 @@ public class TicketFragment extends Fragment {
         }
     };
 
-
     private AppContextVS contextVS;
-    private ReceiptContainer selectedTicket;
+    private TicketVS selectedTicket;
     private View progressContainer;
     private FrameLayout mainLayout;
-    private Menu menu;
     private TextView ticketSubject;
     private TextView ticket_content;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
@@ -92,17 +99,8 @@ public class TicketFragment extends Fragment {
         return fragment;
     }
 
-    public static Fragment newInstance(String ticketURL, TypeVS type) {
-        TicketFragment fragment = new TicketFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ContextVS.TYPEVS_KEY, type);
-        args.putString(ContextVS.URL_KEY, ticketURL);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+               Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
@@ -119,94 +117,45 @@ public class TicketFragment extends Fragment {
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
-        return rootView;
-    }
-
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        String ticketURL = getArguments().getString(ContextVS.URL_KEY);
         if(savedInstanceState != null) {
-            selectedTicket = (ReceiptContainer) savedInstanceState.getSerializable(
+            selectedTicket = (TicketVS) savedInstanceState.getSerializable(
                     ContextVS.RECEIPT_KEY);
             initTicketScreen(selectedTicket);
         } else {
-            if(ticketURL != null) {
-                selectedTicket = new ReceiptContainer(type, ticketURL);
-                String selection = TicketContentProvider.URL_COL + "=? ";
-                String[] selectionArgs = new String[]{ticketURL};
-                Cursor cursor = getActivity().getContentResolver().query(
-                        TicketContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
-                if(cursor.getCount() > 0 ) {
-                    cursor.moveToFirst();
-                    byte[] serializedTicketContainer = cursor.getBlob(cursor.getColumnIndex(
-                            TicketContentProvider.SERIALIZED_OBJECT_COL));
-                    Long ticketId = cursor.getLong(cursor.getColumnIndex(TicketContentProvider.ID_COL));
-                    try {
-                        selectedTicket = (ReceiptContainer) ObjectUtils.
-                                deSerializeObject(serializedTicketContainer);
-                        selectedTicket.setLocalId(ticketId);
-                        initTicketScreen(selectedTicket);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                } else {
-                    TicketDownloader getDataTask = new TicketDownloader();
-                    getDataTask.execute(ticketURL);
-                }
-            } else {
-                int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-                Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
-                        TicketContentProvider.CONTENT_URI, null, null, null, null);
-                cursor.moveToPosition(cursorPosition);
-                byte[] serializedTicketContainer = cursor.getBlob(cursor.getColumnIndex(
-                        TicketContentProvider.SERIALIZED_OBJECT_COL));
-                Long ticketId = cursor.getLong(cursor.getColumnIndex(TicketContentProvider.ID_COL));
-                try {
-                    selectedTicket = (ReceiptContainer) ObjectUtils.
-                            deSerializeObject(serializedTicketContainer);
-                    selectedTicket.setLocalId(ticketId);
-                    initTicketScreen(selectedTicket);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+            Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
+                    TicketContentProvider.CONTENT_URI, null, null, null, null);
+            cursor.moveToPosition(cursorPosition);
+            byte[] serializedTicketContainer = cursor.getBlob(cursor.getColumnIndex(
+                    TicketContentProvider.SERIALIZED_OBJECT_COL));
+            Long ticketId = cursor.getLong(cursor.getColumnIndex(TicketContentProvider.ID_COL));
+            try {
+                selectedTicket = (TicketVS) ObjectUtils.deSerializeObject(serializedTicketContainer);
+                selectedTicket.setLocalId(ticketId);
+                initTicketScreen(selectedTicket);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
+        return rootView;
     }
 
-    private void initTicketScreen (ReceiptContainer ticket) {
-        Log.d(TAG + ".initTicketScreen(...)", "type: " + ticket.getType() + " - messageId: " +
+
+    private void initTicketScreen (TicketVS ticket) {
+        Log.d(TAG + ".initTicketScreen(...)", "type: " + ticket.getTypeVS() + " - messageId: " +
             ticket.getMessageId());
         try {
             selectedTicketSMIME = ticket.getReceipt();
-            ticketSubject.setText(getString(R.string.smime_subject_msg, selectedTicket.getSubject()));
-            ticket_content.setText(Html.fromHtml(getTicketContentFormatted(selectedTicket)));
+            if(selectedTicket != null) {
+                ticketSubject.setText("ID: " + selectedTicket.getLocalId() +
+                        " - State: " + selectedTicket.getState() +
+                        " - Subject: " + selectedTicket.getSubject());
+                if(selectedTicket.getReceipt() != null)
+                    ticket_content.setText(Html.fromHtml(getTicketContentFormatted(selectedTicket)));
+            }
         } catch(Exception ex) {
             ex.printStackTrace();
         }
     }
-
-    private void setActionBar() {
-        if(selectedTicket == null) return;
-        switch(selectedTicket.getType()) {
-
-        }
-        if(selectedTicket.getLocalId() < 0) {
-            menu.removeItem(R.id.delete_ticket);
-        } else menu.removeItem(R.id.save_ticket);
-        if(getActivity() instanceof ActionBarActivity) {
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.ticket_lbl));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                    selectedTicket.getTypeDescription(getActivity()));
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(R.drawable.euro_32);
-        }
-    }
-
-    @Override public void onStart() {
-        Log.d(TAG + ".onStart(...) ", "");
-        super.onStart();
-    }
-
 
     @Override public void onDestroy() {
         Log.d(TAG + ".onDestroy()", "");
@@ -220,10 +169,6 @@ public class TicketFragment extends Fragment {
         if(selectedTicket != null) outState.putSerializable(ContextVS.RECEIPT_KEY, selectedTicket);
     }
 
-    @Override public void onStop() {
-        Log.d(TAG + ".onStop()", "");
-        super.onStop();
-    }
 
     @Override public void onResume() {
         Log.d(TAG + ".onResume() ", "onResume");
@@ -240,21 +185,69 @@ public class TicketFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected ticket type:" +
-                selectedTicket.getType());
+        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected ticket type:" + selectedTicket.getTypeVS());
         menuInflater.inflate(R.menu.ticket_fragment, menu);
-        this.menu = menu;
-        setActionBar();
+        try {
+            if(selectedTicket.getReceipt() == null) {
+                menu.removeItem(R.id.show_timestamp_info);
+                menu.removeItem(R.id.share_ticket);
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         AlertDialog dialog = null;
-        switch (item.getItemId()) {
+        try {
+            switch (item.getItemId()) {
+                case android.R.id.home:
+                    getActivity().onBackPressed();
+                    return true;
+                case R.id.cert_info:
+                    X509Certificate certificate = selectedTicket.getCertificationRequest().getCertificate();
+                    String userCertInfo = getActivity().getString(R.string.cert_info_formated_msg,
+                            certificate.getSubjectDN().toString(),
+                            certificate.getIssuerDN().toString(),
+                            certificate.getSerialNumber().toString(),
+                            DateUtils.getDate_Es(certificate.getNotBefore()),
+                            DateUtils.getDate_Es(certificate.getNotAfter()));
+                    dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.
+                            ticket_cert_caption)).setMessage(Html.fromHtml(userCertInfo)).show();
+                    break;
+                case R.id.show_timestamp_info:
+                    TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
+                            selectedTicket.getReceipt().getSigner().getTimeStampToken(),
+                            getActivity().getApplicationContext());
+                    newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
+                    break;
+                case R.id.cancel_ticket:
 
+                    break;
+                case R.id.share_ticket:
+                    try {
+                        Intent sendIntent = new Intent();
+                        String receiptStr = new String(selectedTicket.getReceipt().getBytes());
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
+                        sendIntent.setType(ContentTypeVS.TEXT.getName());
+                        startActivity(sendIntent);
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    break;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void setActionBar() {
+        Log.d(TAG + ".setActionBar() ", "");
+    }
+
 
     private void showMessage(Integer statusCode,String caption,String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
@@ -341,7 +334,9 @@ public class TicketFragment extends Fragment {
     public String getTicketContentFormatted(ReceiptContainer selectedTicket) {
         String result = null;
         try {
-            switch(selectedTicket.getType()) {
+            switch(selectedTicket.getTypeVS()) {
+                default:
+                    return selectedTicket.getReceipt().getSignedContent();
             }
         } catch(Exception ex) {
             ex.printStackTrace();
