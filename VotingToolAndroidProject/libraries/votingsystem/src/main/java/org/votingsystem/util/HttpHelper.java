@@ -121,13 +121,8 @@ public class HttpHelper {
             httpPost.setEntity(reqEntity);
             httpPost.setEntity(reqEntity);
             response = httpclient.execute(httpPost);
-            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),responseBytes);
-            } else {
-                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
-            }
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
+                    EntityUtils.toByteArray(response.getEntity()));
             Header header = response.getFirstHeader("Content-Type");
             if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
             Log.d(TAG + ".sendData(...)" ,"----------------------------------------");

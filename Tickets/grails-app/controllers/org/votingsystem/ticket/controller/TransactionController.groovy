@@ -36,8 +36,10 @@ class TransactionController {
         if(!params.requestBytes) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        TicketVSBatchRequest batchRequest = new TicketVSBatchRequest(state:BatchRequest.State.OK,
-                content:params.requestBytes).save()
+        TicketVSBatchRequest batchRequest;
+        TicketVSBatchRequest.withTransaction {
+            batchRequest = new TicketVSBatchRequest(state:BatchRequest.State.OK, content:params.requestBytes).save()
+        }
         def requestJSON = JSON.parse(new String(params.requestBytes, "UTF-8"))
         byte[] decodedPK = Base64.decode(requestJSON.publicKey);
         PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
@@ -78,11 +80,14 @@ class TransactionController {
             }
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                    cancelTicketBatchRequest(responseList, batchRequest, TypeVS.TICKET_BATCH_WITH_ITEMS_REPEATED,
+                            responseVS.data.message)
                     cancelTicketBatchDeposit(depositResponseList, batchRequest,TypeVS.TICKET_BATCH_WITH_ITEMS_REPEATED,
                             responseVS.data.message)
                     return [receiverPublicKey:receiverPublic, responseVS:responseVS];
                 } else {
                     String msg = message(code: "ticketBatchErrorMsg") + " ${responseVS.getMessage()}"
+                    cancelTicketBatchRequest(responseList, batchRequest, TypeVS.TICKET_BATCH_ERROR, msg)
                     cancelTicketBatchDeposit(depositResponseList, batchRequest,TypeVS.TICKET_BATCH_ERROR, msg)
                     return [receiverPublicKey:receiverPublic,  responseVS:new ResponseVS(
                             statusCode:responseVS.getStatusCode(), type:TypeVS.TICKET_BATCH_ERROR,
@@ -91,7 +96,8 @@ class TransactionController {
             } else {
                 List<String> ticketReceiptList = new ArrayList<String>()
                 for(ResponseVS response: depositResponseList) {
-                    ticketReceiptList.add(new String(Base64.encode(((MessageSMIME)response.getData()).content)))
+                    //Map dataMap = [ticketReceipt:messageSMIMEResp, ticket:ticket]
+                    ticketReceiptList.add(new String(Base64.encode(((MessageSMIME)response.getData().ticketReceipt).content)))
                 }
                 Map responseMap = [tickets:ticketReceiptList]
                 byte[] responseBytes = "${responseMap as JSON}".getBytes()

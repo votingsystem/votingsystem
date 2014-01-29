@@ -30,7 +30,7 @@ public class MessageSMIME implements Serializable {
     @Column(name="content") @Lob private byte[] content;
     
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;cd
+    @JoinColumn(name="userVS") private UserVS userVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventVS") private EventVS eventVS;

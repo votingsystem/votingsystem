@@ -458,6 +458,8 @@ class  SignatureVSService {
                 default:
                     certValidationResponse = validateSMIME(smimeMessageReq, locale);
             }
+            TypeVS typeVS = TypeVS.OK;
+            if(contenType && ContentTypeVS.TICKET == contenType) typeVS = TypeVS.TICKET;
             MessageSMIME messageSMIME
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
                 messageSMIME = new MessageSMIME(metaInf:certValidationResponse.message, type:TypeVS.ERROR,
@@ -470,7 +472,7 @@ class  SignatureVSService {
                 messageSMIME = new MessageSMIME(signers:certValidationResponse.data?.checkedSigners,
                         anonymousSigner:certValidationResponse.data?.anonymousSigner,
                         userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
-                        eventVS:certValidationResponse.eventVS, type:TypeVS.OK,
+                        eventVS:certValidationResponse.eventVS, type:typeVS,
                         content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr())
                 MessageSMIME.withTransaction {messageSMIME.save()}
             }

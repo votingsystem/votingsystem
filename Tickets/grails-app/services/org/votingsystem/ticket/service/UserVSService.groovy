@@ -19,7 +19,7 @@ class UserVSService {
         log.debug("init")
         systemUser = UserVS.findWhere(type:UserVS.Type.SYSTEM)
         if(!systemUser) {
-            systemUser = new UserVS(IBAN:"SystemIBAN-AA-BBBB-CCCC", nif:"SYSTEM_NIF", type:UserVS.Type.SYSTEM,
+            systemUser = new UserVS(IBAN:"GR16 0110 1250 0000 0001 2300 695", nif:"SYSTEM_NIF", type:UserVS.Type.SYSTEM,
                 firstName: "SYSTEM", lastName: "SYSTEM").save()
         }
     }

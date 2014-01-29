@@ -118,26 +118,37 @@ public class TicketService extends IntentService {
         }
     }
 
-    private ResponseVS cancelTickets(Collection<TicketVS> sendedTickets) {
+    private ResponseVS cancelTickets(Collection<TicketVS> sendedTickets, String pin) {
+        TicketServer ticketServer = contextVS.getTicketServer();
         ResponseVS responseVS = null;
-        String message = null;
-        String caption = null;
-        Integer iconId = R.drawable.cancel_22;
         try {
+            List<String> cancellationList = new ArrayList<String>();
             for(TicketVS ticket : sendedTickets) {
-                Map dataToSend = new HashMap();
-                //ticket.getOriginHashCertVS()
+                Map ticketCancellationDataMap = new HashMap();
+                ticketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
+                ticketCancellationDataMap.put("typeVS", TypeVS.TICKET_CANCELLATION);
+                ticketCancellationDataMap.put("hashCertVSBase64", ticket.getHashCertVSBase64());
+                ticketCancellationDataMap.put("originHashCertVS", ticket.getOriginHashCertVS());
+                ticketCancellationDataMap.put("ticketCertSerialNumber", ticket.getCertificationRequest().
+                        getCertificate().getSerialNumber().longValue());
+                String textToSing = new JSONObject(ticketCancellationDataMap).toString();
+                responseVS = contextVS.signMessage(ticketServer.getNameNormalized(), textToSing,
+                        getString(R.string.ticket_cancellation_msg_subject), pin);
+                cancellationList.add(new String(Base64.encode(responseVS.getSmimeMessage().getBytes())));
             }
+            Map requestMap = new HashMap();
+            requestMap.put("ticketCancellationList", cancellationList);
+            byte[] messageToSend = Encryptor.encryptToCMS(new JSONObject(requestMap).toString().getBytes(),
+                    ticketServer.getCertificate());
+            responseVS = HttpHelper.sendData(messageToSend, ContentTypeVS.JSON_ENCRYPTED,
+                    ticketServer.getTicketBatchCancellationServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
-            message = ex.getMessage();
+            String message = ex.getMessage();
             if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     message);
         } finally {
-            responseVS.setIconId(iconId);
-            responseVS.setCaption(caption);
-            responseVS.setNotificationMessage(message);
             return responseVS;
         }
     }
@@ -228,14 +239,14 @@ public class TicketService extends IntentService {
             responseVS.setNotificationMessage(tex.getMessage());
         } catch(Exception ex) {
             ex.printStackTrace();
-            cancelTickets(sendedTicketsMap.values());
+            cancelTickets(sendedTicketsMap.values(), pin);
             message = ex.getMessage();
             if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     message);
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                cancelTickets(sendedTicketsMap.values());
+                cancelTickets(sendedTicketsMap.values(), pin);
                 caption = getString(R.string.ticket_send_error_caption);
                 message = getString(R.string.ticket_send_error_msg, responseVS.getMessage());
             } else {

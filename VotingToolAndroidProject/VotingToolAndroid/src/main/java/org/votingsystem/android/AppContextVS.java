@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
 
+import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.model.AccessControlVS;
@@ -18,17 +19,23 @@ import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.TicketVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,11 +50,14 @@ import java.util.Set;
 
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
+import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PROVIDER;
+import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.STATE_KEY;
 import static org.votingsystem.model.ContextVS.State;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.USER_DATA_FILE_NAME;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
@@ -280,6 +290,46 @@ public class AppContextVS extends Application {
             values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, getCurrentWeekLapseId());
             getContentResolver().insert(TicketContentProvider.CONTENT_URI, values);
         }
+    }
+
+    public ResponseVS signMessage(String toUser, String textToSign, String subject, String pin) {
+        ResponseVS responseVS = null;
+        try {
+            FileInputStream fis = openFileInput(KEY_STORE_FILE);
+            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+            String userVS = getUserVS().getNif();
+            Log.d(TAG + ".signMessage(...) ", "subject: " + subject);
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
+                    keyStoreBytes, USER_CERT_ALIAS, pin.toCharArray(), SIGNATURE_ALGORITHM);
+            SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS, toUser,
+                    textToSign, subject);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
+                    (AppContextVS)getApplicationContext());
+            responseVS = timeStamper.call();
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),message);
+        } finally {
+            return responseVS;
+        }
+    }
+
+    public boolean checkPin(String pin) {
+        try {
+            FileInputStream fis = openFileInput(KEY_STORE_FILE);
+            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
+                    keyStoreBytes, pin.toCharArray());
+            return true;
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
     }
 
     public void setControlCenter(ControlCenterVS controlCenter) {

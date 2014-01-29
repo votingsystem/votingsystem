@@ -403,5 +403,6 @@
     <string name="transactionvs_to_user_lbl"><![CDATA[Usuario <b>receptor</b>:<br/><b>NIF:</b> %1$s <br/>
         <b>Nombre:</b> %2$s]]></string>
     <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>Justificante</a>]]></string>
+    <string name="ticket_cancellation_msg_subject">Cancelación de Ticket</string>
 
 </resources>

@@ -21,9 +21,8 @@
 	</body>
 	<r:script>
 
-
         function initTransaction(transactionSubject) {
-            var encodedIBAN = encodeURIComponent("ESkk bbbb gggg xxcc cccc cccc")
+            var encodedIBAN = encodeURIComponent("GR16 0110 1250 0000 0001 2300 695")
             var encodedSubject = encodeURIComponent(transactionSubject)
             var encodedReceptor = encodeURIComponent('<g:message code="receptorTestWebAccountLbl"/>')
             var uriData = "${createLink(controller:'app', action:'androidClient')}?operation=TRANSACTION&amount=20&currency=Euro&" +

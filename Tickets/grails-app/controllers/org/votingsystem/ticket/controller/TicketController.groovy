@@ -24,6 +24,17 @@ class TicketController {
         //check id cancellation data is ok and increment user account with the cancelled amount
     }
 
+    /*
+                    ticketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
+                ticketCancellationDataMap.put("hashCertVSBase64", ticket.getHashCertVSBase64());
+                ticketCancellationDataMap.put("originHashCertVS", ticket.getOriginHashCertVS());
+                ticketCancellationDataMap.put("ticketCertSerialNumber", ticket.getCertificationRequest().
+     */
+    def cancelBatch () {
+        //Update Ticket data
+        //Increment user account
+    }
+
     /**
      * Servicio que valida las solicitudes de tickets de los usuarios.
      *
