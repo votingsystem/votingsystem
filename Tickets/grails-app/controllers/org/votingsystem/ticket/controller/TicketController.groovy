@@ -21,15 +21,15 @@ class TicketController {
 
 
     def cancel() {
-        //check id cancellation data is ok and increment user account with the cancelled amount
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+        if(!messageSMIMEReq) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        }
+        ResponseVS responseVS = ticketService.cancelTicket(messageSMIMEReq, request.getLocale())
+        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }
 
-    /*
-                    ticketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
-                ticketCancellationDataMap.put("hashCertVSBase64", ticket.getHashCertVSBase64());
-                ticketCancellationDataMap.put("originHashCertVS", ticket.getOriginHashCertVS());
-                ticketCancellationDataMap.put("ticketCertSerialNumber", ticket.getCertificationRequest().
-     */
+
     def cancelBatch () {
         //Update Ticket data
         //Increment user account

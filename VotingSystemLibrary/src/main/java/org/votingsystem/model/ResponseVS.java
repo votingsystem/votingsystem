@@ -40,6 +40,7 @@ public class ResponseVS<T> implements Serializable {
     private Integer statusCode;
     private StatusVS<?> status;
     private String message;
+    private String reason;
     private SMIMEMessageWrapper smimeMessage;
     private EventVS eventVS;
     private T data;
@@ -198,4 +199,13 @@ public class ResponseVS<T> implements Serializable {
     public void setContentType(ContentTypeVS contentType) {
         this.contentType = contentType;
     }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
 }

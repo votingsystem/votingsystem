@@ -24,13 +24,8 @@ class TestingController {
 
     def accounts() {}
 
-    def index() {
-        SimpleDateFormat formatter = new SimpleDateFormat("EEEE dd/MMM/yyyy HH:mm");
-        render formatter.format(Calendar.getInstance().getTime());
-        return false
-    }
 
-    def index1() {
+    def index() {
         Date selectedDate = null
         Calendar calendar = Calendar.getInstance()
         if(params.year && params.month && params.day) {
@@ -40,7 +35,7 @@ class TestingController {
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
         } else calendar = DateUtils.getMonday(calendar)
 
-        UserVS userVS = UserVS.get(2)
+        UserVS userVS = UserVS.get(4)
 
 
         //Calendar calendar = Calendar.getInstance();

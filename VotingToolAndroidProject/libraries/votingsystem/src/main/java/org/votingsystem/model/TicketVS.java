@@ -32,13 +32,16 @@ public class TicketVS extends ReceiptContainer {
     private Long localId = -1L;
     private TransactionVS transaction;
     private transient SMIMEMessageWrapper receipt;
+    private transient SMIMEMessageWrapper cancellationReceipt;
     private CertificationRequestVS certificationRequest;
     private byte[] receiptBytes;
+    private byte[] cancellationReceiptBytes;
     private String originHashCertVS;
     private String hashCertVSBase64;
     private BigDecimal amount;
     private String subject;
     private State state;
+    private Date cancellationDate;
     private CurrencyVS currency;
     private String url;
     private String ticketServerURL;
@@ -102,14 +105,45 @@ public class TicketVS extends ReceiptContainer {
         return receipt;
     }
 
+    public SMIMEMessageWrapper getCancellationReceipt() throws Exception {
+        if(cancellationReceipt == null && cancellationReceiptBytes != null) cancellationReceipt =
+                new SMIMEMessageWrapper(null, new ByteArrayInputStream(cancellationReceiptBytes), null);
+        return cancellationReceipt;
+    }
+
     public void setReceiptBytes(byte[] receiptBytes) {
         this.receiptBytes = receiptBytes;
+    }
+
+    public void setCancellationReceiptBytes(byte[] receiptBytes) {
+        this.cancellationReceiptBytes = receiptBytes;
+    }
+
+    public void setCancellationReceipt(SMIMEMessageWrapper receipt) {
+        try {
+            this.cancellationReceiptBytes = receipt.getBytes();
+            this.cancellationReceipt = receipt;
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public Date getCancellationDate() {
+        try {
+            if(cancellationDate == null && getCancellationReceipt() != null)
+                cancellationDate = getCancellationReceipt().getSigner().getTimeStampToken().
+                        getTimeStampInfo().getGenTime();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return cancellationDate;
     }
 
     @Override public String getMessageId() {
         String result = null;
         try {
             SMIMEMessageWrapper receipt = getReceipt();
+            if(receipt == null) return null;
             String[] headers = receipt.getHeader("Message-ID");
             if(headers != null && headers.length >0) return headers[0];
         } catch(Exception ex) {

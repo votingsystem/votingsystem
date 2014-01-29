@@ -25,7 +25,7 @@ public class TransactionVS  implements Serializable {
 
     //Retirada efectivo, Ingreso en cuenta, Pago en Tickets
     public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION,
-        TICKET_PAYCHECK;}
+        TICKET_CANCELLATION, TICKET_PAYCHECK;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 

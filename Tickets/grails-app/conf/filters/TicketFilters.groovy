@@ -160,17 +160,12 @@ class TicketFilters {
                                 "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
                         messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
                         if(responseVS.type) messageSMIMEReq.type = responseVS.type
-                        if(ResponseVS.SC_OK != responseVS.statusCode) messageSMIMEReq.reason = responseVS.message
+                        messageSMIMEReq.setReason(responseVS.getReason())
                         messageSMIMEReq.save(flush:true)
                     }
                     log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"
                 }
                 if(!responseVS) return;
-                MessageSMIME messageSMIME = null
-                if(responseVS?.data instanceof MessageSMIME) {
-                    messageSMIME = responseVS?.data
-                    responseVS.setMessageBytes(messageSMIME.content)
-                }
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
@@ -181,44 +176,28 @@ class TicketFilters {
                             encryptResponse.setStatusCode(responseVS.getStatusCode())
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
-                        } else {
-                            messageSMIME.reason = encryptResponse.message
-                            messageSMIME.save()
-                            return printOutput(response, encryptResponse)
                         }
-                    case ContentTypeVS.JSON_ENCRYPTED:
-                        ResponseVS encryptResponse
-                        if(model.receiverPublicKey) {
-                            encryptResponse =  signatureVSService.encryptToCMS(
-                                    responseVS.getMessage().getBytes(), model.receiverPublicKey)
-                        } else if(model.receiverCert) {
-                            encryptResponse =  signatureVSService.encryptToCMS(
-                                    responseVS.getMessage().getBytes(), model.receiverCert)
-                        }
-                        if(ResponseVS.SC_OK == encryptResponse.statusCode) {
-                            encryptResponse.setStatusCode(responseVS.getStatusCode())
-                            encryptResponse.setContentType(responseVS.getContentType())
-                            return printOutputStream(response, encryptResponse)
-                        } else {
-                            messageSMIME.reason = encryptResponse.message
-                            messageSMIME.save()
-                            return printOutput(response, encryptResponse)
-                        }
-                        break;
                     case ContentTypeVS.JSON_SIGNED:
                     case ContentTypeVS.SIGNED:
                         if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)
                         else return printOutput(response, responseVS)
+                    case ContentTypeVS.JSON_ENCRYPTED:
+                    case ContentTypeVS.ENCRYPTED:
                     case ContentTypeVS.MULTIPART_ENCRYPTED:
+                        ResponseVS encryptResponse
                         if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
                             if(model.receiverPublicKey) {
-                                responseVS =  signatureVSService.encryptToCMS(
+                                encryptResponse =  signatureVSService.encryptToCMS(
                                         responseVS.messageBytes, model.receiverPublicKey)
                             } else if(model.receiverCert) {
-                                responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,model.receiverCert)
+                                encryptResponse = signatureVSService.encryptToCMS(
+                                        responseVS.messageBytes,model.receiverCert)
                             }
-                            responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
-                            if (ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response,responseVS)
+                            if(ResponseVS.SC_OK == encryptResponse.getStatusCode()) {
+                                encryptResponse.setStatusCode(responseVS.getStatusCode())
+                                encryptResponse.setContentType(responseVS.getContentType())
+                            }
+                            return printOutputStream(response, encryptResponse)
                         } else log.error("missing params - messageBytes && (receiverCert ||receiverPublicKey)")
                         return printOutput(response, responseVS)
                     case ContentTypeVS.HTML:

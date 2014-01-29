@@ -398,7 +398,7 @@
     <string name="transactionv_lbl">Transacción</string>
     <string name="transactionvs_lbl">Transacciones</string>
     <string name="transactionvs_formatted"><![CDATA[Fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$ss]]></string>
-    <string name="transactionvs_from_user_lbl"><![CDATA[Usuario <b>emisor</b>:<br/><b>NIF:</b> %1$s <br/>
+    <string name="transactionvs_from_user_lbl"><![CDATA[Usuario <b>emisor</b>:<br/><b>NIF:</b> %1$s<br/>
     <b>Nombre:</b> %2$s]]></string>
     <string name="transactionvs_to_user_lbl"><![CDATA[Usuario <b>receptor</b>:<br/><b>NIF:</b> %1$s <br/>
         <b>Nombre:</b> %2$s]]></string>
@@ -409,5 +409,9 @@
     <string name="ticket_cert_caption">Datos del certificado del Ticket</string>
     <string name="cancel_ticket_lbl">Cancelar Ticket</string>
     <string name="ticket_data_info_lbl">Válido desde %1$s hasta %2$s</string>
+    <string name="cancel_ticket_dialog_msg">Va a firmar una solicitud de cancelación de Ticket</string>
+    <string name="cancellation_date_lbl"><b>Fecha de cancelación:</b> %1$s</string>
+    <string name="ticket_cancellation_msg">El ticket se ha cancellado correctamente</string>
+    <string name="ticket_cancellation_error_msg_subject">Error cancelando Ticket</string>
 
 </resources>

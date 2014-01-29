@@ -104,7 +104,7 @@ class CsrService {
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
-                    message:messageSource.getMessage('ticketWithdrawalDataError', null, locale))
+                    message:messageSource.getMessage('ticketRequestDataError', null, locale))
         }
     }
 
@@ -144,7 +144,7 @@ class CsrService {
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.TICKET_REQUEST_ERROR,
-                    message:messageSource.getMessage('ticketWithdrawalDataError', null, locale))
+                    message:messageSource.getMessage('ticketRequestDataError', null, locale))
         }
     }
 

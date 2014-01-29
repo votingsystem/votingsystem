@@ -37,12 +37,18 @@ public class CurrencyData implements Serializable {
             else if(currencyVS != transaction.getCurrencyVS()) throw new Exception(
                     "Transaction List with mixed currencies " + currencyVS + ", " +
                     transaction.getCurrencyVS());
-            if(transaction.getType() == TransactionVS.Type.USER_INPUT) {
-                totalInputs = totalInputs.add(transaction.getAmount());
-            } else if(transaction.getType() == TransactionVS.Type.USER_OUTPUT) {
-                totalInputs = totalInputs.add(transaction.getAmount());
-            } else  Log.d(TAG + ".parse(..) ", "Unknown transaction type: " +
-                    transaction.getType().toString());
+            switch(transaction.getType()) {
+                case USER_INPUT:
+                case TICKET_CANCELLATION:
+                    totalInputs = totalInputs.add(transaction.getAmount());
+                    break;
+                case USER_OUTPUT:
+                    totalOutputs = totalOutputs.add(transaction.getAmount());
+                    break;
+                default:
+                    Log.d(TAG + ".parse(..) ", "Unknown transaction type: " +
+                            transaction.getType().toString());
+            }
         }
     }
 
@@ -115,12 +121,18 @@ public class CurrencyData implements Serializable {
             BigDecimal totalOutputsTransactions = new BigDecimal(0);
             for (int i = 0; i< jsonArray.length(); i++) {
                 TransactionVS transaction = TransactionVS.parse(jsonArray.getJSONObject(i));
-                if(transaction.getType() == TransactionVS.Type.USER_INPUT) {
-                    totalInputsTransactions = totalInputsTransactions.add(transaction.getAmount());
-                } else if(transaction.getType() == TransactionVS.Type.USER_OUTPUT) {
-                    totalOutputsTransactions = totalOutputsTransactions.add(transaction.getAmount());
-                } else  Log.d(TAG + ".parse(..) ", "Unknown transaction type: " +
-                        transaction.getType().toString());
+                switch(transaction.getType()) {
+                    case USER_INPUT:
+                    case TICKET_CANCELLATION:
+                        totalInputsTransactions = totalInputsTransactions.add(transaction.getAmount());
+                        break;
+                    case USER_OUTPUT:
+                        totalOutputsTransactions = totalOutputsTransactions.add(transaction.getAmount());
+                        break;
+                    default:
+                        Log.d(TAG + ".parse(..) ", "Unknown transaction type: " +
+                                transaction.getType().toString());
+                }
                 transactionList.add(transaction);
             }
             if(!totalInputs.equals(totalInputsTransactions)) {

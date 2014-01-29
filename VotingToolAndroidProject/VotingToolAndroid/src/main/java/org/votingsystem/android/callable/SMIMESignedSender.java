@@ -82,22 +82,19 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 messageToSend = Encryptor.encryptSMIME(smimeMessage, receiverCert);
             else messageToSend = smimeMessage.getBytes();
             responseVS  = HttpHelper.sendData(messageToSend, contentType, serviceURL);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                if(responseVS.getContentType() != null &&
-                        responseVS.getContentType().isEncrypted()) {
-                    KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-                    PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
-                    Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
-                    PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
-                    if(responseVS.getContentType().isSigned()) {
-                        SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
-                                responseVS.getMessageBytes(), publicKey, privateKey);
-                        responseVS.setSmimeMessage(signedMessage);
-                    } else {
-                        byte[] decryptedMessageBytes = Encryptor.decryptCMS(privateKey,
-                                responseVS.getMessageBytes());
-                        responseVS = new ResponseVS(ResponseVS.SC_OK, decryptedMessageBytes);
-                    }
+            if(responseVS.getContentType() != null && responseVS.getContentType().isEncrypted()) {
+                KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+                PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
+                Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
+                PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
+                if(responseVS.getContentType().isSigned()) {
+                    SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
+                            responseVS.getMessageBytes(), publicKey, privateKey);
+                    responseVS.setSmimeMessage(signedMessage);
+                } else {
+                    byte[] decryptedMessageBytes = Encryptor.decryptCMS(privateKey,
+                            responseVS.getMessageBytes());
+                    responseVS = new ResponseVS(ResponseVS.SC_OK, decryptedMessageBytes);
                 }
             }
         } catch(VotingSystemKeyStoreException ex) {

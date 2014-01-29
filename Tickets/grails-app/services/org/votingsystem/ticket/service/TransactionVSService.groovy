@@ -115,10 +115,11 @@ class TransactionVSService {
 
             def criteria = UserVS.createCriteria()
             def usersToDeposit = criteria.scroll { eq("type", UserVS.Type.USER) }
+            UserVS systemUser = UserVS.findWhere(type: UserVS.Type.SYSTEM)
             while (usersToDeposit.next()) {
                 UserVS userVS = (UserVS) usersToDeposit.get(0);
                 TransactionVS userTransaction = new TransactionVS(transactionParent:transactionParent, amount:userPart,
-                        subject:subject, fromUserVS: signer, toUserVS:userVS, currency:currency,
+                        subject:subject, fromUserVS: systemUser, toUserVS:userVS, currency:currency,
                         type:TransactionVS.Type.USER_INPUT).save()
                 if((usersToDeposit.getRowNumber() % 100) == 0) {
                     sessionFactory.currentSession.flush()
@@ -184,7 +185,10 @@ class TransactionVSService {
         def inputCriteria = TransactionVS.createCriteria()
         def userInputTransactions = inputCriteria.scroll {
             eq("toUserVS", userVS)
-            eq("type", TransactionVS.Type.USER_INPUT)
+            or {
+                eq("type", TransactionVS.Type.USER_INPUT)
+                eq("type", TransactionVS.Type.TICKET_CANCELLATION)
+            }
             ge("dateCreated", mondayLapse.getTime())
         }
 

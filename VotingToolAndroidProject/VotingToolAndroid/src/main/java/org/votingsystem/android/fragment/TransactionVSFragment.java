@@ -148,6 +148,8 @@ public class TransactionVSFragment extends Fragment {
     private void setActionBar() {
         if(selectedTransactionVS == null) return;
         switch(selectedTransactionVS.getType()) {
+            case TICKET_CANCELLATION:
+                break;
             case USER_INPUT:
                 //menu.removeItem(R.id.cancel_vote);
                 break;

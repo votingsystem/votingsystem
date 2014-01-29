@@ -242,10 +242,11 @@ public class AppContextVS extends Application {
 
     public CurrencyData getCurrencyData(CurrencyVS currency) {
         String selection = TicketContentProvider.WEEK_LAPSE_COL + " =? AND " +
+                TicketContentProvider.STATE_COL + " =? AND " +
                 TicketContentProvider.CURRENCY_COL + "= ? ";
         String weekLapseId = getCurrentWeekLapseId();
         Cursor cursor = getContentResolver().query(TicketContentProvider.CONTENT_URI,null, selection,
-                new String[]{weekLapseId, currency.toString()}, null);
+                new String[]{weekLapseId, TicketVS.State.OK.toString(), currency.toString()}, null);
         Log.d(TAG + ".getCurrencyData(...)", "TicketContentProvider - cursor.getCount(): " + cursor.getCount());
         List<TicketVS> ticketList = new ArrayList<TicketVS>();
         while(cursor.moveToNext()) {
@@ -278,18 +279,22 @@ public class AppContextVS extends Application {
         return DateUtils.getDirPath(currentLapseCalendar.getTime());
     }
 
-    public void updateTickets(Collection<TicketVS> tickets) {
+    public void insertTickets(Collection<TicketVS> tickets) {
         for(TicketVS ticketVS : tickets) {
-            ContentValues values = new ContentValues();
-            values.put(TicketContentProvider.SQL_INSERT_OR_REPLACE, true);
-            values.put(TicketContentProvider.AMOUNT_COL, ticketVS.getAmount().toPlainString());
-            values.put(TicketContentProvider.CURRENCY_COL, ticketVS.getCurrency().toString());
-            values.put(TicketContentProvider.STATE_COL, ticketVS.getState().toString());
-            values.put(TicketContentProvider.SERIALIZED_OBJECT_COL,
-                    ObjectUtils.serializeObject(ticketVS));
-            values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, getCurrentWeekLapseId());
-            getContentResolver().insert(TicketContentProvider.CONTENT_URI, values);
+            getContentResolver().insert(TicketContentProvider.CONTENT_URI,
+                    populateTicketContentValues(ticketVS));
         }
+    }
+
+    public ContentValues populateTicketContentValues(TicketVS ticketVS) {
+        ContentValues values = new ContentValues();
+        values.put(TicketContentProvider.AMOUNT_COL, ticketVS.getAmount().toPlainString());
+        values.put(TicketContentProvider.CURRENCY_COL, ticketVS.getCurrency().toString());
+        values.put(TicketContentProvider.STATE_COL, ticketVS.getState().toString());
+        values.put(TicketContentProvider.SERIALIZED_OBJECT_COL,
+                ObjectUtils.serializeObject(ticketVS));
+        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, getCurrentWeekLapseId());
+        return values;
     }
 
     public ResponseVS signMessage(String toUser, String textToSign, String subject, String pin) {

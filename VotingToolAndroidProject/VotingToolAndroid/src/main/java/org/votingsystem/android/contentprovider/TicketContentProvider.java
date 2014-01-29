@@ -22,9 +22,6 @@ public class TicketContentProvider extends ContentProvider {
 
     public static final String TAG = "TicketContentProvider";
 
-    //from http://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
-    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
-
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME       = "voting_system_ticket.db";
     private static final String TABLE_NAME    = "ticket";
@@ -110,11 +107,23 @@ public class TicketContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
         values.put(TicketContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-        int updateCount = database.update(TABLE_NAME, values,
-                whereClause, whereArgs);
+        int updateCount = 0;
+        switch (URI_MATCHER.match(uri)){
+            case ALL_ITEMS:
+                updateCount = database.update(TABLE_NAME, values, selection, selectionArgs);
+                break;
+            case SPECIFIC_ITEM:
+                updateCount = database.update(TABLE_NAME, values, ID_COL +
+                        " = " + uri.getPathSegments().get(1) +
+                        (!TextUtils.isEmpty(selection) ? " AND (" +
+                                selection + ')' : ""), selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri );
+        }
         // Notify any listeners and return the updated row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;
@@ -137,19 +146,7 @@ public class TicketContentProvider extends ContentProvider {
             boolean replace = false;
             values.put(TicketContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
             values.put(TicketContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-            if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
-                replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
-                // Clone the values object, so we don't modify the original.
-                // This is not strictly necessary, but depends on your needs
-                //values = new ContentValues( values );
-                // Remove the key, so we don't pass that on to db.insert() or db.replace()
-                values.remove( SQL_INSERT_OR_REPLACE );
-            }
-            if ( replace ) {
-                rowId = database.replace(TABLE_NAME, null, values);
-            } else {
-                rowId = database.insert(TABLE_NAME, null, values);
-            }
+            rowId = database.insert(TABLE_NAME, null, values);
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
         // Notify any listeners and return the URI of the new row.

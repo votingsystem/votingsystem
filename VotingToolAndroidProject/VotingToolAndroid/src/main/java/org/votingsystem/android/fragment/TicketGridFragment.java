@@ -285,6 +285,11 @@ public class TicketGridFragment extends Fragment
             if(cursor != null) {
                 byte[] serializedTicket = cursor.getBlob(cursor.getColumnIndex(
                         TicketContentProvider.SERIALIZED_OBJECT_COL));
+
+                Long ticketId = cursor.getLong(cursor.getColumnIndex(
+                        TicketContentProvider.ID_COL));
+
+
                 TicketVS ticket = (TicketVS) ObjectUtils.
                         deSerializeObject(serializedTicket);
                 String weekLapseStr = cursor.getString(cursor.getColumnIndex(
@@ -301,7 +306,7 @@ public class TicketGridFragment extends Fragment
                 date_data.setText(DateUtils.getLongDate_Es(ticket.getValidFrom()));
 
                 TextView ticket_state = (TextView) view.findViewById(R.id.ticket_state);
-                ticket_state.setText(ticket.getState().toString());
+                ticket_state.setText(ticket.getState().toString() + " - ID: " + ticketId);
                 TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
                 week_lapse.setText(weekLapseStr);
 

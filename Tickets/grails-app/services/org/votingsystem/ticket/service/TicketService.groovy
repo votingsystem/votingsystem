@@ -17,6 +17,7 @@ import org.votingsystem.model.ticket.TicketVS
 import org.votingsystem.model.ticket.TicketVSBatchRequest
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
@@ -34,13 +35,14 @@ class TicketService {
     def transactionVSService
     def grailsApplication
     def signatureVSService
+    def userVSService
 
 	public ResponseVS processRequest(MessageSMIME messageSMIMEReq, Locale locale) {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
-        String msg;
+        def dataRequestJSON
         try {
-            def dataRequestJSON = JSON.parse(smimeMessageReq.getSignedContent())
+            dataRequestJSON = JSON.parse(smimeMessageReq.getSignedContent())
             String ticketServerURL = StringUtils.checkURL(dataRequestJSON.serverURL)
             String serverURL = grailsApplication.config.grails.serverURL
             if(!serverURL.equals(ticketServerURL)) throw new ExceptionVS(messageSource.getMessage("serverMismatchErrorMsg",
@@ -84,7 +86,7 @@ class TicketService {
                     "ticketRequestAmountErrorMsg", [totalAmount, ticketsAmount].toArray(), locale));
 
             Map resultMap = [amount:totalAmount, currency:requestCurrency, userInfoMap:userInfoMap]
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.TICKET_REQUEST)
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.TICKET_REQUEST,)
         } catch(ExceptionVS ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(),
@@ -92,12 +94,71 @@ class TicketService {
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.TICKET_REQUEST_ERROR,
-                    message:messageSource.getMessage('ticketWithdrawalDataError', null, locale))
+                    message:messageSource.getMessage('ticketRequestDataError', null, locale))
         }
     }
 
-    public ResponseVS cancel(MessageSMIME messageSMIMEReq, Locale locale) {
-
+    public ResponseVS cancelTicket(MessageSMIME messageSMIMEReq, Locale locale) {
+        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        UserVS signer = messageSMIMEReq.userVS
+        try {
+            def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
+            if(TypeVS.TICKET_CANCEL != TypeVS.valueOf(requestJSON.operation))
+                throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
+                        [TypeVS.TICKET_CANCEL.toString(),requestJSON.operation ].toArray(), locale))
+            def hashCertVSBase64 = CMSUtils.getHashBase64(requestJSON.originHashCertVS, ContextVS.VOTING_DATA_DIGEST)
+            if(!hashCertVSBase64.equals(requestJSON.hashCertVSBase64))
+                throw new ExceptionVS(messageSource.getMessage("originHashErrorMsg", null, locale))
+            TicketVS ticket = TicketVS.findWhere(hashCertVS: requestJSON.hashCertVSBase64,
+                    serialNumber:Long.valueOf(requestJSON.ticketCertSerialNumber))
+            if(TicketVS.State.OK == ticket.getState()) {
+                String fromUser = grailsApplication.config.VotingSystem.serverName
+                String toUser = smimeMessageReq.getFrom().toString()
+                String subject = messageSource.getMessage('cancelTicketReceiptSubject', null, locale)
+                ticket.setState(TicketVS.State.CANCELLED)
+                SMIMEMessageWrapper receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                        smimeMessageReq, subject)
+                MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
+                        content:receipt.getBytes()).save()
+                ticket.cancelMessage = messageSMIMEReq
+                ticket.save()
+                TransactionVS transaction = new TransactionVS(amount: ticket.amount, messageSMIME:messageSMIMEReq,
+                        subject:subject, fromUserVS:userVSService.getSystemUser(), toUserVS:signer,
+                        currency:ticket.currency, type:TransactionVS.Type.TICKET_CANCELLATION, validTo:ticket.validTo).save()
+                log.debug("cancelTicket - ticket: ${ticket.id} - transactionVS: ${transaction.id}");
+                return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                        messageBytes: ticket.cancelMessage.content, type:TypeVS.TICKET_CANCEL)
+            } else {
+                log.error("cancelTicket - ERROR - request for cancel ticket: ${ticket.id} - with state: ${ticket.state}");
+                byte[] messageBytes
+                ContentTypeVS contentType = ContentTypeVS.ENCRYPTED
+                int statusCode = ResponseVS.SC_ERROR_REQUEST
+                //ResponseVS.
+                if(TicketVS.State.CANCELLED == ticket.getState()) {
+                    contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
+                    messageBytes = ticket.cancelMessage.content
+                } else if(TicketVS.State.EXPENDED == ticket.getState()) {
+                    contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
+                    messageBytes = ticket.messageSMIME.content
+                }
+                if(TicketVS.State.LAPSED == ticket.getState()) {
+                    contentType = ContentTypeVS.ENCRYPTED
+                    messageBytes = messageSource.getMessage("ticketLapsedErrorMsg",
+                            [ticket.serialNumber].toArray(), locale).getBytes()
+                }
+                return new ResponseVS(statusCode:statusCode, messageBytes: messageBytes, contentType: contentType,
+                        type:TypeVS.TICKET_CANCEL_ERROR)
+            }
+        } catch(ExceptionVS ex) {
+            log.error(ex.getMessage(), ex);
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, messageBytes: ex.getMessage().getBytes("UTF-8"),
+                    contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.TICKET_CANCEL_ERROR)
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.TICKET_CANCEL_ERROR, contentType:
+                    ContentTypeVS.ENCRYPTED, messageBytes: messageSource.getMessage(
+                    'ticketRequestDataError', null, locale).getBytes("UTF-8"))
+        }
     }
 
 
@@ -138,7 +199,7 @@ class TicketService {
                 Map dataMap = [message:messageSource.getMessage("tickedExpendedErrorMsg", null, locale),
                         messageSMIME:new String(ticket.messageSMIME.content, "UTF-8")]
                 resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
-                        type:TypeVS.TICKET_DEPOSIT_ERROR, message:"${dataMap as JSON}", data:dataMap,
+                        type:TypeVS.TICKET_DEPOSIT_ERROR, messageBytes: "${dataMap as JSON}".getBytes(), data:dataMap,
                         contentType:ContentTypeVS.JSON_ENCRYPTED)
             }
         } catch(ExceptionVS ex) {

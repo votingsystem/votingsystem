@@ -32,6 +32,9 @@ public class TicketServer extends ActorVS implements Serializable {
         return getServerURL() + "/ticket/cancelBatch";
     }
 
+    public String getTicketCancelServiceURL() {
+        return getServerURL() + "/ticket/cancel";
+    }
 
     public String getTicketBatchServiceURL() {
         return getServerURL() + "/transaction/ticketBatch";

@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
+import org.votingsystem.android.service.TicketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
@@ -56,39 +58,20 @@ public class TicketFragment extends Fragment {
 
     public static final String TAG = "TicketFragment";
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(pin != null) {
-
-            } else {
-                int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                        ResponseVS.SC_ERROR);
-                String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-                String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-                TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-                if(resultOperation == TypeVS.CANCEL_VOTE){
-                    if(ResponseVS.SC_OK == responseStatusCode) { }
-                    getActivity().onBackPressed();
-                }
-                showProgress(false, true);
-                showMessage(responseStatusCode, caption, message);
-            }
-        }
-    };
-
     private AppContextVS contextVS;
     private TicketVS selectedTicket;
     private View progressContainer;
     private FrameLayout mainLayout;
     private TextView ticketSubject;
     private TextView ticket_content;
+    private TextView ticket_cancellation_date;
+
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SMIMEMessageWrapper selectedTicketSMIME;
     private String broadCastId = null;
+    private String userCertInfo;
+    private Button cancel_button;
+    private int cursorPosition;
 
 
     public static Fragment newInstance(int cursorPosition) {
@@ -99,11 +82,44 @@ public class TicketFragment extends Fragment {
         return fragment;
     }
 
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                    "intent.getExtras(): " + intent.getExtras());
+            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            if(pin != null) launchTicketCancellation(pin);
+            else {
+                showProgress(false, true);
+                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage());
+            }
+        }
+    };
+
+    private void launchTicketCancellation(String pin) {
+        Log.d(TAG + ".launchTicketRequest(...) ", "");
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    TicketService.class);
+            startIntent.putExtra(ContextVS.PIN_KEY, pin);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_CANCEL);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.ITEM_ID_KEY, cursorPosition);
+            showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
@@ -111,25 +127,26 @@ public class TicketFragment extends Fragment {
         LinearLayout ticketDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.ticket_data_container);
         ticket_content = (TextView)rootView.findViewById(R.id.ticket_content);
+        ticket_cancellation_date = (TextView)rootView.findViewById(R.id.ticket_cancellation_date);
         ticket_content.setMovementMethod(LinkMovementMethod.getInstance());
         ticketSubject = (TextView)rootView.findViewById(R.id.ticket_subject);
+        cancel_button = (Button)rootView.findViewById(R.id.cancel_button);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         if(savedInstanceState != null) {
-            selectedTicket = (TicketVS) savedInstanceState.getSerializable(
-                    ContextVS.RECEIPT_KEY);
+            selectedTicket = (TicketVS) savedInstanceState.getSerializable(ContextVS.RECEIPT_KEY);
             initTicketScreen(selectedTicket);
         } else {
             Cursor cursor = getActivity().getApplicationContext().getContentResolver().query(
                     TicketContentProvider.CONTENT_URI, null, null, null, null);
             cursor.moveToPosition(cursorPosition);
-            byte[] serializedTicketContainer = cursor.getBlob(cursor.getColumnIndex(
+            byte[] serializedTicket = cursor.getBlob(cursor.getColumnIndex(
                     TicketContentProvider.SERIALIZED_OBJECT_COL));
             Long ticketId = cursor.getLong(cursor.getColumnIndex(TicketContentProvider.ID_COL));
             try {
-                selectedTicket = (TicketVS) ObjectUtils.deSerializeObject(serializedTicketContainer);
+                selectedTicket = (TicketVS) ObjectUtils.deSerializeObject(serializedTicket);
                 selectedTicket.setLocalId(ticketId);
                 initTicketScreen(selectedTicket);
             } catch (Exception ex) {
@@ -145,12 +162,32 @@ public class TicketFragment extends Fragment {
             ticket.getMessageId());
         try {
             selectedTicketSMIME = ticket.getReceipt();
+            X509Certificate certificate = selectedTicket.getCertificationRequest().getCertificate();
+            userCertInfo = getActivity().getString(R.string.cert_info_formated_msg,
+                    certificate.getSubjectDN().toString(),
+                    certificate.getIssuerDN().toString(),
+                    certificate.getSerialNumber().toString(),
+                    DateUtils.getLongDate_Es(certificate.getNotBefore()),
+                    DateUtils.getLongDate_Es(certificate.getNotAfter()));
             if(selectedTicket != null) {
                 ticketSubject.setText("ID: " + selectedTicket.getLocalId() +
-                        " - State: " + selectedTicket.getState() +
-                        " - Subject: " + selectedTicket.getSubject());
+                        " - State: " + selectedTicket.getState());
                 if(selectedTicket.getReceipt() != null)
                     ticket_content.setText(Html.fromHtml(getTicketContentFormatted(selectedTicket)));
+                else ticket_content.setText(Html.fromHtml(userCertInfo));
+            }
+            if(TicketVS.State.OK == selectedTicket.getState()) {
+                cancel_button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                                getString(R.string.cancel_ticket_dialog_msg), false, null);
+                    }
+                });
+                cancel_button.setVisibility(View.VISIBLE);
+            } else if(TicketVS.State.CANCELLED == selectedTicket.getState()) {
+                ticket_cancellation_date.setText(getString(R.string.cancellation_date_lbl,
+                        DateUtils.getLongDate_Es(selectedTicket.getCancellationDate())));
+                ticket_cancellation_date.setVisibility(View.VISIBLE);
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -206,13 +243,6 @@ public class TicketFragment extends Fragment {
                     getActivity().onBackPressed();
                     return true;
                 case R.id.cert_info:
-                    X509Certificate certificate = selectedTicket.getCertificationRequest().getCertificate();
-                    String userCertInfo = getActivity().getString(R.string.cert_info_formated_msg,
-                            certificate.getSubjectDN().toString(),
-                            certificate.getIssuerDN().toString(),
-                            certificate.getSerialNumber().toString(),
-                            DateUtils.getDate_Es(certificate.getNotBefore()),
-                            DateUtils.getDate_Es(certificate.getNotAfter()));
                     dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.
                             ticket_cert_caption)).setMessage(Html.fromHtml(userCertInfo)).show();
                     break;
@@ -223,7 +253,8 @@ public class TicketFragment extends Fragment {
                     newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
                     break;
                 case R.id.cancel_ticket:
-
+                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                            getString(R.string.cancel_ticket_dialog_msg), false, null);
                     break;
                 case R.id.share_ticket:
                     try {

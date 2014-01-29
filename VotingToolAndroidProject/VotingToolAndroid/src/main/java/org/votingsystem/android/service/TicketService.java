@@ -4,7 +4,10 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
@@ -24,6 +27,7 @@ import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
+import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -42,6 +46,7 @@ import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
 
@@ -55,6 +60,7 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -115,7 +121,77 @@ public class TicketService extends IntentService {
                 showNotification(responseVS);
                 sendMessage(responseVS);
                 break;
+            case TICKET_CANCEL:
+                Integer ticketCursorPosition = arguments.getInt(ContextVS.ITEM_ID_KEY);
+                Cursor cursor = getContentResolver().query(TicketContentProvider.CONTENT_URI,
+                        null, null, null, null);
+                cursor.moveToPosition(ticketCursorPosition);
+                byte[] serializedTicket = cursor.getBlob(cursor.getColumnIndex(
+                        TicketContentProvider.SERIALIZED_OBJECT_COL));
+                Long ticketId = cursor.getLong(cursor.getColumnIndex(TicketContentProvider.ID_COL));
+                try {
+                    TicketVS ticketVS = (TicketVS) ObjectUtils.deSerializeObject(serializedTicket);
+                    ticketVS.setLocalId(ticketCursorPosition.longValue());
+                    responseVS = cancelTicket(ticketVS, pin);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        ticketVS.setCancellationReceipt(responseVS.getSmimeMessage());
+                        ticketVS.setState(TicketVS.State.CANCELLED);
+                        ContentValues values = contextVS.populateTicketContentValues(ticketVS);
+                        getContentResolver().update(TicketContentProvider.getTicketURI(ticketId),
+                                values, null, null);
+                        responseVS.setCaption(getString(R.string.ticket_cancellation_msg_subject));
+                        responseVS.setNotificationMessage(getString(R.string.ticket_cancellation_msg));
+                        responseVS.setIconId(R.drawable.accept_22);
+                    } else {
+                        responseVS.setCaption(getString(R.string.ticket_cancellation_error_msg_subject));
+                        responseVS.setNotificationMessage(getString(R.string.ticket_cancellation_error_msg_subject));
+                        responseVS.setIconId(R.drawable.cancel_22);
+                        if(responseVS.getContentType() == ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED) {
+                            SMIMEMessageWrapper signedMessage = responseVS.getSmimeMessage();
+                            Log.d(TAG + ".cancelTicket(...)", "error JSON response: " + signedMessage.getSignedContent());
+                            JSONObject jsonResponse = new JSONObject(signedMessage.getSignedContent());
+                            TypeVS operation = TypeVS.valueOf(jsonResponse.getString("operation"));
+                            if(TypeVS.TICKET_CANCEL == operation) {
+                                ticketVS.setCancellationReceipt(responseVS.getSmimeMessage());
+                                ticketVS.setState(TicketVS.State.LAPSED);
+                                ContentValues values = contextVS.populateTicketContentValues(ticketVS);
+                                getContentResolver().update(TicketContentProvider.getTicketURI(ticketId),
+                                        values, null, null);
+                                responseVS.setCaption(getString(R.string.ticket_cancellation_msg_subject));
+                                responseVS.setNotificationMessage(getString(R.string.ticket_cancellation_msg));
+                                responseVS.setIconId(R.drawable.accept_22);
+                            }
+                        }
+                    }
+                    responseVS.setServiceCaller(serviceCaller);
+                    showNotification(responseVS);
+                    sendMessage(responseVS);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                break;
         }
+    }
+
+    private ResponseVS cancelTicket(TicketVS ticket, String pin) {
+        ResponseVS responseVS = getTicketServer();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        TicketServer ticketServer = (TicketServer) responseVS.getData();
+        Map ticketCancellationDataMap = new HashMap();
+        ticketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
+        ticketCancellationDataMap.put("operation", TypeVS.TICKET_CANCEL.toString());
+        ticketCancellationDataMap.put("hashCertVSBase64", ticket.getHashCertVSBase64());
+        ticketCancellationDataMap.put("originHashCertVS", ticket.getOriginHashCertVS());
+        ticketCancellationDataMap.put("ticketCertSerialNumber", ticket.getCertificationRequest().
+                getCertificate().getSerialNumber().longValue());
+        String textToSing = new JSONObject(ticketCancellationDataMap).toString();
+        SMIMESignedSender signedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
+                ticketServer.getNameNormalized(), ticketServer.getTicketCancelServiceURL(),
+                textToSing, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                getString(R.string.ticket_cancellation_msg_subject), pin.toCharArray(),
+                ticketServer.getCertificate(), (AppContextVS)getApplicationContext());
+        responseVS = signedSender.call();
+        return responseVS;
     }
 
     private ResponseVS cancelTickets(Collection<TicketVS> sendedTickets, String pin) {
@@ -126,7 +202,7 @@ public class TicketService extends IntentService {
             for(TicketVS ticket : sendedTickets) {
                 Map ticketCancellationDataMap = new HashMap();
                 ticketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
-                ticketCancellationDataMap.put("typeVS", TypeVS.TICKET_CANCELLATION);
+                ticketCancellationDataMap.put("typeVS", TypeVS.TICKET_CANCEL);
                 ticketCancellationDataMap.put("hashCertVSBase64", ticket.getHashCertVSBase64());
                 ticketCancellationDataMap.put("originHashCertVS", ticket.getOriginHashCertVS());
                 ticketCancellationDataMap.put("ticketCertSerialNumber", ticket.getCertificationRequest().
@@ -145,8 +221,8 @@ public class TicketService extends IntentService {
         } catch(Exception ex) {
             ex.printStackTrace();
             String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
             return responseVS;
@@ -167,12 +243,9 @@ public class TicketService extends IntentService {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyVS.toString(),
                         requestAmount.toString(), available.toString()));
             }
-            TicketServer ticketServer = contextVS.getTicketServer();
-            if(ticketServer == null) {
-                responseVS = initTicketServer();
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-                else ticketServer = contextVS.getTicketServer();
-            }
+            responseVS = getTicketServer();
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+            TicketServer ticketServer = (TicketServer) responseVS.getData();
 
             BigDecimal ticketAmount = new BigDecimal(10);
             int numTickets = requestAmount.divide(ticketAmount).intValue();
@@ -235,14 +308,14 @@ public class TicketService extends IntentService {
             }
         } catch(TimestampException tex) {
             responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
-            responseVS.setCaption(contextVS.getString(R.string.timestamp_service_error_caption));
+            responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
             responseVS.setNotificationMessage(tex.getMessage());
         } catch(Exception ex) {
             ex.printStackTrace();
             cancelTickets(sendedTicketsMap.values(), pin);
             message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -263,18 +336,14 @@ public class TicketService extends IntentService {
     }
 
     private ResponseVS ticketRequest(BigDecimal requestAmount, CurrencyVS currencyVS, String pin) {
-        ResponseVS responseVS = null;
-        TicketServer ticketServer = contextVS.getTicketServer();
+        ResponseVS responseVS = getTicketServer();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        TicketServer ticketServer = (TicketServer) responseVS.getData();
         Map<String, TicketVS> ticketsMap = new HashMap<String, TicketVS>();
         String caption = null;
         String message = null;
         int iconId = R.drawable.cancel_22;
         try {
-            if(ticketServer == null) {
-                responseVS = initTicketServer();
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-                else ticketServer = contextVS.getTicketServer();
-            }
             BigDecimal numTickets = requestAmount.divide(new BigDecimal(10));
             BigDecimal ticketsValue = new BigDecimal(10);
             List<TicketVS> ticketList = new ArrayList<TicketVS>();
@@ -372,7 +441,7 @@ public class TicketService extends IntentService {
                     ticket.setState(TicketVS.State.OK);
                     ticket.getCertificationRequest().initSigner(issuedTicketsArray.getString(i).getBytes());
                 }
-                contextVS.updateTickets(ticketsMap.values());
+                contextVS.insertTickets(ticketsMap.values());
                 caption = getString(R.string.ticket_request_ok_caption);
                 message = getString(R.string.ticket_request_ok_msg, requestAmount.toString(),
                         currencyVS.toString());
@@ -383,8 +452,8 @@ public class TicketService extends IntentService {
         } catch(Exception ex) {
             ex.printStackTrace();
             message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
             responseVS.setIconId(iconId);
@@ -395,7 +464,9 @@ public class TicketService extends IntentService {
     }
 
     private ResponseVS updateUserInfo(String pin) {
-        ResponseVS responseVS = null;
+        ResponseVS responseVS = getTicketServer();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        TicketServer ticketServer = (TicketServer) responseVS.getData();
         Map mapToSend = new HashMap();
         mapToSend.put("NIF", contextVS.getUserVS().getNif());
         mapToSend.put("operation", TypeVS.TICKET_USER_INFO.toString());
@@ -403,13 +474,6 @@ public class TicketService extends IntentService {
         String msgSubject = getString(R.string.ticket_user_info_request_msg_subject);
         try {
             JSONObject userInfoRequestJSON = new JSONObject(mapToSend);
-            TicketServer ticketServer = contextVS.getTicketServer();
-            if(ticketServer == null) {
-                responseVS = initTicketServer();
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    ticketServer = contextVS.getTicketServer();
-                } else return responseVS;
-            }
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
                     ticketServer.getNameNormalized(), ticketServer.getUserInfoServiceURL(),
                     userInfoRequestJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
@@ -445,34 +509,37 @@ public class TicketService extends IntentService {
         } catch(Exception ex) {
             ex.printStackTrace();
             String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
             return responseVS;
         }
     }
 
-    private ResponseVS initTicketServer() {
+    private ResponseVS getTicketServer() {
         ResponseVS responseVS = null;
-        TicketServer ticketServer = null;
-        try {
-            responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(contextVS.getTicketServerURL()),
-                    ContentTypeVS.JSON);
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                ticketServer = (TicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                contextVS.setTicketServer(ticketServer);
+        TicketServer ticketServer = contextVS.getTicketServer();
+        if(ticketServer != null) {
+            responseVS = new ResponseVS(ResponseVS.SC_OK);
+        } else {
+            try {
+                responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(contextVS.getTicketServerURL()),
+                        ContentTypeVS.JSON);
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    ticketServer = (TicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                    contextVS.setTicketServer(ticketServer);
+                }
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                String message = ex.getMessage();
+                if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+                responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
+                        message);
             }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
-                    message);
-        } finally {
-            responseVS.setData(ticketServer);
-            return responseVS;
         }
+        responseVS.setData(ticketServer);
+        return responseVS;
     }
 
     private void showNotification(ResponseVS responseVS){

@@ -15,16 +15,18 @@ class UserVSService {
 
     UserVS systemUser
 
-    public synchronized void init() throws Exception {
+    public synchronized Map init() throws Exception {
         log.debug("init")
         systemUser = UserVS.findWhere(type:UserVS.Type.SYSTEM)
         if(!systemUser) {
-            systemUser = new UserVS(IBAN:"GR16 0110 1250 0000 0001 2300 695", nif:"SYSTEM_NIF", type:UserVS.Type.SYSTEM,
-                firstName: "SYSTEM", lastName: "SYSTEM").save()
+            systemUser = new UserVS(IBAN:"GR16 0110 1250 0000 0001 2300 695", nif:"TICKET_SYSTEM_NIF",
+                    type:UserVS.Type.SYSTEM, firstName: "TICKET", lastName: "SYSTEM").save()
         }
+        return [systemUser:systemUser]
     }
 
     public UserVS getSystemUser() {
+        if(!systemUser) systemUser = init().systemUser
         return systemUser;
     }
 
