@@ -111,10 +111,23 @@ public class UserContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
         values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-        int updateCount = database.update(TABLE_NAME, values, whereClause, whereArgs);
+        int updateCount = 0;
+        switch (URI_MATCHER.match(uri)){
+            case ALL_ITEMS:
+                updateCount = database.update(TABLE_NAME, values, selection, selectionArgs);
+                break;
+            case SPECIFIC_ITEM:
+                updateCount = database.update(TABLE_NAME, values, ID_COL +
+                        " = " + uri.getPathSegments().get(1) +
+                        (!TextUtils.isEmpty(selection) ? " AND (" +
+                                selection + ')' : ""), selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri );
+        }
         // Notify any listeners and return the updated row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;

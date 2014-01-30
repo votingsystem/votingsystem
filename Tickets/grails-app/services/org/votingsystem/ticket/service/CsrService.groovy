@@ -81,6 +81,9 @@ class CsrService {
             //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
             //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
             Calendar calendar = Calendar.getInstance()
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
             Date certValidFrom = calendar.getTime()
             calendar.add(Calendar.DAY_OF_YEAR, 7);
             Date certValidTo = DateUtils.getMonday(calendar).getTime()

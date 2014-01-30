@@ -43,6 +43,9 @@ public class RssContentProvider extends ContentProvider {
     private static final String DB_NAME = "voting_system_rss.db";
     static final String TABLE_NAME = "rss";
 
+    private static final int ALL_ITEMS = 1;
+    private static final int SPECIFIC_ITEM = 2;
+
     public static final String ID_COL = "_id";
     public static final String URL_COL = "url";
     public static final String TITLE_COL = "title";
@@ -53,14 +56,11 @@ public class RssContentProvider extends ContentProvider {
 
     private SQLiteDatabase database;
 
-    private static final int ALL_MESSAGES = 1;
-    private static final int SPECIFIC_MESSAGE = 2;
-
     private static final UriMatcher URI_MATCHER;
     static{
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-        URI_MATCHER.addURI("votingsysten.org", "rssitem", ALL_MESSAGES);
-        URI_MATCHER.addURI("votingsysten.org", "rssitem/#", SPECIFIC_MESSAGE);
+        URI_MATCHER.addURI("votingsysten.org", "rssitem", ALL_ITEMS);
+        URI_MATCHER.addURI("votingsysten.org", "rssitem/#", SPECIFIC_ITEM);
     }
 
     public static final String AUTHORITY = "votingsysten.org/rssitem";
@@ -86,9 +86,9 @@ public class RssContentProvider extends ContentProvider {
     // URI is for a single item or a list.
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
-            case ALL_MESSAGES:
+            case ALL_ITEMS:
                 return "vnd.android.cursor.dir/rssitem"; // List of items.
-            case SPECIFIC_MESSAGE:
+            case SPECIFIC_ITEM:
                 return "vnd.android.cursor.item/rssitem"; // Specific item.
             default:
                 return null;
@@ -105,7 +105,7 @@ public class RssContentProvider extends ContentProvider {
         // If the query ends in a specific record number, we're
         // being asked for a specific record, so set the
         // WHERE clause in our query.
-        if((URI_MATCHER.match(uri)) == SPECIFIC_MESSAGE){
+        if((URI_MATCHER.match(uri)) == SPECIFIC_ITEM){
             qBuilder.appendWhere("id=" + ContentUris.parseId(uri));
         }
         // Set sort order. If none specified, use default.
@@ -122,9 +122,22 @@ public class RssContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        int updateCount = database.update(TABLE_NAME, values, whereClause, whereArgs);
+        int updateCount = 0;
+        switch (URI_MATCHER.match(uri)){
+            case ALL_ITEMS:
+                updateCount = database.update(TABLE_NAME, values, selection, selectionArgs);
+                break;
+            case SPECIFIC_ITEM:
+                updateCount = database.update(TABLE_NAME, values, ID_COL +
+                        " = " + uri.getPathSegments().get(1) +
+                        (!TextUtils.isEmpty(selection) ? " AND (" +
+                                selection + ')' : ""), selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri );
+        }
         // Notify any listeners and return the updated row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;
