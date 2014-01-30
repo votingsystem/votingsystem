@@ -53,20 +53,17 @@ class TestingController {
     def date() {
 
         Date selectedDate = null
-        if(params.year && params.mont && params.day) {
-
-        }
-        if(!selectedDate) selectedDate = Calendar.getInstance().getTime()
-        log.debug("=========== ${params.year}")
-
-        UserVS userVS = UserVS.get(13)
 
 
-        //Calendar calendar = Calendar.getInstance();
-        //calendar.add(Calendar.DAY_OF_YEAR, -7);
-        //calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        Calendar calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
 
-        render transactionVSService.getUserInfoMap(userVS, selectedDate) as JSON
+
+
+        render DateUtils.getMonday(calendar).getTime()
         return false
     }
 

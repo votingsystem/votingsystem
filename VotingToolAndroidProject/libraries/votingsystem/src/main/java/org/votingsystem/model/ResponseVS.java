@@ -251,6 +251,12 @@ public class ResponseVS<T> implements Parcelable {
         this.uri = uri;
     }
 
+    public String getLogStr() {
+        return "statusCode: " + getStatusCode() + " - serviceCaller: " + getServiceCaller() +
+                " - caption: " + getCaption() + " - message:" + getNotificationMessage();
+
+    }
+
     public static final Parcelable.Creator<ResponseVS> CREATOR =
             new Parcelable.Creator<ResponseVS>() {
 

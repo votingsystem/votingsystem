@@ -57,6 +57,7 @@ public class EventVSService extends IntentService {
     }
 
     @Override protected void onHandleIntent(Intent intent) {
+        ResponseVS responseVS = null;
         final Bundle arguments = intent.getExtras();
         contextVS = (AppContextVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
@@ -69,7 +70,7 @@ public class EventVSService extends IntentService {
             String serviceURL = contextVS.getAccessControl().getEventVSURL(
                     eventState, EventVS.getURLPart(eventType),
                     ContextVS.EVENTS_PAGE_SIZE, offset);
-            ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
+            responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     EventVSResponse response = EventVSResponse.parse(responseVS.getMessage());
@@ -144,28 +145,21 @@ public class EventVSService extends IntentService {
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    sendMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
-                            ex.getMessage(), serviceCaller);
-
+                    String message = ex.getMessage();
+                    if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+                    responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl), message);
                 }
-            } else sendMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
-                    responseVS.getMessage(), serviceCaller);
+            } else responseVS.setCaption(getString(R.string.operation_error_msg));
         }
+        sendMessage(responseVS);
     }
 
-
-    private void sendMessage(Integer statusCode, String caption, String message,
-            String serviceCaller) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + statusCode + " - serviceCaller: " +
-                serviceCaller  + " - caption: " + caption  + " - message: " + message );
-        Intent intent = new Intent(serviceCaller);
-        if(statusCode != null) {
-            intent.putExtra(ContextVS.RESPONSE_STATUS_KEY, statusCode.intValue());
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == statusCode)
-                message = getString(R.string.conn_timeout_msg);
-        }
-        if(caption != null) intent.putExtra(ContextVS.CAPTION_KEY, caption);
-        if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
+    private void sendMessage(ResponseVS responseVS) {
+        Log.d(TAG + ".sendMessage(...) ", responseVS.getLogStr());
+        if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())
+            responseVS.setNotificationMessage(getString(R.string.conn_timeout_msg));
+        Intent intent = new Intent(responseVS.getServiceCaller());
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 

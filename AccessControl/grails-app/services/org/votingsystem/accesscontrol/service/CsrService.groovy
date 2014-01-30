@@ -11,6 +11,7 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.KeyStoreUtil
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.StringUtils
 
@@ -138,10 +139,10 @@ class CsrService {
         //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
         String hashCertVSBase64 = certAttributeJSON.hashCertVS
-        Calendar calendar = Calendar.getInstance();
-        Date certValidFrom = calendar.getTime()
-        calendar.add(Calendar.DATE, ContextVS.DAYS_ANONYMOUS_DELEGATION_DURATION);
-        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, calendar.getTime())
+        Date certValidFrom = DateUtils.getMonday(Calendar.getInstance()).getTime()
+        Calendar calendarValidTo = Calendar.getInstance();
+        calendarValidTo.add(Calendar.DATE, ContextVS.DAYS_ANONYMOUS_DELEGATION_DURATION);
+        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, calendarValidTo.getTime())
         if (!issuedCert) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
             log.error("signAnonymousDelegationCert - error signing cert")
@@ -150,74 +151,12 @@ class CsrService {
             CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
                     content:issuedCert.getEncoded(), type:CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION,
                     state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
-                    validTo: calendar.getTime())
+                    validTo: calendarValidTo.getTime())
             certificate.save()
             log.debug("signAnonymousDelegationCert - expended CertificateVS '${certificate.id}'")
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
             Map data = [requestPublicKey:csr.getPublicKey()]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
-                    data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
-        }
-    }
-
-
-
-    ///return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_REQUEST, data:[publicKey:csr.getPublicKey(), hashCertVSBase64:voteCertDataJSON.hashCertVS])
-
-    public synchronized ResponseVS signTicket (byte[] csrPEMBytes, Locale locale) {
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-        if(!csr) {
-            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-            log.error("signTicket - msg:  ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
-        }
-        CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        Enumeration csrAttributes = info.getAttributes().getObjects()
-        def certAttributeJSON
-        while(csrAttributes.hasMoreElements()) {
-            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-            switch(attribute.getTagNo()) {
-                case ContextVS.TICKET_OID:
-                    String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString()
-                    certAttributeJSON = JSON.parse(certAttributeJSONStr)
-                    break;
-            }
-        }
-        if(!certAttributeJSON) {
-            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-            log.error("signTicket - missing certAttributeJSON")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
-        }
-        String amount = certAttributeJSON.amount
-        String serverURL = grailsApplication.config.grails.serverURL
-        String ticketProviderURL = StringUtils.checkURL(certAttributeJSON.ticketProviderURL)
-        if (!serverURL.equals(ticketProviderURL) || !certAttributeJSON.hashCertVS) {
-            String msg = messageSource.getMessage('accessControlURLError',
-                    [serverURL, ticketProviderURL].toArray(),locale)
-            log.error("- signTicket - ERROR - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
-        }
-        //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
-        String hashCertVSBase64 = certAttributeJSON.hashCertVS
-        Date certValidFrom = Calendar.getInstance().getTime()
-        Calendar today_plus_day = Calendar.getInstance();
-        today_plus_day.add(Calendar.DATE, 1);
-        Date certValidTo = today_plus_day.getTime()
-        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, certValidTo)
-        if (!issuedCert) {
-            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-            log.error("signTicket - error signing cert")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
-        } else {
-            CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
-                    content:issuedCert.getEncoded(), type:CertificateVS.Type.TICKET,
-                    state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
-                    validTo: certValidTo).save()
-            log.debug("signTicket - expended CertificateVS '${certificate.id}'")
-            byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
-            Map data = [requestPublicKey:csr.getPublicKey(), amount:amount, ticketProviderURL:ticketProviderURL]
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TICKET_REQUEST,
                     data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
         }
     }
@@ -296,10 +235,12 @@ class CsrService {
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
 		//log.debug("signCertUserVS - certSigner:${certSigner}");
-
-		Date today = Calendar.getInstance().getTime();
+		Date today = DateUtils.getMonday(Calendar.getInstance()).getTime();
 		Calendar today_plus_year = Calendar.getInstance();
 		today_plus_year.add(Calendar.YEAR, 1);
+        today_plus_year.set(Calendar.HOUR_OF_DAY, 0);
+        today_plus_year.set(Calendar.MINUTE, 0);
+        today_plus_year.set(Calendar.SECOND, 0);
         PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(requestCSR.content);
         X509Certificate issuedCert = CertUtil.signCSR(csr, null, privateKeySigner,
                 certSigner, today, today_plus_year.getTime())

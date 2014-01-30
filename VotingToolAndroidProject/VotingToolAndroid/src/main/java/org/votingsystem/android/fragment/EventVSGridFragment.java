@@ -80,14 +80,12 @@ public class EventVSGridFragment extends Fragment
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
-                    ResponseVS.SC_ERROR);
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
                 hasHTTPConnection.set(false);
             }
-            String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
-            String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-            showMessage(responseStatusCode, caption, message);
+            showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage());
         }
     };
 
