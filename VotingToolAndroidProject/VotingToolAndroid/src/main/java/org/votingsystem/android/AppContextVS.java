@@ -252,6 +252,8 @@ public class AppContextVS extends Application {
         while(cursor.moveToNext()) {
             TicketVS ticketVS = (TicketVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                     cursor.getColumnIndex(TicketContentProvider.SERIALIZED_OBJECT_COL)));
+            Long ticketId = cursor.getLong(cursor.getColumnIndex(TicketContentProvider.ID_COL));
+            ticketVS.setLocalId(ticketId);
             ticketList.add(ticketVS);
         }
         selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? AND " +
@@ -295,6 +297,14 @@ public class AppContextVS extends Application {
                 ObjectUtils.serializeObject(ticketVS));
         values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, getCurrentWeekLapseId());
         return values;
+    }
+
+    public int updateTicket(TicketVS ticket) {
+        Log.d(TAG + ".updateTicket(...) ", "ticket id: " + ticket.getLocalId() +
+                " - state: " + ticket.getState());
+        ContentValues values = populateTicketContentValues(ticket);
+        return getContentResolver().update(TicketContentProvider.getTicketURI(ticket.getLocalId()),
+                values, null, null);
     }
 
     public ResponseVS signMessage(String toUser, String textToSign, String subject, String pin) {

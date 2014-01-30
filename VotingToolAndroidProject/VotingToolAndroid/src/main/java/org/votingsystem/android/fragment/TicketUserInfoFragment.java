@@ -165,7 +165,7 @@ public class TicketUserInfoFragment extends Fragment {
                     " - receptor: " + receptor);
             CurrencyData currencyData = contextVS.getCurrencyData(currencyVS);
             BigDecimal cashAvailable = currencyData.getCashBalance();
-            if(cashAvailable != null && cashAvailable.compareTo(amount) > 0) {
+            if(cashAvailable != null && cashAvailable.compareTo(amount) >= 0) {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.ticket_send_pin_msg, amount,
                                 currencyVS.toString(), receptor, subject), false, TypeVS.TICKET_SEND);

@@ -156,7 +156,7 @@ public class TransactionVSFragment extends Fragment {
             case USER_OUTPUT:
                 //menu.removeItem(R.id.cancel_vote);
                 break;
-            case TICKET_PAYCHECK:
+            case TICKET_SEND:
                 //menu.removeItem(R.id.cancel_vote);
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +

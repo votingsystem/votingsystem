@@ -112,6 +112,7 @@ public class TicketVS extends ReceiptContainer {
     }
 
     public void setReceiptBytes(byte[] receiptBytes) {
+        this.setState(State.EXPENDED);
         this.receiptBytes = receiptBytes;
     }
 

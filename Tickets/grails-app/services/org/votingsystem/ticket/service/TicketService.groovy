@@ -123,7 +123,8 @@ class TicketService {
                 ticket.cancelMessage = messageSMIMEReq
                 ticket.save()
                 TransactionVS transaction = new TransactionVS(amount: ticket.amount, messageSMIME:messageSMIMEReq,
-                        subject:subject, fromUserVS:userVSService.getSystemUser(), toUserVS:signer,
+                        subject:messageSource.getMessage('cancelTicketTransactionSubject', null, locale),
+                        fromUserVS:signer, toUserVS:signer, state:TransactionVS.State.OK,
                         currency:ticket.currency, type:TransactionVS.Type.TICKET_CANCELLATION, validTo:ticket.validTo).save()
                 log.debug("cancelTicket - ticket: ${ticket.id} - transactionVS: ${transaction.id}");
                 return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,

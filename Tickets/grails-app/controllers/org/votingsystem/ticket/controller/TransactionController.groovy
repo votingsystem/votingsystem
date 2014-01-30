@@ -38,7 +38,8 @@ class TransactionController {
         }
         TicketVSBatchRequest batchRequest;
         TicketVSBatchRequest.withTransaction {
-            batchRequest = new TicketVSBatchRequest(state:BatchRequest.State.OK, content:params.requestBytes).save()
+            batchRequest = new TicketVSBatchRequest(state:BatchRequest.State.OK, content:params.requestBytes,
+                    type: TypeVS.TICKET_REQUEST).save()
         }
         def requestJSON = JSON.parse(new String(params.requestBytes, "UTF-8"))
         byte[] decodedPK = Base64.decode(requestJSON.publicKey);
@@ -80,9 +81,9 @@ class TransactionController {
             }
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                    cancelTicketBatchRequest(responseList, batchRequest, TypeVS.TICKET_BATCH_WITH_ITEMS_REPEATED,
+                    cancelTicketBatchRequest(responseList, batchRequest, TypeVS.TICKET_REQUEST_WITH_ITEMS_REPEATED,
                             responseVS.data.message)
-                    cancelTicketBatchDeposit(depositResponseList, batchRequest,TypeVS.TICKET_BATCH_WITH_ITEMS_REPEATED,
+                    cancelTicketBatchDeposit(depositResponseList, batchRequest,TypeVS.TICKET_REQUEST_WITH_ITEMS_REPEATED,
                             responseVS.data.message)
                     return [receiverPublicKey:receiverPublic, responseVS:responseVS];
                 } else {

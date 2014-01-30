@@ -25,7 +25,7 @@ public class TransactionVS  implements Serializable {
 
     //Retirada efectivo, Ingreso en cuenta, Pago en Tickets
     public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION,
-        TICKET_CANCELLATION, TICKET_PAYCHECK;}
+        USER_ALLOCATION_INPUT, TICKET_CANCELLATION, TICKET_SEND;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -211,7 +211,7 @@ public class TransactionVS  implements Serializable {
                 return R.drawable.edit_redo_24;
             case USER_OUTPUT:
                 return R.drawable.edit_undo_24;
-            case TICKET_PAYCHECK:
+            case TICKET_SEND:
                 return R.drawable.euro_24;
             default:
                 return R.drawable.pending;
@@ -220,12 +220,14 @@ public class TransactionVS  implements Serializable {
 
     public String getDescription(Context context) {
         switch(type) {
+            case USER_ALLOCATION_INPUT:
+                return context.getString(R.string.account_input);
             case USER_INPUT:
                 return context.getString(R.string.account_input);
             case USER_OUTPUT:
                 return context.getString(R.string.account_output);
-            case TICKET_PAYCHECK:
-                return context.getString(R.string.ticket_paycheck);
+            case TICKET_SEND:
+                return context.getString(R.string.ticket_send);
             default:
                 return type.toString();
         }

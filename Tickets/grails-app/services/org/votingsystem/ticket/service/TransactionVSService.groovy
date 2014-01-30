@@ -109,18 +109,26 @@ class TransactionVSService {
             BigDecimal totalUsers = userPart.multiply(numUsersBigDecimal)
             log.debug("processUserAllocation - ${messageJSON}")
             if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
+
+            Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
+            Calendar weekToCalendar = weekFromCalendar.clone();
+            weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
             TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
+                    state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
                     subject:subject, fromUserVS:signer, toUserVS: userVSService.getSystemUser(),
                     currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
-
             def criteria = UserVS.createCriteria()
-            def usersToDeposit = criteria.scroll { eq("type", UserVS.Type.USER) }
+            def usersToDeposit = criteria.scroll {
+                eq("type", UserVS.Type.USER)
+                le("dateCreated", weekFromCalendar.getTime())
+            }
             UserVS systemUser = UserVS.findWhere(type: UserVS.Type.SYSTEM)
             while (usersToDeposit.next()) {
                 UserVS userVS = (UserVS) usersToDeposit.get(0);
                 TransactionVS userTransaction = new TransactionVS(transactionParent:transactionParent, amount:userPart,
+                        state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
                         subject:subject, fromUserVS: systemUser, toUserVS:userVS, currency:currency,
-                        type:TransactionVS.Type.USER_INPUT).save()
+                        type:TransactionVS.Type.USER_ALLOCATION_INPUT).save()
                 if((usersToDeposit.getRowNumber() % 100) == 0) {
                     sessionFactory.currentSession.flush()
                     sessionFactory.currentSession.clear()
@@ -182,14 +190,18 @@ class TransactionVSService {
     }
 
     public Map getUserInfoMap(UserVS userVS, Calendar mondayLapse) {
+        Calendar weekToCalendar = mondayLapse.clone();
+        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
         def inputCriteria = TransactionVS.createCriteria()
         def userInputTransactions = inputCriteria.scroll {
             eq("toUserVS", userVS)
             or {
                 eq("type", TransactionVS.Type.USER_INPUT)
+                eq("type", TransactionVS.Type.USER_ALLOCATION_INPUT)
                 eq("type", TransactionVS.Type.TICKET_CANCELLATION)
             }
             ge("dateCreated", mondayLapse.getTime())
+            le("dateCreated", weekToCalendar.getTime())
         }
 
 

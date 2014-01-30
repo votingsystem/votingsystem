@@ -24,7 +24,15 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity @Table(name="UserVS") @DiscriminatorValue("UserVS")
 public class UserVS implements Serializable {
 
-    public enum Type {USER, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
+    public Date getDateCancelled() {
+        return dateCancelled;
+    }
+
+    public void setDateCancelled(Date dateCancelled) {
+        this.dateCancelled = dateCancelled;
+    }
+
+    public enum Type {USER, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, CANCELLED ,EX_REPRESENTATIVE}
 	
     private static final long serialVersionUID = 1L;
     
@@ -61,7 +69,9 @@ public class UserVS implements Serializable {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
-    
+
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
+
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;

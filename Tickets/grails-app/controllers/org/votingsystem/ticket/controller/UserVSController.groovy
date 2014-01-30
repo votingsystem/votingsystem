@@ -102,6 +102,12 @@ class UserVSController {
 			responseVS.userVS.representativeMessage = null
 			responseVS.userVS.representativeRegisterDate = null
 			responseVS.userVS.metaInf = null
+
+            Calendar weekFromCalendar = Calendar.getInstance();
+            weekFromCalendar = DateUtils.getMonday(weekFromCalendar)
+            responseVS.userVS.setDateCreated(weekFromCalendar.getTime())
+
+
 			UserVS.withTransaction { responseVS.userVS.save() }
             return [responseVS : responseVS]
 		} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code:"nullCertificateErrorMsg"))]

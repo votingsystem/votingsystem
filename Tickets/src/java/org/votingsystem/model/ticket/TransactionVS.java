@@ -25,7 +25,8 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION, TICKET_CANCELLATION;}
+    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION, USER_ALLOCATION_INPUT,
+        TICKET_SEND, TICKET_CANCELLATION;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -51,6 +52,8 @@ public class TransactionVS  implements Serializable {
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
 
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
+
+    @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
@@ -159,6 +162,14 @@ public class TransactionVS  implements Serializable {
 
     public void setCurrency(CurrencyVS currency) {
         this.currency = currency;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 
 }

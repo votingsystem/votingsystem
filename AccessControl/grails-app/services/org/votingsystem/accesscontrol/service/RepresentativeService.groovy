@@ -89,8 +89,7 @@ class RepresentativeService {
 			optionsMap[option.id] = optionMap
 		}		
 		
-		int numRepresentatives = UserVS.
-			countByTypeAndRepresentativeRegisterDateLessThanEquals(
+		int numRepresentatives = UserVS.countByTypeAndRepresentativeRegisterDateLessThanEquals(
 				UserVS.Type.REPRESENTATIVE, selectedDate)
 		log.debug("num representatives: ${numRepresentatives}")
 		

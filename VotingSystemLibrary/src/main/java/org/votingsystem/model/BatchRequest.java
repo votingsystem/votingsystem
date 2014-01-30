@@ -23,14 +23,6 @@ public class BatchRequest implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public TypeVS getType() {
-        return type;
-    }
-
-    public void setType(TypeVS type) {
-        this.type = type;
-    }
-
     public enum State { OK, ERROR;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -39,7 +31,8 @@ public class BatchRequest implements Serializable  {
     @Column(name="reason") private String reason;
     @Column(name="type") @Enumerated(EnumType.STRING) private TypeVS type;
     @Column(name="content") @Lob private byte[] content;
-
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="userVS") private UserVS userVS;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
@@ -89,6 +82,22 @@ public class BatchRequest implements Serializable  {
 
     public void setContent(byte[] content) {
         this.content = content;
+    }
+
+    public TypeVS getType() {
+        return type;
+    }
+
+    public void setType(TypeVS type) {
+        this.type = type;
+    }
+
+    public UserVS getUserVS() {
+        return userVS;
+    }
+
+    public void setUserVS(UserVS userVS) {
+        this.userVS = userVS;
     }
 
 }

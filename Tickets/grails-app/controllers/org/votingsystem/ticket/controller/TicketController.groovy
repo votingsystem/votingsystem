@@ -1,6 +1,7 @@
 package org.votingsystem.ticket.controller
 
 import grails.converters.JSON
+import org.votingsystem.groovy.util.SMIMECommand
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
@@ -18,7 +19,6 @@ class TicketController {
     def transactionVSService
 
     def request() {}
-
 
     def cancel() {
         MessageSMIME messageSMIMEReq = request.messageSMIMEReq
@@ -59,6 +59,8 @@ class TicketController {
                 ticketGenBatchResponse.setContentType(ContentTypeVS.JSON_ENCRYPTED)
                 UserVS userVS = messageSMIMEReq.userVS
                 TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
+                        state:TransactionVS.State.OK,
+                        subject: message(code:'ticketRequest'), messageSMIME: messageSMIMEReq,
                         fromUserVS: userVS, toUserVS: userVS, currency:responseVS.data.currency,
                         type:TransactionVS.Type.USER_OUTPUT).save()
 

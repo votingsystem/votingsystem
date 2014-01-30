@@ -154,9 +154,8 @@ public class TicketService extends IntentService {
                             if(TypeVS.TICKET_CANCEL == operation) {
                                 ticketVS.setCancellationReceipt(responseVS.getSmimeMessage());
                                 ticketVS.setState(TicketVS.State.LAPSED);
-                                ContentValues values = contextVS.populateTicketContentValues(ticketVS);
-                                getContentResolver().update(TicketContentProvider.getTicketURI(ticketId),
-                                        values, null, null);
+                                ticketVS.setLocalId(ticketId);
+                                contextVS.updateTicket(ticketVS);
                                 responseVS.setCaption(getString(R.string.ticket_cancellation_msg_subject));
                                 responseVS.setNotificationMessage(getString(R.string.ticket_cancellation_msg));
                                 responseVS.setIconId(R.drawable.accept_22);
@@ -202,7 +201,7 @@ public class TicketService extends IntentService {
             for(TicketVS ticket : sendedTickets) {
                 Map ticketCancellationDataMap = new HashMap();
                 ticketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
-                ticketCancellationDataMap.put("typeVS", TypeVS.TICKET_CANCEL);
+                ticketCancellationDataMap.put("operation", TypeVS.TICKET_CANCEL.toString());
                 ticketCancellationDataMap.put("hashCertVSBase64", ticket.getHashCertVSBase64());
                 ticketCancellationDataMap.put("originHashCertVS", ticket.getOriginHashCertVS());
                 ticketCancellationDataMap.put("ticketCertSerialNumber", ticket.getCertificationRequest().
@@ -255,6 +254,7 @@ public class TicketService extends IntentService {
             }
             Map mapToSend = new HashMap();
             mapToSend.put("receptor", receptor);
+            mapToSend.put("operation", TypeVS.TICKET.toString());
             mapToSend.put("subject", subject);
             mapToSend.put("IBAN", IBAN);
             mapToSend.put("currency", currencyVS.toString());
@@ -284,6 +284,7 @@ public class TicketService extends IntentService {
             String publicKeyStr = new String(Base64.encode(keyPair.getPublic().getEncoded()));
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 mapToSend.put("amount", requestAmount.toString());
+                mapToSend.put("operation", TypeVS.TICKET_SEND.toString());
                 mapToSend.put("tickets", smimeTicketList);
                 mapToSend.put("publicKey", publicKeyStr);
                 String textToSign = new JSONObject(mapToSend).toString();
@@ -318,11 +319,18 @@ public class TicketService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            if(ResponseVS.SC_OK != responseVS.getStatusCode() &&
+                    ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()) {
                 cancelTickets(sendedTicketsMap.values(), pin);
                 caption = getString(R.string.ticket_send_error_caption);
                 message = getString(R.string.ticket_send_error_msg, responseVS.getMessage());
+            } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                caption = getString(R.string.ticket_send_error_caption);
+                message = getString(R.string.ticket_expended_send_error_msg);
             } else {
+                for(TicketVS ticket:sendedTicketsMap.values()) contextVS.updateTicket(ticket);
+
+
                 iconId = R.drawable.euro_24;
                 caption = getString(R.string.ticket_send_ok_caption);
                 message = getString(R.string.ticket_send_ok_msg, requestAmount.toString(),
