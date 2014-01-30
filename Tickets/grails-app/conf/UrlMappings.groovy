@@ -11,14 +11,32 @@ class UrlMappings {
         "500"(view:'/error')
 
 
+        "/certificateVS/ticket/hashHex/$hashHex" {
+            controller = "certificateVS"
+            action = "voteVS"
+        }
+
+        "/testing/$year/$month/$day" {
+            controller = "testing"
+            action = "index"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
         "/ticket/request" {
             controller = "ticket"
             action = [POST:"processRequestFileMap"]
         }
 
-        "/certificateVS/ticket/hashHex/$hashHex" {
-            controller = "certificateVS"
-            action = "voteVS"
+        "/messageSMIME/$id" {
+            controller = "messageSMIME"
+            action = [GET:"index"]
+            constraints {
+                id(matches:/\d*/)
+            }
         }
 
         "/userVS" {
@@ -29,16 +47,6 @@ class UrlMappings {
         "/userVS/$year/$month/$day" {
             controller = "userVS"
             action = "userInfo"
-            constraints {
-                year(matches:/\d*/)
-                month(matches:/\d*/)
-                day(matches:/\d*/)
-            }
-        }
-
-        "/testing/$year/$month/$day" {
-            controller = "testing"
-            action = "index"
             constraints {
                 year(matches:/\d*/)
                 month(matches:/\d*/)

@@ -143,23 +143,6 @@ class TransactionVSService {
         }
     }
 
-    //_ TODO _
-    public ResponseVS getUserBalance(UserVS uservs) {
-        def userInputTransactions = TransactionVS.findAllWhere(toUserVS: uservs, type:TransactionVS.Type.USER_INPUT)
-        BigDecimal totalInputs = new BigDecimal(0)
-        userInputTransactions.each {
-            totalInputs = totalInputs.add(it.amount)
-        }
-        def userOutputTransactions = TransactionVS.findAllWhere(toUserVS:uservs,
-                type:TransactionVS.Type.USER_OUTPUT)
-        BigDecimal totalOutputs = new BigDecimal(0)
-        userOutputTransactions.each {
-            totalOutputs = totalOutputs.add(it.amount)
-        }
-        BigDecimal result = totalInputs.add(totalOutputs.negate())
-        log.debug("getUserBalance - totalInputs: ${totalInputs} - totalOutputs: ${totalOutputs} - Balance: ${result}")
-        return new ResponseVS(statusCode: ResponseVS.SC_OK, data:result)
-    }
 
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
@@ -196,7 +179,6 @@ class TransactionVSService {
         def userInputTransactions = inputCriteria.scroll {
             eq("toUserVS", userVS)
             or {
-                eq("type", TransactionVS.Type.USER_INPUT)
                 eq("type", TransactionVS.Type.USER_ALLOCATION_INPUT)
                 eq("type", TransactionVS.Type.TICKET_CANCELLATION)
             }
@@ -213,7 +195,7 @@ class TransactionVSService {
         def outputCriteria = TransactionVS.createCriteria()
         def userOutputTransactions = outputCriteria.scroll {
             eq("fromUserVS", userVS)
-            eq("type", TransactionVS.Type.USER_OUTPUT)
+            eq("type", TransactionVS.Type.TICKET_REQUEST)
             ge("dateCreated", mondayLapse.getTime())
         }
 

@@ -24,8 +24,7 @@ public class TransactionVS  implements Serializable {
     public static final long serialVersionUID = 1L;
 
     //Retirada efectivo, Ingreso en cuenta, Pago en Tickets
-    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION,
-        USER_ALLOCATION_INPUT, TICKET_CANCELLATION, TICKET_SEND;}
+    public enum Type {TICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, TICKET_CANCELLATION, TICKET_SEND;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -208,9 +207,8 @@ public class TransactionVS  implements Serializable {
     public int getIconId(Context context) {
         switch(type) {
             case USER_ALLOCATION_INPUT:
-            case USER_INPUT:
                 return R.drawable.edit_redo_24;
-            case USER_OUTPUT:
+            case TICKET_REQUEST:
                 return R.drawable.edit_undo_24;
             case TICKET_SEND:
                 return R.drawable.euro_24;
@@ -223,9 +221,7 @@ public class TransactionVS  implements Serializable {
         switch(type) {
             case USER_ALLOCATION_INPUT:
                 return context.getString(R.string.account_input);
-            case USER_INPUT:
-                return context.getString(R.string.account_input);
-            case USER_OUTPUT:
+            case TICKET_REQUEST:
                 return context.getString(R.string.account_output);
             case TICKET_SEND:
                 return context.getString(R.string.ticket_send);

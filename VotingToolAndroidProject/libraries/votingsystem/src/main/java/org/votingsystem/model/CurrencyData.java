@@ -39,11 +39,10 @@ public class CurrencyData implements Serializable {
                     transaction.getCurrencyVS());
             switch(transaction.getType()) {
                 case USER_ALLOCATION_INPUT:
-                case USER_INPUT:
                 case TICKET_CANCELLATION:
                     totalInputs = totalInputs.add(transaction.getAmount());
                     break;
-                case USER_OUTPUT:
+                case TICKET_REQUEST:
                     totalOutputs = totalOutputs.add(transaction.getAmount());
                     break;
                 default:
@@ -124,11 +123,10 @@ public class CurrencyData implements Serializable {
                 TransactionVS transaction = TransactionVS.parse(jsonArray.getJSONObject(i));
                 switch(transaction.getType()) {
                     case USER_ALLOCATION_INPUT:
-                    case USER_INPUT:
                     case TICKET_CANCELLATION:
                         totalInputsTransactions = totalInputsTransactions.add(transaction.getAmount());
                         break;
-                    case USER_OUTPUT:
+                    case TICKET_REQUEST:
                         totalOutputsTransactions = totalOutputsTransactions.add(transaction.getAmount());
                         break;
                     default:

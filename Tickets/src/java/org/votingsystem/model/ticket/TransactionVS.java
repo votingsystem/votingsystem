@@ -25,8 +25,7 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type { USER_INPUT, USER_OUTPUT, SYSTEM_INPUT, SYSTEM_OUTPUT, USER_ALLOCATION, USER_ALLOCATION_INPUT,
-        TICKET_SEND, TICKET_CANCELLATION;}
+    public enum Type { TICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, TICKET_SEND, TICKET_CANCELLATION;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 

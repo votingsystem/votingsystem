@@ -30,17 +30,9 @@ class TestingController {
 
 
     def index1() {
-        auditingService.backupUserTransactionHistory(Calendar.getInstance().getTime())
+        auditingService.checkTicketRequest(Calendar.getInstance().getTime())
         render "OK"
     }
-
-    def index2() {
-        Map pruebaMap = ["http://tickets:8083/Tickets/messageSMIME/index/2":12334,
-                "http://tickets:8083/Tickets/messageSMIME/index/3":22222]
-        render pruebaMap as JSON
-        return false
-    }
-
 
     def index() {
         Date selectedDate = null
@@ -53,34 +45,7 @@ class TestingController {
         } else calendar = DateUtils.getMonday(calendar)
 
         UserVS userVS = UserVS.get(2)
-
-
-        //Calendar calendar = Calendar.getInstance();
-        //calendar.add(Calendar.DAY_OF_YEAR, -7);
-        //calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-
         render transactionVSService.getUserInfoMap(userVS, calendar) as JSON
-        //def userInputTransactions = TransactionVS.findAllWhere(toUserVS: userVS, type:TransactionVS.Type.USER_INPUT)
-        //ResponseVS responseVS = transactionVSService.getUserBalance(userVS)
-        //render responseVS.data
-        return false
-    }
-
-
-    def date() {
-
-        Calendar weekFromCalendar = Calendar.getInstance();
-        weekFromCalendar = DateUtils.getMonday(weekFromCalendar)
-        Calendar weekToCalendar = weekFromCalendar.clone();
-        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
-        render "weekFrom: ${weekFromCalendar.getTime()} - weekTo: ${weekToCalendar.getTime()}"
-        return false
-    }
-
-    def subject() {
-        Map resultMap = checkSubject("OU=DigitalCurrency,OU=AMOUNT:10,CN=ticketProviderURL:http://tickets:8083/Tickets, OU=CURRENCY:euro")
-
-        render resultMap as JSON
         return false
     }
 

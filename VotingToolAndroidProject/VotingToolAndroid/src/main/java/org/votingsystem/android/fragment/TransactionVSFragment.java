@@ -138,7 +138,7 @@ public class TransactionVSFragment extends Fragment {
         transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));
         transactionvs_content.setText(Html.fromHtml(transactionHtml));
         receipt.setText(Html.fromHtml(getString(R.string.transactionvs_receipt_url, transactionvs.getMessageSMIMEURL())));
-        if(TransactionVS.Type.USER_OUTPUT == transactionvs.getType()) {
+        if(TransactionVS.Type.TICKET_REQUEST == transactionvs.getType()) {
             from_user.setVisibility(View.GONE);
             transactionvsSubject.setVisibility(View.GONE);
             receipt.setVisibility(View.GONE);
@@ -150,10 +150,7 @@ public class TransactionVSFragment extends Fragment {
         switch(selectedTransactionVS.getType()) {
             case TICKET_CANCELLATION:
                 break;
-            case USER_INPUT:
-                //menu.removeItem(R.id.cancel_vote);
-                break;
-            case USER_OUTPUT:
+            case TICKET_REQUEST:
                 //menu.removeItem(R.id.cancel_vote);
                 break;
             case TICKET_SEND:

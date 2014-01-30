@@ -62,7 +62,7 @@ class TicketController {
                         state:TransactionVS.State.OK,
                         subject: message(code:'ticketRequest'), messageSMIME: messageSMIMEReq,
                         fromUserVS: userVS, toUserVS: userVS, currency:responseVS.data.currency,
-                        type:TransactionVS.Type.USER_OUTPUT).save()
+                        type:TransactionVS.Type.TICKET_REQUEST).save()
 
                 Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
                 Map resultMap = [transactionList:[transactionMap], issuedTickets:ticketGenBatchResponse.data]

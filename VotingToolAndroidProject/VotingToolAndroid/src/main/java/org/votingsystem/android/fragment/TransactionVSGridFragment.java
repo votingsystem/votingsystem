@@ -310,7 +310,7 @@ public class TransactionVSGridFragment extends Fragment
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView subject = (TextView)view.findViewById(R.id.subject);
                 subject.setText(transactionVS.getSubject());
-                if(TransactionVS.Type.USER_OUTPUT == transactionVS.getType()) {
+                if(TransactionVS.Type.TICKET_REQUEST == transactionVS.getType()) {
                     subject.setVisibility(View.GONE);
                 }
                 TextView transaction_type = (TextView) view.findViewById(
