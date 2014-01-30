@@ -38,6 +38,7 @@ public class CurrencyData implements Serializable {
                     "Transaction List with mixed currencies " + currencyVS + ", " +
                     transaction.getCurrencyVS());
             switch(transaction.getType()) {
+                case USER_ALLOCATION_INPUT:
                 case USER_INPUT:
                 case TICKET_CANCELLATION:
                     totalInputs = totalInputs.add(transaction.getAmount());
@@ -122,6 +123,7 @@ public class CurrencyData implements Serializable {
             for (int i = 0; i< jsonArray.length(); i++) {
                 TransactionVS transaction = TransactionVS.parse(jsonArray.getJSONObject(i));
                 switch(transaction.getType()) {
+                    case USER_ALLOCATION_INPUT:
                     case USER_INPUT:
                     case TICKET_CANCELLATION:
                         totalInputsTransactions = totalInputsTransactions.add(transaction.getAmount());

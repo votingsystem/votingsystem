@@ -58,18 +58,18 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int TICKET_LIST_POSITION           = 1;
 
     public enum GroupPosition {
-        VOTING(VOTING_GROUP_POSITION, R.drawable.poll_22, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
+        VOTING(VOTING_GROUP_POSITION, R.drawable.poll_32, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        MANIFESTS(MANIFESTS_GROUP_POSITION, R.drawable.manifest_22, SubSystemVS.MANIFESTS,
+        MANIFESTS(MANIFESTS_GROUP_POSITION, R.drawable.manifest_32, SubSystemVS.MANIFESTS,
                 TypeVS.MANIFEST_EVENT, Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING,
                 ChildPosition.CLOSED)),
-        CLAIMS(CLAIMS_GROUP_POSITION, R.drawable.filenew_22, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT,
+        CLAIMS(CLAIMS_GROUP_POSITION, R.drawable.filenew_32, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT,
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, R.drawable.system_users_22,
+        REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, R.drawable.system_users_32,
                 SubSystemVS.REPRESENTATIVES, TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
         RECEIPTS(RECEIPTS_GROUP_POSITION, R.drawable.receipt_32, SubSystemVS.RECEIPTS,
                 TypeVS.RECEIPT, new ArrayList<ChildPosition>()),
-        TICKETS(TICKETS_GROUP_POSITION, R.drawable.euro_24, SubSystemVS.TICKETS,
+        TICKETS(TICKETS_GROUP_POSITION, R.drawable.euro_32, SubSystemVS.TICKETS,
                 TypeVS.TICKET, Arrays.asList(ChildPosition.TICKET_USER_INFO,
                 ChildPosition.TICKET_LIST));
 

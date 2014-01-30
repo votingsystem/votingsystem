@@ -207,6 +207,7 @@ public class TransactionVS  implements Serializable {
 
     public int getIconId(Context context) {
         switch(type) {
+            case USER_ALLOCATION_INPUT:
             case USER_INPUT:
                 return R.drawable.edit_redo_24;
             case USER_OUTPUT:
