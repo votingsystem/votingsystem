@@ -1,7 +1,6 @@
 package org.votingsystem.ticket.controller
 
 import grails.converters.JSON
-import org.votingsystem.groovy.util.SMIMECommand
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
