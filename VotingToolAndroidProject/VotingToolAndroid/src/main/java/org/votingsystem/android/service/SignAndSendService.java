@@ -148,37 +148,9 @@ public class SignAndSendService extends IntentService {
             responseVS.setIconId(resultIcon);
             responseVS.setTypeVS(operationType);
             responseVS.setServiceCaller(serviceCaller);
-            sendMessage(responseVS);
+            contextVS.showNotification(responseVS);
+            contextVS.sendBroadcast(responseVS);
         }
-    }
-
-    private void showNotification(ResponseVS responseVS){
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        Intent clickIntent = new Intent(this, MessageActivity.class);
-        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(responseVS.getCaption()).setContentText(
-                        responseVS.getNotificationMessage()).setSmallIcon(responseVS.getIconId())
-                .setContentIntent(pendingIntent);
-        Notification note = builder.build();
-        // hide the notification after its selected
-        note.flags |= Notification.FLAG_AUTO_CANCEL;
-        //Identifies our service icon in the icon tray.
-        notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
-    }
-
-    private void sendMessage(ResponseVS responseVS) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
-                " - serviceCaller: " + responseVS.getServiceCaller() +
-                " - caption: " + responseVS.getCaption()  + " - message: " +
-                responseVS.getNotificationMessage());
-        showNotification(responseVS);
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
 }

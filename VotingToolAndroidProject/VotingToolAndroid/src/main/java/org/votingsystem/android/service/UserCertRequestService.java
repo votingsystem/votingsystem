@@ -54,7 +54,7 @@ public class UserCertRequestService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         Log.d(TAG + ".onHandleIntent(...) ", "arguments: " + arguments);
-        AppContextVS appContextVS = (AppContextVS) getApplicationContext();
+        AppContextVS contextVS = (AppContextVS) getApplicationContext();
         String serviceCaller = arguments.getString(CALLER_KEY);
         ResponseVS responseVS = null;
         try {
@@ -81,7 +81,7 @@ public class UserCertRequestService extends IntentService {
             fos.write(keyStoreBytes);
             fos.close();
             responseVS = HttpHelper.sendData(csrBytes, null,
-                    appContextVS.getAccessControl().getUserCSRServiceURL());
+                    contextVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SharedPreferences settings = getApplicationContext().getSharedPreferences(
                         VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -89,7 +89,7 @@ public class UserCertRequestService extends IntentService {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 editor.putLong(CSR_REQUEST_ID_KEY, requestId);
                 editor.commit();
-                appContextVS.setState(State.WITH_CSR, null);
+                contextVS.setState(State.WITH_CSR, null);
             }
             String caption = null;
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -104,17 +104,8 @@ public class UserCertRequestService extends IntentService {
                     message);
         } finally {
             responseVS.setServiceCaller(serviceCaller);
-            sendMessage(responseVS);
+            contextVS.sendBroadcast(responseVS);
         }
-    }
-
-    private void sendMessage(ResponseVS responseVS) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
-                " - caption: " + responseVS.getCaption()  + " - message: " +
-                responseVS.getNotificationMessage());
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(RESPONSEVS_KEY, responseVS);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
 }

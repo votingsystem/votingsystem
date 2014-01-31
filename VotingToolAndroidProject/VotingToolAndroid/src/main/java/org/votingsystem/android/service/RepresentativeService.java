@@ -309,7 +309,7 @@ public class RepresentativeService extends IntentService {
         } finally {
             responseVS.setServiceCaller(serviceCaller);
             responseVS.setTypeVS(operationType);
-            sendMessage(responseVS, TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST);
+            contextVS.sendBroadcast(responseVS);
         }
     }
 
@@ -476,34 +476,6 @@ public class RepresentativeService extends IntentService {
         if(message != null) intent.putExtra(ContextVS.MESSAGE_KEY, message);
         if(representativeUri != null) intent.putExtra(ContextVS.URI_KEY, representativeUri);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-    }
-
-    private void sendMessage(ResponseVS responseVS, TypeVS typeVS) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
-                " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
-                responseVS.getServiceCaller());
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-    }
-
-    private void showNotification(ResponseVS responseVS){
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        Intent clickIntent = new Intent(this, MessageActivity.class);
-        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                REPRESENTATIVE_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(responseVS.getCaption()).setContentText(
-                        responseVS.getNotificationMessage()).setContentIntent(pendingIntent);
-        if(responseVS.getIconId() != null) builder.setSmallIcon(responseVS.getIconId());
-        Notification note = builder.build();
-        // hide the notification after its selected
-        note.flags |= Notification.FLAG_AUTO_CANCEL;
-        //Identifies our service icon in the icon tray.
-        notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
     }
 
 }

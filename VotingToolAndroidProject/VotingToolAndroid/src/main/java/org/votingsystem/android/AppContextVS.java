@@ -1,15 +1,23 @@
 package org.votingsystem.android;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
 import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
 
+import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
@@ -361,6 +369,34 @@ public class AppContextVS extends Application {
 
     public void setTicketServer(TicketServer ticketServer) {
         this.ticketServer = ticketServer;
+    }
+
+
+    public void showNotification(ResponseVS responseVS){
+        NotificationManager notificationManager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+        Intent clickIntent = new Intent(this, MessageActivity.class);
+        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
+                TICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setContentTitle(responseVS.getCaption()).setContentText(Html.fromHtml(
+                        responseVS.getNotificationMessage())).setSmallIcon(responseVS.getIconId())
+                .setContentIntent(pendingIntent);
+        Notification note = builder.build();
+        // hide the notification after its selected
+        note.flags |= Notification.FLAG_AUTO_CANCEL;
+        //Identifies our service icon in the icon tray.
+        notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
+    }
+
+    public void sendBroadcast(ResponseVS responseVS) {
+        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
+                " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
+                responseVS.getServiceCaller());
+        Intent intent = new Intent(responseVS.getServiceCaller());
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
 }

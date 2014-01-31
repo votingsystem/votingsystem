@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
@@ -151,16 +150,7 @@ public class EventVSService extends IntentService {
                 }
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
         }
-        sendMessage(responseVS);
-    }
-
-    private void sendMessage(ResponseVS responseVS) {
-        Log.d(TAG + ".sendMessage(...) ", responseVS.getLogStr());
-        if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())
-            responseVS.setNotificationMessage(getString(R.string.conn_timeout_msg));
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        contextVS.sendBroadcast(responseVS);
     }
 
 }

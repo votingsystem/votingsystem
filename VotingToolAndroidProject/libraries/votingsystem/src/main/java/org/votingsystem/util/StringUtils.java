@@ -55,7 +55,7 @@ public class StringUtils {
     	if(string == null) return null;
     	String result = null;
         try {
-        	result = URLDecoder.decode(string, ContextVS.UTF_8);
+        	result = URLDecoder.decode(string, ContextVS.UTF_8.name());
 		} catch (UnsupportedEncodingException ex) {
 			Log.e(TAG + ".decodeString()", ex.getMessage(), ex);
 		}

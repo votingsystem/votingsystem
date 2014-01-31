@@ -1,18 +1,11 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.Html;
 import android.util.Log;
 
 import org.bouncycastle2.asn1.DERTaggedObject;
@@ -23,7 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
@@ -60,7 +52,6 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -100,14 +91,14 @@ public class TicketService extends IntentService {
                 responseVS = updateUserInfo(pin);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
-                sendMessage(responseVS);
+                contextVS.sendBroadcast(responseVS);
                 break;
             case TICKET_REQUEST:
                 responseVS = ticketRequest(amount, currencyVS, pin);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
-                showNotification(responseVS);
-                sendMessage(responseVS);
+                contextVS.showNotification(responseVS);
+                contextVS.sendBroadcast(responseVS);
                 break;
             case TICKET_SEND:
                 amount = new BigDecimal(uriData.getQueryParameter("amount"));
@@ -118,8 +109,8 @@ public class TicketService extends IntentService {
                 responseVS = ticketSend(amount, currencyVS, subject, receptor, IBAN, pin);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
-                showNotification(responseVS);
-                sendMessage(responseVS);
+                contextVS.showNotification(responseVS);
+                contextVS.sendBroadcast(responseVS);
                 break;
             case TICKET_CANCEL:
                 Integer ticketCursorPosition = arguments.getInt(ContextVS.ITEM_ID_KEY);
@@ -163,8 +154,8 @@ public class TicketService extends IntentService {
                         }
                     }
                     responseVS.setServiceCaller(serviceCaller);
-                    showNotification(responseVS);
-                    sendMessage(responseVS);
+                    contextVS.showNotification(responseVS);
+                    contextVS.sendBroadcast(responseVS);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -548,34 +539,6 @@ public class TicketService extends IntentService {
         }
         responseVS.setData(ticketServer);
         return responseVS;
-    }
-
-    private void showNotification(ResponseVS responseVS){
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        Intent clickIntent = new Intent(this, MessageActivity.class);
-        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                TICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(responseVS.getCaption()).setContentText(Html.fromHtml(
-                responseVS.getNotificationMessage())).setSmallIcon(responseVS.getIconId())
-                .setContentIntent(pendingIntent);
-        Notification note = builder.build();
-        // hide the notification after its selected
-        note.flags |= Notification.FLAG_AUTO_CANCEL;
-        //Identifies our service icon in the icon tray.
-        notificationManager.notify(ContextVS.REPRESENTATIVE_SERVICE_NOTIFICATION_ID, note);
-    }
-
-    private void sendMessage(ResponseVS responseVS) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
-                " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
-                responseVS.getServiceCaller());
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        intent.putExtra(ContextVS.TYPEVS_KEY, responseVS.getTypeVS());
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
 }
