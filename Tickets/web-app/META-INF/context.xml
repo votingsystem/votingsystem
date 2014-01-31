@@ -1,6 +1,6 @@
 <Context>
 
-    <Resource name="jdbc/TicketServer"
+    <Resource name="jdbc/Tickets"
               auth="Container"
               type="javax.sql.DataSource"
               maxActive="100" maxIdle="30" maxWait="10000"

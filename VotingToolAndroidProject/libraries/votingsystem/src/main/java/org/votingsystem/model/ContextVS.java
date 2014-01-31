@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import java.nio.charset.Charset;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -138,5 +140,8 @@ public class ContextVS {
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
 
     public static final String KEYSTORE_TYPE = "PKCS12";
+
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final Charset US_ASCII = Charset.forName("US-ASCII");
 
 }
