@@ -363,7 +363,7 @@ public class Encryptor {
         //send the encryptedText and the iv to the recipient.
         Map responseMap = new HashMap();
         byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
-        byte[] encryptedText = cipher.doFinal(textToEncrypt.getBytes("UTF-8"));
+        byte[] encryptedText = cipher.doFinal(textToEncrypt.getBytes(ContextVS.UTF_8));
         responseMap.put("iv", iv);
         responseMap.put("encryptedText", encryptedText);
         responseMap.put("salt", salt);
@@ -418,7 +418,7 @@ public class Encryptor {
         /* Decrypt the message, given derived key and initialization vector. */
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv));
-        String plaintext = new String(cipher.doFinal(encryptedTextBytes), "UTF-8");
+        String plaintext = new String(cipher.doFinal(encryptedTextBytes), ContextVS.UTF_8);
         return plaintext;
     }
 

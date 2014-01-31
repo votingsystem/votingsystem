@@ -28,9 +28,13 @@ class TestingController {
 
     def accounts() {}
 
-
-    def index1() {
+    def checkTicket() {
         auditingService.checkTicketRequest(Calendar.getInstance().getTime())
+        render "OK"
+    }
+
+    def backup() {
+        auditingService.backupUserTransactionHistory(Calendar.getInstance().getTime())
         render "OK"
     }
 
@@ -48,6 +52,5 @@ class TestingController {
         render transactionVSService.getUserInfoMap(userVS, calendar) as JSON
         return false
     }
-
 
 }

@@ -64,6 +64,7 @@ class TimeStampService {
                 }
             }
             if(x509TimeStampServerCert) {
+                ContextVS.getInstance().setTimeStampServerCert(x509TimeStampServerCert)
                 timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                         ContextVS.PROVIDER).build(x509TimeStampServerCert)
                 X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();

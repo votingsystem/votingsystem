@@ -27,6 +27,7 @@ import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
 import org.bouncycastle2.util.io.Streams;
+import org.votingsystem.model.ContextVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -294,7 +295,7 @@ public class CMSUtils {
     public static String getBase64ToHexStr(String base64Str) throws UnsupportedEncodingException {
         if (base64Str == null) return null;
         byte[] hexBytes = Hex.encode(base64Str.getBytes());
-        return new String(hexBytes, "UTF-8");
+        return new String(hexBytes, ContextVS.UTF_8);
     }
 
     public static AlgorithmIdentifier fixAlgID(AlgorithmIdentifier algId) {

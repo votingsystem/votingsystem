@@ -3,6 +3,7 @@ package org.votingsystem.util;
 import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Base64;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 
@@ -54,7 +55,7 @@ public class StringUtils {
     	if(string == null) return null;
     	String result = null;
         try {
-        	result = URLDecoder.decode(string, "UTF-8");
+        	result = URLDecoder.decode(string, ContextVS.UTF_8);
 		} catch (UnsupportedEncodingException ex) {
 			Log.e(TAG + ".decodeString()", ex.getMessage(), ex);
 		}

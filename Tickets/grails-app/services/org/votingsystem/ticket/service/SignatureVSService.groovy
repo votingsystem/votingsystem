@@ -13,6 +13,7 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
 import org.bouncycastle.util.encoders.Base64
+import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
@@ -310,6 +311,23 @@ class  SignatureVSService {
 		baos.close();
 		return baos.toByteArray();
 	}
+
+    public ResponseVS getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
+            Header... headers) {
+        log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+        if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+        if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+        SMIMEMessageWrapper smimeMessage = getSignedMailGenerator().genMimeMessage(
+                fromUser, toUser, textToSign, subject, headers)
+        MessageTimeStamper timeStamper = new MessageTimeStamper(
+                smimeMessage, "${grailsApplication.config.VotingSystem.urlTimeStampServer}/timeStamp")
+        ResponseVS responseVS = timeStamper.call();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        smimeMessage = timeStamper.getSmimeMessage();
+        responseVS = new ResponseVS(ResponseVS.SC_OK)
+        responseVS.setSmimeMessage(smimeMessage)
+        return responseVS;
+    }
 		
 	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (
 		String fromUser, String toUser,	final SMIMEMessageWrapper smimeMessage, String subject) {

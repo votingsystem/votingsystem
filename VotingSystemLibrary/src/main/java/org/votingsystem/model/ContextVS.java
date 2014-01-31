@@ -18,6 +18,7 @@ import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.FileUtils;
 
 import javax.mail.Session;
+import java.nio.charset.Charset;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -137,6 +138,9 @@ public class ContextVS {
     private static final long ROOT_KEYSTORE_PERIOD = 20000000000L;
     private static final long USER_KEYSTORE_PERIOD = 20000000000L;
     public static final int DAYS_ANONYMOUS_DELEGATION_DURATION = 10;
+
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     private UserVS userTest;
     private X509Certificate rootCACert;

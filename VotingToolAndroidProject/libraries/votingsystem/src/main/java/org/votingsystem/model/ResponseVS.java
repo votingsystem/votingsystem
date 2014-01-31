@@ -134,7 +134,8 @@ public class ResponseVS<T> implements Parcelable {
     public String getMessage() {
         String result = null;
         try {
-            if(message == null && messageBytes != null) result = new String(messageBytes, "UTF-8");
+            if(message == null && messageBytes != null) result = new String(messageBytes,
+                    ContextVS.UTF_8);
             else result = message;
         } catch(Exception ex) {
             ex.printStackTrace();

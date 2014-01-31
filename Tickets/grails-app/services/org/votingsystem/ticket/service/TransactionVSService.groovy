@@ -5,6 +5,7 @@ import grails.transaction.Transactional
 import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
+import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
@@ -15,6 +16,7 @@ import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.VoteVS
 import org.votingsystem.model.ticket.TicketVS
 import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -100,7 +102,25 @@ class TransactionVSService {
                 msg = messageSource.getMessage('userAllocationAdminErrorMsg', [signer.getNif()].toArray(), locale)
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.TICKET_DEPOSIT_ERROR)
             }
-            int numUsers = UserVS.countByType(UserVS.Type.USER)
+            Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
+            Calendar weekToCalendar = weekFromCalendar.clone();
+            weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
+
+            int numUsers = UserVS.createCriteria().count {
+                eq("type", UserVS.Type.USER)
+                le("dateCreated", weekFromCalendar.getTime())
+            }
+            def dataMapToSignBySystem = [numUsers:numUsers, amount: messageJSON.amount,
+                    currency:messageJSON.currency, allocationMessage:new String(Base64.encode(messageSMIMEReq.content))]
+            String dataToSignBySystem = new JSONObject(dataMapToSignBySystem).toString()
+            ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage(userVSService.getSystemUser().getNif(),
+                    null, dataToSignBySystem, messageSource.getMessage("userAllocationReceiptMsg", null, locale))
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS
+            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TICKET_USER_ALLOCATION_RECEIPT,
+                    smimeParent: messageSMIMEReq,
+                    content:responseVS.getSmimeMessage().getBytes())
+            MessageSMIME.withTransaction { messageSMIMEResp.save(); }
+
             BigDecimal numUsersBigDecimal = new BigDecimal(numUsers)
             CurrencyVS currency = CurrencyVS.valueOf(messageJSON.currency)
             String subject = messageJSON.subject
@@ -110,15 +130,12 @@ class TransactionVSService {
             log.debug("processUserAllocation - ${messageJSON}")
             if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
 
-            Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
-            Calendar weekToCalendar = weekFromCalendar.clone();
-            weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
-            TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
+            TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEResp,
                     state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
                     subject:subject, fromUserVS:signer, toUserVS: userVSService.getSystemUser(),
                     currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
-            def criteria = UserVS.createCriteria()
-            def usersToDeposit = criteria.scroll {
+
+            def usersToDeposit = UserVS.createCriteria().scroll {
                 eq("type", UserVS.Type.USER)
                 le("dateCreated", weekFromCalendar.getTime())
             }
@@ -175,8 +192,7 @@ class TransactionVSService {
     public Map getUserInfoMap(UserVS userVS, Calendar mondayLapse) {
         Calendar weekToCalendar = mondayLapse.clone();
         weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
-        def inputCriteria = TransactionVS.createCriteria()
-        def userInputTransactions = inputCriteria.scroll {
+        def userInputTransactions = TransactionVS.createCriteria().scroll {
             eq("toUserVS", userVS)
             or {
                 eq("type", TransactionVS.Type.USER_ALLOCATION_INPUT)
@@ -192,8 +208,7 @@ class TransactionVSService {
         //int month = calendar.get(Calendar.MONTH) + 1; // Note: zero based!
         //int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        def outputCriteria = TransactionVS.createCriteria()
-        def userOutputTransactions = outputCriteria.scroll {
+        def userOutputTransactions = TransactionVS.createCriteria().scroll {
             eq("fromUserVS", userVS)
             eq("type", TransactionVS.Type.TICKET_REQUEST)
             ge("dateCreated", mondayLapse.getTime())
