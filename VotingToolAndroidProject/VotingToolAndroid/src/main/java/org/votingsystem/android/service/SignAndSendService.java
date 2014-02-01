@@ -1,19 +1,13 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.model.ContentTypeVS;

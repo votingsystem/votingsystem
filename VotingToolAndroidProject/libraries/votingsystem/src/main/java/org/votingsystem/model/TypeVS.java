@@ -46,5 +46,7 @@ public enum TypeVS {
 
     TRANSACTION,
 
+    USER_ALLOCATION_INPUT,
+
     RECEIPT;
 }

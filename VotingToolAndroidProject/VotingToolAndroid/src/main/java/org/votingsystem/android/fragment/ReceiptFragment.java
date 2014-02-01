@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -39,12 +40,14 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -94,6 +97,7 @@ public class ReceiptFragment extends Fragment {
 
     private AppContextVS contextVS;
     private ReceiptContainer selectedReceipt;
+    private TransactionVS transaction;
     private View progressContainer;
     private FrameLayout mainLayout;
     private Menu menu;
@@ -146,7 +150,28 @@ public class ReceiptFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         String receiptURL = getArguments().getString(ContextVS.URL_KEY);
-        if(savedInstanceState != null) {
+        selectedReceipt = (ReceiptContainer) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
+        transaction = (TransactionVS) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
+        if(transaction != null) {
+            selectedReceipt = new ReceiptContainer(TypeVS.TICKET_REQUEST,
+                    transaction.getMessageSMIMEURL());
+            selectedReceipt.setTypeVS(transaction.getTypeVS());
+            try {
+                selectedReceipt.setReceiptBytes(transaction.getMessageSMIMEBytes());
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        if(selectedReceipt != null) {
+            try {
+                if(selectedReceipt.getReceipt() == null) {
+                    ReceiptDownloader getDataTask = new ReceiptDownloader();
+                    getDataTask.execute(selectedReceipt.getURL());
+                } else initReceiptScreen(selectedReceipt);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        } else if(savedInstanceState != null) {
             selectedReceipt = (ReceiptContainer) savedInstanceState.getSerializable(
                     ContextVS.RECEIPT_KEY);
             initReceiptScreen(selectedReceipt);
@@ -221,6 +246,7 @@ public class ReceiptFragment extends Fragment {
                 checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
                 menu.removeItem(R.id.cancel_vote);
                 break;
+            case TICKET_REQUEST:
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 menu.removeItem(R.id.cancel_vote);
@@ -431,6 +457,10 @@ public class ReceiptFragment extends Fragment {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     selectedReceipt.setReceiptBytes(responseVS.getMessageBytes());
+                    if(transaction != null) {
+                        transaction.setMessageSMIMEBytes(responseVS.getMessageBytes());
+                        contextVS.updateTransaction(transaction);
+                    }
                     initReceiptScreen(selectedReceipt);
                     setActionBar();
                 } catch (Exception ex) {
@@ -450,15 +480,27 @@ public class ReceiptFragment extends Fragment {
     public String getReceiptContentFormatted(ReceiptContainer selectedReceipt) {
         String result = null;
         try {
+            JSONObject dataJSON = null;
             switch(selectedReceipt.getTypeVS()) {
                 case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                    JSONObject dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
+                    dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
                     result = getString(R.string.anonymous_representative_request_formatted,
                             dataJSON.getString("weeksOperationActive"),
                             dataJSON.getString("dateFrom"),
                             dataJSON.getString("dateTo"),
                             dataJSON.getString("accessControlURL"));
+                    break;
+                case TICKET_REQUEST:
+                    dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
+                    BigDecimal totalAmount = new BigDecimal(dataJSON.getString("totalAmount"));
+                    String currency = dataJSON.getString("currency");
+                    String serverURL = dataJSON.getString("serverURL");
+                    JSONArray arrayTickets = dataJSON.getJSONArray("tickets");
+                    String ticketValueStr = arrayTickets.getJSONObject(0).getString("ticketValue");
+                    Integer numTickets = arrayTickets.getJSONObject(0).getInt("numTickets");
+                    result = getString(R.string.ticket_request_formatted, totalAmount.toPlainString(),
+                            currency, numTickets, ticketValueStr, serverURL);
                     break;
                 default: return selectedReceipt.getReceipt().getSignedContent();
             }

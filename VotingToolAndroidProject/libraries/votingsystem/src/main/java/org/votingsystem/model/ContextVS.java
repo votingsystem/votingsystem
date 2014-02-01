@@ -80,6 +80,7 @@ public class ContextVS {
     public static final String EVENTVS_KEY  = "EVENTVS";
     public static final String CURRENCY_KEY  = "CURRENCY_KEY";
     public static final String IBAN_KEY  = "IBAN_KEY";
+    public static final String TRANSACTION_KEY  = "TRANSACTION_KEY";
     public static final String VOTE_KEY  = "VOTE_KEY";
     public static final String RECEIPT_KEY  = "RECEIPT_KEY";
     public static final String STATE_KEY                   = "STATE";

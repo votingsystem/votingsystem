@@ -29,6 +29,7 @@ public class TransactionVS  implements Serializable {
     public enum State { OK, REPEATED, CANCELLED;}
 
     private Long id;
+    private Long localId;
     private String messageSMIMEURL;
     private String subject;
     private BigDecimal amount = null;
@@ -204,6 +205,14 @@ public class TransactionVS  implements Serializable {
         this.validTo = validTo;
     }
 
+    public Long getLocalId() {
+        return localId;
+    }
+
+    public void setLocalId(Long localId) {
+        this.localId = localId;
+    }
+
     public int getIconId(Context context) {
         switch(type) {
             case USER_ALLOCATION_INPUT:
@@ -214,6 +223,16 @@ public class TransactionVS  implements Serializable {
                 return R.drawable.euro_24;
             default:
                 return R.drawable.pending;
+        }
+    }
+
+    public TypeVS getTypeVS() {
+        switch(getType()){
+            case TICKET_REQUEST:
+                return TypeVS.TICKET_REQUEST;
+            case USER_ALLOCATION_INPUT:
+                return TypeVS.USER_ALLOCATION_INPUT;
+            default: return null;
         }
     }
 
@@ -233,9 +252,9 @@ public class TransactionVS  implements Serializable {
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(messageSMIME != null) s.writeObject(messageSMIME.getBytes());
+            if(getMessageSMIME() != null) s.writeObject(messageSMIME.getBytes());
             else s.writeObject(null);
-            if(cancellationSMIME != null) s.writeObject(cancellationSMIME.getBytes());
+            if(getCancellationSMIME() != null) s.writeObject(cancellationSMIME.getBytes());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();

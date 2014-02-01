@@ -351,6 +351,8 @@
     Duración de la delegación: \'%1$s\' semanas<br/><br/>Delegación activa desde: \'%2$s\'
     <br/><br/>Fecha fin de la delegación: \'%3$s\'<br/>
     <br/>URL de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
+    <string name="ticket_request_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
+    %3$s Tickets de %4$s %2$ss<br/><br/>URL de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
     <string name="receipt_vote_subtitle">Voto</string>
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
     <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>

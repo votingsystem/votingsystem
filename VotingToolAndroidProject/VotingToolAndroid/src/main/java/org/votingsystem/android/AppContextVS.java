@@ -228,8 +228,19 @@ public class AppContextVS extends Application {
 
     public Uri addTransaction(TransactionVS transactionVS, String weekLapse) {
         String weekLapseStr = (weekLapse == null) ? getCurrentWeekLapseId():weekLapse;
+        ContentValues values = populateTransactionContentValues(transactionVS);
+        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapseStr);
+        return getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+    }
+
+    public int updateTransaction(TransactionVS transactionVS) {
+        ContentValues values = populateTransactionContentValues(transactionVS);
+        return getContentResolver().update(TransactionVSContentProvider.getTransactionVSURI(
+                transactionVS.getLocalId()), values, null, null);
+    }
+
+    private ContentValues populateTransactionContentValues(TransactionVS transactionVS) {
         ContentValues values = new ContentValues();
-        values.put(TransactionVSContentProvider.SQL_INSERT_OR_REPLACE, true);
         values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
         values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
         values.put(TransactionVSContentProvider.FROM_USER_COL,
@@ -242,10 +253,9 @@ public class AppContextVS extends Application {
         values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
         values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
                 ObjectUtils.serializeObject(transactionVS));
-        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapseStr);
         values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
                 transactionVS.getDateCreated().getTime());
-        return getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+        return values;
     }
 
     public CurrencyData getCurrencyData(CurrencyVS currency) {
@@ -346,8 +356,7 @@ public class AppContextVS extends Application {
         try {
             FileInputStream fis = openFileInput(KEY_STORE_FILE);
             byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
-                    keyStoreBytes, pin.toCharArray());
+            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, pin.toCharArray());
             return true;
         } catch(Exception ex) {
             ex.printStackTrace();

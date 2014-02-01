@@ -22,8 +22,6 @@ public class TransactionVSContentProvider extends ContentProvider {
 
     public static final String TAG = "TransactionVSContentProvider";
 
-    //from http://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
-    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME       = "voting_system_transactionVS.db";
@@ -144,14 +142,6 @@ public class TransactionVSContentProvider extends ContentProvider {
         if(values != null) {
             values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
             values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-            if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
-                replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
-                // Clone the values object, so we don't modify the original.
-                // This is not strictly necessary, but depends on your needs
-                //values = new ContentValues( values );
-                // Remove the key, so we don't pass that on to db.insert() or db.replace()
-                values.remove( SQL_INSERT_OR_REPLACE );
-            }
             if ( replace ) {
                 rowId = database.replace(TABLE_NAME, null, values);
             } else {

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
@@ -33,7 +32,6 @@ import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PHONE_KEY;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.PROVIDER;
-import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;

@@ -44,6 +44,8 @@ public class ReceiptContainer implements Serializable {
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 return context.getString(R.string.receipt_anonimous_representative_request_subtitle);
+            case TICKET_REQUEST:
+                return context.getString(R.string.ticket_request_subtitle);
             default:
                 return context.getString(R.string.receipt_lbl);
         }
@@ -69,8 +71,10 @@ public class ReceiptContainer implements Serializable {
 
     public void setReceiptBytes(byte[] receiptBytes) throws Exception {
         this.receiptBytes = receiptBytes;
-        receipt = new SMIMEMessageWrapper(null, new ByteArrayInputStream(receiptBytes), null);
-        subject = receipt.getSubject();
+        if(receiptBytes != null) {
+            receipt = new SMIMEMessageWrapper(null, new ByteArrayInputStream(receiptBytes), null);
+            subject = receipt.getSubject();
+        }
     }
 
     public String getMessageId() {

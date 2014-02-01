@@ -21,14 +21,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -55,6 +60,7 @@ public class TransactionVSFragment extends Fragment {
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SMIMEMessageWrapper messageSMIME;
     private String broadCastId = null;
+    private AppContextVS contextVS;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -63,7 +69,15 @@ public class TransactionVSFragment extends Fragment {
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(pin != null) {
 
-        } else { }
+        } else {
+            switch(responseVS.getTypeVS()) {
+                case RECEIPT:
+                    byte[] receiptBytes = (byte[]) responseVS.getData();
+                    selectedTransactionVS.setMessageSMIMEBytes(receiptBytes);
+                    contextVS.updateTransaction(selectedTransactionVS);
+                break;
+            }
+        }
         }
     };
 
@@ -79,12 +93,16 @@ public class TransactionVSFragment extends Fragment {
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        contextVS = (AppContextVS) getActivity().getApplicationContext();
         //String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + "= ? ";
         Cursor cursor = getActivity().getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,
                 null, null, null, null);
         cursor.moveToPosition(cursorPosition);
+        Long transactionId = cursor.getLong(cursor.getColumnIndex(
+                TransactionVSContentProvider.ID_COL));
         selectedTransactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
+        selectedTransactionVS.setLocalId(transactionId);
         /*String weekLapseStr = cursor.getString(cursor.getColumnIndex(
                 TransactionVSContentProvider.WEEK_LAPSE_COL));
         String currencyStr = cursor.getString(cursor.getColumnIndex(
@@ -116,7 +134,7 @@ public class TransactionVSFragment extends Fragment {
         initTransactionVSScreen(selectedTransactionVS);
     }
 
-    private void initTransactionVSScreen (TransactionVS transactionvs) {
+    private void initTransactionVSScreen (final TransactionVS transactionvs) {
         Log.d(TAG + ".initTransactionVSScreen(...)", "transactionvsId: " + transactionvs.getId());
         if(transactionvs.getFromUserVS() != null) {
             from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
@@ -140,8 +158,16 @@ public class TransactionVSFragment extends Fragment {
         if(TransactionVS.Type.TICKET_REQUEST == transactionvs.getType()) {
             from_user.setVisibility(View.GONE);
             transactionvsSubject.setVisibility(View.GONE);
-            receipt.setVisibility(View.GONE);
+            receipt.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                    intent.putExtra(ContextVS.TRANSACTION_KEY, transactionvs);
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                    startActivity(intent);
+                }
+            });
         }
+
     }
 
     private void setActionBar() {
