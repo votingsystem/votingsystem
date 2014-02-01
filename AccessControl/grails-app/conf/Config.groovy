@@ -173,7 +173,28 @@ log4j = {
             error   'org.hibernate'
         }
 
-        production { }
+        production {
+            debug   'org.votingsystem','filters', 'grails.app', 'com.itextpdf.text.*'
+            //debug   'org.springframework.security'
+            //debug   'org.hibernate'
+            //debug   'org.apache'
+
+
+            error   'org.codehaus.groovy.grails.web.servlet',  //  controllers
+                    'org.codehaus.groovy.grails.web.pages', //  GSP
+                    'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+                    'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+                    'org.codehaus.groovy.grails.web.mapping', // URL mapping
+                    'org.codehaus.groovy.grails.commons', // core / classloading
+                    'org.codehaus.groovy.grails.plugins', // plugins
+                    'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
+                    'org.springframework',
+                    'grails.plugins',
+                    'grails.app.services.org.grails.plugin.resource',
+                    'grails.app.taglib.org.grails.plugin.resource',
+                    'grails.app.resourceMappers.org.grails.plugin.resource'
+            error   'org.hibernate'
+        }
 
         test{ }
 
