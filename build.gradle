@@ -34,7 +34,7 @@ task releaseAndroid () {
         proc.consumeProcessErrorStream(System.err)
         proc.consumeProcessOutputStream(System.out)
         if (proc.waitFor() != 0) {
-            throw new Exception("runCommand - project: '${project.name}' - commands: ${commands} - failed")
+            throw new Exception("runCommand - project: '${project.name}' - commands: 'gradle release' - failed")
         }
     }
 }

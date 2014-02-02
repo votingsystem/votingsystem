@@ -4,12 +4,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.8.+'
     }
 }
 
-apply plugin: 'android'
 apply plugin: 'announce'
+apply plugin: 'android'
 
 
 repositories {
@@ -18,9 +18,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion "18.1.1"
+    lintOptions {
+        abortOnError false
+    }
 
+    compileSdkVersion 19
+    buildToolsVersion "19.0.1"
 
     signingConfigs {
         release {
