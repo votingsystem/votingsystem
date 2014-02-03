@@ -24,7 +24,7 @@ import org.votingsystem.model.EventVS;
 public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
         implements PagerAdapterVS {
 
-    public static final String TAG = "EventNavigationPagerAdapter";
+    public static final String TAG = EventNavigationPagerAdapter.class.getSimpleName();
 
     private GroupPosition selectedGroup = GroupPosition.VOTING;
     private ChildPosition selectedChild = GroupPosition.VOTING.getChildList().get(0);

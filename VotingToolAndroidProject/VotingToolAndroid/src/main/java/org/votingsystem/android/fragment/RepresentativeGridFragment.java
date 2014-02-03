@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class RepresentativeGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
-    public static final String TAG = "RepresentativeGridFragment";
+    public static final String TAG = RepresentativeGridFragment.class.getSimpleName();
 
     private View rootView;
     private GridView gridView;
@@ -141,7 +141,7 @@ public class RepresentativeGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        broadCastId = this.getClass().getName();
+        broadCastId = RepresentativeGridFragment.class.getSimpleName();
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
@@ -231,7 +231,7 @@ public class RepresentativeGridFragment extends Fragment
                     RepresentativeService.class);
             startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
                     getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
-            startIntent.putExtra(ContextVS.CALLER_KEY, this.getClass().getName());
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);
             getActivity().startService(startIntent);
         }
@@ -397,17 +397,6 @@ public class RepresentativeGridFragment extends Fragment
         }
     }
 
-
-    @Override public void onStop() {
-        super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop - ");
-    }
-
-    @Override public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG + ".onDestroy()", "onDestroy");
-    }
-
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(ContextVS.OFFSET_KEY, offset);
@@ -422,7 +411,7 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+                broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {

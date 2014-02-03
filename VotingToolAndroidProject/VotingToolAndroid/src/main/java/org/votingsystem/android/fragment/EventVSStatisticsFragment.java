@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EventVSStatisticsFragment extends Fragment {
 	
-	public static final String TAG = "EventVSStatisticsFragment";
+	public static final String TAG = EventVSStatisticsFragment.class.getSimpleName();
 
     private View rootView;
     private EventVS eventVS;

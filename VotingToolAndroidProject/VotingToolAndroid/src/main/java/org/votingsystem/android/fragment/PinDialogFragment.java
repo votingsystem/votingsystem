@@ -45,7 +45,7 @@ import org.votingsystem.model.TypeVS;
 
 public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
-    public static final String TAG = "PinDialogFragment";
+    public static final String TAG = PinDialogFragment.class.getSimpleName();
 
     private TypeVS typeVS;
     private TextView msgTextView;

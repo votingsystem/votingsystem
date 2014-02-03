@@ -56,7 +56,7 @@ import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
  */
 public class VotingEventFragment extends Fragment implements View.OnClickListener {
 
-    public static final String TAG = "VotingEventFragment";
+    public static final String TAG = VotingEventFragment.class.getSimpleName();
 
     private TypeVS operation = TypeVS.VOTEVS;
     private EventVS eventVS;
@@ -168,7 +168,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         saveReceiptButton.setOnClickListener(this);
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
-        broadCastId = this.getClass().getSimpleName()+ "_" + eventVS.getId();
+        broadCastId = VotingEventFragment.class.getSimpleName() + "_" + eventVS.getId();
         return rootView;
     }
 

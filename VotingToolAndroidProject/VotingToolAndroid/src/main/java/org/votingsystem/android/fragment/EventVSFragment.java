@@ -55,7 +55,7 @@ import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
  */
 public class EventVSFragment extends Fragment implements View.OnClickListener {
 
-    public static final String TAG = "EventVSFragment";
+    public static final String TAG = EventVSFragment.class.getSimpleName();
 
     private Button signAndSendButton;
     private EventVS eventVS;
@@ -167,7 +167,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         eventSubject.setOnClickListener(this);
         if(savedInstanceState != null && savedInstanceState.getBoolean(
                 ContextVS.LOADING_KEY, false)) showProgress(true, true);
-        broadCastId = this.getClass().getSimpleName()+ "_" + eventVS.getId();
+        broadCastId = EventVSFragment.class.getSimpleName() + "_" + eventVS.getId();
         return rootView;
     }
 

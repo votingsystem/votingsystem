@@ -60,7 +60,7 @@ import static org.votingsystem.model.ContextVS.SURNAME_KEY;
  */
 public class UserCertRequestFormFragment extends Fragment {
 
-	public static final String TAG = "UserCertRequestFormFragment";
+	public static final String TAG = UserCertRequestFormFragment.class.getSimpleName();
 
     private String broadCastId = null;
     private String givenname = null;
@@ -96,7 +96,7 @@ public class UserCertRequestFormFragment extends Fragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        broadCastId = this.getClass().getName();
+        broadCastId = UserCertRequestFormFragment.class.getSimpleName();
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         // if set to true savedInstanceState will be allways null
         setRetainInstance(true);
@@ -157,21 +157,6 @@ public class UserCertRequestFormFragment extends Fragment {
         mainLayout.getForeground().setAlpha(0);
         if(progressVisible.get()) showProgress(true, true);
         return rootView;
-    }
-
-
-    @Override public void onStart() {
-    	Log.d(TAG + ".onStart(...) ", "onStart");
-    	super.onStart();
-    }
-
-    @Override public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG + ".onDestroy()", "onDestroy");
-    }
-
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
     @Override public void onResume() {
@@ -289,7 +274,7 @@ public class UserCertRequestFormFragment extends Fragment {
         startIntent.putExtra(SURNAME_KEY, surname);
         startIntent.putExtra(NIF_KEY, nif);
         startIntent.putExtra(EMAIL_KEY, email);
-        startIntent.putExtra(CALLER_KEY, this.getClass().getName());
+        startIntent.putExtra(CALLER_KEY, broadCastId);
         getActivity().startService(startIntent);
         showProgress(true, true);
     }

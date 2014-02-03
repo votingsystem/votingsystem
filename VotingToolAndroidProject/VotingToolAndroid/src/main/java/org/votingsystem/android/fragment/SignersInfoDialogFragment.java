@@ -27,7 +27,7 @@ import java.util.Set;
  */
 public class SignersInfoDialogFragment extends DialogFragment {
 
-    public static final String TAG = "SignersInfoDialogFragment";
+    public static final String TAG = SignersInfoDialogFragment.class.getSimpleName();
 
     public static SignersInfoDialogFragment newInstance(byte[] smimeMessage){
         SignersInfoDialogFragment frag = new SignersInfoDialogFragment();

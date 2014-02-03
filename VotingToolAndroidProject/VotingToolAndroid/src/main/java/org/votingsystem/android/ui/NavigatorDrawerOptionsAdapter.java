@@ -40,7 +40,8 @@ import java.util.List;
  */
 public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
-    public static final String TAG = "NavigatorDrawerOptionsAdapter";
+    public static final String TAG = NavigatorDrawerOptionsAdapter.class.getSimpleName();
+
     public static final String GROUP_POSITION_KEY = "groupPosition";
 
     public static final int VOTING_GROUP_POSITION          = 0;

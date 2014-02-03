@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class PublishEventVSFragment extends Fragment {
 	
-	public static final String TAG = "PublishEventVSFragment";
+	public static final String TAG = PublishEventVSFragment.class.getSimpleName();
 	
 
 	private TypeVS formType;
@@ -258,7 +258,7 @@ public class PublishEventVSFragment extends Fragment {
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        broadCastId = this.getClass().getSimpleName();
+        broadCastId = PublishEventVSFragment.class.getSimpleName();
         formType = (TypeVS)getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         switch(formType) {
             case CLAIM_PUBLISHING:

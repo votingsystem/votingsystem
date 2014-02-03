@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ReceiptGridFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{
 
-    public static final String TAG = "ReceiptGridFragment";
+    public static final String TAG = ReceiptGridFragment.class.getSimpleName();
 
     private View rootView;
     private ReceiptGridAdapter adapter = null;

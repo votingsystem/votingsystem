@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class TicketFragment extends Fragment {
 
-    public static final String TAG = "TicketFragment";
+    public static final String TAG = TicketFragment.class.getSimpleName();
 
     private AppContextVS contextVS;
     private TicketVS selectedTicket;
@@ -112,7 +112,7 @@ public class TicketFragment extends Fragment {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
+        broadCastId = TicketFragment.class.getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.ticket_fragment, container, false);

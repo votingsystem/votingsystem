@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RepresentativeFragment extends Fragment {
 
-	public static final String TAG = "RepresentativeFragment";
+	public static final String TAG = RepresentativeFragment.class.getSimpleName();
 
     private static final int REPRESENTATIVE_DELEGATION   = 1;
 
@@ -118,7 +118,7 @@ public class RepresentativeFragment extends Fragment {
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
-        broadCastId = this.getClass().getSimpleName()+ "_" + representativeId;
+        broadCastId = RepresentativeFragment.class.getSimpleName() + "_" + representativeId;
         if(representative.getDescription() != null) {
             printRepresentativeData(representative);
         } else {

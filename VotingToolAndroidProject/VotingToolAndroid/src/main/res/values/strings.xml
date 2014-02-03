@@ -265,8 +265,8 @@
     <string name="cert_info_formated_msg"><![CDATA[<html><b>Asunto: </b>%1$s<br/><b>Emisor del certificado: </b> %2$s <br/> \n \
     <b>Num. serie del certificado: </b> %3$s <br/><b>Valido desde: </b> %4$s<br/> \n \
     <b>Valido hasta: </b> %5$s<br/></html>]]></string>
-    <string name="timestamp_info_formated_msg"><![CDATA[<html><b>Fecha: </b>%1$s<br/><b>Num. de serie: </b> %2$s <br/> \n \
-    <b>Num. serie de certificado firmante: </b> %3$s <br/><b>Certificado firmante:<br/></b> %4$s]]></string>
+    <string name="timestamp_info_formated_msg"><![CDATA[<html><b>Fecha: </b>%1$s<br/><b>Num. serie del sello de tiempo:</b><br/> %2$s <br/> \n \
+    <br/><b>Certificado firmante:</b><br/> %3$s<br/><b>Num. serie de certificado: </b> %4$s ]]></string>
 
     <string name="share_receipt_lbl">Compartir recibo</string>
     <string name="check_receipt_lbl">Comprobar voto en el recuento</string>
@@ -356,7 +356,7 @@
     <string name="user_allocation_input_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
     Repartidos entre <b>%3$s usuarios</b>]]></string>
     <string name="user_allocation_input_receipt_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
-    Asunto: <b>%3$s</b><br/>IBAN: <b>%4$s usuarios</b>]]></string>
+    IBAN: <b>%3$s usuarios</b>]]></string>
 
     <string name="receipt_vote_subtitle">Voto</string>
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>

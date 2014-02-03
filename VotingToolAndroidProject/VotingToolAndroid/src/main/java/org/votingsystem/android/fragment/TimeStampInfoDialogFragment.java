@@ -39,7 +39,7 @@ import java.util.Collection;
  */
 public class TimeStampInfoDialogFragment extends DialogFragment {
 
-    public static final String TAG = "TimeStampInfoDialogFragment";
+    public static final String TAG = TimeStampInfoDialogFragment.class.getSimpleName();
 
     public static TimeStampInfoDialogFragment newInstance(TimeStampToken timeStampToken,
             AppContextVS contextVS){
@@ -94,8 +94,8 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
             timeStampToken.validate(timeStampCert, ContextVS.PROVIDER);
             htmlInfo = contextVS.getString(R.string.timestamp_info_formated_msg, dateInfoStr,
                     tsInfo.getSerialNumber().toString(),
-                    timeStampToken.getSID().getSerialNumber().toString(),
-                    timeStampCert.getSubjectDN());
+                    timeStampCert.getSubjectDN(),
+                    timeStampToken.getSID().getSerialNumber().toString());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

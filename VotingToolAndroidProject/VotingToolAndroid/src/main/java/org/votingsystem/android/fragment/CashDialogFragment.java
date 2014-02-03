@@ -44,7 +44,7 @@ import java.math.BigDecimal;
 
 public class CashDialogFragment extends DialogFragment {
 
-    public static final String TAG = "CashDialogFragment";
+    public static final String TAG = CashDialogFragment.class.getSimpleName();
 
     public static final String MAX_VALUE_KEY = "MAX_VALUE_KEY";
 

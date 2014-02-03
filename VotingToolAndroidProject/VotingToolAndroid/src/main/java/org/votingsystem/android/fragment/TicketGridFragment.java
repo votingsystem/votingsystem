@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TicketGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
-    public static final String TAG = "TicketGridFragment";
+    public static final String TAG = TicketGridFragment.class.getSimpleName();
 
     private View rootView;
     private GridView gridView;
@@ -66,7 +66,7 @@ public class TicketGridFragment extends Fragment
     private Integer firstVisiblePosition = null;
     private View progressContainer;
     private FrameLayout gridContainer;
-    private String broadCastId;
+    private String broadCastId = TicketGridFragment.class.getSimpleName();
     private int loaderId = -1;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -107,7 +107,6 @@ public class TicketGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        broadCastId = this.getClass().getName();
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.TICKETS.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
@@ -283,10 +282,8 @@ public class TicketGridFragment extends Fragment
             if(cursor != null) {
                 byte[] serializedTicket = cursor.getBlob(cursor.getColumnIndex(
                         TicketContentProvider.SERIALIZED_OBJECT_COL));
-
                 Long ticketId = cursor.getLong(cursor.getColumnIndex(
                         TicketContentProvider.ID_COL));
-
 
                 TicketVS ticket = (TicketVS) ObjectUtils.
                         deSerializeObject(serializedTicket);
@@ -312,19 +309,8 @@ public class TicketGridFragment extends Fragment
                 amount.setText(ticket.getAmount().toPlainString());
                 TextView currency = (TextView) view.findViewById(R.id.currency);
                 currency.setText(ticket.getCurrency().toString());
-
             }
         }
-    }
-
-    @Override public void onStop() {
-        super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop - ");
-    }
-
-    @Override public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG + ".onDestroy()", "onDestroy");
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -340,7 +326,7 @@ public class TicketGridFragment extends Fragment
         Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+                broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {

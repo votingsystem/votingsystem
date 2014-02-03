@@ -20,7 +20,7 @@ import org.votingsystem.model.ResponseVS;
  */
 public class MessageDialogFragment extends DialogFragment {
 
-    public static final String TAG = "MessageDialogFragment";
+    public static final String TAG = MessageDialogFragment.class.getSimpleName();
 
     public static MessageDialogFragment newInstance(Integer statusCode, String caption,
                     String message){

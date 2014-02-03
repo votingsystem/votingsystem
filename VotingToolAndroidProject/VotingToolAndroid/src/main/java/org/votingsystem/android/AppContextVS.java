@@ -61,7 +61,7 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
  */
 public class AppContextVS extends Application {
 
-    public static final String TAG = "AppContextVS";
+    public static final String TAG = AppContextVS.class.getSimpleName();
 
     private State state = State.WITHOUT_CSR;
     private String ticketServerURL;

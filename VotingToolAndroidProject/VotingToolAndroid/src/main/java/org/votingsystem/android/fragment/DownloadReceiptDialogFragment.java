@@ -23,7 +23,7 @@ import org.votingsystem.model.TypeVS;
  */
 public class DownloadReceiptDialogFragment extends DialogFragment {
 
-    public static final String TAG = "DownloadReceiptDialogFragment";
+    public static final String TAG = DownloadReceiptDialogFragment.class.getSimpleName();
 
     public static DownloadReceiptDialogFragment newInstance(Integer statusCode, String caption,
                     String message, String url, TypeVS typeVS){

@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TransactionVSGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
-    public static final String TAG = "TransactionVSGridFragment";
+    public static final String TAG = TransactionVSGridFragment.class.getSimpleName();
 
     private View rootView;
     private GridView gridView;
@@ -69,7 +69,7 @@ public class TransactionVSGridFragment extends Fragment
     private Integer firstVisiblePosition = null;
     private View progressContainer;
     private FrameLayout gridContainer;
-    private String broadCastId = getClass().getName();
+    private String broadCastId = TransactionVSGridFragment.class.getName();
     private int loaderId = -1;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

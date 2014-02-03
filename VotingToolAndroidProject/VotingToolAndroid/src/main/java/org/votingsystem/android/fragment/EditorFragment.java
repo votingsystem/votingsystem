@@ -29,7 +29,7 @@ import java.util.Locale;
  */
 public class EditorFragment extends Fragment {
 	
-	public static final String TAG = "EditorFragment";
+	public static final String TAG = EditorFragment.class.getSimpleName();
 	
 	private WebView webView;
 	private JavaScriptInterface javaScriptInterface;

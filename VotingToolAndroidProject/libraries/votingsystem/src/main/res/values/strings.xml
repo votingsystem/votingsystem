@@ -47,5 +47,6 @@
     <string name="ticket_request_subtitle">Obtención de Tickets</string>
     <string name="user_allocation_input">Confirmación de ingreso colectivo.</string>
     <string name="user_allocation_input_receipt">Ingreso colectivo.</string>
+    <string name="ticket_cancellation">Cancelación de Tickets</string>
 
 </resources>

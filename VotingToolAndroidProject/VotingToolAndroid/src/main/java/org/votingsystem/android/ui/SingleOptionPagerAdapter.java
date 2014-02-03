@@ -23,7 +23,7 @@ import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         implements PagerAdapterVS {
 
-    public static final String TAG = "SingleOptionPagerAdapter";
+    public static final String TAG = SingleOptionPagerAdapter.class.getSimpleName();
 
     private ChildPosition selectedChild = null;
     private GroupPosition selectedGroup = null;

@@ -28,7 +28,7 @@ import org.votingsystem.model.TypeVS;
  */
 public class NewFieldDialogFragment extends DialogFragment {
 
-    public static final String TAG = "NewFieldDialogFragment";
+    public static final String TAG = NewFieldDialogFragment.class.getSimpleName();
 
     private TextView error_message;
     private EditText fieldEditText;

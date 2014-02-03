@@ -11,7 +11,7 @@ import org.votingsystem.model.OperationVS;
  */
 public class JavaScriptInterface {
 	
-	public static final String TAG = "JavaScriptInterface";
+	public static final String TAG = JavaScriptInterface.class.getSimpleName();
 
     private EditorFragment editorFragment;
 

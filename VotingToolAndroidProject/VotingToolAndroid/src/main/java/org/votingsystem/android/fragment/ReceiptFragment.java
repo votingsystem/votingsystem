@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ReceiptFragment extends Fragment {
 
-    public static final String TAG = "ReceiptFragment";
+    public static final String TAG = ReceiptFragment.class.getSimpleName();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -136,7 +136,7 @@ public class ReceiptFragment extends Fragment {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
+        broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
@@ -234,7 +234,9 @@ public class ReceiptFragment extends Fragment {
             JSONObject dataJSON = null;
             BigDecimal totalAmount = null;
             String currency = null;
-            String subject = null;
+            selectedReceiptSMIME = receiptContainer.getReceipt();
+            String receiptSubjectStr = selectedReceiptSMIME == null? null :
+                    selectedReceiptSMIME.getSubject();
             switch(receiptContainer.getTypeVS()) {
                 case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_REPRESENTATIVE_REQUEST:
@@ -269,16 +271,14 @@ public class ReceiptFragment extends Fragment {
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
                     totalAmount = new BigDecimal(dataJSON.getString("amount"));
                     currency = dataJSON.getString("currency");
-                    subject = dataJSON.getString("subject");
+                    receiptSubjectStr = dataJSON.getString("subject");
                     String IBAN = dataJSON.getString("IBAN");
                     contentFormatted = getString(R.string.user_allocation_input_receipt_formatted,
-                            totalAmount.toPlainString(), currency, subject, IBAN);
+                            totalAmount.toPlainString(), currency, IBAN);
                     break;
                 default: contentFormatted = receiptContainer.getReceipt().getSignedContent();
             }
-            selectedReceiptSMIME = receiptContainer.getReceipt();
-            receiptSubject.setText(getString(R.string.smime_subject_msg,
-                    selectedReceiptSMIME.getSubject()));
+            receiptSubject.setText(getString(R.string.smime_subject_msg, receiptSubjectStr));
             receipt_content.setText(Html.fromHtml(contentFormatted));
             if(receiptContainer.getTypeVS() == TypeVS.USER_ALLOCATION_INPUT) {
                 receipt.setText(Html.fromHtml(getString(R.string.user_allocation_receipt_url, "")));
@@ -291,6 +291,7 @@ public class ReceiptFragment extends Fragment {
                         try {
                             selectedReceiptChild.setReceiptBytes(selectedReceiptChildBytes);
                             initReceiptScreen(selectedReceiptChild);
+                            setActionBar(selectedReceiptChild);
                         } catch(Exception ex) {ex.printStackTrace();}
                     }
                 });
@@ -301,11 +302,11 @@ public class ReceiptFragment extends Fragment {
     }
 
 
-    private void setActionBar() {
-        if(selectedReceipt == null) return;
-        switch(selectedReceipt.getTypeVS()) {
+    private void setActionBar(ReceiptContainer receiptContainer) {
+        if(receiptContainer == null) return;
+        switch(receiptContainer.getTypeVS()) {
             case VOTEVS:
-                if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
+                if(((VoteVS)receiptContainer).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
@@ -323,22 +324,22 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.check_receipt);
                 break;
             default: Log.d(TAG + ".onCreateOptionsMenu(...) ", "unprocessed type: " +
-                    selectedReceipt.getTypeVS());
+                    receiptContainer.getTypeVS());
         }
-        if(selectedReceipt.getLocalId() < 0) {
+        if(receiptContainer.getLocalId() < 0) {
             menu.removeItem(R.id.delete_receipt);
         } else menu.removeItem(R.id.save_receipt);
         if(getActivity() instanceof ActionBarActivity) {
             ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                    selectedReceipt.getTypeDescription(getActivity()));
+                    receiptContainer.getTypeDescription(getActivity()));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(R.drawable.receipt_32);
         }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(selectedReceipt != null) outState.putSerializable(ContextVS.RECEIPT_KEY, selectedReceipt);
+        if(selectedReceipt != null) outState.putSerializable(ContextVS.RECEIPT_KEY,selectedReceipt);
     }
 
     @Override public void onResume() {
@@ -360,7 +361,7 @@ public class ReceiptFragment extends Fragment {
                 selectedReceipt.getTypeVS());
         menuInflater.inflate(R.menu.receipt_fragment, menu);
         this.menu = menu;
-        setActionBar();
+        setActionBar(selectedReceipt);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -525,7 +526,7 @@ public class ReceiptFragment extends Fragment {
                         TransactionVSContentProvider.updateTransaction(contextVS, transaction);
                     }
                     initReceiptScreen(selectedReceipt);
-                    setActionBar();
+                    setActionBar(selectedReceipt);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),

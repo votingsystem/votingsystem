@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class HorizontalNumberPicker extends LinearLayout {
 
-    public static final String TAG = "HorizontalNumberPicker";
+    public static final String TAG = HorizontalNumberPicker.class.getSimpleName();
 
     private EditText edit_text;
     private Button btn_plus;

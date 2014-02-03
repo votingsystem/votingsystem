@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class TicketUserInfoFragment extends Fragment {
 
-	public static final String TAG = "TicketUserInfoFragment";
+	public static final String TAG = TicketUserInfoFragment.class.getSimpleName();
 
     private BigDecimal amount;
     private CurrencyVS currencyVS = CurrencyVS.Euro;
@@ -128,7 +128,7 @@ public class TicketUserInfoFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        broadCastId = this.getClass().getSimpleName();
+        broadCastId = TicketUserInfoFragment.class.getSimpleName();
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();

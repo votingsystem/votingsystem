@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class EventVSGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
-    public static final String TAG = "EventVSGridFragment";
+    public static final String TAG = EventVSGridFragment.class.getSimpleName();
 
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private AtomicBoolean hasHTTPConnection = new AtomicBoolean(true);
@@ -167,8 +167,8 @@ public class EventVSGridFragment extends Fragment
         gridView.setOnScrollListener(this);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         gridContainer = (FrameLayout) rootView.findViewById(R.id.gridContainer);
-        broadCastId = this.getClass().getSimpleName()+ "_" + groupPosition.toString() + "_" +
-                eventState.toString();
+        broadCastId = EventVSGridFragment.class.getSimpleName() + "_" + groupPosition.toString() +
+                "_" + eventState.toString();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         gridContainer.getForeground().setAlpha(0);

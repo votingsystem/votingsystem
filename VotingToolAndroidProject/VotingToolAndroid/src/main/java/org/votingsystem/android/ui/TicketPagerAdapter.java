@@ -25,7 +25,7 @@ import java.util.Calendar;
 public class TicketPagerAdapter extends FragmentStatePagerAdapter
         implements PagerAdapterVS {
 
-    public static final String TAG = "TicketPagerAdapter";
+    public static final String TAG = TicketPagerAdapter.class.getSimpleName();
 
     private ChildPosition selectedChild = null;
     private GroupPosition selectedGroup = GroupPosition.TICKETS;

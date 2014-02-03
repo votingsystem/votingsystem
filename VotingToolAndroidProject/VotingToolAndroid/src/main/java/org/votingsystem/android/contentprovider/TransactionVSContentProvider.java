@@ -151,16 +151,12 @@ public class TransactionVSContentProvider extends ContentProvider {
         // NOTE Argument checking code omitted. Check your parameters! Check that
         // your row addition request succeeded!
         long rowId = -1;
-        boolean replace = false;
         Uri newUri = null;
         if(values != null) {
             values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
             values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-            if ( replace ) {
-                rowId = database.replace(TABLE_NAME, null, values);
-            } else {
-                rowId = database.insert(TABLE_NAME, null, values);
-            }
+            //identifies the primary key and finds a matching row to update, inserting a new one if none is found.
+            rowId = database.replace(TABLE_NAME, null, values);
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
         // Notify any listeners and return the URI of the new row.

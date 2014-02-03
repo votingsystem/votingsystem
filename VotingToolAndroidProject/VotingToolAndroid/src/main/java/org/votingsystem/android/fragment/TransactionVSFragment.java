@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class TransactionVSFragment extends Fragment {
 
-    public static final String TAG = "TransactionVSFragment";
+    public static final String TAG = TransactionVSFragment.class.getSimpleName();
 
     private TransactionVS selectedTransactionVS;
     private View progressContainer;
@@ -108,7 +108,7 @@ public class TransactionVSFragment extends Fragment {
         String currencyStr = cursor.getString(cursor.getColumnIndex(
                 TransactionVSContentProvider.CURRENCY_COL));
         Log.d(TAG + ".onCreateView(...)", "weekLapse: " + weekLapseStr + " - currency:" + currencyStr);*/
-        broadCastId = this.getClass().getSimpleName() + "_" + cursorPosition;
+        broadCastId = TransactionVSFragment.class.getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.transactionvs_fragment, container, false);

@@ -215,6 +215,7 @@ public class TransactionVS  implements Serializable {
 
     public int getIconId(Context context) {
         switch(type) {
+            case TICKET_CANCELLATION:
             case USER_ALLOCATION_INPUT:
                 return R.drawable.edit_redo_24;
             case TICKET_REQUEST:
@@ -238,6 +239,8 @@ public class TransactionVS  implements Serializable {
 
     public String getDescription(Context context) {
         switch(type) {
+            case TICKET_CANCELLATION:
+                return context.getString(R.string.ticket_cancellation);
             case USER_ALLOCATION_INPUT:
                 return context.getString(R.string.account_input);
             case TICKET_REQUEST:
