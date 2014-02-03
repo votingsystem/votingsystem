@@ -13,17 +13,22 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
+import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -37,7 +42,7 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
     public static final String TAG = "TimeStampInfoDialogFragment";
 
     public static TimeStampInfoDialogFragment newInstance(TimeStampToken timeStampToken,
-            Context context){
+            AppContextVS contextVS){
         TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
         String certificateInfo = null;
         SignerId signerId = timeStampToken.getSID();
@@ -69,7 +74,7 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
                 try {
                     X509Certificate certificate = new JcaX509CertificateConverter().
                             getCertificate(certificateHolder);
-                    certificateInfo = context.getString(R.string.cert_info_formated_msg,
+                    certificateInfo = contextVS.getString(R.string.cert_info_formated_msg,
                             certificate.getSubjectDN().toString(),
                             certificate.getIssuerDN().toString(),
                             certificate.getSerialNumber().toString(),
@@ -83,10 +88,17 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
                 if(!validationOk) Log.d(TAG + ".newInstance(...)", "Validation ERROR");
             }
         }
-        String htmlInfo = context.getString(R.string.timestamp_info_formated_msg, dateInfoStr,
-                tsInfo.getSerialNumber().toString(),
-                timeStampToken.getSID().getSerialNumber().toString(),
-                certificateInfo);
+        String htmlInfo = null;
+        X509Certificate timeStampCert = contextVS.getTimeStampCert();
+        try {
+            timeStampToken.validate(timeStampCert, ContextVS.PROVIDER);
+            htmlInfo = contextVS.getString(R.string.timestamp_info_formated_msg, dateInfoStr,
+                    tsInfo.getSerialNumber().toString(),
+                    timeStampToken.getSID().getSerialNumber().toString(),
+                    timeStampCert.getSubjectDN());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         TimeStampInfoDialogFragment frag = new TimeStampInfoDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, htmlInfo);

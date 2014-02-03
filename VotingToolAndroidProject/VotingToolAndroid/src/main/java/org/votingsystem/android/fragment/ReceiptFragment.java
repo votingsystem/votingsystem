@@ -30,11 +30,14 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
+import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -47,6 +50,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -97,12 +101,14 @@ public class ReceiptFragment extends Fragment {
 
     private AppContextVS contextVS;
     private ReceiptContainer selectedReceipt;
+    private ReceiptContainer selectedReceiptChild;
     private TransactionVS transaction;
     private View progressContainer;
     private FrameLayout mainLayout;
     private Menu menu;
     private TextView receiptSubject;
     private TextView receipt_content;
+    private TextView receipt;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SMIMEMessageWrapper selectedReceiptSMIME;
     private String broadCastId = null;
@@ -126,7 +132,7 @@ public class ReceiptFragment extends Fragment {
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
@@ -139,6 +145,7 @@ public class ReceiptFragment extends Fragment {
         receipt_content = (TextView)rootView.findViewById(R.id.receipt_content);
         receipt_content.setMovementMethod(LinkMovementMethod.getInstance());
         receiptSubject = (TextView)rootView.findViewById(R.id.receipt_subject);
+        receipt = (TextView)rootView.findViewById(R.id.receipt);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
@@ -153,9 +160,8 @@ public class ReceiptFragment extends Fragment {
         selectedReceipt = (ReceiptContainer) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
         transaction = (TransactionVS) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
         if(transaction != null) {
-            selectedReceipt = new ReceiptContainer(TypeVS.TICKET_REQUEST,
+            selectedReceipt = new ReceiptContainer(transaction.getTypeVS(),
                     transaction.getMessageSMIMEURL());
-            selectedReceipt.setTypeVS(transaction.getTypeVS());
             try {
                 selectedReceipt.setReceiptBytes(transaction.getMessageSMIMEBytes());
             } catch(Exception ex) {
@@ -219,17 +225,81 @@ public class ReceiptFragment extends Fragment {
         }
     }
 
-    private void initReceiptScreen (ReceiptContainer receipt) {
-        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receipt.getTypeVS() + " - messageId: " +
-            receipt.getMessageId());
+    private void initReceiptScreen (ReceiptContainer receiptContainer) {
+        Log.d(TAG + ".initReceiptScreen(...)", "type: " + receiptContainer.getTypeVS() +
+                " - messageId: " + receiptContainer.getMessageId());
         try {
-            selectedReceiptSMIME = receipt.getReceipt();
-            receiptSubject.setText(getString(R.string.smime_subject_msg, selectedReceipt.getSubject()));
-            receipt_content.setText(Html.fromHtml(getReceiptContentFormatted(selectedReceipt)));
+            String contentFormatted = null;
+            String bas64EncodedSMIMEChild = null;
+            JSONObject dataJSON = null;
+            BigDecimal totalAmount = null;
+            String currency = null;
+            String subject = null;
+            switch(receiptContainer.getTypeVS()) {
+                case REPRESENTATIVE_SELECTION:
+                case ANONYMOUS_REPRESENTATIVE_REQUEST:
+                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
+                    contentFormatted = getString(R.string.anonymous_representative_request_formatted,
+                            dataJSON.getString("weeksOperationActive"),
+                            dataJSON.getString("dateFrom"),
+                            dataJSON.getString("dateTo"),
+                            dataJSON.getString("accessControlURL"));
+                    break;
+                case TICKET_REQUEST:
+                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
+                    totalAmount = new BigDecimal(dataJSON.getString("totalAmount"));
+                    currency = dataJSON.getString("currency");
+                    String serverURL = dataJSON.getString("serverURL");
+                    JSONArray arrayTickets = dataJSON.getJSONArray("tickets");
+                    String ticketValueStr = arrayTickets.getJSONObject(0).getString("ticketValue");
+                    Integer numTickets = arrayTickets.getJSONObject(0).getInt("numTickets");
+                    contentFormatted = getString(R.string.ticket_request_formatted,
+                            totalAmount.toPlainString(), currency, numTickets, ticketValueStr, serverURL);
+                    break;
+                case USER_ALLOCATION_INPUT:
+                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
+                    totalAmount = new BigDecimal(dataJSON.getString("amount"));
+                    currency = dataJSON.getString("currency");
+                    Integer numUsers = dataJSON.getInt("numUsers");
+                    bas64EncodedSMIMEChild = dataJSON.getString("allocationMessage");
+                    contentFormatted = getString(R.string.user_allocation_input_formatted,
+                            totalAmount.toPlainString(), currency, numUsers);
+                    break;
+                case USER_ALLOCATION_INPUT_RECEIPT:
+                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
+                    totalAmount = new BigDecimal(dataJSON.getString("amount"));
+                    currency = dataJSON.getString("currency");
+                    subject = dataJSON.getString("subject");
+                    String IBAN = dataJSON.getString("IBAN");
+                    contentFormatted = getString(R.string.user_allocation_input_receipt_formatted,
+                            totalAmount.toPlainString(), currency, subject, IBAN);
+                    break;
+                default: contentFormatted = receiptContainer.getReceipt().getSignedContent();
+            }
+            selectedReceiptSMIME = receiptContainer.getReceipt();
+            receiptSubject.setText(getString(R.string.smime_subject_msg,
+                    selectedReceiptSMIME.getSubject()));
+            receipt_content.setText(Html.fromHtml(contentFormatted));
+            if(receiptContainer.getTypeVS() == TypeVS.USER_ALLOCATION_INPUT) {
+                receipt.setText(Html.fromHtml(getString(R.string.user_allocation_receipt_url, "")));
+                receipt.setVisibility(View.VISIBLE);
+                final byte[] selectedReceiptChildBytes = Base64.decode(bas64EncodedSMIMEChild);
+                receipt.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        selectedReceiptChild = new ReceiptContainer(
+                                TypeVS.USER_ALLOCATION_INPUT_RECEIPT, null);
+                        try {
+                            selectedReceiptChild.setReceiptBytes(selectedReceiptChildBytes);
+                            initReceiptScreen(selectedReceiptChild);
+                        } catch(Exception ex) {ex.printStackTrace();}
+                    }
+                });
+            } else receipt.setVisibility(View.GONE);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
     }
+
 
     private void setActionBar() {
         if(selectedReceipt == null) return;
@@ -266,19 +336,6 @@ public class ReceiptFragment extends Fragment {
         }
     }
 
-    @Override public void onStart() {
-        Log.d(TAG + ".onStart(...) ", "");
-        super.onStart();
-    }
-
-
-    @Override public void onDestroy() {
-        Log.d(TAG + ".onDestroy()", "");
-        super.onDestroy();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
-    }
-
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if(selectedReceipt != null) outState.putSerializable(ContextVS.RECEIPT_KEY, selectedReceipt);
@@ -310,6 +367,12 @@ public class ReceiptFragment extends Fragment {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         AlertDialog dialog = null;
         switch (item.getItemId()) {
+            case android.R.id.home:
+                if(selectedReceiptChild != null) {
+                    initReceiptScreen(selectedReceipt);
+                    selectedReceiptChild = null;
+                    return true;
+                } else return false;
             case R.id.show_signers_info:
                 try {
                     SignersInfoDialogFragment newFragment = SignersInfoDialogFragment.newInstance(
@@ -322,7 +385,7 @@ public class ReceiptFragment extends Fragment {
             case R.id.show_timestamp_info:
                 TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
                         selectedReceiptSMIME.getSigner().getTimeStampToken(),
-                        getActivity().getApplicationContext());
+                        (AppContextVS) getActivity().getApplicationContext());
                 newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
                 break;
             case R.id.share_receipt:
@@ -459,7 +522,7 @@ public class ReceiptFragment extends Fragment {
                     selectedReceipt.setReceiptBytes(responseVS.getMessageBytes());
                     if(transaction != null) {
                         transaction.setMessageSMIMEBytes(responseVS.getMessageBytes());
-                        contextVS.updateTransaction(transaction);
+                        TransactionVSContentProvider.updateTransaction(contextVS, transaction);
                     }
                     initReceiptScreen(selectedReceipt);
                     setActionBar();
@@ -476,38 +539,5 @@ public class ReceiptFragment extends Fragment {
         }
     }
 
-
-    public String getReceiptContentFormatted(ReceiptContainer selectedReceipt) {
-        String result = null;
-        try {
-            JSONObject dataJSON = null;
-            switch(selectedReceipt.getTypeVS()) {
-                case REPRESENTATIVE_SELECTION:
-                case ANONYMOUS_REPRESENTATIVE_REQUEST:
-                    dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
-                    result = getString(R.string.anonymous_representative_request_formatted,
-                            dataJSON.getString("weeksOperationActive"),
-                            dataJSON.getString("dateFrom"),
-                            dataJSON.getString("dateTo"),
-                            dataJSON.getString("accessControlURL"));
-                    break;
-                case TICKET_REQUEST:
-                    dataJSON = new JSONObject(selectedReceipt.getReceipt().getSignedContent());
-                    BigDecimal totalAmount = new BigDecimal(dataJSON.getString("totalAmount"));
-                    String currency = dataJSON.getString("currency");
-                    String serverURL = dataJSON.getString("serverURL");
-                    JSONArray arrayTickets = dataJSON.getJSONArray("tickets");
-                    String ticketValueStr = arrayTickets.getJSONObject(0).getString("ticketValue");
-                    Integer numTickets = arrayTickets.getJSONObject(0).getInt("numTickets");
-                    result = getString(R.string.ticket_request_formatted, totalAmount.toPlainString(),
-                            currency, numTickets, ticketValueStr, serverURL);
-                    break;
-                default: return selectedReceipt.getReceipt().getSignedContent();
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return result;
-    }
 
 }

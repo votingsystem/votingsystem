@@ -14,6 +14,20 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
+import org.votingsystem.model.CurrencyData;
+import org.votingsystem.model.CurrencyVS;
+import org.votingsystem.model.TicketAccount;
+import org.votingsystem.model.TransactionVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -202,5 +216,87 @@ public class TransactionVSContentProvider extends ContentProvider {
                 ex.printStackTrace();
             }
         }
+    }
+
+    public static List<String> getTransactionWeekList(AppContextVS contextVS) {
+        List<String> result = new ArrayList<String>();
+        Cursor cursor = contextVS.getContentResolver().query(
+                TransactionVSContentProvider.CONTENT_URI, null, null, null, null);
+        if(cursor.getCount() == 0) return result;
+        cursor.moveToFirst(); //ORDER -> ID_COL DESC
+        int lastId =  cursor.getInt(
+                cursor.getColumnIndex(TransactionVSContentProvider.ID_COL));
+        Calendar lastTransactionCalendar = Calendar.getInstance();
+        Long lastTransactionMillis = cursor.getLong(
+                cursor.getColumnIndex(TransactionVSContentProvider.TIMESTAMP_CREATED_COL));
+        lastTransactionCalendar.setTimeInMillis(lastTransactionMillis);
+
+        cursor.moveToLast();
+        int firstId =  cursor.getInt(
+                cursor.getColumnIndex(TransactionVSContentProvider.ID_COL));
+        Long firstTransactionMillis = cursor.getLong(
+                cursor.getColumnIndex(TransactionVSContentProvider.TIMESTAMP_CREATED_COL));
+        Calendar firstTransactionCalendar = Calendar.getInstance();
+        firstTransactionCalendar.setTimeInMillis(firstTransactionMillis);
+
+        int numWeeks = firstTransactionCalendar.get(Calendar.WEEK_OF_YEAR) -
+                lastTransactionCalendar.get(Calendar.WEEK_OF_YEAR);
+        Log.d(TAG + ".getTransactionWeekList() ", "numWeeks: " + numWeeks +
+                " - firstTransactionDate: " + firstTransactionCalendar.getTime() +
+                " - lastTransactionDate: " + lastTransactionCalendar.getTime());
+        Calendar iteratorCalendar = (Calendar) lastTransactionCalendar.clone();
+        while(iteratorCalendar.before(lastTransactionCalendar)) {
+            String lapseWeekLbl = contextVS.getLapseWeekLbl(iteratorCalendar);
+            result.add(lapseWeekLbl);
+            Log.d(TAG + ".getTransactionWeekList() ", "lapseWeekLbl: " + lapseWeekLbl);
+        }
+        return result;
+    }
+
+
+    public static void setTicketAccount(AppContextVS contextVS, TicketAccount updatedTicketAccount) {
+        Set<CurrencyVS> keySet = updatedTicketAccount.getCurrencyMap().keySet();
+        for(CurrencyVS currencyVS : keySet) {
+            CurrencyData currencyData = updatedTicketAccount.getCurrencyMap().get(currencyVS);
+            for(TransactionVS transactionVS : currencyData.getTransactionList()) {
+                addTransaction(contextVS, transactionVS,
+                        DateUtils.getDirPath(updatedTicketAccount.getWeekLapse()));
+            }
+            currencyData.setTransactionList(null);
+        }
+        contextVS.updateTicketAccountLastChecked();
+    }
+
+    public static Uri addTransaction(AppContextVS contextVS, TransactionVS transactionVS,
+              String weekLapse) {
+        String weekLapseStr = (weekLapse == null) ? contextVS.getCurrentWeekLapseId():weekLapse;
+        ContentValues values = populateTransactionContentValues(transactionVS);
+        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapseStr);
+        return contextVS.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+    }
+
+    public static int updateTransaction(AppContextVS contextVS, TransactionVS transactionVS) {
+        ContentValues values = populateTransactionContentValues(transactionVS);
+        return contextVS.getContentResolver().update(TransactionVSContentProvider.
+                getTransactionVSURI(transactionVS.getLocalId()), values, null, null);
+    }
+
+    private static ContentValues populateTransactionContentValues(TransactionVS transactionVS) {
+        ContentValues values = new ContentValues();
+        values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
+        values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
+        values.put(TransactionVSContentProvider.FROM_USER_COL,
+                transactionVS.getFromUserVS().getNif());
+        values.put(TransactionVSContentProvider.TO_USER_COL,
+                transactionVS.getToUserVS().getNif());
+        values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
+        values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
+        values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
+        values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
+        values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
+                ObjectUtils.serializeObject(transactionVS));
+        values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
+                transactionVS.getDateCreated().getTime());
+        return values;
     }
 }

@@ -165,7 +165,6 @@ class  SignatureVSService {
         return issuedCert
     }
 
-	
 	public KeyStore getTrustedCertsKeyStore() {
 		if(!trustedCertsKeyStore ||
 			trustedCertsKeyStore.size() != trustedCerts.size()) {

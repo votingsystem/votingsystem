@@ -4,12 +4,9 @@ import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
@@ -19,19 +16,12 @@ import com.itextpdf.text.Context_iTextVS;
 
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
-import org.votingsystem.android.contentprovider.TicketContentProvider;
-import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.model.CurrencyData;
-import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TicketServer;
-import org.votingsystem.model.TicketVS;
-import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -45,16 +35,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
@@ -147,6 +133,11 @@ public class AppContextVS extends Application {
         certsMap.put(serverURL, cert);
     }
 
+    public X509Certificate getTimeStampCert() {
+        if(accessControl == null) return null;
+        return getAccessControl().getTimeStampCert();
+    }
+
     public UserVS getUserVS() {
         return userVS;
     }
@@ -213,116 +204,9 @@ public class AppContextVS extends Application {
         } else return null;
     }
 
-    public void setTicketAccount(TicketAccount updatedTicketAccount) {
-        Set<CurrencyVS> keySet = updatedTicketAccount.getCurrencyMap().keySet();
-        for(CurrencyVS currencyVS : keySet) {
-            CurrencyData currencyData = updatedTicketAccount.getCurrencyMap().get(currencyVS);
-            for(TransactionVS transactionVS : currencyData.getTransactionList()) {
-                addTransaction(transactionVS,
-                        DateUtils.getDirPath(updatedTicketAccount.getWeekLapse()));
-            }
-            currencyData.setTransactionList(null);
-        }
-        updateTicketAccountLastChecked();
-    }
-
-    public Uri addTransaction(TransactionVS transactionVS, String weekLapse) {
-        String weekLapseStr = (weekLapse == null) ? getCurrentWeekLapseId():weekLapse;
-        ContentValues values = populateTransactionContentValues(transactionVS);
-        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapseStr);
-        return getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
-    }
-
-    public int updateTransaction(TransactionVS transactionVS) {
-        ContentValues values = populateTransactionContentValues(transactionVS);
-        return getContentResolver().update(TransactionVSContentProvider.getTransactionVSURI(
-                transactionVS.getLocalId()), values, null, null);
-    }
-
-    private ContentValues populateTransactionContentValues(TransactionVS transactionVS) {
-        ContentValues values = new ContentValues();
-        values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
-        values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
-        values.put(TransactionVSContentProvider.FROM_USER_COL,
-                transactionVS.getFromUserVS().getNif());
-        values.put(TransactionVSContentProvider.TO_USER_COL,
-                transactionVS.getToUserVS().getNif());
-        values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
-        values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
-        values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
-        values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
-        values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
-                ObjectUtils.serializeObject(transactionVS));
-        values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
-                transactionVS.getDateCreated().getTime());
-        return values;
-    }
-
-    public CurrencyData getCurrencyData(CurrencyVS currency) {
-        String selection = TicketContentProvider.WEEK_LAPSE_COL + " =? AND " +
-                TicketContentProvider.STATE_COL + " =? AND " +
-                TicketContentProvider.CURRENCY_COL + "= ? ";
-        String weekLapseId = getCurrentWeekLapseId();
-        Cursor cursor = getContentResolver().query(TicketContentProvider.CONTENT_URI,null, selection,
-                new String[]{weekLapseId, TicketVS.State.OK.toString(), currency.toString()}, null);
-        Log.d(TAG + ".getCurrencyData(...)", "TicketContentProvider - cursor.getCount(): " + cursor.getCount());
-        List<TicketVS> ticketList = new ArrayList<TicketVS>();
-        while(cursor.moveToNext()) {
-            TicketVS ticketVS = (TicketVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                    cursor.getColumnIndex(TicketContentProvider.SERIALIZED_OBJECT_COL)));
-            Long ticketId = cursor.getLong(cursor.getColumnIndex(TicketContentProvider.ID_COL));
-            ticketVS.setLocalId(ticketId);
-            ticketList.add(ticketVS);
-        }
-        selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? AND " +
-                TransactionVSContentProvider.CURRENCY_COL + "= ? ";
-        cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,null, selection,
-                new String[]{weekLapseId, currency.toString()}, null);
-        List<TransactionVS> transactionList = new ArrayList<TransactionVS>();
-        while(cursor.moveToNext()) {
-            TransactionVS transactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
-                    cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
-            transactionList.add(transactionVS);
-        }
-        CurrencyData currencyData = null;
-        try {
-            currencyData = new CurrencyData(transactionList);
-            currencyData.setTicketList(ticketList);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return currencyData;
-    }
-
     public String getCurrentWeekLapseId() {
         Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
         return DateUtils.getDirPath(currentLapseCalendar.getTime());
-    }
-
-    public void insertTickets(Collection<TicketVS> tickets) {
-        for(TicketVS ticketVS : tickets) {
-            getContentResolver().insert(TicketContentProvider.CONTENT_URI,
-                    populateTicketContentValues(ticketVS));
-        }
-    }
-
-    public ContentValues populateTicketContentValues(TicketVS ticketVS) {
-        ContentValues values = new ContentValues();
-        values.put(TicketContentProvider.AMOUNT_COL, ticketVS.getAmount().toPlainString());
-        values.put(TicketContentProvider.CURRENCY_COL, ticketVS.getCurrency().toString());
-        values.put(TicketContentProvider.STATE_COL, ticketVS.getState().toString());
-        values.put(TicketContentProvider.SERIALIZED_OBJECT_COL,
-                ObjectUtils.serializeObject(ticketVS));
-        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, getCurrentWeekLapseId());
-        return values;
-    }
-
-    public int updateTicket(TicketVS ticket) {
-        Log.d(TAG + ".updateTicket(...) ", "ticket id: " + ticket.getLocalId() +
-                " - state: " + ticket.getState());
-        ContentValues values = populateTicketContentValues(ticket);
-        return getContentResolver().update(TicketContentProvider.getTicketURI(ticket.getLocalId()),
-                values, null, null);
     }
 
     public ResponseVS signMessage(String toUser, String textToSign, String subject, String pin) {

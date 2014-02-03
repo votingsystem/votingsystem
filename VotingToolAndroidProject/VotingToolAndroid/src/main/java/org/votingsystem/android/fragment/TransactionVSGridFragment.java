@@ -51,6 +51,7 @@ import java.text.Collator;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TransactionVSGridFragment extends Fragment
@@ -68,7 +69,7 @@ public class TransactionVSGridFragment extends Fragment
     private Integer firstVisiblePosition = null;
     private View progressContainer;
     private FrameLayout gridContainer;
-    private String broadCastId;
+    private String broadCastId = getClass().getName();
     private int loaderId = -1;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -91,6 +92,7 @@ public class TransactionVSGridFragment extends Fragment
         }
         }
     };
+
 
     private void launchUpdateUserInfoService(String pin) {
         Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");
@@ -120,7 +122,6 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        broadCastId = this.getClass().getName();
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.TICKETS.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
@@ -143,8 +144,7 @@ public class TransactionVSGridFragment extends Fragment
         adapter = new TransactionVSListAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+            @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
                 return onLongListItemClick(v, pos, id);
             }
         });
@@ -185,8 +185,21 @@ public class TransactionVSGridFragment extends Fragment
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.ticket_user_info, menu);
+
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
+        List<String> transactionWeekList =TransactionVSContentProvider.getTransactionWeekList (
+                (AppContextVS)getActivity().getApplicationContext());
+        for(final String weekLbl: transactionWeekList) {
+            MenuItem item = menu.add (weekLbl);
+            item.setOnMenuItemClickListener (new MenuItem.OnMenuItemClickListener(){
+                @Override public boolean onMenuItemClick (MenuItem item){
+                    Log.d(TAG +  ".onMenuItemClick(..)", "click on weekLbl: " + weekLbl);
+                    return true;
+                }
+            });
+        }
+
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -308,13 +321,7 @@ public class TransactionVSGridFragment extends Fragment
                 weekLapseCalendar.setTime(weekLapse);
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
-                TextView subject = (TextView)view.findViewById(R.id.subject);
-                subject.setText(transactionVS.getSubject());
-                if(TransactionVS.Type.TICKET_REQUEST == transactionVS.getType()) {
-                    subject.setVisibility(View.GONE);
-                }
-                TextView transaction_type = (TextView) view.findViewById(
-                        R.id.transaction_type);
+                TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
                 transaction_type.setText(transactionVS.getDescription(getActivity().getApplicationContext()));
                 TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
                 week_lapse.setText(DateUtils.getLongDate_Es(transactionVS.getDateCreated()));
@@ -330,16 +337,6 @@ public class TransactionVSGridFragment extends Fragment
         }
     }
 
-    @Override public void onStop() {
-        super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop - ");
-    }
-
-    @Override public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG + ".onDestroy()", "onDestroy");
-    }
-
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(ContextVS.OFFSET_KEY, offset);
@@ -353,7 +350,7 @@ public class TransactionVSGridFragment extends Fragment
         Log.d(TAG + ".onResume() ", "");
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(this.getClass().getName()));
+                broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
@@ -362,4 +359,5 @@ public class TransactionVSGridFragment extends Fragment
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
+
 }

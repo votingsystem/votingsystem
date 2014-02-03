@@ -76,7 +76,6 @@ public class TicketFragment extends Fragment {
         return fragment;
     }
 
-
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
@@ -107,7 +106,6 @@ public class TicketFragment extends Fragment {
             ex.printStackTrace();
         }
     }
-
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
@@ -150,7 +148,6 @@ public class TicketFragment extends Fragment {
         return rootView;
     }
 
-
     private void initTicketScreen (TicketVS ticket) {
         Log.d(TAG + ".initTicketScreen(...)", "type: " + ticket.getTypeVS() + " - messageId: " +
             ticket.getMessageId());
@@ -186,13 +183,6 @@ public class TicketFragment extends Fragment {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-    @Override public void onDestroy() {
-        Log.d(TAG + ".onDestroy()", "");
-        super.onDestroy();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
-                unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -243,7 +233,7 @@ public class TicketFragment extends Fragment {
                 case R.id.show_timestamp_info:
                     TimeStampInfoDialogFragment newFragment = TimeStampInfoDialogFragment.newInstance(
                             selectedTicket.getReceipt().getSigner().getTimeStampToken(),
-                            getActivity().getApplicationContext());
+                            (AppContextVS) getActivity().getApplicationContext());
                     newFragment.show(getFragmentManager(), TimeStampInfoDialogFragment.TAG);
                     break;
                 case R.id.cancel_ticket:

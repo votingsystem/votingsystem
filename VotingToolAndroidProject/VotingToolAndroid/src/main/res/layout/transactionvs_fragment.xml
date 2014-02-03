@@ -59,17 +59,6 @@
                     android:textSize="12sp"
                     android:layout_weight="1.0"/>
 
-                <Button android:id="@+id/receipt_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_weight="1"
-                    android:drawableLeft="@drawable/receipt_22"
-                    android:text="@string/receipt_lbl"
-                    android:visibility="gone"
-                    android:textStyle="bold" />
-
             </LinearLayout>
         </ScrollView>
     </FrameLayout>

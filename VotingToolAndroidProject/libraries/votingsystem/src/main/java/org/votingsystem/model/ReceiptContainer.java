@@ -46,6 +46,10 @@ public class ReceiptContainer implements Serializable {
                 return context.getString(R.string.receipt_anonimous_representative_request_subtitle);
             case TICKET_REQUEST:
                 return context.getString(R.string.ticket_request_subtitle);
+            case USER_ALLOCATION_INPUT:
+                return context.getString(R.string.user_allocation_input);
+            case USER_ALLOCATION_INPUT_RECEIPT:
+                return context.getString(R.string.user_allocation_input_receipt);
             default:
                 return context.getString(R.string.receipt_lbl);
         }

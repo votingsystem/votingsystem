@@ -14,6 +14,12 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.votingsystem.android.AppContextVS;
+import org.votingsystem.model.TicketVS;
+import org.votingsystem.util.ObjectUtils;
+
+import java.util.Collection;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -202,4 +208,30 @@ public class TicketContentProvider extends ContentProvider {
         }
     }
 
+    public static void insertTickets(AppContextVS contextVS, Collection<TicketVS> tickets) {
+        for(TicketVS ticketVS : tickets) {
+            contextVS.getContentResolver().insert(TicketContentProvider.CONTENT_URI,
+                    populateTicketContentValues(contextVS, ticketVS));
+        }
+    }
+
+    public static ContentValues populateTicketContentValues(AppContextVS contextVS,
+                TicketVS ticketVS) {
+        ContentValues values = new ContentValues();
+        values.put(TicketContentProvider.AMOUNT_COL, ticketVS.getAmount().toPlainString());
+        values.put(TicketContentProvider.CURRENCY_COL, ticketVS.getCurrency().toString());
+        values.put(TicketContentProvider.STATE_COL, ticketVS.getState().toString());
+        values.put(TicketContentProvider.SERIALIZED_OBJECT_COL,
+                ObjectUtils.serializeObject(ticketVS));
+        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, contextVS.getCurrentWeekLapseId());
+        return values;
+    }
+
+    public static int updateTicket(AppContextVS contextVS, TicketVS ticket) {
+        Log.d(TAG + ".updateTicket(...) ", "ticket id: " + ticket.getLocalId() +
+                " - state: " + ticket.getState());
+        ContentValues values = populateTicketContentValues(contextVS, ticket);
+        return contextVS.getContentResolver().update(TicketContentProvider.getTicketURI(ticket.getLocalId()),
+                values, null, null);
+    }
 }

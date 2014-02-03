@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.contentprovider.Utils;
 import org.votingsystem.android.service.TicketService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CurrencyData;
@@ -163,7 +164,7 @@ public class TicketUserInfoFragment extends Fragment {
             receptor = uriData.getQueryParameter("receptor");
             Log.d(TAG + ".onStart(...)", "amount: " + amount + " - subject: " + subject +
                     " - receptor: " + receptor);
-            CurrencyData currencyData = contextVS.getCurrencyData(currencyVS);
+            CurrencyData currencyData = Utils.getCurrencyData(contextVS, currencyVS);
             BigDecimal cashAvailable = currencyData.getCashBalance();
             if(cashAvailable != null && cashAvailable.compareTo(amount) >= 0) {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
@@ -184,7 +185,7 @@ public class TicketUserInfoFragment extends Fragment {
                             Calendar.getInstance())));
             return;
         }
-        final CurrencyData currencyData = contextVS.getCurrencyData(CurrencyVS.Euro);
+        final CurrencyData currencyData = Utils.getCurrencyData(contextVS, CurrencyVS.Euro);
         if(currencyData != null) {
             request_button.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {

@@ -266,7 +266,7 @@
     <b>Num. serie del certificado: </b> %3$s <br/><b>Valido desde: </b> %4$s<br/> \n \
     <b>Valido hasta: </b> %5$s<br/></html>]]></string>
     <string name="timestamp_info_formated_msg"><![CDATA[<html><b>Fecha: </b>%1$s<br/><b>Num. de serie: </b> %2$s <br/> \n \
-    <b>Num.serie del certificado firmante: </b> %3$s <br/><b>Expendedor del certificado firmante:<br/></b> %4$s]]></string>
+    <b>Num. serie de certificado firmante: </b> %3$s <br/><b>Certificado firmante:<br/></b> %4$s]]></string>
 
     <string name="share_receipt_lbl">Compartir recibo</string>
     <string name="check_receipt_lbl">Comprobar voto en el recuento</string>
@@ -353,6 +353,11 @@
     <br/>URL de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
     <string name="ticket_request_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
     %3$s Tickets de %4$s %2$ss<br/><br/>URL de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
+    <string name="user_allocation_input_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
+    Repartidos entre <b>%3$s usuarios</b>]]></string>
+    <string name="user_allocation_input_receipt_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
+    Asunto: <b>%3$s</b><br/>IBAN: <b>%4$s usuarios</b>]]></string>
+
     <string name="receipt_vote_subtitle">Voto</string>
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
     <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
@@ -397,6 +402,7 @@
     <string name="ticket_send_error_caption">Error realizando pago</string>
     <string name="ticket_send_error_msg"><![CDATA[Problemas realizando el pago. \'%1$s\']]></string>
     <string name="week_lapse_lbl">%1$s al %2$s</string>
+    <string name="week_lbl">semana</string>
     <string name="transactionv_lbl">Transacción</string>
     <string name="transactionvs_lbl">Transacciones</string>
     <string name="transactionvs_formatted"><![CDATA[Fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$ss]]></string>
@@ -405,6 +411,7 @@
     <string name="transactionvs_to_user_lbl"><![CDATA[Usuario <b>receptor</b>:<br/><b>NIF:</b> %1$s <br/>
         <b>Nombre:</b> %2$s]]></string>
     <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>Justificante</a>]]></string>
+    <string name="user_allocation_receipt_url"><![CDATA[<a href=\'%1$s\'>Ingreso original</a>]]></string>
     <string name="ticket_cancellation_msg_subject">Cancelación de Ticket</string>
     <string name="open_ticket_grid_menu">Ver Tickets</string>
     <string name="cert_info_lbl">Datos del certificado</string>

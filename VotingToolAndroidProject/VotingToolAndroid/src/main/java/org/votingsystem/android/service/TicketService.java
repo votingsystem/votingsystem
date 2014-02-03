@@ -20,6 +20,8 @@ import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.TicketContentProvider;
+import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.android.contentprovider.Utils;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -127,7 +129,8 @@ public class TicketService extends IntentService {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         ticketVS.setCancellationReceipt(responseVS.getSmimeMessage());
                         ticketVS.setState(TicketVS.State.CANCELLED);
-                        ContentValues values = contextVS.populateTicketContentValues(ticketVS);
+                        ContentValues values = TicketContentProvider.populateTicketContentValues(
+                                contextVS, ticketVS);
                         getContentResolver().update(TicketContentProvider.getTicketURI(ticketId),
                                 values, null, null);
                         responseVS.setCaption(getString(R.string.ticket_cancellation_msg_subject));
@@ -146,7 +149,7 @@ public class TicketService extends IntentService {
                                 ticketVS.setCancellationReceipt(responseVS.getSmimeMessage());
                                 ticketVS.setState(TicketVS.State.LAPSED);
                                 ticketVS.setLocalId(ticketId);
-                                contextVS.updateTicket(ticketVS);
+                                TicketContentProvider.updateTicket(contextVS, ticketVS);
                                 responseVS.setCaption(getString(R.string.ticket_cancellation_msg_subject));
                                 responseVS.setNotificationMessage(getString(R.string.ticket_cancellation_msg));
                                 responseVS.setIconId(R.drawable.accept_22);
@@ -227,7 +230,7 @@ public class TicketService extends IntentService {
         Integer iconId = R.drawable.cancel_22;
         Map <Long,TicketVS> sendedTicketsMap = new HashMap<Long, TicketVS>();
         try {
-            CurrencyData availableCurrencyData = contextVS.getCurrencyData(currencyVS);
+            CurrencyData availableCurrencyData = Utils.getCurrencyData(contextVS, currencyVS);
             BigDecimal available = availableCurrencyData.getCashBalance();
             if(available.compareTo(requestAmount) < 0) {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyVS.toString(),
@@ -319,8 +322,8 @@ public class TicketService extends IntentService {
                 caption = getString(R.string.ticket_send_error_caption);
                 message = getString(R.string.ticket_expended_send_error_msg);
             } else {
-                for(TicketVS ticket:sendedTicketsMap.values()) contextVS.updateTicket(ticket);
-
+                for(TicketVS ticket:sendedTicketsMap.values())
+                    TicketContentProvider.updateTicket(contextVS, ticket);
 
                 iconId = R.drawable.euro_24;
                 caption = getString(R.string.ticket_send_ok_caption);
@@ -415,7 +418,7 @@ public class TicketService extends IntentService {
                 JSONArray transactionsArray = issuedTicketsJSON.getJSONArray("transactionList");
                 for(int i = 0; i < transactionsArray.length(); i++) {
                     TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
-                    contextVS.addTransaction(transaction, null);
+                    TransactionVSContentProvider.addTransaction(contextVS, transaction, null);
                 }
 
                 JSONArray issuedTicketsArray = issuedTicketsJSON.getJSONArray("issuedTickets");
@@ -440,7 +443,7 @@ public class TicketService extends IntentService {
                     ticket.setState(TicketVS.State.OK);
                     ticket.getCertificationRequest().initSigner(issuedTicketsArray.getString(i).getBytes());
                 }
-                contextVS.insertTickets(ticketsMap.values());
+                TicketContentProvider.insertTickets(contextVS, ticketsMap.values());
                 caption = getString(R.string.ticket_request_ok_caption);
                 message = getString(R.string.ticket_request_ok_msg, requestAmount.toString(),
                         currencyVS.toString());
@@ -501,7 +504,7 @@ public class TicketService extends IntentService {
                 if(ticketAccount != null) {
                     ticketAccount.setLastRequestDate(requestDate);
                 } else Log.d(TAG + "updateUserInfo(...)", "Current week data not found");
-                contextVS.setTicketAccount(ticketAccount);
+                TransactionVSContentProvider.setTicketAccount(contextVS, ticketAccount);
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
             }

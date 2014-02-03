@@ -10,10 +10,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight ="12dp"
-        android:layout_gravity="center"
-        android:drawableLeft="@drawable/cancel_16"
+        android:drawableLeft="@drawable/cancel_22"
         android:text="@string/delete_option_lbl"
-        android:gravity="left"/>
+        android:textStyle="bold" />
 
 
     <TextView

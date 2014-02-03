@@ -74,7 +74,7 @@ public class TransactionVSFragment extends Fragment {
                 case RECEIPT:
                     byte[] receiptBytes = (byte[]) responseVS.getData();
                     selectedTransactionVS.setMessageSMIMEBytes(receiptBytes);
-                    contextVS.updateTransaction(selectedTransactionVS);
+                    TransactionVSContentProvider.updateTransaction(contextVS, selectedTransactionVS);
                 break;
             }
         }
@@ -155,19 +155,16 @@ public class TransactionVSFragment extends Fragment {
         transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));
         transactionvs_content.setText(Html.fromHtml(transactionHtml));
         receipt.setText(Html.fromHtml(getString(R.string.transactionvs_receipt_url, transactionvs.getMessageSMIMEURL())));
-        if(TransactionVS.Type.TICKET_REQUEST == transactionvs.getType()) {
-            from_user.setVisibility(View.GONE);
-            transactionvsSubject.setVisibility(View.GONE);
-            receipt.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.TRANSACTION_KEY, transactionvs);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
-                    startActivity(intent);
-                }
-            });
-        }
-
+        from_user.setVisibility(View.GONE);
+        transactionvsSubject.setVisibility(View.GONE);
+        receipt.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.TRANSACTION_KEY, transactionvs);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                startActivity(intent);
+            }
+        });
     }
 
     private void setActionBar() {

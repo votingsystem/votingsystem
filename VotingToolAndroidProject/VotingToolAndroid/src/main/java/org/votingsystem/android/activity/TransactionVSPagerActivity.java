@@ -15,6 +15,9 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.fragment.TransactionVSFragment;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.DateUtils;
+
+import java.util.Calendar;
 
 /**
  * @author jgzornoza
@@ -41,8 +44,10 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         TransactionVSPagerAdapter pagerAdapter = new TransactionVSPagerAdapter(
                 getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,
-                null, null, null, null);
+        String weekLapse = DateUtils.getDirPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
+        String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
+        cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI, null, selection,
+                new String[]{weekLapse}, null);
         cursor.moveToFirst();
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
@@ -59,11 +64,6 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState:" + outState);
-    }
-
-    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG + ".onRestoreInstanceState(...)", "onRestoreInstanceState:" + savedInstanceState);
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -83,8 +83,10 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
 
         public TransactionVSPagerAdapter(FragmentManager fm) {
             super(fm);
-            cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,
-                    null, null, null, null);
+            String weekLapse = DateUtils.getDirPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
+            String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
+            cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI, null, selection,
+                    new String[]{weekLapse}, null);
         }
 
         @Override public Fragment getItem(int i) {
