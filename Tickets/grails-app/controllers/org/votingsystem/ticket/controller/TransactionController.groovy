@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.BatchRequest
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -41,7 +42,7 @@ class TransactionController {
             batchRequest = new TicketVSBatchRequest(state:BatchRequest.State.OK, content:params.requestBytes,
                     type: TypeVS.TICKET_REQUEST).save()
         }
-        def requestJSON = JSON.parse(new String(params.requestBytes, "UTF-8"))
+        def requestJSON = JSON.parse(new String(params.requestBytes, ContextVS.UTF_8))
         byte[] decodedPK = Base64.decode(requestJSON.publicKey);
         PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
         //log.debug("receiverPublic.toString(): " + receiverPublic.toString());

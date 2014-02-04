@@ -35,7 +35,7 @@ class TicketController {
         JSONObject jsonRequest = JSON.parse(new String(params.requestBytes))
         JSONArray ticketCancellationArray = jsonRequest.getJSONArray("ticketCancellationList")
         ticketCancellationArray.each {
-            log.debug("ticketCancellationArray - it: ${it}")
+            log.debug("ticketCancellationArray -it: ${it}")
         }
     }
 

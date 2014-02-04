@@ -194,6 +194,11 @@ class TicketService {
                         smimeMessageReq, subject)
                 MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                         content:smimeMessageResp.getBytes()).save()
+
+                TransactionVS transaction = new TransactionVS(amount: ticket.amount, messageSMIME:messageSMIMEReq,
+                    subject:messageSource.getMessage('sendTicketTransactionSubject', null, locale),
+                    state:TransactionVS.State.OK, currency:ticket.currency, type:TransactionVS.Type.TICKET_SEND).save()
+
                 Map dataMap = [ticketReceipt:messageSMIMEResp, ticket:ticket]
                 resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.TICKET, data:dataMap)
             } else if (TicketVS.State.EXPENDED == ticket.state) {
