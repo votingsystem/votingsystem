@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 */
 public class MessageTimeStamper implements Callable<ResponseVS> {
     
-	public static final String TAG = "MessageTimeStamper";
+	public static final String TAG = MessageTimeStamper.class.getSimpleName();
     
     private SMIMEMessageWrapper smimeMessage;
     private static final int numMaxAttempts = 3;

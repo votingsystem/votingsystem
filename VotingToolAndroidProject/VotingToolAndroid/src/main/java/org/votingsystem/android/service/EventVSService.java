@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class EventVSService extends IntentService {
 
-    public static final String TAG = "EventVSService";
+    public static final String TAG = EventVSService.class.getSimpleName();
 
     public EventVSService() { super(TAG); }
 

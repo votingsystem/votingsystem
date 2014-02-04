@@ -28,7 +28,7 @@ import static org.votingsystem.model.ContextVS.VOTE_SIGN_MECHANISM;
 */
 public class AccessRequestDataSender implements Callable<ResponseVS> {
     
-	public static final String TAG = "AccessRequestDataSender";
+	public static final String TAG = AccessRequestDataSender.class.getSimpleName();
 
     private SMIMEMessageWrapper accessRequest;
     private CertificationRequestVS certificationRequest;

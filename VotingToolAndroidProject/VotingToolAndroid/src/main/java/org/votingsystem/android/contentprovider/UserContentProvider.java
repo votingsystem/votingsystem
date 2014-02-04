@@ -20,7 +20,7 @@ import android.util.Log;
  */
 public class UserContentProvider extends ContentProvider {
 
-    public static final String TAG = "UserContentProvider";
+    public static final String TAG = UserContentProvider.class.getSimpleName();
 
     //from http://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
     public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";

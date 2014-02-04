@@ -31,7 +31,7 @@ import java.util.Properties;
  */
 public class MainActivity extends FragmentActivity {
 	
-	public static final String TAG = "MainActivity";
+	public static final String TAG = MainActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
     private ProgressDialog progressDialog = null;

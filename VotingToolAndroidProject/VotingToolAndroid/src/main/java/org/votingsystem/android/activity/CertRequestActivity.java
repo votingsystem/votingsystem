@@ -23,7 +23,7 @@ import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
  */
 public class CertRequestActivity extends FragmentActivity {
 	
-	public static final String TAG = "CertRequestActivity";
+	public static final String TAG = CertRequestActivity.class.getSimpleName();
 
     private AppContextVS appContextVS;
 

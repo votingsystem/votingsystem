@@ -32,7 +32,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  */
 public class VoteSender implements Callable<ResponseVS> {
 
-    public static final String TAG = "VoteSender";
+    public static final String TAG = VoteSender.class.getSimpleName();
 
     private VoteVS vote;
     private char[] password;

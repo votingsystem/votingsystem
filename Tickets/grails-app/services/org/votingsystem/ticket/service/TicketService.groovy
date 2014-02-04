@@ -5,6 +5,7 @@ import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
+import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
@@ -198,7 +199,7 @@ class TicketService {
             } else if (TicketVS.State.EXPENDED == ticket.state) {
                 log.error("processTicketDeposit - ticket '${ticket.id}' state ${ticket.state}")
                 Map dataMap = [message:messageSource.getMessage("tickedExpendedErrorMsg", null, locale),
-                        messageSMIME:new String(ticket.messageSMIME.content, "UTF-8")]
+                        messageSMIME:new String(Base64.encode(ticket.messageSMIME.content))]
                 resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
                         type:TypeVS.TICKET_DEPOSIT_ERROR, messageBytes: "${dataMap as JSON}".getBytes(), data:dataMap,
                         contentType:ContentTypeVS.JSON_ENCRYPTED)

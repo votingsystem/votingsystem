@@ -37,7 +37,7 @@ import java.io.File;
 // to learn what each record contains.
 public class RssContentProvider extends ContentProvider {
 
-    public static final String TAG = "RssContentProvider";
+    public static final String TAG = RssContentProvider.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME = "voting_system_rss.db";

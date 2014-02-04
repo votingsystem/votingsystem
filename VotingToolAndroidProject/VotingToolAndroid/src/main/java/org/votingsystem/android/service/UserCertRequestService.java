@@ -45,7 +45,7 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
  */
 public class UserCertRequestService extends IntentService {
 
-    public static final String TAG = "UserCertRequestService";
+    public static final String TAG = UserCertRequestService.class.getSimpleName();
 
     public UserCertRequestService() { super(TAG); }
 

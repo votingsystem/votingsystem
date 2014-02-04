@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RepresentativeDelegationActivity extends ActionBarActivity {
 	
-	public static final String TAG = "RepresentativeDelegationActivity";
+	public static final String TAG = RepresentativeDelegationActivity.class.getSimpleName();
 
     public static final String ANONYMOUS_SELECTED_KEY  = "ANONYMOUS_SELECTED_KEY";
     public static final String PUBLIC_SELECTED_KEY     = "PUBLIC_SELECTED_KEY";
@@ -150,7 +150,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
-        broadCastId = this.getClass().getSimpleName();
+        broadCastId = RepresentativeDelegationActivity.class.getSimpleName();
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
         representative = (UserVS) getIntent().getSerializableExtra(ContextVS.USER_KEY);

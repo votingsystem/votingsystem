@@ -26,7 +26,7 @@ import java.util.Collection;
  */
 public class TicketContentProvider extends ContentProvider {
 
-    public static final String TAG = "TicketContentProvider";
+    public static final String TAG = TicketContentProvider.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME       = "voting_system_ticket.db";

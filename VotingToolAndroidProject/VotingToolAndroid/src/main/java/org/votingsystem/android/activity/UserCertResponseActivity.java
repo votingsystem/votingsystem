@@ -56,7 +56,7 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
  */
 public class UserCertResponseActivity extends ActionBarActivity {
 	
-	public static final String TAG = "UserCertResponseActivity";
+	public static final String TAG = UserCertResponseActivity.class.getSimpleName();
 	
 	
 	private ProgressDialog progressDialog = null;
@@ -129,7 +129,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.user_cert_response_activity);
         appContextVS = (AppContextVS) getApplicationContext();
-        broadCastId = this.getClass().getName();
+        broadCastId = UserCertResponseActivity.class.getSimpleName();
         Log.d(TAG + ".onCreate(...) ", "state: " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));

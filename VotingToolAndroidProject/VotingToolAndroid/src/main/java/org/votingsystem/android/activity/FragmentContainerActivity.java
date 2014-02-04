@@ -34,7 +34,7 @@ import org.votingsystem.model.OperationVS;
  */
 public class FragmentContainerActivity extends ActionBarActivity {
 
-	public static final String TAG = "FragmentContainerActivity";
+	public static final String TAG = FragmentContainerActivity.class.getSimpleName();
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState +
@@ -54,7 +54,7 @@ public class FragmentContainerActivity extends ActionBarActivity {
             fragment.setArguments(getIntent().getExtras());
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, fragment,
-                    fragment.getClass().getSimpleName()).commit();
+                            ((Object)fragment).getClass().getSimpleName()).commit();
         } catch(Exception ex) {
             ex.printStackTrace();
         }

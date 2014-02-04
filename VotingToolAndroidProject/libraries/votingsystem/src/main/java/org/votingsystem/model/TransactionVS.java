@@ -15,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -23,8 +24,8 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    //Retirada efectivo, Ingreso en cuenta, Pago en Tickets
-    public enum Type {TICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, TICKET_CANCELLATION, TICKET_SEND;}
+    public enum Type {TICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, TICKET_CANCELLATION,
+        TICKET_SEND;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -45,13 +46,29 @@ public class TransactionVS  implements Serializable {
     private UserVS fromUserVS;
     private UserVS toUserVS;
 
-    private List<TicketVS> ticketsToSend;
+    private List<TicketVS> tickets;
     private Type type;
 
     private Date validTo;
     private Date dateCreated;
     private Date lastUpdated;
 
+
+    public TransactionVS() {}
+
+    public TransactionVS(Type type, List<TicketVS> tickets) {
+        this.type = type;
+        this.tickets = tickets;
+    }
+
+    public TransactionVS(Type type, Date dateCreated,  List<TicketVS> tickets, BigDecimal amount,
+                 CurrencyVS currencyVS) {
+        this.type = type;
+        this.tickets = tickets;
+        this.amount = amount;
+        this.currencyVS = currencyVS;
+        this.dateCreated = dateCreated;
+    }
 
     public Long getId() {
         return id;
@@ -131,14 +148,6 @@ public class TransactionVS  implements Serializable {
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public List<TicketVS> getTicketsToSend() {
-        return ticketsToSend;
-    }
-
-    public void setTicketsToSend(List<TicketVS> ticketsToSend) {
-        this.ticketsToSend = ticketsToSend;
     }
 
     public SMIMEMessageWrapper getMessageSMIME() {
@@ -263,6 +272,10 @@ public class TransactionVS  implements Serializable {
             ex.printStackTrace();
         }
 
+    }
+
+    public List<TicketVS> getTickets() {
+        return tickets;
     }
 
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {

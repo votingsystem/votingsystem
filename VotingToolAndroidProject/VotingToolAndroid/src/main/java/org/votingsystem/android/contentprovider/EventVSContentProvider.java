@@ -23,7 +23,7 @@ import org.votingsystem.model.TypeVS;
  */
 public class EventVSContentProvider extends ContentProvider {
 
-    public static final String TAG = "EventVSContentProvider";
+    public static final String TAG = EventVSContentProvider.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME = "voting_system_eventvs.db";

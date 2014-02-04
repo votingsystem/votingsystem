@@ -26,7 +26,7 @@ import org.votingsystem.util.DateUtils;
  */
 public class EventVSStatisticsPagerActivity extends ActionBarActivity {
 
-    public static final String TAG = "EventVSStatisticsPagerActivity";
+    public static final String TAG = EventVSStatisticsPagerActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
     private Cursor cursor = null;

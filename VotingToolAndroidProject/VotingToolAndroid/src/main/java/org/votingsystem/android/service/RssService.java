@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  */
 public class RssService extends Service  implements Runnable {
 
-    public static final String TAG = "RssService";
+    public static final String TAG = RssService.class.getSimpleName();
 
     public static final String REQUERY_KEY = "REQUERY_KEY"; // Sent to tell us force a requery.
     public static final String RSS_URL = "RSS_URL"; // Sent to tell us to requery a specific item.

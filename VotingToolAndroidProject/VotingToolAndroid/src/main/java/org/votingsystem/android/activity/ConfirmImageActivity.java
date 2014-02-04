@@ -34,7 +34,7 @@ import java.math.RoundingMode;
  */
 public class ConfirmImageActivity extends ActionBarActivity {
 	
-	public static final String TAG = "ConfirmImageActivity";
+	public static final String TAG = ConfirmImageActivity.class.getSimpleName();
 
     private ImageView image;
     private Uri imageUri;

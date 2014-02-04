@@ -423,5 +423,6 @@
     <string name="ticket_cancellation_msg">El ticket se ha cancellado correctamente</string>
     <string name="ticket_cancellation_error_msg_subject">Error cancelando Ticket</string>
     <string name="ticket_expended_send_error_msg">Los tickets ya habían sido consumidos</string>
+    <string name="ticket_repeated_error_msg">En la operación se han mezclado Tickets usados. Por favor, vuelva a intentarlo</string>
 
 </resources>

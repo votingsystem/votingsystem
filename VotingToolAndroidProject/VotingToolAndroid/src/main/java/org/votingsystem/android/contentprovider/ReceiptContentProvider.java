@@ -20,7 +20,7 @@ import android.util.Log;
  */
 public class ReceiptContentProvider extends ContentProvider {
 
-    public static final String TAG = "ReceiptContentProvider";
+    public static final String TAG = ReceiptContentProvider.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME = "voting_system_receipt.db";

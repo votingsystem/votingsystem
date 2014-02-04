@@ -225,7 +225,7 @@ public class AppContextVS extends Application {
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
-            }
+            } else responseVS.setSmimeMessage(timeStamper.getSmimeMessage());
         } catch (Exception ex) {
             ex.printStackTrace();
             String message = ex.getMessage();

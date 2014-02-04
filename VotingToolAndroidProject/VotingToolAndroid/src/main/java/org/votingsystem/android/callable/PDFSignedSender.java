@@ -67,7 +67,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  */
 public class PDFSignedSender implements Callable<ResponseVS> {
 
-    public static final String TAG = "PDFSignedSender";
+    public static final String TAG = PDFSignedSender.class.getSimpleName();
 
     public static final PdfName PDF_SIGNATURE_NAME     = PdfName.ADBE_PKCS7_SHA1;
     public static final String PDF_SIGNATURE_DIGEST    = "SHA1";

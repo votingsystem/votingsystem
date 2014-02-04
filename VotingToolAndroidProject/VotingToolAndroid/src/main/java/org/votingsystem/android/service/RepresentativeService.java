@@ -67,7 +67,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  */
 public class RepresentativeService extends IntentService {
 
-    public static final String TAG = "RepresentativeService";
+    public static final String TAG = RepresentativeService.class.getSimpleName();
 
     private AppContextVS contextVS;
 

@@ -228,11 +228,10 @@ public class TransactionVSGridFragment extends Fragment
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.d(TAG + ".onCreateLoader(...)", "");
-        String weekLapse = DateUtils.getDirPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 TransactionVSContentProvider.CONTENT_URI, null, selection,
-                new String[]{weekLapse}, null);
+                new String[]{contextVS.getCurrentWeekLapseId()}, null);
         return loader;
     }
 

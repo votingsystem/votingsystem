@@ -33,7 +33,7 @@ import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
  */
 public class EventVSPagerActivity extends ActionBarActivity {
 
-    public static final String TAG = "EventVSPagerActivity";
+    public static final String TAG = EventVSPagerActivity.class.getSimpleName();
 
     private Cursor cursor = null;
 

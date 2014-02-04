@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class SignAndSendService extends IntentService {
 
-    public static final String TAG = "SignAndSendService";
+    public static final String TAG = SignAndSendService.class.getSimpleName();
 
     public SignAndSendService() { super(TAG); }
 

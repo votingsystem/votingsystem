@@ -19,7 +19,7 @@ import org.votingsystem.model.ResponseVS;
  */
 public class MessageActivity extends FragmentActivity {
 	
-	public static final String TAG = "MessageActivity";
+	public static final String TAG = MessageActivity.class.getSimpleName();
 
 
     @Override protected void onCreate(Bundle savedInstanceState) {

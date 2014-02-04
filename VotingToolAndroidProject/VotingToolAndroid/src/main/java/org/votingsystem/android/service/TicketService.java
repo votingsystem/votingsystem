@@ -54,6 +54,7 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -64,6 +65,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.TICKET_OID;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
@@ -72,7 +74,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  */
 public class TicketService extends IntentService {
 
-    public static final String TAG = "TicketService";
+    public static final String TAG = TicketService.class.getSimpleName();
 
     public TicketService() { super(TAG); }
 
@@ -188,6 +190,7 @@ public class TicketService extends IntentService {
     }
 
     private ResponseVS cancelTickets(Collection<TicketVS> sendedTickets, String pin) {
+        Log.d(TAG + ".cancelTickets(...)", "cancelTickets");
         TicketServer ticketServer = contextVS.getTicketServer();
         ResponseVS responseVS = null;
         try {
@@ -227,6 +230,7 @@ public class TicketService extends IntentService {
         ResponseVS responseVS = null;
         String message = null;
         String caption = null;
+        byte[] decryptedMessageBytes = null;
         Integer iconId = R.drawable.cancel_22;
         Map <Long,TicketVS> sendedTicketsMap = new HashMap<Long, TicketVS>();
         try {
@@ -278,6 +282,7 @@ public class TicketService extends IntentService {
             String publicKeyStr = new String(Base64.encode(keyPair.getPublic().getEncoded()));
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 mapToSend.put("amount", requestAmount.toString());
+                mapToSend.put("currency", currencyVS.toString());
                 mapToSend.put("operation", TypeVS.TICKET_SEND.toString());
                 mapToSend.put("tickets", smimeTicketList);
                 mapToSend.put("publicKey", publicKeyStr);
@@ -287,17 +292,29 @@ public class TicketService extends IntentService {
                 responseVS = HttpHelper.sendData(messageToSend, ContentTypeVS.JSON_ENCRYPTED,
                         ticketServer.getTicketBatchServiceURL());
                 if(responseVS.getContentType()!= null && responseVS.getContentType().isEncrypted()) {
-                    byte[] decryptedMessageBytes = Encryptor.decryptCMS(keyPair.getPrivate(),
+                    decryptedMessageBytes = Encryptor.decryptCMS(keyPair.getPrivate(),
                             responseVS.getMessageBytes());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         JSONObject jsonResponse = new JSONObject(new String(decryptedMessageBytes));
                         JSONArray jsonArray = jsonResponse.getJSONArray("tickets");
+                        Date dateCreated = null;
                         for(int i = 0; i < jsonArray.length(); i ++) {
                             SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null,
                                     new ByteArrayInputStream(Base64.decode(jsonArray.getString(i))), null);
-                            sendedTicketsMap.get(smimeMessage.getSigner().getCertificate().
-                                    getSerialNumber().longValue()).setReceiptBytes(smimeMessage.getBytes());
+                            dateCreated = smimeMessage.getSigner().getTimeStampToken().
+                                    getTimeStampInfo().getGenTime();
+                            TicketVS sendedTicket = sendedTicketsMap.get(smimeMessage.getSigner().getCertificate().
+                                    getSerialNumber().longValue());
+                            sendedTicket.setReceiptBytes(smimeMessage.getBytes());
+                            sendedTicket.setState(TicketVS.State.EXPENDED);
+                            TicketContentProvider.updateTicket(contextVS, sendedTicket);
                         }
+                        List<TicketVS> ticketList = new ArrayList<TicketVS>();
+                        ticketList.addAll(sendedTicketsMap.values());
+                        TransactionVS ticketSendTransaction = new TransactionVS(TransactionVS.Type.
+                                TICKET_SEND, dateCreated, ticketList, requestAmount, currencyVS);
+                        TransactionVSContentProvider.addTransaction(contextVS,
+                                ticketSendTransaction, contextVS.getCurrentWeekLapseId());
                     }
                 }
             }
@@ -314,10 +331,25 @@ public class TicketService extends IntentService {
                     message);
         } finally {
             if(ResponseVS.SC_OK != responseVS.getStatusCode() &&
-                    ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVS.getStatusCode()) {
-                cancelTickets(sendedTicketsMap.values(), pin);
+                    ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                Log.d(TAG + ".cancelTicketRepeated(...)", "cancelTicketRepeated");
+                try {
+                    JSONObject responseJSON = new JSONObject(new String(decryptedMessageBytes, ContextVS.UTF_8));
+                    String base64EncodedTicketRepeated = responseJSON.getString("messageSMIME");
+                    SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null,
+                            new ByteArrayInputStream(Base64.decode(base64EncodedTicketRepeated)), null);
+                    Long repeatedCertSerialNumber = smimeMessage.getSigner().getCertificate().
+                            getSerialNumber().longValue();
+                    TicketVS repeatedTicket = sendedTicketsMap.get(repeatedCertSerialNumber);
+                    repeatedTicket.setState(TicketVS.State.EXPENDED);
+                    TicketContentProvider.updateTicket(contextVS, repeatedTicket);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                    responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
+                            ex.getMessage());
+                }
                 caption = getString(R.string.ticket_send_error_caption);
-                message = getString(R.string.ticket_send_error_msg, responseVS.getMessage());
+                message = getString(R.string.ticket_repeated_error_msg);
             } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                 caption = getString(R.string.ticket_send_error_caption);
                 message = getString(R.string.ticket_expended_send_error_msg);

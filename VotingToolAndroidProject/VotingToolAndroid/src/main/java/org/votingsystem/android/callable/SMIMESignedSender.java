@@ -32,7 +32,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
  */
 public class SMIMESignedSender implements Callable<ResponseVS> {
 
-    public static final String TAG = "SMIMESignedSender";
+    public static final String TAG = SMIMESignedSender.class.getSimpleName();
 
     private SMIMEMessageWrapper smimeMessage = null;
     private X509Certificate receiverCert = null;

@@ -22,7 +22,7 @@ import javax.mail.Header;
  */
 public class AnonymousSMIMESender implements Callable<ResponseVS> {
 
-    public static final String TAG = "AnonymousSMIMESender";
+    public static final String TAG = AnonymousSMIMESender.class.getSimpleName();
 ;
     private AppContextVS contextVS;
     private CertificationRequestVS certificationRequest;

@@ -582,7 +582,7 @@ class  SignatureVSService {
 
 
     public ResponseVS decryptCMS (byte[] base64EncryptedData, Locale locale) {
-        log.debug " - decryptCMS"
+        log.debug "decryptCMS"
         byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
         CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
@@ -602,9 +602,14 @@ class  SignatureVSService {
             }
             dataOut.close();
             result = dataOut.toByteArray();
+            return new ResponseVS(ResponseVS.SC_OK, result);
             //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
+        } else {
+            String msg = messageSource.getMessage('encryptedMessageWithoutRecipientsErrorMsg', null, locale)
+            log.error "decryptCMS - ${msg}"
+            return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, msg);
         }
-        new ResponseVS(ResponseVS.SC_OK, result);
+
     }
 
 

@@ -16,8 +16,7 @@ class AppController {
 	 * 		   para una sesión con cliente Android.
 	 */
 	def androidClient() {
-		log.debug("*** Si llega aqui mostrar message app market browserToken: ${params.browserToken}" )
-		if(params.boolean('androidClientLoaded')) render(view:"index")
+		/*if(params.boolean('androidClientLoaded')) render(view:"index")
 		else {
             String uri = "${grailsApplication.config.grails.serverURL}?androidClientLoaded=false"
             if(params.browserToken) uri = "${uri}#${params.browserToken}"
@@ -28,7 +27,7 @@ class AppController {
                 uri = "${uri}&msg=${msg}"
                 log.debug("msg: ${msg}")
             }
-        }
+        }*/
 	}
 	
 }

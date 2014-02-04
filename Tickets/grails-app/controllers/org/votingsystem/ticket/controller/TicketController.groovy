@@ -1,6 +1,8 @@
 package org.votingsystem.ticket.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
@@ -30,8 +32,11 @@ class TicketController {
 
 
     def cancelBatch () {
-        //Update Ticket data
-        //Increment user account
+        JSONObject jsonRequest = JSON.parse(new String(params.requestBytes))
+        JSONArray ticketCancellationArray = jsonRequest.getJSONArray("ticketCancellationList")
+        ticketCancellationArray.each {
+            log.debug("ticketCancellationArray - it: ${it}")
+        }
     }
 
     /**

@@ -22,7 +22,7 @@ import org.votingsystem.model.ContextVS;
  */
 public class ReceiptPagerActivity extends ActionBarActivity {
 
-    public static final String TAG = "ReceiptPagerActivity";
+    public static final String TAG = ReceiptPagerActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
     private Cursor cursor = null;

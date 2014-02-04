@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class NewRepresentativeActivity extends ActionBarActivity {
 	
-	public static final String TAG = "NewRepresentativeActivity";
+	public static final String TAG = NewRepresentativeActivity.class.getSimpleName();
 
     private static final int SELECT_PICTURE   = 1;
     private static final int CONFIRM_PICTURE  = 2;
@@ -153,7 +153,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        broadCastId = this.getClass().getSimpleName();
+        broadCastId = ((Object)this).getClass().getSimpleName();
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         Log.d(TAG + ".onCreate(...)", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);

@@ -49,7 +49,7 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
  */
 public class VotingAppService extends Service implements Runnable {
 
-    public static final String TAG = "VotingAppService";
+    public static final String TAG = VotingAppService.class.getSimpleName();
 
     private AppContextVS appContextVS;
     private GregorianCalendar lastCheckedTime; // Time we last checked our feeds.

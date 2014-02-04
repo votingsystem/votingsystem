@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class Utils {
 
-    public static final String TAG = "Utils";
+    public static final String TAG = Utils.class.getSimpleName();
 
     public static CurrencyData getCurrencyData(AppContextVS contextVS, CurrencyVS currency) {
         String selection = TicketContentProvider.WEEK_LAPSE_COL + " =? AND " +

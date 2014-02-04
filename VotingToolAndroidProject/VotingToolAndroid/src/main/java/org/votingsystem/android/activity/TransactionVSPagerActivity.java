@@ -25,7 +25,7 @@ import java.util.Calendar;
  */
 public class TransactionVSPagerActivity extends ActionBarActivity {
 
-    public static final String TAG = "TransactionVSPagerActivity";
+    public static final String TAG = TransactionVSPagerActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
     private Cursor cursor = null;

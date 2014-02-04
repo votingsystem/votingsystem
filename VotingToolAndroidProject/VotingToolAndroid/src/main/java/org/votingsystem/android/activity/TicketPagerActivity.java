@@ -22,7 +22,7 @@ import org.votingsystem.model.ContextVS;
  */
 public class TicketPagerActivity extends ActionBarActivity {
 
-    public static final String TAG = "TicketPagerActivity";
+    public static final String TAG = TicketPagerActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
     private Cursor cursor = null;

@@ -42,7 +42,7 @@ import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
  */
 public class VoteService extends IntentService {
 
-    public static final String TAG = "VoteService";
+    public static final String TAG = VoteService.class.getSimpleName();
 
     public VoteService() { super(TAG); }
 

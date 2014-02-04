@@ -54,7 +54,7 @@ import org.votingsystem.util.ScreenUtils;
  */
 public class NavigationDrawer extends ActionBarActivity {
 
-    public static final String TAG = "NavigationDrawer";
+    public static final String TAG = NavigationDrawer.class.getSimpleName();
 
     public static final String GROUP_POSITION_KEY = "groupPosition";
     public static final String CHILD_POSITION_KEY = "childPosition";

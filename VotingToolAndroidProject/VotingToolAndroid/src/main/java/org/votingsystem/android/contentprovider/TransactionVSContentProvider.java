@@ -34,7 +34,7 @@ import java.util.Set;
  */
 public class TransactionVSContentProvider extends ContentProvider {
 
-    public static final String TAG = "TransactionVSContentProvider";
+    public static final String TAG = TransactionVSContentProvider.class.getSimpleName();
 
 
     private static final int DATABASE_VERSION = 1;
@@ -265,10 +265,11 @@ public class TransactionVSContentProvider extends ContentProvider {
 
     public static Uri addTransaction(AppContextVS contextVS, TransactionVS transactionVS,
               String weekLapse) {
-        String weekLapseStr = (weekLapse == null) ? contextVS.getCurrentWeekLapseId():weekLapse;
         ContentValues values = populateTransactionContentValues(transactionVS);
-        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapseStr);
-        return contextVS.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapse);
+        Uri uri = contextVS.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+        Log.d(TAG + ".addTransaction() ", "added uri: " + uri.toString());
+        return uri;
     }
 
     public static int updateTransaction(AppContextVS contextVS, TransactionVS transactionVS) {
@@ -281,10 +282,10 @@ public class TransactionVSContentProvider extends ContentProvider {
         ContentValues values = new ContentValues();
         values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
         values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
-        values.put(TransactionVSContentProvider.FROM_USER_COL,
-                transactionVS.getFromUserVS().getNif());
-        values.put(TransactionVSContentProvider.TO_USER_COL,
-                transactionVS.getToUserVS().getNif());
+        if(transactionVS.getFromUserVS() != null) values.put(
+                TransactionVSContentProvider.FROM_USER_COL, transactionVS.getFromUserVS().getNif());
+        if(transactionVS.getToUserVS() != null) values.put(
+                TransactionVSContentProvider.TO_USER_COL, transactionVS.getToUserVS().getNif());
         values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
         values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
         values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());

@@ -21,7 +21,7 @@ import org.votingsystem.model.ContextVS;
  */
 public class WebSocketService extends Service {
 
-    public static final String TAG = "WebSocketService";
+    public static final String TAG = WebSocketService.class.getSimpleName();
 
     @Override public void onCreate(){
         NotificationManager notificationManager = (NotificationManager)
