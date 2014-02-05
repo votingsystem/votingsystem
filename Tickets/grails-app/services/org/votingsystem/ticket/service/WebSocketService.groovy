@@ -1,37 +1,27 @@
-package org.votingsystem.simulation
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicBoolean
-import grails.transaction.Transactional
-import org.votingsystem.websocket.SocketServletVS.SocketMessageInbound;
-import org.votingsystem.model.ResponseVS;
-import org.apache.catalina.websocket.MessageInbound;
-import org.codehaus.groovy.grails.web.json.JSONElement
-import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.votingsystem.simulation.model.*
+package org.votingsystem.ticket.service
 
 import grails.converters.JSON
+import org.apache.catalina.websocket.MessageInbound
+import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.util.ExceptionVS
+import org.votingsystem.websocket.SocketServletVS.SocketMessageInbound
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.nio.ByteBuffer
+import java.nio.CharBuffer
+import java.util.concurrent.ConcurrentHashMap
 
 class WebSocketService {
-	
+
+    public enum SocketOperation {LISTEN_TRANSACTIONS}
 
 	private static final ConcurrentHashMap<String, MessageInbound> connectionsMap = new ConcurrentHashMap<String, MessageInbound>();
 
 	def grailsApplication
-	
+    def messageSource
 
 	public void init() throws Exception {
-		log.debug("--- init")
-
+		log.debug("init")
 	}
 
 	public void onOpen(SocketMessageInbound messageInbound) {
@@ -43,21 +33,20 @@ class WebSocketService {
 		connectionsMap.remove(messageInbound.getBrowserId());
 	}
 
-	public void onBinaryMessage(SocketMessageInbound messageInbound,
-			ByteBuffer message) {
+	public void onBinaryMessage(SocketMessageInbound messageInbound, ByteBuffer message) {
 		log.debug("onBinaryMessage")
 	}
 
 	public void onTextMessage(SocketMessageInbound messageInbound, CharBuffer message) {
 		String messageStr = new String(message.array());
-		def mensajeJSON = JSON.parse(messageStr)
-		mensajeJSON.userId = messageInbound.getBrowserId()
-		processRequest(mensajeJSON)
+		def messageJSON = JSON.parse(messageStr)
+		messageJSON.userId = messageInbound.getBrowserId()
+		processRequest(messageJSON)
 	}
 	
 	public void broadcast(JSONObject messageJSON) {
 		String messageStr = messageJSON.toString()
-		log.debug("--- broadcast - message: " + messageStr)
+		log.debug("broadcast - message: " + messageStr)
 		Enumeration<MessageInbound> connections = connectionsMap.elements()
 		while(connections.hasMoreElements()) {
 			MessageInbound connection = connections.nextElement()
@@ -77,8 +66,7 @@ class WebSocketService {
 		def errorList = []
 		listeners.each {
             CharBuffer messageBuffer = CharBuffer.wrap(messageStr);
-			//log.debug("broadcastList - ${it} messageBuffer: ${messageBuffer}")
-			MessageInbound messageInbound = connectionsMap.get(it)
+            MessageInbound messageInbound = connectionsMap.get(it)
 			if(messageInbound) {
 				try {
 					messageInbound.getWsOutbound().writeTextMessage(messageBuffer);
@@ -99,27 +87,22 @@ class WebSocketService {
 	 */
 	public void processRequest(JSONObject messageJSON) {
 		String message = null;
-        if(messageJSON.service) {
-			Object targetService = grailsApplication.mainContext.getBean(messageJSON.service)
-			if(!targetService.metaClass.respondsTo(targetService, 'processRequest').isEmpty()) {
-				try {
-					targetService.processRequest(messageJSON)
-				} catch(Exception ex) {
-					log.error(ex.getMessage() + messageJSON.toString(), ex);
-				}
-			} else {
-                message = "Target service '${messageJSON.service}' doesn't implements 'processRequest'"
-                log.error(message)
-                messageJSON.status = ResponseVS.SC_ERROR
-                messageJSON.message = message
-                processResponse(messageJSON)
+        Locale locale = null
+        try {
+            locale = Locale.forLanguageTag(messageJSON.locale)
+            SocketOperation socketOperation = SocketOperation.valueOf(messageJSON.operation)
+            switch(socketOperation) {
+                case SocketOperation.LISTEN_TRANSACTIONS:
+                    TransactionVSService transactionVSService = grailsApplication.mainContext.getBean("transactionVSService")
+                    transactionVSService.addTransactionListener(messageJSON.userId)
+                    break;
+                default: throw new ExceptionVS(messageSource.getMessage("unknownSocketOperationErrorMsg",
+                        [messageJSON.operation].toArray(), locale))
             }
-		} else {
-            message = "Message with target service: '${messageJSON.service}'"
-            log.error(message)
-            log.error("${messageJSON}")
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
             messageJSON.status = ResponseVS.SC_ERROR
-            messageJSON.message = message
+            messageJSON.message = ex.getMessage()
             processResponse(messageJSON)
         }
 	}

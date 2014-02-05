@@ -33,12 +33,17 @@ import java.security.cert.X509Certificate
 */
 class TransactionVSService {
 
+    private final Set<String> listenerSet = Collections.synchronizedSet(new HashSet<String>());
+
     def signatureVSService
     def messageSource
     def userVSService
     def sessionFactory
     def grailsLinkGenerator
     def grailsApplication
+    def webSocketService
+    def csrService
+
 
     public ResponseVS cancelTicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
@@ -49,13 +54,8 @@ class TransactionVSService {
             String fromUser = grailsApplication.config.VotingSystem.serverName
             String toUser = smimeMessageReq.getFrom().toString()
             String subject = messageSource.getMessage('ticketReceiptSubject', null, locale)
-
-
-
-
             SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                     smimeMessageReq, subject)
-
             MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                     content:smimeMessageResp.getBytes()).save()
             return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.TICKET_CANCEL, data:messageSMIMEResp,
@@ -67,7 +67,9 @@ class TransactionVSService {
         }
     }
 
-
+    public void addTransactionListener (String listenerId) {
+        listenerSet.add(listenerId)
+    }
 
     public ResponseVS processDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
@@ -91,6 +93,15 @@ class TransactionVSService {
         }
     }
 
+
+    public void notifyListeners(TransactionVS transactionVS) {
+        Map messageMap = getTransactionMap(transactionVS)
+        log.debug("notifyListeners - transactionVS.id: ${transactionVS.id} - messageMap: ${messageMap as JSON}")
+        Map broadcastResul = webSocketService.broadcastList(messageMap, listenerSet);
+        if(ResponseVS.SC_OK != broadcastResul.statusCode) {
+            broadcastResul.errorList.each {listenerSet.remove(it)}
+        }
+    }
 
     private ResponseVS processUserAllocation(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
 
@@ -160,6 +171,28 @@ class TransactionVSService {
         }
     }
 
+    public ResponseVS processTicketRequest(MessageSMIME messageSMIMEReq, byte[] csrRequest, Locale locale) {
+        log.debug("processTicketRequest");
+        //To avoid circular references issues
+        ResponseVS responseVS = ((TicketService)grailsApplication.mainContext.getBean("ticketService")).processRequest(
+                messageSMIMEReq, locale)
+        if (ResponseVS.SC_OK == responseVS.statusCode) {
+            ResponseVS ticketGenBatchResponse = csrService.signTicketBatchRequest(csrRequest,
+                    responseVS.data.amount, responseVS.data.currency, locale)
+            if (ResponseVS.SC_OK == ticketGenBatchResponse.statusCode) {
+                UserVS userVS = messageSMIMEReq.userVS
+                TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
+                        state:TransactionVS.State.OK, currency:responseVS.data.currency,
+                        subject: messageSource.getMessage('ticketRequest', null, locale), messageSMIME: messageSMIMEReq,
+                        fromUserVS: userVS, toUserVS: userVS, type:TransactionVS.Type.TICKET_REQUEST).save()
+
+                Map transactionMap = getTransactionMap(userTransaction)
+                Map resultMap = [transactionList:[transactionMap], issuedTickets:ticketGenBatchResponse.data]
+                return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_ENCRYPTED,
+                        type:TypeVS.TICKET_REQUEST, messageBytes:"${resultMap as JSON}".getBytes());
+            } else return ticketGenBatchResponse
+        } else return responseVS
+    }
 
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
@@ -202,12 +235,10 @@ class TransactionVSService {
             le("dateCreated", weekToCalendar.getTime())
         }
 
-
         String dirPath = DateUtils.getDirPath(mondayLapse.getTime())
         //int year =  calendar.get(Calendar.YEAR);
         //int month = calendar.get(Calendar.MONTH) + 1; // Note: zero based!
         //int day = calendar.get(Calendar.DAY_OF_MONTH);
-
         def userOutputTransactions = TransactionVS.createCriteria().scroll {
             eq("fromUserVS", userVS)
             eq("type", TransactionVS.Type.TICKET_REQUEST)

@@ -54,27 +54,9 @@ class TicketController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = ticketService.processRequest(messageSMIMEReq, request.getLocale())
-        if (ResponseVS.SC_OK == responseVS.statusCode) {
-            byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
-            ResponseVS ticketGenBatchResponse = csrService.signTicketBatchRequest(csrRequest,
-                    responseVS.data.amount, responseVS.data.currency,request.getLocale())
-            if (ResponseVS.SC_OK == ticketGenBatchResponse.statusCode) {
-                ticketGenBatchResponse.setContentType(ContentTypeVS.JSON_ENCRYPTED)
-                UserVS userVS = messageSMIMEReq.userVS
-                TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
-                        state:TransactionVS.State.OK,
-                        subject: message(code:'ticketRequest'), messageSMIME: messageSMIMEReq,
-                        fromUserVS: userVS, toUserVS: userVS, currency:responseVS.data.currency,
-                        type:TransactionVS.Type.TICKET_REQUEST).save()
-
-                Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
-                Map resultMap = [transactionList:[transactionMap], issuedTickets:ticketGenBatchResponse.data]
-
-                responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK,
-                        type:TypeVS.TICKET_REQUEST, messageBytes:"${resultMap as JSON}".getBytes());
-                return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
-            } else return [responseVS:ticketGenBatchResponse]
-        } else return [responseVS:responseVS]
+        ResponseVS responseVS = transactionVSService.processTicketRequest(messageSMIMEReq,
+                params[ContextVS.CSR_FILE_NAME], request.getLocale())
+        if(!responseVS.contentType) responseVS.setContentType(ContentTypeVS.ENCRYPTED);
+        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
     }
 }

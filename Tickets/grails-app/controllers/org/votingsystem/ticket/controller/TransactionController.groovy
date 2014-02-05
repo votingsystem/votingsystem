@@ -24,6 +24,11 @@ class TransactionController {
     def signatureVSService
     def ticketService
 
+
+    def listener() {
+
+    }
+
     /**
      * Servicio que recibe una transacción compuesta por un lote de Tickets
      *

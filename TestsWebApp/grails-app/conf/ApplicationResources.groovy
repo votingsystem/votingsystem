@@ -14,7 +14,6 @@ modules = {
 	
 	application {
 		//if (isDevMode()) {}
-		dependsOn 'masterStyles', 'jquery'
 		resource url: 'js/utils.js.gsp'
 		resource url: 'js/pcUtils.js.gsp'
 	}

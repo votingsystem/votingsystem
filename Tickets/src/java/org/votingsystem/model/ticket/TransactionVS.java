@@ -1,10 +1,13 @@
 package org.votingsystem.model.ticket;
 
 import org.apache.log4j.Logger;
+import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.ticket.service.TransactionVSService;
+import org.votingsystem.util.ApplicationContextHolder;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -169,6 +172,11 @@ public class TransactionVS  implements Serializable {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public void afterInsert() {
+        GrailsApplication grailsApplication = (GrailsApplication) ApplicationContextHolder.getBean("grailsApplication");
+        ((TransactionVSService)grailsApplication.getMainContext().getBean("transactionVSService")).notifyListeners(this);
     }
 
 }

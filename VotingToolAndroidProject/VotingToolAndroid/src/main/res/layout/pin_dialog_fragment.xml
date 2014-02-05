@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:layout_gravity="center"
-        android:textSize="22sp" />
+        android:textSize="21sp" />
    
     <EditText
         android:id="@+id/user_pin"

@@ -9,7 +9,7 @@ package org.votingsystem.ticket.controller
 class AppController {
 
 	def grailsApplication;
-	
+
 	/**
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación con parámetros de utilidad
