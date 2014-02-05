@@ -33,8 +33,13 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
+import java.net.URI;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
@@ -43,6 +48,10 @@ import static org.votingsystem.model.ContextVS.URI_KEY;
 import static org.votingsystem.model.ContextVS.URL_KEY;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
+import org.eclipse.jetty.websocket.WebSocket;
+import org.eclipse.jetty.websocket.WebSocketClient;
+import org.eclipse.jetty.websocket.WebSocketClientFactory;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -50,6 +59,8 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 public class VotingAppService extends Service implements Runnable {
 
     public static final String TAG = VotingAppService.class.getSimpleName();
+
+    public enum SocketOperation {LISTEN_TRANSACTIONS}
 
     private AppContextVS appContextVS;
     private GregorianCalendar lastCheckedTime; // Time we last checked our feeds.
@@ -183,6 +194,9 @@ public class VotingAppService extends Service implements Runnable {
             * spawn its own thread in which to do that work.*/
         Thread thr = new Thread(null, runnable, "voting_app_service_thread");
         thr.start();
+        WebsocketListener socketListener = new WebsocketListener("ws://tickets:8083/Tickets/websocket/service");
+        Thread websocketThread = new Thread(null, socketListener, "websocket_service_thread");
+        websocketThread.start();
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
     }
@@ -212,10 +226,51 @@ public class VotingAppService extends Service implements Runnable {
 
     private void runPendingOperations() {
         Log.d(TAG + ".checkForPendingOperations(...) ", "");
+
     }
 
     @Override public void run() {
         checkForPendingOperations();
+    }
+
+    private class WebsocketListener implements Runnable {
+
+        private WebsocketListener socketListener = null;
+        private String serviceURL = null;
+
+        public WebsocketListener(String serviceURL) {
+            this.serviceURL = serviceURL;
+        }
+
+        @Override public void run() {
+            WebSocketClientFactory factory = new WebSocketClientFactory();
+            try {
+                factory.start();
+                WebSocketClient client = factory.newWebSocketClient();
+                Log.d(TAG +  ".WebsocketListener", " - getMaxTextMessageSize: " + client.getMaxTextMessageSize());
+                WebSocket.Connection connection = client.open(new URI(serviceURL), new WebSocket.OnTextMessage() {
+                    public void onOpen(Connection connection) {
+                        Log.d(TAG +  ".WebsocketListener.onOpen(...)", "onOpen");
+                    }
+
+                    public void onClose(int closeCode, String message) {
+                        Log.d(TAG + ".WebsocketListener.onClose(...)", "onClose");
+                    }
+
+                    public void onMessage(String data) {
+                        Log.d(TAG + ".WebsocketListener.onMessage(...)", "data: " + data);
+                    }
+                }).get(10, TimeUnit.SECONDS);
+                Map connectMsgMap = new HashMap();
+                connectMsgMap.put("operation", SocketOperation.LISTEN_TRANSACTIONS.toString());
+                connectMsgMap.put("locale", "es");
+                JSONObject requestJSON = new JSONObject(connectMsgMap);
+                connection.sendMessage(requestJSON.toString());
+
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
 }

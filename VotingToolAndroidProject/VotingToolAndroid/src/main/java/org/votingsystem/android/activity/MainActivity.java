@@ -22,9 +22,7 @@ import org.votingsystem.model.ResponseVS;
 import java.io.IOException;
 import java.util.Properties;
 
-//import org.eclipse.jetty.websocket.WebSocket;
-//import org.eclipse.jetty.websocket.WebSocketClient;
-//import org.eclipse.jetty.websocket.WebSocketClientFactory;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -71,8 +69,6 @@ public class MainActivity extends FragmentActivity {
             Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
             startActivity(intent);
         }
-        //WebsocketLoader websocketLoader = new WebsocketLoader();
-        //websocketLoader.execute("ws://192.168.1.20:8080/SistemaVotacionTest/websocket/service");
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {
@@ -153,61 +149,5 @@ public class MainActivity extends FragmentActivity {
         if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
     };
-
-    /*public class WebsocketLoader extends AsyncTask<String, String, ResponseVS> {
-
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-
-        public WebsocketLoader() { }
-
-        @Override protected void onPreExecute() {
-            Log.d(TAG + ".WebsocketLoader.onPreExecute() ", " - onPreExecute");
-        }
-
-        @Override protected ResponseVS doInBackground(String... urls) {
-            String websocketURL = urls[0];
-            Log.d(TAG + ".WebsocketLoader.doInBackground() ", " - websocketURL: " + websocketURL);
-            // Bridge Jetty Logging to Android Logging
-            //System.setProperty("org.eclipse.jetty.util.log.class",AndroidLog.class.getName());
-            //org.eclipse.jetty.util.log.Log.setLog(new AndroidLog());
-
-            WebSocketClientFactory factory = new WebSocketClientFactory();
-            try {
-                factory.start();
-                WebSocketClient client = factory.newWebSocketClient();
-                Log.d(TAG +  "WebSocketClient", " - getMaxTextMessageSize: " + client.getMaxTextMessageSize());
-
-
-                WebSocket.Connection connection = client.open(new URI(websocketURL), new WebSocket.OnTextMessage() {
-                    public void onOpen(Connection connection) {
-                        Log.d(TAG +  "WebSocketClient.onOpen(..)", " - onOpen");
-                    }
-
-                    public void onClose(int closeCode, String message) {
-                        Log.d(TAG +  "WebSocketClient.onClose(..)", " - onClose");
-                        countDownLatch.countDown();
-                    }
-
-                    public void onMessage(String data) {
-                        Log.d(TAG +  "WebSocketClient.onMessage(..)", " - onMessage - data: " + data);
-                        publishProgress(data);
-                    }
-                }).get(300, TimeUnit.SECONDS);
-                countDownLatch.await();
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-            return new ResponseVS(ResponseVS.SC_OK);
-        }
-
-        @Override  protected void onProgressUpdate(String... progress) {
-            Log.d(TAG +  "WebSocketClient.onProgressUpdate(..)", " - data: " + progress[0]);
-
-        }
-
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + ".EventInfoLoader.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
-        }
-    }*/
 
 }

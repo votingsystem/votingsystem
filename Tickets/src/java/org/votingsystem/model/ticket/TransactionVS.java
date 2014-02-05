@@ -175,8 +175,10 @@ public class TransactionVS  implements Serializable {
     }
 
     public void afterInsert() {
-        GrailsApplication grailsApplication = (GrailsApplication) ApplicationContextHolder.getBean("grailsApplication");
-        ((TransactionVSService)grailsApplication.getMainContext().getBean("transactionVSService")).notifyListeners(this);
+        if(Type.USER_ALLOCATION_INPUT != getType()) {
+            GrailsApplication grailsApplication = (GrailsApplication) ApplicationContextHolder.getBean("grailsApplication");
+            ((TransactionVSService)grailsApplication.getMainContext().getBean("transactionVSService")).notifyListeners(this);
+        }
     }
 
 }

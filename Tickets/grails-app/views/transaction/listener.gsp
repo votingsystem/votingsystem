@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><g:message code="appTitle"/></title>
+    <title><g:message code="transactionListenerPageTitle"/></title>
     <r:external uri="/images/euro_16.png"/>
     <r:require module="application"/>
     <r:layoutResources />
@@ -21,14 +21,14 @@
     </div>
     <table style="display:none;">
         <tbody id="transactionRowTemplate">
-        <tr style="width: 100%;">
-            <td>{0}</td>
-            <td>{1}</td>
-            <td>{2}</td>
-            <td style="width:200px;">{3}</td>
-            <td style="width:300px;">{4}</td>
-            <td style="width:200px;"><a href="{5}">Justificante</a></td>
-        </tr>
+            <tr style="width: 100%;">
+                <td>{0}</td>
+                <td>{1}</td>
+                <td>{2}</td>
+                <td style="width:200px;">{3}</td>
+                <td style="width:300px;">{4}</td>
+                <td style="width:200px;"><a href="{5}">Justificante</a></td>
+            </tr>
         </tbody>
     </table>
 </body>
@@ -37,13 +37,13 @@
 <r:script>
 
     socketService.socket.onmessage = function (message) {
-        console.log('socket.onmessage - msg: ' + message.data);
+        console.log('socket.onmessage - message.data: ' + message.data);
         var messageJSON = toJSON(message.data)
         addTransactionRow(messageJSON)
     }
 
     socketService.socket.onopen = function () {
-        console.log('listener - Info: WebSocket connection opened');
+        console.log('listener - WebSocket connection opened');
         socketService.sendMessage({operation:SocketOperation.LISTEN_TRANSACTIONS, locale:navigator.language})
     };
 
@@ -54,7 +54,7 @@
         var newTransactionHTML = newTransactionRowTemplate.format(jsonTransactionData.type,
                 jsonTransactionData.amount, jsonTransactionData.currency,
                 jsonTransactionData.dateCreated, jsonTransactionData.subject, jsonTransactionData.messageSMIMEURL);
-        $('#transaction_table tr:first').after(newTransactionHTML);
+        $('#transaction_table tr:first').after(newTransactionHTML).fadeIn("slow");
     }
 
 </r:script>
