@@ -1,4 +1,4 @@
-gradversion = '0.6.0'
+version = '0.6.0'
 
 apply plugin: 'project-report'
 apply plugin: 'announce'
