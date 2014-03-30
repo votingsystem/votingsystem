@@ -2,7 +2,7 @@ package org.votingsystem.model;
 
 import android.content.Context;
 
-import org.votingsystem.android.R;
+import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
 import java.io.ByteArrayInputStream;

@@ -4,7 +4,7 @@ import android.content.Context;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.android.R;
+import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 

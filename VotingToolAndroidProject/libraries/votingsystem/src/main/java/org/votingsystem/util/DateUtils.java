@@ -2,7 +2,7 @@ package org.votingsystem.util;
 
 import android.content.Context;
 
-import org.votingsystem.android.R;
+import org.votingsystem.android.lib.R;
 
 import java.io.File;
 import java.text.DateFormat;
