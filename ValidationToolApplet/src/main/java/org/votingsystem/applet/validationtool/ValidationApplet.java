@@ -9,6 +9,7 @@ import org.votingsystem.applet.validationtool.panel.AboutPanel;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.*;
 import javax.swing.*;
+import java.lang.reflect.Method;
 import java.security.Security;
 import java.util.Map;
 import java.util.Timer;
@@ -109,17 +110,25 @@ public class ValidationApplet extends JApplet implements AppHostVS {
     private void initOperationGetter() {
         logger.info("initOperationGetter");
         operationGetter =  new Timer(true);
-        final netscape.javascript.JSObject jsObject = netscape.javascript.JSObject.getWindow(this);
-        operationGetter.scheduleAtFixedRate(
-            new TimerTask(){
-                public void run() {
-                    Object object = jsObject.call(
-                            "getMessageToValidationTool", null);
-                    if(object != null) {
-                        runOperation(object.toString());
-                    } else { }
-                }
-            }, 0, 1000);
+        Class JSObjectClass = netscape.javascript.JSObject.class;
+        try {
+            final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
+            operationGetter.scheduleAtFixedRate(
+                    new TimerTask(){
+                        public void run() {
+                            try {
+                                Object object = method.invoke(null, "getMessageToValidationTool", null);
+                                if(object != null) {
+                                    runOperation(object.toString());
+                                } else { }
+                            } catch(Exception ex) {
+                                logger.error(ex.getMessage(), ex);
+                            }
+                        }
+                    }, 0, 1000);
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
 
 
@@ -141,9 +150,9 @@ public class ValidationApplet extends JApplet implements AppHostVS {
             try {
                 if(executionMode == ExecutionMode.APPLET) {
                     Object[] args = {messageJSON.toString()};
-                    JSObject jsObject = null;
-                    Object object = netscape.javascript.JSObject.getWindow(this).
-                            call("setMessageFromValidationTool", args);
+                    Class JSObjectClass = netscape.javascript.JSObject.class;
+                    final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
+                    Object object = method.invoke(null, "setMessageFromValidationTool", args);
                 } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);

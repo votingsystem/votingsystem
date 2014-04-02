@@ -8,7 +8,9 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.*;
 import org.votingsystem.util.FileUtils;
 import javax.swing.*;
+import java.applet.Applet;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -97,19 +99,29 @@ public class VotingApplet extends JApplet implements AppHostVS {
      */
     private void initOperationGetter() {
         operationGetter =  new Timer(true);
-        final netscape.javascript.JSObject jsObject = netscape.javascript.JSObject.getWindow(this);
-        operationGetter.scheduleAtFixedRate(
-            new TimerTask(){
-                public void run() {
-                    //logger.debug("Comprobando operaciones pendientes");
-                    Object object = jsObject.call("getMessageToSignatureClient", null);
-                    if(object != null) {
-                        runOperation(object.toString());
-                    } else {
-                        //logger.debug("Testeando JSObject - responseVS nula");
-                    }
-                }
-            }, 0, 1000);
+        Class JSObjectClass = netscape.javascript.JSObject.class;
+        try {
+            final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
+            operationGetter.scheduleAtFixedRate(
+                    new TimerTask(){
+                        public void run() {
+                            //logger.debug("Comprobando operaciones pendientes");
+                            try {
+                                Object object = method.invoke(null, "getMessageToSignatureClient", null);
+                                if(object != null) {
+                                    runOperation(object.toString());
+                                } else {
+                                    //logger.debug("Testeando JSObject - responseVS nula");
+                                }
+                            } catch(Exception ex) {
+                                logger.error(ex.getMessage(), ex);
+                            }
+                        }
+                    }, 0, 1000);
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+
     }
 
 
@@ -183,7 +195,9 @@ public class VotingApplet extends JApplet implements AppHostVS {
                     logger.debug(" - sendMessageToHost - status: " + messageToHost.getStatusCode() +
                             " - callbackFunction: " + callbackFunction + " - message: " + messageJSON.toString());
                     Object[] args = {messageJSON.toString()};
-                    Object object = netscape.javascript.JSObject.getWindow(this).call(callbackFunction, args);
+                    Class JSObjectClass = netscape.javascript.JSObject.class;
+                    final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
+                    Object object = method.invoke(null, callbackFunction, args);
                 } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
