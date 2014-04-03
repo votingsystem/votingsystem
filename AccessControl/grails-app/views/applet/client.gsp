@@ -18,9 +18,10 @@
     <body onload="loadCallerCallback()">
 		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet"
      		CODE="org.votingsystem.applet.votingtool.VotingApplet"
-     		ARCHIVE="${jarArchives}" 
+     		ARCHIVE="${jarArchives}"
      		HEIGHT=200
-     		WIDTH=600> 
+     		WIDTH=600>
+            <param name="permissions" value="all-permissions" />
 		</APPLET>
     </body>
 </html>

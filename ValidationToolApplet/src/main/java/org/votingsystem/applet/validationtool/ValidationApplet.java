@@ -2,7 +2,6 @@ package org.votingsystem.applet.validationtool;
 
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import netscape.javascript.*;
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.dialog.MainDialog;
 import org.votingsystem.applet.validationtool.panel.AboutPanel;
@@ -110,8 +109,9 @@ public class ValidationApplet extends JApplet implements AppHostVS {
     private void initOperationGetter() {
         logger.info("initOperationGetter");
         operationGetter =  new Timer(true);
-        Class JSObjectClass = netscape.javascript.JSObject.class;
         try {
+            //Class JSObjectClass = netscape.javascript.JSObject.class;
+            Class JSObjectClass = Class.forName("netscape.javascript.JSObject");
             final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
             operationGetter.scheduleAtFixedRate(
                     new TimerTask(){
@@ -150,7 +150,8 @@ public class ValidationApplet extends JApplet implements AppHostVS {
             try {
                 if(executionMode == ExecutionMode.APPLET) {
                     Object[] args = {messageJSON.toString()};
-                    Class JSObjectClass = netscape.javascript.JSObject.class;
+                    //Class JSObjectClass = netscape.javascript.JSObject.class;
+                    Class JSObjectClass = Class.forName("netscape.javascript.JSObject");
                     final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
                     Object object = method.invoke(null, "setMessageFromValidationTool", args);
                 } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());

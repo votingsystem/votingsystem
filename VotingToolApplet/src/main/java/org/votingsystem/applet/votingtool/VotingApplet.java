@@ -99,8 +99,9 @@ public class VotingApplet extends JApplet implements AppHostVS {
      */
     private void initOperationGetter() {
         operationGetter =  new Timer(true);
-        Class JSObjectClass = netscape.javascript.JSObject.class;
         try {
+            //Class JSObjectClass = netscape.javascript.JSObject.class;
+            Class JSObjectClass = Class.forName("netscape.javascript.JSObject");
             final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
             operationGetter.scheduleAtFixedRate(
                     new TimerTask(){
@@ -195,7 +196,8 @@ public class VotingApplet extends JApplet implements AppHostVS {
                     logger.debug(" - sendMessageToHost - status: " + messageToHost.getStatusCode() +
                             " - callbackFunction: " + callbackFunction + " - message: " + messageJSON.toString());
                     Object[] args = {messageJSON.toString()};
-                    Class JSObjectClass = netscape.javascript.JSObject.class;
+                    //Class JSObjectClass = netscape.javascript.JSObject.class;
+                    Class JSObjectClass = Class.forName("netscape.javascript.JSObject");
                     final Method method = JSObjectClass.getMethod("getWindow", this.getClass());
                     Object object = method.invoke(null, callbackFunction, args);
                 } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
