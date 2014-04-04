@@ -121,12 +121,12 @@ function httpGet(theUrl){
     return xmlHttp.responseText;
 }
 
-var DateUtils = {
+function DateUtils(){}
 
-	//parse dates with format "2010-08-30 01:02:03" 	
-	parse: function (dateStr) {
+//parse dates with format "2010-08-30 01:02:03"
+DateUtils.parse = function (dateStr) {
 		var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
-		var dateArray = reggie.exec(dateStr); 
+		var dateArray = reggie.exec(dateStr);
 		var dateObject = new Date(
 		    (+dateArray[1]),
 		    (+dateArray[2])-1, //Months are zero based
@@ -136,21 +136,20 @@ var DateUtils = {
 		    (+dateArray[6])
 		);
 		return dateObject
-	},
-	
-	checkDate: function (dateInit, dateFinish) {
+	}
+
+DateUtils.checkDate = function (dateInit, dateFinish) {
 		var todayDate = new Date();
 		if(todayDate > dateInit && todayDate < dateFinish) return true;
 		else return false;
 	}
-}
 
 Date.prototype.format = function() {
 	var curr_date = this.getDate();
     var curr_month = this.getMonth() + 1; //Months are zero based
     var curr_year = this.getFullYear();
     return curr_year + "/" + curr_month + "/" + curr_date + " 00:00:00"
-};
+}
 
 //http://jsfiddle.net/cckSj/5/
 Date.prototype.getElapsedTime = function() {
