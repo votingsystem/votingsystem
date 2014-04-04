@@ -24,21 +24,6 @@ EventVS.State = {
 
 function EventVS(eventJSON, eventTemplate, subSystem) {
 
-
-    this.getMessage = function () {
-    	var result =  "";
-    	if(EventVS.State.ACTIVE == this.state) {
-    		result = "<g:message code='openLbl'/>";
-    	} else if(EventVS.State.AWAITING == this.state) {
-    		result =  "<g:message code='pendingLbl'/>";
-    	} else if(EventVS.State.TERMINATED == this.state) {
-    		result =  "<g:message code='closedLbl'/>";
-    	} else if(EventVS.State.CANCELLED == this.state) {
-    		result =  "<g:message code='cancelledLbl'/>";
-    	}
-    	return result;
-    }
-
     if(eventJSON != null) {
         this.id = eventJSON.id
         this.dateFinish = eventJSON.dateFinish
@@ -80,7 +65,10 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
             this.dateFinish.getElapsedTime(), this.getMessage());
     }
 
-    this.getURL = function() {
+
+}
+
+EventVS.prototype.getURL = function() {
         var result
         if(this.subSystem == SubSystem.VOTES) result = "${createLink( controller:'eventVSElection')}/" + this.id
         if(this.subSystem == SubSystem.CLAIMS) result = "${createLink( controller:'eventVSClaim')}/" + this.id
@@ -88,7 +76,21 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
 		return result;
     }
 
-    this.getElement = function() {
+EventVS.prototype.getMessage = function () {
+    	var result =  "";
+    	if(EventVS.State.ACTIVE == this.state) {
+    		result = "<g:message code='openLbl'/>";
+    	} else if(EventVS.State.AWAITING == this.state) {
+    		result =  "<g:message code='pendingLbl'/>";
+    	} else if(EventVS.State.TERMINATED == this.state) {
+    		result =  "<g:message code='closedLbl'/>";
+    	} else if(EventVS.State.CANCELLED == this.state) {
+    		result =  "<g:message code='cancelledLbl'/>";
+    	}
+    	return result;
+    }
+
+EventVS.prototype.getElement = function() {
         if(eventTemplate == null) console.log("eventTemplate null")
 
         var $newEvent = $(this.eventHTML)
@@ -110,7 +112,6 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
         return $newEvent
     }
 
-}
 
 function httpGet(theUrl){
     var xmlHttp = null;
