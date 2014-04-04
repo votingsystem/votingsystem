@@ -30,7 +30,7 @@ dependencies {
 task buildApplet(type:VotingSystemApplet){
 
 	manifest {
-		attributes 'Main-Class': 'VotingApplet',
+		attributes 'Main-Class': 'org.votingsystem.applet.votingtool.VotingApplet',
 				   'SplashScreen-Image':'resources/icon_32/application-certificate.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingToolApplet',
 				   'provider': 'SistemaVotacion.org'
