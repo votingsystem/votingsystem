@@ -168,14 +168,13 @@ class TimeStampService {
 			getAcceptedAlgorithms(), getAcceptedPolicies(), getAcceptedExtensions())
 	}	
 	
-	public ResponseVS processRequest(byte[] timeStampRequestBytes, Locale locale) throws Exception {
+	public ResponseVS processRequest(byte[] timeStampRequestBytes, Date date, Locale locale) throws Exception {
 		if(!timeStampRequestBytes) {
 			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
 			log.debug("processRequest - ${msg}"); 
 			return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
 		}
 		TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
-		final Date date = Calendar.getInstance().getTime()
 		final BigInteger serialNumber = VotingSystemKeyGenerator.INSTANCE.getSerno()
 		log.debug("processRequest - serialNumber: '${serialNumber}' - CertReq: ${timeStampRequest.getCertReq()}");
 		final TimeStampToken token = null;

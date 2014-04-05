@@ -49,5 +49,3 @@ La dirección del servidor de sello de tiempo de las aplicaciones **AccessContro
 *   Las aplicaciones que utilizan **Hibernate** y **Grails** (**TimeStampServer**, **AccessControl**, **ControlCenter** y **TestsWebApp**
 dan problemas con OpenJDK 1.7.0_25).
 
-*   En entornos de desarrollo con máquinas virtuales Oracle pueden presentarse problemas de colisión de clases entre las
-librerías **jfxrt.jar** y la librería **plugin.jar** en las aplicaciones **ValidationToolApplet** y **VotingToolApplet**.

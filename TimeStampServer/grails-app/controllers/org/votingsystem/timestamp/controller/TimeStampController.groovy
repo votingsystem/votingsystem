@@ -10,6 +10,36 @@ class TimeStampController {
 	def timeStampService
     def timeStampTestService
 
+    /**
+     * Servicio de generación de sellos de tiempo 'discretos'. Para dificultar la asociación de socilicitudes de acceso
+     * a votos
+     *
+     * @httpMethod [POST]
+     * @serviceURL [/timeStamp/discrete]
+     * @param [timeStampRequest] Solicitud de sellado de tiempo en formato RFC 3161.
+     * @responseContentType [application/timestamp-query]
+     * @responseContentType [application/timestamp-response]
+     *
+     * @return Si todo es correcto un sello de tiempo en formato RFC 3161 con la hora de la petición (con minutos y
+     * segundos puestos a 0)
+     */
+    def discrete() {
+        byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
+        Calendar calendar = Calendar.getInstance()
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        ResponseVS responseVS = timeStampService.processRequest(timeStampRequestBytes, calendar.getTime(),
+                request.getLocale())
+        response.status = responseVS.getStatusCode()
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            response.contentLength = responseVS.getMessageBytes().length
+            response.setContentType(responseVS.getContentType().getName())
+            response.outputStream <<  responseVS.getMessageBytes()
+            response.outputStream.flush()
+        } else render responseVS.getMessage()
+        return false
+    }
+
 	/**
 	 * Servicio de generación de sellos de tiempo.
 	 *
@@ -23,7 +53,8 @@ class TimeStampController {
 	 */
 	def index() {
         byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
-        ResponseVS responseVS = timeStampService.processRequest(timeStampRequestBytes, request.getLocale())
+        ResponseVS responseVS = timeStampService.processRequest(timeStampRequestBytes,
+                Calendar.getInstance().getTime(), request.getLocale())
         response.status = responseVS.getStatusCode()
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             response.contentLength = responseVS.getMessageBytes().length

@@ -8,7 +8,7 @@ import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.util.DateUtils
-
+import java.util.Calendar
 import static java.util.Calendar.*
 
 
@@ -22,8 +22,7 @@ import static java.util.Calendar.*
 class TestingController {
 
 
-    def index() {
-    }
+    def index() { }
 
 
 }
