@@ -4,6 +4,7 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.FileUtils
+import java.util.Calendar
 
 class TimeStampController {
 	

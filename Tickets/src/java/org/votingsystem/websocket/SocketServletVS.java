@@ -16,14 +16,14 @@ import java.nio.CharBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @deprecated 
- *  
+ * @deprecated
+ *
  * Spring 3.x doesn't support @ServerEndpoint
  */
 @Deprecated
 public class SocketServletVS extends WebSocketServlet {
-	
-	private static Logger logger = Logger.getLogger(SocketServletVS.class); 
+
+    private static Logger logger = Logger.getLogger(SocketServletVS.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -32,7 +32,7 @@ public class SocketServletVS extends WebSocketServlet {
     private final AtomicInteger connectionIds = new AtomicInteger(0);
 
     @Override protected StreamInbound createWebSocketInbound(
-    		String subProtocol, HttpServletRequest request) {
+            String subProtocol, HttpServletRequest request) {
         //String[] beanNames = GrailsWebUtil.lookupApplication(getServletContext()).
         //		getMainContext().getBeanDefinitionNames();        
         return new SocketMessageInbound(connectionIds.incrementAndGet());
@@ -44,8 +44,8 @@ public class SocketServletVS extends WebSocketServlet {
         private GrailsApplication grailsApplication;
 
         private SocketMessageInbound(int id) {
-        	//grailsApplication = GrailsWebUtil.lookupApplication(getServletContext()); 
-        	grailsApplication = (GrailsApplication) ApplicationContextHolder.getBean("grailsApplication");
+            //grailsApplication = GrailsWebUtil.lookupApplication(getServletContext());
+            grailsApplication = (GrailsApplication) ApplicationContextHolder.getBean("grailsApplication");
         	/*String[] beanNames = grailsApplication.getMainContext().getBeanDefinitionNames(); 
         	for(String name : beanNames) {
         		logger.debug("beanName: " + name);
@@ -54,30 +54,30 @@ public class SocketServletVS extends WebSocketServlet {
         }
 
         @Override protected void onOpen(WsOutbound outbound) {
-        	logger.debug(" - onOpen - client: " + browserId);
+            logger.debug(" - onOpen - client: " + browserId);
             ((WebSocketService)grailsApplication.getMainContext().
-            		getBean("webSocketService")).onOpen(this);
+                    getBean("webSocketService")).onOpen(this);
         }
 
         @Override protected void onClose(int status) {
             ((WebSocketService)grailsApplication.getMainContext().
-            		getBean("webSocketService")).onClose(this, status);
+                    getBean("webSocketService")).onClose(this, status);
         }
 
         @Override protected void onBinaryMessage(ByteBuffer message) throws IOException {
             ((WebSocketService)grailsApplication.getMainContext().
-            		getBean("webSocketService")).onBinaryMessage(this, message);
+                    getBean("webSocketService")).onBinaryMessage(this, message);
         }
 
         @Override protected void onTextMessage(CharBuffer message) throws IOException {
             ((WebSocketService)grailsApplication.getMainContext().
-            		getBean("webSocketService")).onTextMessage(this, message);
+                    getBean("webSocketService")).onTextMessage(this, message);
         }
-        
+
         public String getBrowserId() {
-        	return browserId;
+            return browserId;
         }
 
     }
-    
+
 }
