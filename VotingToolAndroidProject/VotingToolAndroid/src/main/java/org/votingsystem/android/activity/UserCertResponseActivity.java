@@ -89,6 +89,9 @@ public class UserCertResponseActivity extends ActionBarActivity {
             try {
                 FileInputStream fis = openFileInput(KEY_STORE_FILE);
                 byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+
+                //KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+
                 KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
                         keyStoreBytes, pin.toCharArray());
                 PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS,
