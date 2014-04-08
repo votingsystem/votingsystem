@@ -3,6 +3,8 @@ version = '0.6.0'
 apply plugin: 'java'
 apply plugin: 'groovy'
 
+sourceCompatibility = 7
+
 dependencies {
 
 	compile (project(':VotingSystemLibrary')) {

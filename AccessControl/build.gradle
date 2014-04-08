@@ -1,5 +1,7 @@
 apply plugin: 'java'
 
+sourceCompatibility = 7
+
 dependencies {
     compile (project(':VotingSystemLibrary'))
 }

@@ -7,6 +7,8 @@ apply plugin: 'ivy-publish'
 apply plugin: 'maven-publish'
 apply plugin: "idea"
 
+sourceCompatibility = 7
+
 install {
     repositories.mavenInstaller {
         pom.artifactId = 'votingsystemlibrary'

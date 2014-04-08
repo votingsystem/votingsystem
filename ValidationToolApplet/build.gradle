@@ -4,6 +4,8 @@ apply plugin: 'java'
 apply plugin:'application'
 apply plugin: "idea"
 
+sourceCompatibility = 7
+
 mainClassName = "org.votingsystem.org.votingsystem.applet.validationtool.ValidationApplet"
 
 dependencies {
