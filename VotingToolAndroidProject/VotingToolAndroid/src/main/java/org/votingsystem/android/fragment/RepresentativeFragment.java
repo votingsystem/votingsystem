@@ -64,10 +64,8 @@ public class RepresentativeFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                 "intent.getExtras(): " + intent.getExtras());
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(pin != null);
-        else {
+        if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
             if(TypeVS.ITEM_REQUEST == typeVS) {
                 Cursor cursor = getActivity().getApplicationContext().getContentResolver().
                         query(UserContentProvider.getRepresentativeURI(representativeId),

@@ -77,13 +77,12 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             TypeVS broadcastType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                     ResponseVS.SC_ERROR);
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-            if(pin != null) launchSignAndSendService(pin);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
             else {
                 if(TypeVS.NIF_REQUEST == broadcastType) {
                     if(ResponseVS.SC_OK == responseStatusCode) {
@@ -127,14 +126,13 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         }
     };
 
-    private void launchSignAndSendService(String pin) {
+    private void launchSignAndSendService() {
         Log.d(TAG + ".launchSignAndSendService(...) ", "");
         editorFragment.setEditable(false);
         String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
         String signedMessageSubject = null;
         try {
             Intent startIntent = new Intent(getApplicationContext(), RepresentativeService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.NEW_REPRESENTATIVE);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);

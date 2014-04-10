@@ -9,24 +9,17 @@ import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.HttpHelper;
-
-import java.io.FileOutputStream;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.Date;
+import org.votingsystem.util.ObjectUtils;
 
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
 import static org.votingsystem.model.ContextVS.EMAIL_KEY;
-import static org.votingsystem.model.ContextVS.KEYSTORE_TYPE;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.NAME_KEY;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PHONE_KEY;
@@ -36,7 +29,6 @@ import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 import static org.votingsystem.model.ContextVS.State;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 /**
@@ -48,6 +40,7 @@ public class UserCertRequestService extends IntentService {
     public static final String TAG = UserCertRequestService.class.getSimpleName();
 
     public UserCertRequestService() { super(TAG); }
+
 
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
@@ -66,26 +59,21 @@ public class UserCertRequestService extends IntentService {
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
                     KEY_SIZE, SIG_NAME, SIGNATURE_ALGORITHM, PROVIDER, nif, email, phone, deviceId,
                     givenName, surname);
+
             byte[] csrBytes = certificationRequest.getCsrPEM();
-            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
-            keyStore.load(null, null);
-            X509Certificate[] dummyCerts = CertUtil.generateCertificate(
-                    certificationRequest.getKeyPair(), new Date(System.currentTimeMillis()),
-                    new Date(System.currentTimeMillis()), "CN=Dummy" + USER_CERT_ALIAS);
-            keyStore.setKeyEntry(USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
-                    pin.toCharArray(), dummyCerts);
-            byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, pin.toCharArray());
-            FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
-            fos.write(keyStoreBytes);
-            fos.close();
+            SharedPreferences settings = getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
+            editor.putString(ContextVS.CSR_KEY, new String(serializedCertificationRequest, "UTF-8"));
+            editor.commit();
+
             responseVS = HttpHelper.sendData(csrBytes, null,
                     contextVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SharedPreferences settings = getApplicationContext().getSharedPreferences(
-                        VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 editor.putLong(CSR_REQUEST_ID_KEY, requestId);
+                contextVS.setPin(pin);
                 editor.commit();
                 contextVS.setState(State.WITH_CSR, null);
             }

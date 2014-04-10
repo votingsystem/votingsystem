@@ -264,7 +264,7 @@ public class UserCertRequestFormFragment extends Fragment {
     }
 
     private void launchUserCertRequestService(String pin) {
-        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
+        Log.d(TAG + ".launchUserCertRequestService() ", "launchUserCertRequestService");
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 UserCertRequestService.class);
         startIntent.putExtra(PIN_KEY, pin);

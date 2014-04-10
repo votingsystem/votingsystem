@@ -1,5 +1,6 @@
 package org.votingsystem.signature.smime;
 
+import android.security.KeyChain;
 import android.util.Log;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
@@ -20,6 +21,8 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -32,48 +35,27 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class SignedMailGenerator {
 	
-	public static final String TAG = "SignedMailGenerator";
+	public static final String TAG = SignedMailGenerator.class.getSimpleName();
     
     private SMIMESignedGenerator smimeSignedGenerator = null;
     // Get a Session object and create the mail message
     private static Properties props = System.getProperties();
     private static Session session = Session.getDefaultInstance(props, null);
 
-    public SignedMailGenerator(byte[] keyStoreBytes, String keyAlias, 
-    		char[] password, String signMechanism) throws VotingSystemKeyStoreException {
-        try {
-            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-            PrivateKey key = (PrivateKey)keyStore.getKey(keyAlias, password);
-            Certificate[] chain = keyStore.getCertificateChain(keyAlias);
-            init(key, chain, signMechanism);
-        }catch(Exception ex) {
-            throw new VotingSystemKeyStoreException(ex);
-        }
-    }
-    
     public SignedMailGenerator(PrivateKey key, Certificate[] chain, 
-    		String signMechanism) throws Exception {
-        init(key, chain, signMechanism);
-    }
-    
-    public SignedMailGenerator(PrivateKey privateKey,
-			X509Certificate[] arrayCerts, String signMechanism) 
-					throws CertificateEncodingException, OperatorCreationException {
-    	init(privateKey, arrayCerts, signMechanism);
-	}
-
-	private void init (PrivateKey key, Certificate[] chain, String signatureMechanism) 
-            throws CertificateEncodingException, OperatorCreationException {
-    	Log.d(TAG + ".init(...)", " - signatureMechanism: " + signatureMechanism);
+    		String signatureMechanism, String provider) throws Exception {
+        Log.d(TAG + ".SignedMailGenerator(...)", " - signatureMechanism: " + signatureMechanism);
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
-        //create some smime capabilities in case someone wants to respond        
+        //create some smime capabilities in case someone wants to respond
         caps.addCapability(SMIMECapability.dES_EDE3_CBC);
         caps.addCapability(SMIMECapability.rC2_CBC, 128);
         caps.addCapability(SMIMECapability.dES_CBC);
@@ -82,7 +64,8 @@ public class SignedMailGenerator {
         Store certs = new JcaCertStore(certList);
         smimeSignedGenerator = new SMIMESignedGenerator();
         SimpleSignerInfoGeneratorBuilder signerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
-        signerInfoGeneratorBuilder.setProvider(ContextVS.PROVIDER);
+
+        signerInfoGeneratorBuilder.setProvider(provider);
         signerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
                 signatureMechanism, key, (X509Certificate)chain[0]);
@@ -120,14 +103,14 @@ public class SignedMailGenerator {
     }
    
      public MimeMultipart genMimeMultipart(MimeBodyPart body, 
-             SMIMEMessageWrapper dnieMimeMessage) throws Exception {
+             SMIMEMessageWrapper dnieMimeMessage, String provider) throws Exception {
          smimeSignedGenerator.addSigners(dnieMimeMessage.getSmimeSigned().getSignerInfos());
          smimeSignedGenerator.addAttributeCertificates(dnieMimeMessage.getSmimeSigned().getAttributeCertificates());
          smimeSignedGenerator.addCertificates(dnieMimeMessage.getSmimeSigned().getCertificates());
          smimeSignedGenerator.addCRLs(dnieMimeMessage.getSmimeSigned().getCRLs());
          smimeSignedGenerator.getGeneratedDigests();
          MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-        		 body, ContextVS.PROVIDER, ContextVS.SIGNATURE_ALGORITHM);
+        		 body, provider, ContextVS.SIGNATURE_ALGORITHM);
          return mimeMultipart;
      }
     

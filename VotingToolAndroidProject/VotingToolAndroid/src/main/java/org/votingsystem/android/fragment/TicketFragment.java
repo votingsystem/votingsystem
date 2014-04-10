@@ -80,9 +80,8 @@ public class TicketFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(pin != null) launchTicketCancellation(pin);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchTicketCancellation();
             else {
                 showProgress(false, true);
                 showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
@@ -91,12 +90,11 @@ public class TicketFragment extends Fragment {
         }
     };
 
-    private void launchTicketCancellation(String pin) {
+    private void launchTicketCancellation() {
         Log.d(TAG + ".launchTicketRequest(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     TicketService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_CANCEL);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.ITEM_ID_KEY, cursorPosition);

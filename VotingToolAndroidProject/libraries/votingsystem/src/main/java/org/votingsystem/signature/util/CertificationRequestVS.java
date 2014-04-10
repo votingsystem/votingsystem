@@ -1,5 +1,6 @@
 package org.votingsystem.signature.util;
 
+import android.security.KeyPairGeneratorSpec;
 import android.util.Log;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
@@ -18,10 +19,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -30,6 +33,12 @@ import java.util.Map;
 
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
+
+import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
+import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
+import static org.votingsystem.model.ContextVS.KEY_SIZE;
+import static org.votingsystem.model.ContextVS.PROVIDER;
+import static org.votingsystem.model.ContextVS.SIG_NAME;
 
 /**
 * @author jgzornoza
@@ -117,12 +126,14 @@ public class CertificationRequestVS implements java.io.Serializable {
                String signatureMechanism, String provider, String nif, String email,
                String phone, String deviceId, String givenName, String surName) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
+
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", UID=deviceId:" + deviceId + ", GIVENNAME=" +
                 givenName + ", SURNAME=" + surName;
         if (email != null) principal.concat(", emailAddress=" + email);
         if (phone != null) principal.concat(", mobilePhone=" + phone);
         X500Principal subject = new X500Principal(principal);
+
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), null, keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
@@ -145,8 +156,10 @@ public class CertificationRequestVS implements java.io.Serializable {
             certificate = certificates.iterator().next();
             X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
             certificates.toArray(arrayCerts);
-            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
-            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
+            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts,
+                    signatureMechanism, ANDROID_PROVIDER);
+            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts,
+                    signatureMechanism, ANDROID_PROVIDER);
         }
         return signedMailGenerator;
     }

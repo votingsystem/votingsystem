@@ -23,17 +23,22 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TicketServer;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -43,8 +48,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
+import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
@@ -77,6 +82,17 @@ public class AppContextVS extends Application {
         //System.setProperty("android.os.Build.ID", android.os.Build.ID);
         Log.d(TAG + ".onCreate()", "");
         try {
+            /*java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            java.security.KeyStore.PrivateKeyEntry keyEntry = (java.security.KeyStore.PrivateKeyEntry)
+                    keyStore.getEntry("USER_CERT_ALIAS", null);
+            Enumeration aliases = keyStore.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = (String) aliases.nextElement();
+                X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+                Log.d(TAG, "Subject DN: " + cert.getSubjectX500Principal().toString());
+                Log.d(TAG, "Issuer DN: " + cert.getIssuerDN().getName());
+            }*/
             Context_iTextVS.init(getApplicationContext());
             VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Properties props = new Properties();
@@ -204,20 +220,44 @@ public class AppContextVS extends Application {
         } else return null;
     }
 
+    public void setPin(String pin) throws NoSuchAlgorithmException {
+        SharedPreferences settings = getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        String hashPin = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+        editor.putString(ContextVS.PIN_KEY, hashPin);
+        editor.commit();
+    }
+
+    public String getStoredPasswordHash() throws NoSuchAlgorithmException,
+            VotingSystemKeyStoreException {
+        SharedPreferences settings = getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        return settings.getString(ContextVS.PIN_KEY, null);
+    }
+
     public String getCurrentWeekLapseId() {
         Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
         return DateUtils.getDirPath(currentLapseCalendar.getTime());
     }
 
-    public ResponseVS signMessage(String toUser, String textToSign, String subject, String pin) {
+    public KeyStore.PrivateKeyEntry getUserPrivateKey() throws KeyStoreException, CertificateException,
+            NoSuchAlgorithmException, IOException, UnrecoverableEntryException {
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry)keyStore.getEntry(
+                USER_CERT_ALIAS, null);
+        return keyEntry;
+    }
+
+    public ResponseVS signMessage(String toUser, String textToSign, String subject) {
         ResponseVS responseVS = null;
         try {
-            FileInputStream fis = openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
             String userVS = getUserVS().getNif();
             Log.d(TAG + ".signMessage(...) ", "subject: " + subject);
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    keyStoreBytes, USER_CERT_ALIAS, pin.toCharArray(), SIGNATURE_ALGORITHM);
+            KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
+                    keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
             SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS, toUser,
                     textToSign, subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
@@ -234,18 +274,6 @@ public class AppContextVS extends Application {
         } finally {
             return responseVS;
         }
-    }
-
-    public boolean checkPin(String pin) {
-        try {
-            FileInputStream fis = openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, pin.toCharArray());
-            return true;
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return false;
     }
 
     public void setControlCenter(ControlCenterVS controlCenter) {

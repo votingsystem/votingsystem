@@ -39,7 +39,6 @@ public class SignAndSendService extends IntentService {
         try {
             contextVS = (AppContextVS) getApplicationContext();
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
-            String pin = arguments.getString(ContextVS.PIN_KEY);
             String signatureContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
@@ -63,7 +62,7 @@ public class SignAndSendService extends IntentService {
                         pdfBytes = responseVS.getMessageBytes();
                         serviceURL = serviceURL + "/" + manifestId;
                         PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes, serviceURL,
-                                pin.toCharArray(), null, null,
+                                null, null,
                                 (AppContextVS)getApplicationContext());
                         responseVS = pdfSignedSender.call();
                     }
@@ -76,8 +75,7 @@ public class SignAndSendService extends IntentService {
                         pdfBytes = responseVS.getMessageBytes();
                         PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes,
                                 contextVS.getAccessControl().getEventVSManifestCollectorURL(eventId),
-                                pin.toCharArray(), null, null,
-                                (AppContextVS)getApplicationContext());
+                                null, null, (AppContextVS)getApplicationContext());
                         responseVS = pdfSignedSender.call();
                     }
                     break;
@@ -91,8 +89,7 @@ public class SignAndSendService extends IntentService {
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                             contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
-                            contentType, messageSubject, pin.toCharArray(),
-                            contextVS.getAccessControl().getCertificate(),
+                            contentType, messageSubject, contextVS.getAccessControl().getCertificate(),
                             (AppContextVS)getApplicationContext());
                     responseVS = smimeSignedSender.call();
                     break;

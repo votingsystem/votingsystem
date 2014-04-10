@@ -14,6 +14,9 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.eclipse.jetty.websocket.WebSocket;
+import org.eclipse.jetty.websocket.WebSocketClient;
+import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -38,7 +41,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
@@ -47,10 +49,6 @@ import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.URI_KEY;
 import static org.votingsystem.model.ContextVS.URL_KEY;
 import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
-
-import org.eclipse.jetty.websocket.WebSocket;
-import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 /**
  * @author jgzornoza

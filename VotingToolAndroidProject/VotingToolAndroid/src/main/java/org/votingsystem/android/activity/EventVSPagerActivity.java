@@ -25,7 +25,6 @@ import org.votingsystem.util.DateUtils;
 
 import static org.votingsystem.model.ContextVS.CURSOR_POSITION_KEY;
 import static org.votingsystem.model.ContextVS.EVENT_STATE_KEY;
-import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
 /**
  * @author jgzornoza
@@ -40,7 +39,6 @@ public class EventVSPagerActivity extends ActionBarActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)", "intentExtras:" + intent.getExtras());
-            String pin = intent.getStringExtra(PIN_KEY);
         }
     };
 

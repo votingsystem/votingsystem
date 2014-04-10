@@ -80,10 +80,9 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                 "intent.getExtras(): " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(pin != null) launchSignAndSendService(pin);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
         else {
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                 try {
@@ -104,8 +103,8 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         }
     };
 
-    private void launchSignAndSendService(String pin) {
-        Log.d(TAG + ".launchUserCertRequestService() ", "pin: " + pin);
+    private void launchSignAndSendService() {
+        Log.d(TAG + ".launchUserCertRequestService() ", "launchSignAndSendService");
         try {
             Intent startIntent = null;
             String serviceURL = null;
@@ -129,8 +128,6 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                 JSONObject signatureContent = new JSONObject(signatureDataMap);
                 startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
             }
-
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);

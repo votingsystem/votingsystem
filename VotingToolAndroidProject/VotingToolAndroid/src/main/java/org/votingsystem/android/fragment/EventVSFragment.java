@@ -79,8 +79,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
-            if(pin != null) launchSignAndSendService(pin);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
             else {
                 ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(
                         ContextVS.RESPONSEVS_KEY);
@@ -92,12 +91,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         }
     };
 
-    private void launchSignAndSendService(String pin) {
+    private void launchSignAndSendService() {
         Log.d(TAG + ".launchSignAndSendService(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             if(eventVS.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {

@@ -13,18 +13,15 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
+import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -35,14 +32,10 @@ public class VoteSender implements Callable<ResponseVS> {
     public static final String TAG = VoteSender.class.getSimpleName();
 
     private VoteVS vote;
-    private char[] password;
     private AppContextVS contextVS = null;
-    private byte[] keyStoreBytes = null;
 
-    public VoteSender(VoteVS vote, byte[] keyStoreBytes, char[] password, AppContextVS context) {
+    public VoteSender(VoteVS vote, AppContextVS context) {
         this.vote = vote;
-        this.keyStoreBytes = keyStoreBytes;
-        this.password = password;
         this.contextVS = context;
     }
 
@@ -56,12 +49,10 @@ public class VoteSender implements Callable<ResponseVS> {
                     vote.getEventVS().getEventVSId());
             String userVS = contextVS.getUserVS().getNif();
 
-            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-            PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
-            Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
-            X509Certificate userCert = (X509Certificate) chain[0];
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    privateKey, chain, SIGNATURE_ALGORITHM);
+            KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
+            X509Certificate userCert = (X509Certificate) keyEntry.getCertificate();
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
+                    keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
 
             JSONObject accessRequestJSON = new JSONObject(vote.getAccessRequestDataMap());
             SMIMEMessageWrapper accessRequest = signedMailGenerator.genMimeMessage(
@@ -149,7 +140,7 @@ public class VoteSender implements Callable<ResponseVS> {
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                     contextVS.getUserVS().getNif(),contextVS.getAccessControl().getNameNormalized(),
                     serviceURL, cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    subject, password, contextVS.getAccessControl().getCertificate(), contextVS);
+                    subject, contextVS.getAccessControl().getCertificate(), contextVS);
             return smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();

@@ -21,7 +21,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -30,10 +29,8 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -65,11 +62,8 @@ public class TransactionVSFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras(): " + intent.getExtras());
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(pin != null) {
-
-        } else {
+        if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
             switch(responseVS.getTypeVS()) {
                 case RECEIPT:
                     byte[] receiptBytes = (byte[]) responseVS.getData();

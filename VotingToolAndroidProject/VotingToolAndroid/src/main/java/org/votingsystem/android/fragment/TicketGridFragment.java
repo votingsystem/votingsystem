@@ -72,12 +72,11 @@ public class TicketGridFragment extends Fragment
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras(): " + intent.getExtras());
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(pin != null) {
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case TICKET_USER_INFO:
-                    launchUpdateUserInfoService(pin);
+                    launchUpdateUserInfoService();
                     break;
             }
         } else {
@@ -90,7 +89,7 @@ public class TicketGridFragment extends Fragment
         }
     };
 
-    private void launchUpdateUserInfoService(String pin) {
+    private void launchUpdateUserInfoService() {
 
     }
 

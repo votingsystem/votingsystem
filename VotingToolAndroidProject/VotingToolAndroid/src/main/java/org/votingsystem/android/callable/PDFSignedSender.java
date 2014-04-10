@@ -33,7 +33,6 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.PDF_CMSSignedGenerator;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.DateUtils;
@@ -41,7 +40,6 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -57,9 +55,6 @@ import java.util.concurrent.Callable;
 
 import javax.mail.Header;
 import javax.mail.internet.MimeBodyPart;
-
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -78,30 +73,25 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private String location;
     private String reason;
     private AppContextVS contextVS;
-    private char[] password;
     byte[] pdfBytes = null;
     private String serviceURL = null;
 
-    public PDFSignedSender(byte[] pdfBytes, String serviceURL, char[] password, String reason,
+    public PDFSignedSender(byte[] pdfBytes, String serviceURL, String reason,
             String location, AppContextVS context) {
         this.pdfBytes = pdfBytes;
         this.serviceURL = serviceURL;
         this.contextVS = context;
         this.reason = reason;
         this.location = location;
-        this.password = password;
     }
 
     @Override public ResponseVS call() {
         ResponseVS responseVS = null;
         try {
-            FileInputStream fis = contextVS.openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-            PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
-            //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(USER_CERT_ALIAS);
-            Certificate[] signerCertChain = keyStore.getCertificateChain(USER_CERT_ALIAS);
-            X509Certificate signerCert = (X509Certificate) signerCertChain[0];
+            KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
+            PrivateKey signerPrivatekey = keyEntry.getPrivateKey();
+            X509Certificate signerCert = (X509Certificate) keyEntry.getCertificate();
+            Certificate[] signerCertChain = keyEntry.getCertificateChain();
             PdfReader pdfReader = new PdfReader(pdfBytes);
             byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader,
                     signerCert, signerPrivatekey, signerCertChain);

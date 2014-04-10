@@ -36,6 +36,9 @@ public class ContextVS {
     public static final String USER_DATA_FILE_NAME             = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
+    public static final String ANDROID_PROVIDER                = "AndroidOpenSSL";
+
+
 
     //Intent keys
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
@@ -85,6 +88,7 @@ public class ContextVS {
     public static final String RECEIPT_KEY  = "RECEIPT_KEY";
     public static final String STATE_KEY                   = "STATE";
     public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
+    public static final String CSR_KEY                     = "csrKey";
     public static final String HASH_CERT_KEY               = "HASH_CERT_KEY";
     public static final String TIME_KEY                    = "TIME_KEY";
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
@@ -132,7 +136,6 @@ public class ContextVS {
     //public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA256WithRSA";
     public static final String USER_CERT_ALIAS = "USER_CERT_ALIAS";
-    public static final String KEY_STORE_FILE = "keyStoreVS.p12";
 
     public static final String TIMESTAMP_USU_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
     public static final String TIMESTAMP_VOTE_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256

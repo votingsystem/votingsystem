@@ -10,10 +10,9 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 
-import java.io.FileInputStream;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -22,9 +21,8 @@ import java.util.concurrent.Callable;
 
 import javax.mail.Header;
 
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -36,7 +34,6 @@ public class SignedMapSender implements Callable<ResponseVS> {
 
     private SMIMEMessageWrapper smimeMessage = null;
     private X509Certificate receiverCert = null;
-    private char[] password;
     private AppContextVS contextVS = null;
     private String fromUser = null;
     private String toUser = null;
@@ -51,7 +48,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
 
     public SignedMapSender(String fromUser, String toUser, String textToSign,
             Map<String, Object> mapToSend, String subject, Header header, String serviceURL,
-            String signedFileName, ContentTypeVS contentType, char[] password,
+            String signedFileName, ContentTypeVS contentType,
             X509Certificate receiverCert, PublicKey decriptorPublicKey,
             PrivateKey decriptorPrivateKey, AppContextVS context) {
         this.fromUser = fromUser;
@@ -60,7 +57,6 @@ public class SignedMapSender implements Callable<ResponseVS> {
         this.mapToSend = mapToSend;
         this.subject = subject;
         this.contentType = contentType;
-        this.password = password;
         this.contextVS = context;
         this.serviceURL = serviceURL;
         this.signedFileName = signedFileName;
@@ -73,10 +69,9 @@ public class SignedMapSender implements Callable<ResponseVS> {
         Log.d(TAG + ".call()", "serviceURL: " + serviceURL);
         ResponseVS responseVS = null;
         try {
-            FileInputStream fis = contextVS.openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    keyStoreBytes, USER_CERT_ALIAS, password, SIGNATURE_ALGORITHM);
+            KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
+                    keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
             smimeMessage = signedMailGenerator.genMimeMessage(fromUser, toUser,textToSign, subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
             responseVS = timeStamper.call();

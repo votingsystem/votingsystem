@@ -2,7 +2,6 @@ package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
@@ -13,13 +12,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
@@ -28,7 +24,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

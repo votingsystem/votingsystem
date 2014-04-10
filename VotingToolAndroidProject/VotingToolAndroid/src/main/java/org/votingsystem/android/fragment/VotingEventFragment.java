@@ -76,9 +76,8 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)", "intentExtras:" + intent.getExtras());
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(pin != null) launchVoteService(pin);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchVoteService();
         else {
             vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
             TypeVS resultOperation = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
@@ -115,12 +114,11 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         }
     };
 
-    private void launchVoteService(String pin) {
+    private void launchVoteService() {
         Log.d(TAG + ".launchVoteService(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VoteService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, operation);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.VOTE_KEY, vote);

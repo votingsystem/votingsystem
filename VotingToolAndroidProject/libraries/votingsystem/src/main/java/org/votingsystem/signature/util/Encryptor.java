@@ -82,11 +82,11 @@ public class Encryptor {
     	/* Create the encrypter */
     	SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
     	encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-    			receiverCert).setProvider("BC"));
+    			receiverCert).setProvider(ContextVS.PROVIDER));
         /* Encrypt the message */
         MimeBodyPart encryptedPart = encrypter.generate(msgToEncrypt,
                 new JceCMSContentEncryptorBuilder(
-                CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+                CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         /* Set all original MIME headers in the encrypted message */
         Enumeration headers = msgToEncrypt.getAllHeaderLines();
         while (headers.hasMoreElements()) {
@@ -123,11 +123,11 @@ public class Encryptor {
 		//mimeMessage.setSentDate(new Date());
 		SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 		encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-		        receiverCert).setProvider("BC"));
+		        receiverCert).setProvider(ContextVS.PROVIDER));
 		/* Encrypt the message */
 		MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
 		        new JceCMSContentEncryptorBuilder(
-		        CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+		        CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         encryptedPart.writeTo(baos);
         byte[] result = baos.toByteArray();
@@ -153,11 +153,11 @@ public class Encryptor {
         //mimeMessage.setSentDate(new Date());
         SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
         encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-                        receiverCert).setProvider("BC"));
+                        receiverCert).setProvider(ContextVS.PROVIDER));
         /* Encrypt the message */
         MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
                 new JceCMSContentEncryptorBuilder(
-                CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+                CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         return encryptedPart;
     }
 
@@ -199,7 +199,7 @@ public class Encryptor {
        /*if(receiverCert != null) 
            recId = new JceKeyTransRecipientId(receiverCert);*/
        Recipient recipient = new JceKeyTransEnvelopedRecipient(
-               receiverPrivateKey).setProvider("BC");
+               receiverPrivateKey).setProvider(ContextVS.PROVIDER);
        MimeMessage msg = new MimeMessage(null, 
                        new ByteArrayInputStream(encryptedMessageBytes));
        SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
@@ -249,7 +249,7 @@ public class Encryptor {
 			} else log.debug(" -- recipient.getRID().getCertificate() NULL");
 		} else log.debug(" -- getRID NULL");
 		MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
-			 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
+			 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider(ContextVS.PROVIDER)));*/
 		return  recipientInfo.getContent(recipient);
     }
 	
@@ -287,7 +287,8 @@ public class Encryptor {
         if (it.hasNext()) {
             RecipientInformation   recipient = (RecipientInformation)it.next();
             //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-            CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.PROVIDER));
+            CMSTypedStream recData = recipient.getContentStream(
+                    new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.ANDROID_PROVIDER));
             InputStream           dataStream = recData.getContentStream();
             ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
             byte[]                buf = new byte[4096];

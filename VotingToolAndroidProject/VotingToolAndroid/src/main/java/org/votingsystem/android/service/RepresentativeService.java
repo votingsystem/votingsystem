@@ -45,8 +45,8 @@ import org.votingsystem.util.ObjectUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -57,9 +57,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -205,7 +204,6 @@ public class RepresentativeService extends IntentService {
         UserVS representative = (UserVS) arguments.getSerializable(ContextVS.USER_KEY);
         ResponseVS responseVS = null;
         try {
-            String pin = arguments.getString(ContextVS.PIN_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
             AnonymousDelegationVS anonymousDelegation = new AnonymousDelegationVS(
                     weeksOperationActive, contextVS.getAccessControl().getServerURL());
@@ -235,7 +233,7 @@ public class RepresentativeService extends IntentService {
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
                     representativeDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    pin.toCharArray(), contextVS.getAccessControl().getCertificate(),
+                    contextVS.getAccessControl().getCertificate(),
                     anonymousDelegation.getCertificationRequest().getPublicKey(),
                     anonymousDelegation.getCertificationRequest().getPrivateKey(),
                     (AppContextVS)getApplicationContext());
@@ -317,7 +315,6 @@ public class RepresentativeService extends IntentService {
         String caption = null;
         String message = null;
         try {
-            String pin = arguments.getString(ContextVS.PIN_KEY);
             String serviceURL = arguments.getString(ContextVS.URL_KEY);
             String editorContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
@@ -346,12 +343,10 @@ public class RepresentativeService extends IntentService {
             contentToSignMap.put("UUID", UUID.randomUUID().toString());
             String contentToSign = new JSONObject(contentToSignMap).toString();
 
-            FileInputStream fis = openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
             String userVS = contextVS.getUserVS().getNif();
-            Log.d(TAG + ".onHandleIntent(...) ", "signing message: " + messageSubject);
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    keyStoreBytes, USER_CERT_ALIAS, pin.toCharArray(), SIGNATURE_ALGORITHM);
+            KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
+                    keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
             SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS,
                     contextVS.getAccessControl().getNameNormalized(),contentToSign, messageSubject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,

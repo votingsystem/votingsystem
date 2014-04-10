@@ -70,18 +70,17 @@ public class TicketUserInfoFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(pin != null) {
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case TICKET_USER_INFO:
-                    launchUpdateUserInfoService(pin);
+                    launchUpdateUserInfoService();
                     break;
                 case TICKET_REQUEST:
-                    launchTicketRequest(pin);
+                    launchTicketRequest();
                     break;
                 case TICKET_SEND:
-                    launchTicketSend(pin);
+                    launchTicketSend();
                     break;
             }
 
@@ -250,6 +249,7 @@ public class TicketUserInfoFragment extends Fragment {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
+
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.update_user_info_pin_msg), false, TypeVS.TICKET_USER_INFO);
                 return true;
@@ -261,12 +261,11 @@ public class TicketUserInfoFragment extends Fragment {
         }
     }
 
-    private void launchUpdateUserInfoService(String pin) {
+    private void launchUpdateUserInfoService() {
         Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     TicketService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             showProgress(true, true);
@@ -276,12 +275,11 @@ public class TicketUserInfoFragment extends Fragment {
         }
     }
 
-    private void launchTicketRequest(String pin) {
+    private void launchTicketRequest() {
         Log.d(TAG + ".launchTicketRequest(...) ", "amount: " + amount);
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     TicketService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_REQUEST);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.VALUE_KEY, amount);
@@ -293,12 +291,11 @@ public class TicketUserInfoFragment extends Fragment {
         }
     }
 
-    private void launchTicketSend(String pin) {
+    private void launchTicketSend() {
         Log.d(TAG + ".launchTicketSend(...) ", "amount: " + amount);
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     TicketService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_SEND);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URI_KEY, uriData);

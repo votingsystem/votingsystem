@@ -87,10 +87,9 @@ public class PublishEventVSFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            if(pin != null) launchSignAndSendService(pin);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
             else {
                 int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                         ResponseVS.SC_ERROR);
@@ -204,7 +203,7 @@ public class PublishEventVSFragment extends Fragment {
 
     };
 
-    private void launchSignAndSendService(String pin) {
+    private void launchSignAndSendService() {
         Log.d(TAG + ".launchSignAndSendService(...) ", "operation: " + formType);
         String serviceURL = contextVS.getAccessControl().getPublishServiceURL(formType);
         String signedMessageSubject = null;
@@ -238,7 +237,6 @@ public class PublishEventVSFragment extends Fragment {
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, formType);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);

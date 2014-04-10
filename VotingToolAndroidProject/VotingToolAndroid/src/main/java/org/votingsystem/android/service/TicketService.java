@@ -36,25 +36,18 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -63,10 +56,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
-import static org.votingsystem.model.ContextVS.TICKET_OID;
-import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -85,20 +74,19 @@ public class TicketService extends IntentService {
         final Bundle arguments = intent.getExtras();
         TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-        String pin = arguments.getString(ContextVS.PIN_KEY);
         Uri uriData =  arguments.getParcelable(ContextVS.URI_KEY);;
         BigDecimal amount = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
         CurrencyVS currencyVS = (CurrencyVS) arguments.getSerializable(ContextVS.CURRENCY_KEY);
         ResponseVS responseVS = null;
         switch(operationType) {
             case TICKET_USER_INFO:
-                responseVS = updateUserInfo(pin);
+                responseVS = updateUserInfo();
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.sendBroadcast(responseVS);
                 break;
             case TICKET_REQUEST:
-                responseVS = ticketRequest(amount, currencyVS, pin);
+                responseVS = ticketRequest(amount, currencyVS);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.showNotification(responseVS);
@@ -110,7 +98,7 @@ public class TicketService extends IntentService {
                 String subject = uriData.getQueryParameter("subject");
                 String receptor = uriData.getQueryParameter("receptor");
                 String IBAN = uriData.getQueryParameter("IBAN");
-                responseVS = ticketSend(amount, currencyVS, subject, receptor, IBAN, pin);
+                responseVS = ticketSend(amount, currencyVS, subject, receptor, IBAN);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.showNotification(responseVS);
@@ -127,7 +115,7 @@ public class TicketService extends IntentService {
                 try {
                     TicketVS ticketVS = (TicketVS) ObjectUtils.deSerializeObject(serializedTicket);
                     ticketVS.setLocalId(ticketCursorPosition.longValue());
-                    responseVS = cancelTicket(ticketVS, pin);
+                    responseVS = cancelTicket(ticketVS);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         ticketVS.setCancellationReceipt(responseVS.getSmimeMessage());
                         ticketVS.setState(TicketVS.State.CANCELLED);
@@ -168,7 +156,7 @@ public class TicketService extends IntentService {
         }
     }
 
-    private ResponseVS cancelTicket(TicketVS ticket, String pin) {
+    private ResponseVS cancelTicket(TicketVS ticket) {
         ResponseVS responseVS = getTicketServer();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         TicketServer ticketServer = (TicketServer) responseVS.getData();
@@ -183,13 +171,13 @@ public class TicketService extends IntentService {
         SMIMESignedSender signedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
                 ticketServer.getNameNormalized(), ticketServer.getTicketCancelServiceURL(),
                 textToSing, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                getString(R.string.ticket_cancellation_msg_subject), pin.toCharArray(),
-                ticketServer.getCertificate(), (AppContextVS)getApplicationContext());
+                getString(R.string.ticket_cancellation_msg_subject), ticketServer.getCertificate(),
+                (AppContextVS)getApplicationContext());
         responseVS = signedSender.call();
         return responseVS;
     }
 
-    private ResponseVS cancelTickets(Collection<TicketVS> sendedTickets, String pin) {
+    private ResponseVS cancelTickets(Collection<TicketVS> sendedTickets) {
         Log.d(TAG + ".cancelTickets(...)", "cancelTickets");
         TicketServer ticketServer = contextVS.getTicketServer();
         ResponseVS responseVS = null;
@@ -205,7 +193,7 @@ public class TicketService extends IntentService {
                         getCertificate().getSerialNumber().longValue());
                 String textToSing = new JSONObject(ticketCancellationDataMap).toString();
                 responseVS = contextVS.signMessage(ticketServer.getNameNormalized(), textToSing,
-                        getString(R.string.ticket_cancellation_msg_subject), pin);
+                        getString(R.string.ticket_cancellation_msg_subject));
                 cancellationList.add(new String(Base64.encode(responseVS.getSmimeMessage().getBytes())));
             }
             Map requestMap = new HashMap();
@@ -226,7 +214,7 @@ public class TicketService extends IntentService {
     }
 
     private ResponseVS ticketSend(BigDecimal requestAmount, CurrencyVS currencyVS,
-            String subject, String receptor, String IBAN, String pin) {
+            String subject, String receptor, String IBAN) {
         ResponseVS responseVS = null;
         String message = null;
         String caption = null;
@@ -324,7 +312,7 @@ public class TicketService extends IntentService {
             responseVS.setNotificationMessage(tex.getMessage());
         } catch(Exception ex) {
             ex.printStackTrace();
-            cancelTickets(sendedTicketsMap.values(), pin);
+            cancelTickets(sendedTicketsMap.values());
             message = ex.getMessage();
             if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
             responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
@@ -369,7 +357,7 @@ public class TicketService extends IntentService {
         }
     }
 
-    private ResponseVS ticketRequest(BigDecimal requestAmount, CurrencyVS currencyVS, String pin) {
+    private ResponseVS ticketRequest(BigDecimal requestAmount, CurrencyVS currencyVS) {
         ResponseVS responseVS = getTicketServer();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         TicketServer ticketServer = (TicketServer) responseVS.getData();
@@ -428,20 +416,15 @@ public class TicketService extends IntentService {
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, encryptedCSRBytes);
 
-            FileInputStream fis = contextVS.openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, pin.toCharArray());
-            PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, pin.toCharArray());
-            Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
-            PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
-
+            KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
                     ticketServer.getNameNormalized(),
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     ticketServer.getTicketRequestServiceURL(),
                     requestDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    pin.toCharArray(), ticketServer.getCertificate(),
-                    publicKey, privateKey, (AppContextVS)getApplicationContext());
+                    ticketServer.getCertificate(),
+                    keyEntry.getCertificate().getPublicKey(), keyEntry.getPrivateKey(),
+                    (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject issuedTicketsJSON = new JSONObject(new String(
@@ -497,7 +480,7 @@ public class TicketService extends IntentService {
         }
     }
 
-    private ResponseVS updateUserInfo(String pin) {
+    private ResponseVS updateUserInfo() {
         ResponseVS responseVS = getTicketServer();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         TicketServer ticketServer = (TicketServer) responseVS.getData();
@@ -511,7 +494,7 @@ public class TicketService extends IntentService {
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
                     ticketServer.getNameNormalized(), ticketServer.getUserInfoServiceURL(),
                     userInfoRequestJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                    msgSubject, pin.toCharArray(), ticketServer.getCertificate(), contextVS);
+                    msgSubject, ticketServer.getCertificate(), contextVS);
             responseVS = smimeSignedSender.call();
 
             Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());

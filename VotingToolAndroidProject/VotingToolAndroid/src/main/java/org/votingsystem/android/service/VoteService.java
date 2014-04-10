@@ -25,16 +25,13 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.FileInputStream;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 
 /**
  * @author jgzornoza
@@ -59,7 +56,6 @@ public class VoteService extends IntentService {
         try {
             contextVS = (AppContextVS) getApplicationContext();
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
-            String pin = arguments.getString(ContextVS.PIN_KEY);
             String receiverName = arguments.getString(ContextVS.RECEIVER_KEY);
             Log.d(TAG + ".onHandleIntent(...) ", "operation: " + operation + " - receiverName: " +
                     receiverName + " - event: " + vote.getEventVS().getId());
@@ -83,11 +79,11 @@ public class VoteService extends IntentService {
                 contextVS.setControlCenter(controlCenter);
                 switch(operation) {
                     case VOTEVS:
-                        responseVS = processVote(pin, vote);
+                        responseVS = processVote(vote);
                         break;
                     case CANCEL_VOTE:
                         JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-                        responseVS = processCancellation(receiverName, pin, cancelDataJSON.toString());
+                        responseVS = processCancellation(receiverName, cancelDataJSON.toString());
                         break;
                 }
                 showNotification(responseVS, vote.getEventVS().getSubject(), operation, vote);
@@ -147,13 +143,10 @@ public class VoteService extends IntentService {
         }
     }
 
-    private ResponseVS processVote(String pin, VoteVS vote) {
+    private ResponseVS processVote(VoteVS vote) {
         ResponseVS responseVS = null;
         try {
-            FileInputStream fis = openFileInput(KEY_STORE_FILE);
-            byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            VoteSender voteSender = new VoteSender(vote, keyStoreBytes, pin.toCharArray(),
-                    (AppContextVS)getApplicationContext());
+            VoteSender voteSender = new VoteSender(vote, (AppContextVS)getApplicationContext());
             responseVS = voteSender.call();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -163,14 +156,14 @@ public class VoteService extends IntentService {
     }
 
 
-    private ResponseVS processCancellation(String toUser, String pin, String signatureContent) {
+    private ResponseVS processCancellation(String toUser, String signatureContent) {
         ResponseVS responseVS = null;
         String subject = getString(R.string.cancel_vote_msg_subject);
         String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
         try {
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                     contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject, pin.toCharArray(),
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject,
                     contextVS.getAccessControl().getCertificate(),
                     (AppContextVS)getApplicationContext());
             responseVS = smimeSignedSender.call();

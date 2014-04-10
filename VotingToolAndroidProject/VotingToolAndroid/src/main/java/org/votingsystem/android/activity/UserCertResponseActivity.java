@@ -25,15 +25,14 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.UserCertRequestFormFragment;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.FileUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -43,7 +42,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.FRAGMENT_KEY;
-import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 import static org.votingsystem.model.ContextVS.PIN_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
@@ -76,39 +74,34 @@ public class UserCertResponseActivity extends ActionBarActivity {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(PIN_KEY);
-            if(pin != null) updateKeyStore(pin);
+            if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore();
         }
     };
 
-    private void updateKeyStore (String pin) {
+    private void updateKeyStore () {
         Log.d(TAG + ".updateKeyStore(...)", "");
         if (csrSigned == null) {
             setMessage(getString(R.string.cert_install_error_msg));
         } else {
             try {
-                FileInputStream fis = openFileInput(KEY_STORE_FILE);
-                byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+                KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+                keyStore.load(null);
 
-                //KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+                SharedPreferences settings = getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                String csrRequest = settings.getString(ContextVS.CSR_KEY, null);
+                CertificationRequestVS certificationRequest = (CertificationRequestVS)
+                        ObjectUtils.deSerializeObject(csrRequest.getBytes());
+                PrivateKey privateKey = certificationRequest.getPrivateKey();
 
-                KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
-                        keyStoreBytes, pin.toCharArray());
-                PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS,
-                        pin.toCharArray());
-                Collection<X509Certificate> certificates =
-                        CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
+                Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
+                        csrSigned.getBytes());
                 X509Certificate userCert = certificates.iterator().next();
                 UserVS user = UserVS.getUserVS(userCert);
                 Log.d(TAG + ".updateKeyStore(...)", "user: " + user.getNif() +
                         " - certificates.size(): " + certificates.size());
-                X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
-                certificates.toArray(arrayCerts);
-                keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, pin.toCharArray(), arrayCerts);
-                keyStoreBytes = KeyStoreUtil.getBytes(keyStore, pin.toCharArray());
-                FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
-                fos.write(keyStoreBytes);
-                fos.close();
+                X509Certificate[] certsArray = new X509Certificate[certificates.size()];
+                certificates.toArray(certsArray);
+                keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, null, certsArray);
 
                 byte[] userDataBytes = ObjectUtils.serializeObject(user);
                 FileOutputStream outputStream = openFileOutput(USER_DATA_FILE_NAME,

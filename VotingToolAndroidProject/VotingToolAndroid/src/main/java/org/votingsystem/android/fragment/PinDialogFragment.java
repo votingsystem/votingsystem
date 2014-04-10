@@ -42,6 +42,7 @@ import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.smime.CMSUtils;
 
 public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
@@ -161,19 +162,33 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 }
             }
         }
-        InputMethodManager imm = (InputMethodManager)getActivity().
-                getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getDialog().getCurrentFocus().getWindowToken(), 0);
-        if(dialogCaller != null) {
-            Intent intent = new Intent(dialogCaller);
-            intent.putExtra(ContextVS.PIN_KEY, pin);
-            intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-            ResponseVS responseVS = new ResponseVS(typeVS, pin);
-            intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+
+        AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
+        try {
+            String storedPasswordHash = contextVS.getStoredPasswordHash();
+            if(storedPasswordHash != null) {
+                String passwordHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+                if(!passwordHash.equals(storedPasswordHash)) {
+                    msgTextView.setText(getString(R.string.pin_error_msg));
+                    return;
+                }
+            }
+            InputMethodManager imm = (InputMethodManager)getActivity().
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getDialog().getCurrentFocus().getWindowToken(), 0);
+            if(dialogCaller != null) {
+                Intent intent = new Intent(dialogCaller);
+                intent.putExtra(ContextVS.PIN_KEY, pin);
+                intent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
+                ResponseVS responseVS = new ResponseVS(typeVS, pin);
+                intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+            }
+            firstPin = null;
+            getDialog().dismiss();
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
-        firstPin = null;
-        getDialog().dismiss();
     }
 
     @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {

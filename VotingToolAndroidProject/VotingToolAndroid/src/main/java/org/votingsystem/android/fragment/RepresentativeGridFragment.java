@@ -83,9 +83,8 @@ public class RepresentativeGridFragment extends Fragment
                 "intent.getExtras(): " + intent.getExtras());
         int responseStatusCode = intent.getIntExtra(ContextVS.RESPONSE_STATUS_KEY,
                 ResponseVS.SC_ERROR);
-        String pin = intent.getStringExtra(ContextVS.PIN_KEY);
         TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(pin != null) launchSignAndSendService(pin);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
         else {
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
                 hasHTTPConnection.set(false);
@@ -103,12 +102,11 @@ public class RepresentativeGridFragment extends Fragment
         }
     };
 
-    private void launchSignAndSendService(String pin) {
+    private void launchSignAndSendService() {
         Log.d(TAG + ".launchSignAndSendService(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     SignAndSendService.class);
-            startIntent.putExtra(ContextVS.PIN_KEY, pin);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE_REVOKE);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY,

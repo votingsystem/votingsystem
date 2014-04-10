@@ -35,7 +35,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VoteService;
@@ -50,7 +49,6 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -67,13 +65,12 @@ public class ReceiptFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            String pin = intent.getStringExtra(ContextVS.PIN_KEY);
             TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(pin != null) {
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(typeVS) {
                     case CANCEL_VOTE:
-                        launchVoteCancellation(pin, (VoteVS)selectedReceipt);
+                        launchVoteCancellation((VoteVS)selectedReceipt);
                         break;
                 }
             } else {
@@ -88,10 +85,9 @@ public class ReceiptFragment extends Fragment {
         }
     };
 
-    private void launchVoteCancellation(String pin, VoteVS vote) {
+    private void launchVoteCancellation(VoteVS vote) {
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 VoteService.class);
-        startIntent.putExtra(ContextVS.PIN_KEY, pin);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.VOTE_KEY, vote);
