@@ -125,10 +125,10 @@ class CertificateVSController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def addCertificateAuthority () {
-		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+		/*if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                     message(code: "serviceDevelopmentModeMsg"))]
-		}
+		}*/
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		signatureVSService.deleteTestCerts()
 		return [responseVS:signatureVSService.addCertificateAuthority(

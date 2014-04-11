@@ -140,13 +140,13 @@
                            title="<g:message code="subjectLbl"/>"
                            placeholder="<g:message code="subjectLbl"/>"/>
                     <input type="url" id="accessControlURL" style="width:280px; margin:0 20px 0 20px;" required
-                           value="http://192.168.1.20:8080/AccessControl"
+                           value="http://sistemavotacion.org/AccessControl"
                            title="<g:message code="accessControlURLMsg"/>"
                            placeholder="<g:message code="accessControlURLMsg"/>"
                            oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
                            onchange="this.setCustomValidity('')"/>
                     <input type="url" id="controlCenterURL" style="width:280px;" required
-                           value="http://192.168.1.20:8081/ControlCenter"
+                           value="http://sistemavotacion.org/ControlCenter"
                            title="<g:message code="controlCenterURLMsg"/>"
                            placeholder="<g:message code="controlCenterURLMsg"/>"
                            oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"

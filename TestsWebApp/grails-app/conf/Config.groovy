@@ -113,11 +113,11 @@ log4j = {
 	
 	appenders {
 		file name:'TestsWebAppERRORES', threshold:Level.ERROR,
-			file:"./logs/TestsWebAppERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
+			file:"/var/log/votingsystem/TestsWebAppERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"TestsWebApp", threshold:org.apache.log4j.Level.DEBUG,
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-			file:"./logs/TestsWebApp.log", datePattern: '\'_\'yyyy-MM-dd'
+			file:"/var/log/votingsystem/TestsWebApp.log", datePattern: '\'_\'yyyy-MM-dd'
 			
 		/*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
 			subject: mail.error.subject, threshold: Level.ERROR,

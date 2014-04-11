@@ -109,11 +109,11 @@ class SignatureVSService {
 	 */
 	public ResponseVS addCertificateAuthority (byte[] caPEM, Locale locale)  {
 		log.debug("addCertificateAuthority");
-		if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
+		/*if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
 			log.debug(" ### ADDING CERTS NOT ALLOWED IN PRODUCTION ENVIRONMENTS ###")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message: messageSource.getMessage('serviceDevelopmentModeMsg', null, locale))
-		}
+		}*/
 		if(!caPEM) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 			message: messageSource.getMessage('nullCertificateErrorMsg', null, locale))
 		try {

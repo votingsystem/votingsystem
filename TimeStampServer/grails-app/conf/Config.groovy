@@ -89,12 +89,12 @@ environments {
 
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "http://timestampserver.org:8080/TimeStampServer"
+        grails.serverURL = "http://sistemavotacion.org/TimeStampServer"
     }
 
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://timestampserver.org:8080/TimeStampServer"
+        grails.serverURL = "http://sistemavotacion.org/TimeStampServer"
     }
 
 }
@@ -128,11 +128,11 @@ log4j = {
 
     appenders {
         file name:'TimeStampServerERRORS', threshold:Level.ERROR,
-                file:"./logs/TimeStampServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"/var/log/votingsystem/TimeStampServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"TimeStampServer", threshold:org.apache.log4j.Level.DEBUG,
                 layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-                file:"./logs/TimeStampServer.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"/var/log/votingsystem/TimeStampServer.log", datePattern: '\'_\'yyyy-MM-dd'
 
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
             subject: mail.error.subject, threshold: Level.ERROR,

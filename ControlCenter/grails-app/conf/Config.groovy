@@ -96,15 +96,15 @@ environments {
     development {
         grails.logging.jul.usebridge = true
 		grails.resources.debug = true// -> rendering problems
-        grails.serverURL = "http://www.controlcenter.org:8081/ControlCenter"
+        grails.serverURL = "http://sistemavotacion.org/ControlCenter"
     }
 	production {
 		grails.logging.jul.usebridge = false
-		grails.serverURL = "http://www.controlcenter.org:8081/ControlCenter"
+		grails.serverURL = "http://sistemavotacion.org/ControlCenter"
 	}
     test {
 		grails.logging.jul.usebridge = true
-        grails.serverURL = "http://www.controlcenter.org:8081/ControlCenter"
+        grails.serverURL = "http://sistemavotacion.org/ControlCenter"
     }
 }
 
@@ -127,11 +127,11 @@ log4j = {
   
     appenders {
 		file name:'ControlCenterERRORS', threshold:Level.ERROR,
-			file:"./logs/ControlCenterERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
+			file:"/var/log/votingsystem/ControlCenterERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"ControlCenter", threshold:org.apache.log4j.Level.DEBUG, 
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-            file:"./logs/ControlCenter.log", datePattern: '\'_\'yyyy-MM-dd'
+            file:"/var/log/votingsystem/ControlCenter.log", datePattern: '\'_\'yyyy-MM-dd'
 			
 		/*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
 			subject: mail.error.subject, threshold: Level.ERROR,
@@ -202,7 +202,7 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://timestampserver.org:8080/TimeStampServer'
+VotingSystem.urlTimeStampServer='http://sistemavotacion.org/TimeStampServer'
 VotingSystem.backupCopyPath='./VotingSystem/backup'
 VotingSystem.eventsMetaInfBaseDir='./VotingSystem/EventVS_MetaInf'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
@@ -215,7 +215,7 @@ VotingSystem.signKeysPassword='PemPass'
 VotingSystem.requestTimeOut = 500
 //Name decriptivo del servidor
 VotingSystem.serverName='Primer ControlCenter'
-VotingSystem.blogURL ='http://www.gruposp2p.org'
+VotingSystem.blogURL ='http://www.sistemavotacion.org/blog.html'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
 //_ TODO _
 VotingSystem.adminsDNI='07553172H'

@@ -29,7 +29,7 @@ public class DocumentVSValidator {
     private static Logger logger = Logger.getLogger(DocumentVSValidator.class);
 
     //{"operation":"SEND_SMIME_VOTE","optionSelectedId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
-    //"optionSelectedContent":"option A","eventURL":"http://192.168.1.20:8080/AccessControl/eventVSElection/1"}
+    //"optionSelectedContent":"option A","eventURL":"http://sistemavotacion.org/AccessControl/eventVSElection/1"}
     public static ResponseVS<Long> validateVote(SignedFile signedFile, Set<X509Certificate> systemTrustedCerts,
                Set<X509Certificate> eventTrustedCerts, Long optionSelectedId, String eventURL, Date dateInit,
                Date dateFinish, X509Certificate timeStampServerCert) throws Exception {

@@ -130,11 +130,11 @@ log4j = {
 
     appenders {
         file name:'TicketServerERRORS', threshold:Level.ERROR,
-                file:"./logs/TicketServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"/var/log/votingsystem/TicketServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"TicketServer", threshold:org.apache.log4j.Level.DEBUG,
                 layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-                file:"./logs/TicketServer.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"/var/log/votingsystem/TicketServer.log", datePattern: '\'_\'yyyy-MM-dd'
 
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
             subject: mail.error.subject, threshold: Level.ERROR,
@@ -207,7 +207,7 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://timestampserver.org:8080/TimeStampServer'
+VotingSystem.urlTimeStampServer='http://sistemavotacion.org/TimeStampServer'
 VotingSystem.backupCopyPath='./VotingSystem/backups'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
 VotingSystem.keyStorePath='WEB-INF/cms/TicketServer.jks'

@@ -97,15 +97,15 @@ environments {
     development {
         grails.logging.jul.usebridge = true
 		grails.resources.debug = true// -> rendering problems
-        grails.serverURL = "http://sistemavotacion.org:8080/${appName}"
+        grails.serverURL = "http://sistemavotacion.org/${appName}"
     }
 	production {
 		grails.logging.jul.usebridge = false
-		grails.serverURL = "http://sistemavotacion.org:8080/AccessControl"
+		grails.serverURL = "http://sistemavotacion.org/AccessControl"
 	}
     test {
 		grails.logging.jul.usebridge = true
-        grails.serverURL = "http://sistemavotacion.org:8080/AccessControl"
+        grails.serverURL = "http://sistemavotacion.org/AccessControl"
     }
 }
 
@@ -128,11 +128,11 @@ log4j = {
   
     appenders {
 		file name:'AccessControlERRORS', threshold:Level.ERROR,
-			file:"./logs/AccessControlERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
+			file:"/var/log/votingsystem/AccessControlERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"AccessControl", threshold:org.apache.log4j.Level.DEBUG, 
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-            file:"./logs/AccessControl.log", datePattern: '\'_\'yyyy-MM-dd'
+            file:"/var/log/votingsystem/AccessControl.log", datePattern: '\'_\'yyyy-MM-dd'
 			
 		/*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
 			subject: mail.error.subject, threshold: Level.ERROR,
@@ -204,7 +204,7 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://timestampserver.org:8080/TimeStampServer'
+VotingSystem.urlTimeStampServer='http://sistemavotacion.org/TimeStampServer'
 VotingSystem.backupCopyPath='./VotingSystem/backups'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
 VotingSystem.keyStorePath='WEB-INF/cms/AccessControl.jks'
@@ -214,7 +214,7 @@ VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
 VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 VotingSystem.requestTimeOut = 500
 VotingSystem.serverName='Primer AccessControlVS'
-VotingSystem.blogURL = 'http://www.gruposp2p.org'
+VotingSystem.blogURL = 'http://www.sistemavotacion.org/blog.html'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
 //_ TODO _
 VotingSystem.adminsDNI='07553172H'

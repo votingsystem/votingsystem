@@ -44,7 +44,7 @@
             <div style="margin:10px 0px 10px 0px">
                 <label><g:message code="serverURLMsg"/></label>
                 <input type="url" id="serverURL" style="width:500px; margin:0px 0px 0px 3px;" required
-                       value="http://192.168.1.20:8080/AccessControl"
+                       value="http://sistemavotacion.org/AccessControl"
                        title="<g:message code="serverURLMsg"/>"
                        placeholder="<g:message code="serverURLMsg"/>"
                        oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"

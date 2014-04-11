@@ -19,7 +19,7 @@ class TestingController {
 
 	def index() {
         ResponseVS responseVS = HttpHelper.getInstance().getData(
-                "http://192.168.1.20:8080/AccessControl/backupVS/download/13", ContentTypeVS.BACKUP);
+                "http://sistemavotacion.org/AccessControl/backupVS/download/13", ContentTypeVS.BACKUP);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             render "TODO validate backup";
             /*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(

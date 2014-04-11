@@ -249,7 +249,7 @@ public class CMSUtils {
         String contentType, String from, String to) throws MessagingException {
         Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
-        //Address fromUser = new InternetAddress("\"JJ\"<jj@gruposp2p.org>");
+        //Address fromUser = new InternetAddress("\"JJ\"<jj@sistemavotacion.org/blog>");
         Address fromUser = new InternetAddress(from);
         Address toUser = new InternetAddress(to);
         MimeMessage message = new MimeMessage(session);

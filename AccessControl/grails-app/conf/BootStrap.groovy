@@ -20,7 +20,6 @@ class BootStrap {
 		ContextVS.init()
 		filesService.init()
         signatureVSService.init();
-        timeStampService.init();
 		JSON.registerObjectMarshaller(RepresentativeVS) {
 			def returnMap = [:]
 			returnMap['optionSelectedId'] = it.optionSelectedId

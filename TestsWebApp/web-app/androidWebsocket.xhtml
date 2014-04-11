@@ -48,7 +48,7 @@
 
     SimulationService.initialize = function() {
     	console.log("=========== SimulationService.initialize")
-    	var serviceURL = 'ws://192.168.1.20:8080/SistemaVotacionTest/websocket/service' 
+    	var serviceURL = 'ws://sistemavotacion.org/SistemaVotacionTest/websocket/service'
         if (window.location.protocol == 'http:') {
             SimulationService.connect(serviceURL.replace('http', 'ws'));
             console.log('Connecting with: ' + serviceURL.replace('http', 'ws'));

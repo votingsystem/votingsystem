@@ -61,7 +61,7 @@
                     title="<g:message code="subjectLbl"/>"
                     placeholder="<g:message code="subjectLbl"/>"/>
                 <input type="url" id="accessControlURL" style="width:300px; margin:0px 0px 0px 20px;" required
-                       value="http://192.168.1.20:8080/AccessControl"
+                       value="http://sistemavotacion.org/AccessControl"
                        title="<g:message code="accessControlURLMsg"/>"
                        placeholder="<g:message code="accessControlURLMsg"/>"
                        oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"

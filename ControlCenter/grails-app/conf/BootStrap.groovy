@@ -18,7 +18,6 @@ class BootStrap {
         ContextVS.init()
 		filesService.init()
         signatureVSService.init();
-        timeStampService.init();
     }
 	
     def destroy = { }

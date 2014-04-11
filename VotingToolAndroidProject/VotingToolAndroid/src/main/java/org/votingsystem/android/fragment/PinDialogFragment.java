@@ -169,6 +169,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             if(storedPasswordHash != null) {
                 String passwordHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
                 if(!passwordHash.equals(storedPasswordHash)) {
+                    msgTextView.setVisibility(View.VISIBLE);
                     msgTextView.setText(getString(R.string.pin_error_msg));
                     return;
                 }
