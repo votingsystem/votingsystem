@@ -1,0 +1,32 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-tickets {
+    background-color: #ba0011;
+    border-color: #ba0011;
+    color:#f9f9f9;
+}
+
+.nav-var-ticket-icon:hover {
+    color: #870000;
+    cursor: pointer;
+}
+
+.navbar-tickets .navbar-nav > li > a:hover, .nav > li > a:focus {
+    text-decoration: none;
+    background-color: #870000;
+}
+
+#menu {
+    position: absolute;
+    top: 50px;
+}
+
+#pushobj {
+    position: absolute;
+    top: 40px;
+    left: 300px;
+    text-align: center;
+}

@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><g:message code="transactionListenerPageTitle"/></title>
-    <r:external uri="/images/euro_16.png"/>
-    <r:require module="application"/>
-    <r:layoutResources />
+    <meta name="layout" content="main" />
 </head>
 <body>
     <div id="simulationRunningDialog" style="padding: 20px;">
@@ -19,8 +16,9 @@
             </tr>
         </table>
     </div>
-    <table style="display:none;">
-        <tbody id="transactionRowTemplate">
+    <div id="pushobj">
+        <table style="display:none;">
+            <tbody id="transactionRowTemplate">
             <tr style="width: 100%;">
                 <td>{0}</td>
                 <td>{1}</td>
@@ -29,8 +27,9 @@
                 <td style="width:300px;">{4}</td>
                 <td style="width:200px;"><a href="{5}">Justificante</a></td>
             </tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </body>
 
 </html>
@@ -58,4 +57,3 @@
     }
 
 </r:script>
-<r:layoutResources />

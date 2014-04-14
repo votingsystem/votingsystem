@@ -10,6 +10,8 @@ class AppController {
 
 	def grailsApplication;
 
+    def index() {}
+
 	/**
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación con parámetros de utilidad
