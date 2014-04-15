@@ -11,6 +11,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.ticket.TicketVS
 import org.votingsystem.model.ticket.TicketVSBatchRequest
+import org.votingsystem.model.ticket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
 import java.security.KeyFactory
@@ -24,10 +25,26 @@ class TransactionController {
     def signatureVSService
     def ticketService
 
+    def index() {
+        List<TransactionVS> transactionList = null
+        int totalTransactions = 0;
+        TransactionVS.withTransaction {
+            transactionList = TransactionVS.findAll(params);
+            totalTransactions = TransactionVS.count()
+        }
+        def resultList = []
+        transactionList.each {transactionItem ->
+            resultList.add(transactionVSService.getTransactionMap(transactionItem))
+        }
+
+        def resulMap = ["${message(code: 'transactionRecordsLbl')}":resultList, queryRecordCount: totalTransactions, numTotalTransactions:totalTransactions ]
+        render resulMap as JSON
+    }
 
     def listener() {
 
     }
+
 
     /**
      * Servicio que recibe una transacción compuesta por un lote de Tickets

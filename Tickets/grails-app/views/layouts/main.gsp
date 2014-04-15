@@ -1,56 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
     <r:external uri="/images/euro_16.png"/>
     <r:require module="multilevelmenu"/>
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>
-	<body>
-    <div id="menu">
-        <nav>
-            <h2><i class="fa fa-reorder"></i><g:message code="sectionsLbl"/></h2>
-            <ul>
-                <li>
-                    <a href="${createLink(controller: 'transaction', action: 'listener')}">
-                        <g:message code="transactionsLbl"/> <i class="fa fa-money"></i></a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="navbar navbar-tickets navbar-fixed-top" role="navigation" style="min-height:30px; margin-bottom: 6px; height: 50px;">
-        <div class="container">
-            <i id="expandMenuIcon" class="fa fa-bars fa-2x navbar-text nav-var-ticket-icon" style=""></i>
-
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li class="" style="font-size: 2.5em; margin: 0 50px 0 50px; font-weight: bold;"><g:message code="appTitle"/></li>
-
+	<body class="">
+    <div>
+        <div id="menu">
+            <nav>
+                <h2><i class="fa fa-reorder"></i>
+                    <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
+                </h2>
+                <ul>
                     <li>
-                        <form class="navbar-form" role="search">
-                            <div class="input-group"  style="width:270px;">
-                                <input type="text" class="form-control" placeholder="<g:message code="searchLbl"/>" style="border-color:#f9f9f9 ;">
-                                <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-default"
-                                            style="color: #f9f9f9; background-color: #ba0011; border-color: #f9f9f9;">
-                                        <i class="fa fa-search" style="margin:0 0 0 0px;font-size: 1.3em; "></i></button>
-                                </span>
-                            </div>
-                        </form>
+                        <a href="${createLink(controller: 'transaction', action: 'listener')}">
+                            <g:message code="transactionsLbl"/> <i class="fa fa-money"></i></a>
                     </li>
-                    <li class="navbar-text">
-                        <i id="rssMenuIcon" class="fa fa-rss-square  nav-var-ticket-icon" style="font-size: 2em;"></i>
+                    <li>
+                        <a href="#">
+                            <g:message code="subscriptionLbl"/><i class="fa fa-rss"></i></a>
                     </li>
-                    <li class=""><a  href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
-                                     style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/></a></li>
+                    <li>
+                        <a  href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
+                            style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-envelope-o"></i></a>
+                    </li>
                 </ul>
-            </div>
+            </nav>
         </div>
+            <div  id="navbar" class="navbar navbar-tickets navbar-fixed-top" role="navigation" style="min-height:30px; margin-bottom: 6px;">
+                <div class="container">
+                    <div class="container-fluid">
+                        <div class="navbar-collapse collapse">
+                            <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-ticket-icon" style="margin: 5px 10px 0 15px;"></i>
+                            <a class= "" href="${createLink(controller: 'app', action: 'index')}" style="">
+                                <i id="homeIcon" class="fa fa fa-home navbar-text navBar-ticket-icon"
+                                   style="color: #fdd302;margin: 5px 10px 0 35px;"></i>
+                            </a>
+                            <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 30px 0 30px; font-weight: bold;">
+                                <g:message code="appTitle"/>
+                            </span>
+                            <form class="navbar-form navbar-right" role="search">
+                                <div class="input-group"  style="width:160px;">
+                                    <input type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
+                                           style="border-color:#f9f9f9; height: 30px;">
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-default"
+                                                style="color: #f9f9f9; background-color: #ba0011; border-color: #f9f9f9; height: 30px;">
+                                            <i class="fa fa-search" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+        <div id="pushobj" style="min-height: 600px; margin-top: 10px;"><g:layoutBody/></div>
+
     </div>
 
-    <div id="pushobj" style="min-height: 600px;"><g:layoutBody/></div>
+
+
 
 	</body>
 </html>
@@ -78,8 +96,9 @@
             collapsed: true,
             fullCollapse: true
         });
-
     })
+
+    $( "expandMenuIcon" ).css("color", "green")
 
     $("#expandMenuIcon").click(function () {
         if(isMenuVisible) $('#menu').multilevelpushmenu( 'collapse' );

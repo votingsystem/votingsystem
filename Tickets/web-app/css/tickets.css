@@ -1,15 +1,34 @@
-body {
-    margin: 0;
-    padding: 0;
+html {
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    height:100%;
+    margin: 0px auto 0px 0px;
 }
+
+body {
+    font-family: Arial, sans-serif;
+    color:#434343;
+    margin: 0 auto 0 auto;
+    padding: 0 10px 0 0px;
+    height: 600px;
+}
+
 
 .navbar-tickets {
     background-color: #ba0011;
     border-color: #ba0011;
     color:#f9f9f9;
+    height: 50px;
 }
 
-.nav-var-ticket-icon:hover {
+.navBar-ticket-icon {
+    color: #f9f9f9;
+    cursor: pointer;
+    font-size: 3em;
+}
+
+.navBar-ticket-icon:hover {
     color: #870000;
     cursor: pointer;
 }
@@ -20,8 +39,9 @@ body {
 }
 
 #menu {
-    position: absolute;
+    position: fixed;
     top: 50px;
+    font-weight: bold;
 }
 
 #pushobj {
@@ -30,3 +50,4 @@ body {
     left: 300px;
     text-align: center;
 }
+

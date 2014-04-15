@@ -14,35 +14,33 @@ var WebAppMessage = function (statusCode, operation) {
 }
 
 function httpGet(theUrl){
-    var xmlHttp = null;
-    xmlHttp = new XMLHttpRequest();
+    var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false );
     xmlHttp.send( null );
     return xmlHttp.responseText;
 }
 
-var DateUtils = {
+function DateUtils(){}
 
-	//parse dates with format "2010-08-30 01:02:03" 	
-	parse: function (dateStr) {
-		var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
-		var dateArray = reggie.exec(dateStr); 
-		var dateObject = new Date(
-		    (+dateArray[1]),
-		    (+dateArray[2])-1, //Months are zero based
-		    (+dateArray[3]),
-		    (+dateArray[4]),
-		    (+dateArray[5]),
-		    (+dateArray[6])
-		);
-		return dateObject
-	},
-	
-	checkDate: function (dateInit, dateFinish) {
-		var todayDate = new Date();
-		if(todayDate > dateInit && todayDate < dateFinish) return true;
-		else return false;
-	}
+//parse dates with format "2010-08-30 01:02:03"
+DateUtils.parse = function (dateStr) {
+    var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+    var dateArray = reggie.exec(dateStr);
+    var dateObject = new Date(
+        (+dateArray[1]),
+        (+dateArray[2])-1, //Months are zero based
+        (+dateArray[3]),
+        (+dateArray[4]),
+        (+dateArray[5]),
+        (+dateArray[6])
+    );
+    return dateObject
+}
+
+DateUtils.checkDate = function (dateInit, dateFinish) {
+    var todayDate = new Date();
+    if(todayDate > dateInit && todayDate < dateFinish) return true;
+    else return false;
 }
 
 Date.prototype.format = function() {
@@ -143,8 +141,6 @@ var SocketOperation = {
     LISTEN_TRANSACTIONS : "LISTEN_TRANSACTIONS"
 }
 
-
-
 function getUrlParam(paramName, staticURL, decode){
    var currLocation = (staticURL.length)? staticURL : window.location.search,
        parArr = currLocation.split("?")[1].split("&");
@@ -182,4 +178,49 @@ function validateNIF(nif) {
     var letter = nif.substring(8, 9);
     if(letter != calculateNIFLetter(number)) return null;
     else return nif;
+}
+
+var dynatableInputs = {
+        queries: null,
+        sorts: null,
+        multisort: ['ctrlKey', 'shiftKey', 'metaKey'],
+        page: null,
+        queryEvent: 'blur change',
+        recordCountTarget: null,
+        recordCountPlacement: 'after',
+        paginationLinkTarget: null,
+        paginationLinkPlacement: 'after',
+        paginationPrev: '«',
+        paginationNext: '»',
+        paginationGap: [1,2,2,1],
+        searchTarget: null,
+        searchPlacement: 'before',
+        perPageTarget: null,
+        perPagePlacement: 'before',
+        perPageText: '',
+        recordCountText: '',
+        pageText:'',
+        recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
+        processingText: '<span class="dynatableLoading">Actualizando <i class="fa fa-refresh fa-spin"></i></span>'
+}
+
+
+var dynatableParams = {
+    dynatable: 'dynatable',
+    queries: 'queries',
+    sorts: 'sorts',
+    page: 'page',
+    perPage: 'max',
+    offset: 'offset',
+    records: '<g:message code="transactionRecordsLbl"/>',
+    record: null,
+    queryRecordCount: 'queryRecordCount',
+    totalRecordCount: 'numTotalTransactions'
+  }
+
+var dynatableFeatures =  {
+    paginate: true
+    //recordCount: false,
+    //sorting: false,
+    //search: false
 }

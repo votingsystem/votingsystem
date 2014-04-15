@@ -31,6 +31,11 @@ modules = {
 
     }
 
+    dynatableModule {
+        dependsOn 'multilevelmenu'
+        resource url: 'css/jquery.dynatable.css'
+        resource url: 'js/jquery.dynatable.js'
+    }
 }
 
 boolean isDevMode() { !Metadata.current.isWarDeployed() }
