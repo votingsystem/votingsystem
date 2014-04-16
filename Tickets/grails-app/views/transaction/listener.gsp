@@ -115,7 +115,7 @@
     }
 
     function processUserSearch(textToSearch) {
-        $("#pageInfoPanel").text(<g:message code="searchResultLbl"/> + " '" + textToSearch + "'")
+        $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
         dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'transactionVS')}?searchParam=" + textToSearch
         dynatable.process();
     }
