@@ -22,7 +22,7 @@ import org.hibernate.search.annotations.*;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="eventVSType", discriminatorType=DiscriminatorType.STRING)
 @DiscriminatorValue("EventVS")
-@AnalyzerDef(name="customAnalyzer",
+@AnalyzerDef(name="eventVSAnalyzer",
 	charFilters = { @CharFilterDef(factory = HTMLStripCharFilterFactory.class) }, 
 	tokenizer =  @TokenizerDef(factory = StandardTokenizerFactory.class))
 public class EventVS implements Serializable {

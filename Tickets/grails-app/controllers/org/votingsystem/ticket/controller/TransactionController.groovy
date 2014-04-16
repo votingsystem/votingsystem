@@ -29,16 +29,25 @@ class TransactionController {
         List<TransactionVS> transactionList = null
         int totalTransactions = 0;
         TransactionVS.withTransaction {
-            transactionList = TransactionVS.findAll(params);
-            totalTransactions = TransactionVS.count()
+            if(params.searchParam) {
+                transactionList = TransactionVS.withCriteria {
+                    ilike('subject', "%${params.searchParam}%")
+                    ilike('dateCreated', "%${params.searchParam}%")
+                }
+            } else {
+                transactionList = TransactionVS.findAll(params);
+                totalTransactions = TransactionVS.count()
+            }
         }
         def resultList = []
         transactionList.each {transactionItem ->
             resultList.add(transactionVSService.getTransactionMap(transactionItem))
         }
-
-        def resulMap = ["${message(code: 'transactionRecordsLbl')}":resultList, queryRecordCount: totalTransactions, numTotalTransactions:totalTransactions ]
-        render resulMap as JSON
+        Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
+        log.debug("sortMap: ${sortParamsMap}")
+        def resultMap = ["${message(code: 'transactionRecordsLbl')}":resultList, queryRecordCount: totalTransactions,
+                        numTotalTransactions:totalTransactions ]
+        render resultMap as JSON
     }
 
     def listener() {

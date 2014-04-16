@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
+
     <r:external uri="/images/euro_16.png"/>
     <r:require module="multilevelmenu"/>
 	<g:layoutHead/>
@@ -10,7 +11,7 @@
 </head>
 	<body class="">
     <div>
-        <div id="menu">
+        <div id="menu" style="visibility: hidden;">
             <nav>
                 <h2><i class="fa fa-reorder"></i>
                     <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
@@ -43,31 +44,22 @@
                             <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 30px 0 30px; font-weight: bold;">
                                 <g:message code="appTitle"/>
                             </span>
-                            <form class="navbar-form navbar-right" role="search">
-                                <div class="input-group"  style="width:160px;">
-                                    <input type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
-                                           style="border-color:#f9f9f9; height: 30px;">
-                                    <span class="input-group-btn">
-                                        <button type="submit" class="btn btn-default"
-                                                style="color: #f9f9f9; background-color: #ba0011; border-color: #f9f9f9; height: 30px;">
-                                            <i class="fa fa-search" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
-                                    </span>
-                                </div>
-                            </form>
+                            <div class="input-group navbar-right"  style="width:160px; margin-top: 10px;">
+                                <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
+                                       style="border-color:#f9f9f9; height: 30px;">
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-default"
+                                            style="color: #f9f9f9; background-color: #ba0011; border-color: #f9f9f9; height: 30px;">
+                                        <i class="fa fa-search" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-
-
-
-
         <div id="pushobj" style="min-height: 600px; margin-top: 10px;"><g:layoutBody/></div>
 
     </div>
-
-
 
 
 	</body>
@@ -98,13 +90,20 @@
         });
     })
 
-    $( "expandMenuIcon" ).css("color", "green")
-
     $("#expandMenuIcon").click(function () {
+        $('#menu').css("visibility", "visible")
         if(isMenuVisible) $('#menu').multilevelpushmenu( 'collapse' );
         else $('#menu').multilevelpushmenu( 'expand' );
 
     })
 
+
+    $("#searchInput").bind('keypress', function(e) {
+                if (e.which == 13) {
+                    if("" != $("#searchInput").val().trim()) {
+                        processUserSearch($("#searchInput").val())
+                    }
+                }
+            });
 </r:script>
 <r:layoutResources/>

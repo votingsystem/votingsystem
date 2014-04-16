@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.model.ResponseVS;
 
 @Repository("searchHelper")
 public class SearchHelper {
@@ -49,7 +50,28 @@ public class SearchHelper {
         FullTextQuery query = session.createFullTextQuery( luceneQuery, entityClass );
         return query.setFirstResult(firstResult).setMaxResults(maxResults).list();
     }
-    
+
+    @Transactional(readOnly = true) public <T> ResponseVS<List<T>> findResponseVSByFullText(Class<T> entityClass,
+          String[] entityFields, String textToFind, int firstResult, int maxResults) {
+        FullTextSession session = Search.getFullTextSession(
+                sessionFactory.getCurrentSession());
+        MultiFieldQueryParser parser = new MultiFieldQueryParser(Version.LUCENE_31,
+                entityFields, new StandardAnalyzer(Version.LUCENE_31));
+        Query luceneQuery = null;
+        ResponseVS<List<T>> result = new ResponseVS<List<T>>();
+        try {
+            luceneQuery = parser.parse(textToFind);
+        } catch (ParseException e) {
+            log.error("Cannot parse [" + textToFind + "] to a full text query", e);
+            result.setSize(0);
+            result.setData(new ArrayList<T>(0));
+        }
+        FullTextQuery query = session.createFullTextQuery(luceneQuery, entityClass);
+        result.setSize(query.getResultSize());
+        result.setData(query.setFirstResult(firstResult).setMaxResults(maxResults).list());
+        return result;
+    }
+
     @Transactional(readOnly = true) public FullTextQuery getFullTextQuery(Class<?> entityClass,
             String[] entityFields, String textToFind) {
         FullTextSession session = Search.getFullTextSession(

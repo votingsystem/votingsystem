@@ -201,6 +201,7 @@ var dynatableInputs = {
         recordCountText: '',
         pageText:'',
         recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
+        recordCountTotalTemplate: '{recordsQueryCount}',
         processingText: '<span class="dynatableLoading">Actualizando <i class="fa fa-refresh fa-spin"></i></span>'
 }
 
@@ -212,15 +213,9 @@ var dynatableParams = {
     page: 'page',
     perPage: 'max',
     offset: 'offset',
-    records: '<g:message code="transactionRecordsLbl"/>',
     record: null,
-    queryRecordCount: 'queryRecordCount',
-    totalRecordCount: 'numTotalTransactions'
   }
 
 var dynatableFeatures =  {
-    paginate: true
-    //recordCount: false,
-    //sorting: false,
-    //search: false
+    search: false
 }

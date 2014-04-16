@@ -58,6 +58,7 @@ grails.project.dependency.resolution = {
                     'org.bouncycastle:bcmail-jdk16:1.46',
                     'org.bouncycastle:bcpg-jdk16:1.46',
                     'org.bouncycastle:bctsp-jdk16:1.46',
+                    'org.hibernate:hibernate-search:4.2.0.Final',
                     //'gnu.mail:gnumail:1.1.2',
                     //'gnu.mail:inetlib:1.1.1',
                     //'org.apache.geronimo.specs:geronimo-javamail_1.4_spec:1.7.1',

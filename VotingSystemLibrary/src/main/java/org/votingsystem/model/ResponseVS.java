@@ -50,6 +50,7 @@ public class ResponseVS<T> implements Serializable {
     private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private File file;
     private List<String> errorList;
+    private Integer size;
         
     public ResponseVS () {  }
 
@@ -208,4 +209,11 @@ public class ResponseVS<T> implements Serializable {
         this.reason = reason;
     }
 
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
 }

@@ -35,6 +35,7 @@ modules = {
         dependsOn 'multilevelmenu'
         resource url: 'css/jquery.dynatable.css'
         resource url: 'js/jquery.dynatable.js'
+        resource url: 'js/jquery.stickytableheaders.js'
     }
 }
 

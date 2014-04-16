@@ -16,7 +16,7 @@ hibernate {
     //cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory' // Hibernate 3
     cache.region.factory_class = 'org.hibernate.cache.ehcache.EhCacheRegionFactory' // Hibernate 4
 
-    hibernate.search.default.indexBase = new File("./VotingSystem/searchIndexAccessControl").absolutePath
+    hibernate.search.default.indexBase = new File("./VotingSystem/searchIndexTickets").absolutePath
     //hibernate.show_sql=true
 }
 
