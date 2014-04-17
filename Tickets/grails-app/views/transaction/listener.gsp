@@ -5,17 +5,17 @@
     <r:require module="dynatableModule"/>
 </head>
 <body>
+    <div style="width: 900px; margin: 0 auto 0 auto;">
+        <button id="loadHistoryButton" type="button" class="btn btn-primary"
+                style="margin: 10px 0px 10px 0px;display: none;">
+            <g:message code="loadHistoryLbl"/>
+            <i  id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
+        </button>
 
-    <button id="loadHistoryButton" type="button" class="btn btn-primary"
-            style="margin: 10px 0px 10px 0px;display: none;">
-        <g:message code="loadHistoryLbl"/>
-        <i  id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
-    </button>
+        <p id="pageInfoPanel" class="" style="margin: 20px 20px 20px 20px; font-size: 1.3em; background-color: #f9f9f9;"></p>
 
-    <p id="pageInfoPanel" class="bg-info" style="margin: 20px 20px 20px 20px; font-size: 1.3em;"></p>
-
-    <table class="table" id="transaction_table">
-        <thead>
+        <table class="table dynatable-tickets" id="transaction_table">
+            <thead>
             <tr style="color: #ff0000;">
                 <th data-dynatable-column="type" style="width:210px;"><g:message code="typeLbl"/></th>
                 <th data-dynatable-column="amount"><g:message code="amountLbl"/></th>
@@ -24,9 +24,9 @@
                 <th data-dynatable-column="subject" style="width:300px;"><g:message code="subjectLbl"/></th>
                 <th><g:message code="voucherLbl"/></th>
             </tr>
-        </thead>
-    </table>
-
+            </thead>
+        </table>
+    </div>
 </body>
 
 </html>
@@ -60,8 +60,7 @@
             $('#dynatable-record-count-transaction_table').css('visibility', 'visible');
         })
 
-        var offset = $('.navbar').height();
-        $("html:not(.legacy) table").stickyTableHeaders({fixedOffset: offset});
+        //$("#transaction_table").stickyTableHeaders({fixedOffset: $('.navbar')});
     })
 
     $("#loadHistoryButton").click(function() {
@@ -109,14 +108,14 @@
         tr = '<tr><td title="' + jsonTransactionData.type + '">' + jsonTransactionData.type + '</td><td>' +
         jsonTransactionData.amount + '</td>' +
         '<td>' + jsonTransactionData.currency + '</td><td>' + jsonTransactionData.dateCreated +
-        '</td><td>' + jsonTransactionData.subject + '</td><td>' + '<a href="#" onclick="openWindow(\'' +
+        '</td><td title="' + jsonTransactionData.subject + '">' + jsonTransactionData.subject + '</td><td>' + '<a href="#" onclick="openWindow(\'' +
         jsonTransactionData.messageSMIMEURL+ '\')"><g:message code="proofLbl"/></a></td></tr>'
         return tr
     }
 
     function processUserSearch(textToSearch) {
         $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'transactionVS')}?searchParam=" + textToSearch
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}?searchParam=" + textToSearch
         dynatable.process();
     }
 

@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
-
     <r:external uri="/images/euro_16.png"/>
     <r:require module="multilevelmenu"/>
 	<g:layoutHead/>
@@ -32,7 +31,7 @@
                 </ul>
             </nav>
         </div>
-            <div  id="navbar" class="navbar navbar-tickets navbar-fixed-top" role="navigation" style="min-height:30px; margin-bottom: 6px;">
+            <div  id="navbar" class="navbar navbar-tickets navbar-fixed-top" role="navigation" style="min-height:30px; margin-bottom: 6px; width: 100%;">
                 <div class="container">
                     <div class="container-fluid">
                         <div class="navbar-collapse collapse">
@@ -41,18 +40,30 @@
                                 <i id="homeIcon" class="fa fa fa-home navbar-text navBar-ticket-icon"
                                    style="color: #fdd302;margin: 5px 10px 0 35px;"></i>
                             </a>
-                            <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 30px 0 30px; font-weight: bold;">
-                                <g:message code="appTitle"/>
+                            <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 0px 0 30px;
+                                    font-weight: bold; "><g:message code="appTitle"/>
                             </span>
-                            <div class="input-group navbar-right"  style="width:160px; margin-top: 10px;">
+
+
+
+
+                            <div class="navbar-form navbar-right input-group" style="width:15px;">
                                 <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
-                                       style="border-color:#f9f9f9; height: 30px;">
-                                <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-default"
-                                            style="color: #f9f9f9; background-color: #ba0011; border-color: #f9f9f9; height: 30px;">
-                                        <i class="fa fa-search" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
-                                </span>
+                                       style="width:120px; border-color: #f9f9f9;">
+                                <div class="input-group-btn">
+                                    <button id="searchButton" type="button" class="btn navBar-ticket-button" style="border-color: #f9f9f9;">
+                                        <i class="fa fa-search navBar-ticket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"
+                                            style="background-color: #ba0011; border-color: #f9f9f9; color:#f9f9f9;">
+                                        <span class="caret"></span>
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" style="">
+                                        <li><a id="showAdvancedSearchButton" href="#"><g:message code="advancedSearchLbl"/></a></li>
+                                    </ul>
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -61,13 +72,53 @@
 
     </div>
 
+    <!-- Advanced search Modal dialog -->
+    <div class="modal fade" id="advancedSearchDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel"><g:message code="advancedSearchLbl"/></h4>
+                </div>
+                <form id="advancedSearchForm" onsubmit="return submitAdvancedSearchForm(this);">
+                <div class="modal-body">
+
+                    <div id="searchErrorPanel" class="alert alert-danger" style="display: none;">
+                        <a class="close" onclick="$('#searchErrorPanel').fadeOut()">×</a>
+                        <div id="searchErrorMsg"></div>
+                    </div>
+                    <div  class="form-inline" style="display:block; margin: 0 0 10px 0;">
+                        <label><g:message code="fromLbl"/></label>
+                        <input type="text" id="advancedSearchFrom" class="form-control">
+                        <label><g:message code="toLbl"/></label>
+                        <input type="text" id="advancedSearchTo" name="to" class="form-control">
+                    </div>
+
+                    <div class="form-inline" style="margin: 0 0 10px 0;">
+                        <label class="control-label" ><g:message code="advancedSearchTextLbl"/></label>
+                        <input type="text" id="advancedSearchText" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
+                        <g:message code="closeLbl"/>
+                    </button>
+                    <button id="advancedSearchButton" type="submit" class="btn btn-accept-vs">
+                        <g:message code="doAdvancedSearchLbl"/>
+                    </button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 	</body>
 </html>
 <r:script>
     var isMenuVisible = false
     var isSearchInputVisible = false
-
+    var dateBeginFrom  = $("#advancedSearchFrom")
+	var dateBeginTo    = $("#advancedSearchTo")
     $(function() {
         $( '#menu' ).multilevelpushmenu({
             menuWidth: 250,
@@ -88,6 +139,10 @@
             collapsed: true,
             fullCollapse: true
         });
+
+        $("#advancedSearchFrom").datepicker();
+        $("#advancedSearchTo").datepicker();
+
     })
 
     $("#expandMenuIcon").click(function () {
@@ -97,13 +152,85 @@
 
     })
 
+    $("#searchButton").click(function () {
+        if("" != $("#searchInput").val().trim()) {
+            processUserSearch($("#searchInput").val())
+        }
+    })
+
+    $("#showAdvancedSearchButton").click(function () {
+        $('#advancedSearchDialog').modal()
+    })
+
+    $("#advancedSearchButton").click(function () {
+        console.log("========= advancedSearchButton")
+        if(dateBeginFrom.datepicker("getDate") === null) {
+            dateBeginFrom.addClass( "formFieldError" );
+            showErrorMsg('<g:message code="emptyFieldMsg"/>')
+            return
+        }
+
+        if(dateBeginTo.datepicker("getDate") === null) {
+            dateBeginTo.addClass( "formFieldError" );
+            showErrorMsg('<g:message code="emptyFieldMsg"/>')
+            return
+        }
+
+        if(dateBeginFrom.datepicker("getDate") >
+            dateBeginTo.datepicker("getDate")) {
+            showErrorMsg('<g:message code="dateRangeERRORMsg"/>')
+            dateBeginFrom.addClass("formFieldError");
+            dateBeginTo.addClass("formFieldError");
+            return
+        }
+
+        if(dateFinishFrom.datepicker("getDate") === null) {
+            dateFinishFrom.addClass( "formFieldError" );
+            showErrorMsg('<g:message code="emptyFieldMsg"/>')
+            return
+        }
+
+        if(dateFinishTo.datepicker("getDate") === null) {
+            dateFinishTo.addClass( "formFieldError" );
+            showErrorMsg('<g:message code="emptyFieldMsg"/>')
+            return
+        }
+
+        if(dateFinishFrom.datepicker("getDate") >
+            dateFinishTo.datepicker("getDate")) {
+            showErrorMsg('<g:message code="dateRangeERRORMsg"/>')
+            dateFinishFrom.addClass("formFieldError");
+            dateFinishTo.addClass("formFieldError");
+            return
+        }
+    })
 
     $("#searchInput").bind('keypress', function(e) {
-                if (e.which == 13) {
-                    if("" != $("#searchInput").val().trim()) {
-                        processUserSearch($("#searchInput").val())
-                    }
-                }
-            });
+        if (e.which == 13) {
+            if("" != $("#searchInput").val().trim()) {
+                processUserSearch($("#searchInput").val())
+            }
+        }
+    });
+
+    function isValidForm() {
+ 	    //allFields.removeClass("formFieldError");
+ 	}
+
+    function showErrorMsg(errorMsg) {
+        console.log("========= errorMsg: " + errorMsg)
+        $("#searchErrorMsg").html('<p>' + errorMsg + '<p>')
+        $("#searchErrorPanel").fadeIn(500)
+    }
+
+    $('#advancedSearchDialog').on('hidden.bs.modal', function (e) { //reset form
+        $("#searchErrorPanel").hide()
+    })
+
+    function submitAdvancedSearchForm(form) {
+        console.log("============= submitAdvancedSearchForm")
+        return false
+    }
+
 </r:script>
 <r:layoutResources/>

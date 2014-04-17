@@ -5,5 +5,5 @@ package org.votingsystem.model;
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public enum CurrencyVS {
-    Euro;
+    EURO;
 }

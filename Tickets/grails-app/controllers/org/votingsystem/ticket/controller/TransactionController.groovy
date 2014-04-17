@@ -6,6 +6,7 @@ import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.BatchRequest
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
+import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -26,25 +27,39 @@ class TransactionController {
     def ticketService
 
     def index() {
+        Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
+        Map.Entry sortParam
+        if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
         List<TransactionVS> transactionList = null
         int totalTransactions = 0;
         TransactionVS.withTransaction {
             if(params.searchParam) {
-                transactionList = TransactionVS.withCriteria {
-                    ilike('subject', "%${params.searchParam}%")
-                    ilike('dateCreated', "%${params.searchParam}%")
+                CurrencyVS currency = null
+                TransactionVS.Type transactionType = null
+                BigDecimal amount = null
+                try {currency = CurrencyVS.valueOf(params.searchParam.toUpperCase())} catch(Exception ex) {}
+                try {transactionType = TransactionVS.Type.valueOf(params.searchParam.toUpperCase())} catch(Exception ex) {}
+                try {amount = new BigDecimal(params.searchParam)} catch(Exception ex) {}
+                transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:sortParam?.key, order:sortParam?.value) {
+                    or {
+                        if(currency) eq("currency", currency)
+                        if(transactionType) eq("type", transactionType)
+                        if(amount) eq("amount", amount)
+                        ilike('subject', "%${params.searchParam}%")
+                    }
                 }
+                totalTransactions = transactionList.totalCount
             } else {
-                transactionList = TransactionVS.findAll(params);
-                totalTransactions = TransactionVS.count()
+                transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:sortParam?.key, order:sortParam?.value){};
+                totalTransactions = transactionList.totalCount
             }
         }
         def resultList = []
         transactionList.each {transactionItem ->
             resultList.add(transactionVSService.getTransactionMap(transactionItem))
         }
-        Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
-        log.debug("sortMap: ${sortParamsMap}")
         def resultMap = ["${message(code: 'transactionRecordsLbl')}":resultList, queryRecordCount: totalTransactions,
                         numTotalTransactions:totalTransactions ]
         render resultMap as JSON

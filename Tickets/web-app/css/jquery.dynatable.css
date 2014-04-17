@@ -8,8 +8,9 @@
  *
  * Date: Tue Jan 02 2014
  */
+.dynatable-tickets {}
 
-th {
+.dynatable-tickets th {
     background-color: #870000;
     text-align: center;
     padding:5px 0;
@@ -17,16 +18,16 @@ th {
     color:white;
 }
 
-th a {
+.dynatable-tickets th a {
   color: #fff;
 }
 
-th a:hover {
+.dynatable-tickets th a:hover {
   color: #fff;
   text-decoration: underline;
 }
 
-td {
+.dynatable-tickets td {
     max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;

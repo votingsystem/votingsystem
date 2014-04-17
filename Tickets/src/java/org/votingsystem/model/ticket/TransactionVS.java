@@ -1,10 +1,7 @@
 package org.votingsystem.model.ticket;
 
 import org.apache.log4j.Logger;
-import org.apache.solr.analysis.HTMLStripCharFilterFactory;
-import org.apache.solr.analysis.StandardTokenizerFactory;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
-import org.hibernate.search.annotations.*;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.MessageSMIME;
@@ -23,12 +20,8 @@ import static javax.persistence.GenerationType.IDENTITY;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-@Indexed
 @Entity
 @Table(name="TransactionVS")
-@AnalyzerDef(name="transactionVSAnalyzer",
-        charFilters = { @CharFilterDef(factory = HTMLStripCharFilterFactory.class) },
-        tokenizer =  @TokenizerDef(factory = StandardTokenizerFactory.class))
 public class TransactionVS  implements Serializable {
 
     private static Logger log = Logger.getLogger(TransactionVS.class);
@@ -40,17 +33,12 @@ public class TransactionVS  implements Serializable {
     public enum State { OK, REPEATED, CANCELLED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
-    @Column(name="id", unique=true, nullable=false)
-    @DocumentId
-    private Long id;
+    @Column(name="id", unique=true, nullable=false) private Long id;
 
-    @Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)
     @Column(name="subject") private String subject;
 
-    @Field(index = Index.NO, analyze=Analyze.NO, store=Store.YES)
     @Column(name="currency", nullable=false) @Enumerated(EnumType.STRING) private CurrencyVS currency;
 
-    @Field(index = Index.NO, analyze=Analyze.NO, store=Store.YES)
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;
 
@@ -65,14 +53,11 @@ public class TransactionVS  implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
 
-    @Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
 
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
-    @Field(index = Index.NO, analyze= Analyze.NO, store = Store.YES)
-    @DateBridge(resolution = Resolution.HOUR)
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
