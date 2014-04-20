@@ -38,12 +38,12 @@ import android.widget.ExpandableListView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
-import org.votingsystem.android.fragment.TicketGridFragment;
+import org.votingsystem.android.fragment.VicketGridFragment;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
 import org.votingsystem.android.ui.SingleOptionPagerAdapter;
-import org.votingsystem.android.ui.TicketPagerAdapter;
+import org.votingsystem.android.ui.VicketPagerAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ScreenUtils;
@@ -69,7 +69,7 @@ public class NavigationDrawer extends ActionBarActivity {
     //private RepresentativeNavigationPagerAdapter representativePagerAdapter;
     private SingleOptionPagerAdapter singleOptionPagerAdapter;
     private EventNavigationPagerAdapter pagerAdapter;
-    private TicketPagerAdapter ticketAdapter;
+    private VicketPagerAdapter vicketAdapter;
 
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -214,12 +214,12 @@ public class NavigationDrawer extends ActionBarActivity {
                     mViewPager.setAdapter(representativePagerAdapter);
                 }*/
                 break;
-            case TICKETS:
+            case VICKETS:
                 if(childPosition == null) return;
-                if(ticketAdapter == null) ticketAdapter = new TicketPagerAdapter(
+                if(vicketAdapter == null) vicketAdapter = new VicketPagerAdapter(
                         getSupportFragmentManager(), mViewPager);
-                if(!(mViewPager.getAdapter() instanceof  TicketPagerAdapter)) {
-                    mViewPager.setAdapter(ticketAdapter);
+                if(!(mViewPager.getAdapter() instanceof VicketPagerAdapter)) {
+                    mViewPager.setAdapter(vicketAdapter);
                 }
                 break;
         }
@@ -267,9 +267,9 @@ public class NavigationDrawer extends ActionBarActivity {
                 finish();
                 System.exit(0);
                 return true;
-            case R.id.open_ticket_grid:
+            case R.id.open_vicket_grid:
                 Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, TicketGridFragment.class.getName());
+                intent.putExtra(ContextVS.FRAGMENT_KEY, VicketGridFragment.class.getName());
                 startActivity(intent);
                 return true;
             default:

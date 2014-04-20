@@ -243,16 +243,16 @@ public class ReceiptFragment extends Fragment {
                             dataJSON.getString("dateTo"),
                             dataJSON.getString("accessControlURL"));
                     break;
-                case TICKET_REQUEST:
+                case VICKET_REQUEST:
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
                     totalAmount = new BigDecimal(dataJSON.getString("totalAmount"));
                     currency = dataJSON.getString("currency");
                     String serverURL = dataJSON.getString("serverURL");
-                    JSONArray arrayTickets = dataJSON.getJSONArray("tickets");
-                    String ticketValueStr = arrayTickets.getJSONObject(0).getString("ticketValue");
-                    Integer numTickets = arrayTickets.getJSONObject(0).getInt("numTickets");
-                    contentFormatted = getString(R.string.ticket_request_formatted,
-                            totalAmount.toPlainString(), currency, numTickets, ticketValueStr, serverURL);
+                    JSONArray arrayVickets = dataJSON.getJSONArray("vickets");
+                    String vicketValueStr = arrayVickets.getJSONObject(0).getString("vicketValue");
+                    Integer numVickets = arrayVickets.getJSONObject(0).getInt("numVickets");
+                    contentFormatted = getString(R.string.vicket_request_formatted,
+                            totalAmount.toPlainString(), currency, numVickets, vicketValueStr, serverURL);
                     break;
                 case USER_ALLOCATION_INPUT:
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
@@ -313,7 +313,7 @@ public class ReceiptFragment extends Fragment {
                 checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
                 menu.removeItem(R.id.cancel_vote);
                 break;
-            case TICKET_REQUEST:
+            case VICKET_REQUEST:
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_REQUEST:
                 menu.removeItem(R.id.cancel_vote);

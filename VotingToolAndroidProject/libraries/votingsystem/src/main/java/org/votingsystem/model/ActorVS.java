@@ -29,7 +29,7 @@ public class ActorVS implements java.io.Serializable {
         this.environment = environment;
     }
 
-    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, TICKETS, TIMESTAMP_SERVER;}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, VICKETS, TIMESTAMP_SERVER;}
 
     public enum State {CANCELLED, ACTIVE, PAUSED, RUNNING}
 
@@ -185,8 +185,8 @@ public class ActorVS implements java.io.Serializable {
             case CONTROL_CENTER:
                 actorVS = new ControlCenterVS();
                 break;
-            case TICKETS:
-                actorVS = new TicketServer();
+            case VICKETS:
+                actorVS = new VicketServer();
                 break;
             case TIMESTAMP_SERVER:
                 actorVS = new ActorVS();

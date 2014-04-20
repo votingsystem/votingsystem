@@ -1,3 +1,3 @@
 include "VotingSystemLibrary", "VotingToolApplet", "ValidationToolApplet", "TimeStampServer", "AccessControl",
-        "ControlCenter", "Tickets", "TestsWebApp"
+        "ControlCenter", "Vickets", "TestsWebApp"
 

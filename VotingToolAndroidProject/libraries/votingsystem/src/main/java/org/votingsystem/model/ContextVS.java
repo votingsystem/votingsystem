@@ -15,14 +15,14 @@ public class ContextVS {
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
-    public static final int TICKET_TAG                              = 3;
+    public static final int VICKET_TAG                              = 3;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
-    public static final String TICKET_OID = VOTING_SYSTEM_BASE_OID + TICKET_TAG;
+    public static final String VICKET_OID = VOTING_SYSTEM_BASE_OID + VICKET_TAG;
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
@@ -31,8 +31,8 @@ public class ContextVS {
     public static final String IMAGE_FILE_NAME                 = "image";
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest";
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
-    public static final String TICKET_USER_INFO_DATA_FILE_NAME = "ticketUserInfo";
-    public static final String TICKET_REQUEST_DATA_FILE_NAME   = "ticketRequestData";
+    public static final String VICKET_USER_INFO_DATA_FILE_NAME = "vicketUserInfo";
+    public static final String VICKET_REQUEST_DATA_FILE_NAME   = "vicketRequestData";
     public static final String USER_DATA_FILE_NAME             = "USER_DATA_FILE_NAME";
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
@@ -55,7 +55,7 @@ public class ContextVS {
     public static final String NAME_KEY = "NAME_KEY";
     public static final String URI_KEY = "URI_DATA";
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
-    public static final String TICKET_SERVER_URL = "TICKET_SERVER_URL";
+    public static final String VICKET_SERVER_URL = "VICKET_SERVER_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String RECEIVER_KEY = "RECEIVER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
@@ -75,7 +75,7 @@ public class ContextVS {
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
-    public static final String TICKET_ACCOUNT_LAST_CHECKED_KEY = "TICKET_ACCOUNT_LAST_CHECKED_KEY";
+    public static final String VICKET_ACCOUNT_LAST_CHECKED_KEY = "VICKET_ACCOUNT_LAST_CHECKED_KEY";
     public static final String CONTENT_TYPE_KEY = "CONTENT_TYPE_KEY";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
@@ -113,7 +113,7 @@ public class ContextVS {
     public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID  = 2;
     public static final int VOTE_SERVICE_NOTIFICATION_ID           = 3;
     public static final int REPRESENTATIVE_SERVICE_NOTIFICATION_ID = 4;
-    public static final int TICKET_SERVICE_NOTIFICATION_ID         = 5;
+    public static final int VICKET_SERVICE_NOTIFICATION_ID         = 5;
 
     public static final int NUM_MIN_OPTIONS = 2;
 

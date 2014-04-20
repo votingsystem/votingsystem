@@ -49,14 +49,14 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final int CLAIMS_GROUP_POSITION          = 2;
     public static final int REPRESENTATIVES_GROUP_POSITION = 3;
     public static final int RECEIPTS_GROUP_POSITION        = 4;
-    public static final int TICKETS_GROUP_POSITION         = 5;
+    public static final int VICKETS_GROUP_POSITION         = 5;
 
     public static final int OPEN_CHILD_POSITION            = 0;
     public static final int PENDING_CHILD_POSITION         = 1;
     public static final int CLOSED_CHILD_POSITION          = 2;
 
-    public static final int TICKET_USER_INFO_POSITION      = 0;
-    public static final int TICKET_LIST_POSITION           = 1;
+    public static final int VICKET_USER_INFO_POSITION      = 0;
+    public static final int VICKET_LIST_POSITION           = 1;
 
     public enum GroupPosition {
         VOTING(VOTING_GROUP_POSITION, R.drawable.poll_32, SubSystemVS.VOTES, TypeVS.VOTING_EVENT,
@@ -70,9 +70,9 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 SubSystemVS.REPRESENTATIVES, TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
         RECEIPTS(RECEIPTS_GROUP_POSITION, R.drawable.receipt_32, SubSystemVS.RECEIPTS,
                 TypeVS.RECEIPT, new ArrayList<ChildPosition>()),
-        TICKETS(TICKETS_GROUP_POSITION, R.drawable.euro_32, SubSystemVS.TICKETS,
-                TypeVS.TICKET, Arrays.asList(ChildPosition.TICKET_USER_INFO,
-                ChildPosition.TICKET_LIST));
+        VICKETS(VICKETS_GROUP_POSITION, R.drawable.euro_32, SubSystemVS.VICKETS,
+                TypeVS.VICKET, Arrays.asList(ChildPosition.VICKET_USER_INFO,
+                ChildPosition.VICKET_LIST));
 
         int position;
         int logo;
@@ -95,7 +95,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 case CLAIMS_GROUP_POSITION: return CLAIMS;
                 case REPRESENTATIVES_GROUP_POSITION: return REPRESENTATIVES;
                 case RECEIPTS_GROUP_POSITION: return RECEIPTS;
-                case TICKETS_GROUP_POSITION: return TICKETS;
+                case VICKETS_GROUP_POSITION: return VICKETS;
                 default: return null;
             }
         }
@@ -137,7 +137,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 case CLAIMS: return context.getString(R.string.claims_drop_down_lbl);
                 case REPRESENTATIVES: return context.getString(R.string.representatives_drop_down_lbl);
                 case RECEIPTS: return context.getString(R.string.receipts_drop_down_lbl);
-                case TICKETS: return context.getString(R.string.tickets_drop_down_lbl);
+                case VICKETS: return context.getString(R.string.vickets_drop_down_lbl);
                 default: return context.getString(R.string.unknown_drop_down_lbl);
             }
         }
@@ -153,11 +153,11 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     }
 
     public enum ChildPosition{OPEN(OPEN_CHILD_POSITION), PENDING(PENDING_CHILD_POSITION),
-        CLOSED(CLOSED_CHILD_POSITION), TICKET_USER_INFO(TICKET_USER_INFO_POSITION),
-        TICKET_LIST(TICKET_LIST_POSITION);
+        CLOSED(CLOSED_CHILD_POSITION), VICKET_USER_INFO(VICKET_USER_INFO_POSITION),
+        VICKET_LIST(VICKET_LIST_POSITION);
 
-        //public static final int TICKET_USER_INFO_POSITION
-        //public static final int TICKET_LIST_POSITION
+        //public static final int VICKET_USER_INFO_POSITION
+        //public static final int VICKET_LIST_POSITION
 
         int position;
 
@@ -259,8 +259,8 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 context.getString(R.string.representatives_drop_down_lbl));
         listDataHeader.add(GroupPosition.RECEIPTS.getPosition(),
                 context.getString(R.string.receipts_drop_down_lbl));
-        listDataHeader.add(GroupPosition.TICKETS.getPosition(),
-                context.getString(R.string.tickets_drop_down_lbl));
+        listDataHeader.add(GroupPosition.VICKETS.getPosition(),
+                context.getString(R.string.vickets_drop_down_lbl));
 
         List<String> voting = new ArrayList<String>();
         voting.add(context.getString(R.string.open_voting_lbl));
@@ -277,9 +277,9 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         claims.add(context.getString(R.string.pending_claim_lbl));
         claims.add(context.getString(R.string.closed_claim_lbl));
 
-        List<String> tickets = new ArrayList<String>();
-        tickets.add(context.getString(R.string.ticket_user_info_lbl));
-        tickets.add(context.getString(R.string.tickets_list_lbl));
+        List<String> vickets = new ArrayList<String>();
+        vickets.add(context.getString(R.string.vicket_user_info_lbl));
+        vickets.add(context.getString(R.string.vickets_list_lbl));
 
         listDataChild.put(listDataHeader.get(GroupPosition.VOTING.getPosition()), voting);
         listDataChild.put(listDataHeader.get(GroupPosition.MANIFESTS.getPosition()), manifests);
@@ -288,7 +288,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 new ArrayList<String>());
         listDataChild.put(listDataHeader.get(GroupPosition.RECEIPTS.getPosition()),
                 new ArrayList<String>());
-        listDataChild.put(listDataHeader.get(GroupPosition.TICKETS.getPosition()), tickets);
+        listDataChild.put(listDataHeader.get(GroupPosition.VICKETS.getPosition()), vickets);
     }
 
 }

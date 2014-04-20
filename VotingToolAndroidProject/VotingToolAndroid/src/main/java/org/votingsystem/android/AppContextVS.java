@@ -21,7 +21,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TicketServer;
+import org.votingsystem.model.VicketServer;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -69,10 +69,10 @@ public class AppContextVS extends Application {
     public static final String TAG = AppContextVS.class.getSimpleName();
 
     private State state = State.WITHOUT_CSR;
-    private String ticketServerURL;
+    private String vicketServerURL;
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
-    private TicketServer ticketServer;
+    private VicketServer vicketServer;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private OperationVS operationVS = null;
@@ -97,14 +97,14 @@ public class AppContextVS extends Application {
             VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
-            ticketServerURL = props.getProperty(ContextVS.TICKET_SERVER_URL);
+            vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
 	}
 
-    public String getTicketServerURL() {
-        return ticketServerURL;
+    public String getVicketServerURL() {
+        return vicketServerURL;
     }
 
     public String getHostID() {
@@ -198,20 +198,20 @@ public class AppContextVS extends Application {
                 thisWeekMonday.getTime()), DateUtils.getDate_Es(calendar.getTime()));
     }
 
-    public void updateTicketAccountLastChecked() {
+    public void updateVicketAccountLastChecked() {
         SharedPreferences settings = getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putLong(ContextVS.TICKET_ACCOUNT_LAST_CHECKED_KEY,
+        editor.putLong(ContextVS.VICKET_ACCOUNT_LAST_CHECKED_KEY,
         Calendar.getInstance().getTimeInMillis());
         editor.commit();
     }
 
-    public Date getTicketAccountLastChecked() {
+    public Date getVicketAccountLastChecked() {
         SharedPreferences pref = getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         GregorianCalendar lastCheckedTime = new GregorianCalendar();
-        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.TICKET_ACCOUNT_LAST_CHECKED_KEY, 0));
+        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.VICKET_ACCOUNT_LAST_CHECKED_KEY, 0));
 
         Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
 
@@ -284,12 +284,12 @@ public class AppContextVS extends Application {
         return controlCenter;
     }
 
-    public TicketServer getTicketServer() {
-        return ticketServer;
+    public VicketServer getVicketServer() {
+        return vicketServer;
     }
 
-    public void setTicketServer(TicketServer ticketServer) {
-        this.ticketServer = ticketServer;
+    public void setVicketServer(VicketServer vicketServer) {
+        this.vicketServer = vicketServer;
     }
 
 
@@ -299,7 +299,7 @@ public class AppContextVS extends Application {
         Intent clickIntent = new Intent(this, MessageActivity.class);
         clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
-                TICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+                VICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(responseVS.getCaption()).setContentText(Html.fromHtml(
                         responseVS.getNotificationMessage())).setSmallIcon(responseVS.getIconId())

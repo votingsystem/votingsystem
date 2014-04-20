@@ -25,7 +25,7 @@ import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
-import org.votingsystem.android.fragment.TicketUserInfoFragment;
+import org.votingsystem.android.fragment.VicketUserInfoFragment;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -104,7 +104,7 @@ public class VotingAppService extends Service implements Runnable {
                         }
                     } else if(operationVS.getTypeVS() == TypeVS.TRANSACTION) {
                         Intent newIntent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-                        newIntent.putExtra(ContextVS.FRAGMENT_KEY, TicketUserInfoFragment.class.getName());
+                        newIntent.putExtra(ContextVS.FRAGMENT_KEY, VicketUserInfoFragment.class.getName());
                         newIntent.putExtra(ContextVS.URI_KEY, operationVS.getUriData());
                         newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(newIntent);
@@ -192,7 +192,7 @@ public class VotingAppService extends Service implements Runnable {
             * spawn its own thread in which to do that work.*/
         Thread thr = new Thread(null, runnable, "voting_app_service_thread");
         thr.start();
-        WebsocketListener socketListener = new WebsocketListener("ws://tickets:8083/Tickets/websocket/service");
+        WebsocketListener socketListener = new WebsocketListener("ws://vickets:8083/Vickets/websocket/service");
         Thread websocketThread = new Thread(null, socketListener, "websocket_service_thread");
         websocketThread.start();
         //We want this service to continue running until it is explicitly stopped, so return sticky.

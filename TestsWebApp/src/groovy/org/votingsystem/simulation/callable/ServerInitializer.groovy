@@ -56,7 +56,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
                         return new ResponseVS(ResponseVS.SC_ERROR, msg);
                     }
                     break;
-                case ActorVS.Type.TICKETS:
+                case ActorVS.Type.VICKETS:
                     responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                             actorVS.getUrlTimeStampServer()),ContentTypeVS.JSON);
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;

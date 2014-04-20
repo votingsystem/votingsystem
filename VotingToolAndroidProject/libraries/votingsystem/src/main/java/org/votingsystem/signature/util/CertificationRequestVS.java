@@ -101,21 +101,21 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getTicketRequest(int keySize, String keyName,
-           String signatureMechanism, String provider, String ticketProviderURL, String hashCertVS,
-           String amount, String currency) throws NoSuchAlgorithmException,
+    public static CertificationRequestVS getVicketRequest(int keySize, String keyName,
+                                                          String signatureMechanism, String provider, String vicketProviderURL, String hashCertVS,
+                                                          String amount, String currency) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
-        X500Principal subject = new X500Principal("CN=ticketProviderURL:" + ticketProviderURL +
+        X500Principal subject = new X500Principal("CN=vicketProviderURL:" + vicketProviderURL +
                 ", OU=AMOUNT:" + amount + ", OU=CURRENCY:" + currency +", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
-        delegationDataMap.put("ticketProviderURL", ticketProviderURL);
+        delegationDataMap.put("vicketProviderURL", vicketProviderURL);
         delegationDataMap.put("hashCertVS", hashCertVS);
         delegationDataMap.put("amount", amount);
         delegationDataMap.put("currency", currency);
         JSONObject jsonObject = new JSONObject(delegationDataMap);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.TICKET_TAG,
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.VICKET_TAG,
                 new DERUTF8String(jsonObject.toString())));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);

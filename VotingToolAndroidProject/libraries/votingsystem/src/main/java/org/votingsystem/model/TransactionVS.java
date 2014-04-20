@@ -15,7 +15,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -24,8 +23,8 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type {TICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, TICKET_CANCELLATION,
-        TICKET_SEND;}
+    public enum Type {VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_CANCELLATION,
+        VICKET_SEND;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -46,7 +45,7 @@ public class TransactionVS  implements Serializable {
     private UserVS fromUserVS;
     private UserVS toUserVS;
 
-    private List<TicketVS> tickets;
+    private List<Vicket> vickets;
     private Type type;
 
     private Date validTo;
@@ -56,15 +55,15 @@ public class TransactionVS  implements Serializable {
 
     public TransactionVS() {}
 
-    public TransactionVS(Type type, List<TicketVS> tickets) {
+    public TransactionVS(Type type, List<Vicket> vickets) {
         this.type = type;
-        this.tickets = tickets;
+        this.vickets = vickets;
     }
 
-    public TransactionVS(Type type, Date dateCreated,  List<TicketVS> tickets, BigDecimal amount,
+    public TransactionVS(Type type, Date dateCreated,  List<Vicket> vickets, BigDecimal amount,
                  CurrencyVS currencyVS) {
         this.type = type;
-        this.tickets = tickets;
+        this.vickets = vickets;
         this.amount = amount;
         this.currencyVS = currencyVS;
         this.dateCreated = dateCreated;
@@ -224,12 +223,12 @@ public class TransactionVS  implements Serializable {
 
     public int getIconId(Context context) {
         switch(type) {
-            case TICKET_CANCELLATION:
+            case VICKET_CANCELLATION:
             case USER_ALLOCATION_INPUT:
                 return R.drawable.edit_redo_24;
-            case TICKET_REQUEST:
+            case VICKET_REQUEST:
                 return R.drawable.edit_undo_24;
-            case TICKET_SEND:
+            case VICKET_SEND:
                 return R.drawable.euro_24;
             default:
                 return R.drawable.pending;
@@ -238,8 +237,8 @@ public class TransactionVS  implements Serializable {
 
     public TypeVS getTypeVS() {
         switch(getType()){
-            case TICKET_REQUEST:
-                return TypeVS.TICKET_REQUEST;
+            case VICKET_REQUEST:
+                return TypeVS.VICKET_REQUEST;
             case USER_ALLOCATION_INPUT:
                 return TypeVS.USER_ALLOCATION_INPUT;
             default: return null;
@@ -248,14 +247,14 @@ public class TransactionVS  implements Serializable {
 
     public String getDescription(Context context) {
         switch(type) {
-            case TICKET_CANCELLATION:
-                return context.getString(R.string.ticket_cancellation);
+            case VICKET_CANCELLATION:
+                return context.getString(R.string.vicket_cancellation);
             case USER_ALLOCATION_INPUT:
                 return context.getString(R.string.account_input);
-            case TICKET_REQUEST:
+            case VICKET_REQUEST:
                 return context.getString(R.string.account_output);
-            case TICKET_SEND:
-                return context.getString(R.string.ticket_send);
+            case VICKET_SEND:
+                return context.getString(R.string.vicket_send);
             default:
                 return type.toString();
         }
@@ -274,8 +273,8 @@ public class TransactionVS  implements Serializable {
 
     }
 
-    public List<TicketVS> getTickets() {
-        return tickets;
+    public List<Vicket> getVickets() {
+        return vickets;
     }
 
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {

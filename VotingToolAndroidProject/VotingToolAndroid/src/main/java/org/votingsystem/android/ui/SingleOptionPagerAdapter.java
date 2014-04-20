@@ -59,7 +59,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         switch(selectedGroup) {
             case REPRESENTATIVES: return context.getString(R.string.representatives_list_lbl);
             case RECEIPTS: return context.getString(R.string.receipt_list_lbl);
-            case TICKETS: return context.getString(R.string.tickets_list_lbl);
+            case VICKETS: return context.getString(R.string.vickets_list_lbl);
         }
         return context.getString(R.string.unknown_drop_down_lbl);
     }
@@ -68,7 +68,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         switch(selectedGroup) {
             case REPRESENTATIVES: return GroupPosition.REPRESENTATIVES.getDescription(context);
             case RECEIPTS: return GroupPosition.RECEIPTS.getDescription(context);
-            case TICKETS: return GroupPosition.TICKETS.getDescription(context);
+            case VICKETS: return GroupPosition.VICKETS.getDescription(context);
         }
         return context.getString(R.string.unknown_drop_down_lbl);
     }
@@ -99,7 +99,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         switch(selectedGroup) {
             case REPRESENTATIVES: return context.getResources().getDrawable(R.drawable.system_users_22);
             case RECEIPTS: return context.getResources().getDrawable(R.drawable.receipt_32);
-            case TICKETS: return context.getResources().getDrawable(R.drawable.euro_32);
+            case VICKETS: return context.getResources().getDrawable(R.drawable.euro_32);
         }
         return context.getResources().getDrawable(R.drawable.mail_mark_unread_22);
     }

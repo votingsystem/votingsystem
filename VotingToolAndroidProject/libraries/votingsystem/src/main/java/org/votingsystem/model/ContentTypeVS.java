@@ -52,7 +52,7 @@ public enum ContentTypeVS {
 
     VOTE("application/vote;application/pkcs7-signature;application/pkcs7-mime", "vote"),
 
-    TICKET("application/ticket;application/pkcs7-signature;application/pkcs7-mime", "ticket"),
+    VICKET("application/vicket;application/pkcs7-signature;application/pkcs7-mime", "vicket"),
 
     X509_CA("application/x509-ca-cert", "crt"),
     X509_USER("application/x509-user-cert", "crt");
@@ -128,7 +128,7 @@ public enum ContentTypeVS {
 
         if(contentTypeStr.contains(VOTE.getName())) result = VOTE;
 
-        if(contentTypeStr.contains(TICKET.getName())) result = TICKET;
+        if(contentTypeStr.contains(VICKET.getName())) result = VICKET;
 
         return result;
     }

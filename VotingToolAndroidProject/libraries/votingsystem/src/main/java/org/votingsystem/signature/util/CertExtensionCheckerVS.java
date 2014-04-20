@@ -19,7 +19,7 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
 
     public enum ExtensionVS {VOTE(ContextVS.VOTE_OID), REPRESENTATIVE_VOTE(ContextVS.REPRESENTATIVE_VOTE_OID),
         ANONYMOUS_REPRESENTATIVE_DELEGATION(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID),
-        TICKET(ContextVS.TICKET_OID);
+        VICKET(ContextVS.VICKET_OID);
 
         String OID = null;
         ExtensionVS(String OID) { this.OID = OID; }
@@ -32,7 +32,7 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
             if(ContextVS.REPRESENTATIVE_VOTE_OID.equals(extensionVS_OID)) return REPRESENTATIVE_VOTE;
             if(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID.equals(extensionVS_OID))
                 return ANONYMOUS_REPRESENTATIVE_DELEGATION;
-            if(ContextVS.TICKET_OID.equals(extensionVS_OID)) return TICKET;
+            if(ContextVS.VICKET_OID.equals(extensionVS_OID)) return VICKET;
             return null;
         }
 
@@ -48,7 +48,7 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
         supportedExtensions.add(ExtensionVS.VOTE.getOID());
         supportedExtensions.add(ExtensionVS.REPRESENTATIVE_VOTE.getOID());
         supportedExtensions.add(ExtensionVS.ANONYMOUS_REPRESENTATIVE_DELEGATION.getOID());
-        supportedExtensions.add(ExtensionVS.TICKET.getOID());
+        supportedExtensions.add(ExtensionVS.VICKET.getOID());
 	}
 	
 	public void init(boolean forward) throws CertPathValidatorException {

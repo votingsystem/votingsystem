@@ -76,11 +76,11 @@ def initWebAppsCertsData() {
             distinguishedName:timeStampServerDN, alias:timeStampServerCertAlias,
             isTimeStampingCert:true]
 
-    Map ticketServerMap = [file:"$projectDir/Tickets/web-app/WEB-INF/cms/TicketServer.jks",
-            distinguishedName:ticketServerDN, alias:ticketServerCertAlias,
+    Map vicketServerMap = [file:"$projectDir/Vickets/web-app/WEB-INF/cms/VicketServer.jks",
+            distinguishedName:vicketServerDN, alias:vicketServerCertAlias,
             isTimeStampingCert:true]
 
-    List certs = [accessControlMap, controlCenterMap, timeStampServerMap, ticketServerMap]
+    List certs = [accessControlMap, controlCenterMap, timeStampServerMap, vicketServerMap]
     rootProject.certsDataMap.certs = certs
 }
 

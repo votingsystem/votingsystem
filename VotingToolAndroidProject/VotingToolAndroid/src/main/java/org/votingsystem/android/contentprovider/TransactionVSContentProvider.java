@@ -17,8 +17,8 @@ import android.util.Log;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
-import org.votingsystem.model.TicketAccount;
 import org.votingsystem.model.TransactionVS;
+import org.votingsystem.model.VicketAccount;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
@@ -249,17 +249,17 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
 
-    public static void setTicketAccount(AppContextVS contextVS, TicketAccount updatedTicketAccount) {
-        Set<CurrencyVS> keySet = updatedTicketAccount.getCurrencyMap().keySet();
+    public static void setVicketAccount(AppContextVS contextVS, VicketAccount updatedVicketAccount) {
+        Set<CurrencyVS> keySet = updatedVicketAccount.getCurrencyMap().keySet();
         for(CurrencyVS currencyVS : keySet) {
-            CurrencyData currencyData = updatedTicketAccount.getCurrencyMap().get(currencyVS);
+            CurrencyData currencyData = updatedVicketAccount.getCurrencyMap().get(currencyVS);
             for(TransactionVS transactionVS : currencyData.getTransactionList()) {
                 addTransaction(contextVS, transactionVS,
-                        DateUtils.getDirPath(updatedTicketAccount.getWeekLapse()));
+                        DateUtils.getDirPath(updatedVicketAccount.getWeekLapse()));
             }
             currencyData.setTransactionList(null);
         }
-        contextVS.updateTicketAccountLastChecked();
+        contextVS.updateVicketAccountLastChecked();
     }
 
     public static Uri addTransaction(AppContextVS contextVS, TransactionVS transactionVS,

@@ -27,7 +27,7 @@ public class ActorVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, TICKETS, TIMESTAMP_SERVER;}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, VICKETS, TIMESTAMP_SERVER;}
 
     public enum State { SUSPENDED, RUNNING, PAUSED;}
 
@@ -234,12 +234,12 @@ public class ActorVS implements Serializable {
         return serverURL + "/serverInfo";
     }
 
-    @Transient public String getTicketRequestServiceURL() {
-        return getServerURL() + "/ticket/request";
+    @Transient public String getVicketRequestServiceURL() {
+        return getServerURL() + "/vicket/request";
     }
 
-    @Transient public String getTicketDepositServiceURL() {
-        return getServerURL() + "/ticket/deposit";
+    @Transient public String getVicketDepositServiceURL() {
+        return getServerURL() + "/vicket/deposit";
     }
 
     @Transient public String getUserCertServiceURL() {
@@ -299,8 +299,8 @@ public class ActorVS implements Serializable {
                     actorVS.setControlCenters(controlCenters);
                 }
                 break;
-            case TICKETS:
-                actorVS = new TicketServer();
+            case VICKETS:
+                actorVS = new VicketServer();
                 break;
             default:
                 actorVS = new ActorVS();

@@ -37,7 +37,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.android.service.TicketService;
+import org.votingsystem.android.service.VicketService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -78,13 +78,13 @@ public class TransactionVSGridFragment extends Fragment
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
-                case TICKET_USER_INFO:
+                case VICKET_USER_INFO:
                     launchUpdateUserInfoService();
                     break;
             }
         } else {
             switch(responseVS.getTypeVS()) {
-                case TICKET_USER_INFO:
+                case VICKET_USER_INFO:
                     break;
             }
             showProgress(false, false);
@@ -97,8 +97,8 @@ public class TransactionVSGridFragment extends Fragment
         Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    TicketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TICKET_USER_INFO);
+                    VicketService.class);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             showProgress(true, true);
             getActivity().startService(startIntent);
@@ -120,7 +120,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.TICKETS.getLoaderId(0);
+        loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS.getLoaderId(0);
         queryStr = getArguments().getString(SearchManager.QUERY);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
@@ -182,7 +182,7 @@ public class TransactionVSGridFragment extends Fragment
                int visibleItemCount, int totalItemCount) { }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.ticket_user_info, menu);
+        menuInflater.inflate(R.menu.vicket_user_info, menu);
 
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
@@ -208,7 +208,7 @@ public class TransactionVSGridFragment extends Fragment
                 return true;
             case R.id.update_signers_info:
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.update_user_info_pin_msg), false, TypeVS.TICKET_USER_INFO);
+                        getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

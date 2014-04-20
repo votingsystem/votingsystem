@@ -21,7 +21,7 @@ public class CurrencyData implements Serializable {
     public static final long serialVersionUID = 1L;
 
     private List<TransactionVS> transactionList;
-    private List<TicketVS> ticketList;
+    private List<Vicket> vicketList;
     private BigDecimal totalInputs = new BigDecimal(0);
     private BigDecimal totalOutputs = new BigDecimal(0);
     private Date lastRequestDate;
@@ -39,10 +39,10 @@ public class CurrencyData implements Serializable {
                     transaction.getCurrencyVS());
             switch(transaction.getType()) {
                 case USER_ALLOCATION_INPUT:
-                case TICKET_CANCELLATION:
+                case VICKET_CANCELLATION:
                     totalInputs = totalInputs.add(transaction.getAmount());
                     break;
-                case TICKET_REQUEST:
+                case VICKET_REQUEST:
                     totalOutputs = totalOutputs.add(transaction.getAmount());
                     break;
                 default:
@@ -90,9 +90,9 @@ public class CurrencyData implements Serializable {
 
     public BigDecimal getCashBalance() {
         BigDecimal result = new BigDecimal(0);
-        if(ticketList != null && !ticketList.isEmpty()) {
-            for(TicketVS ticketVS : ticketList) {
-                result = result.add(ticketVS.getAmount());
+        if(vicketList != null && !vicketList.isEmpty()) {
+            for(Vicket vicket : vicketList) {
+                result = result.add(vicket.getAmount());
             }
         }
         return result;
@@ -123,10 +123,10 @@ public class CurrencyData implements Serializable {
                 TransactionVS transaction = TransactionVS.parse(jsonArray.getJSONObject(i));
                 switch(transaction.getType()) {
                     case USER_ALLOCATION_INPUT:
-                    case TICKET_CANCELLATION:
+                    case VICKET_CANCELLATION:
                         totalInputsTransactions = totalInputsTransactions.add(transaction.getAmount());
                         break;
-                    case TICKET_REQUEST:
+                    case VICKET_REQUEST:
                         totalOutputsTransactions = totalOutputsTransactions.add(transaction.getAmount());
                         break;
                     default:
@@ -148,17 +148,17 @@ public class CurrencyData implements Serializable {
         return currencyData;
     }
 
-    public List<TicketVS> getTicketList() {
-        return ticketList;
+    public List<Vicket> getVicketList() {
+        return vicketList;
     }
 
-    public void setTicketList(List<TicketVS> ticketList) {
-        this.ticketList = ticketList;
+    public void setVicketList(List<Vicket> vicketList) {
+        this.vicketList = vicketList;
     }
 
-    public void addTicket(TicketVS ticket) {
-        if (ticketList == null) ticketList = new ArrayList<TicketVS>();
-        ticketList.add(ticket);
+    public void addVicket(Vicket vicket) {
+        if (vicketList == null) vicketList = new ArrayList<Vicket>();
+        vicketList.add(vicket);
     }
 
 

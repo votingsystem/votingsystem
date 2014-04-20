@@ -351,8 +351,8 @@
     Duración de la delegación: \'%1$s\' semanas<br/><br/>Delegación activa desde: \'%2$s\'
     <br/><br/>Fecha fin de la delegación: \'%3$s\'<br/>
     <br/>URL de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
-    <string name="ticket_request_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
-    %3$s Tickets de %4$s %2$ss<br/><br/>URL de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
+    <string name="vicket_request_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
+    %3$s Vickets de %4$s %2$ss<br/><br/>URL de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
     <string name="user_allocation_input_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
     Repartidos entre <b>%3$s usuarios</b>]]></string>
     <string name="user_allocation_input_receipt_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
@@ -362,45 +362,45 @@
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
     <string name="receipt_anonimous_representative_request_subtitle">Delegación anónima de representante</string>
     <string name="last_updated_msg">Ultima actualización <b>\'%1$s\'</b></string>
-    <string name="tickets_drop_down_lbl">Tickets</string>
-    <string name="tickets_list_lbl">Ultimos movimientos</string>
-    <string name="ticket_lbl">Tickets</string>
-    <string name="save_ticket_lbl">Guardar Ticket</string>
-    <string name="delete_ticket_lbl">Borrar Ticket</string>
-    <string name="share_ticket_lbl">Compartir Ticket</string>
-    <string name="ticket_user_info_lbl">Información del usuario</string>
+    <string name="vickets_drop_down_lbl">Vickets</string>
+    <string name="vickets_list_lbl">Ultimos movimientos</string>
+    <string name="vicket_lbl">Vickets</string>
+    <string name="save_vicket_lbl">Guardar Vicket</string>
+    <string name="delete_vicket_lbl">Borrar Vicket</string>
+    <string name="share_vicket_lbl">Compartir Vicket</string>
+    <string name="vicket_user_info_lbl">Información del usuario</string>
     <string name="request_button">Retirar efectivo</string>
-    <string name="empty_ticket_user_info_caption">Faltan los datos del usuario</string>
-    <string name="empty_ticket_user_info"><![CDATA[Todavía no ha actualizado los datos para el
+    <string name="empty_vicket_user_info_caption">Faltan los datos del usuario</string>
+    <string name="empty_vicket_user_info"><![CDATA[Todavía no ha actualizado los datos para el
     periodo comprendido entre:<br/> <b>\'%1$s\'</b>]]></string>
     <string name="update_signers_info_lbl">Actualizar datos</string>
     <string name="send_message_lbl">Enviar mensaje</string>
     <string name="update_user_info_pin_msg">Para obtener los datos necesita firmar una solicitud</string>
-    <string name="ticket_user_info_request_msg_subject">Solicitud de información de cuentas</string>
-    <string name="ticket_account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en caja]]></string>
-    <string name="ticket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en efectivo en su móvil]]></string>
-    <string name="ticket_last_request_info_lbl"><![CDATA[Ultima actualización el <u><b>\'%1$s\'</b></u>]]></string>
+    <string name="vicket_user_info_request_msg_subject">Solicitud de información de cuentas</string>
+    <string name="vicket_account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en caja]]></string>
+    <string name="vicket_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$ss en efectivo en su móvil]]></string>
+    <string name="vicket_last_request_info_lbl"><![CDATA[Ultima actualización el <u><b>\'%1$s\'</b></u>]]></string>
     <string name="time_remaining_info_lbl"><![CDATA[Lo que no gastes antes del <b>\'%1$s\'</b> se repartirá
         entre el resto de usuarios]]></string>
     <string name="cash_request_dialog_caption">Retirar efectivo</string>
     <string name="cash_send_dialog_caption">Realizar pago</string>
     <string name="cash_dialog_msg"><![CDATA[Seleccione un importe inferior a <b>\'%1$s\'</b> %2$ss]]></string>
     <string name="min_withdrawal_msg">El importe debe ser mayor que cero</string>
-    <string name="ticket_request_msg_subject">Retirada de Tickets</string>
-    <string name="ticket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$ss en efectivo]]></string>
-    <string name="ticket_send_pin_msg"><![CDATA[Va a realizar un pago de <b>\'%1$s\'</b> %2$ss a
+    <string name="vicket_request_msg_subject">Retirada de Vickets</string>
+    <string name="vicket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$ss en efectivo]]></string>
+    <string name="vicket_send_pin_msg"><![CDATA[Va a realizar un pago de <b>\'%1$s\'</b> %2$ss a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
-    <string name="ticket_request_ok_caption">Retirada de efectivo con éxito</string>
-    <string name="ticket_request_error_caption">Error retirando efectivo</string>
-    <string name="ticket_request_ok_msg"><![CDATA[Su efectivo se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
+    <string name="vicket_request_ok_caption">Retirada de efectivo con éxito</string>
+    <string name="vicket_request_error_caption">Error retirando efectivo</string>
+    <string name="vicket_request_ok_msg"><![CDATA[Su efectivo se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
     <string name="insufficient_cash_caption">Efectivo insuficiente</string>
     <string name="insufficient_cash_msg"><![CDATA[Importe solicitado <b>\'%2$s\' %1$ss</b><br/>
     Efectivo disponible <b>\'%3$s\' %1$ss</b>]]></string>
-    <string name="ticket_send_ok_caption">Pago realizado con éxito</string>
-    <string name="ticket_send_ok_msg"><![CDATA[Ha realizado un pago de <b>\'%1$s\' %2$ss</b> bajo el
+    <string name="vicket_send_ok_caption">Pago realizado con éxito</string>
+    <string name="vicket_send_ok_msg"><![CDATA[Ha realizado un pago de <b>\'%1$s\' %2$ss</b> bajo el
     concepto de <b>\'%3$s\'</b> a <b>\'%4$s\'</b>]]></string>
-    <string name="ticket_send_error_caption">Error realizando pago</string>
-    <string name="ticket_send_error_msg"><![CDATA[Problemas realizando el pago. \'%1$s\']]></string>
+    <string name="vicket_send_error_caption">Error realizando pago</string>
+    <string name="vicket_send_error_msg"><![CDATA[Problemas realizando el pago. \'%1$s\']]></string>
     <string name="week_lapse_lbl">%1$s y %2$s</string>
     <string name="week_lbl">semana</string>
     <string name="transactionv_lbl">Transacción</string>
@@ -412,17 +412,17 @@
         <b>Nombre:</b> %2$s]]></string>
     <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>Justificante</a>]]></string>
     <string name="user_allocation_receipt_url"><![CDATA[<a href=\'%1$s\'>Ingreso original</a>]]></string>
-    <string name="ticket_cancellation_msg_subject">Cancelación de Ticket</string>
-    <string name="open_ticket_grid_menu">Ver Tickets</string>
+    <string name="vicket_cancellation_msg_subject">Cancelación de Vicket</string>
+    <string name="open_vicket_grid_menu">Ver Vickets</string>
     <string name="cert_info_lbl">Datos del certificado</string>
-    <string name="ticket_cert_caption">Datos del certificado del Ticket</string>
-    <string name="cancel_ticket_lbl">Cancelar Ticket</string>
-    <string name="ticket_data_info_lbl">Válido desde %1$s hasta %2$s</string>
-    <string name="cancel_ticket_dialog_msg">Va a firmar una solicitud de cancelación de Ticket</string>
+    <string name="vicket_cert_caption">Datos del certificado del Vicket</string>
+    <string name="cancel_vicket_lbl">Cancelar Vicket</string>
+    <string name="vicket_data_info_lbl">Válido desde %1$s hasta %2$s</string>
+    <string name="cancel_vicket_dialog_msg">Va a firmar una solicitud de cancelación de Vicket</string>
     <string name="cancellation_date_lbl"><b>Fecha de cancelación:</b> %1$s</string>
-    <string name="ticket_cancellation_msg">El ticket se ha cancellado correctamente</string>
-    <string name="ticket_cancellation_error_msg_subject">Error cancelando Ticket</string>
-    <string name="ticket_expended_send_error_msg">Los tickets ya habían sido consumidos</string>
-    <string name="ticket_repeated_error_msg">En la operación se han mezclado Tickets usados. Por favor, vuelva a intentarlo</string>
+    <string name="vicket_cancellation_msg">El vicket se ha cancellado correctamente</string>
+    <string name="vicket_cancellation_error_msg_subject">Error cancelando Vicket</string>
+    <string name="vicket_expended_send_error_msg">Los vickets ya habían sido consumidos</string>
+    <string name="vicket_repeated_error_msg">En la operación se han mezclado Vickets usados. Por favor, vuelva a intentarlo</string>
 
 </resources>
