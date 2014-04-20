@@ -10,7 +10,7 @@
 </head>
 	<body class="">
     <div>
-        <div id="menu">
+        <div id="menu" style="visibility:hidden;">
             <nav>
                 <h2><i class="fa fa-reorder"></i>
                     <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
@@ -91,8 +91,10 @@
                             <div  class="form-inline" style="display:block; margin: 0 0 10px 0;">
                                 <label><g:message code="fromLbl"/></label>
                                 <votingSystem:datePicker id="advancedSearchFrom"></votingSystem:datePicker>
+                                <votingSystem:timePicker id="advancedSearchFromTime"></votingSystem:timePicker>
                                 <label style="margin: 0 0 0 20px;"><g:message code="toLbl"/></label>
                                 <votingSystem:datePicker id="advancedSearchTo"></votingSystem:datePicker>
+                                <votingSystem:timePicker id="advancedSearchToTime"></votingSystem:timePicker>
                             </div>
                             <div class="form-group" style="margin: 0 0 10px 0;">
                                 <label class="control-label" ><g:message code="advancedSearchTextLbl"/></label>

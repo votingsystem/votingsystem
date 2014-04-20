@@ -203,7 +203,7 @@ class VicketService {
                 resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET, data:dataMap)
             } else if (Vicket.State.EXPENDED == vicket.state) {
                 log.error("processVicketDeposit - vicket '${vicket.id}' state ${vicket.state}")
-                Map dataMap = [message:messageSource.getMessage("tickedExpendedErrorMsg", null, locale),
+                Map dataMap = [message:messageSource.getMessage("vicketExpendedErrorMsg", null, locale),
                         messageSMIME:new String(Base64.encode(vicket.messageSMIME.content))]
                 resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
                         type:TypeVS.VICKET_DEPOSIT_ERROR, messageBytes: "${dataMap as JSON}".getBytes(), data:dataMap,

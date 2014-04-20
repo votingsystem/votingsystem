@@ -43,7 +43,7 @@ class VicketUserBaseDataSimulationService {
     private Set<String> synchronizedListenerSet;
 
     private List<String> userList;
-    private ActorVS ticketServer;
+    private ActorVS vicketServer;
 
     private SimulationData simulationData;
     private List<String> errorList;
@@ -88,7 +88,7 @@ class VicketUserBaseDataSimulationService {
     private void initSimulation(JSONObject simulationDataJSON) {
         log.debug("initSimulation ### Enter status INIT_SIMULATION")
         ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}/" +
-                "ticket_user_base_data_" + simulationCounter.getAndIncrement());
+                "vicket_user_base_data_" + simulationCounter.getAndIncrement());
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
         requestExecutor = Executors.newFixedThreadPool(100);
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
@@ -107,7 +107,7 @@ class VicketUserBaseDataSimulationService {
         //String serviceURL = simulationData.getUserBaseSimulationData().getUserBaseInitServiceURL()
         ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(), ActorVS.Type.VICKETS);
         ResponseVS responseVS = serverInitializer.call();
-        ticketServer = responseVS.getData();
+        vicketServer = responseVS.getData();
         responseVS.setStatus(Status.INITIALIZE_SERVER)
         changeSimulationStatus(responseVS)
     }
@@ -126,7 +126,7 @@ class VicketUserBaseDataSimulationService {
                 Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
                 X509Certificate usertCert = (X509Certificate) chain[0];
                 byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
-                String certServiceURL = ticketServer.getUserCertServiceURL();
+                String certServiceURL = vicketServer.getUserCertServiceURL();
                 responseVS =HttpHelper.getInstance().sendData(usertCertPEMBytes,ContentTypeVS.X509_USER,certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());

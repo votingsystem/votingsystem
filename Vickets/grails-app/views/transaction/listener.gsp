@@ -86,7 +86,8 @@
     }
 
     function addRecordToTable(record)  {
-        dynatable.settings.dataset.originalRecords.push(record);
+        //dynatable.settings.dataset.originalRecords.push(record);
+        dynatable.settings.dataset.records.push(record);
         dynatable.process();
     }
 

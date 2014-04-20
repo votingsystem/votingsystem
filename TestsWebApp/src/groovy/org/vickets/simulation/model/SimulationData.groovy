@@ -122,7 +122,7 @@ class SimulationData {
             simulationData.setDepositAmount(new BigDecimal(dataJSON.getLong("depositAmount")));
         }
         if (dataJSON.containsKey("currency")) {
-            simulationData.setCurrency(CurrencyVS.valueOf(dataJSON.getString("currency")));
+            simulationData.setCurrency(CurrencyVS.valueOf(dataJSON.getString("currency").toUpperCase()));
         }
         if (dataJSON.containsKey("subject")) {
             simulationData.setSubject(dataJSON.getString("subject"));

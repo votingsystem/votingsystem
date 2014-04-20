@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><g:message code="ticketDepositSimulationCaption"/></title>
+    <title><g:message code="vicketDepositSimulationCaption"/></title>
     <r:external uri="/images/euro_16.png"/>
     <r:require modules="application"/>
     <r:require modules="textEditorPC"/>
     <r:layoutResources />
 </head>
 <body style="overflow-y: scroll;">
-<div id="ticketDepositSimulationDataDialog"
+<div id="vicketDepositSimulationDataDialog"
      style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
@@ -22,9 +22,9 @@
         </div>
     </div>
     <div id="formDataDiv">
-        <form id="ticketDepositSimulationDataForm">
+        <form id="vicketDepositSimulationDataForm">
             <input type="hidden" autofocus="autofocus" />
-            <input id="resetticketDepositSimulationDataForm" type="reset" style="display:none;">
+            <input id="resetvicketDepositSimulationDataForm" type="reset" style="display:none;">
             <fieldset id="Deposit">
                 <legend style="font-size: 1.2em"><g:message code="depositCaption"/></legend>
                 <div style="display: block; margin: 0px 0px 5px 0px;">
@@ -47,9 +47,9 @@
                            oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
                            onchange="this.setCustomValidity('')"/>
 
-                    <input type="url" id="ticketServerURL" style="width:280px; margin:10px 20px 0 20px;" required
-                           value="http://tickets:8083/Vickets/" title="<g:message code="ticketServerURLMsg"/>"
-                           placeholder="<g:message code="ticketServerURLMsg"/>"
+                    <input type="url" id="vicketServerURL" style="width:280px; margin:10px 20px 0 20px;" required
+                           value="http://vickets:8083/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
+                           placeholder="<g:message code="vicketServerURLMsg"/>"
                            oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
                            onchange="this.setCustomValidity('')"/>
                 </div>
@@ -76,7 +76,7 @@
 </html>
 <r:script>
 
-//$("#resetticketDepositSimulationDataForm").click()
+//$("#resetvicketDepositSimulationDataForm").click()
 //This is for number validation in Firefox
 var allNumberFields = document.getElementsByClassName('DepositInputNumber');
 for (var inputElement in allNumberFields) {
@@ -103,12 +103,12 @@ function setInvalidMsg(event) {
 var electionEditorDiv = $("#electionEditorDiv")
 
 
-$('#ticketDepositSimulationDataForm').submit(function(event){
+$('#vicketDepositSimulationDataForm').submit(function(event){
 	event.preventDefault();
  	$(".errorMsgWrapper").fadeOut()
 
-	 var simulationData = {service:ticketDepositSimulationService, status:"INIT_SIMULATION",
-	 		 serverURL:$('#ticketServerURL').val(),  depositAmount: $('#depositAmount').val(),
+	 var simulationData = {service:'vicketDepositSimulationService', status:"INIT_SIMULATION",
+	 		 serverURL:$('#vicketServerURL').val(),  depositAmount: $('#depositAmount').val(),
 	 		 subject:$('#subject').val(), currency:$( "#currencySelect option:selected").val()}
 
      showListenerDiv(true)
@@ -119,22 +119,22 @@ $('#ticketDepositSimulationDataForm').submit(function(event){
 function isValidForm() {
 
 
-	if(!document.getElementById('ticketServerURL').validity.valid) {
-		$("#ticketServerURL").addClass( "formFieldError" );
+	if(!document.getElementById('vicketServerURL').validity.valid) {
+		$("#vicketServerURL").addClass( "formFieldError" );
 		showResultDialog('<g:message code="dataFormERRORLbl"/>',
 			'<g:message code="emptyFieldLbl"/>', function() {
 			$("#addControlCenterDialog").dialog("open")
 		})
 		return false
 	}
-	var ticketServerURL = $('#ticketServerURL').val()
+	var vicketServerURL = $('#vicketServerURL').val()
 	var suffix = "/"
-	if((ticketServerURL.indexOf(suffix, ticketServerURL.length - suffix.length) == -1)) {
-		ticketServerURL = ticketServerURL + "/"
+	if((vicketServerURL.indexOf(suffix, vicketServerURL.length - suffix.length) == -1)) {
+		vicketServerURL = vicketServerURL + "/"
 	}
-	ticketServerURL = ticketServerURL + "serverInfo"
-	if(ticketServerURL.indexOf("http://") != 0) {
-		ticketServerURL = "http://" + ticketServerURL
+	vicketServerURL = vicketServerURL + "serverInfo"
+	if(vicketServerURL.indexOf("http://") != 0) {
+		vicketServerURL = "http://" + vicketServerURL
 	}
 	return true
 }
@@ -163,8 +163,8 @@ $("#testButton").click(function () {
 });
 
 function showErrorMsg(errorMsg) {
-	$("#ticketDepositSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#ticketDepositSimulationDataDialog .errorMsgWrapper").fadeIn()
+	$("#vicketDepositSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+	$("#vicketDepositSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 
 </r:script>

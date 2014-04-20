@@ -10,6 +10,7 @@ modules = {
 	'application' {
 		//if (isDevMode()) {}
 		dependsOn 'jquery'
+        resource url: 'font-awesome/css/font-awesome.min.css'
         resource url: 'css/pcVotingSystem.css'
 		resource url: 'js/utils.js.gsp'
 		resource url: 'js/pcUtils.js.gsp'
@@ -18,6 +19,7 @@ modules = {
 	
 	'applicationMobile' {
 		dependsOn 'jquery'
+        resource url: 'font-awesome/css/font-awesome.min.css'
         resource url: 'css/mobileVotingSystem.css'
 		resource url: 'js/utils.js.gsp'
 		resource url: 'js/mobileUtils.js.gsp'

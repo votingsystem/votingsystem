@@ -135,7 +135,7 @@ log4j = {
 
     environments {
         development{
-            debug   'org.votingsystem', 'org.tickets', 'filters', 'grails.app', 'com.itextpdf.text.*'
+            debug   'org.votingsystem', 'org.vickets', 'filters', 'grails.app', 'com.itextpdf.text.*'
             //debug   'org.springframework.security'
             //debug   'org.hibernate'
             //debug   'org.apache'

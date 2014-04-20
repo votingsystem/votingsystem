@@ -22,7 +22,7 @@
 <r:script>
 
     var ${attrs.id}Required = true
-    if ("" == '${attrs.required}'.trim()) ? ${attrs.id}Required = false;
+    if ("" == '${attrs.required}'.trim())  ${attrs.id}Required = false;
 
     document.getElementById('${attrs.id}HourInput').addEventListener('change', hourInputValidator, false);
     document.getElementById('${attrs.id}MinuteInput').addEventListener('change', minuteValidator, false);

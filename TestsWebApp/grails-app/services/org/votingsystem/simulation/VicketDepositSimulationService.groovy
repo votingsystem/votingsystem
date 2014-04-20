@@ -39,7 +39,7 @@ class VicketDepositSimulationService {
     private String simulationStarter
     private Set<String> synchronizedListenerSet;
 
-    private VicketServer ticketServer;
+    private VicketServer vicketServer;
 
     private SimulationData simulationData;
     private List<String> errorList;
@@ -84,7 +84,7 @@ class VicketDepositSimulationService {
     private void initSimulation(JSONObject simulationDataJSON) {
         log.debug(" initSimulation ### Enter status INIT_SIMULATION")
         ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}/" +
-                "ticket_user_base_data_" + simulationCounter.getAndIncrement());
+                "vicket_user_base_data_" + simulationCounter.getAndIncrement());
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
         requestExecutor = Executors.newFixedThreadPool(100);
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
@@ -101,7 +101,7 @@ class VicketDepositSimulationService {
         log.debug("initializeServer ### Enter INITIALIZE_SERVER status")
         ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(), ActorVS.Type.VICKETS);
         ResponseVS responseVS = serverInitializer.call();
-        ticketServer = responseVS.getData();
+        vicketServer = responseVS.getData();
         responseVS.setStatus(Status.INITIALIZE_SERVER)
         changeSimulationStatus(responseVS)
     }
@@ -125,9 +125,9 @@ class VicketDepositSimulationService {
             String signatureContentStr = new JSONObject(signatureContentMap).toString()
             log.debug("makeDeposit ${signatureContentStr}")
             SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(userNif,
-                    ticketServer.getNameNormalized(),signatureContentStr , msgSubject);
-            SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, ticketServer.getDepositURL(),
-                    ticketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
+                    vicketServer.getNameNormalized(),signatureContentStr , msgSubject);
+            SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, vicketServer.getDepositURL(),
+                    vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
             responseVS = signedSender.call();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);

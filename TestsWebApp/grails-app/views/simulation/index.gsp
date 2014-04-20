@@ -54,17 +54,17 @@
 				</votingSystem:simpleButton>
 
                 <span style="margin: 30px 0 20 0; font-size: 1.3em;">
-                    <h1>Operaciones para tickets</h1>
+                    <h1>Operaciones para vickets</h1>
                 </span>
 
                 <votingSystem:simpleButton id="initUserBaseDataButton"
-                                           onclick="openWindow('${createLink(controller: 'ticket', action:'initUserBaseData', absolute:true)}')"
+                                           onclick="openWindow('${createLink(controller: 'vicket', action:'initUserBaseData', absolute:true)}')"
                                            style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="initUserBaseDataButton"/>
                 </votingSystem:simpleButton>
 
                 <votingSystem:simpleButton id="makeDepositButton"
-                                           onclick="openWindow('${createLink(controller: 'ticket', action:'deposit', absolute:true)}')"
+                                           onclick="openWindow('${createLink(controller: 'vicket', action:'deposit', absolute:true)}')"
                                            style="margin:15px 20px 0px 0px; width:400px;">
                     <g:message code="makeDepositButton"/>
                 </votingSystem:simpleButton>
