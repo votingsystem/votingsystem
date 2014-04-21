@@ -46,9 +46,9 @@ class SearchController {
 
     def transactionVS() {
         def resultMap = [:]
-        if (params.searchParam) {
+        /*if (params.searchText) {
             ResponseVS<List<TransactionVS>> responseVS = searchHelper.findResponseVSByFullText(TransactionVS.class,
-                    ['type', 'amount', 'currency', 'dateCreated', 'subject']  as String[], params.searchParam,
+                    ['type', 'amount', 'currency', 'dateCreated', 'subject']  as String[], params.searchText,
                     params.int('offset'), params.int('max'));
             List<TransactionVS> transactionList = responseVS.getData()
             log.debug("responseVS.size: ${responseVS.size} - transactionList.size(): ${transactionList.size()}")
@@ -58,7 +58,7 @@ class SearchController {
             }
             resultMap = ["${message(code: 'transactionRecordsLbl')}":resultList, queryRecordCount: responseVS.size,
                             numTotalTransactions:responseVS.size ]
-        }
+        }*/
         render resultMap as JSON
     }
 }

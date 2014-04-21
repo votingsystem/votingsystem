@@ -72,56 +72,15 @@
 
     </div>
 
-    <!-- Advanced search Modal dialog -->
-    <div class="modal fade" id="advancedSearchDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel"><g:message code="advancedSearchLbl"/></h4>
-                </div>
-                <form id="advancedSearchForm" class="" onsubmit="return submitAdvancedSearchForm(this);">
-                    <div class="modal-body">
-
-                        <div id="searchErrorPanel" class="alert alert-danger" style="display: none;">
-                            <a class="close" onclick="$('#searchErrorPanel').fadeOut()">×</a>
-                            <div id="searchErrorMsg"></div>
-                        </div>
-                        <div class="form-horizontal">
-                            <div  class="form-inline" style="display:block; margin: 0 0 10px 0;">
-                                <label><g:message code="fromLbl"/></label>
-                                <votingSystem:datePicker id="advancedSearchFrom"></votingSystem:datePicker>
-                                <votingSystem:timePicker id="advancedSearchFromTime"></votingSystem:timePicker>
-                                <label style="margin: 0 0 0 20px;"><g:message code="toLbl"/></label>
-                                <votingSystem:datePicker id="advancedSearchTo"></votingSystem:datePicker>
-                                <votingSystem:timePicker id="advancedSearchToTime"></votingSystem:timePicker>
-                            </div>
-                            <div class="form-group" style="margin: 0 0 10px 0;">
-                                <label class="control-label" ><g:message code="advancedSearchTextLbl"/></label>
-                                <input type="text" id="advancedSearchText" class="form-control" style="">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
-                            <g:message code="closeLbl"/>
-                        </button>
-                        <button id="advancedSearchButton" type="submit" class="btn btn-accept-vs">
-                            <g:message code="doAdvancedSearchLbl"/>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
 	</body>
+
+    <g:include view="/include/dialog/advancedSearchDialog.gsp"/>
+
 </html>
 <r:script>
     var isMenuVisible = false
     var isSearchInputVisible = false
-    var dateBeginFrom  = $("#advancedSearchFrom")
-	var dateBeginTo    = $("#advancedSearchTo")
+
     $(function() {
         $( '#menu' ).multilevelpushmenu({
             menuWidth: 250,
@@ -162,75 +121,9 @@
         $('#advancedSearchDialog').modal()
     })
 
-    $("#advancedSearchButton").click(function () {
-        console.log("========= advancedSearchButton")
-        if(dateBeginFrom.datepicker("getDate") === null) {
-            dateBeginFrom.addClass( "formFieldError" );
-            showErrorMsg('<g:message code="emptyFieldMsg"/>')
-            return
-        }
-
-        if(dateBeginTo.datepicker("getDate") === null) {
-            dateBeginTo.addClass( "formFieldError" );
-            showErrorMsg('<g:message code="emptyFieldMsg"/>')
-            return
-        }
-
-        if(dateBeginFrom.datepicker("getDate") >
-            dateBeginTo.datepicker("getDate")) {
-            showErrorMsg('<g:message code="dateRangeERRORMsg"/>')
-            dateBeginFrom.addClass("formFieldError");
-            dateBeginTo.addClass("formFieldError");
-            return
-        }
-
-        if(dateFinishFrom.datepicker("getDate") === null) {
-            dateFinishFrom.addClass( "formFieldError" );
-            showErrorMsg('<g:message code="emptyFieldMsg"/>')
-            return
-        }
-
-        if(dateFinishTo.datepicker("getDate") === null) {
-            dateFinishTo.addClass( "formFieldError" );
-            showErrorMsg('<g:message code="emptyFieldMsg"/>')
-            return
-        }
-
-        if(dateFinishFrom.datepicker("getDate") >
-            dateFinishTo.datepicker("getDate")) {
-            showErrorMsg('<g:message code="dateRangeERRORMsg"/>')
-            dateFinishFrom.addClass("formFieldError");
-            dateFinishTo.addClass("formFieldError");
-            return
-        }
-    })
-
-    $("#searchInput").bind('keypress', function(e) {
-        if (e.which == 13) {
-            if("" != $("#searchInput").val().trim()) {
-                processUserSearch($("#searchInput").val())
-            }
-        }
-    });
-
     function isValidForm() {
  	    //allFields.removeClass("formFieldError");
  	}
-
-    function showErrorMsg(errorMsg) {
-        console.log("========= errorMsg: " + errorMsg)
-        $("#searchErrorMsg").html('<p>' + errorMsg + '<p>')
-        $("#searchErrorPanel").fadeIn(500)
-    }
-
-    $('#advancedSearchDialog').on('hidden.bs.modal', function (e) { //reset form
-        $("#searchErrorPanel").hide()
-    })
-
-    function submitAdvancedSearchForm(form) {
-        console.log("============= submitAdvancedSearchForm")
-        return false
-    }
 
 </r:script>
 <r:layoutResources/>

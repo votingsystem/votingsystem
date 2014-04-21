@@ -33,13 +33,11 @@ class UserVSService {
 	public Map getUserVS(Date fromDate){
 		def usersVS
 		UserVS.withTransaction {
-			def criteria = UserVS.createCriteria()
-			usersVS = criteria.list {
+			usersVS = UserVS.createCriteria().list(offset: 0) {
 				gt("dateCreated", fromDate)
 			}
 		}
-		int numUsers = UserVS.countByDateCreatedGreaterThan(fromDate)
-		return [totalNumUsu:numUsers]
+		return [totalNumUsu:usersVS?usersVS.getTotalCount():0]
 	}
 
     public Map getUserVSDataMap(UserVS userVS){

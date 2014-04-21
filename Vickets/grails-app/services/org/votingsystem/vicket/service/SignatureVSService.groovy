@@ -60,8 +60,7 @@ class  SignatureVSService {
         d.persistentProperties.each { log.debug("============ ${it}") }*/
 		int numTestCerts = CertificateVS.countByType(CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
 		log.debug(" - deleteTestCerts - numTestCerts: ${numTestCerts}")
-		def criteria = CertificateVS.createCriteria()
-		def testCerts = criteria.scroll { eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST) }
+		def testCerts = CertificateVS.createCriteria().scroll { eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST) }
 		while (testCerts.next()) {
 			CertificateVS cert = (CertificateVS) testCerts.get(0);
 			int numCerts = CertificateVS.countByAuthorityCertificateVS(cert)

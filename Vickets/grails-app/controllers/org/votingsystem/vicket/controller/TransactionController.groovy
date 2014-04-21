@@ -14,6 +14,7 @@ import org.votingsystem.model.vicket.Vicket
 import org.votingsystem.model.vicket.VicketBatchRequest
 import org.votingsystem.model.vicket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.util.DateUtils
 
 import java.security.KeyFactory
 import java.security.PublicKey
@@ -32,21 +33,33 @@ class TransactionController {
         if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
         List<TransactionVS> transactionList = null
         int totalTransactions = 0;
+
         TransactionVS.withTransaction {
-            if(params.searchParam) {
+            if(params.searchText || params.searchFrom || params.searchTo) {
                 CurrencyVS currency = null
                 TransactionVS.Type transactionType = null
                 BigDecimal amount = null
-                try {currency = CurrencyVS.valueOf(params.searchParam.toUpperCase())} catch(Exception ex) {}
-                try {transactionType = TransactionVS.Type.valueOf(params.searchParam.toUpperCase())} catch(Exception ex) {}
-                try {amount = new BigDecimal(params.searchParam)} catch(Exception ex) {}
+                Date dateFrom = null
+                Date dateTo = null
+                try {currency = CurrencyVS.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
+                try {transactionType = TransactionVS.Type.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
+                try {amount = new BigDecimal(params.searchText)} catch(Exception ex) {}
+                //searchFrom:2014/04/14 00:00:00, max:100, searchTo
+                if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
+                if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
+
                 transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
                         sort:sortParam?.key, order:sortParam?.value) {
                     or {
                         if(currency) eq("currency", currency)
                         if(transactionType) eq("type", transactionType)
                         if(amount) eq("amount", amount)
-                        ilike('subject', "%${params.searchParam}%")
+                        ilike('subject', "%${params.searchText}%")
+                    }
+                    and {
+                        if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
+                        else if(dateFrom) {ge("dateCreated", dateFrom)}
+                        else if(dateTo) {le("dateCreated", dateTo)}
                     }
                 }
                 totalTransactions = transactionList.totalCount
@@ -65,10 +78,7 @@ class TransactionController {
         render resultMap as JSON
     }
 
-    def listener() {
-
-    }
-
+    def listener() { }
 
     /**
      * Servicio que recibe una transacción compuesta por un lote de Vickets

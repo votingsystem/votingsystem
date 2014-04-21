@@ -43,11 +43,19 @@ DateUtils.checkDate = function (dateInit, dateFinish) {
     else return false;
 }
 
+Date.prototype.formatWithTime = function() {
+	var curr_date = this.getDate();
+    var curr_month = this.getMonth() + 1; //Months are zero based
+    var curr_year = this.getFullYear();
+    return curr_year + "/" + curr_month + "/" + curr_date + " " + ('0' + this.getHours()).slice(-2)  + ":" +
+            ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
+};
+
 Date.prototype.format = function() {
 	var curr_date = this.getDate();
     var curr_month = this.getMonth() + 1; //Months are zero based
     var curr_year = this.getFullYear();
-    return curr_year + "/" + curr_month + "/" + curr_date + " 00:00:00"
+    return curr_year + "/" + curr_month + "/" + curr_date
 };
 
 //http://jsfiddle.net/cckSj/5/

@@ -1,5 +1,5 @@
 <div id="dateSupportedDiv${attrs.id}" class="" style='width: 145px; display: inline;'>
-    <input type="date" id='${attrs.id}Native' class="form-control" style='width: 160px; display: inline;'>
+    <input type="date" id='${attrs.id}Native' class="form-control has-error" style='width: 160px; display: inline;'>
     <i id='${attrs.id}NativeIcon' class="fa fa-calendar form-control-feedback" style="color:#870000; margin: 0 0 0 -20px;"></i>
 </div>
 
@@ -16,12 +16,6 @@
 
 <r:script>
 
-    $("#${attrs.id}NativeIcon").click(function(e) {
-        console.log("=============")
-        $("#${attrs.id}Native").click()
-    });
-
-
     var ${attrs.id}Required = true
     if ("" == '${attrs.required}'.trim()) ${attrs.id}Required = false;
 
@@ -35,23 +29,42 @@
         }
     } else {
         $("#dateSupportedDiv${attrs.id}").css("display", "none")
-        //dd/MM/yy 00:00:00"
-        $("#${attrs.id}").datepicker({dateFormat: 'dd/MM/yy'});
+        //yy/dd/MM 00:00:00"
+        $("#${attrs.id}").datepicker({dateFormat: 'yy/dd/MM'});
         if( ${attrs.id}Required) {
             $("#${attrs.id}").attr("required", true)
         }
     }
 
     document.getElementById("${attrs.id}").getDate = function() {
-            var result = null
+        var result = null
         if(inputDateSupported${attrs.id}) {
-            if("" != $("#${attrs.id}Native").val().trim()) result = $("#${attrs.id}Native").val()
+            if("" != $("#${attrs.id}Native").val().trim()) result = $("#${attrs.id}Native").val().replace(/-/g, "/");
         } else {
             if ($("#${attrs.id}").datepicker("getDate") != null) result = $("#${attrs.id}").datepicker("getDate").format()
             if(result == null) $("#${attrs.id}").val("")
             document.getElementById("${attrs.id}").setCustomValidity("DummyInvalid");
         }
         return result
+    }
+
+    document.getElementById("${attrs.id}").getValidatedDate = function() {
+        var result = document.getElementById("${attrs.id}").getDate()
+        if(result == null) {
+            $("#dateSupportedDiv${attrs.id}").addClass( "has-error" );
+            $("#dateNotSupportedDiv${attrs.id}").addClass( "has-error" );
+        } else {
+            $("#dateSupportedDiv${attrs.id}").removeClass( "has-error" );
+            $("#dateNotSupportedDiv${attrs.id}").removeClass( "has-error" );
+        }
+        return result
+    }
+
+    document.getElementById("${attrs.id}").reset = function() {
+        $('#${attrs.id}').val( "" );
+        $('#dateSupportedDiv${attrs.id}').removeClass( "has-error" );
+        $("#${attrs.id}Native").val("")
+        $('#dateNotSupportedDiv${attrs.id}').removeClass( "has-error" );
     }
 
 </r:script>

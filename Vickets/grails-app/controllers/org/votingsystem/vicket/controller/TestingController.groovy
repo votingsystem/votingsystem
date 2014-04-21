@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat
  * */
 class TestingController {
 
+    def userVSService
     def grailsApplication
     def transactionVSService
     def auditingService
@@ -53,7 +54,12 @@ class TestingController {
         return false
     }
 
-    def index() {
-
+    def users() {
+        Calendar calendar = Calendar.getInstance()
+        calendar.set(Calendar.MONTH, 0)
+        def result = userVSService.getUserVS(calendar.getTime())
+        render result as JSON
     }
+
+
 }

@@ -10,10 +10,9 @@
         <ul>
             <li>Libre de patentes y con implementación de código libre</li>
             <li>Operativas transparentes y seguras.</li>
-            <li>Todos los intercambios quedan reflejados en documentos firmados electrónicamente facilitando la trazabilidad
-            de las transacciones financieras.</li>
-            <li>Auditorías de millones de transaciones en minutos.</li>
-            <li>Herramientas que permiten auditorías remotas.</li>
+            <li>Todos los intercambios de moneda quedan reflejados en documentos firmados electrónicamente facilitando la trazabilidad de las operaciones.</li>
+            <li>Posibilidad de hacer intercambios de moneda anónimos.</li>
+            <li>Auditorías remotas de millones de transaciones en minutos.</li>
         </ul>
     </div>
 </body>
