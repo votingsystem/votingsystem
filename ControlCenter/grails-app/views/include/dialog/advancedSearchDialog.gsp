@@ -1,4 +1,4 @@
-<div id="advancedSearchDialog" title="<g:message code="advancedSearchLabel"/>" style="display:none;">
+<div id="advancedSearchDialog" title="<g:message code="advancedSearchLbl"/>" style="display:none;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
 	<p style="text-align: center;"><g:message code="advancedSearchMsg"/>.</p>
   		<form id="advancedSearchForm">

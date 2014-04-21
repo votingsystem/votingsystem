@@ -66,3 +66,10 @@ hr {
     font-weight: bold;
     background: #f6ccd0;
 }
+
+.mainPage {
+    position: relative;
+    min-height: 600px;
+    overflow: hidden;
+    margin: 10px 0 0 0;
+}

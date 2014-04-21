@@ -17,6 +17,8 @@ import org.votingsystem.search.SearchHelper;
 import grails.converters.JSON
 import org.hibernate.search.Search
 import org.apache.lucene.search.Sort
+import org.votingsystem.util.DateUtils
+
 /**
  * @infoController Búsquedas
  * @descController Servicios de búsqueda sobre los datos generados por la aplicación

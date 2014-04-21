@@ -49,8 +49,7 @@ class EventVSElectionController {
 	def index() {
 		List eventVSList = []
 		def responseMap = new HashMap()
-		responseMap.eventsVS = new HashMap()
-		responseMap.eventsVS.elections = []
+		responseMap.eventsVSElections = []
 		if (params.long('id')) {
             EventVSElection eventVS = null
             EventVSElection.withTransaction { eventVS = EventVSElection.get(params.long('id')) }
@@ -93,7 +92,7 @@ class EventVSElectionController {
 		}
 		responseMap.numEventsVSElection = eventVSList.size()
 		eventVSList.each {eventVSItem ->
-				responseMap.eventsVS.elections.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
+				responseMap.eventsVSElections.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
 		}
 		render responseMap as JSON
 	}

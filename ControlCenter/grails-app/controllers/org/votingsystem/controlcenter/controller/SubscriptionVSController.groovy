@@ -119,4 +119,8 @@ class SubscriptionVSController {
 		return writer.toString();
 	}
 
+    def feeds () {
+
+    }
+
 }

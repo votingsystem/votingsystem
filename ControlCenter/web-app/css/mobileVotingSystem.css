@@ -7,9 +7,3 @@ html {
 body {
  	font-family: Arial, sans-serif;
 }
-
-.contentDiv {
-	display:block;
-	overflow: hidden;
-	padding: 0px 0px 0px 0px;
-}

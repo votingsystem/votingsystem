@@ -25,7 +25,7 @@
 				  		placeholder="<g:message code="searchLbl"/>" 
 				  		title="<g:message code="searchLbl"/>" style="width:120px;">
 					<div id="advancedSearchLink" class="appLink" style="display:inline;font-weight:bold;font-size: 0.8em">
-						<g:message code="advancedSearchLabel"/>
+						<g:message code="advancedSearchLbl"/>
 					</div>
 				</form>
 				</div>

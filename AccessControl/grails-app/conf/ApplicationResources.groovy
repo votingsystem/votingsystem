@@ -2,8 +2,8 @@ modules = {
 
 	'jquery' {
 		resource url: 'js/jquery-1.10.2.min.js'
-		resource url: 'js/jquery-ui-1.10.3.custom.min.js'
-		resource url: 'css/jquery-ui-1.10.3.custom.min.css'
+		resource url: 'js/jquery-ui-1.10.4.custom.min.js'
+		resource url: 'css/jquery-ui-1.10.4.custom.min.css'
 		resource url: 'js/i18n/jquery.ui.datepicker-es.js'
 	}
 	
