@@ -49,7 +49,6 @@ class EventVSClaimController {
     def index () {
         def resultList
         if (params.long('id')) {
-            EventVSClaim eventVS = null
             EventVSClaim.withTransaction {
                 resultList = EventVSClaim.createCriteria().list {
                     or {
@@ -61,18 +60,17 @@ class EventVSClaimController {
                     and { eq("id", params.long('id'))}
                 }
             }
-            if(!resultList.isEmpty()) eventVS = resultList.iterator().next()
-			if(!eventVS) {
+			if(resultList.isEmpty()) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'eventVSNotFound', args:[params.id]))]
 			} else {
+                EventVSClaim eventVS = resultList.iterator().next()
 				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 					return [responseVS: new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                             data:eventVSService.getEventVSMap(eventVS))]
 				} else {
 					render(view:"eventVSClaim", model: [selectedSubsystem:SubSystemVS.CLAIMS.toString(),
 						eventMap: eventVSService.getEventVSMap(eventVS)])
-					return
 				}
 			}
         } else {

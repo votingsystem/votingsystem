@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <FrameLayout android:id="@+id/mainLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:foreground="@drawable/shape_window_dim" >
+        <LinearLayout android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:orientation="vertical">
+            <TextView android:id="@+id/last_request_date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_weight="1"
+                android:textColor="@color/event_subject"
+                android:layout_marginBottom="15dip"
+                android:gravity="center"/>
+            <TextView android:id="@+id/vicket_account_info"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:layout_marginLeft="15dip"
+                android:layout_weight="1"/>
+            <TextView android:id="@+id/vicket_cash_info"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:layout_marginLeft="15dip"
+                android:layout_weight="1"/>
+
+            <TextView android:id="@+id/time_remaining_info"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="15dip"
+                android:layout_marginBottom="15dip"
+                android:layout_marginLeft="15dip"
+                android:layout_weight="1"/>
+
+            <Button android:id="@+id/request_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop ="7dp"
+                android:layout_marginBottom="7dp"
+                android:layout_marginRight ="7dp"
+                android:layout_gravity="center"
+                android:layout_weight="0"
+                android:visibility="gone"
+                android:textStyle="bold"
+                android:text="@string/request_button" />
+
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout android:id="@+id/progressContainer"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        android:gravity="center">
+        <ProgressBar android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateDrawable="@drawable/progress_loading"/>
+        <TextView android:id="@+id/progressMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/connecting_caption"
+            android:layout_marginLeft="10dip"
+            android:textColor="@color/loading_data"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:paddingTop="4dip"
+            android:singleLine="true" />
+    </LinearLayout>
+
+</RelativeLayout>

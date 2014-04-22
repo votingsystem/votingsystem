@@ -61,7 +61,6 @@ class EventVSElectionController {
 	def index() {
         def resultList
         if (params.long('id')) {
-            EventVSElection eventVS = null
             EventVSElection.withTransaction {
                 resultList = EventVSElection.createCriteria().list {
                     or {
@@ -73,19 +72,17 @@ class EventVSElectionController {
                     and { eq("id", params.long('id'))}
                 }
             }
-            if(!resultList.isEmpty()) eventVS = resultList.iterator().next()
-            if(!eventVS) {
+            if(resultList.isEmpty()) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'eventVSNotFound', args:[params.id]))]
 
             } else {
+                EventVSElection eventVS = resultList.iterator().next()
                 if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                     render eventVSService.getEventVSMap(eventVS) as JSON
-                    return
                 } else {
                     render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
                             eventMap: eventVSService.getEventVSMap(eventVS)])
-                    return
                 }
             }
         } else {
