@@ -8,47 +8,117 @@
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>
-    <body>
-		<div class="header"  style="display:none;">
-		   	<div class="col-subsystem">
-		   		<a id="subsystem_0_0_Link"></a>
-		   		<a id="subsystem_0_1_Link"></a>
-		   		<a id="subsystem_0_2_Link"></a>
-		   	</div>
-		   	<div id="selectedSubsystemDiv" class="col-selectedSystem">
-		        <a id="selectedSubsystemLink"></a>
-		   	</div>
-		   	<div class="col-advancedSearch">
-		   		<div id="searchFormDiv" style="display:none;">
-				<form id="searchForm">
-				  	<input id="searchText" name="q"  required 
-				  		placeholder="<g:message code="searchLbl"/>" 
-				  		title="<g:message code="searchLbl"/>" style="width:120px;">
-					<div id="advancedSearchLink" class="appLink" style="display:inline;font-weight:bold;font-size: 0.8em">
-						<g:message code="advancedSearchLbl"/>
-					</div>
-				</form>
-				</div>
-		   	</div>
-            <div id="headerButtonContainer" style="padding: 7px 0 0 0;"></div>
-		</div>
+<body>
+<div>
+    <div id="menu" style="visibility:hidden;">
+        <nav>
+            <h2><i class="fa fa-reorder"></i>
+                <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
+            </h2>
+            <ul>
+                <li>
+                    <a href="${createLink(controller: 'eventVSElection', action: 'main')}">
+                        <g:message code="homeLbl"/> <i class="fa fa-home" style="color: #fdd302"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="${createLink(controller: 'eventVSElection', action: 'main')}">
+                        <g:message code="electionSystemLbl"/><i class="fa fa-envelope"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="${createLink(controller: 'eventVSManifest', action: 'main')}">
+                        <g:message code="manifestSystemLbl"/><i class="fa fa-certificate"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="${createLink(controller: 'eventVSClaim', action: 'main')}">
+                        <g:message code="claimSystemLbl"/><i class="fa fa-exclamation-triangle"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-users"></i><g:message code="representativesPageLbl"/></a>
+                    <h2><i class="fa fa-users"></i><g:message code="representativesPageLbl"/></h2>
+                    <ul>
+                        <li>
+                            <a href="${createLink(controller: 'representative', action: 'main')}" style="font-weight: normal;">
+                                <g:message code="selectRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i></a>
+                        </li>
+                        <li>
+                            <a href="${createLink(controller: 'representative', action: 'representativeAdmin')}" style="font-weight: normal;">
+                                <g:message code="adminRepresentativeLbl"/> <i class="fa fa-cogs"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-pencil-square-o"></i><g:message code="publishDocumentLbl"/></a>
+                    <h2><i class="fa fa-pencil-square-o"></i><g:message code="publishDocumentLbl"/></h2>
+                    <ul>
+                        <li>
+                            <a href="${createLink(controller: 'editor', action: 'manifest')}" style="font-weight: normal;">
+                                <g:message code="publishManifestLbl"/><i class="fa fa-certificate"></i></a>
+                        </li>
+                        <li>
+                            <a href="${createLink(controller: 'editor', action: 'claim')}" style="font-weight: normal;">
+                                <g:message code="publishClaimLbl"/> <i class="fa fa-exclamation-triangle"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${createLink(controller: 'editor', action: 'vote')}" style="font-weight: normal;">
+                                <g:message code="publishVoteLbl"/> <i class="fa fa-envelope"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="${createLink(controller: 'subscriptionVS', action: 'feeds')}">
+                        <g:message code="subscriptionLbl"/><i class="fa fa-rss"></i>
+                    </a>
+                </li>
+                <li>
+                    <a  href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
+                        style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-phone"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div  id="navbar" class="navbar navbar-vickets navbar-fixed-top" role="navigation" style="min-height:30px; margin-bottom: 6px; width: 100%;">
+        <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
+        <div class="container">
+            <div class="container-fluid">
+                <div class="navbar-collapse collapse">
+                    <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 0px 0 30px;
+                    font-weight: bold; "><a id="selectedSubsystemLink" style="color: #f9f9f9;"></a>
+                    </span>
+                    <div class="navbar-form navbar-right input-group" style="width:15px;">
+                        <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
+                               style="width:120px; border-color: #f9f9f9;">
+                        <div class="input-group-btn">
+                            <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
+                                <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"
+                                    style="background-color: #ba0011; border-color: #f9f9f9; color:#f9f9f9;">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" style="">
+                                <li><a id="showAdvancedSearchButton" href="#"><g:message code="advancedSearchLbl"/></a></li>
+                            </ul>
+                        </div>
+                    </div>
 
-        <div style="min-height: 600px;"><g:layoutBody/></div>
-	
-		<div class="footer" style="display:none;">
-			<a class="appLink" href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
-				 style="">${message(code: 'emailLabel', null)}</a>
-			<a class="appLink" href="${createLink(controller: 'serverInfo', action: 'info')}"
-				style="margin: 3px 0 0 20px; float:right;">
-				<g:message code="dataInfoLinkText"/>
-			</a>
-		</div>
-		
-	
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1000px; margin:0 auto;"><g:layoutBody/></div>
+</div>
 
-	<div id="appletsFrame"  style="width:0px; height:0px;">
-		<iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
-	</div>	
+    <div id="appletsFrame"  style="width:0px; height:0px;">
+        <iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+    </div>
 </body>
 
 <g:include view="/include/dialog/advancedSearchDialog.gsp"/>	
@@ -59,12 +129,68 @@
 
 </html>
 <r:script>
+    var isMenuVisible = false
+    var isSearchInputVisible = false
+
 	$(function() {
-		updateSubsystem("${selectedSubsystem}")
-		$(".header").fadeIn(3000)
-		$(".footer").fadeIn(3000)
+	    var selectedSubsystem = "${selectedSubsystem}"
+        if(SubSystem.VOTES == selectedSubsystem) {
+            selectedSubsystemLink = "${createLink(controller: 'eventVSElection', action: 'main')}"
+            selectedSubsystemText = "<g:message code="electionSystemLbl"/>"
+
+        } else if(SubSystem.CLAIMS == selectedSubsystem) {
+            selectedSubsystemLink = "${createLink(controller: 'eventVSClaim', action: 'main')}"
+            selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
+        } else if(SubSystem.MANIFESTS == selectedSubsystem) {
+            selectedSubsystemLink = "${createLink(controller: 'eventVSManifest', action: 'main')}"
+            selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
+        } else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
+            selectedSubsystemLink = "${createLink(controller: 'representative', action: 'main')}"
+            selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
+        } else if(SubSystem.FEEDS == selectedSubsystem) {
+            selectedSubsystemLink = "${createLink(controller: 'subscriptionVS', action: 'feeds')}"
+            selectedSubsystemText = "<g:message code="subscriptionsPageLbl"/>"
+        } else {
+            console.log("### unknown subsytem -> " + selectedSubsystem)
+        }
+
+
+
+
+	    $('#selectedSubsystemLink').attr('href',selectedSubsystemLink);
+	    $('#selectedSubsystemLink').text(selectedSubsystemText)
+
 		
-		$("#advancedSearchLink").click(function () { 
+        $( '#menu' ).multilevelpushmenu({
+                menuWidth: 330,
+                onItemClick: function() {
+                    var event = arguments[0], // First argument is original event object
+                    $menuLevelHolder = arguments[1], // Second argument is menu level object containing clicked item (<div> element)
+                    $item = arguments[2], // Third argument is clicked item (<li> element)
+                    options = arguments[3]; // Fourth argument is instance settings/options object
+                    var itemHref = $item.find( 'a:first' ).attr( 'href' );
+                    location.href = itemHref;
+                },
+                onCollapseMenuEnd: function() {
+                    isMenuVisible = false
+                },
+                onExpandMenuEnd: function() {
+                    isMenuVisible = true
+                },
+                backText:'<g:message code="backLbl"/>' ,
+                collapsed: true,
+                fullCollapse: true
+            });
+
+
+        $("#expandMenuIcon").click(function () {
+            $('#menu').css("visibility", "visible")
+            if(isMenuVisible) $('#menu').multilevelpushmenu( 'collapse' );
+            else $('#menu').multilevelpushmenu( 'expand' );
+
+        })
+
+		$("#showAdvancedSearchButton").click(function () {
 			$("#advancedSearchDialog").dialog("open");
 		});
 
@@ -77,7 +203,6 @@
 
 	})
 	
-	
 	function setMessageFromSignatureClient(appMessage) {
 		var appMessageJSON = toJSON(appMessage)
 		if(appMessageJSON != null) {
@@ -88,6 +213,5 @@
 			}
 		}
 	}
-	
 </r:script>
 <r:layoutResources/>

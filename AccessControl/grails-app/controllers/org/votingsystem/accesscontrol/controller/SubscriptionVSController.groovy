@@ -14,6 +14,7 @@ import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.EventVSManifest
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.SubSystemVS
 import org.votingsystem.util.StringUtils
 /**
  * @infoController Subscripciones
@@ -260,4 +261,7 @@ class SubscriptionVSController {
 		return writer.toString();
 	}
 
+    def feeds() {
+        render(view:"feeds" , model:[selectedSubsystem:SubSystemVS.FEEDS.toString()])
+    }
 }

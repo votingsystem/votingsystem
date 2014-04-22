@@ -1,4 +1,4 @@
-<div id="editRepresentativeDialog" title="<g:message code="editRepresentativeLbl"/>" style="margin:20px auto 20px auto;">	
+<div id="editRepresentativeDialog" title="<g:message code="editRepresentativeLbl"/>" style="margin:20px auto 20px auto;display:none;">
 	<div id="editRepresentativeDialogFormDiv" style="margin:0px auto 0px 20px;">
 		<form id="editRepresentativeForm">
             <input id="resetEditRepresentativeForm" type="reset" style="display:none;">

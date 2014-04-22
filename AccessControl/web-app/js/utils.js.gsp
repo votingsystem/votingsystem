@@ -94,22 +94,18 @@ EventVS.prototype.getElement = function() {
         if(eventTemplate == null) console.log("eventTemplate null")
 
         var $newEvent = $(this.eventHTML)
+        var $li = $newEvent.find("li");
 
-        if(EventVS.State.AWAITING == this.state) $newEvent.addClass("eventVSAwaiting");
-        if(EventVS.State.ACTIVE == this.state) $newEvent.addClass("eventVSActive");
-        if(EventVS.State.TERMINATED == this.state) $newEvent.addClass("eventVSFinished");
+        if(EventVS.State.AWAITING == this.state) $li.addClass("eventVSAwaiting");
+        if(EventVS.State.ACTIVE == this.state) $li.addClass("eventVSActive");
+        if(EventVS.State.TERMINATED == this.state) $li.addClass("eventVSFinished");
         if(EventVS.State.CANCELLED == this.state) {
-            $newEvent.addClass("eventVSFinished");
-            $newEvent.find(".cancelMessage").fadeIn(100)
+            $li.addClass("eventVSFinished");
+            $li.find(".cancelMessage").fadeIn(100)
         }
 
-        var eventURL = this.getURL()
-        $newEvent.click(function() {
-            console.log("- eventURL: " + eventURL);
-            window.location.href = eventURL;
-        });
-
-        return $newEvent
+        $li.attr('href', this.getURL())
+        return $newEvent.html();
     }
 
 
@@ -265,8 +261,8 @@ var SubSystem = {
 		VOTES : "VOTES",
 		CLAIMS: "CLAIMS",
 		MANIFESTS: "MANIFESTS",
-		REPRESENTATIVES:"REPRESENTATIVES"
-			
+		REPRESENTATIVES:"REPRESENTATIVES",
+		FEEDS:"FEEDS"
 }
 
 
@@ -307,4 +303,45 @@ function validateNIF(nif) {
     var letter = nif.substring(8, 9);
     if(letter != calculateNIFLetter(number)) return null;
     else return nif;
+}
+
+
+var dynatableInputs = {
+        queries: null,
+        sorts: null,
+        multisort: ['ctrlKey', 'shiftKey', 'metaKey'],
+        page: null,
+        queryEvent: 'blur change',
+        recordCountTarget: null,
+        recordCountPlacement: 'after',
+        paginationLinkTarget: null,
+        paginationLinkPlacement: 'after',
+        paginationPrev: '«',
+        paginationNext: '»',
+        paginationGap: [1,2,2,1],
+        searchTarget: null,
+        searchPlacement: 'before',
+        perPageTarget: null,
+        perPagePlacement: 'before',
+        perPageText: '',
+        recordCountText: '',
+        pageText:'',
+        recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
+        recordCountTotalTemplate: '{recordsQueryCount}',
+        processingText: '<span class="dynatableLoading">"<g:message code="updatingLbl"/><i class="fa fa-refresh fa-spin"></i></span>'
+}
+
+
+var dynatableParams = {
+    dynatable: 'dynatable',
+    queries: 'queries',
+    sorts: 'sorts',
+    page: 'page',
+    perPage: 'max',
+    offset: 'offset',
+    record: null
+  }
+
+var dynatableFeatures =  {
+    search: false
 }

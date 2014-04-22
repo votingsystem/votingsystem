@@ -48,9 +48,7 @@ tbody tr:hover{
   margin-bottom: 10px;
 }
 
-.dynatable-pagination-links {
-  float: right;
-}
+.dynatable-pagination-links { }
 
 .dynatable-record-count {
     display: block;
@@ -89,6 +87,7 @@ tbody tr:hover{
 }
 
 .dynatableLoading{
+    position: relative;
     background: #f9f9f9;
     color: #870000;
     border: 1px solid #870000;

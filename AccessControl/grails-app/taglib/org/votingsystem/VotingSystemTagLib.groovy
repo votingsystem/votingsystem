@@ -6,13 +6,7 @@ import org.votingsystem.util.StringUtils;
 class VotingSystemTagLib {
 	
 	static namespace = "votingSystem"
-	
-	def simpleButton = { attrs, body ->
-        if(!attrs.id) attrs.id = StringUtils.getRandomAlphaNumeric(3)
-		attrs.message = body()
-		out << render(template: "/template/taglib/button", model:[attrs: attrs])
-	}
-	
+
 	def datePicker = { attrs, body ->
 		attrs.message = body()
 		out << render(template: "/template/taglib/datePicker", model:[attrs: attrs])

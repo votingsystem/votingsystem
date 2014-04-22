@@ -1,4 +1,4 @@
-<div id="selectRepresentativeDialog" title="<g:message code="selectRepresentativeLbl"/>" style="padding:20px 20px 20px 20px;display:none;">
+<div id="selectRepresentativeDialog" title="<g:message code="saveAsRepresentativeLbl"/>" style="padding:20px 20px 20px 20px;display:none;">
 
     <div id="representativeSelectionFormDiv">
         <p><g:message code="delegationIntroLbl"/></p>

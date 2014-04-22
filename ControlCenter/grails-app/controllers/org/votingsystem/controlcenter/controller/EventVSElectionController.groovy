@@ -70,7 +70,7 @@ class EventVSElectionController {
 		} else {
 			params.sort = "dateBegin"
 			EventVS.State eventVSState
-			if(params.eventVSState) eventVSState = EventVS.State.valueOf(params.eventVSState)
+            try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
             EventVSElection.withTransaction {
 				if(eventVSState) {
 					if(eventVSState == EventVS.State.TERMINATED) {

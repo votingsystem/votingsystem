@@ -66,14 +66,13 @@
 	</fieldset>
 	
 	<div style="position:relative; margin:0px 0px 20px 30px;">
-		<votingSystem:simpleButton id="addOptionButton" style="margin:0px 20px 0px 0px;"
-                onclick='showAddVoteOptionDialog(addVoteOption)'> <g:message code="addOptionLbl"/>
-		</votingSystem:simpleButton>
+        <button id="addOptionButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;"
+                onclick='showAddVoteOptionDialog(addVoteOption)'><g:message code="addOptionLbl"/>
+        </button>
 
-		<votingSystem:simpleButton id="buttonAccept" isSubmitButton='true'
-			imgSrc="${resource(dir:'images/icon_16',file:'accept.png')}" style="position:absolute; right:10px; top:0px;">
-				<g:message code="publishDocumentLbl"/>
-		</votingSystem:simpleButton>
+        <button id="buttonAccept" type="submit" class="btn btn-default btn-lg" style="position:absolute; right:10px; top:0px;">
+            <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
+        </button>
 	</div>
 		 
 	</form>

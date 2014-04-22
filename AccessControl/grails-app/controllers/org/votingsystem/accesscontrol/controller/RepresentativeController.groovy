@@ -86,10 +86,9 @@ class RepresentativeController {
 	 * @responseContentType [application/json]
 	 */
 	def index() {
-		def representativeList = []
-		def representativeMap = new HashMap()
-		representativeMap.representatives = []
-		if (params.long('id')) {
+		def representativeList = null
+        def representativeMap = null
+        if (params.long('id')) {
 			UserVS representative
 			UserVS.withTransaction {
 				representative = UserVS.findWhere(id:params.long('id'), type:UserVS.Type.REPRESENTATIVE)
@@ -104,20 +103,23 @@ class RepresentativeController {
 				}
 			} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR,
                         message(code:'representativeIdErrorMsg', args:[params.id]))]
-			return
 		} else {
+            representativeMap = new HashMap()
+            representativeMap.representatives = []
 			UserVS.withTransaction {
-				representativeList = UserVS.findAllByType(UserVS.Type.REPRESENTATIVE, params)
+                representativeList = UserVS.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:params.sort, order:params.order) {
+                    eq("type", UserVS.Type.REPRESENTATIVE)
+                }
 			}
 			representativeMap.offset = params.long('offset')
+            representativeMap.numTotalRepresentatives = representativeList.totalCount
+            representativeMap.numRepresentatives = representativeList.totalCount
+            representativeList.each {representative ->
+                representativeMap.representatives.add(representativeService.getRepresentativeMap(representative))
+            }
+            render representativeMap as JSON
 		}
-
-		representativeMap.numTotalRepresentatives = UserVS.countByType(UserVS.Type.REPRESENTATIVE)
-		representativeMap.numRepresentatives = representativeList.size()
-		representativeList.each {representative ->
-				representativeMap.representatives.add(representativeService.getRepresentativeMap(representative))
-		}
-		render representativeMap as JSON
 	}
 	
 	/**

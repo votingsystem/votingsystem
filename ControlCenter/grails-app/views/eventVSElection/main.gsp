@@ -16,7 +16,6 @@
                 </select>
             </div>
         </div>
-
         <g:render template="/template/eventsSearchInfo"/>
         <div class="">
             <ul id="mainPageEventList" style="display: block; width: 100%; position: relative;" class="row"></ul>
@@ -84,10 +83,7 @@
         $('.eventDiv').click(function() {
             window.location.href = $(this).attr('href')
         }
-    )
-
-
-    })
+    )})
 
     var eventTemplate = $('#eventTemplate').html()
 

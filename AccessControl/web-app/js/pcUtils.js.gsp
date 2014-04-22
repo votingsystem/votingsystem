@@ -29,60 +29,6 @@ function checkIEVersion() {
    }
 }
 
-function updateSubsystem(selectedSubsystem) {
-	console.log(" - selectedSubsystem: " + selectedSubsystem)
-	var subsystem_0_0_Link
-	var subsystem_0_0_Text
-	var subsystem_0_1_Link
-	var subsystem_0_1_Text
-	var subsystem_0_2_Link
-	var subsystem_0_2_Text
-	var selectedSubsystemLink
-	var selectedSubsystemText
-	if(SubSystem.VOTES == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSManifest', action: 'main')}"
-		subsystem_0_0_Text = "<g:message code="manifestSystemLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'main')}"
-		subsystem_0_1_Text = "<g:message code="claimSystemLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventVSElection', action: 'main')}"
-		selectedSubsystemText = "<g:message code="electionSystemLbl"/>"
-
-	} else if(SubSystem.CLAIMS == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'main')}"
-		subsystem_0_0_Text = "<g:message code="electionSystemLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSManifest', action: 'main')}"
-		subsystem_0_1_Text = "<g:message code="manifestSystemLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventVSClaim', action: 'main')}"
-		selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
-	} else if(SubSystem.MANIFESTS == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'main')}"
-		subsystem_0_0_Text = "<g:message code="electionSystemLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'main')}"
-		subsystem_0_1_Text = "<g:message code="claimSystemLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventVSManifest', action: 'main')}"
-		selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
-	} else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'main')}"
-		subsystem_0_0_Text = "<g:message code="electionSystemLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'main')}"
-		subsystem_0_1_Text = "<g:message code="claimSystemLbl"/>"
-		subsystem_0_2_Link = "${createLink(controller: 'eventVSManifest', action: 'main')}"
-		subsystem_0_2_Text = "<g:message code="manifestSystemLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'representative', action: 'main')}"
-		selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
-	} else {
-		console.log("### updateSubsystem - unknown subsytem -> " + selectedSubsystem)
-	}
-	$('#subsystem_0_0_Link').attr('href',subsystem_0_0_Link);
-	$('#subsystem_0_0_Link').text(subsystem_0_0_Text)
-	$('#subsystem_0_1_Link').attr('href',subsystem_0_1_Link);
-	$('#subsystem_0_1_Link').text(subsystem_0_1_Text)
-	$('#subsystem_0_2_Link').attr('href',subsystem_0_2_Link);
-	$('#subsystem_0_2_Link').text(subsystem_0_2_Text)
-	$('#selectedSubsystemLink').attr('href',selectedSubsystemLink);
-	$('#selectedSubsystemLink').text(selectedSubsystemText)
-}
-
 function isChrome () {
 	return (navigator.userAgent.toLowerCase().indexOf("chrome") > - 1);
 }

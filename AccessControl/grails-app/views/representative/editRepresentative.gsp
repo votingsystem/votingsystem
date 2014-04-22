@@ -28,10 +28,9 @@
 
         <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
             <div style="position:absolute; right:0;">
-                    <votingSystem:simpleButton isSubmitButton='true'
-                        imgSrc="${resource(dir:'images/icon_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
-                            <g:message code="acceptLbl"/>
-                    </votingSystem:simpleButton>
+                <button type="submit" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;">
+                    <g:message code="acceptLbl"/> <i class="fa fa fa-check"></i>
+                </button>
             </div>
         </div>
 	</form>

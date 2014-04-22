@@ -47,19 +47,21 @@ class EventVSClaimController {
 	 * @return documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
     def index () {
-        def eventVSList = []
-        def eventsVSMap = new HashMap()
-        eventsVSMap.eventsVS = new HashMap()
-        eventsVSMap.eventsVS.claims = []
+        def resultList
         if (params.long('id')) {
-			EventVSClaim eventVS = null
-			EventVSClaim.withTransaction {eventVS = EventVSClaim.get(params.long('id'))}
-            if(eventVS) {
-                if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
-                        eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) {
-                    eventVS = null
+            EventVSClaim eventVS = null
+            EventVSClaim.withTransaction {
+                resultList = EventVSClaim.createCriteria().list {
+                    or {
+                        eq("state", EventVS.State.ACTIVE)
+                        eq("state", EventVS.State.AWAITING)
+                        eq("state", EventVS.State.CANCELLED)
+                        eq("state", EventVS.State.TERMINATED)
+                    }
+                    and { eq("id", params.long('id'))}
                 }
             }
+            if(!resultList.isEmpty()) eventVS = resultList.iterator().next()
 			if(!eventVS) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'eventVSNotFound', args:[params.id]))]
@@ -74,36 +76,39 @@ class EventVSClaimController {
 				}
 			}
         } else {
-			params.sort = "dateBegin"
-			EventVS.State eventVSState
-			if(params.eventVSState) eventVSState = EventVS.State.valueOf(params.eventVSState)
-			if(eventVSState) {
-				if(eventVSState == EventVS.State.TERMINATED) {
-					eventVSList =  EventVSClaim.findAllByStateOrState(
-						EventVS.State.CANCELLED, EventVS.State.TERMINATED, params)
-					eventsVSMap.numEventsVSClaimInSystem =
-							EventVSClaim.countByStateOrState(
-							EventVS.State.CANCELLED, EventVS.State.TERMINATED)
-				} else {
-					eventVSList =  EventVSClaim.findAllByState(eventVSState, params)
-					eventsVSMap.numEventsVSClaimInSystem =
-						EventVSClaim.countByState(eventVSState)
-				}
-			} else {
-				eventVSList =  EventVSClaim.findAllByStateOrStateOrState(EventVS.State.ACTIVE,
-					   EventVS.State.CANCELLED, EventVS.State.TERMINATED, params)
-				eventsVSMap.numEventsVSClaimInSystem =
-						EventVSClaim.countByStateOrStateOrState(EventVS.State.ACTIVE,
-						EventVS.State.CANCELLED, EventVS.State.TERMINATED)
-			}
+            def eventsVSMap = new HashMap()
+            eventsVSMap.eventsVSClaims = []
+            params.sort = "dateBegin"
+            EventVS.State eventVSState
+            try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
+            EventVSClaim.withTransaction {
+                resultList = EventVSClaim.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:params.sort, order:params.order) {
+                    if(eventVSState == EventVS.State.TERMINATED) {
+                        or{
+                            eq("state", EventVS.State.TERMINATED)
+                            eq("state", EventVS.State.CANCELLED)
+                        }
+                    } else if(eventVSState) {
+                        eq("state", eventVSState)
+                    } else {
+                        or{
+                            eq("state", EventVS.State.ACTIVE)
+                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.TERMINATED)
+                            eq("state", EventVS.State.CANCELLED)
+                        }
+                    }
+                }
+                eventsVSMap.numEventsVSClaimInSystem = resultList.totalCount
+                eventsVSMap.numEventsVSClaim = resultList.totalCount
+            }
             eventsVSMap.offset = params.long('offset')
+            resultList.each {eventVSItem ->
+                eventsVSMap.eventsVSClaims.add(eventVSService.getEventVSClaimMap(eventVSItem))
+            }
+            render eventsVSMap as JSON
         }
-		eventsVSMap.numEventsVSClaim = eventVSList.size()
-        eventVSList.each {eventVSItem ->
-                eventsVSMap.eventsVS.claims.add(
-				eventVSService.getEventVSClaimMap(eventVSItem))
-        }
-        render eventsVSMap as JSON
     }
     
 	/**
@@ -122,21 +127,22 @@ class EventVSClaimController {
 		}
         MessageSMIME messageSMIME
         if (eventVS?.id) {
-			MessageSMIME.withTransaction {
-				List results = MessageSMIME.withCriteria {
-					createAlias("smimeParent", "smimeParent")
-					eq("smimeParent.eventVS", eventVS)
-					eq("smimeParent.type", TypeVS.CLAIM_EVENT)
-				}
-				messageSMIME = results?.iterator()?.next()
-			}
+            MessageSMIME.withTransaction {
+                List results =MessageSMIME.createCriteria().list {
+                    smimeParent{
+                        eq("eventVS", eventVS)
+                        eq("type", TypeVS.CLAIM_EVENT)
+                    }
+                }
+                messageSMIME = results.iterator().next()
+            }
             if (messageSMIME) {
-                    response.status = ResponseVS.SC_OK
-                    response.contentLength = messageSMIME.content.length
-                    //response.setContentType(ContentTypeVS.TEXT.getName())
-                    response.outputStream <<  messageSMIME.content
-                    response.outputStream.flush()
-                    return false
+                response.status = ResponseVS.SC_OK
+                response.contentLength = messageSMIME.content.length
+                //response.setContentType(ContentTypeVS.TEXT.getName())
+                response.outputStream <<  messageSMIME.content
+                response.outputStream.flush()
+                return false
             }
         }
         if (!eventVS || !messageSMIME) {

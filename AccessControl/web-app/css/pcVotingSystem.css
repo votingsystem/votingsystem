@@ -1,21 +1,5 @@
 @import url("votingSystem.css");
 
-html {
-  	font-size: 100%;
-  	-webkit-text-size-adjust: 100%;
-  	-ms-text-size-adjust: 100%;
-	height:100%;
-	margin: 0px auto 0px 0px;
-}
-
-body {
- 	font-family: Arial, sans-serif;
- 	color:#434343;
- 	max-width:1000px;
- 	margin: 0 auto 0 auto;
- 	padding: 0 10px 0 10px;
- 	height: 600px;
-}
 
 .errorMsgWrapper {
 	width: 90%;
@@ -43,14 +27,6 @@ body {
 	padding: 0.1em 0 5px 0;
 	overflow: hidden;
 	display:table;
-}
-
-.footer {
-    margin: 0 auto 20px 0;
-	border-top: 1pt solid #3E125F;
-	padding: 0 20px 5px 20px;
-	overflow: hidden;
-	font-size: 0.7em;
 }
 
 .mainPageEventList {
@@ -477,7 +453,7 @@ body {
 	font-weight:bold; 
 	color:white;  
 	position: relative;
-	padding: 5px 5px 5px 5px;
+	padding: 5px 5px 45px 5px;
 }
 
 .eventAuthorDiv {
@@ -551,4 +527,5 @@ body {
     position: relative;
     min-height: 600px;
     overflow: hidden;
+    margin: 10px 0 0 0;
 }

@@ -8,10 +8,10 @@
 	<div>
 		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
 			<div style="display:table-cell;">
-				<votingSystem:simpleButton onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
-					imgSrc="${resource(dir:'images/icon_16',file:'accept.png')}" style="margin:0px 20px 0px 30px;">
-						<g:message code="selectRepresentativeLbl"/>
-				</votingSystem:simpleButton>
+                <button type="button" onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
+                        class="btn btn-default btn-lg">
+                    <g:message code="saveAsRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i>
+                </button>
 			</div>
 			<div class="representativeNameHeader">
 				<div>${representativeFullName}</div>
@@ -40,14 +40,16 @@
 			<div id="tabs-2">
 				<div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
 					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;">
-								<g:message code="requestVotingHistoryLbl"/>
-						</votingSystem:simpleButton>
+                        <button id="votingHistoryButton" type="button" class="btn btn-default btn-lg"
+                                style="margin:0px 20px 0px 0px; width:300px;">
+                            <g:message code="requestVotingHistoryLbl"/>
+                        </button>
 					</div>
 					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;">
-								<g:message code="requestRepresentativeAcreditationsLbl"/>
-						</votingSystem:simpleButton>
+                        <button type="button" id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                class="btn btn-default btn-lg">
+                            <g:message code="requestRepresentativeAcreditationsLbl"/>
+                        </button>
 					</div>
 				</div>
 			</div>

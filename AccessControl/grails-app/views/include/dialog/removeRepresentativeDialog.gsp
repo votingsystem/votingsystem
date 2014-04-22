@@ -1,4 +1,4 @@
-<div id="removeRepresentativeDialog" title="<g:message code="removeRepresentativeLbl"/>"  style="padding:20px 20px 20px 20px">
+<div id="removeRepresentativeDialog" title="<g:message code="removeRepresentativeLbl"/>"  style="padding:20px 20px 20px 20px;display:none;">
 	<p style="text-align: center;"><g:message code="removeRepresentativeMsg"/></p>
 </div> 
 <r:script>

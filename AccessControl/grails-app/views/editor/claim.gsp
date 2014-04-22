@@ -37,9 +37,9 @@
 			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
 		</div>
 	    <div style="float:right; margin:10px 20px 0px 0px;">
-			<votingSystem:simpleButton id="addClaimFieldButton" style="margin:0px 20px 0px 0px;"
-                   onclick="showAddClaimFieldDialog(addClaimField)"><g:message code="addClaimFieldLbl"/>
-			</votingSystem:simpleButton>
+            <button id="addClaimFieldButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;"
+                    onclick='showAddClaimFieldDialog(addClaimField)'><g:message code="addClaimFieldLbl"/>
+            </button>
 	    </div>
 	</div>
 
@@ -50,10 +50,9 @@
 	
 	<div style='overflow:hidden;'>
 		<div style="float:right; margin:0px 10px 0px 0px;">
-			<votingSystem:simpleButton id="buttonAccept" isSubmitButton='true'
-				imgSrc="${resource(dir:'images/icon_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
-					<g:message code="publishDocumentLbl"/>
-			</votingSystem:simpleButton>
+            <button id="buttonAccept" type="submit" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;">
+                <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
+            </button>
 		</div>	
 	</div>
 

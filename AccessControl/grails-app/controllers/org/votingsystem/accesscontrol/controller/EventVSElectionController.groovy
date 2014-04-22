@@ -59,18 +59,21 @@ class EventVSElectionController {
 	 * @return documento JSON con las votaciones que cumplen con el criterio de búsqueda.
 	 */
 	def index() {
-        def eventVSList = []
-        def eventsVSMap = new HashMap()
-        eventsVSMap.eventsVS = new HashMap()
-        eventsVSMap.eventsVS.elections = []
+        def resultList
         if (params.long('id')) {
             EventVSElection eventVS = null
-            EventVSElection.withTransaction { eventVS = EventVSElection.get(params.long('id'))}
-            if(eventVS) {
-                if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
-                        eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) {
-                    eventVS = null   }
+            EventVSElection.withTransaction {
+                resultList = EventVSElection.createCriteria().list {
+                    or {
+                        eq("state", EventVS.State.ACTIVE)
+                        eq("state", EventVS.State.AWAITING)
+                        eq("state", EventVS.State.CANCELLED)
+                        eq("state", EventVS.State.TERMINATED)
+                    }
+                    and { eq("id", params.long('id'))}
+                }
             }
+            if(!resultList.isEmpty()) eventVS = resultList.iterator().next()
             if(!eventVS) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'eventVSNotFound', args:[params.id]))]
@@ -86,35 +89,39 @@ class EventVSElectionController {
                 }
             }
         } else {
+            def eventsVSMap = new HashMap()
+            eventsVSMap.eventsVSElections = []
             params.sort = "dateBegin"
             EventVS.State eventVSState
-            if(params.eventVSState) eventVSState = EventVS.State.valueOf(params.eventVSState)
+            try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
             EventVSElection.withTransaction {
-                if(eventVSState) {
+                resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:params.sort, order:params.order) {
                     if(eventVSState == EventVS.State.TERMINATED) {
-                        eventVSList =  EventVSElection.findAllByStateOrState(
-                                EventVS.State.CANCELLED, EventVS.State.TERMINATED, params)
-                        eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByStateOrState(
-                                EventVS.State.CANCELLED, EventVS.State.TERMINATED)
+                        or{
+                            eq("state", EventVS.State.TERMINATED)
+                            eq("state", EventVS.State.CANCELLED)
+                        }
+                    } else if(eventVSState) {
+                        eq("state", eventVSState)
                     } else {
-                        eventVSList =  EventVSElection.findAllByState(eventVSState, params)
-                        eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByState(eventVSState)
+                        or{
+                            eq("state", EventVS.State.ACTIVE)
+                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.TERMINATED)
+                            eq("state", EventVS.State.CANCELLED)
+                        }
                     }
-                } else {
-                    eventVSList =  EventVSElection.findAllByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-                            EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING, params)
-                    eventsVSMap.numEventsVSElectionInSystem =
-                            EventVSElection.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-                                    EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
                 }
+                eventsVSMap.numEventsVSElectionInSystem = resultList.totalCount
+                eventsVSMap.numEventsVSElection = resultList.totalCount
             }
             eventsVSMap.offset = params.long('offset')
+            resultList.each {eventVSItem ->
+                eventsVSMap.eventsVSElections.add(eventVSService.getEventVSElectionMap(eventVSItem))
+            }
+            render eventsVSMap as JSON
         }
-        eventsVSMap.numEventsVSElection = eventVSList.size()
-        eventVSList.each {eventVSItem ->
-            eventsVSMap.eventsVS.elections.add(eventVSService.getEventVSElectionMap(eventVSItem))
-        }
-        render eventsVSMap as JSON
 	}
 	
 	/**
@@ -194,14 +201,15 @@ class EventVSElectionController {
 			}
             MessageSMIME messageSMIME
             if (eventVS) {
-				MessageSMIME.withTransaction {
-					List results = MessageSMIME.withCriteria {
-						createAlias("smimeParent", "smimeParent")
-						eq("smimeParent.eventVS", eventVS)
-						eq("smimeParent.type", TypeVS.VOTING_EVENT)
-					}
-					messageSMIME = results.iterator().next()
-				}
+                MessageSMIME.withTransaction {
+                    List results =MessageSMIME.createCriteria().list {
+                        smimeParent{
+                            eq("eventVS", eventVS)
+                            eq("type", TypeVS.VOTING_EVENT)
+                        }
+                    }
+                    messageSMIME = results.iterator().next()
+                }
                 if (messageSMIME) {
                     return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK,
                             contentType:ContentTypeVS.TEXT_STREAM, messageBytes: messageSMIME.content)]

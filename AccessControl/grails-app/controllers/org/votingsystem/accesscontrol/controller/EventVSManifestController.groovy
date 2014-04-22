@@ -39,17 +39,23 @@ class EventVSManifestController {
 	 * @return documento JSON con información del manifiesto solicitado.
 	 */
 	def index() {
+        def resultList
 		if(request.contentType?.contains(ContentTypeVS.PDF.getName())) getPDF();
 		else {
             if(params.long('id')) {
-                EventVSManifest eventVS
-                EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
-                if(eventVS) {
-                    if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
-                            eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) {
-                        eventVS = null }
+                EventVSManifest eventVS = null
+                EventVSManifest.withTransaction {
+                    resultList = EventVSManifest.createCriteria().list {
+                        or {
+                            eq("state", EventVS.State.ACTIVE)
+                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.CANCELLED)
+                            eq("state", EventVS.State.TERMINATED)
+                        }
+                        and { eq("id", params.long('id'))}
+                    }
                 }
-
+                if(!resultList.isEmpty()) eventVS = resultList.iterator().next()
                 if(eventVS) {
                     if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                         return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
@@ -219,51 +225,64 @@ class EventVSManifestController {
 	 * @return PDFDocumentVS JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
 	def getManifests () {
-		def eventVSList = []
-		def responseMap = new HashMap()
-		responseMap.eventsVS = new HashMap()
-		def manifests = []
-		if (params.long('id')) {
-			EventVSManifest eventVS = null
-			EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
-			if(!eventVS) {
-                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))]
-			} else {
-				render eventVSService.getEventVSMap(eventVS) as JSON
-			}
-	   } else {
-		   params.sort = "dateBegin"
-		   //params.order="dwefeasc"
-		   log.debug " -Params: " + params
-		   EventVS.State eventVSState
-           if(params.eventVSState) eventVSState = EventVS.State.valueOf(params.eventVSState)
-		   EventVSManifest.withTransaction {
-			   if(eventVSState) {
-				   if(eventVSState == EventVS.State.TERMINATED) {
-					   eventVSList =  EventVSManifest.findAllByStateOrState(
-						   EventVS.State.CANCELLED, EventVS.State.TERMINATED, params)
-					   responseMap.numEventsVSManifestInSystem = EventVSManifest.countByStateOrState(
-						   EventVS.State.CANCELLED, EventVS.State.TERMINATED)
-				   } else {
-					   eventVSList =  EventVSManifest.findAllByState(eventVSState, params)
-					   responseMap.numEventsVSManifestInSystem = EventVSManifest.countByState(eventVSState)
-				   }
-			   } else {
-				   eventVSList =  EventVSManifest.findAllByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-					   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING, params)
-				   responseMap.numEventsVSManifestInSystem =
-				   		EventVSManifest.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-					    EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
-			   }
-		   }
-            responseMap.offset = params.long('offset')
-            responseMap.numEventsVSManifest = eventVSList.size()
-            eventVSList.each {eventVSItem -> manifests.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
-            responseMap.eventsVS.manifests = manifests
-            render responseMap as JSON
-	   }
-	}
+        def resultList
+        if (params.long('id')) {
+            EventVSManifest.withTransaction {
+                resultList = EventVSManifest.createCriteria().list {
+                    or {
+                        eq("state", EventVS.State.ACTIVE)
+                        eq("state", EventVS.State.AWAITING)
+                        eq("state", EventVS.State.CANCELLED)
+                        eq("state", EventVS.State.TERMINATED)
+                    }
+                    and { eq("id", params.long('id')) }
+                }
+            }
+            if (resultList.isEmpty()) {
+                return [responseVS: new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args: [params.id]))]
+            } else {
+                EventVSManifest eventVS = resultList.iterator().next()
+                render eventVSService.getEventVSMap(eventVS) as JSON
+            }
+        } else {
+            def eventsVSMap = new HashMap()
+            eventsVSMap.eventsVSManifests = []
+            params.sort = "dateBegin"
+            EventVS.State eventVSState = null
+            try {
+                eventVSState = EventVS.State.valueOf(params.eventVSState)
+            } catch (Exception ex) {
+            }
+            EventVSManifest.withTransaction {
+                EventVSManifest.withTransaction {
+                    resultList = EventVSManifest.createCriteria().list(max: params.max, offset: params.offset,
+                            sort: params.sort, order: params.order) {
+                        if (eventVSState == EventVS.State.TERMINATED) {
+                            or {
+                                eq("state", EventVS.State.TERMINATED)
+                                eq("state", EventVS.State.CANCELLED)
+                            }
+                        } else if (eventVSState) {
+                            eq("state", eventVSState)
+                        } else {
+                            or {
+                                eq("state", EventVS.State.ACTIVE)
+                                eq("state", EventVS.State.AWAITING)
+                                eq("state", EventVS.State.TERMINATED)
+                                eq("state", EventVS.State.CANCELLED)
+                            }
+                        }
+                    }
+                    eventsVSMap.numEventsVSElectionInSystem = resultList.totalCount
+                    eventsVSMap.numEventsVSElection = resultList.totalCount
+                    eventsVSMap.offset = params.long('offset')
+                }
+            }
+            resultList.each { eventVSItem -> eventsVSMap.eventsVSManifests.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
+            render eventsVSMap as JSON
+        }
+    }
 	
 	
 	/**

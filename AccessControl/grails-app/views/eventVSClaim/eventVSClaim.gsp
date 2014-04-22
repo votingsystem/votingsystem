@@ -56,10 +56,9 @@
 		<div style="width:100%; height: 50px;">
 			<g:if test="${eventMap?.numSignatures > 0}">
 				<div style="float:left;margin:0px 0px 0px 40px;">
-					<votingSystem:simpleButton id="requestBackupButton"  
-						style="margin:0px 20px 0px 0">
-						<g:message code="numClaimsForEvent" args="${[eventMap?.numSignatures]}"/>
-					</votingSystem:simpleButton>
+                    <button id="requestBackupButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0;">
+                        <g:message code="numClaimsForEvent" args="${[eventMap?.numSignatures]}"/>
+                    </button>
 				</div>
 			</g:if>
 			<div id="eventAuthorDiv" style="float:right;top:0px;">
@@ -97,10 +96,9 @@
 		</g:if>
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
 			<div style="overflow: hidden;">
-				<votingSystem:simpleButton id="signClaimFieldButton" isSubmitButton='true'
-					style="margin:0px 20px 0px 0px; float:right;">
-						<g:message code="signClaim"/>
-				</votingSystem:simpleButton>
+                <button id="signClaimFieldButton" type="submit" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px; float:right;">
+                    <g:message code="signClaim"/> <i class="fa fa fa-check"></i>
+                </button>
 			</div>
 		</g:if>
 		</form>

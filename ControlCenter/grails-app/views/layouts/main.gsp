@@ -83,7 +83,6 @@
 <r:script>
     var isMenuVisible = false
     var isSearchInputVisible = false
-
 	        
 	$(function() {
         $( '#menu' ).multilevelpushmenu({
@@ -115,9 +114,6 @@
 
         })
 
-
-		updateSubsystem("${selectedSubsystem}")
-		$(".footer").fadeIn(3000)
 		$("#showAdvancedSearchButton").click(function () {
 			$("#advancedSearchDialog").dialog("open");
 		});
