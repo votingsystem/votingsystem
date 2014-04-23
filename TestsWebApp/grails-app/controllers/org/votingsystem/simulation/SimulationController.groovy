@@ -4,6 +4,10 @@ class SimulationController {
 
     def index() { }
 
+    def vickets() { }
+
+    def votingSystem() { }
+
     def testing() { }
 
 }

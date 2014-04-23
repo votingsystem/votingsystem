@@ -3,22 +3,28 @@
 <head>
     <title><g:message code="vicketUserBaseDataSimulationCaption"/></title>
     <r:external uri="/images/euro_16.png"/>
-    <r:require modules="application"/>
-    <r:require modules="textEditorPC"/>
-    <r:layoutResources />
+    <meta name="layout" content="main" />
 </head>
-<body style="overflow-y: scroll;">
-<div id="vicketUserBaseDataSimulationDataDialog"
-     style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
+<body style="">
+<div class="row" style="">
+    <ol class="breadcrumbVS pull-left">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li><a href="${createLink(controller: 'simulation', action:'vickets', absolute:true)}">
+            <g:message code="vicketsOperationsLbl"/></a></li>
+        <li class="active"><g:message code="initUserBaseDataButton"/></li>
+    </ol>
+</div>
+<div id="vicketUserBaseDataSimulationDataDialog"  class="row"
+     style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #48802c;
-        text-align:center;vertical-align: middle;width: 80%;">
+        <div id="pageTitle" class="operationPageTitle">
             <g:message code="initVicketUserBaseDataSimulationMsg"/>
         </div>
         <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
-            <votingSystem:simpleButton id="testButton" style="margin:0px 0px 0px 30px;">
-                <g:message code="goToResultViewMsg"/></votingSystem:simpleButton>
+            <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                <g:message code="goToResultViewMsg"/>
+            </button>
         </div>
     </div>
     <div id="formDataDiv">
@@ -57,14 +63,11 @@
                        onchange="this.setCustomValidity('')"/>
             </fieldset>
 
-
             <div style="position: relative; overflow:hidden; ">
-                <votingSystem:simpleButton id="submitButton" isSubmitButton='true' style="margin:15px 20px 20px 0px;
-                        width:450px; float:right;">
+                <button id="testButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:450px; float:right;">
                     <g:message code="initVicketuserBaseDataButton"/>
-                </votingSystem:simpleButton>
+                </button>
             </div>
-
         </form>
 
     </div>
@@ -174,4 +177,3 @@ function showErrorMsg(errorMsg) {
 }
 
 </r:script>
-<r:layoutResources />

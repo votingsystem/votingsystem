@@ -1,7 +1,6 @@
 modules = {
 
     masterStyles {
-        resource 'css/mobile.css'
         resource 'css/vickets.css'
     }
 

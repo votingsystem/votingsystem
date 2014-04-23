@@ -1,5 +1,5 @@
 <g:if test="${'mobile'.equals(attrs.type)}">
-    <r:require modules="textEditorMobile"/>
+    <r:require modules="textEditorPC"/>
 </g:if>
 <g:else><r:require modules="textEditorPC"/></g:else>
 <div id='${attrs.id}' style="${attrs.style}"></div>

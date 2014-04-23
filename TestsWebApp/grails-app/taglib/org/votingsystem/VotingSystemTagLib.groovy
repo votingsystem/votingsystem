@@ -6,12 +6,6 @@ class VotingSystemTagLib {
 	
 	static namespace = "votingSystem"
 	
-	def simpleButton = { attrs, body ->		
-		attrs.message = body()
-        if(!attrs.id) attrs.id = StringUtils.getRandomAlphaNumeric(3)
-		out << render(template: "/template/taglib/button", model:[attrs: attrs])
-	}
-	
 	def textEditor = {attrs, body ->
 		out << render(template: "/template/taglib/textEditorPC", model:[attrs: attrs])
 	}

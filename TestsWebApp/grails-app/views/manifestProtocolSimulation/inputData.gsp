@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  	<title><g:message code="manifestProtocolSimulationCaption"/></title>
+    <title><g:message code="manifestProtocolSimulationCaption"/></title>
     <r:external uri="/images/TestWebApp.ico"/>
-   	<r:require modules="application"/>
-   	<r:require modules="textEditorPC"/>
-	<r:layoutResources />
+    <meta name="layout" content="main" />
+    <r:require modules="textEditorPC"/>
 </head>
+<div class="row">
+    <ol class="breadcrumbVS pull-left">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
+            <g:message code="votingSystemOperationsLbl"/></a></li>
+        <li class="active"><g:message code="initManifestProtocolSimulationButton"/></li>
+    </ol>
+</div>
 <div id="manifestProtocolSimulationDataDialog" title="<g:message code="initManifestProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #48802c;
+        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #870000;
                 text-align:center;vertical-align: middle;">
             <g:message code="initManifestProtocolSimulationMsg"/>
         </div>
         <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
-            <votingSystem:simpleButton id="testButton" style="margin:0px 0px 0px 30px;">
-                <g:message code="goToResultViewMsg"/></votingSystem:simpleButton>
+            <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                <g:message code="goToResultViewMsg"/>
+            </button>
         </div>
     </div>
   	<div id="formDataDiv">
@@ -79,10 +87,9 @@
                 </div>
             </div>
             <div style="position: relative; overflow:hidden; ">
-                <votingSystem:simpleButton id="submitButton" isSubmitButton='true'
-                    style="margin:15px 20px 20px 0px; width:400px; float:right;">
+                <button id="submitButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:400px; float:right;">
                     <g:message code="initManifestProtocolSimulationButton"/>
-                </votingSystem:simpleButton>
+                </button>
             </div>
 
    		</form>
@@ -101,15 +108,17 @@
            oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
            onchange="this.setCustomValidity('')">
 </template>
-</html> 
+</html>
 <r:script>
 
-$("#requestBackup").click(function () {
+        $(function() {
+        $("#requestBackup").click(function () {
 	if($("#requestBackup").is(':checked')) $('#emailDiv').append($('#emailTemplate').html());
 	else $('#emailDiv').html("");
 })
 
 $("#testButtonDiv").hide()
+
 
 function showListenerDiv(isListening) {
     $("#testButtonDiv").show()
@@ -142,13 +151,13 @@ var callerCallback
 
 function showManifestProtocolSimulationDataDialog(callback) {
 	$("#manifestProtocolSimulationDataDialog").dialog("open");
-	callerCallback = callback	
+	callerCallback = callback
 }
 
 $('#manifestProtocolSimulationDataForm').submit(function(event){
 	event.preventDefault();
 
- 	allFields.removeClass("formFieldError");   
+ 	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
     getEditor_manifestEditorDivData()
 	if(!isValidForm()) {
@@ -160,15 +169,15 @@ $('#manifestProtocolSimulationDataForm').submit(function(event){
 	        content:getEditor_manifestEditorDivData(),
 	        dateBegin:dateBeginStr,
 	        dateFinish:dateFinish.datepicker("getDate").format()}
-	
+
 	 var simulationData = {service:"manifestSimulationService", status:"INIT_SIMULATION",
 	         accessControlURL:$('#accessControlURL').val(),
-			 maxPendingResponses: $('#maxPendingResponses').val(), 
+			 maxPendingResponses: $('#maxPendingResponses').val(),
 			 numRequestsProjected: $('#numRequestsProjected').val(),
-			 dateBeginDocument: dateBeginStr, 
+			 dateBeginDocument: dateBeginStr,
 			 dateFinishDocument: dateFinish.datepicker("getDate").format(),
-			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(), 
-			 backupRequestEmail:$('#emailRequestBackup').val(), 
+			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(),
+			 backupRequestEmail:$('#emailRequestBackup').val(),
 			 event:event}
 
      showListenerDiv(true)
@@ -179,12 +188,12 @@ $('#manifestProtocolSimulationDataForm').submit(function(event){
 function isValidForm() {
 	if(!document.getElementById('accessControlURL').validity.valid) {
 		$("#accessControlURL").addClass("formFieldError");
-		showResultDialog('<g:message code="dataFormERRORLbl"/>', 
+		showResultDialog('<g:message code="dataFormERRORLbl"/>',
 			'<g:message code="emptyFieldLbl"/>', function() {
 			$("#addControlCenterDialog").dialog("open")
 		})
 		return false
-	}	      
+	}
 	var accessControlURL = $('#accessControlURL').val()
 	var suffix = "/"
 	if((accessControlURL.indexOf(suffix, accessControlURL.length - suffix.length) == -1)) {
@@ -202,23 +211,27 @@ function isValidForm() {
 	}
 
 	if(dateFinish.datepicker("getDate") < new Date()) {
-		showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>') 
+		showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>')
 		dateFinish.addClass("formFieldError");
 		return false
 	}
 
 	if('' == getEditor_manifestEditorDivData()) {
-		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>') 
+		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>')
 		manifestEditorDiv.addClass("formFieldError");
 		return false
 	}
 	return true
 }
 
-function showErrorMsg(errorMsg) {
-	$("#manifestProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
-	$("#manifestProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
-}
-	
+        function showErrorMsg(errorMsg) {
+            $("#manifestProtocolSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
+            $("#manifestProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
+        }
+
+    })
+
+
+
+
 </r:script>
-	<r:layoutResources />

@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-  	<title><g:message code="claimProtocolSimulationRunning"/></title>
-</head>
-<body>
+<div>
 <div id="simulationRunningDialog" style="padding: 20px;">
 	<div class="errorMsgWrapper" style="display: none;"></div>
 
@@ -58,8 +53,7 @@
         <div>{1}</div>
     </div>
 </template>
-</body>
-</html> 
+</div>
 <r:script>
 
 $("#listenButton").click(function() {	

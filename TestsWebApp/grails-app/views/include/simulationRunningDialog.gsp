@@ -10,10 +10,10 @@
 	<div id="progressDiv" style="vertical-align: middle;height:100%;">
 		<progress style="display:block;margin:0px auto 20px auto;"></progress>
 	</div>
-	
-	<votingSystem:simpleButton id="listenButton" isSubmitButton='true' style="margin:15px 20px 0px 0px;">
-			Listen broadcast
-	</votingSystem:simpleButton>
+
+    <button id="listenButton" type="submit" class="btn btn-default" style="margin:15px 20px 0px 0px;">
+        Listen broadcast
+    </button>
   	
 </div>
 

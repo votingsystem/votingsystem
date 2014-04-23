@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  	<title><g:message code="encryptionSimulationCaption"/></title>
+    <title><g:message code="encryptionSimulationCaption"/></title>
     <r:external uri="/images/TestWebApp.ico"/>
-   	<r:require modules="application"/>
-	<r:layoutResources />
+    <meta name="layout" content="main" />
 </head>
+<div class="row">
+    <ol class="breadcrumbVS pull-left">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
+            <g:message code="votingSystemOperationsLbl"/></a></li>
+        <li class="active"><g:message code="initEncryptionProtocolSimulationButton"/></li>
+    </ol>
+</div>
 <div id="encryptionProtocolSimulationDataDialog" title="<g:message code="initEncryptionProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #48802c; text-align:center;vertical-align: middle;">
+        <div id="pageTitle"  class="operationPageTitle">
             <g:message code="initEncryptionProtocolSimulationMsg"/>
         </div>
         <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
-            <votingSystem:simpleButton id="testButton" style="margin:0px 0px 0px 30px;">
-                <g:message code="goToResultViewMsg"/></votingSystem:simpleButton>
+            <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                <g:message code="addClaimFieldLbl"/>
+            </button>
         </div>
     </div>
   	<div id="formDataDiv">
@@ -61,10 +69,10 @@
             </div>
 
             <div style="position: relative; overflow:hidden; ">
-                <votingSystem:simpleButton id="submitButton" isSubmitButton='true'
-                    style="margin:15px 20px 20px 0px; width:400px; float:right;">
+                <button id="testButton" type="submit" class="btn btn-default"
+                        style="margin:15px 20px 20px 0px; width:400px; float:right;">
                     <g:message code="initEncryptionProtocolSimulationButton"/>
-                </votingSystem:simpleButton>
+                </button>
             </div>
 
    		</form>
@@ -163,4 +171,3 @@ function showErrorMsg(errorMsg) {
 }
 	
 </r:script>
-	<r:layoutResources />
