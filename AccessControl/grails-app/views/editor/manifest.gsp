@@ -14,19 +14,20 @@
 	</div>
 	
 	<form id="mainForm" onsubmit="return submitForm(this);">
-	
-	<div style="margin:0px 0px 20px 0px">
-    	<input type="text" name="subject" id="subject" style="width:400px"  required 
-				title="<g:message code="subjectLbl"/>"
-				placeholder="<g:message code="subjectLbl"/>"
-    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-    			onchange="this.setCustomValidity('')" />
-        <label>${message(code:'dateLbl')}</label>
-		<votingSystem:datePicker id="dateFinish" style="margin:0px 0px 0px 35px;" 
-						title="${message(code:'dateLbl')}"
-						placeholder="${message(code:'dateLbl')}"
-	   					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
-	   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+	<div class="form-inline">
+        <div style="margin:0px 0px 20px 0px" class="row">
+            <input type="text" name="subject" id="subject" style="width:400px"  required
+                   title="<g:message code="subjectLbl"/>" class="form-control"
+                   placeholder="<g:message code="subjectLbl"/>"
+                   oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                   onchange="this.setCustomValidity('')" />
+            <label style="margin:0 0 0 30px;">${message(code:'dateLbl')}</label>
+            <votingSystem:datePicker id="dateFinish" style="margin:0px 0px 0px 35px;"
+                                     title="${message(code:'dateLbl')}"
+                                     placeholder="${message(code:'dateLbl')}"
+                                     oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+                                     onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+        </div>
 	</div>
 
     <div style="position:relative; width:100%;">

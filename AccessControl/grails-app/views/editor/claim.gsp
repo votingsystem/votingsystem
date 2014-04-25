@@ -13,20 +13,22 @@
 	</div>
 
 	<form id="mainForm" onsubmit="return submitForm(this);">
-	
-	<div style="margin:0px 0px 20px 0px">
-    	<input type="text" name="subject" id="subject" style="width:400px;margin:0px 40px 0px 0px" required
-				title="<g:message code="subjectLbl"/>"
-				placeholder="<g:message code="subjectLbl"/>" 
-    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-    			onchange="this.setCustomValidity('')" />
 
-        <label>${message(code:'dateLbl')}</label>
-		<votingSystem:datePicker id="dateFinish" title="${message(code:'dateLbl')}"
-						placeholder="${message(code:'dateLbl')}"
-	   					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
-	   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
-	</div>
+    <div class="form-inline">
+        <div style="margin:0px 0px 20px 0px">
+            <input type="text" name="subject" id="subject" style="width:400px;margin:0px 40px 0px 0px" required
+                   title="<g:message code="subjectLbl"/>" class="form-control"
+                   placeholder="<g:message code="subjectLbl"/>"
+                   oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                   onchange="this.setCustomValidity('')" />
+
+            <label>${message(code:'dateLbl')}</label>
+            <votingSystem:datePicker id="dateFinish" title="${message(code:'dateLbl')}"
+                                     placeholder="${message(code:'dateLbl')}"
+                                     oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+                                     onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+        </div>
+    </div>
 
     <div style="position:relative; width:100%;">
         <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
@@ -39,7 +41,7 @@
 		</div>
 	    <div style="float:right; margin:10px 20px 0px 0px;">
             <button id="addClaimFieldButton" type="button" class="btn btn-default" style="margin:0px 20px 0px 0px;"
-                    onclick='showAddClaimFieldDialog(addClaimField)'><g:message code="addClaimFieldLbl"/>
+                    onclick='showAddClaimFieldDialog(addClaimField)'><g:message code="addClaimFieldLbl"/> <i class="fa fa-plus"></i>
             </button>
 	    </div>
 	</div>

@@ -243,6 +243,7 @@
 
 .publishPageTitle {
 	font-size:1.5em;
+    font-weight: bold;
     display: table;
 	color:#870000;
 	margin: 5px auto 20px auto;
@@ -336,7 +337,7 @@
 
 .fieldsBox {
 	border: #f2f2f2 solid 1px;
-	margin: 50px auto 30px auto;
+	margin: 10px auto 30px auto;
 	width: 80%;
 }
 

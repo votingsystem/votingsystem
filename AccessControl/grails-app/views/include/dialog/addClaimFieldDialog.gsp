@@ -7,7 +7,7 @@
 	<form id="newFieldClaimForm">
 			<input type="text" id="claimFieldText" style="width:400px" 
 				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-				onchange="this.setCustomValidity('')"
+				onchange="this.setCustomValidity('')" class="form-control"
 				class="text ui-widget-content ui-corner-all" required/>
 			<input id="submitClaimFieldText" type="submit" style="display:none;">
 	</form>

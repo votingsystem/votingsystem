@@ -20,12 +20,12 @@
 	<div style="margin:0px 0px 20px 0px">
 		<div class="text-left" style="display: block;">
 	    	<input type="text" name="subject" id="subject" style="width:600px" required 
-				title="<g:message code="subjectLbl"/>"
+				title="<g:message code="subjectLbl"/>" class="form-control"
 				placeholder="<g:message code="subjectLbl"/>"
 	    		oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 	   			onchange="this.setCustomValidity('')" />
 		</div>
-		<div class="text-left" style="margin:10px 0px 0px 0px;">
+		<div id="dateRangeDiv" class="text-left" style="margin:10px 0px 0px 0px;">
                 <label>${message(code:'dateBeginLbl')}</label>
 				<votingSystem:datePicker id="dateBegin" title="${message(code:'dateBeginLbl')}"
 					placeholder="${message(code:'dateBeginLbl')}"
@@ -45,23 +45,34 @@
     <div style="position:relative; width:100%;">
         <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
     </div>
-	
-	<div style="margin: 15px auto 30px auto; width:600px">
-		<img src="${resource(dir:'images/icon_16',file:'information.png')}"/>
-		<span id="controlCenterLink" onclick="showVoteControlCenterDialog()" style="font-size:1.1em; color:#02227a;
-        cursor: pointer; cursor: hand;">
-			<g:message code="controlCenterLbl"/>
-		</span>
-		     	
-		<select id="controlCenterSelect" style="margin:0px 0px 0px 40px;min-width: 300px;" required
-				oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
-   				onchange="this.setCustomValidity('')">
-            <option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
-			<g:each status="i" in="${controlCenters}" var="controlCenterVS">
-			  	<option value="${controlCenterVS.id}">${controlCenterVS.name}</option>
-			</g:each>
-		</select>		
-	</div>
+
+    <div class="container-fluid">
+        <div style="margin: 15px auto 30px auto;" class="row">
+            <div class="col-md-2">
+                <label style="">
+                    <span id="controlCenterLink" onclick="showVoteControlCenterDialog()" style="font-size:1.1em; color:#02227a;
+                    cursor: pointer; cursor: hand;"> <g:message code="controlCenterLbl"/>  <i class="fa fa-info-circle"></i>
+                    </span>
+                </label>
+            </div>
+            <div class="col-md-4" style="margin: 0px 0px 0px 30px;">
+                <select id="controlCenterSelect" style="" required
+                        oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
+                        onchange="this.setCustomValidity('')" class="form-control">
+                    <option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
+                    <g:each status="i" in="${controlCenters}" var="controlCenterVS">
+                        <option value="${controlCenterVS.id}">${controlCenterVS.name}</option>
+                    </g:each>
+                </select>
+            </div>
+            <div class="col-md-1 col-md-offset-2 text-right">
+                <button id="addOptionButton" type="button" class="btn btn-default" style=""
+                        onclick='showAddVoteOptionDialog(addVoteOption)'><g:message code="addOptionLbl"/> <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <div id="fieldsDiv" class="fieldsBox" style="display:none;">
         <fieldset id="fieldsBox">
@@ -70,19 +81,16 @@
         </fieldset>
     </div>
 	
-	<div style="position:relative; margin:0px 0px 20px 30px;">
-        <button id="addOptionButton" type="button" class="btn btn-default" style="margin:0px 20px 0px 0px;"
-                onclick='showAddVoteOptionDialog(addVoteOption)'><g:message code="addOptionLbl"/>
-        </button>
-
+	<div style="position:relative; margin:0px 10px 30px 30px;" class="row">
         <button id="buttonAccept" type="submit" class="btn btn-default" style="position:absolute; right:10px; top:0px;">
             <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
         </button>
 	</div>
 		 
 	</form>
-
-	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+    <div class="row">
+        <g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+    </div>
 
 </div>
 <g:include view="/include/dialog/addControlCenterDialog.gsp"/>
@@ -146,12 +154,14 @@
 
     function getPollOptions() {
         var subject = $("#subject"),
-        dateBegin = $("#dateBegin"),
-        dateFinish = $("#dateFinish"),
+        dateRangeDiv = $("#dateRangeDiv"),
+        dateBegin = document.getElementById("dateBegin").getValidatedDate(),
+        dateFinish = document.getElementById("dateFinish").getValidatedDate(),
         editorDiv = $("#editorDiv"),
         addOptionButton = $("#addOptionButton"),
-        allFields = $( [] ).add( subject ).add(dateBegin).add(dateFinish).add(editorDiv);
+        allFields = $( [] ).add( subject ).add(editorDiv);
         allFields.removeClass("formFieldError");
+        allFields.removeClass("has-error");
 
         if(!document.getElementById('subject').validity.valid) {
             subject.addClass("formFieldError");
@@ -159,29 +169,25 @@
             return null
         }
 
-        if(dateBegin.datepicker("getDate") === null) {
-            dateBegin.addClass("formFieldError");
+        if(dateBegin == null) {
             showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyFieldMsg"/>')
             return null
         }
 
-        if(dateFinish.datepicker("getDate") === null) {
-            dateFinish.addClass("formFieldError");
+        if(dateFinish == null) {
             showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
             return null
         }
 
-        if(dateFinish.datepicker("getDate") < new Date() ) {
-            dateFinish.addClass("formFieldError");
+        if(dateFinish < new Date() ) {
+            dateRangeDiv.addClass("has-error");
             showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
             return null
         }
 
-        if(dateBegin.datepicker("getDate") >
-            dateFinish.datepicker("getDate")) {
+        if(dateBegin > dateFinish) {
             showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateRangeERRORMsg"/>')
-            dateBegin.addClass("formFieldError");
-            dateFinish.addClass("formFieldError");
+            dateRangeDiv.addClass("has-error");
             return null
         }
 

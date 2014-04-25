@@ -161,6 +161,7 @@
 
 .publishPageTitle {
     font-size:1.5em;
+    font-weight: bold;
     display: table;
     color:#870000;
     margin: 5px auto 20px auto;
