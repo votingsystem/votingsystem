@@ -173,7 +173,7 @@ public class CancelRepresentationDialog extends JDialog {
             runningTask.cancel(true);
             showProgressPanel(false);
             return;
-        } else sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelledMsg"));
+        } else sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelled"));
         dispose();
     }
 

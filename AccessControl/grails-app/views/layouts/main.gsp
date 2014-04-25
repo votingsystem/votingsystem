@@ -205,16 +205,5 @@
 		 });
 
 	})
-
-	function setMessageFromSignatureClient(appMessage) {
-		var appMessageJSON = toJSON(appMessage)
-		if(appMessageJSON != null) {
-			if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
-				signatureClientToolLoaded = true;
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				$("#workingWithAppletDialog").dialog("open");
-			}
-		}
-	}
 </r:script>
 <r:layoutResources/>

@@ -201,8 +201,8 @@ public class VotingApplet extends JApplet implements AppHostVS {
                     Class JSObjectClass = Class.forName("netscape.javascript.JSObject");
                     Method staticInitializerMethod = JSObjectClass.getMethod("getWindow", Applet.class);
                     Object jsObject = staticInitializerMethod.invoke(null, this);
-                    Method javascriptCallMethod = JSObjectClass.getMethod("call", String.class, java.lang.Object[].class);
-                    Object object = javascriptCallMethod.invoke(jsObject, callbackFunction, args);
+                    final Method javascriptCallMethod = JSObjectClass.getMethod("call", String.class, java.lang.Object[].class);
+                    Object object = javascriptCallMethod.invoke(jsObject, "setMessageFromSignatureClient", args);
                 } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);

@@ -58,8 +58,8 @@
                     <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="eventCancelledLbl"/> - </option>
                     <option value="DELETED" style="color:#cc1606;"> - <g:message code="eventDeletedLbl"/> - </option>
                 </select>
+                <label>${message(code:'dateFinishLbl')}</label>
                 <votingSystem:datePicker id="dateFinish" title="${message(code:'dateFinishLbl')}"
-                    placeholder="${message(code:'dateFinishLbl')}"
                     oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
                     onchange="this.setCustomValidity('')"></votingSystem:datePicker>
             </div>

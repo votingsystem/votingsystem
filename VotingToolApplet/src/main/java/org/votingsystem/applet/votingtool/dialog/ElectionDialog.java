@@ -163,7 +163,7 @@ public class ElectionDialog extends JDialog {
             showProgressPanel(false);
             return;
         } else {
-            sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelledMsg"));
+            sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelled"));
         }
         dispose();
     }

@@ -7,7 +7,7 @@
 <div class="mainPage">
     <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
+            <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
                 <option value="" style="color:black;"> - <g:message code="selectClaimsLbl"/> - </option>
                 <option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
                 <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
@@ -19,10 +19,6 @@
     <g:render template="/template/eventsSearchInfo"/>
 
     <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
-
-    <div style="width:100%;position:absolute;display:block; margin:auto; bottom:20px;">
-        <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
-    </div>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>

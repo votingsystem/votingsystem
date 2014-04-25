@@ -24,7 +24,6 @@
             <label style="margin:0 0 0 30px;">${message(code:'dateLbl')}</label>
             <votingSystem:datePicker id="dateFinish" style="margin:0px 0px 0px 35px;"
                                      title="${message(code:'dateLbl')}"
-                                     placeholder="${message(code:'dateLbl')}"
                                      oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
                                      onchange="this.setCustomValidity('')"></votingSystem:datePicker>
         </div>
@@ -45,7 +44,7 @@
 	</form>
 		
 	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
-	
+
 </div>
 
 </body>

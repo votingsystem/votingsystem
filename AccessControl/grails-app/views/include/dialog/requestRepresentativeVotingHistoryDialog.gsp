@@ -5,16 +5,16 @@
 		<input type="hidden" autofocus="autofocus" />
 		<div style="display:table;margin:20px 0px 0px 0px;">
 			<div id="dateBeginFromDiv" style="display:table-cell;margin:0px 0px 0px 20px;">
+            <label>${message(code:'firstDaterangeLbl')}</label>
 			<votingSystem:datePicker id="dateFrom" title="${message(code:'firstDaterangeLbl')}"
 				 style="width:200px;"
-				 placeholder="${message(code:'firstDaterangeLbl')}"
 				 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
 				 onchange="this.setCustomValidity('')"></votingSystem:datePicker>
 			</div>
 			<div id="dateBeginToDiv" style="display:table-cell;margin:0px 0px 0px 20px;">
+                <label>${message(code:'dateToLbl')}</label>
 				<votingSystem:datePicker id="dateTo" title="${message(code:'dateToLbl')}"
 					 style="width:200px;margin:0px 0px 0px 20px;"
-					 placeholder="${message(code:'dateToLbl')}"
 					 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
 					 onchange="this.setCustomValidity('')"></votingSystem:datePicker>
 			</div>

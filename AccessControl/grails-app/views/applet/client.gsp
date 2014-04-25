@@ -15,7 +15,7 @@
     <head>
         <r:layoutResources />
     </head>
-    <body onload="loadCallerCallback()">
+    <body>
 		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet"
      		CODE="org.votingsystem.applet.votingtool.VotingApplet"
      		ARCHIVE="${jarArchives}"
@@ -28,17 +28,12 @@
 <r:script>
 
 		function setMessageFromSignatureClient(message) {
-			return parent.setMessageFromSignatureClient(message)
+			return parent.votingSystemClient.setMessageFromSignatureClient(message)
 		}
 
 		function getMessageToSignatureClient() {
-			return parent.getMessageToSignatureClient()
+			return parent.votingSystemClient.getMessageToSignatureClient()
 		}
 
-		function loadCallerCallback() {
-			var signatureClientCallback = parent.signatureClientCallback
-			this[parent.getFnName(signatureClientCallback)] = signatureClientCallback
-		}
-		
 </r:script>
 <r:layoutResources />

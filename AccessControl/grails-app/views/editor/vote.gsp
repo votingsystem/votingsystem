@@ -28,14 +28,12 @@
 		<div id="dateRangeDiv" class="text-left" style="margin:10px 0px 0px 0px;">
                 <label>${message(code:'dateBeginLbl')}</label>
 				<votingSystem:datePicker id="dateBegin" title="${message(code:'dateBeginLbl')}"
-					placeholder="${message(code:'dateBeginLbl')}"
    					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
    					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
 
                 <label style="margin:0px 0px 0px 30px;">${message(code:'dateFinishLbl')}</label>
 				<votingSystem:datePicker id="dateFinish" title="${message(code:'dateFinishLbl')}"
 					style="width:150px; margin: 0px 0px 0px 30px;"
-					placeholder="${message(code:'dateFinishLbl')}"
    					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
    					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
 		

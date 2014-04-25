@@ -89,8 +89,7 @@ class PdfService {
 					String notBefore = DateUtils.getStringFromDate(cert.getNotBefore())
 					log.debug("checkSignature - fails - Cert: ${cert.getSubjectDN()} - NotBefore: ${notBefore} - NotAfter: ${notAfter}")
 				}
-				return new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-					messageSource.getMessage('unknownCAErrorMsg', null, locale))
+				return new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST, message:fails[1])
 			}
 			CertificateVS certificate = CertificateVS.findWhere(serialNumber:signingCert.getSerialNumber()?.longValue())
 			if (!certificate) {

@@ -174,7 +174,7 @@ public class RepresentativeFormDialog extends JDialog {
             executingTask.cancel(true);
             showProgressPanel(false);
         } else {
-            sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelledMsg"));
+            sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelled"));
             dispose();
         }
     }

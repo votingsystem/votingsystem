@@ -130,14 +130,14 @@
                 </div>
 
                 <div>
+                    <label>${message(code:'dateInitLbl')}</label>
                     <votingSystem:datePicker id="dateInit"  style="width:160px;"
                                              title="${message(code:'dateInitLbl')}"
-                                             placeholder="${message(code:'dateInitLbl')}"
                                              oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
                                              onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+                    <label>${message(code:'dateFinishLbl')}</label>
                     <votingSystem:datePicker style="width:160px; margin:0px 0px 0px 15px;" id="dateFinish"
                                              title="${message(code:'dateFinishLbl')}"
-                                             placeholder="${message(code:'dateFinishLbl')}"
                                              oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
                                              onchange="this.setCustomValidity('')"></votingSystem:datePicker>
                 </div>

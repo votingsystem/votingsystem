@@ -6,7 +6,6 @@
             <label>${message(code:'dateRequestLbl')}</label>
 			<votingSystem:datePicker id="accreditationDateSelected" title="${message(code:'dateRequestLbl')}"
 				 style="width:200px;"
-				 placeholder="${message(code:'dateRequestLbl')}"
 				 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
 				 onchange="this.setCustomValidity('')"></votingSystem:datePicker>
 		</div>

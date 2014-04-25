@@ -5,7 +5,7 @@
 
 <div id="dateNotSupportedDiv${attrs.id}" class="form-inline" role="form" style="width: 160px; display: inline;">
     <input class="datePickerVS form-control" type="text" id='${attrs.id}' readonly
-           style='width: 160px; display: inline;'
+           style='width: 160px; display: inline; cursor: pointer;'
            title='${attrs.title}'
            placeholder='${attrs.placeholder}'
            oninvalid='${attrs.oninvalid}'

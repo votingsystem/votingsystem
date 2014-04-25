@@ -27,11 +27,11 @@
 <r:script>
 
 	function setMessageFromValidationTool(message) {
-		return parent.setMessageFromValidationTool(message)
+		return parent.votingSystemClient.setMessageFromValidationTool(message)
 	}
 	
 	function getMessageToValidationTool() {
-		return parent.getMessageToValidationTool()
+		return parent.votingSystemClient.getMessageToValidationTool()
 	}
 
 </r:script>
