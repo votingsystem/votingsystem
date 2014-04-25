@@ -75,7 +75,7 @@ class EventVSClaimController {
 			}
         } else {
             def eventsVSMap = new HashMap()
-            eventsVSMap.eventsVSClaims = []
+            eventsVSMap.eventVS = []
             params.sort = "dateBegin"
             EventVS.State eventVSState
             try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
@@ -98,12 +98,11 @@ class EventVSClaimController {
                         }
                     }
                 }
-                eventsVSMap.numEventsVSClaimInSystem = resultList.totalCount
-                eventsVSMap.numEventsVSClaim = resultList.totalCount
+                eventsVSMap.totalEventVS = resultList.totalCount
             }
             eventsVSMap.offset = params.long('offset')
             resultList.each {eventVSItem ->
-                eventsVSMap.eventsVSClaims.add(eventVSService.getEventVSClaimMap(eventVSItem))
+                eventsVSMap.eventVS.add(eventVSService.getEventVSClaimMap(eventVSItem))
             }
             render eventsVSMap as JSON
         }

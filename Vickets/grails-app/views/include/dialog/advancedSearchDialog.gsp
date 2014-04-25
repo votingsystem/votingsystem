@@ -85,9 +85,9 @@
             $("#advancedSearchDialogDiv").addClass( "has-error" );
         } else {
             var searchFrom
-            if(advancedSearchFromValue != null) searchFrom = advancedSearchFromValue + " " + advancedSearchFromTimeValue
+            if(advancedSearchFromValue != null) searchFrom = advancedSearchFromValue.format() + " " + advancedSearchFromTimeValue
             var searchTo
-            if(advancedSearchToValue != null) searchTo = advancedSearchToValue + " " + advancedSearchToTimeValue
+            if(advancedSearchToValue != null) searchTo = advancedSearchToValue.format() + " " + advancedSearchToTimeValue
             userSearch = {searchText:$("#advancedSearchText").val().trim(), searchFrom: searchFrom, searchTo:searchTo}
             console.log("advancedSearchDialog - userSearch: " + JSON.stringify(userSearch))
         }

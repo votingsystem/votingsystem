@@ -1,8 +1,8 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
-import org.apache.solr.analysis.HTMLStripCharFilterFactory;
-import org.apache.solr.analysis.StandardTokenizerFactory;
+//import org.apache.solr.analysis.HTMLStripCharFilterFactory;
+//import org.apache.solr.analysis.StandardTokenizerFactory;
 import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
@@ -11,20 +11,20 @@ import java.text.ParseException;
 import java.util.*;
 
 import static javax.persistence.GenerationType.IDENTITY;
-import org.hibernate.search.annotations.*;
+//import org.hibernate.search.annotations.*;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-@Indexed
+//@Indexed
 @Entity @Table(name="EventVS")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="eventVSType", discriminatorType=DiscriminatorType.STRING)
 @DiscriminatorValue("EventVS")
-@AnalyzerDef(name="eventVSAnalyzer",
+/*@AnalyzerDef(name="eventVSAnalyzer",
 	charFilters = { @CharFilterDef(factory = HTMLStripCharFilterFactory.class) }, 
-	tokenizer =  @TokenizerDef(factory = StandardTokenizerFactory.class))
+	tokenizer =  @TokenizerDef(factory = StandardTokenizerFactory.class))*/
 public class EventVS implements Serializable {
 
     private static Logger logger = Logger.getLogger(EventVS.class);
@@ -40,11 +40,13 @@ public class EventVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY) 
     @Column(name="id", unique=true, nullable=false)
-    @DocumentId
+    //@DocumentId
     private Long id;
     @Column(name="accessControlEventVSId", unique=true)
     private Long accessControlEventVSId;//id of the event in the Access Control
-    @Column(name="content", columnDefinition="TEXT") @Analyzer(definition = "customAnalyzer") private String content;
+    @Column(name="content", columnDefinition="TEXT")
+    //@Analyzer(definition = "customAnalyzer")
+    private String content;
     @Column(name="metaInf", columnDefinition="TEXT")
     private String metaInf = "{}"; 
     @ManyToOne(fetch=FetchType.LAZY)
@@ -54,11 +56,11 @@ public class EventVS implements Serializable {
     @JoinColumn(name="accessControl")
     private AccessControlVS accessControlVS;
     @Column(name="subject", length=1000)
-    @Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)    
+    //@Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)
     private String subject;
     @Enumerated(EnumType.STRING)
     @Column(name="state")
-    @Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)    
+    //@Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)
     private State state;
     @Column(name="cardinality") @Enumerated(EnumType.STRING)
     private Cardinality cardinality = Cardinality.EXCLUSIVE;
@@ -83,13 +85,13 @@ public class EventVS implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateBegin", length=23, nullable=false)
-    @Field(index = Index.NO, analyze=Analyze.NO, store = Store.YES)
-    @DateBridge(resolution = Resolution.HOUR)
+    //@Field(index = Index.NO, analyze=Analyze.NO, store = Store.YES)
+    //@DateBridge(resolution = Resolution.HOUR)
     private Date dateBegin;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateFinish", length=23, nullable=false)
-    @Field(index = Index.NO, analyze=Analyze.NO, store = Store.YES)
-    @DateBridge(resolution = Resolution.HOUR)
+    //@Field(index = Index.NO, analyze=Analyze.NO, store = Store.YES)
+    //@DateBridge(resolution = Resolution.HOUR)
     private Date dateFinish;
     
     @Temporal(TemporalType.TIMESTAMP)

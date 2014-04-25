@@ -95,6 +95,7 @@ class RepresentativeController {
 			}
 			if (representative) {
 				representativeMap = representativeService.getRepresentativeDetailedMap(representative)
+                log.debug("============ ${representativeMap}")
 				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 					render representativeMap as JSON
 				} else {

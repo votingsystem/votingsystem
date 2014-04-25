@@ -4,14 +4,14 @@
 	<form id="reqVotingHistoryForm">
 		<input type="hidden" autofocus="autofocus" />
 		<div style="display:table;margin:20px 0px 0px 0px;">
-			<div style="display:table-cell;margin:0px 0px 0px 20px;">
+			<div id="dateBeginFromDiv" style="display:table-cell;margin:0px 0px 0px 20px;">
 			<votingSystem:datePicker id="dateFrom" title="${message(code:'firstDaterangeLbl')}"
 				 style="width:200px;"
 				 placeholder="${message(code:'firstDaterangeLbl')}"
 				 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
 				 onchange="this.setCustomValidity('')"></votingSystem:datePicker>
 			</div>
-			<div style="display:table-cell;margin:0px 0px 0px 20px;">				
+			<div id="dateBeginToDiv" style="display:table-cell;margin:0px 0px 0px 20px;">
 				<votingSystem:datePicker id="dateTo" title="${message(code:'dateToLbl')}"
 					 style="width:200px;margin:0px 0px 0px 20px;"
 					 placeholder="${message(code:'dateToLbl')}"
@@ -37,7 +37,7 @@
         		text:"<g:message code="acceptLbl"/>",
                	icons: { primary: "ui-icon-check"},
              	click:function() {
-             		$("#submitVotingHistoryRequest").click() 	   			   				
+
 	        	}}, {id: "cancelButton",
 		        		text:"<g:message code="cancelLbl"/>",
 		               	icons: { primary: "ui-icon-closethick"},
@@ -47,4 +47,27 @@
       show: {effect:"fade", duration: 300},
       hide: {effect: "fade",duration: 300}
 });
+
+
+    function resetAdvancedSearchDialogForm() {
+        $("#submitVotingHistoryRequest").click()
+        $("#dateBeginFromDiv").removeClass("has-error");
+        $("#dateBeginToDiv").removeClass("has-error");
+    }
+
+    function checkDateRange() {
+        var dateFrom = document.getElementById("dateFrom").getValidatedDate(),
+              dateTo = document.getElementById("dateTo").getValidatedDate();
+        if(dateFrom > dateTo) {
+            showResultDialog("${message(code:'dataFormERRORLbl')}",'<g:message code="dateRangeERRORMsg"/>')
+
+            $("#dateBeginFromDiv").addClass("has-error");
+            $("#dateBeginToDiv").addClass("has-error");
+
+            dateFrom.addClass("formFieldError");
+            dateTo.addClass("formFieldError");
+            return false
+        } else return true
+    }
+
 </r:script>

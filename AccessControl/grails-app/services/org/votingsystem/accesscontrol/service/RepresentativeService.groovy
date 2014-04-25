@@ -100,8 +100,7 @@ class RepresentativeService {
 		int numVotesRepresentedByRepresentatives = 0	
 		
 		long representativeBegin = System.currentTimeMillis()
-		def criteria = UserVS.createCriteria()
-		def representatives = criteria.scroll {
+		def representatives = UserVS.createCriteria().scroll {
 			eq("type", UserVS.Type.REPRESENTATIVE)
 			le("representativeRegisterDate", selectedDate)
 		}
@@ -832,7 +831,7 @@ class RepresentativeService {
 		ImageVS.withTransaction {
 			image = ImageVS.findByTypeAndUserVS (ImageVS.Type.REPRESENTATIVE, representative)
 		}
-		String imageURL = "${grailsApplication.config.grails.serverURL}/representative/${representative?.id}/image"
+		String imageURL = "${grailsLinkGenerator.link(controller: 'representative', absolute:true)}/${representative?.id}/image"
 		String URL = "${grailsLinkGenerator.link(controller: 'representative', absolute:true)}/${representative?.id}"
 		def numRepresentations = UserVS.countByRepresentative(representative) + 1//plus the representative itself
 		def representativeMap = [id: representative.id, nif:representative.nif,

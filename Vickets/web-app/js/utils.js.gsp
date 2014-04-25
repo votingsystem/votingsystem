@@ -58,6 +58,18 @@ Date.prototype.format = function() {
     return curr_year + "/" + curr_month + "/" + curr_date
 };
 
+//parse dates with format "yyyy-mm-dd"
+DateUtils.parseInputType = function (dateStr) {
+		var reggie = /(\d{4})-(\d{2})-(\d{2})/;
+		var dateArray = reggie.exec(dateStr);
+		var dateObject = new Date(
+		    (+dateArray[1]),
+		    (+dateArray[2])-1, //Months are zero based
+		    (+dateArray[3])
+		);
+		return dateObject
+	}
+
 //http://jsfiddle.net/cckSj/5/
 Date.prototype.getElapsedTime = function() {
     // time difference in ms

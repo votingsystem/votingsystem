@@ -17,8 +17,8 @@
             </div>
         </div>
         <g:render template="/template/eventsSearchInfo"/>
-        <div class="">
-            <ul id="mainPageEventList" style="display: block; width: 100%; position: relative;" class="row"></ul>
+        <div class="container">
+            <ul id="mainPageEventList" style="width: 100%; position: relative;" class="row"></ul>
         </div>
     </div>
 
@@ -29,11 +29,12 @@
 </body>
 </html>
 <r:script>
+    var dynatable
     var eventState = ''
     var searchQuery
 
     $(function() {
-
+        $("#navBarSearchInput").css( "visibility", "visible" );
         $('#mainPageEventList').dynatable({
             features: dynatableFeatures,
             inputs: dynatableInputs,
@@ -45,7 +46,7 @@
                 ajax: true,
                 ajaxUrl: "${createLink(controller: 'eventVSElection', action: 'index')}",
                 ajaxOnLoad: false,
-                perPageDefault: 100,
+                perPageDefault: 50,
                 records: []
             },
             writers: {
@@ -54,9 +55,9 @@
         });
 
         dynatable = $('#mainPageEventList').data('dynatable');
-        dynatable.settings.params.records = 'eventsVSElections'
-        dynatable.settings.params.queryRecordCount = 'numEventsVSManifest'
-        dynatable.settings.params.totalRecordCount = 'numEventsVSElectionInSystem'
+        dynatable.settings.params.records = 'eventVS'
+        dynatable.settings.params.queryRecordCount = 'totalEventVS'
+
 
         $('#eventsStateSelect').on('change', function (e) {
             eventState = $(this).val()
@@ -70,9 +71,11 @@
                          'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
                 }
             }
+            hideEventsSearchInfoMsg()
             var targetURL = "${createLink( controller:'eventVSElection')}";
             if("" != eventState) targetURL = targetURL + "?eventVSState=" + eventState
             dynatable.settings.dataset.ajaxUrl= targetURL
+            dynatable.paginationPage.set(1);
             dynatable.process();
         });
     });
@@ -90,12 +93,11 @@
         return eventVS.getElement()
     }
 
-    function getSearchResult(newSearchQuery) {
-        newSearchQuery.eventState = eventState
-        newSearchQuery.subsystem = "${selectedSubsystem}"
-        searchQuery = newSearchQuery
-        showEventsSearchInfoMsg(newSearchQuery)
-        loadEvents("${createLink(controller:'search', action:'find')}?max=" +
-                numMaxEventsForPage + "&offset=0", newSearchQuery)
+    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}?searchText=" +
+            textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo + "&eventvsType=ELECTION"
+        dynatable.process();
     }
+
 </r:script>

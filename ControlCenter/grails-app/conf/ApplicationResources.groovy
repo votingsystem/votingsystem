@@ -34,6 +34,7 @@ modules = {
 	}
 
     dynatableModule {
+        dependsOn 'jquery'
         resource url: 'css/jquery.dynatable.css'
         resource url: 'js/jquery.dynatable.js'
     }

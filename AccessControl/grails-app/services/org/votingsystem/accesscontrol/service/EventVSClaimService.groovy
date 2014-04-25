@@ -138,27 +138,26 @@ class EventVSClaimService {
 		
 		long begin = System.currentTimeMillis()
 		SignatureVS.withTransaction {
-			def criteria = SignatureVS.createCriteria()
-			def firmasRecibidas = criteria.scroll {
+			def eventSigantures = SignatureVS.createCriteria().scroll {
 				eq("eventVS", event)
 				eq("type", TypeVS.CLAIM_EVENT_SIGN)
 			}
 			
 			
 			
-			while (firmasRecibidas.next()) {
-				SignatureVS firma = (SignatureVS) firmasRecibidas.get(0);
+			while (eventSigantures.next()) {
+				SignatureVS firma = (SignatureVS) eventSigantures.get(0);
 				MessageSMIME messageSMIME = firma.messageSMIME
-				File smimeFile = new File("${baseDir}/${fileNamePrefix}_${formatted.format(firmasRecibidas.getRowNumber())}.p7m")
+				File smimeFile = new File("${baseDir}/${fileNamePrefix}_${formatted.format(eventSigantures.getRowNumber())}.p7m")
 				smimeFile.setBytes(messageSMIME.content)
-				if((firmasRecibidas.getRowNumber() % 100) == 0) {
+				if((eventSigantures.getRowNumber() % 100) == 0) {
 					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
 						System.currentTimeMillis() - begin)
-					log.debug(" - accessRequest ${firmasRecibidas.getRowNumber()} of ${numSignatures} - ${elapsedTimeStr}");
+					log.debug(" - accessRequest ${eventSigantures.getRowNumber()} of ${numSignatures} - ${elapsedTimeStr}");
 					sessionFactory.currentSession.flush()
 					sessionFactory.currentSession.clear()
 				}
-				if(((firmasRecibidas.getRowNumber() + 1) % 2000) == 0) {
+				if(((eventSigantures.getRowNumber() + 1) % 2000) == 0) {
 					baseDir="${filesDir.absolutePath}/batch_${formatted.format(++claimsBatch)}"
 					new File(baseDir).mkdirs()
 				}

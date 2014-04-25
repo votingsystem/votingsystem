@@ -13,7 +13,7 @@
 		</p>
 	</div>
 	
-	<div class="userAdvert" >
+	<div class="userAdvert text-left" >
 		<ul>
 			<li><g:message code="newRepresentativeAdviceMsg1"/></li>
 			<li><g:message code="newRepresentativeAdviceMsg2"/></li>
@@ -30,8 +30,8 @@
 		
 	<div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
 		<div style="position:absolute; right:0;">
-            <button type="submit" class="btn btn-default btn-lg">
-                <g:message code="newRepresentativeLbl"/><i class="fa fa fa-check"></i>
+            <button type="submit" class="btn btn-default">
+                <g:message code="newRepresentativeLbl"/> <i class="fa fa fa-check"></i>
             </button>
 		</div>	
 	</div>	

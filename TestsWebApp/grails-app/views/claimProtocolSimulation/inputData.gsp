@@ -133,8 +133,7 @@ $("#requestBackup").click(function () {
 })
 
 var claimEditorDiv = $("#claimEditorDiv")
-dateFinish    = $("#dateFinish")
-allFields = $( [] ).add(dateFinish).add(claimEditorDiv);
+allFields = $( [] ).add(claimEditorDiv);
 
 function submitForm(form) {
     if(!isValidForm()) return false
@@ -143,7 +142,7 @@ function submitForm(form) {
 	var event = {subject:$('#subject').val(),
 	        content:getEditor_claimEditorDivData(),
 	        dateBegin:dateBeginStr,
-	        dateFinish:dateFinish.datepicker("getDate").format()}
+	        dateFinish:document.getElementById("dateFinish").getValidatedDate().format()}
 
     var claimFields = new Array();
     $("#fields").children().each(function(){
@@ -160,7 +159,7 @@ function submitForm(form) {
 			 maxPendingResponses: $('#maxPendingResponses').val(),
 			 numRequestsProjected: $('#numRequestsProjected').val(),
 			 dateBeginDocument: dateBeginStr,
-			 dateFinishDocument: dateFinish.datepicker("getDate").format(),
+			 dateFinishDocument: document.getElementById("dateFinish").getValidatedDate().format(),
 			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(),
 			 backupRequestEmail:$('#emailRequestBackup').val(),
 			 event:event}
@@ -192,15 +191,13 @@ function isValidForm() {
 		accessControlURL = "http://" + accessControlURL
 	}
 
-	if(dateFinish.datepicker("getDate") === null) {
-		dateFinish.addClass( "formFieldError" );
+	if(document.getElementById("dateFinish").getValidatedDate() == null) {
 		showErrorMsg('<g:message code="emptyFieldLbl"/>')
 		return false
 	}
 
-	if(dateFinish.datepicker("getDate") < new Date()) {
-		showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>') 
-		dateFinish.addClass("formFieldError");
+	if(document.getElementById("dateFinish").getValidatedDate() < new Date()) {
+		showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>')
 		return false
 	}
 

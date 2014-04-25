@@ -301,7 +301,7 @@ var electionEditorDiv = $("#electionEditorDiv")
 dateFinish    = $("#dateFinish")
 dateInit    = $("#dateInit")
 electionEditorDivButton = $("#addElectionFieldButton");
-allFields = $( [] ).add(dateFinish).add(electionEditorDiv).add(electionEditorDivButton);
+allFields = $( [] ).add(electionEditorDiv).add(electionEditorDivButton);
 
 
 $('#electionProtocolSimulationDataForm').submit(function(event){
@@ -316,8 +316,8 @@ $('#electionProtocolSimulationDataForm').submit(function(event){
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
 	        content:getEditor_electionEditorDivData(),
-	        dateBegin:dateInit.datepicker("getDate").format(),
-	        dateFinish:dateFinish.datepicker("getDate").format()}
+	        dateBegin:document.getElementById("dateInit").getValidatedDate().format(),
+	        dateFinish:document.getElementById("dateFinish").getValidatedDate().format()}
 
     var electionFields = new Array();
     $("#fields").children().each(function(){
@@ -343,8 +343,8 @@ $('#electionProtocolSimulationDataForm').submit(function(event){
 	 		 accessControlURL:$('#accessControlURL').val(),
 	 		 controlCenterURL:$('#controlCenterURL').val(),
 			 maxPendingResponses: $('#maxPendingResponses').val(),
-			 dateBeginDocument: dateBeginStr,
-			 dateFinishDocument: dateFinish.datepicker("getDate").format(),
+			 dateBeginDocument: document.getElementById("dateInit").getValidatedDate().format(),
+			 dateFinishDocument: document.getElementById("dateFinish").getValidatedDate().format(),
 			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(),
 			 backupRequestEmail:$('#emailRequestBackup').val(),
 			 event:event}
@@ -368,7 +368,8 @@ $('#electionProtocolSimulationDataForm').submit(function(event){
 
 function isValidForm() {
 	//numRepresentativesMsg"/></label>numRepresentativesWithVote numUsersWithRepresentativeMsg numUsersWithRepresentativeWithVote
-
+    var dateInit = document.getElementById("dateInit").getValidatedDate()
+    var dateFinish = document.getElementById("dateFinish").getValidatedDate()
 
 	if(!document.getElementById('accessControlURL').validity.valid) {
 		$("#accessControlURL").addClass( "formFieldError" );
@@ -388,21 +389,17 @@ function isValidForm() {
 		accessControlURL = "http://" + accessControlURL
 	}
 
-	if(dateInit.datepicker("getDate") === null) {
-		dateInit.addClass( "formFieldError" );
+	if(dateInit == null) {
 		showErrorMsg('<g:message code="emptyFieldLbl"/>')
 		return false
 	}
 
-    if(dateFinish.datepicker("getDate") === null) {
-		dateFinish.addClass( "formFieldError" );
+    if(dateFinish == null) {
 		showErrorMsg('<g:message code="emptyFieldLbl"/>')
 		return false
 	}
 
-
-	if(dateFinish.datepicker("getDate") < dateInit.datepicker("getDate")) {
-		dateFinish.addClass("formFieldError");
+	if(dateFinish < dateInit) {
         showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>')
 		return false
 	}

@@ -33,7 +33,7 @@
     var dynatable
 
     $(function() {
-
+        $("#navBarSearchInput").css( "visibility", "visible" );
         $('#mainPageEventList').dynatable({
             features: dynatableFeatures,
             inputs: dynatableInputs,
@@ -53,7 +53,7 @@
             }
         });
         dynatable = $('#mainPageEventList').data('dynatable');
-        dynatable.settings.params.records = 'eventsVSElections'
+        dynatable.settings.params.records = 'eventsVSElection'
         dynatable.settings.params.queryRecordCount = 'numEventsVSElection'
         dynatable.settings.params.totalRecordCount = 'numEventsVSElectionInSystem'
 
@@ -73,6 +73,7 @@
             var targetURL = "${createLink( controller:'eventVSElection')}";
             if("" != eventState) targetURL = targetURL + "?eventVSState=" + $(this).val()
             dynatable.settings.dataset.ajaxUrl= targetURL
+            dynatable.paginationPage.set(1);
             dynatable.process();
         });
 
@@ -92,12 +93,11 @@
         return eventVS.getElement()
     }
 
-    function getSearchResult(newSearchQuery) {
-        newSearchQuery.eventState = eventState
-        newSearchQuery.subsystem = "${selectedSubsystem}"
-        searchQuery = newSearchQuery
-        showEventsSearchInfoMsg(newSearchQuery)
-        loadEvents("${createLink(controller:'search', action:'find')}?max=" +
-                numMaxEventsForPage + "&offset=0", newSearchQuery)
+    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVSElection')}?searchText=" +
+            textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo
+        dynatable.process();
     }
+
 </r:script>

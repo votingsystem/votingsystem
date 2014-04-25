@@ -1,6 +1,6 @@
 package org.votingsystem.model;
 
-import org.hibernate.search.annotations.Indexed;
+//import org.hibernate.search.annotations.Indexed;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Entity
 @Table(name="EventVSManifest")
 @DiscriminatorValue("EventVSManifest")
-@Indexed
+//@Indexed
 public class EventVSManifest extends EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;

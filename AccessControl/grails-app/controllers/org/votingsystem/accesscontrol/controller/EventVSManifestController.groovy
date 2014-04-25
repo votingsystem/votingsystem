@@ -247,7 +247,7 @@ class EventVSManifestController {
             }
         } else {
             def eventsVSMap = new HashMap()
-            eventsVSMap.eventsVSManifests = []
+            eventsVSMap.eventVS = []
             params.sort = "dateBegin"
             EventVS.State eventVSState = null
             try {
@@ -274,12 +274,11 @@ class EventVSManifestController {
                             }
                         }
                     }
-                    eventsVSMap.numEventsVSElectionInSystem = resultList.totalCount
-                    eventsVSMap.numEventsVSElection = resultList.totalCount
+                    eventsVSMap.totalEventVS = resultList.totalCount
                     eventsVSMap.offset = params.long('offset')
                 }
             }
-            resultList.each { eventVSItem -> eventsVSMap.eventsVSManifests.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
+            resultList.each { eventVSItem -> eventsVSMap.eventVS.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
             render eventsVSMap as JSON
         }
     }

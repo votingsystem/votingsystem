@@ -130,6 +130,18 @@ DateUtils.parse = function (dateStr) {
 		return dateObject
 	}
 
+//parse dates with format "yyyy-mm-dd"
+DateUtils.parseInputType = function (dateStr) {
+		var reggie = /(\d{4})-(\d{2})-(\d{2})/;
+		var dateArray = reggie.exec(dateStr);
+		var dateObject = new Date(
+		    (+dateArray[1]),
+		    (+dateArray[2])-1, //Months are zero based
+		    (+dateArray[3])
+		);
+		return dateObject
+	}
+
 DateUtils.checkDate = function (dateInit, dateFinish) {
 		var todayDate = new Date();
 		if(todayDate > dateInit && todayDate < dateFinish) return true;
@@ -299,6 +311,21 @@ function validateNIF(nif) {
     var letter = nif.substring(8, 9);
     if(letter != calculateNIFLetter(number)) return null;
     else return nif;
+}
+
+function checkInputType(inputType) {
+    if(null == inputType || '' == inputType.trim()) return false
+    var isSuppported = true
+    var elem = document.createElement("input");
+    elem.type = inputType;
+    if (elem.disabled || elem.type != inputType) isSuppported = false;
+    if("text" != inputType.toLowerCase()) {
+        try {
+            elem.value = "Test";
+            if(elem.value == "Test") isSuppported = false;
+        } catch(e) { console.log(e) }
+    }
+    return isSuppported
 }
 
 var dynatableInputs = {

@@ -1,6 +1,6 @@
 package org.votingsystem.model;
 
-import org.hibernate.search.annotations.Indexed;
+//import org.hibernate.search.annotations.Indexed;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -12,7 +12,7 @@ import java.io.Serializable;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-@Indexed
+//@Indexed
 @Entity @Table(name="EventVSClaim") @DiscriminatorValue("EventVSClaim")
 public class EventVSClaim extends EventVS implements Serializable {
     

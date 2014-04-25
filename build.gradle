@@ -211,7 +211,7 @@ def installCkeditor(project) {
 	println ckeditorVersion
 	File apiFile = file("libs/gckeditor_${ckeditorVersion}_standard.zip")
 	if(!apiFile.exists()) {
-		String fileURL = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.2.2/ckeditor_${ckeditorVersion}_standard.zip"
+		String fileURL = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${ckeditorVersion}/ckeditor_${ckeditorVersion}_standard.zip"
 		println "--- downloading ${fileURL}"
 		ant.get(src:fileURL, dest:apiFile)
 	}

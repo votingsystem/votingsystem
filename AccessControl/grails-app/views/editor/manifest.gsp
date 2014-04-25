@@ -21,7 +21,7 @@
 				placeholder="<g:message code="subjectLbl"/>"
     			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
     			onchange="this.setCustomValidity('')" />
-
+        <label>${message(code:'dateLbl')}</label>
 		<votingSystem:datePicker id="dateFinish" style="margin:0px 0px 0px 35px;" 
 						title="${message(code:'dateLbl')}"
 						placeholder="${message(code:'dateLbl')}"
@@ -35,13 +35,12 @@
 		
 	<div style='overflow:hidden;'>
 		<div style="float:right; margin:20px 10px 0px 0px;">
-            <button id="buttonAccept" type="submit" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;">
+            <button id="buttonAccept" type="submit" class="btn btn-default" style="margin:0px 20px 0px 0px;">
                 <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
             </button>
 		</div>	
 	</div>	
-		
-		
+
 	</form>
 		
 	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
@@ -51,18 +50,18 @@
 </body>
 </html>
 <r:script>
+
     $(function() { });
 
     function submitForm(form) {
         var subject = $( "#subject" ),
-        dateFinish = $( "#dateFinish" ),
+        dateFinish = document.getElementById("dateFinish").getValidatedDate(),
         editorDiv = $( "#editorDiv" ),
-        allFields = $( [] ).add( subject ).add( dateFinish ).add(editorDiv);
+        allFields = $( [] ).add( subject ).add(editorDiv);
         allFields.removeClass( "formFieldError" );
 
 
-        if(dateFinish.datepicker("getDate") < new Date() ) {
-            dateFinish.addClass( "formFieldError" );
+        if(dateFinish < new Date() ) {
             showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
             return false
         }
@@ -76,7 +75,7 @@
         var eventVS = new EventVS();
         eventVS.subject = subject.val();
         eventVS.content = getEditor_editorDivData();
-        eventVS.dateFinish = dateFinish.datepicker('getDate').format();
+        eventVS.dateFinish = dateFinish.format();
 
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.MANIFEST_PUBLISHING)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"

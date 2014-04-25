@@ -18,19 +18,21 @@
 	<form id="mainForm" onsubmit="return submitForm(this);">
 	
 	<div style="margin:0px 0px 20px 0px">
-		<div style="display: block;">
+		<div class="text-left" style="display: block;">
 	    	<input type="text" name="subject" id="subject" style="width:600px" required 
 				title="<g:message code="subjectLbl"/>"
 				placeholder="<g:message code="subjectLbl"/>"
 	    		oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 	   			onchange="this.setCustomValidity('')" />
 		</div>
-		<div style="margin:10px 0px 0px 0px;">
+		<div class="text-left" style="margin:10px 0px 0px 0px;">
+                <label>${message(code:'dateBeginLbl')}</label>
 				<votingSystem:datePicker id="dateBegin" title="${message(code:'dateBeginLbl')}"
 					placeholder="${message(code:'dateBeginLbl')}"
    					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
-   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>   					
-   					
+   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+
+                <label style="margin:0px 0px 0px 30px;">${message(code:'dateFinishLbl')}</label>
 				<votingSystem:datePicker id="dateFinish" title="${message(code:'dateFinishLbl')}"
 					style="width:150px; margin: 0px 0px 0px 30px;"
 					placeholder="${message(code:'dateFinishLbl')}"
@@ -46,7 +48,8 @@
 	
 	<div style="margin: 15px auto 30px auto; width:600px">
 		<img src="${resource(dir:'images/icon_16',file:'information.png')}"/>
-		<span id="controlCenterLink" style="font-size:1.1em; color:#02227a; cursor: pointer; cursor: hand;">
+		<span id="controlCenterLink" onclick="showVoteControlCenterDialog()" style="font-size:1.1em; color:#02227a;
+        cursor: pointer; cursor: hand;">
 			<g:message code="controlCenterLbl"/>
 		</span>
 		     	
@@ -59,18 +62,20 @@
 			</g:each>
 		</select>		
 	</div>
-	
-	<fieldset id="fieldsBox" class="fieldsBox" style="display:none;">
-		<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
-		<div id="fields"></div>
-	</fieldset>
+
+    <div id="fieldsDiv" class="fieldsBox" style="display:none;">
+        <fieldset id="fieldsBox">
+            <legend id="fieldsLegend" style="border: none;"><g:message code="pollFieldLegend"/></legend>
+            <div id="fields" style=""></div>
+        </fieldset>
+    </div>
 	
 	<div style="position:relative; margin:0px 0px 20px 30px;">
-        <button id="addOptionButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;"
+        <button id="addOptionButton" type="button" class="btn btn-default" style="margin:0px 20px 0px 0px;"
                 onclick='showAddVoteOptionDialog(addVoteOption)'><g:message code="addOptionLbl"/>
         </button>
 
-        <button id="buttonAccept" type="submit" class="btn btn-default btn-lg" style="position:absolute; right:10px; top:0px;">
+        <button id="buttonAccept" type="submit" class="btn btn-default" style="position:absolute; right:10px; top:0px;">
             <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
         </button>
 	</div>
@@ -98,12 +103,7 @@
         controlCenters["${controlCenterVS.id}"] = ${controlCenterVS as JSON}
     </g:each>
 
-    $(function() {
-        $("#controlCenterLink").click(function () {
-            showVoteControlCenterDialog()
-        });
-
-    });
+    $(function() { });
 
     function addVoteOption (voteOptionText) {
         if(voteOptionText == null) return
@@ -113,24 +113,24 @@
         $newField.find('#deleteFieldButton').click(function() {
             $(this).parent().fadeOut(1000, function() { $(this).parent().remove(); });
             numVoteOptions--
-            if(numVoteOptions == 0) { $("#fieldsBox").fadeOut(1000) }
+            if(numVoteOptions == 0) { $("#fieldsDiv").fadeOut(500) }
         })
         $("#fieldsBox #fields").append($newField)
-        if(numVoteOptions == 0) $("#fieldsBox").fadeIn(1000)
+        if(numVoteOptions == 0) $("#fieldsDiv").fadeIn(500)
         numVoteOptions++
     }
 
     function submitForm(form) {
         var subject = $("#subject"),
-        dateBegin = $("#dateBegin"),
-        dateFinish = $("#dateFinish")
+        dateBegin = document.getElementById("dateBegin").getValidatedDate(),
+        dateFinish = document.getElementById("dateFinish").getValidatedDate()
         var pollOptions = getPollOptions()
         if(pollOptions == null) return false;
         var eventVS = new EventVS();
         eventVS.subject = subject.val();
         eventVS.content = getEditor_editorDivData();
-        eventVS.dateBegin = dateBegin.datepicker('getDate').format();
-        eventVS.dateFinish = dateFinish.datepicker('getDate').format();
+        eventVS.dateBegin = dateBegin.format();
+        eventVS.dateFinish = dateFinish.format();
         eventVS.controlCenter = controlCenters[$('#controlCenterSelect').val()]
         eventVS.fieldsEventVS = pollOptions
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VOTING_PUBLISHING)
@@ -139,7 +139,7 @@
         webAppMessage.signedContent = eventVS
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         webAppMessage.serviceURL = "${createLink(controller:'eventVSElection', absolute:true)}"
-        webAppMessage.signedMessageSubject = "${message(code:'publishVoteSubject')}"
+        webAppMessage.signedMessageSubject = "<g:message code="publishVoteSubject"/>"
         votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback)
         return false
     }

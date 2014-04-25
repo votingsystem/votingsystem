@@ -87,7 +87,7 @@ class EventVSElectionController {
             }
         } else {
             def eventsVSMap = new HashMap()
-            eventsVSMap.eventsVSElections = []
+            eventsVSMap.eventVS = []
             params.sort = "dateBegin"
             EventVS.State eventVSState
             try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
@@ -110,12 +110,11 @@ class EventVSElectionController {
                         }
                     }
                 }
-                eventsVSMap.numEventsVSElectionInSystem = resultList.totalCount
-                eventsVSMap.numEventsVSElection = resultList.totalCount
+                eventsVSMap.totalEventVS = resultList.totalCount
             }
             eventsVSMap.offset = params.long('offset')
             resultList.each {eventVSItem ->
-                eventsVSMap.eventsVSElections.add(eventVSService.getEventVSElectionMap(eventVSItem))
+                eventsVSMap.eventVS.add(eventVSService.getEventVSElectionMap(eventVSItem))
             }
             render eventsVSMap as JSON
         }

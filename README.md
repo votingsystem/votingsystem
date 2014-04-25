@@ -33,6 +33,7 @@ De esta forma:
 *   Se instalan los editores de texto empleados en las aplicaciones **Control de Acceso**, y **TestsWebApp**
 *   Se instalan los certificados empleados por la aplicación para generar firmas y descifrar documentos.
 
+Para que se ejecuten los editores en entornos Android hay que modificar el valor de la variable 'mobile' en el archivo 'ckeditor.js'
 
 #### Servicio de sellado de tiempo
 

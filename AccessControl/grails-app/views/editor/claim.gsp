@@ -21,6 +21,7 @@
     			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
     			onchange="this.setCustomValidity('')" />
 
+        <label>${message(code:'dateLbl')}</label>
 		<votingSystem:datePicker id="dateFinish" title="${message(code:'dateLbl')}"
 						placeholder="${message(code:'dateLbl')}"
 	   					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
@@ -32,25 +33,27 @@
     </div>
 	
 	<div style="margin:0px 0px 30px 0px;">
-		<div style="font-size: 0.9em; margin:10px 0 0 10px; width:60%;display: inline-block;"> 
+		<div class="text-left" style="font-size: 0.9em; margin:10px 0 0 20px; width:60%;display: inline-block;">
 			<input type="checkbox" id="multipleSignaturesCheckbox"><g:message code="multipleClaimsLbl"/><br>
 			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
 		</div>
 	    <div style="float:right; margin:10px 20px 0px 0px;">
-            <button id="addClaimFieldButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;"
+            <button id="addClaimFieldButton" type="button" class="btn btn-default" style="margin:0px 20px 0px 0px;"
                     onclick='showAddClaimFieldDialog(addClaimField)'><g:message code="addClaimFieldLbl"/>
             </button>
 	    </div>
 	</div>
 
-	<fieldset id="fieldsBox" class="fieldsBox" style="display:none;">
-		<legend id="fieldsLegend"><g:message code="claimsFieldLegend"/></legend>
-		<div id="fields"></div>
-	</fieldset>
+        <div id="fieldsDiv" class="fieldsBox" style="display:none;">
+            <fieldset id="fieldsBox">
+                <legend id="fieldsLegend" style="border: none;"><g:message code="claimsFieldLegend"/></legend>
+                <div id="fields" style=""></div>
+            </fieldset>
+        </div>
 	
 	<div style='overflow:hidden;'>
 		<div style="float:right; margin:0px 10px 0px 0px;">
-            <button id="buttonAccept" type="submit" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;">
+            <button id="buttonAccept" type="submit" class="btn btn-default" style="margin:0px 20px 0px 0px;">
                 <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
             </button>
 		</div>	
@@ -62,8 +65,8 @@
 
 </div>
 
-<g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
-	
+    <g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
+
 	<div id="newFieldTemplate" style="display:none;">
 		<g:render template="/template/newField"/>
 	</div> 
@@ -72,14 +75,14 @@
 <r:script>
     var numClaimFields = 0
 
-    $(function() {  });
+    $(function() { });
 
     function submitForm(form) {
         if(!validateForm()) return false;
         var eventVS = new EventVS();
         eventVS.subject = $("#subject").val();
         eventVS.content = getEditor_editorDivData();
-        eventVS.dateFinish = $("#dateFinish").datepicker('getDate').format();
+        eventVS.dateFinish = document.getElementById("dateFinish").getValidatedDate().format();
         var claimFields = new Array();
         $("#fieldsBox").children().each(function(){
             var claimField = $(this).find('div.newFieldValueDiv');
@@ -113,22 +116,18 @@
                 $(this).parent().fadeOut(1000,
                 function() { $(this).parent().remove(); });
                 numClaimFields--
-                if(numClaimFields == 0) {
-                    $("#fieldsBox").fadeOut(1000)
-                }
+                if(numClaimFields == 0) $("#fieldsDiv").fadeOut(500)
             }
         )
         $("#fieldsBox #fields").append($newField)
-        if(numClaimFields == 0) {
-            $("#fieldsBox").fadeIn(1000)
-        }
+        if(numClaimFields == 0) $("#fieldsDiv").fadeIn(500)
         numClaimFields++
         $("#claimFieldText").val("");
     }
 
     function validateForm() {
         var subject = $("#subject"),
-        dateFinish = $("#dateFinish"),
+        dateFinish = document.getElementById("dateFinish").getValidatedDate(),
         editorDiv = $("#editorDiv"),
         allFields = $([]).add(subject).add(dateFinish).add(editorDiv);
         allFields.removeClass( "formFieldError" );
@@ -139,14 +138,12 @@
             return false
         }
 
-        if(!document.getElementById('dateFinish').validity.valid) {
-            dateFinish.addClass( "formFieldError" );
+        if(dateFinish == null) {
             showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
             return false
         }
 
-        if(dateFinish.datepicker("getDate") < new Date() ) {
-            dateFinish.addClass( "formFieldError" );
+        if(dateFinish < new Date() ) {
             showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
             return false
         }

@@ -133,11 +133,30 @@ DateUtils.parse = function (dateStr) {
 		return dateObject
 	}
 
+//parse dates with format "yyyy-mm-dd"
+DateUtils.parseInputType = function (dateStr) {
+		var reggie = /(\d{4})-(\d{2})-(\d{2})/;
+		var dateArray = reggie.exec(dateStr);
+		var dateObject = new Date(
+		    (+dateArray[1]),
+		    (+dateArray[2])-1, //Months are zero based
+		    (+dateArray[3])
+		);
+		return dateObject
+	}
+
 DateUtils.checkDate = function (dateInit, dateFinish) {
 		var todayDate = new Date();
 		if(todayDate > dateInit && todayDate < dateFinish) return true;
 		else return false;
 	}
+
+function FormUtils(){}
+
+FormUtils.checkIfEmpty = function (param) {
+    if((param == undefined) || (param == null) || '' == param.trim()) return true;
+    else return false
+}
 
 Date.prototype.format = function() {
 	var curr_date = this.getDate();
@@ -305,6 +324,20 @@ function validateNIF(nif) {
     else return nif;
 }
 
+function checkInputType(inputType) {
+    if(null == inputType || '' == inputType.trim()) return false
+    var isSuppported = true
+    var elem = document.createElement("input");
+    elem.type = inputType;
+    if (elem.disabled || elem.type != inputType) isSuppported = false;
+    if("text" != inputType.toLowerCase()) {
+        try {
+            elem.value = "Test";
+            if(elem.value == "Test") isSuppported = false;
+        } catch(e) { console.log(e) }
+    }
+    return isSuppported
+}
 
 var dynatableInputs = {
         queries: null,
@@ -328,7 +361,7 @@ var dynatableInputs = {
         pageText:'',
         recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
         recordCountTotalTemplate: '{recordsQueryCount}',
-        processingText: '<span class="dynatableLoading">"<g:message code="updatingLbl"/><i class="fa fa-refresh fa-spin"></i></span>'
+        processingText: '<span class="dynatableLoading">"<g:message code="updatingLbl"/> <i class="fa fa-refresh fa-spin"></i></span>'
 }
 
 
@@ -343,5 +376,6 @@ var dynatableParams = {
   }
 
 var dynatableFeatures =  {
-    search: false
+    search: false,
+     paginate: true
 }

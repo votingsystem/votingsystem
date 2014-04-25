@@ -22,7 +22,7 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.search.SearchHelper
 import org.votingsystem.util.DateUtils
 /**
- * @infoController Búsquedas
+ * @infoController Búsquedas mediante
  * @descController Servicios de búsqueda sobre los datos generados por la aplicación
  *
  * @author jgzornoza
@@ -33,7 +33,7 @@ class SearchController {
    SearchHelper searchHelper;
    def sessionFactory
    def eventVSService
-    def grailsApplication
+   def grailsApplication
    def userVSService
 
    
@@ -95,7 +95,7 @@ class SearchController {
 	 * @param [offset] Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @responseContentType [application/json]
 	 */
-    def eventVS () {
+    def eventVS_HS () {
         def eventsVSMap = new HashMap()
 		if (params.consultaTexto) {
 	        List<EventVS> eventsVS = searchHelper.findByFullText(EventVS.class,
@@ -107,6 +107,89 @@ class SearchController {
 	        }
 		}
         render eventsVSMap as JSON
+    }
+
+    /**
+     * Servicio que busca entre los eventos publicados una cadena de texto en el rango de fechas solicitado.
+     *
+     * @httpMethod [GET]
+     * @param [searchText] Opcional. Texto de la búsqueda.
+     * @param [dateBeginFrom] Opcional. Fecha límite inferior de comienzo del evento.
+     * @param [dateBeginTo] Opcional. Fecha límite superior de comienzo del evento.
+     * @param [max] Opcional (por defecto 20). Número máximo de documentos que
+     * 		  devuelve la consulta (tamaño de la página).
+     * @param [offset] Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+     * @responseContentType [application/json]
+     */
+    def eventVS () {
+        List<EventVS> eventvsList = null
+        def resultList = []
+        int totalEventvs = 0;
+        EventVS.withTransaction {
+            Date dateBeginFrom = null
+            Date dateBeginTo = null
+            EventVS.Type eventvsType = null
+            EventVS.State eventVSState
+            try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
+            if(params.dateBeginFrom) try {dateBeginFrom = DateUtils.getDateFromString(params.dateBeginFrom)} catch(Exception ex) {}
+            if(params.dateBeginTo) try {dateBeginTo = DateUtils.getDateFromString(params.dateBeginTo)} catch(Exception ex) {}
+            if(params.eventvsType) try {eventvsType = EventVS.Type.valueOf(params.eventvsType)} catch(Exception ex) {}
+            def criteria
+            switch(eventvsType) {
+                case EventVS.Type.MANIFEST:
+                    criteria = EventVSManifest.createCriteria();
+                    break;
+                case EventVS.Type.CLAIM:
+                    criteria = EventVSClaim.createCriteria();
+                    break;
+                case EventVS.Type.ELECTION:
+                    criteria = EventVSElection.createCriteria();
+                    break;
+            }
+
+            eventvsList = criteria.list(max: params.max, offset: params.offset, sort:params.sort, order:params.order) {
+                or {
+                    ilike('subject', "%${params.searchText}%")
+                    ilike('content', "%${params.searchText}%")
+                }
+                and {
+                    if(dateBeginFrom && dateBeginTo) {between("dateBegin", dateBeginFrom, dateBeginTo)}
+                    else if(dateBeginFrom) {ge("dateBegin", dateBeginFrom)}
+                    else if(dateBeginTo) {le("dateBegin", dateBeginTo)}
+                }
+                if(eventVSState == EventVS.State.TERMINATED) {
+                    or{
+                        eq("state", EventVS.State.TERMINATED)
+                        eq("state", EventVS.State.CANCELLED)
+                    }
+                } else if(eventVSState) {
+                    eq("state", eventVSState)
+                } else {
+                    or{
+                        eq("state", EventVS.State.ACTIVE)
+                        eq("state", EventVS.State.AWAITING)
+                        eq("state", EventVS.State.TERMINATED)
+                        eq("state", EventVS.State.CANCELLED)
+                    }
+                }
+            }
+            totalEventvs = eventvsList.totalCount
+            eventvsList.each {eventvsItem ->
+                switch(eventvsType) {
+                    case EventVS.Type.MANIFEST:
+                        resultList.add(eventVSService.getEventVSMap(eventvsItem))
+                        break;
+                    case EventVS.Type.CLAIM:
+                        resultList.add(eventVSService.getEventVSClaimMap(eventvsItem))
+                        break;
+                    case EventVS.Type.ELECTION:
+                        resultList.add(eventVSService.getEventVSElectionMap(eventvsItem))
+                        break;
+                }
+            }
+        }
+        def resultMap = [eventVS:resultList, totalEventVS: totalEventvs]
+        render resultMap as JSON
     }
 
 	/**

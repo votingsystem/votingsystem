@@ -4,23 +4,21 @@
 	<meta name="layout" content="main" />
 </head>
 <body>
-<div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">	
-	<div>
-		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
-			<div style="display:table-cell;">
-                <button type="button" onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
-                        class="btn btn-default btn-lg">
-                    <g:message code="saveAsRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i>
-                </button>
-			</div>
-			<div class="representativeNameHeader">
-				<div>${representativeFullName}</div>
-			</div>
-			<div  class="representativeNumRepHeader">
-				<div>  ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/></div>
-			</div>
-		</div>
-	</div>
+<div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">
+    <div class="text-center row" style="margin:20px auto 15px 0px;">
+        <div class="representativeNameHeader col-md-7">
+            <div>${representativeFullName}</div>
+        </div>
+        <div  class="representativeNumRepHeader col-md-2">
+            <div>  ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/></div>
+        </div>
+        <div class="col-md-1">
+            <button type="button" onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
+                    class="btn btn-default">
+                <g:message code="saveAsRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i>
+            </button>
+        </div>
+    </div>
 	<div id="tabs" style="min-height: 700px; margin: 0 30px 0 30px;">
 		    <ul>
 			    <li><a href="#tabs-1" style="font-size: 0.8em;"><g:message code='profileLbl'/></a></li>
@@ -93,18 +91,11 @@
 		    
 		   $('#reqVotingHistoryForm').submit(function(event){
 		 		event.preventDefault();
-				var dateFrom = $("#dateFrom"),
-					dateTo = $("#dateTo"); 
+				var dateFrom = document.getElementById("dateFrom").getValidatedDate(),
+					dateTo = document.getElementById("dateTo").getValidatedDate();
 	        	allFields = $([]).add(dateFrom).add(dateTo);
 				allFields.removeClass("formFieldError");
-
-				if(dateFrom.datepicker("getDate") > 
-					dateTo.datepicker("getDate")) {
-					showResultDialog("${message(code:'dataFormERRORLbl')}",'<g:message code="dateRangeERRORMsg"/>')
-					dateFrom.addClass("formFieldError");
-					dateTo.addClass("formFieldError");
-					return false
-				}
+                if(!checkDateRange()) return false
 				requestVotingHistory();
 		   })
 		   
@@ -119,8 +110,8 @@
 	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
 	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
     		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-        	var dateFromStr = $("#dateFrom").datepicker('getDate').format()
-        	var dateToStr = $("#dateTo").datepicker('getDate').format() 
+        	var dateFromStr =  document.getElementById("dateFrom").getValidatedDate().format()
+        	var dateToStr = document.getElementById("dateTo").getValidatedDate().format()
         	console.log("requestVotingHistory - dateFromStr: " + dateFromStr + " - dateToStr: " + dateToStr)
 			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representativeNif:"${representative.nif}",
     				representativeName:"${representativeFullName}", dateFrom:dateFromStr,
@@ -133,7 +124,7 @@
 		}
 
 		function requestAccreditations() {
-			var accreditationDateSelectedStr = $("#accreditationDateSelected").datepicker('getDate').format()
+			var accreditationDateSelectedStr = document.getElementById("accreditationDateSelected").getValidatedDate().format()
 			console.log("requestAccreditations - accreditationDateSelectedStr: " + accreditationDateSelectedStr)
 	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
 	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"

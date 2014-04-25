@@ -10,7 +10,7 @@
 </head>
 <body>
 <div>
-    <div id="menu" style="visibility:hidden;">
+    <div id="menu" class="navBarMainMenu" style="">
         <nav>
             <h2><i class="fa fa-reorder"></i>
                 <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
@@ -41,11 +41,11 @@
                     <h2><i class="fa fa-users"></i><g:message code="representativesPageLbl"/></h2>
                     <ul>
                         <li>
-                            <a href="${createLink(controller: 'representative', action: 'main')}" style="font-weight: normal;">
+                            <a href="${createLink(controller: 'representative', action: 'main')}" style="">
                                 <g:message code="selectRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i></a>
                         </li>
                         <li>
-                            <a href="${createLink(controller: 'representative', action: 'representativeAdmin')}" style="font-weight: normal;">
+                            <a href="${createLink(controller: 'representative', action: 'representativeAdmin')}" style="">
                                 <g:message code="adminRepresentativeLbl"/> <i class="fa fa-cogs"></i>
                             </a>
                         </li>
@@ -88,14 +88,14 @@
         <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
         <div class="container">
             <div class="container-fluid">
-                <div class="navbar-collapse collapse">
+                <div class="navbar-default">
                     <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 0px 0 30px;
                     font-weight: bold; "><a id="selectedSubsystemLink" style="color: #f9f9f9;"></a>
                     </span>
-                    <div class="navbar-form navbar-right input-group" style="width:15px;">
+                    <div id="navBarSearchInput" class="navbar-form navbar-right input-group" style=" width:200px;top:0px; visibility: hidden;">
                         <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
                                style="width:120px; border-color: #f9f9f9;">
-                        <div class="input-group-btn">
+                        <div class="input-group-btn" style="">
                             <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
                                 <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"
@@ -113,7 +113,7 @@
             </div>
         </div>
     </div>
-    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1000px; margin:0 auto;"><g:layoutBody/></div>
+    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1100px; margin:0 auto;"><g:layoutBody/></div>
 </div>
 
     <div id="appletsFrame"  style="width:0px; height:0px;">
@@ -154,8 +154,13 @@
             console.log("### unknown subsytem -> " + selectedSubsystem)
         }
 
-
-
+        $("#searchInput").bind('keypress', function(e) {
+            if (e.which == 13) {
+                if("" != $("#searchInput").val().trim()) {
+                    processUserSearch($("#searchInput").val())
+                }
+            }
+        });
 
 	    $('#selectedSubsystemLink').attr('href',selectedSubsystemLink);
 	    $('#selectedSubsystemLink').text(selectedSubsystemText)
@@ -187,7 +192,6 @@
             $('#menu').css("visibility", "visible")
             if(isMenuVisible) $('#menu').multilevelpushmenu( 'collapse' );
             else $('#menu').multilevelpushmenu( 'expand' );
-
         })
 
 		$("#showAdvancedSearchButton").click(function () {
@@ -197,12 +201,11 @@
 		 $('#searchForm').submit(function(event){
 		 	console.log("searchForm")
 		 	event.preventDefault();
-		 	var searchQuery = {textQuery:$("#searchText").val()}
-		 	getSearchResult(searchQuery)
+		 	processUserSearch($("#searchText").val())
 		 });
 
 	})
-	
+
 	function setMessageFromSignatureClient(appMessage) {
 		var appMessageJSON = toJSON(appMessage)
 		if(appMessageJSON != null) {

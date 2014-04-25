@@ -1,3 +1,4 @@
+
 <div class="eventSearchInfo" style="">
 	<div style="text-align:center;display:table-cell; width:100%;">
 		<div class="eventSearchText"></div>
@@ -11,25 +12,25 @@ var searchResultMsgTemplate = "<g:message code="searchResultMsg"/>"
 var beginSearchMsgTemplate = "<g:message code="beginSearchInfoLbl"/>"
 var endSearchMsgTemplate = "<g:message code="endSearchInfoLbl"/>"
  
-function showEventsSearchInfoMsg(searchQuery) {
-	var searchResultMsg = searchResultMsgTemplate.format(searchQuery.textQuery)
+function showEventsSearchInfoMsg(textQuery, dateBeginFrom, dateBeginTo, dateFinishFrom, dateFinishTo) {
+	var searchResultMsg = searchResultMsgTemplate.format(textQuery)
 	$(".eventSearchInfo .eventSearchText").html(searchResultMsg)
-	var dateBeginFrom = searchQuery.dateBeginFrom?searchQuery.dateBeginFrom:''
-	var dateBeginTo = searchQuery.dateBeginTo?searchQuery.dateBeginTo:''
-	if('' == dateBeginFrom && '' == dateBeginTo) {
+	if(FormUtils.checkIfEmpty(dateBeginFrom) && FormUtils.checkIfEmpty(dateBeginTo)) {
 		$(".eventSearchInfo .eventSearchDateBegin").hide()
 	} else {
 		var beginSearchMsg = beginSearchMsgTemplate.format(dateBeginFrom, dateBeginTo)
 		$(".eventSearchInfo .eventSearchDateBegin").html(beginSearchMsg)
 	}
-	var dateFinishFrom = searchQuery.dateFinishFrom?searchQuery.dateFinishFrom:''
-	var dateFinishTo = searchQuery.dateFinishTo?searchQuery.dateFinishTo:''
-	if('' == dateFinishFrom && '' == dateFinishTo) {
+	if(FormUtils.checkIfEmpty(dateFinishFrom) && FormUtils.checkIfEmpty(dateFinishTo)) {
 		$(".eventSearchInfo .eventSearchDateFinish").hide()
 	} else {
-		var endSearchMsg = endSearchMsgTemplate.format(dateFinishTo, dateFinishTo)
+		var endSearchMsg = endSearchMsgTemplate.format(dateFinishFrom, dateFinishTo)
 		$(".eventSearchInfo .eventSearchDateFinish").html(endSearchMsg)
 	}
 	$(".eventSearchInfo").fadeIn()
+}
+
+function hideEventsSearchInfoMsg() {
+    $(".eventSearchInfo").hide()
 }
 </r:script>

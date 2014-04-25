@@ -141,20 +141,15 @@
 }
 
 .representativeNameHeader {
-	font-size: 1.4em;
+	font-size: 1.5em;
 	text-overflow: ellipsis;
-	color:#141414;
-	display:table-cell; 
-	text-align:center; 
-	width: 400px;
+    color:#870000;
 }
 
 .representativeNumRepHeader {
 	font-size: 1.1em;
 	text-overflow: ellipsis;
 	color:#aaaaaa;
-	display:table-cell; 
-	text-align:center;
 }
 
 .headerTitle {
@@ -236,7 +231,7 @@
 .userAdvert {
 	margin: 20px auto 20px auto;
 	background-color: #f2f2f2;
-	font-size:0.8em; 
+	font-size:0.9em;
 	padding: 5px 10px 5px 0px;
 	-moz-border-radius: 5px; border-radius: 5px;
 	width:90%;
@@ -249,7 +244,7 @@
 .publishPageTitle {
 	font-size:1.5em;
     display: table;
-	color:#aaaaaa;
+	color:#870000;
 	margin: 5px auto 20px auto;
 }
 
@@ -339,7 +334,7 @@
     display: none;
 }
 
-#fieldsBox {
+.fieldsBox {
 	border: #f2f2f2 solid 1px;
 	margin: 50px auto 30px auto;
 	width: 80%;
@@ -347,6 +342,7 @@
 
 #fieldsBox legend {
 	font-size: 1.2em;
+    color:#870000;
 }
 
 .eventMessagePanel {

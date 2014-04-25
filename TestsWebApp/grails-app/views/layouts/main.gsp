@@ -8,7 +8,7 @@
     <r:layoutResources />
 </head>
 	<body>
-    <div id="menu" style="visibility:hidden;">
+    <div id="menu" class="navBarMainMenu" style="">
         <nav>
             <h2><i class="fa fa-reorder"></i>
                 <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>

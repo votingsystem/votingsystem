@@ -36,7 +36,7 @@
     var searchQuery
 
     $(function() {
-
+        $("#navBarSearchInput").css( "visibility", "visible" );
         $('#mainPageEventList').dynatable({
             features: dynatableFeatures,
             inputs: dynatableInputs,
@@ -48,7 +48,7 @@
                 ajax: true,
                 ajaxUrl: "${createLink(controller: 'eventVSManifest', action: 'index')}",
                 ajaxOnLoad: false,
-                perPageDefault: 100,
+                perPageDefault: 50,
                 records: []
             },
             writers: {
@@ -57,9 +57,8 @@
         });
 
         dynatable = $('#mainPageEventList').data('dynatable');
-        dynatable.settings.params.records = 'eventsVSManifests'
-        dynatable.settings.params.queryRecordCount = 'numEventsVSManifest'
-        dynatable.settings.params.totalRecordCount = 'numEventsVSManifestInSystem'
+        dynatable.settings.params.records = 'eventVS'
+        dynatable.settings.params.queryRecordCount = 'totalEventVS'
 
         $('#eventsStateSelect').on('change', function (e) {
             eventState = $(this).val()
@@ -76,6 +75,7 @@
             var targetURL = "${createLink( controller:'eventVSManifest')}";
             if("" != eventState) targetURL = targetURL + "?eventVSState=" + $(this).val()
             dynatable.settings.dataset.ajaxUrl= targetURL
+            dynatable.paginationPage.set(1);
             dynatable.process();
         });
 
@@ -95,13 +95,11 @@
         }
     )})
 
-    function getSearchResult(newSearchQuery) {
-        newSearchQuery.eventState = eventState
-        newSearchQuery.subsystem = "${selectedSubsystem}"
-        searchQuery = newSearchQuery
-        showEventsSearchInfoMsg(newSearchQuery)
-        loadEvents("${createLink(controller:'search', action:'find')}?max=" +
-                numMaxEventsForPage + "&offset=0", newSearchQuery)
+    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}?searchText=" +
+            textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo + "&eventvsType=MANIFEST"
+        dynatable.process();
     }
 
 </r:script>

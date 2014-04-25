@@ -15,16 +15,10 @@
 </g:else>
 var editor, ${attrs.id}Content = '';
 
-CKEDITOR.on('instanceReady',function( ev ) {
-	var height = $("#${attrs.id}").height() - 75
-	$("#contentDiv").fadeIn(500)
-	editor.resize( '100%', height, true )
-});
-
 function showEditor_${attrs.id}() {
-	editor = CKEDITOR.appendTo( '${attrs.id}', editorConfig);
-	$("#${attrs.id}").fadeIn()
-	editor.focus();
+    editor = CKEDITOR.appendTo( '${attrs.id}', editorConfig);
+    $("#${attrs.id}").fadeIn()
+
 }
 
 function getEditor_${attrs.id}Data() {
@@ -35,6 +29,15 @@ function setDataEditor_${attrs.id}(value) {
     editor.insertHtml( value );
 }
 
+$(function() {
 
-$(function() {showEditor_${attrs.id}() })
+    showEditor_${attrs.id}()
+    CKEDITOR.on('instanceReady',function( ev ) {
+        var height = $("#${attrs.id}").height() - 75
+        $("#contentDiv").fadeIn(500)
+        editor.resize( '100%', height, true )
+        editor.focus();
+    });
+
+})
 </r:script>

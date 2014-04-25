@@ -3,6 +3,7 @@
 	<form id="accreditationRequestForm">
 		<input type="hidden" autofocus="autofocus" />
 		<div style="display:table-cell;margin:0px 0px 0px 20px;">
+            <label>${message(code:'dateRequestLbl')}</label>
 			<votingSystem:datePicker id="accreditationDateSelected" title="${message(code:'dateRequestLbl')}"
 				 style="width:200px;"
 				 placeholder="${message(code:'dateRequestLbl')}"

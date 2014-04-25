@@ -10,7 +10,7 @@
 </head>
 <body>
 <div>
-    <div id="menu" style="visibility:hidden;">
+    <div id="menu" class="navBarMainMenu" style="">
         <nav>
             <h2><i class="fa fa-reorder"></i>
                 <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
@@ -38,14 +38,15 @@
         <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
         <div class="container">
             <div class="container-fluid">
-                <div class="navbar-collapse collapse">
+                <div class="navbar-default">
                     <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 0px 0 30px;
-                    font-weight: bold; "><g:message code="serverNameLabel"/>
+                    font-weight: bold; "><a id="selectedSubsystemLink" style="color: #f9f9f9;">
+                        <g:message code="serverNameLabel"/></a>
                     </span>
-                    <div class="navbar-form navbar-right input-group" style="width:15px;">
+                    <div id="navBarSearchInput" class="navbar-form navbar-right input-group" style=" width:200px;top:0px; visibility: hidden;">
                         <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
                                style="width:120px; border-color: #f9f9f9;">
-                        <div class="input-group-btn">
+                        <div class="input-group-btn" style="">
                             <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
                                 <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"

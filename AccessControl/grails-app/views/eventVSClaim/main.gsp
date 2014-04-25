@@ -35,7 +35,7 @@
     var eventState = ''
     var searchQuery
     $(function() {
-
+        $("#navBarSearchInput").css( "visibility", "visible" );
         $('#mainPageEventList').dynatable({
         features: dynatableFeatures,
         inputs: dynatableInputs,
@@ -56,9 +56,8 @@
     });
 
     dynatable = $('#mainPageEventList').data('dynatable');
-    dynatable.settings.params.records = 'eventsVSClaims'
-    dynatable.settings.params.queryRecordCount = 'numEventsVSClaim'
-    dynatable.settings.params.totalRecordCount = 'numEventsVSClaimInSystem'
+    dynatable.settings.params.records = 'eventVS'
+    dynatable.settings.params.queryRecordCount = 'totalEventVS'
 
         $('#eventsStateSelect').on('change', function (e) {
             eventState = $(this).val()
@@ -75,6 +74,7 @@
             var targetURL = "${createLink( controller:'eventVSClaim')}";
             if("" != eventState) targetURL = targetURL + "?eventVSState=" + eventState
             dynatable.settings.dataset.ajaxUrl= targetURL
+            dynatable.paginationPage.set(1);
             dynatable.process();
         });
      });
@@ -92,12 +92,11 @@
         }
     )})
 
-    function getSearchResult(newSearchQuery) {
-        newSearchQuery.eventState = eventState
-        newSearchQuery.subsystem = "${selectedSubsystem}"
-        searchQuery = newSearchQuery
-        showEventsSearchInfoMsg(newSearchQuery)
-        loadEvents("${createLink(controller:'search', action:'find')}?max=" +
-                numMaxEventsForPage + "&offset=0", newSearchQuery)
+    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}?searchText=" +
+            textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo + "&eventvsType=CLAIM"
+        dynatable.process();
     }
+
 </r:script>

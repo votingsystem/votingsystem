@@ -116,12 +116,14 @@
     function processUserSearch(textToSearch) {
         $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
         dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
+        dynatable.paginationPage.set(1);
         dynatable.process();
     }
 
     function processUserSearchJSON(jsonData) {
         dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}"
         dynatable.settings.dataset.ajaxData = jsonData
+        dynatable.paginationPage.set(1);
         dynatable.process();
     }
 

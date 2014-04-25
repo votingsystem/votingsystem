@@ -143,8 +143,7 @@ $("#testButton").click(function () {
 
 
 var manifestEditorDiv = $("#manifestEditorDiv")
-dateFinish    = $("#dateFinish")
-allFields = $( [] ).add(dateFinish).add(manifestEditorDiv);
+allFields = $( [] ).add(manifestEditorDiv);
 
 var callerCallback
 
@@ -168,14 +167,14 @@ $('#manifestProtocolSimulationDataForm').submit(function(event){
 	var event = {subject:$('#subject').val(),
 	        content:getEditor_manifestEditorDivData(),
 	        dateBegin:dateBeginStr,
-	        dateFinish:dateFinish.datepicker("getDate").format()}
+	        dateFinish:document.getElementById("dateFinish").getValidatedDate().format()}
 
 	 var simulationData = {service:"manifestSimulationService", status:"INIT_SIMULATION",
 	         accessControlURL:$('#accessControlURL').val(),
 			 maxPendingResponses: $('#maxPendingResponses').val(),
 			 numRequestsProjected: $('#numRequestsProjected').val(),
 			 dateBeginDocument: dateBeginStr,
-			 dateFinishDocument: dateFinish.datepicker("getDate").format(),
+			 dateFinishDocument: getElementById("dateFinish").getValidatedDate().format(),
 			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(),
 			 backupRequestEmail:$('#emailRequestBackup').val(),
 			 event:event}
@@ -204,13 +203,13 @@ function isValidForm() {
 		accessControlURL = "http://" + accessControlURL
 	}
 
-	if(dateFinish.datepicker("getDate") === null) {
-		dateFinish.addClass( "formFieldError" );
+    var dateFinish = document.getElementById("dateFinish").getValidatedDate()
+	if(dateFinish == null) {
 		showErrorMsg('<g:message code="emptyFieldMsg"/>')
 		return false
 	}
 
-	if(dateFinish.datepicker("getDate") < new Date()) {
+	if(dateFinish < new Date()) {
 		showErrorMsg('<g:message code="dateFinishBeforeTodayERRORMsg"/>')
 		dateFinish.addClass("formFieldError");
 		return false
