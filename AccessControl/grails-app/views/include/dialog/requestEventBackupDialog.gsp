@@ -5,7 +5,7 @@
 	<form id="requestEventBackupForm">
 		<div style="margin:15px 0px 20px 0px">
 			<input type="email" id="eventBackupUserEmailText" style="width:360px; margin:0px auto 0px auto;" required
-				title='<g:message code='enterEmailLbl'/>'
+				title='<g:message code='enterEmailLbl'/>' class="form-control"
 				placeholder='<g:message code='emailInputLbl'/>'
 				oninvalid="this.setCustomValidity('<g:message code="emailERRORMsg"/>')"
 				onchange="this.setCustomValidity('')"/>

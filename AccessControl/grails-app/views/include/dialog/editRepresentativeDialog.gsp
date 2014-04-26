@@ -4,7 +4,7 @@
             <input id="resetEditRepresentativeForm" type="reset" style="display:none;">
 	    	<label for="userNifText" style="margin:0px 0px 20px 0px"><g:message code="nifForEditRepresentativeLbl"/></label>
 			<input type="text" id="representativeNifText" style="width:350px; margin:0px auto 0px auto;" required
-				oninvalid="this.setCustomValidity('<g:message code="nifERRORMsg"/>')"
+				oninvalid="this.setCustomValidity('<g:message code="nifERRORMsg"/>')" class="form-control"
 	   			onchange="this.setCustomValidity('')"/>
 			<input id="submitNifCheck" type="submit" style="display:none;">
 		</form>

@@ -5,9 +5,8 @@
         <p style="text-align: center;">
             <label style="display: block;"><g:message code="numWeeksAnonymousDelegationMsg"/></label>
             <input type="number" id="numWeeksAnonymousDelegation" min="1" value="" max="52" required
-                   style="width:120px;margin:10px 20px 0px 7px;"
+                   style="width:120px;margin:10px 20px 0px 7px;" class="form-control"
                    title="<g:message code="numWeeksAnonymousDelegationMsg"/>"
-                   placeholder="<g:message code="numWeeksAnonymousDelegationMsg"/>"
                    oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
                    onchange="this.setCustomValidity('')">
         </p>

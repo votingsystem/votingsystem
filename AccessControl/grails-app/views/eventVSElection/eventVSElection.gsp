@@ -26,21 +26,20 @@
 
 <g:if test="${messageToUser != null}">
     <div id="eventMessagePanel" class="eventMessagePanel">
-        <p class="messageContent">
-            ${messageToUser}
-        </p>
+        <p class="messageContent">${messageToUser}</p>
     </div>
 </g:if>
 
-<div class="publishPageTitle"> ${eventMap?.subject}</div>
+<div class="publishPageTitle">${eventMap?.subject}</div>
 
-<div style="display:inline-block; width:100%; font-size:0.8em;">
-    <div class="datetime" style="display:inline;margin:0px 20px 0px 60px;">
+<div style="" class="row">
+    <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
+    <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
         <b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
     </div>
     <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
             EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-        <div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
+        <div id="adminDocumentLink" class="appLink" style="float:right; margin:0px 50px 0px 0px;">
             <g:message code="adminDocumentLinkLbl"/>
         </div>
     </g:if>
@@ -51,19 +50,17 @@
         <div class="eventContentDiv">${raw(eventMap?.content)}</div>
     </div>
 
-    <div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
-        <div id="eventAuthorDiv"><b>
-            <g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
-        </div>
+    <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;">
+        <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
     </div>
 
-    <div class="eventOptionsDiv">
-        <fieldset id="fieldsBox" style="">
+    <div class="eventOptionsDiv row">
+        <fieldset id="fieldsBox" class="fieldsBox" style="">
             <legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
             <div id="fields" style="width:100%;">
                 <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
                     <g:each in="${eventMap?.fieldsEventVS}">
-                        <button class="btn btn-default btn-lg"
+                        <button class="btn btn-default btn-lg voteOptionButton"
                                 style="width: 90%;margin: 10px auto 30px auto;"
                                 optionId = "${it.id}" optionContent="${it.content}"  onclick="return false;">
                             ${it.content}
@@ -85,7 +82,6 @@
 </div>
 
 <g:render template="/template/signatureMechanismAdvert"/>
-
 <g:include view="/include/dialog/confirmOptionDialog.gsp"/>
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
 
@@ -94,6 +90,15 @@
 <r:script>
     <g:applyCodec encodeAs="none">
         var votingEvent = ${eventMap as JSON}
+        if(votingEvent.state == "ACTIVE") {
+            $(".publishPageTitle").css("color", "#388746")
+            var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
+                    $("#pendingTimeDiv").text(pendingMsgTemplate.format(votingEvent.dateFinish.getElapsedTime()))
+        }
+        if(votingEvent.state == "ACTIVE") {
+            var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
+            $("#pendingTimeDiv").text(pendingMsgTemplate.format(votingEvent.dateFinish.getElapsedTime()))
+        }
         var selectedOption
         $(function() {
             if(${messageToUser != null?true:false}) {

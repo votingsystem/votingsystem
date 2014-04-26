@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
     <r:external uri="/images/euro_16.png"/>
-    <r:require module="multilevelmenu"/>
+    <r:require module="application"/>
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>

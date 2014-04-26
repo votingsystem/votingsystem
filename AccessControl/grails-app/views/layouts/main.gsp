@@ -5,6 +5,7 @@
 	<title><g:message code="serverNameLabel"/></title>
     <r:external uri="/images/AccessControl.ico"/>
 	<r:require module="application"/>
+    <r:require module="multilevel_menu"/>
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>

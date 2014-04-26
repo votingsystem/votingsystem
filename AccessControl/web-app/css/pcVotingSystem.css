@@ -80,7 +80,7 @@
     font-size: 1.6em;
     text-align: left;
     line-height: 19px;
-    color: #6bad74;
+    color: #388746;
 }
 
 .checkBox input[type="checkbox"] {
@@ -269,7 +269,7 @@
 
 .eventContentDiv {
     border: #f2f2f2 solid 1px;
-    margin:10px 0px 15px 15px;
+    margin:0px 0px 0px 0px;
     min-height:300px;
    	padding: 10px 10px 10px 10px;
    	overflow: hidden;
@@ -296,15 +296,15 @@
 }
 
 .eventVSActive {
-    border: 1px solid #6bad74;
+    border: 1px solid #388746;
 }
 
 .eventVSActive .eventSubjectDiv{
-    background-color:#6bad74;
+    background-color:#388746;
 }
 
 .eventVSActive .eventStateDiv{
-    color:#6bad74;
+    color:#388746;
 }
 
 .eventVSAwaiting {
@@ -336,13 +336,13 @@
 }
 
 .fieldsBox {
-	border: #f2f2f2 solid 1px;
 	margin: 10px auto 30px auto;
 	width: 80%;
 }
 
 #fieldsBox legend {
 	font-size: 1.2em;
+    font-weight: bold;
     color:#870000;
 }
 
@@ -406,15 +406,6 @@
 	-ms-transform:rotate(20deg); 
 	-webkit-transform:rotate(20deg); 
 	-moz-transform: rotate(20deg);
-}
-
-.claimFieldInput {
-	font-size: 1.5em; 
-	display: block; 
-	width: 90%;
-	margin: 10px auto 5px auto;
-	padding: 3px;
-	text-overflow: ellipsis;
 }
 
 #eventsDiv {

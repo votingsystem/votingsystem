@@ -81,9 +81,9 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
         var $newEvent = $(this.eventHTML)
 
         if(EventVS.State.ACTIVE == this.state) {
-            $newEvent.css('border-color', '#6bad74')
-            $newEvent.find(".eventSubjectDiv").css('background-color', '#6bad74')
-            $newEvent.find(".eventStateDiv").css('color', '#6bad74')
+            $newEvent.css('border-color', '#388746')
+            $newEvent.find(".eventSubjectDiv").css('background-color', '#388746')
+            $newEvent.find(".eventStateDiv").css('color', '#388746')
         }
         if(EventVS.State.TERMINATED == this.state) {
             $newEvent.css('border-color', '#cc1606')

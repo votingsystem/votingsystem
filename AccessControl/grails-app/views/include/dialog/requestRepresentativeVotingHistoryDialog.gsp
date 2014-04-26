@@ -21,7 +21,7 @@
 		</div>
 		<div style="margin:15px 0px 20px 0px">
 			<input type="email" id="userEmailText" style="width:350px; margin:0px auto 0px auto;" required
-				title='<g:message code='enterEmailLbl'/>'
+				title='<g:message code='enterEmailLbl'/>' class="form-control"
 				placeholder='<g:message code='emailInputLbl'/>'
 				oninvalid="this.setCustomValidity('<g:message code="emailERRORMsg"/>')"
 				onchange="this.setCustomValidity('')"/>

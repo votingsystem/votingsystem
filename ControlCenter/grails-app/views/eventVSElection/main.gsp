@@ -10,7 +10,7 @@
             <div style="position:absolute;width: 50%;  margin: auto; left: 0; right: 0;">
                 <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
                     <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-                    <option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
+                    <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
                     <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
                     <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
                 </select>

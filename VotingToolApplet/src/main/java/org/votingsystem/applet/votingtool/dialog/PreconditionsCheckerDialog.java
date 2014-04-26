@@ -79,6 +79,8 @@ public class PreconditionsCheckerDialog extends JDialog {
                 responseVS.setData(actorVS);
                 logger.error("checkActorVS - adding " + serverURL.trim() + " to actor map");
                 actorMap.put(serverURL.trim(), actorVS);
+            } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
+                responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
             }
             return responseVS;
         } else {

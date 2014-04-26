@@ -5,8 +5,7 @@
         <form id="addVoteOptionForm">
             <input type="text" id="newOptionText" style="width:350px; margin:10px auto 0px auto;"
                    oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                   onchange="this.setCustomValidity('')"
-                   class="text ui-widget-content ui-corner-all" required/>
+                   onchange="this.setCustomValidity('')" class="form-control" required/>
             <input id="submitOption" type="submit" style="display:none;">
         </form>
     </div>

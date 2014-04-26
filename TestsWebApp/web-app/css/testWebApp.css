@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'digi';
+    src: url('./fonts/DS-DIGII.TTF');
+}
+
 html {
     font-size: 100%;
     -webkit-text-size-adjust: 100%;

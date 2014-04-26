@@ -9,7 +9,7 @@
         <div style="display:table-cell;margin: auto; vertical-align: top;">
             <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
                 <option value="" style="color:black;"> - <g:message code="selectClaimsLbl"/> - </option>
-                <option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
+                <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
                 <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
             </select>

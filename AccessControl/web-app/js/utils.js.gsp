@@ -361,7 +361,7 @@ var dynatableInputs = {
         pageText:'',
         recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
         recordCountTotalTemplate: '{recordsQueryCount}',
-        processingText: '<span class="dynatableLoading">"<g:message code="updatingLbl"/> <i class="fa fa-refresh fa-spin"></i></span>'
+        processingText: '<span class="dynatableLoading" style=""><g:message code="updatingLbl"/> <i class="fa fa-refresh fa-spin"></i></span>'
 }
 
 

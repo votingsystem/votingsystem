@@ -35,9 +35,10 @@
 	</g:if>
 
     <div class="publishPageTitle"> ${eventMap?.subject}</div>
-	
-	<div style="width:100%; font-size:0.8em; margin:2px 0px 10px 0px;">
-		<div class="datetime" style="display:inline;margin:0px 20px 0px 60px;">
+
+    <div style="" class="row">
+        <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
+        <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
@@ -52,10 +53,10 @@
 		<div style="">
 			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
 		</div>
-		
-		<div style="width:100%; height: 50px;">
+
+        <div class="row">
 			<g:if test="${eventMap?.numSignatures > 0}">
-				<div style="float:left;margin:0px 0px 0px 40px;">
+                <div style="float:left;margin:10px 0px 0px 40px;">
                     <button id="requestBackupButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0;">
                         <g:message code="numClaimsForEvent" args="${[eventMap?.numSignatures]}"/>
                     </button>
@@ -75,7 +76,7 @@
 						<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
 							<g:each in="${eventMap?.fieldsEventVS}">
 				  				<input type='text' id='claimField${it.id}' required 
-				  					class='claimFieldInput'
+				  					class='form-control'
 	  								title='${it.content}' placeholder='${it.content}'
 	   								oninvalid="this.setCustomValidity('<g:message code='emptyFieldLbl'/>')"
 	   								onchange="this.setCustomValidity('')" />
@@ -96,7 +97,7 @@
 		</g:if>
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
 			<div style="overflow: hidden;">
-                <button id="signClaimFieldButton" type="submit" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px; float:right;">
+                <button id="signClaimFieldButton" type="submit" class="btn btn-default btn-lg" style="margin:20px 20px 0px 0px; float:right;">
                     <g:message code="signClaim"/> <i class="fa fa-check"></i>
                 </button>
 			</div>
@@ -113,108 +114,113 @@
 </html>
 <r:script>
 <g:applyCodec encodeAs="none">
-       	var pageEvent = ${eventMap as JSON} 
-       	var fieldsArray = new Array();
-	 	$(function() {
-			if(${messageToUser != null?true:false}) { 
-				$("#eventMessagePanel").addClass("${eventClass}");
-			}
-			
-    		$("#adminDocumentLink").click(function () {
-    			showAdminDocumentDialog(adminDocumentCallback)
-	    	})
+    var pageEvent = ${eventMap as JSON}
+    if(pageEvent.state == "ACTIVE") {
+        $(".publishPageTitle").css("color", "#388746")
+        var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
+                $("#pendingTimeDiv").text(pendingMsgTemplate.format(pageEvent.dateFinish.getElapsedTime()))
+    }
+    var fieldsArray = new Array();
+    $(function() {
+        if(${messageToUser != null?true:false}) {
+            $("#eventMessagePanel").addClass("${eventClass}");
+        }
 
-		    $('#submitClaimForm').submit(function(event){
-		        event.preventDefault();
-		        sendSignature()
-		    });
-    		$("#requestBackupButton").click(function () {
-                <g:if test="${eventMap?.backupAvailable}">
-                    showRequestEventBackupDialog(requestBackupCallback)
-                </g:if>
-                <g:else>
-                    showRequestEventBackupDialog(requestBackupCallback, "<g:message code="backupOnlyForPublisherMsg"/>")
-                </g:else>
-	    	})
-		 });
+        $("#adminDocumentLink").click(function () {
+            showAdminDocumentDialog(adminDocumentCallback)
+        })
 
-		function sendSignature() {
-			console.log("sendSignature")
-	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SMIME_CLAIM_SIGNATURE)
-	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-   			webAppMessage.serviceURL = "${createLink( controller:'eventVSClaimCollector', absolute:true)}"
-  				webAppMessage.signedMessageSubject = "${eventMap.subject}"
-			webAppMessage.eventVS = pageEvent
+        $('#submitClaimForm').submit(function(event){
+            event.preventDefault();
+            sendSignature()
+        });
+        $("#requestBackupButton").click(function () {
+            <g:if test="${eventMap?.backupAvailable}">
+                showRequestEventBackupDialog(requestBackupCallback)
+            </g:if>
+            <g:else>
+                showRequestEventBackupDialog(requestBackupCallback, "<g:message code="backupOnlyForPublisherMsg"/>")
+            </g:else>
+        })
+     });
 
-			var fieldsArray = new Array();
-			<g:each in="${eventMap?.fieldsEventVS}" status="i" var="claimField">
-				fieldsArray[${i}] = {id:${claimField?.id}, content:'${claimField?.content}', value:$("#claimField${claimField?.id}").val()}
-			</g:each>
-			pageEvent.fieldsEventVS = fieldsArray
-			pageEvent.operation = Operation.SMIME_CLAIM_SIGNATURE
-			webAppMessage.signedContent = pageEvent
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-			votingSystemClient.setMessageToSignatureClient(webAppMessage, sendSignatureCallback); 
-		}
+    function sendSignature() {
+        console.log("sendSignature")
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SMIME_CLAIM_SIGNATURE)
+        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+        webAppMessage.serviceURL = "${createLink( controller:'eventVSClaimCollector', absolute:true)}"
+            webAppMessage.signedMessageSubject = "${eventMap.subject}"
+        webAppMessage.eventVS = pageEvent
 
-		function requestBackupCallback(appMessage) {
-			console.log("requestBackupCallback");
-			var appMessageJSON = toJSON(appMessage)
-			if(appMessageJSON != null) {
-				if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
-					$("#loadingVotingSystemAppletDialog").dialog("close");
-					$("#workingWithAppletDialog").dialog("open");
-				} else {
-					$("#workingWithAppletDialog" ).dialog("close");
-					var caption = '<g:message code="operationERRORCaption"/>'
-					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-						caption = "<g:message code='operationOKCaption'/>"
-					}
-					var msg = appMessageJSON.message
-					showResultDialog(caption, msg)
-				}
-			}
-		}
+        var fieldsArray = new Array();
+        <g:each in="${eventMap?.fieldsEventVS}" status="i" var="claimField">
+            fieldsArray[${i}] = {id:${claimField?.id}, content:'${claimField?.content}', value:$("#claimField${claimField?.id}").val()}
+        </g:each>
+        pageEvent.fieldsEventVS = fieldsArray
+        pageEvent.operation = Operation.SMIME_CLAIM_SIGNATURE
+        webAppMessage.signedContent = pageEvent
+        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+        votingSystemClient.setMessageToSignatureClient(webAppMessage, sendSignatureCallback);
+    }
 
-		function sendSignatureCallback(appMessage) {
-			console.log("sendSignatureCallback - message from native client: " + appMessage);
-			var appMessageJSON = toJSON(appMessage)
-			if(appMessageJSON != null) {
-				$("#workingWithAppletDialog" ).dialog("close");
-				var caption = '<g:message code="operationERRORCaption"/>'
-				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-					caption = "<g:message code='operationOKCaption'/>"
-				} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
-					caption = "<g:message code='operationCANCELLEDLbl'/>"
-				}
-				showResultDialog(caption, "<g:message code='operationOKMsg'/>")
-			}
-		}
-		
-        function adminDocumentCallback(appMessage) {
-            console.log("adminDocumentCallback - message from native client: " + appMessage);
-            var appMessageJSON = toJSON(appMessage)
-            if(appMessageJSON != null) {
-                $("#workingWithAppletDialog").dialog("close");
-                var callBack
-                var caption
-                var msg
+    function requestBackupCallback(appMessage) {
+        console.log("requestBackupCallback");
+        var appMessageJSON = toJSON(appMessage)
+        if(appMessageJSON != null) {
+            if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
+                $("#loadingVotingSystemAppletDialog").dialog("close");
+                $("#workingWithAppletDialog").dialog("open");
+            } else {
+                $("#workingWithAppletDialog" ).dialog("close");
+                var caption = '<g:message code="operationERRORCaption"/>'
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "<g:message code='operationOKCaption'/>"
-                    var msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
-                    msg = msgTemplate.format('${eventMap?.subject}');
-                    callBack = function() {
-                        var eventVSService = "${createLink(controller:'eventVSClaim')}/"
-						window.location.href = eventVSService.concat(pageEvent.id);
-                    }
-                } else {
-                    caption = "<g:message code='operationERRORCaption'/>"
-                    msg = "<g:message code='operationERRORCaption'/>"
                 }
-                showResultDialog(caption, msg, callBack)
+                var msg = appMessageJSON.message
+                showResultDialog(caption, msg)
             }
         }
+    }
+
+    function sendSignatureCallback(appMessage) {
+        console.log("sendSignatureCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        if(appMessageJSON != null) {
+            $("#workingWithAppletDialog" ).dialog("close");
+            var caption = '<g:message code="operationERRORCaption"/>'
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = "<g:message code='operationOKCaption'/>"
+            } else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
+                caption = "<g:message code='operationCANCELLEDLbl'/>"
+            }
+            showResultDialog(caption, "<g:message code='operationOKMsg'/>")
+        }
+    }
+
+    function adminDocumentCallback(appMessage) {
+        console.log("adminDocumentCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        if(appMessageJSON != null) {
+            $("#workingWithAppletDialog").dialog("close");
+            var callBack
+            var caption
+            var msg
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = "<g:message code='operationOKCaption'/>"
+                var msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+                msg = msgTemplate.format('${eventMap?.subject}');
+                callBack = function() {
+                    var eventVSService = "${createLink(controller:'eventVSClaim')}/"
+                    window.location.href = eventVSService.concat(pageEvent.id);
+                }
+            } else {
+                caption = "<g:message code='operationERRORCaption'/>"
+                msg = "<g:message code='operationERRORCaption'/>"
+            }
+            showResultDialog(caption, msg, callBack)
+        }
+    }
 </g:applyCodec>
 </r:script>

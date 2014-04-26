@@ -4,6 +4,7 @@
 	<title><g:message code="appTitle"/></title>
     <r:external uri="/images/TestWebApp.ico"/>
     <r:require module="application"/>
+    <r:require module="multilevel_menu"/>
     <g:layoutHead/>
     <r:layoutResources />
 </head>

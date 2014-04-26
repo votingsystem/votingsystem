@@ -174,7 +174,7 @@ $('#manifestProtocolSimulationDataForm').submit(function(event){
 			 maxPendingResponses: $('#maxPendingResponses').val(),
 			 numRequestsProjected: $('#numRequestsProjected').val(),
 			 dateBeginDocument: dateBeginStr,
-			 dateFinishDocument: getElementById("dateFinish").getValidatedDate().format(),
+			 dateFinishDocument: document.getElementById("dateFinish").getValidatedDate().format(),
 			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(),
 			 backupRequestEmail:$('#emailRequestBackup').val(),
 			 event:event}

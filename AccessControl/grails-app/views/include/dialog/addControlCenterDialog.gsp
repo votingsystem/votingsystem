@@ -7,8 +7,7 @@
    		<form id="newControlCenter">
    			<input type="url" id="controlCenterURL" style="width:500px; margin:0px auto 0px auto;" 
    				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-   				onchange="this.setCustomValidity('')"
-   				class="text ui-widget-content ui-corner-all" required/>
+   				onchange="this.setCustomValidity('')" class="form-control" required/>
   				<input id="submitControlCenter" type="submit" style="display:none;">
    		</form>
 

@@ -51,6 +51,7 @@
 
 function resetAdvancedSearchDialogForm() {
      $("#resetAdvancedSearchForm").click()
+     $("#advancedSearchDialogErrorPanel").hide()
      $("#dateBeginFromDiv_ASD").removeClass("has-error");
      $("#dateBeginToDiv_ASD").removeClass("has-error");
 }
@@ -63,17 +64,17 @@ function resetAdvancedSearchDialogForm() {
  	var dateBeginTo = document.getElementById("dateBeginTo_ASD").getValidatedDate()
 
 	if(dateBeginFrom == null) {
-		showErrorMsg('<g:message code="emptyFieldMsg"/>')
+		showAdvancedSearchErrorMsg('<g:message code="emptyFieldMsg"/>')
 		return
 	}
 	
 	if(dateBeginTo == null) {
-		showErrorMsg('<g:message code="emptyFieldMsg"/>')
+		showAdvancedSearchErrorMsg('<g:message code="emptyFieldMsg"/>')
 		return
 	}
 
 	if(dateBeginFrom > dateBeginTo) {
-		showErrorMsg('<g:message code="dateRangeERRORMsg"/>')
+		showAdvancedSearchErrorMsg('<g:message code="dateRangeERRORMsg"/>')
 		 $("#dateBeginFromDiv_ASD").addClass("has-error");
 		 $("#dateBeginToDiv_ASD").addClass("has-error");
 		return
@@ -84,7 +85,7 @@ function resetAdvancedSearchDialogForm() {
  });
 
 
-function showErrorMsg(errorMsg) {
+function showAdvancedSearchErrorMsg(errorMsg) {
 	$("#advancedSearchDialogErrorPanel").html('<p>' + errorMsg + '<p>')
 	$("#advancedSearchDialogErrorPanel").fadeIn()
 }
