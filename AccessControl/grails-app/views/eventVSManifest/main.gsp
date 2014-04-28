@@ -27,8 +27,7 @@
 </body>
 </html>
 <r:script>
-    var eventState = ''
-    var searchQuery
+    var dynatable
 
     $(function() {
         $("#navBarSearchInput").css( "visibility", "visible" );
@@ -56,7 +55,7 @@
         dynatable.settings.params.queryRecordCount = 'totalEventVS'
 
         $('#eventsStateSelect').on('change', function (e) {
-            eventState = $(this).val()
+            var eventState = $(this).val()
             var optionSelected = $("option:selected", this);
             if(!isFirefox()) {
                 if($('#eventsStateSelect')[0].selectedIndex == 0) {

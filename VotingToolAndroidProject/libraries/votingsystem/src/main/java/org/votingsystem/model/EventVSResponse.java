@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +15,7 @@ public class EventVSResponse implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "EventVSResponse";
+	public static final String TAG = EventVSResponse.class.getSimpleName();
 
     private Integer numEventsVSManifest;
     private Integer numEventsVSManifestInSystem;
@@ -25,7 +27,6 @@ public class EventVSResponse implements Serializable {
     private Integer numEventVSInSystem;
     
     private int offset;
-    private int numTotal;
     private List<EventVS> eventList;
 
     public void setOffset(int offset) {
@@ -36,7 +37,6 @@ public class EventVSResponse implements Serializable {
             return offset;
     }
 
-
 	public List<EventVS> getEvents() {
 		return eventList;
 	}
@@ -45,60 +45,36 @@ public class EventVSResponse implements Serializable {
 		this.eventList = eventList;
 	}
     
-	public static EventVSResponse parse(String requestStr) throws ParseException, JSONException {
+	public static EventVSResponse parse(String requestStr, TypeVS eventType) throws ParseException,
+            JSONException {
     	JSONObject jsonObject = new JSONObject (requestStr);
         List<EventVS> eventList = new ArrayList<EventVS>();
-        JSONObject requestJSON = jsonObject.getJSONObject("eventsVS");
-        JSONArray eventsArray;
+        JSONArray eventsArray = jsonObject.getJSONArray("eventVS");
         EventVSResponse eventVSResponse = new EventVSResponse();
-        if (requestJSON != null) {
-        	if(requestJSON.has("manifests")) {
-                eventsArray = requestJSON.getJSONArray("manifests");
-                if (eventsArray != null) {
-                    for (int i=0; i<eventsArray.length(); i++) {
-                        EventVS eventVS = EventVS.parse(eventsArray.getJSONObject(i));
-                        eventVS.setTypeVS(TypeVS.MANIFEST_EVENT);
-                        eventList.add(eventVS);
-                    }
-                }
-        	}
-        	if(requestJSON.has("claims")) {
-                eventsArray = requestJSON.getJSONArray("claims");
-                if (eventsArray != null) {
-                    for (int i=0; i<eventsArray.length(); i++) {
-                        EventVS eventVS = EventVS.parse(eventsArray.getJSONObject(i));
-                        eventVS.setTypeVS(TypeVS.CLAIM_EVENT);
-                        eventList.add(eventVS);
-                    }
-                }
-        	}
-        	if(requestJSON.has("elections")) {
-                eventsArray = requestJSON.getJSONArray("elections");
-                if (eventsArray != null) {
-                    for (int i=0; i<eventsArray.length(); i++) {
-                        EventVS eventVS = EventVS.parse(eventsArray.getJSONObject(i));
-                        eventVS.setTypeVS(TypeVS.VOTING_EVENT);
-                        eventList.add(eventVS);
-                    }
-                }
-        	}
+        for (int i=0; i < eventsArray.length(); i++) {
+            EventVS eventVS = EventVS.parse(eventsArray.getJSONObject(i));
+            eventVS.setTypeVS(eventType);
+            eventList.add(eventVS);
         }
-        if(jsonObject.has("numEventsVSManifest"))
-        	eventVSResponse.setNumEventsVSManifest(jsonObject.getInt("numEventsVSManifest"));
-        if(jsonObject.has("numEventsVSManifestInSystem"))
-        	eventVSResponse.setNumEventsVSManifestInSystem(jsonObject.getInt("numEventsVSManifestInSystem"));
-        if(jsonObject.has("numEventsVSElection"))
-        	eventVSResponse.setNumEventsVSElection(jsonObject.getInt("numEventsVSElection"));
-        if(jsonObject.has("numEventsVSElectionInSystem"))
-        	eventVSResponse.setNumEventsVSElectionInSystem(jsonObject.getInt("numEventsVSElectionInSystem"));
-        if(jsonObject.has("numEventsVSClaim"))
-        	eventVSResponse.setNumEventsVSClaim(jsonObject.getInt("numEventsVSClaim"));
-        if(jsonObject.has("numEventsVSClaimInSystem"))
-        	eventVSResponse.setNumEventsVSClaimInSystem(jsonObject.getInt("numEventsVSClaimInSystem"));
-        if(jsonObject.has("numEventVSInRequest"))
-        	eventVSResponse.setNumEventVSInRequest(jsonObject.getInt("numEventVSInRequest"));
-        if(jsonObject.has("numEventVSInSystem"))
-        	eventVSResponse.setNumEventVSInSystem(jsonObject.getInt("numEventVSInSystem"));
+        switch(eventType)  {
+            case VOTING_EVENT:
+                eventVSResponse.setNumEventsVSElection(eventsArray.length());
+                eventVSResponse.setNumEventsVSElectionInSystem(jsonObject.getInt("totalEventVS"));
+                break;
+            case CLAIM_EVENT:
+                eventVSResponse.setNumEventsVSClaim(eventsArray.length());
+                eventVSResponse.setNumEventsVSClaimInSystem(jsonObject.getInt("totalEventVS"));
+                break;
+            case MANIFEST_EVENT:
+                eventVSResponse.setNumEventsVSManifest(eventsArray.length());
+                eventVSResponse.setNumEventsVSManifestInSystem(jsonObject.getInt("totalEventVS"));
+                break;
+            default:
+                Log.d(TAG + ".parse(...)", "unknown eventType: " + eventType.toString());
+
+        }
+        eventVSResponse.setNumEventVSInRequest(eventsArray.length());
+        eventVSResponse.setNumEventVSInSystem(jsonObject.getInt("totalEventVS"));
         if (jsonObject.has("offset")) eventVSResponse.setOffset(jsonObject.getInt("offset"));
         eventVSResponse.setEvents(eventList);
         return eventVSResponse;

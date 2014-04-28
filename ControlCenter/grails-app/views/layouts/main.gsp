@@ -29,7 +29,7 @@
                 </li>
                 <li>
                     <a  href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
-                        style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-envelope-o"></i>
+                        style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-phone"></i>
                     </a>
                 </li>
             </ul>
@@ -65,7 +65,7 @@
             </div>
         </div>
     </div>
-    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1000px; margin:0 auto;"><g:layoutBody/></div>
+    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1300px; margin:0 auto;"><g:layoutBody/></div>
 
 </div>
 

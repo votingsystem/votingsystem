@@ -32,7 +32,7 @@ public class EventVSService extends IntentService {
 
     public EventVSService() { super(TAG); }
 
-    AppContextVS contextVS = null;
+    private AppContextVS contextVS = null;
 
     public void checkDates(EventVS eventVS) {
         Date todayDate = Calendar.getInstance().getTime();
@@ -72,7 +72,7 @@ public class EventVSService extends IntentService {
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    EventVSResponse response = EventVSResponse.parse(responseVS.getMessage());
+                    EventVSResponse response = EventVSResponse.parse(responseVS.getMessage(), eventType);
                     if(response.getNumEventsVSClaimInSystem() != null) {
                         switch (eventState) {
                             case ACTIVE:

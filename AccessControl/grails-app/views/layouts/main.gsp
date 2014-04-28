@@ -114,7 +114,7 @@
             </div>
         </div>
     </div>
-    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1100px; margin:0 auto;"><g:layoutBody/></div>
+    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1300px; margin:0 auto;"><g:layoutBody/></div>
 </div>
 
     <div id="appletsFrame"  style="width:0px; height:0px;">

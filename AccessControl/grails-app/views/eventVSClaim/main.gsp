@@ -28,35 +28,35 @@
 </body>
 </html>
 <r:script>
-    var eventState = ''
-    var searchQuery
+    var dynatable
+
     $(function() {
         $("#navBarSearchInput").css( "visibility", "visible" );
         $('#mainPageEventList').dynatable({
-        features: dynatableFeatures,
-        inputs: dynatableInputs,
-        params: dynatableParams,
-        table: {
-            bodyRowSelector: 'li'
-        },
-        dataset: {
-            ajax: true,
-            ajaxUrl: "${createLink(controller: 'eventVSClaim', action: 'index')}",
-            ajaxOnLoad: false,
-            perPageDefault: 100,
-            records: []
-        },
-        writers: {
-            _rowWriter: eventVSWriter
-        }
-    });
+            features: dynatableFeatures,
+            inputs: dynatableInputs,
+            params: dynatableParams,
+            table: {
+                bodyRowSelector: 'li'
+            },
+            dataset: {
+                ajax: true,
+                ajaxUrl: "${createLink(controller: 'eventVSClaim', action: 'index')}",
+                ajaxOnLoad: false,
+                perPageDefault: 100,
+                records: []
+            },
+            writers: {
+                _rowWriter: eventVSWriter
+            }
+        });
 
-    dynatable = $('#mainPageEventList').data('dynatable');
-    dynatable.settings.params.records = 'eventVS'
-    dynatable.settings.params.queryRecordCount = 'totalEventVS'
+        dynatable = $('#mainPageEventList').data('dynatable');
+        dynatable.settings.params.records = 'eventVS'
+        dynatable.settings.params.queryRecordCount = 'totalEventVS'
 
         $('#eventsStateSelect').on('change', function (e) {
-            eventState = $(this).val()
+            var eventState = $(this).val()
             var optionSelected = $("option:selected", this);
             if(!isFirefox()) {
                 if($('#eventsStateSelect')[0].selectedIndex == 0) {

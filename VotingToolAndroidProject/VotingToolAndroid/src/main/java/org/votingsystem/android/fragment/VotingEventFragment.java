@@ -109,6 +109,9 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
                     showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
                 }
+            } else {
+                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage());
             }
         }
         }

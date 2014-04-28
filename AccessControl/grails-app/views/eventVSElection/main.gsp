@@ -28,8 +28,6 @@
 </html>
 <r:script>
     var dynatable
-    var eventState = ''
-    var searchQuery
 
     $(function() {
         $("#navBarSearchInput").css( "visibility", "visible" );
@@ -58,7 +56,7 @@
 
 
         $('#eventsStateSelect').on('change', function (e) {
-            eventState = $(this).val()
+            var eventState = $(this).val()
             var optionSelected = $("option:selected", this);
             console.log(" - eventState: " + eventState)
             if(!isFirefox()) {

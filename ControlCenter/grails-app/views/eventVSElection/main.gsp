@@ -5,22 +5,20 @@
 </head>
 <body>
 <div class="mainPage">
-    <div style="">
-        <div style="position:relative; height: 30px;">
-            <div style="position:absolute;width: 50%;  margin: auto; left: 0; right: 0;">
-                <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-                    <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-                    <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-                    <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
-                    <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-                </select>
-            </div>
-        </div>
-        <g:render template="/template/eventsSearchInfo"/>
-        <div class="">
-            <ul id="mainPageEventList" style="display: block; width: 100%; position: relative;" class="row"></ul>
+    <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
+        <div style="display:table-cell;margin: auto; vertical-align: top;">
+            <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
+                <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+                <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
+                <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+                <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
+            </select>
         </div>
     </div>
+
+    <g:render template="/template/eventsSearchInfo"/>
+
+    <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>
@@ -58,7 +56,7 @@
         dynatable.settings.params.totalRecordCount = 'numEventsVSElectionInSystem'
 
         $('#eventsStateSelect').on('change', function (e) {
-            eventState = $(this).val()
+            var eventState = $(this).val()
             var optionSelected = $("option:selected", this);
             console.log(" - eventState: " + eventState)
             if(!isFirefox()) {

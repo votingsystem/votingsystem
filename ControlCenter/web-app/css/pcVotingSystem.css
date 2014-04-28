@@ -10,6 +10,17 @@
 	display:table;
 }
 
+.mainPageEventList {
+    display:block;
+    overflow:hidden;
+    margin:0px 0px 100px 0px;
+    min-height: 100%;
+}
+
+.mainPageEventList ul{
+    margin:0px 0px 0px 0px;
+}
+
 .representativeDiv {
 	display:table;
 	width:385px;
@@ -187,10 +198,10 @@
 
 .eventContentDiv {
     border: #f2f2f2 solid 1px;
-    margin:0px 0px 15px 15px;
+    margin:0px 0px 0px 0px;
     min-height:300px;
-   	padding: 10px 10px 10px 10px;
-   	overflow: hidden;
+    padding: 10px 10px 10px 10px;
+    overflow: hidden;
 }
 
 .eventPageContentDiv {
