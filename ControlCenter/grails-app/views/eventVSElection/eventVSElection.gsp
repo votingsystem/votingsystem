@@ -34,12 +34,13 @@
 
     <div class="publishPageTitle"> ${eventMap?.subject}</div>
 
-	<div style="display:inline-block; width:100%; font-size:0.8em;">
-		<div style="display:inline;margin:0px 20px 0px 20px;">
+    <div style="" class="row">
+        <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
+        <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
-		<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state ||
-			EventVS.State.AWAITING.toString()}">
+		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
+			EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
 			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
 				<g:message code="adminDocumentLinkLbl"/>
 			</div>
@@ -51,11 +52,9 @@
 			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
 		</div>
 
-		<div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
-			<div id="eventAuthorDiv"><b>
-				<g:message code="publishedByLbl"/>:</b>${eventMap?.userVS}
-			</div>
-		</div>
+        <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;">
+            <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
+        </div>
 	
 		<div class="eventOptionsDiv">
 			<fieldset id="fieldsBox" style="">
@@ -70,9 +69,9 @@
                             </button>
 						</g:each>
 					</g:if>
-					<g:if test="${EventVS.State.CANCELLED.toString() == eventMap?.state ||
-						EventVS.State.TERMINATED.toString() == eventMap?.state ||
-						EventVS.State.AWAITING.toString() == eventMap?.state}">
+                    <g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state) ||
+                            EventVS.State.TERMINATED.toString().equals(eventMap?.state) ||
+                            EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
 						<g:each in="${eventMap?.fieldsEventVS}">
 							<div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
 								 - ${it.content}
@@ -84,8 +83,7 @@
 		</div>
 	</div>
 
-	<g:render template="/template/signatureMechanismAdvert"/>
-
+<g:render template="/template/signatureMechanismAdvert"/>
 <g:include view="/include/dialog/confirmOptionDialog.gsp"/>
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
 
@@ -93,7 +91,12 @@
 </html>
 <r:script>
 <g:applyCodec encodeAs="none">
-		var votingEvent = ${eventMap as JSON} 
+		var votingEvent = ${eventMap as JSON}
+        if(votingEvent.state == "ACTIVE") {
+            $(".publishPageTitle").css("color", "#388746")
+            var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
+            $("#pendingTimeDiv").text(pendingMsgTemplate.format(votingEvent.dateFinish.getElapsedTime()))
+        }
 		var selectedOption
 		$(function() {
 			if(${messageToUser != null?true:false}) {

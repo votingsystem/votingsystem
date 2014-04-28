@@ -93,7 +93,7 @@
         if(votingEvent.state == "ACTIVE") {
             $(".publishPageTitle").css("color", "#388746")
             var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
-                    $("#pendingTimeDiv").text(pendingMsgTemplate.format(votingEvent.dateFinish.getElapsedTime()))
+            $("#pendingTimeDiv").text(pendingMsgTemplate.format(votingEvent.dateFinish.getElapsedTime()))
         }
         if(votingEvent.state == "ACTIVE") {
             var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
