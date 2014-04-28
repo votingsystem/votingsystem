@@ -50,21 +50,18 @@ function isJavaEnabledClient() {
 	} else return true
 }
 
-function VotingSystemApplet () {
+function getFnName(fn) {
+	  var f = typeof fn == 'function';
+	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
+	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
+}
 
+function VotingSystemApplet () {
 	this.validationToolLoaded = false
     this.signatureClientToolLoaded = false
 	this.messageToSignatureClient = null;
 	this.messageToValidationTool = null;
 	this.signatureClientCallback = null
-
-}
-
-
-function getFnName(fn) {
-	  var f = typeof fn == 'function';
-	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
-	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
 
 VotingSystemApplet.prototype.getMessageToSignatureClient = function (appMessage) {

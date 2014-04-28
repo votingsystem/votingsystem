@@ -56,6 +56,11 @@ body {
     text-align: center;
 }
 
+.pageContenDiv {
+    max-width: 1300px;
+    margin:0 auto 0 auto;
+}
+
 .formFieldError{
     font-weight: bold;
     background: #f6ccd0;
@@ -131,4 +136,28 @@ input:focus:invalid {
 
 input:focus:valid {
     /*background: url('../images/ok_16.png') no-repeat right;*/
+}
+
+.breadcrumbVS {
+    padding: 4px 15px;
+    margin-bottom: 0px;
+    list-style: none;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.breadcrumbVS > ol {
+    margin-bottom: 0px;
+}
+
+.breadcrumbVS > li {
+    display: inline-block;
+}
+.breadcrumbVS > li + li:before {
+    padding: 0 5px;
+    color: #ccc;
+    content: "/\00a0";
+}
+.breadcrumbVS > .active {
+    color: #999;
 }

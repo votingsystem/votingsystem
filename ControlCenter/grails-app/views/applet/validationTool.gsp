@@ -1,4 +1,4 @@
-<% def jarArchives = "ValidationToolApplet.jar"
+<% def jarArchives = "ValidationTool.jar"
 	String depsPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}/applet/lib"
 	def appletJarDependencies = []
 	new File(depsPath).eachFile() { file->

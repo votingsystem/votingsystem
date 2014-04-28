@@ -1,4 +1,4 @@
-version = '0.6.0'
+version = '0.7.0'
 
 apply plugin: 'java'
 apply plugin: 'groovy'
@@ -35,7 +35,7 @@ task buildApplet(type:VotingSystemApplet){
 		attributes 'Main-Class': 'org.votingsystem.applet.votingtool.VotingApplet',
 				   'SplashScreen-Image':'resources/icon_32/application-certificate.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingToolApplet',
-				   'provider': 'SistemaVotacion.org'
+				   'provider': 'sistemavotacion.org'
 	}
 }
 

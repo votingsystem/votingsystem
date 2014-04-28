@@ -31,5 +31,7 @@ class AppController {
             }
         }*/
 	}
+
+    def tools() {}
 	
 }

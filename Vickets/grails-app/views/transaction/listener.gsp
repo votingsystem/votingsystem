@@ -15,7 +15,6 @@
         <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
             <div style="display:table-cell;margin: auto; vertical-align: top;">
                 <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; width: 400px;" class="form-control">
-                    // , , , , VICKET_CANCELLATION;
                     <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
                     <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
                     <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
@@ -49,6 +48,7 @@
 
     $(function() {
         $('#appTitle').text("<g:message code="transactionPageTitle"/>")
+        $("#navBarSearchInput").css( "visibility", "visible" );
         $('#transaction_table').dynatable({
                 features: dynatableFeatures,
                 inputs: dynatableInputs,
@@ -57,7 +57,7 @@
                     ajax: true,
                     ajaxUrl: "${createLink(controller: 'transaction', action: 'index')}",
                     ajaxOnLoad: false,
-                    perPageDefault: 100,
+                    perPageDefault: 50,
                     records: []
                 },
                 writers: {

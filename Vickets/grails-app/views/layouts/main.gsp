@@ -27,6 +27,11 @@
                         </a>
                     </li>
                     <li>
+                        <a href="${createLink(controller: 'app', action: 'tools')}">
+                            <g:message code="toolsSectionLbl"/> <i class="fa fa-cogs"></i>
+                        </a>
+                    </li>
+                    <li>
                         <a href="#">
                             <g:message code="subscriptionLbl"/><i class="fa fa-rss"></i>
                         </a>
@@ -44,11 +49,12 @@
                 <div class="container">
                     <div class="container-fluid">
                         <div class="navbar-collapse collapse">
-                            <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 0px 0 30px;
-                                    font-weight: bold; "><g:message code="appTitle"/>
-                            </span>
-                            <div class="navbar-form navbar-right input-group" style="width:15px;">
-                                <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
+                            <a href="${grailsApplication.config.grails.serverURL}" id="appTitle" class=""
+                               style="font-size: 2.5em; margin: 0 0px 0 30px; color: #f9f9f9; font-weight: bold; ">
+                                <g:message code="appTitle"/>
+                            </a>
+                            <div id="navBarSearchInput" class="navbar-form navbar-right input-group" style="width:15px;visibility: hidden;">
+                                <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl" />"
                                        style="width:120px; border-color: #f9f9f9;">
                                 <div class="input-group-btn">
                                     <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
@@ -63,7 +69,6 @@
                                     </ul>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>

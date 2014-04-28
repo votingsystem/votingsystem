@@ -1,4 +1,4 @@
-version = '0.6.0'
+version = '0.7.0'
 
 apply plugin: 'project-report'
 apply plugin: 'announce'
@@ -156,16 +156,29 @@ def copyVotingSystemApps(project) {
 	File votingToolApplet = project.file("web-app/applet/VotingToolApplet.jar")
 	if(votingToolApplet.exists()) votingToolApplet.delete()
 	votingToolApplet << rootProject.votingToolApplet?.bytes
-	
-	File validationToolApplet = project.file("web-app/applet/ValidationToolApplet.jar")
-	if(validationToolApplet.exists()) validationToolApplet.delete()
-	validationToolApplet << rootProject.validationToolApplet?.bytes
+
+    copyValidationTool(project)
 	
 	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
 	votingToolAndroid << file("VotingToolAndroidProject/VotingToolAndroid/VotingToolAndroid.apk")?.bytes
 
 	copyAppletDeps(project)
+}
+
+def copyValidationTool(project) {
+    File appletDir = project.file("web-app/applet/");
+    appletDir.mkdirs()
+
+    File validationToolApplet = project.file("web-app/applet/${rootProject.validationToolName}.jar")
+    if(validationToolApplet.exists()) validationToolApplet.delete()
+    validationToolApplet << rootProject.validationToolApplet?.bytes
+
+    File validationToolDist = project.file("web-app/applet/${rootProject.validationToolName}.zip")
+    if(validationToolDist.exists()) validationToolApplet.delete()
+    validationToolDist << rootProject.validationToolDistZip?.bytes
+
+    copyAppletDeps(project)
 }
 
 def copyAppletDeps(project) {
@@ -239,5 +252,5 @@ def runCommand(project, targetDir, commands) {
 //  2) /gradlew.bat which is the windows bat script for for executing builds
 //  3) /wrapper which is a directory named by the "jarPath" config which contains other needed files.
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.8'
+	gradleVersion = '1.11'
 }

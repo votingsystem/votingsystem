@@ -1,4 +1,4 @@
-version = '0.6.0'
+version = '0.7.0'
 
 apply plugin: 'java'
 apply plugin:'application'
@@ -6,7 +6,7 @@ apply plugin: "idea"
 
 sourceCompatibility = 7
 
-mainClassName = "org.votingsystem.org.votingsystem.applet.validationtool.ValidationApplet"
+mainClassName = "org.votingsystem.applet.validationtool.ValidationApplet"
 
 dependencies {
 
@@ -36,10 +36,10 @@ dependencies {
 task buildApplet(type:VotingSystemApplet) {
 
 	manifest {
-		attributes 'Main-Class': 'org.votingsystem.org.votingsystem.applet.validationtool.ValidationApplet',
+		attributes 'Main-Class': 'org.votingsystem.applet.validationtool.ValidationApplet',
 				   'SplashScreen-Image':'resources/icon_32/application-certificate.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/ValidationToolApplet',
-				   'provider': 'VotingSystem'
+                   'provider': 'sistemavotacion.org'
 				   //'Class-Path': configurations.runtime.collect { it.name }.join(' ')
 	}
 }
@@ -51,22 +51,27 @@ task signJar {
 			keystore: "$rootProject.projectDir/$rootProject.testUserKeyStorePath",
 			alias:rootProject.signKeyAlias,
 			jar:jar.archivePath,
-			signedjar:"$buildDir/$rootProject.validationToolAppletJarName")
-		rootProject.ext.set("validationToolApplet",file("$buildDir/$rootProject.validationToolAppletJarName"))
-		announce.announce("$rootProject.validationToolAppletJarName signed", "local")
+			signedjar:"$buildDir/${rootProject.validationToolName}.jar")
+		rootProject.ext.set("validationToolApplet",file("$buildDir/${rootProject.validationToolName}.jar"))
+		announce.announce("Applet $rootProject.validationToolName signed", "local")
 	}
 	
 }
+
+
+task copyDistZip(dependsOn: ['distZip']) {
+    doLast {
+        rootProject.ext.set("validationToolDistZip",
+                file("$buildDir/distributions/${rootProject.validationToolName}.zip"))
+    }
+}
+
 
 cleanCompileJava.dependsOn ':VotingSystemLibrary:install'
 classes.dependsOn cleanCompileJava
 buildApplet.dependsOn classes
 signJar.dependsOn buildApplet
 
-
-project.ext {
-	mainClass = "org.votingsystem.org.votingsystem.applet.validationtool.ValidationApplet"
-}
 
 sourceSets {
 	main {
@@ -75,9 +80,12 @@ sourceSets {
 	  output.classesDir   = "$buildDir/classes"
 	}
 }
-  
+
+project.ext {
+    mainClass = "validationToolApplet"
+}
 
 
-
-
-
+distZip {
+    archiveName "${rootProject.validationToolName}.zip"
+}

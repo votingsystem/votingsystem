@@ -74,7 +74,7 @@ task copydeps(type: Copy) {
 jar {
     manifest {
         attributes 'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingSystemLibrary',
-                'provider': 'GruposP2P'
+                'provider': 'sistemavotacion.org'
     }
 
     publishing {
