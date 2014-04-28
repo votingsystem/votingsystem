@@ -5,41 +5,47 @@
     <r:require module="dynatableModule"/>
 </head>
 <body>
-    <div style="width: 900px; margin: 0 auto 0 auto;">
-        <button id="loadHistoryButton" type="button" class="btn btn-primary"
-                style="margin: 10px 0px 10px 0px;display: none;">
-            <g:message code="loadHistoryLbl"/>
-            <i  id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
-        </button>
-
-        <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-            <div style="display:table-cell;margin: auto; vertical-align: top;">
-                <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; width: 400px;" class="form-control">
-                    <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
-                    <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
-                    <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
-                    <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
-                    <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
-                    <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
-                </select>
-            </div>
-        </div>
-
-        <p id="pageInfoPanel" class="" style="margin: 20px 20px 20px 20px; font-size: 1.3em; background-color: #f9f9f9;"></p>
-
-        <table class="table dynatable-vickets" id="transaction_table">
-            <thead>
-            <tr style="color: #ff0000;">
-                <th data-dynatable-column="type" style="width:210px;"><g:message code="typeLbl"/></th>
-                <th data-dynatable-column="amount"><g:message code="amountLbl"/></th>
-                <th data-dynatable-column="currency"><g:message code="currencyLbl"/></th>
-                <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
-                <th data-dynatable-column="subject" style="width:300px;"><g:message code="subjectLbl"/></th>
-                <th><g:message code="voucherLbl"/></th>
-            </tr>
-            </thead>
-        </table>
+<div class="pageContenDiv">
+    <div class="row">
+        <ol class="breadcrumbVS pull-left">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li class="active"><g:message code="transactionPageTitle"/></li>
+        </ol>
     </div>
+    <button id="loadHistoryButton" type="button" class="btn btn-primary"
+            style="margin: 10px 0px 10px 0px;display: none;">
+        <g:message code="loadHistoryLbl"/>
+        <i  id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
+    </button>
+
+    <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
+        <div style="display:table-cell;margin: auto; vertical-align: top;">
+            <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; width: 400px;" class="form-control">
+                <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
+                <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
+                <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
+                <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
+                <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
+                <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
+            </select>
+        </div>
+    </div>
+
+    <p id="pageInfoPanel" class="" style="margin: 20px 20px 20px 20px; font-size: 1.3em; background-color: #f9f9f9;"></p>
+
+    <table class="table dynatable-vickets" id="transaction_table">
+        <thead>
+        <tr style="color: #ff0000;">
+            <th data-dynatable-column="type" style="width:210px;"><g:message code="typeLbl"/></th>
+            <th data-dynatable-column="amount"><g:message code="amountLbl"/></th>
+            <th data-dynatable-column="currency"><g:message code="currencyLbl"/></th>
+            <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
+            <th data-dynatable-column="subject" style="width:300px;"><g:message code="subjectLbl"/></th>
+            <th><g:message code="voucherLbl"/></th>
+        </tr>
+        </thead>
+    </table>
+</div>
 </body>
 
 </html>
@@ -47,7 +53,6 @@
     var dynatable
 
     $(function() {
-        $('#appTitle').text("<g:message code="transactionPageTitle"/>")
         $("#navBarSearchInput").css( "visibility", "visible" );
         $('#transaction_table').dynatable({
                 features: dynatableFeatures,
