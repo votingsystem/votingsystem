@@ -46,7 +46,6 @@ body {
 #menu {
     position: fixed;
     top: 50px;
-    font-weight: bold;
     z-index:10;
 }
 

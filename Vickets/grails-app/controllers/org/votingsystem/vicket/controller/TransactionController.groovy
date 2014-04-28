@@ -35,14 +35,16 @@ class TransactionController {
         int totalTransactions = 0;
 
         TransactionVS.withTransaction {
-            if(params.searchText || params.searchFrom || params.searchTo) {
+            if(params.searchText || params.searchFrom || params.searchTo || params.transactionvsType) {
                 CurrencyVS currency = null
                 TransactionVS.Type transactionType = null
                 BigDecimal amount = null
                 Date dateFrom = null
                 Date dateTo = null
                 try {currency = CurrencyVS.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
-                try {transactionType = TransactionVS.Type.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
+                try {
+                    if(params.transactionvsType) transactionType = TransactionVS.Type.valueOf(params.transactionvsType)
+                    else transactionType = TransactionVS.Type.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
                 try {amount = new BigDecimal(params.searchText)} catch(Exception ex) {}
                 //searchFrom:2014/04/14 00:00:00, max:100, searchTo
                 if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
@@ -65,7 +67,8 @@ class TransactionController {
                 totalTransactions = transactionList.totalCount
             } else {
                 transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
-                        sort:sortParam?.key, order:sortParam?.value){};
+                        sort:sortParam?.key, order:sortParam?.value){
+                };
                 totalTransactions = transactionList.totalCount
             }
         }

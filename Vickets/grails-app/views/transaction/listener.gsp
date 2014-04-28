@@ -12,6 +12,20 @@
             <i  id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
         </button>
 
+        <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
+            <div style="display:table-cell;margin: auto; vertical-align: top;">
+                <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; width: 400px;" class="form-control">
+                    // , , , , VICKET_CANCELLATION;
+                    <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
+                    <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
+                    <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
+                    <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
+                    <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
+                    <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
+                </select>
+            </div>
+        </div>
+
         <p id="pageInfoPanel" class="" style="margin: 20px 20px 20px 20px; font-size: 1.3em; background-color: #f9f9f9;"></p>
 
         <table class="table dynatable-vickets" id="transaction_table">
@@ -61,6 +75,19 @@
         })
 
         $("#transaction_table").stickyTableHeaders({fixedOffset: $('.navbar')});
+
+
+        $('#transactionvsTypeSelect').on('change', function (e) {
+            var transactionvsType = $(this).val()
+            var optionSelected = $("option:selected", this);
+            console.log("transactionvs selected: " + transactionvsType)
+            var targetURL = "${createLink(controller: 'transaction', action: 'index')}";
+            if("" != transactionvsType) targetURL = targetURL + "?transactionvsType=" + transactionvsType
+            dynatable.settings.dataset.ajaxUrl= targetURL
+            dynatable.paginationPage.set(1);
+            dynatable.process();
+        });
+
     })
 
     $("#loadHistoryButton").click(function() {
