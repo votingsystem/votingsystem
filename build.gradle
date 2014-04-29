@@ -17,6 +17,7 @@ subprojects {
 ext {
 	votingToolApplet = null
 	validationToolApplet = null
+    validationToolDistZip = null
 	votingSystemLibrary = null
 	votingToolAndroid = null
 	certsDataMap = null
@@ -175,7 +176,7 @@ def copyValidationTool(project) {
     validationToolApplet << rootProject.validationToolApplet?.bytes
 
     File validationToolDist = project.file("web-app/applet/${rootProject.validationToolName}.zip")
-    if(validationToolDist.exists()) validationToolApplet.delete()
+    if(validationToolDist.exists()) validationToolDist.delete()
     validationToolDist << rootProject.validationToolDistZip?.bytes
 
     copyAppletDeps(project)
