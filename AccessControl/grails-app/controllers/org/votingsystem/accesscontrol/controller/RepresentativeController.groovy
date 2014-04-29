@@ -10,7 +10,6 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubSystemVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
 
 class RepresentativeController {
@@ -60,7 +59,7 @@ class RepresentativeController {
             } else {
                 String name = "${representative.name} ${representative.firstName}"
                 def resultMap = [id: representative.id, name:representative.name,
-                        firstName:representative.firstName, info:representative.description,
+                        firstName:representative.firstName, info: representative.description,
                         nif:representative.nif, fullName:"${representative.name} ${representative.firstName}"]
                 if(request.contentType?.contains(ContentTypeVS.JSON.getName())) render resultMap as JSON
                 else render(view:"editRepresentative" , model:[representative:resultMap,

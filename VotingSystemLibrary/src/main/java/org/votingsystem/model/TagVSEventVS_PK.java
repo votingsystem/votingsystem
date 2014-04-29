@@ -4,6 +4,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import java.io.Serializable;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class TagVSEventVS_PK implements Serializable {
 
 	private static final long serialVersionUID = 1L;

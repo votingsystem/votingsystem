@@ -11,7 +11,7 @@ task copyApps(dependsOn: [':ValidationToolApplet:copyDistZip']) {
         File appletDir = project.file("web-app/tools/");
         appletDir.mkdirs()
         File validationToolDist = project.file("web-app/tools/${rootProject.validationToolName}.zip")
-        if(validationToolDist.exists()) validationToolApplet.delete()
+        if(validationToolDist.exists()) validationToolDist.delete()
         validationToolDist << rootProject.validationToolDistZip?.bytes
 	}
 }

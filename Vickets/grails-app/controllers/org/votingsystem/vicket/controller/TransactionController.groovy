@@ -27,13 +27,28 @@ class TransactionController {
     def signatureVSService
     def vicketService
 
+    def get() {
+        Map resultMap = [:]
+        if (params.long('id')) {
+            TransactionVS result
+            TransactionVS.withTransaction {
+                result = TransactionVS.get(params.long('id'))
+            }
+            if(result) resultMap = transactionVSService.getTransactionMap(result)
+        }
+        if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+            render resultMap as JSON
+        } else {
+            render(view:'get', model: [transactionvsMap:resultMap])
+        }
+    }
+
     def index() {
         Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
         Map.Entry sortParam
         if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
         List<TransactionVS> transactionList = null
         int totalTransactions = 0;
-
         TransactionVS.withTransaction {
             if(params.searchText || params.searchFrom || params.searchTo || params.transactionvsType) {
                 CurrencyVS currency = null
@@ -63,11 +78,17 @@ class TransactionController {
                         else if(dateFrom) {ge("dateCreated", dateFrom)}
                         else if(dateTo) {le("dateCreated", dateTo)}
                     }
+                    not {
+                        eq("type", TransactionVS.Type.USER_ALLOCATION_INPUT)
+                    }
                 }
                 totalTransactions = transactionList.totalCount
             } else {
                 transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
                         sort:sortParam?.key, order:sortParam?.value){
+                    not {
+                        eq("type", TransactionVS.Type.USER_ALLOCATION_INPUT)
+                    }
                 };
                 totalTransactions = transactionList.totalCount
             }

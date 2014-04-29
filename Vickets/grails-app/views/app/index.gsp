@@ -8,6 +8,7 @@
 
     <div  class="text-justify" style="position: relative; width:800px; margin: 0 auto 0 auto;">
         <ul>
+            <li>Con <b>Autoridad Certificadora</b> y <b>Servidor de Sellos de Tiempo</b> propios.</li>
             <li>Libre de patentes y con implementación de código libre</li>
             <li>Operativas transparentes y seguras.</li>
             <li>Todos los intercambios de moneda quedan reflejados en documentos firmados electrónicamente y con sello de tiempo

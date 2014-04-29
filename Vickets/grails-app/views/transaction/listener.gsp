@@ -41,7 +41,7 @@
             <th data-dynatable-column="currency"><g:message code="currencyLbl"/></th>
             <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
             <th data-dynatable-column="subject" style="width:300px;"><g:message code="subjectLbl"/></th>
-            <th><g:message code="voucherLbl"/></th>
+            <th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>
         </tr>
         </thead>
     </table>
@@ -73,6 +73,7 @@
         dynatable.settings.params.records = '<g:message code="transactionRecordsLbl"/>'
         dynatable.settings.params.queryRecordCount = 'queryRecordCount'
         dynatable.settings.params.totalRecordCount = 'numTotalTransactions'
+
 
         $('#transaction_table').bind('dynatable:afterUpdate',  function() {
             console.log("page loaded")
@@ -135,10 +136,33 @@
     };
 
     function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
+        var transactionType
+        switch(jsonTransactionData.type) {
+            case 'VICKET_SEND':
+                transactionType = '<g:message code="selectVicketSendLbl"/>'
+                break;
+            case 'USER_ALLOCATION':
+                transactionType = '<g:message code="selectUserAllocationLbl"/>'
+                break;
+            case 'USER_ALLOCATION_INPUT':
+                transactionType = '<g:message code="selectUserAllocationInputLbl"/>'
+                break;
+            case 'VICKET_REQUEST':
+                transactionType = '<g:message code="selectVicketRequestLbl"/>'
+                break;
+            case 'VICKET_CANCELLATION':
+                transactionType = '<g:message code="selectVicketCancellationLbl"/>'
+                break;
+            default:
+                transactionType = jsonTransactionData.type
+        }
+        var transactionURL = jsonTransactionData.id
+
         var cssClass = "span4", tr;
         if (rowIndex % 3 === 0) { cssClass += ' first'; }
-        tr = '<tr><td title="' + jsonTransactionData.type + '">' + jsonTransactionData.type + '</td><td>' +
-        jsonTransactionData.amount + '</td>' +
+        tr = '<tr><td title="' + transactionType + '">' +
+            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td>' +
+            jsonTransactionData.amount + '</td>' +
         '<td>' + jsonTransactionData.currency + '</td><td>' + jsonTransactionData.dateCreated +
         '</td><td title="' + jsonTransactionData.subject + '">' + jsonTransactionData.subject + '</td><td>' + '<a href="#" onclick="openWindow(\'' +
         jsonTransactionData.messageSMIMEURL+ '\')"><g:message code="proofLbl"/></a></td></tr>'
@@ -158,5 +182,6 @@
         dynatable.paginationPage.set(1);
         dynatable.process();
     }
+
 
 </r:script>

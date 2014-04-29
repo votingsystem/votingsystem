@@ -54,5 +54,20 @@ class UrlMappings {
             }
         }
 
+        "/transaction/$id"{
+            controller = "transaction"
+            action = "get"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/groupVS/$id"{
+            controller = "groupVS"
+            action = "get"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
 	}
 }

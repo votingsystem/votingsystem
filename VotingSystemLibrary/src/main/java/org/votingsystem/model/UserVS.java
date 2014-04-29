@@ -14,6 +14,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -21,27 +22,30 @@ import static javax.persistence.GenerationType.IDENTITY;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-@Entity @Table(name="UserVS") @DiscriminatorValue("UserVS")
+@Entity @Table(name="UserVS")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="userVSType", discriminatorType=DiscriminatorType.STRING)
+@DiscriminatorValue("UserVS")
 public class UserVS implements Serializable {
 
-    public Date getDateCancelled() {
-        return dateCancelled;
-    }
-
-    public void setDateCancelled(Date dateCancelled) {
-        this.dateCancelled = dateCancelled;
-    }
-
-    public enum Type {USER, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, CANCELLED ,EX_REPRESENTATIVE}
-	
     private static final long serialVersionUID = 1L;
-    
+
     private static Logger log = Logger.getLogger(UserVS.class);
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public enum Type {USER, GROUP, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, CANCELLED ,EX_REPRESENTATIVE}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
 	@Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
-    @Column(name="nif", nullable=false) private String nif;
+    @Column(name="nif") private String nif;
 
     @Column(name="IBAN") private String IBAN;
 
@@ -66,9 +70,13 @@ public class UserVS implements Serializable {
     @Column(name="email" ) private String email;
 
     @Column(name="cn") private String cn;
+
+    @Column(name="reason") private String reason;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
+
+    @ManyToMany(mappedBy = "userVSSet", fetch = FetchType.LAZY) private Set<GroupVS> groupVSSet;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
 
@@ -272,6 +280,26 @@ public class UserVS implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Date getDateCancelled() {
+        return dateCancelled;
+    }
+
+    public void setDateCancelled(Date dateCancelled) {
+        this.dateCancelled = dateCancelled;
+    }
+
+    public Set<GroupVS> getGroupVSSet() {
+        return groupVSSet;
+    }
+
+    public void setGroupVSSet(Set<GroupVS> groupVSSet) {
+        this.groupVSSet = groupVSSet;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public void setDescription(String description) {

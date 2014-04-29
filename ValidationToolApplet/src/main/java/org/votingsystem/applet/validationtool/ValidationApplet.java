@@ -64,8 +64,8 @@ public class ValidationApplet extends JApplet implements AppHostVS {
                     if(executionMode != ExecutionMode.APPLET) {
                         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                     }
-                    MainDialog dialogo = new MainDialog(new JFrame(), false);
-                    dialogo.setVisible(true);
+                    MainDialog mainDialog = new MainDialog(new JFrame(), false);
+                    mainDialog.setVisible(true);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }

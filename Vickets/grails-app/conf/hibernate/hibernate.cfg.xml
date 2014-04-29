@@ -22,6 +22,7 @@
         <mapping class="org.votingsystem.model.EventVSManifest" />
         <mapping class="org.votingsystem.model.FieldEventVS" />
         <mapping class="org.votingsystem.model.FieldValueEventVS" />
+        <mapping class="org.votingsystem.model.GroupVS" />
         <mapping class="org.votingsystem.model.ImageVS" />
         <mapping class="org.votingsystem.model.KeyStoreVS" />
         <mapping class="org.votingsystem.model.MessageSMIME" />

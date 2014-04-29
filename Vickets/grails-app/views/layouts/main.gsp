@@ -27,6 +27,11 @@
                         </a>
                     </li>
                     <li>
+                        <a href="${createLink(controller: 'groupVS', action: 'index')}">
+                            <g:message code="groupvsLbl"/> <i class="fa fa-users"></i></i>
+                        </a>
+                    </li>
+                    <li>
                         <a href="${createLink(controller: 'app', action: 'tools')}">
                             <g:message code="toolsSectionLbl"/> <i class="fa fa-cogs"></i>
                         </a>
