@@ -39,6 +39,11 @@ modules = {
         resource url: 'js/pcUtils.js.gsp'
     }
 
+    textEditor {
+        dependsOn 'application'
+        resource url: 'ckeditor/ckeditor.js'
+    }
+
 }
 
 boolean isDevMode() { !Metadata.current.isWarDeployed() }

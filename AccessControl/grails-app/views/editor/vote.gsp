@@ -8,11 +8,8 @@
 
 <div id="contentDiv" style="display:none;padding: 0px 20px 0px 20px;">
 
-
-	<div class="publishPageTitle">
-		<p style="text-align:center; width: 100%;">
-			<g:message code="publishVoteLbl"/>
-		</p>
+	<div class="pageHeader">
+        <g:message code="publishVoteLbl"/>
 	</div>
 
 	<form id="mainForm" onsubmit="return submitForm(this);">

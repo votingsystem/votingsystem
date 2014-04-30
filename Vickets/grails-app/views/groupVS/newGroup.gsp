@@ -1,14 +1,20 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-   		<r:require modules="textEditorPC"/>
+   		<r:require modules="textEditor"/>
 </head>
 <body>
 
-<div id="contentDiv" style="display:none;">
-
+<div id="contentDiv" class="pageContenDiv" style="">
+    <div class="row">
+        <ol class="breadcrumbVS pull-left">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li><a href="${createLink(controller: 'groupVS', action: 'index')}"><g:message code="groupvsLbl"/></a></li>
+            <li class="active"><g:message code="newGroupVSLbl"/></li>
+        </ol>
+    </div>
 	<div class="pageHeader">
-        <g:message code="newRepresentativePageTitle"/>
+        <g:message code="newGroupPageTitle"/>
 	</div>
 	
 	<div class="userAdvert text-left" >

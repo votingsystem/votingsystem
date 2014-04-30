@@ -28,16 +28,32 @@
                     </li>
                     <li>
                         <a href="#"><i class="fa fa-users"></i><g:message code="groupvsLbl"/></a>
-                        <h2><i class="fa fa-users"></i><g:message code="groupvsLbl"/></h2>
+                        <h2><g:message code="groupvsLbl"/><i class="fa fa-users"></i></h2>
                         <ul>
                             <li>
                                 <a href="${createLink(controller: 'groupVS', action: 'index')}" style="">
-                                    <g:message code="groupvsLbl"/> <i class="fa fa-users"></i></i></a>
+                                    <g:message code="groupvsSectionLbl"/> <i class="fa fa-users"></i></i></a>
                             </li>
                             <li>
-                                <a href="${createLink(controller: 'groupVS', action: 'admin')}" style="">
-                                    <g:message code="groupvsAdminLbl"/> <i class="fa fa-cogs"></i>
-                                </a>
+                                <a href="#"><i class="fa fa-cogs"></i><g:message code="toolsSectionLbl"/></a>
+                                <h2><g:message code="toolsSectionLbl"/> <i class="fa fa-cogs"></i></h2>
+                                <ul>
+                                    <li>
+                                        <a href="${createLink(controller: 'groupVS', action: 'newGroup')}" style="">
+                                            <g:message code="newGroupVSLbl"/> <i class="fa fa-plus"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="${createLink(controller: 'groupVS', action: 'editGroup')}" style="">
+                                            <g:message code="editGroupVSLbl"/> <i class="fa fa-pencil"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="${createLink(controller: 'groupVS', action: 'newGroup')}" style="">
+                                            <g:message code="closeGroupVSLbl"/> <i class="fa fa-minus"></i>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </li>

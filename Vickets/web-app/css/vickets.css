@@ -144,6 +144,14 @@ input:focus:valid {
     /*background: url('../images/icon_16/ok.png') no-repeat right;*/
 }
 
+.pageHeader {
+    font-weight: bold;
+    font-size: 1.4em;
+    color: #870000;
+    text-decoration: underline;
+    text-overflow: ellipsis;
+}
+
 .breadcrumbVS {
     padding: 4px 15px;
     margin-bottom: 0px;

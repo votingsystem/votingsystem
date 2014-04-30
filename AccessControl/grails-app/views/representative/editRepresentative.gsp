@@ -7,7 +7,7 @@
 
 <div id="contentDiv" style="display:none;">
 
-	<div class="publishPageTitle">
+	<div class="pageHeader">
         <% def msgParams = [representative.fullName]%>
         <g:message code="editingRepresentativeMsgTitle" args='${msgParams}'/>
 	</div>

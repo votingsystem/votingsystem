@@ -16,6 +16,10 @@ task copyApps(dependsOn: [':ValidationToolApplet:copyDistZip']) {
 	}
 }
 
+task installEditor << { task ->
+    installCkeditor(project)
+}
+
 task stopApp << {
 	file("${projectDir}/.kill-run-app").createNewFile()
 }

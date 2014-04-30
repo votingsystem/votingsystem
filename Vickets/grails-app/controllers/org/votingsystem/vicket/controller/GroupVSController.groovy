@@ -79,7 +79,7 @@ class GroupVSController {
         render resultMap as JSON
     }
 
-    def admin() {}
+    def newGroup() {}
 
     def addGroup() {
         GroupVS groupvs

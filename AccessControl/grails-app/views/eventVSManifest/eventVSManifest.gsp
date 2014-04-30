@@ -35,7 +35,7 @@
 		</div>
 	</g:if>
 
-    <div class="publishPageTitle"> ${eventMap?.subject}</div>
+    <div class="pageHeader"> ${eventMap?.subject}</div>
 	
 	<div style="" class="row">
         <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
@@ -87,7 +87,7 @@
 <g:applyCodec encodeAs="none">
     var pageEvent = ${eventMap as JSON}
     if(pageEvent.state == "ACTIVE") {
-        $(".publishPageTitle").css("color", "#388746")
+        $(".pageHeader").css("color", "#388746")
         var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
             $("#pendingTimeDiv").text(pendingMsgTemplate.format(pageEvent.dateFinish.getElapsedTime()))
     }
