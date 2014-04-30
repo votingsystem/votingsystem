@@ -29,7 +29,7 @@ class TagVSService {
 			}
 			return tag;
 		}
-		return etiquetaSet
+		return tagSet
 	}
 	
 }

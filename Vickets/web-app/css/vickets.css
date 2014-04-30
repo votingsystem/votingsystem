@@ -48,6 +48,12 @@ body {
     top: 50px;
     z-index:10;
 }
+.navBarMainMenu {
+    position: fixed;
+    top: 50px;
+    z-index:10;
+    visibility:hidden;
+}
 
 #pushobj {
     padding: 50px;
@@ -131,11 +137,11 @@ input:required {
 }
 
 input:focus:invalid {
-    /*background: url('../images/cancel_16.png') no-repeat right;*/
+    /*background: url('../images/icon_16/cancel.png') no-repeat right;*/
 }
 
 input:focus:valid {
-    /*background: url('../images/ok_16.png') no-repeat right;*/
+    /*background: url('../images/icon_16/ok.png') no-repeat right;*/
 }
 
 .breadcrumbVS {

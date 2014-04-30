@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <r:require module="application"/>
   	<title>pruebaTemplate</title>
-    <r:require module="multilevelmenu"/>
     <style>
 	  	textarea { }
 	  	input[id="subject"] { }
@@ -10,16 +10,11 @@
     <r:layoutResources />
 </head>
 <body>
-    <form onsubmit="return submitForm(this);">
-        <div class="" style='display: inline-block; margin:100px 0 0 300px;; '>
-            <votingSystem:timePicker id="testTime" style="margin: 0 0 0 20px;"></votingSystem:timePicker>
-        </div>
-        <button class="btn" type="submit">Test</button>
-    </form>
+
+
 
 <div class="form-group has-error">
-    <input type="time" id='' value="11:25" class="form-control" style='width: 160px; display: inline;'>
-
+    <i style="color:#870000; font-size: 4em;" class="fa fa-cog fa-spin"></i>
 </div>
 </body>
 </html>

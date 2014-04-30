@@ -14,12 +14,16 @@ public class GroupVS extends UserVS implements java.io.Serializable {
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CLOSED}
 
-    @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
+    @Column(name="state") @Enumerated(EnumType.STRING) private State state;
 
     @ManyToOne(fetch=FetchType.LAZY)
     private UserVS groupRepresentative;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    //Owning Entity side of the relationship
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "groupvs_uservs", joinColumns = {
+            @JoinColumn(name = "groupvs_id", referencedColumnName = "id", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "uservs_id", referencedColumnName = "id", nullable = false) })
     private Set<UserVS> userVSSet;
 
     public Set<UserVS> getUserVSSet() {

@@ -134,7 +134,7 @@ class UserBaseDataSimulationService {
         log.debug("createRepresentatives ### Enter status REPRESENTATIVES - NumRepresentatives: " +
                 simulationData.getNumRepresentatives());
         if(simulationData.getNumRepresentatives() > 0) {
-            File representativeImage = grailsApplication.mainContext.getResource("images/advert_64x64.png").getFile()
+            File representativeImage = grailsApplication.mainContext.getResource("images/icon_64/fa-user.png").getFile()
             while (simulationData.hasRepresesentativeRequestsPending()){
                 if(!simulationData.waitingForRepresesentativeRequests()) {
                     requestCompletionService.submit(new RepresentativeTestDataSender(NifUtils.getNif(

@@ -50,6 +50,7 @@ modules = {
     }
 	
 	charts {
+        resource url: 'font-awesome/css/font-awesome.min.css'
 		resource url: 'js/jsapi.js'
 		resource 'css/charts.css'
 	}

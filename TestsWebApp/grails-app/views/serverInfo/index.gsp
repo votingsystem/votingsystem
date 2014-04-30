@@ -2,7 +2,6 @@
 <html>
 	<head>
         <meta name="layout" content="main"/>
-        <r:external uri="/images/TestWebApp.ico"/>
         <r:require modules="application"/>
         <link type="text/css" href="${resource(dir: 'css', file: 'pageIndex.css')}"  type="text/css" rel="stylesheet" media="screen, projection" />
         <title><g:message code="simulationWebAppCaption"/></title>

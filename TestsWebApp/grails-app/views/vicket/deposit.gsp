@@ -2,7 +2,6 @@
 <html>
 <head>
     <title><g:message code="vicketDepositSimulationCaption"/></title>
-    <r:external uri="/images/euro_16.png"/>
     <meta name="layout" content="main" />
 </head>
 <body style="">

@@ -27,6 +27,8 @@ class TestingController {
     def transactionVSService
     def auditingService
 
+    def index() {}
+
     def accounts() {}
 
     def checkVicket() {

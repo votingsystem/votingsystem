@@ -73,10 +73,10 @@ public class EventVS implements Serializable {
     private UserVS userVS;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
     //Owning Entity side of the relationship
-    @JoinTable(name="TagVSEventVS",
-        joinColumns = { @JoinColumn(name = "event", referencedColumnName = "id")},
-     	inverseJoinColumns = {@JoinColumn(name = "tag", referencedColumnName = "id")})
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "eventvs_tagvs", joinColumns = {
+            @JoinColumn(name = "eventvs", referencedColumnName = "id", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "tagvs", nullable = false, referencedColumnName = "id") })
     private Set<TagVS> tagVSSet;
     @Column(name="url")
     private String url;

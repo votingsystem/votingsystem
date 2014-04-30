@@ -32,14 +32,6 @@ public class UserVS implements Serializable {
 
     private static Logger log = Logger.getLogger(UserVS.class);
 
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
     public enum Type {USER, GROUP, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, CANCELLED ,EX_REPRESENTATIVE}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -211,7 +203,6 @@ public class UserVS implements Serializable {
 
 	public void setCertificateCA(CertificateVS certificate) {
 		this.certificateCA = certificate;
-		
 	}
 
 	public UserVS getRepresentative() {
@@ -229,6 +220,14 @@ public class UserVS implements Serializable {
 	public void setType(Type type) {
 		this.type = type;
 	}
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 
 	public MessageSMIME getRepresentativeMessage() {
 		return representativeMessage;

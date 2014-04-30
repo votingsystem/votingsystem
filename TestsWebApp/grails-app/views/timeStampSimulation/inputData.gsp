@@ -2,7 +2,6 @@
 <html>
 <head>
     <title><g:message code="initTimeStampProtocolSimulationButton"/></title>
-    <r:external uri="/images/TestWebApp.ico"/>
     <meta name="layout" content="main" />
 </head>
 

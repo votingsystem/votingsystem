@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
-    <r:external uri="/images/euro_16.png"/>
+    <r:external uri="/images/icon_16/fa-credit-card.png"/>
     <r:require module="application"/>
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>
 	<body class="">
     <div>
-        <div id="menu" style="visibility:hidden;">
+        <div id="menu" class="navBarMainMenu" style="">
             <nav>
                 <h2><i class="fa fa-reorder"></i>
                     <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
@@ -27,9 +27,19 @@
                         </a>
                     </li>
                     <li>
-                        <a href="${createLink(controller: 'groupVS', action: 'index')}">
-                            <g:message code="groupvsLbl"/> <i class="fa fa-users"></i></i>
-                        </a>
+                        <a href="#"><i class="fa fa-users"></i><g:message code="groupvsLbl"/></a>
+                        <h2><i class="fa fa-users"></i><g:message code="groupvsLbl"/></h2>
+                        <ul>
+                            <li>
+                                <a href="${createLink(controller: 'groupVS', action: 'index')}" style="">
+                                    <g:message code="groupvsLbl"/> <i class="fa fa-users"></i></i></a>
+                            </li>
+                            <li>
+                                <a href="${createLink(controller: 'groupVS', action: 'admin')}" style="">
+                                    <g:message code="groupvsAdminLbl"/> <i class="fa fa-cogs"></i>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="${createLink(controller: 'app', action: 'tools')}">
@@ -93,7 +103,7 @@
 
     $(function() {
         $( '#menu' ).multilevelpushmenu({
-            menuWidth: 250,
+            menuWidth: 300,
             onItemClick: function() {
                 var event = arguments[0], // First argument is original event object
                 $menuLevelHolder = arguments[1], // Second argument is menu level object containing clicked item (<div> element)
@@ -108,6 +118,7 @@
             onExpandMenuEnd: function() {
                 isMenuVisible = true
             },
+            backText:'<g:message code="backLbl"/>' ,
             collapsed: true,
             fullCollapse: true
         });

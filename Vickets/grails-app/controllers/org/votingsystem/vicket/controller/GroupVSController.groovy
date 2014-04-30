@@ -29,6 +29,8 @@ class GroupVSController {
             }
             if(result) resultMap = groupVSService.getGroupVSDataMap(result)
         }
+        //============
+        render result as JSON
         if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
             //render resultMap as JSON
             render result as JSON
@@ -75,6 +77,55 @@ class GroupVSController {
         def resultMap = ["${message(code: 'groupvsRecordsLbl')}":resultList, queryRecordCount: totalGroups,
                          numTotalGroups:totalGroups ]
         render resultMap as JSON
+    }
+
+    def admin() {}
+
+    def addGroup() {
+        GroupVS groupvs
+        UserVS.withTransaction {
+            groupvs = new GroupVS(name:"Grupo 0 de prueba", type:UserVS.Type.GROUP)
+            groupvs.save()
+        }
+        render "Created group ${groupvs?.id}"
+        return false
+    }
+
+    def addUsersToGroup() {
+        GroupVS groupvs = GroupVS.get(12)
+        UserVS user4 = UserVS.get(4)
+        UserVS user5 = UserVS.get(5)
+        groupvs.userVSSet.addAll([user4, user5])
+        UserVS.withTransaction {
+            groupvs.save()
+        }
+        render "Updated Group"
+        return false
+    }
+
+    def searchGroup1() {
+        def result
+
+        UserVS.withTransaction {
+            result = UserVS.createCriteria().list(max: 2, offset: params.offset) {
+                groupVSSet {
+                    eq("id", 12L)
+                }
+            }
+        }
+        render result as JSON
+    }
+
+    def searchGroup() {
+        def result
+        GroupVS.withTransaction {
+            result = GroupVS.createCriteria().listDistinct() {
+                userVSSet {
+                    ilike('name', '%Name%')
+                }
+            }
+        }
+        render result as JSON
     }
 
 }

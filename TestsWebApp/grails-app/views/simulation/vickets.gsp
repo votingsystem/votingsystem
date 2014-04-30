@@ -4,7 +4,6 @@
 		<meta name="layout" content="main"/>
 			<r:require modules="application"/>
 		<title><g:message code="simulationWebAppCaption"/></title>
-        <r:external uri="/images/TestWebApp.ico"/>
 		<style type="text/css" media="screen"></style>
 	</head>
 	<body>

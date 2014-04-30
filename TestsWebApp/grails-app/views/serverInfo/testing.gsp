@@ -2,7 +2,7 @@
 <html>
 <head>
   	<title>pruebaTemplate</title>
-    <r:external uri="/images/TestWebApp.ico"/>
+    <r:external uri="/images/icon_16/fa-bug.png"/>
    	<r:require modules="application"/>
     <style>
 	  	textarea { }

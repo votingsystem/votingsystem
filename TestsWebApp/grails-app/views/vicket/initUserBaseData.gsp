@@ -2,7 +2,6 @@
 <html>
 <head>
     <title><g:message code="vicketUserBaseDataSimulationCaption"/></title>
-    <r:external uri="/images/euro_16.png"/>
     <meta name="layout" content="main" />
 </head>
 <body style="">
@@ -33,34 +32,33 @@
             <input id="resetvicketUserBaseDataSimulationDataForm" type="reset" style="display:none;">
             <fieldset id="userBaseData">
                 <legend style="font-size: 1.2em"><g:message code="userBaseDataCaption"/></legend>
-                <div style="display: block; margin: 0px 0px 5px 0px;">
+                <div  class="form-inline" style="display: block; margin: 0px 0px 5px 0px;">
                     <label><g:message code="firstUserIndexMsg"/></label>
                     <input type="number" id="firstUserIndex" min="1" value="1" readonly required
-                           class="userBaseDataInputNumber"
+                           class="userBaseDataInputNumber form-control"
                            style="width:120px;margin:10px 20px 0px 7px;"
                            title="<g:message code="firstUserIndexMsg"/>"
                            placeholder="<g:message code="firstUserIndexMsg"/>"
                            oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
                            onchange="this.setCustomValidity('')">
-
-                </div>
-                <div style="display: block; margin: 0px 0px 5px 0px;">
                     <label><g:message code="numUsersMsg"/></label>
                     <input type="number" id="numUsers" min="0" value="1" required
-                           class="userBaseDataInputNumber"
+                           class="userBaseDataInputNumber form-control"
                            style="width:120px;margin:10px 20px 0px 7px;"
                            title="<g:message code="numRepresentativesMsg"/>"
                            placeholder="<g:message code="numRepresentativesMsg"/>"
                            oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
                            onchange="this.setCustomValidity('')">
 
-                </div>
 
-                <input type="url" id="vicketServerURL" style="width:280px; margin:20px 20px 0 20px;" required
-                       value="http://vickets:8083/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
-                       placeholder="<g:message code="vicketServerURLMsg"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')"/>
+                </div>
+                <div>
+                    <input type="url" id="vicketServerURL"  class="form-control" style="width:280px; margin:20px auto 20px auto;" required
+                           value="http://vickets:8083/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
+                           placeholder="<g:message code="vicketServerURLMsg"/>"
+                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                           onchange="this.setCustomValidity('')"/>
+                </div>
             </fieldset>
 
             <div style="position: relative; overflow:hidden; ">

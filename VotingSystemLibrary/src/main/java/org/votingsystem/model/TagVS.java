@@ -23,7 +23,7 @@ public class TagVS implements java.io.Serializable {
     @Column(name="frequency") private Long frequency;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
-    @ManyToMany(mappedBy = "tagVSSet") private Set<EventVS> eventVSSet;
+    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) private Set<EventVS> eventVSSet;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
 

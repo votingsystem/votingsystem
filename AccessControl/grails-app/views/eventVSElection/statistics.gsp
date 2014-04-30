@@ -7,7 +7,7 @@
     <body>    
         <div id="chart_div">
             <div class='loading'>
-                <img src="${resource(dir:'images',file:'Indeterminate.gif')}"/>
+                <i style="color:#870000; font-size: 4em;" class="fa fa-cog fa-spin"></i>
             </div>        
         </div>
     </body>

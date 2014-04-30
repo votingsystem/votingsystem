@@ -13,7 +13,6 @@ import org.votingsystem.model.EventVSManifest
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.SubSystemVS
 import org.votingsystem.model.TagVS
-import org.votingsystem.model.TagVSEventVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.ApplicationContextHolder;
 import org.votingsystem.model.EventVS
@@ -312,20 +311,24 @@ class SearchController {
 	 * @responseContentType [application/json]
 	 */
 	def eventvsByTag () {
-		def eventsVSMap = new HashMap()
 		if (!params.tag) {
             return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code: 'searchMissingParamTag'))]
 		} else {
-            def tag = TagVS.findByName(params.tag)
-            if (tag) {
-                eventsVSMap.eventsVS = TagVSEventVS.findAllByEtiqueta(tag,
-                        [max: params.max, offset: params.offset]).collect { eventVSTag ->
-                    return [id: eventVSTag.eventVS.id,
-                            URL:"${grailsApplication.config.grails.serverURL}/eventVS/${eventVSTag.eventVS.id}",
-                            subject:eventVSTag?.eventVS?.subject, content:eventVSTag?.eventVS?.content]
+            def result
+            EventVS.withTransaction {
+                result = EventVS.createCriteria().listDistinct() {
+                    tagVSSet {
+                        eq('name', params.tag)
+                    }
                 }
             }
-            render eventsVSMap as JSON
+            def eventVSList = []
+            result.each {eventVS ->
+                eventVSList.add([id: eventVS.id,URL:"${grailsApplication.config.grails.serverURL}/eventVS/${eventVS.id}",
+                                 subject:eventVS?.subject, content:eventVS?.content])
+            }
+            def resultMap = [eventsVS:eventVSList]
+            render resultMap as JSON
         }
 	}
 

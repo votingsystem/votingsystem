@@ -3,7 +3,6 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="appTitle"/></title>
-    <r:external uri="/images/euro_16.png"/>
     <style type="text/css" media="screen"></style>
 </head>
 <body>
