@@ -29,7 +29,6 @@ modules = {
         resource url: 'font-awesome/css/font-awesome.min.css'
         resource 'css/testWebApp.css'
         resource url: 'js/utils.js.gsp'
-        resource url: 'js/pcUtils.js.gsp'
     }
 
 	

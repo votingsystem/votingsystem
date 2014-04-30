@@ -44,7 +44,6 @@ modules = {
         resource url: 'font-awesome/css/font-awesome.min.css'
         resource url: 'css/votingSystem.css'
         resource url: 'js/utils.js.gsp'
-		resource url: 'js/mobileUtils.js.gsp'
 	}
 	
 	textEditorPC {

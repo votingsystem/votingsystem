@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title><g:message code="serverNameLabel"/></title>
-    <r:external uri="/images/AccessControl.ico"/>
+    <r:external uri="/images/icon_16/fa-credit-card.png"/>
 	<r:require module="application"/>
     <r:require module="multilevel_menu"/>
 	<g:layoutHead/>

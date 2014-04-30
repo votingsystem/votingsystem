@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
-    <r:external uri="/images/icon_16/fa-credit-card.png"/>
+    <r:external uri="/images/icon_16/fa-ticket.png"/>
     <r:require module="application"/>
 	<g:layoutHead/>
 	<r:layoutResources />
