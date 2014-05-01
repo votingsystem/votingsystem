@@ -50,6 +50,9 @@
 
 </html>
 <r:script>
+    var socketService = new SocketService()
+    socketService.connect()
+
     var dynatable
 
     $(function() {

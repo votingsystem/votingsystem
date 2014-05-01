@@ -91,12 +91,12 @@ environments {
 
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "http://vickets:8083/Vickets"
+        grails.serverURL = "http://vickets/Vickets"
     }
 
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://vickets:8083/Vickets"
+        grails.serverURL = "http://sistemavotacion.org/Vickets"
     }
 
 }
@@ -208,8 +208,8 @@ log4j = {
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
 VotingSystem.urlTimeStampServer='http://sistemavotacion.org/TimeStampServer'
-VotingSystem.backupCopyPath='./VotingSystem/backups'
-VotingSystem.errorsBaseDir='./VotingSystem/errors'
+VotingSystem.backupCopyPath='./Vickets/backups'
+VotingSystem.errorsBaseDir='./Vickets/errors'
 VotingSystem.keyStorePath='WEB-INF/cms/VicketServer.jks'
 VotingSystem.signKeysAlias='VicketServerKeys'
 VotingSystem.signKeysPassword='PemPass'

@@ -3,8 +3,13 @@
 <head>
     <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
-    <r:external uri="/images/icon_16/fa-ticket.png"/>
-    <r:require module="application"/>
+    <r:external uri="/images/icon_16/fa-money.png"/>
+    <g:if test="${request.getHeader("User-Agent").contains("Android")}">
+        <r:require module="applicationMobile"/>
+    </g:if>
+    <g:else>
+        <r:require module="application"/>
+    </g:else>
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>

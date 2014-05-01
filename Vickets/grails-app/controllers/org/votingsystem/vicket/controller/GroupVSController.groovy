@@ -81,6 +81,10 @@ class GroupVSController {
 
     def newGroup() {}
 
+    def add(){
+
+    }
+
     def addGroup() {
         GroupVS groupvs
         UserVS.withTransaction {

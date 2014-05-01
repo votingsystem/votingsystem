@@ -1,3 +1,7 @@
+var Operation = {
+		SMIME_VICKET_NEWGROUP : "SMIME_VICKET_NEWGROUP"
+}
+
 var WebAppMessage = function (statusCode, operation) {
 	this.statusCode = statusCode
 	this.operation = operation
@@ -325,6 +329,112 @@ function getFnName(fn) {
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
 
+function VotingSystemApplet () {
+	this.validationToolLoaded = false
+    this.signatureClientToolLoaded = false
+	this.messageToSignatureClient = null;
+	this.messageToValidationTool = null;
+	this.signatureClientCallback = null
+}
+
+VotingSystemApplet.prototype.getMessageToSignatureClient = function (appMessage) {
+		var result
+		if(this.messageToSignatureClient != null) {
+			console.log("getMessageToSignatureClient - delivering message to applet");
+			result = this.messageToSignatureClient
+			this.messageToSignatureClient = null
+		}
+		return result
+	}
+
+VotingSystemApplet.prototype.getMessageToValidationTool = function (appMessage) {
+		var result
+		if(messageToValidationTool != null) {
+			console.log("getMessageToValidationTool - delivering message to applet: " + appMessage);
+			result = messageToValidationTool
+			messageToValidationTool = null
+		}
+		return result
+	}
+
+
+VotingSystemApplet.prototype.setMessageToValidationTool = function (message) {
+		console.log("utils.js - setMessageToValidationTool - message:" + message);
+		messageToValidationTool = message;
+		if(!validationToolLoaded) {
+			if(isJavaEnabledClient()) {
+				console.log("Loading validationTool")
+				window.getMessageToValidationTool = this.getMessageToValidationTool
+				$("#validationToolAppletFrame").attr("src", '${createLink(controller:'applet', action:'validationTool')}');
+				$("#loadingVotingSystemAppletDialog").dialog("open");
+
+			}
+    	} else {
+    		console.log("setMessageToValidationTool - validationToolLoaded already loaded");
+    		$("#workingWithAppletDialog").dialog("open");
+	    }
+	}
+
+VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON, callerCallback) {
+		var callerCallbackName = getFnName(callerCallback)
+        messageJSON.callerCallback = callerCallbackName
+		this.signatureClientCallback = callerCallback
+
+		this.messageToSignatureClient = JSON.stringify(messageJSON)
+		console.log(" - callerCallback: " + callerCallbackName + " - setMessageToSignatureClient: " + this.messageToSignatureClient);
+
+	   	//var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SEND_SMIME_VOTE)
+	   	//this.messageToSignatureClient = JSON.stringify(webAppMessage)
+
+
+		//alert("'" + encodeURIComponent(messageToSignatureClient) + "'")
+		if(isAndroid()) {
+		    if(typeof androidClient === 'undefined'){
+		        console.log("isAndroid browser - androidClient loaded")
+		        //console.log("---- setMessageToSignatureClient: " + messageToSignatureClient);
+		        androidClient.setVotingWebAppMessage(messageToSignatureClient);
+            } else {
+                console.log("isAndroid browser - androidClient undefined")
+                //to avoid URI too large
+                //if(messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
+
+                var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(messageToSignatureClient) +
+                    "&refererURL=" + window.location +
+                    "&serverURL=" + "${grailsApplication.config.grails.serverURL}"
+
+                alert(redirectURL)
+                window.location.href = redirectURL.replace("\n","")
+            }
+			return
+		}
+
+		if(!this.signatureClientToolLoaded) {
+			if(isJavaEnabledClient()) {
+				console.log("Loading signature client");
+				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'client')}');
+				$("#loadingVotingSystemAppletDialog").dialog("open");
+			}
+    	} else {
+    		console.log("signature client already loaded");
+    		$("#workingWithAppletDialog").dialog("open");
+	    }
+	}
+
+VotingSystemApplet.prototype.setMessageFromSignatureClient = function (appMessage) {
+		var appMessageJSON = toJSON(appMessage)
+		if(appMessageJSON != null) {
+			if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
+				this.signatureClientToolLoaded = true;
+				$("#loadingVotingSystemAppletDialog").dialog("close");
+				$("#workingWithAppletDialog").dialog("open");
+			} else {
+		        this.signatureClientCallback(appMessage)
+		    }
+		}
+	}
+
+var votingSystemClient = new VotingSystemApplet()
+
 var SocketService = function () {
 
     this.socket = null;
@@ -368,6 +478,3 @@ var SocketService = function () {
     }
 
 };
-
-var socketService = new SocketService()
-socketService.connect()

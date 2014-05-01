@@ -69,5 +69,10 @@ class UrlMappings {
                 id(matches:/\d*/)
             }
         }
+
+        "/groupVS" {
+            controller = "groupVS"
+            action = [POST:"add"]
+        }
 	}
 }

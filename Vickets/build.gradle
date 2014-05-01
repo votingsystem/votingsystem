@@ -6,8 +6,10 @@ dependencies {
     compile (project(':VotingSystemLibrary'))
 }
 
-task copyApps(dependsOn: [':ValidationToolApplet:copyDistZip']) {
+task copyApps(dependsOn: [':generateVotingSystemApps', ':ValidationToolApplet:copyDistZip']) {
 	doLast {
+        copyVotingSystemApps(project)
+
         File appletDir = project.file("web-app/tools/");
         appletDir.mkdirs()
         File validationToolDist = project.file("web-app/tools/${rootProject.validationToolName}.zip")

@@ -499,7 +499,7 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
 		//alert("'" + encodeURIComponent(messageToSignatureClient) + "'")
 		if(isAndroid()) {
 		    if(typeof androidClient === 'undefined'){
-		        console.log("isAndroid browser - androidClient loades")
+		        console.log("isAndroid browser - androidClient loaded")
 		        //console.log("---- setMessageToSignatureClient: " + messageToSignatureClient);
 		        androidClient.setVotingWebAppMessage(messageToSignatureClient);
             } else {

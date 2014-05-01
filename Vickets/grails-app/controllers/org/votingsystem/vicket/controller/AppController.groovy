@@ -18,9 +18,10 @@ class AppController {
 	 * 		   para una sesión con cliente Android.
 	 */
 	def androidClient() {
-		/*if(params.boolean('androidClientLoaded')) render(view:"index")
-		else {
-            String uri = "${grailsApplication.config.grails.serverURL}?androidClientLoaded=false"
+        log.debug("*** Si llega aqui mostrar message app market browserToken: ${params.browserToken}" )
+        if(params.boolean('androidClientLoaded')) render(view:"index")
+        else {
+            String uri = "${grailsApplication.config.grails.serverURL}/eventVSElection/main?androidClientLoaded=false"
             if(params.browserToken) uri = "${uri}#${params.browserToken}"
             if(params.eventId) uri = "${uri}&eventId=${params.eventId}"
             if(params.serverURL) uri = "${uri}&serverURL=${params.serverURL}"
@@ -29,7 +30,9 @@ class AppController {
                 uri = "${uri}&msg=${msg}"
                 log.debug("msg: ${msg}")
             }
-        }*/
+            redirect(uri:uri)
+            return
+        }
 	}
 
     def tools() {}

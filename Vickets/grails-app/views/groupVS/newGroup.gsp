@@ -17,12 +17,12 @@
         <g:message code="newGroupPageTitle"/>
 	</div>
 	
-	<div class="userAdvert text-left" >
+	<div class="text-left" style="margin:10px 0 10px 0;">
 		<ul>
-			<li><g:message code="newRepresentativeAdviceMsg1"/></li>
-			<li><g:message code="newRepresentativeAdviceMsg2"/></li>
-			<li><g:message code="newRepresentativeAdviceMsg3"/></li>
-			<li><g:message code="newRepresentativeAdviceMsg4"/></li>
+			<li><g:message code="newGroupVSAdviceMsg1"/></li>
+			<li><g:message code="newGroupVSAdviceMsg2"/></li>
+			<li><g:message code="newGroupVSAdviceMsg3"/></li>
+			<li><g:message code="newGroupVSAdviceMsg4"/></li>
 		</ul>
 	</div>	
 	
@@ -35,7 +35,7 @@
 	<div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
 		<div style="position:absolute; right:0;">
             <button type="submit" class="btn btn-default">
-                <g:message code="newRepresentativeLbl"/> <i class="fa fa fa-check"></i>
+                <g:message code="newGroupVSLbl"/> <i class="fa fa fa-check"></i>
             </button>
 		</div>	
 	</div>	
@@ -45,12 +45,17 @@
 	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
 	
 </div>
-
+<g:include view="/include/dialog/loadingAppletDialog.gsp"/>
+<g:include view="/include/dialog/workingWithAppletDialog.gsp"/>
+<g:include view="/include/dialog/resultDialog.gsp"/>
+<div id="appletsFrame"  style="width:0px; height:0px;">
+    <iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+</div>
 </body>
 </html>
 <r:script>
-    $(function() {
 
+    $(function() {
 
         $('#mainForm').submit(function(event){
             event.preventDefault();
@@ -63,20 +68,22 @@
                 return
             }
 
-            var webAppMessage = new WebAppMessage( ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
+            console.log("newGroup - sendSignature ")
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SMIME_VICKET_NEWGROUP)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+            webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}"
+            webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
             webAppMessage.signedContent = {representativeInfo:getEditor_editorDivData(),
-                    operation:Operation.REPRESENTATIVE_DATA}
-            webAppMessage.serviceURL = "${createLink( controller:'representative', absolute:true)}"
-            webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
+                        operation:Operation.SMIME_VICKET_NEWGROUP}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            votingSystemClient.setMessageToSignatureClient(webAppMessage, newRepresentativeCallback);
+            //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+            votingSystemClient.setMessageToSignatureClient(webAppMessage, newGroupVSCallback);
         });
       });
 
-    function newRepresentativeCallback(appMessage) {
-        console.log("newRepresentativeCallback - message from native client: " + appMessage);
+    function newGroupVSCallback(appMessage) {
+        console.log("newGroupVSCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
             $("#workingWithAppletDialog" ).dialog("close");
@@ -91,4 +98,6 @@
             showResultDialog(caption, msg)
         }
     }
+
+
 </r:script>
