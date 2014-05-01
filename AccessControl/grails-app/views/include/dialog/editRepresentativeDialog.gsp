@@ -2,10 +2,10 @@
 	<div id="editRepresentativeDialogFormDiv" style="margin:0px auto 0px 20px;">
 		<form id="editRepresentativeForm">
             <input id="resetEditRepresentativeForm" type="reset" style="display:none;">
-	    	<label for="userNifText" style="margin:0px 0px 20px 0px"><g:message code="nifForEditRepresentativeLbl"/></label>
+	    	<label for="representativeNifText" style="margin:0px 0px 20px 0px"><g:message code="nifForEditRepresentativeLbl"/></label>
 			<input type="text" id="representativeNifText" style="width:350px; margin:0px auto 0px auto;" required
 				oninvalid="this.setCustomValidity('<g:message code="nifERRORMsg"/>')" class="form-control"
-	   			onchange="this.setCustomValidity('')"/>
+	   			onchange="this.setCustomValidity('')" autofocus="autofocus"/>
 			<input id="submitNifCheck" type="submit" style="display:none;">
 		</form>
 	</div>
@@ -50,7 +50,7 @@ var nifValidation = function () {
     nifValidationResult = validateNIF(nifInput.value)
     console.log("validateNIF result: " + nifValidationResult)
     if (!nifValidationResult) {
-            document.getElementById('userNifText').setCustomValidity("<g:message code='nifERRORMsg'/>");
+            document.getElementById('representativeNifText').setCustomValidity("<g:message code='nifERRORMsg'/>");
     }
 }
 
@@ -67,30 +67,19 @@ var nifValidation = function () {
 			contentType:'application/json',
 			url: urlRequest
 		}).done(function(resultMsg) {
-			window.location.href = urlRequest
+		    var representativeDataJSON = toJSON(resultMsg)
+            showRepresentativeData(representativeDataJSON)
 		}).error(function(resultMsg) {
-			showResultDialog('<g:message code="errorLbl"/>',resultMsg.responseText) 							
+			showResultDialog('<g:message code="errorLbl"/>',resultMsg.responseText, errorCallback)
 		}).always(function(resultMsg) {
 			$("#editRepresentativeDialog").dialog("close");
 		});
 
 	 })
 
-function editRepresentativeCallback(appMessage) {
-	console.log("editRepresentativeCallback - message from native client: " + appMessage);
-	var appMessageJSON = toJSON(appMessage)
-	if(appMessageJSON != null) {
-		$("#workingWithAppletDialog" ).dialog("close");
-		var caption = '<g:message code="operationERRORCaption"/>'
-		var msg = appMessageJSON.message
-		if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-			caption = "<g:message code='operationOKCaption'/>"
-		} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
-			caption = "<g:message code='operationCANCELLEDLbl'/>"
-		}
-		showResultDialog(caption, msg)
-	}
-}
+    function errorCallback(appMessage) {
+        $("#editRepresentativeDialog").dialog("open");
+    }
 
 document.getElementById('representativeNifText').addEventListener('change', nifValidation, false);
 </r:script>

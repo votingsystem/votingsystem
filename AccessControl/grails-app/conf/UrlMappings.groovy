@@ -263,7 +263,7 @@ class UrlMappings {
 
 		"/representative/edit/$nif" {
 			controller = "representative"
-			action = "editRepresentative"
+			action = "edit"
 		}
 
 		"/representative/image/$id" {

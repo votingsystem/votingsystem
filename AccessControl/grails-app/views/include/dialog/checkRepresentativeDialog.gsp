@@ -100,9 +100,9 @@ $("#checkRepresentativeDialog").dialog({
  		$("#cancelButton").find(".ui-button-text").text("<g:message code="acceptLbl"/>")
  		$("#cancelButton").button("enable");
  		if(ResponseVS.SC_OK == statusCode) {
- 			$("#checkRepresentativeDialogResultImage").attr('src',"${resource(dir:'images', file:'accept_48x48.png')}");
+ 			$("#checkRepresentativeDialogResultImage").attr('src',"${resource(dir:'images/icon_64', file:'fa-check.png')}");
 	 	} else {
-	 		$("#checkRepresentativeDialogResultImage").attr('src',"${resource(dir:'images', file:'advert_64x64.png')}")
+	 		$("#checkRepresentativeDialogResultImage").attr('src',"${resource(dir:'images/icon_64', file:'fa-exclamation-triangle.png')}")
 		}
  		$("#checkRepresentativeDialogResultMsg").text(msg)
 	}

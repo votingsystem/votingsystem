@@ -4,6 +4,13 @@
     <r:require module="dynatableModule"/>
 </head>
 <body>
+<div class="row" style="">
+    <ol class="breadcrumbVS pull-left">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li class="active"><g:message code="representativesPageLbl"/></li>
+    </ol>
+</div>
+
 <div class="mainPage" style="margin:0 0 0 0;">
     <ul id="representativeList" style="display: block; width: 100%; position: relative;" class="row"></ul>
 </div>

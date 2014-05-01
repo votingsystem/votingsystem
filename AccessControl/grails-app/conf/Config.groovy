@@ -97,7 +97,7 @@ environments {
     development {
         grails.logging.jul.usebridge = true
 		grails.resources.debug = true// -> rendering problems
-        grails.serverURL = "http://sistemavotacion.org/AccessControl"
+        grails.serverURL = "http://localhost:8080/AccessControl"
     }
 	production {
 		grails.logging.jul.usebridge = false

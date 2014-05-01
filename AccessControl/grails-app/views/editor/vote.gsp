@@ -8,7 +8,7 @@
 
 <div id="contentDiv" style="display:none;padding: 0px 20px 0px 20px;">
 
-	<div class="pageHeader">
+    <div class="pageHeader" style="margin:15px 0px 25px 0px">
         <g:message code="publishVoteLbl"/>
 	</div>
 

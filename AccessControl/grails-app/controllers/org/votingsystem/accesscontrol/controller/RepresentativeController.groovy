@@ -45,28 +45,32 @@ class RepresentativeController {
 	 * @responseContentType [application/json]
 	 * @return documento JSON con datos del representante
 	 */
-	def editRepresentative() {
-		String nif = NifUtils.validate(params.nif)
-		if(!nif) {
-            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'NIFWithErrorsMsg', args:[params.nif]))]
-		} else {
-            UserVS representative
-            UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }
-            if(!representative) {
-                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'representativeNifErrorMsg', args:[nif]))]
+	def edit() {
+        if(params.nif) {
+            String nif = NifUtils.validate(params.nif)
+            if(!nif) {
+                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'NIFWithErrorsMsg', args:[params.nif]))]
             } else {
-                String name = "${representative.name} ${representative.firstName}"
-                def resultMap = [id: representative.id, name:representative.name,
-                        firstName:representative.firstName, info: representative.description,
-                        nif:representative.nif, fullName:"${representative.name} ${representative.firstName}"]
-                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) render resultMap as JSON
-                else render(view:"editRepresentative" , model:[representative:resultMap,
-                            selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+                UserVS representative
+                UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }
+                if(!representative) {
+                    return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                            message(code: 'representativeNifErrorMsg', args:[nif]))]
+                } else {
+                    String name = "${representative.name} ${representative.firstName}"
+                    def resultMap = [id: representative.id, name:representative.name,
+                                     firstName:representative.firstName, info: representative.description,
+                                     nif:representative.nif, fullName:"${representative.name} ${representative.firstName}"]
+                    render resultMap as JSON
+                }
             }
-        }
+        } else render(view:"editRepresentative" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
 	}
+
+    def remove() {
+        render(view:"removeRepresentative", model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+    }
 	
 	/**
 	 * @httpMethod [GET]

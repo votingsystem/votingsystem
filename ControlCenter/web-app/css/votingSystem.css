@@ -199,6 +199,14 @@ hr {
     display:table;
 }
 
+.pageHeader {
+    font-weight: bold;
+    font-size: 1.4em;
+    color: #870000;
+    text-decoration: underline;
+    text-overflow: ellipsis;
+}
+
 .mainPageEventList {
     display:block;
     overflow:hidden;
@@ -674,4 +682,28 @@ hr {
     min-height: 600px;
     overflow: hidden;
     margin: 10px 0 0 0;
+}
+
+.breadcrumbVS {
+    padding: 4px 15px;
+    margin-bottom: 0px;
+    list-style: none;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.breadcrumbVS > ol {
+    margin-bottom: 0px;
+}
+
+.breadcrumbVS > li {
+    display: inline-block;
+}
+.breadcrumbVS > li + li:before {
+    padding: 0 5px;
+    color: #ccc;
+    content: "/\00a0";
+}
+.breadcrumbVS > .active {
+    color: #999;
 }

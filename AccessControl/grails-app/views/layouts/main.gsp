@@ -46,9 +46,23 @@
                                 <g:message code="selectRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i></a>
                         </li>
                         <li>
-                            <a href="${createLink(controller: 'representative', action: 'representativeAdmin')}" style="">
-                                <g:message code="adminRepresentativeLbl"/> <i class="fa fa-cogs"></i>
-                            </a>
+                            <a href="#"><g:message code="toolsLbl"/><i class="fa fa-cogs"></i></a>
+                            <h2><g:message code="toolsLbl"/><i class="fa fa-cogs"></i></h2>
+                            <ul>
+                                <li>
+                                    <a href="${createLink(controller:'representative', action:'newRepresentative')}" style="">
+                                        <g:message code="newRepresentativeLbl"/> <i class="fa fa-plus"></i></a>
+                                </li>
+                                <li>
+                                    <a href="${createLink(controller: 'representative', action: 'edit')}" style="">
+                                        <g:message code="editRepresentativeLbl"/> <i class="fa fa-pencil"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="${createLink(controller:'representative', action:'remove')}" style="">
+                                        <g:message code="removeRepresentativeLbl"/> <i class="fa fa-minus"></i></a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </li>

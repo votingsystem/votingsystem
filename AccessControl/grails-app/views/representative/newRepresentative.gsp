@@ -7,11 +7,19 @@
 
 <div id="contentDiv" style="display:none;">
 
+    <div class="row" style="">
+        <ol class="breadcrumbVS pull-left">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li><a href="${createLink(controller: 'representative', action:'main')}"><g:message code="representativesPageLbl"/></a></li>
+            <li class="active"><g:message code="newRepresentativeLbl"/></li>
+        </ol>
+    </div>
+
 	<div class="pageHeader">
         <g:message code="newRepresentativePageTitle"/>
 	</div>
-	
-	<div class="userAdvert text-left" >
+
+	<div class="text-left" style="margin:15px 0 0 0;">
 		<ul>
 			<li><g:message code="newRepresentativeAdviceMsg1"/></li>
 			<li><g:message code="newRepresentativeAdviceMsg2"/></li>
