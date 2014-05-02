@@ -124,7 +124,7 @@ public class VicketGridFragment extends Fragment
            Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
         ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.vicket_lbl), null,
-                R.drawable.euro_32);
+                R.drawable.fa_money_32);
         rootView = inflater.inflate(R.layout.generic_grid_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new VicketListAdapter(getActivity().getApplicationContext(), null,false);

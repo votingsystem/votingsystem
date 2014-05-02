@@ -29,7 +29,7 @@
                 </li>
                 <li>
                     <a href="${createLink(controller: 'eventVSManifest', action: 'main')}">
-                        <g:message code="manifestSystemLbl"/><i class="fa fa-certificate"></i>
+                        <g:message code="manifestSystemLbl"/><i class="fa fa-file-text"></i>
                     </a>
                 </li>
                 <li>

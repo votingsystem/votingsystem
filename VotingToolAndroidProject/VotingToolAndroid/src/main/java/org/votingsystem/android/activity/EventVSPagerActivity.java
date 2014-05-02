@@ -118,7 +118,7 @@ public class EventVSPagerActivity extends ActionBarActivity {
                 }
                 break;
             case CLAIM_EVENT:
-                getSupportActionBar().setLogo(R.drawable.filenew_32);
+                getSupportActionBar().setLogo(R.drawable.fa_exclamation_triangle_32);
                 switch(event.getState()) {
                     case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.claim_open_lbl,

@@ -229,7 +229,7 @@ public class TransactionVS  implements Serializable {
             case VICKET_REQUEST:
                 return R.drawable.edit_undo_24;
             case VICKET_SEND:
-                return R.drawable.euro_24;
+                return R.drawable.fa_money_24;
             default:
                 return R.drawable.pending;
         }

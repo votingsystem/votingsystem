@@ -64,13 +64,13 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         MANIFESTS(MANIFESTS_GROUP_POSITION, R.drawable.manifest_32, SubSystemVS.MANIFESTS,
                 TypeVS.MANIFEST_EVENT, Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING,
                 ChildPosition.CLOSED)),
-        CLAIMS(CLAIMS_GROUP_POSITION, R.drawable.filenew_32, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT,
+        CLAIMS(CLAIMS_GROUP_POSITION, R.drawable.fa_exclamation_triangle_32, SubSystemVS.CLAIMS, TypeVS.CLAIM_EVENT,
                 Arrays.asList(ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
         REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, R.drawable.system_users_32,
                 SubSystemVS.REPRESENTATIVES, TypeVS.REPRESENTATIVE, new ArrayList<ChildPosition>()),
         RECEIPTS(RECEIPTS_GROUP_POSITION, R.drawable.receipt_32, SubSystemVS.RECEIPTS,
                 TypeVS.RECEIPT, new ArrayList<ChildPosition>()),
-        VICKETS(VICKETS_GROUP_POSITION, R.drawable.euro_32, SubSystemVS.VICKETS,
+        VICKETS(VICKETS_GROUP_POSITION, R.drawable.fa_money_32, SubSystemVS.VICKETS,
                 TypeVS.VICKET, Arrays.asList(ChildPosition.VICKET_USER_INFO,
                 ChildPosition.VICKET_LIST));
 

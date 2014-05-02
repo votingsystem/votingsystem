@@ -117,7 +117,7 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
                 }
                 break;
             case CLAIM_EVENT:
-                getSupportActionBar().setLogo(R.drawable.filenew_32);
+                getSupportActionBar().setLogo(R.drawable.fa_exclamation_triangle_32);
                 title = getString(R.string.claim_info_lbl) + " '"+ event.getSubject() + "'";
                 switch(event.getState()) {
                     case ACTIVE:

@@ -44,7 +44,7 @@ public class VicketPagerActivity extends ActionBarActivity {
                 null);
         cursor.moveToPosition(cursorPosition);
         mViewPager.setCurrentItem(cursorPosition);
-        getSupportActionBar().setLogo(R.drawable.euro_32);
+        getSupportActionBar().setLogo(R.drawable.fa_money_32);
         getSupportActionBar().setTitle(getString(R.string.vicket_lbl));
     }
 

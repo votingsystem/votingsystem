@@ -99,7 +99,7 @@ public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         switch(selectedGroup) {
             case REPRESENTATIVES: return context.getResources().getDrawable(R.drawable.system_users_22);
             case RECEIPTS: return context.getResources().getDrawable(R.drawable.receipt_32);
-            case VICKETS: return context.getResources().getDrawable(R.drawable.euro_32);
+            case VICKETS: return context.getResources().getDrawable(R.drawable.fa_money_32);
         }
         return context.getResources().getDrawable(R.drawable.mail_mark_unread_22);
     }

@@ -345,7 +345,7 @@ public class VicketService extends IntentService {
                 for(Vicket vicket:sendedVicketsMap.values())
                     VicketContentProvider.updateVicket(contextVS, vicket);
 
-                iconId = R.drawable.euro_24;
+                iconId = R.drawable.fa_money_24;
                 caption = getString(R.string.vicket_send_ok_caption);
                 message = getString(R.string.vicket_send_ok_msg, requestAmount.toString(),
                         currencyVS.toString(), subject, receptor);
@@ -462,7 +462,7 @@ public class VicketService extends IntentService {
                 caption = getString(R.string.vicket_request_ok_caption);
                 message = getString(R.string.vicket_request_ok_msg, requestAmount.toString(),
                         currencyVS.toString());
-                iconId = R.drawable.euro_24;
+                iconId = R.drawable.fa_money_24;
             } else {
                 caption = getString(R.string.vicket_request_error_caption);
             }
