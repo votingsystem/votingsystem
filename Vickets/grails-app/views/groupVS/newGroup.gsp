@@ -74,7 +74,7 @@
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
-            webAppMessage.signedContent = {representativeInfo:getEditor_editorDivData(),
+            webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),
                         operation:Operation.SMIME_VICKET_NEWGROUP}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

@@ -101,6 +101,8 @@ public class EditorFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 String functionStr = "javascript:setEditorContent('" + editorDataStr + "')";
                 webView.loadUrl(functionStr);
+                functionStr = "javascript:setAndroidClienLoaded(true)";
+                webView.loadUrl(functionStr);
                 if(!isEditable) setEditable(isEditable);
                 isEditorLoaded = true;
                 rootView.invalidate();

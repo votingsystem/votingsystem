@@ -375,6 +375,8 @@ VotingSystemApplet.prototype.setMessageToValidationTool = function (message) {
 	    }
 	}
 
+var androidClienLoaded = false
+
 VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON, callerCallback) {
 		var callerCallbackName = getFnName(callerCallback)
         messageJSON.callerCallback = callerCallbackName
@@ -389,16 +391,15 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
 
 		//alert("'" + encodeURIComponent(messageToSignatureClient) + "'")
 		if(isAndroid()) {
-		    if(typeof androidClient === 'undefined'){
-		        console.log("isAndroid browser - androidClient loaded")
-		        //console.log("---- setMessageToSignatureClient: " + messageToSignatureClient);
-		        androidClient.setVotingWebAppMessage(messageToSignatureClient);
+		    console.log("isAndroid browser - androidClienLoaded: " + androidClienLoaded)
+		    if(androidClienLoaded){
+		        //console.log("---- setMessageToSignatureClient: " + this.messageToSignatureClient);
+		        androidClient.setVotingWebAppMessage(this.messageToSignatureClient);
             } else {
-                console.log("isAndroid browser - androidClient undefined")
-                //to avoid URI too large
-                //if(messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
+                //to avoid too large URIs
+                //if(this.messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
 
-                var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(messageToSignatureClient) +
+                var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(this.messageToSignatureClient) +
                     "&refererURL=" + window.location +
                     "&serverURL=" + "${grailsApplication.config.grails.serverURL}"
 

@@ -24,7 +24,7 @@ ext {
 }
 
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'ValidationToolApplet:signJar',
-	 'TimeStampServer:war','AccessControl:war', 'ControlCenter:war', ':releaseAndroid']) << { }
+	 'TimeStampServer:war','AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
 
 task releaseAndroid () {
@@ -185,6 +185,9 @@ def copyValidationTool(project) {
 def copyAppletDeps(project) {
 	installAppletBcprov(project)
 }
+
+task copyAppsAll(dependsOn: [':AccessControl:copyApps', 'ControlCenter:copyApps', ':Vickets:copyApps']) {}
+
 
 task installEditor(dependsOn: [':TestsWebApp:installEditor', ':AccessControl:installEditor'])  { }
 
