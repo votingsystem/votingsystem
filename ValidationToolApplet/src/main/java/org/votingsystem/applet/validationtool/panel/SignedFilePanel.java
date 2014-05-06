@@ -1,19 +1,18 @@
 package org.votingsystem.applet.validationtool.panel;
 
-import java.awt.Desktop;
-import java.awt.Frame;
 import net.miginfocom.swing.MigLayout;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.votingsystem.applet.validationtool.dialog.DocumentSignersDialog;
+import org.votingsystem.applet.validationtool.model.SignedFile;
 import org.votingsystem.applet.validationtool.util.Formatter;
 import org.votingsystem.model.ContextVS;
+
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-
-import org.votingsystem.applet.validationtool.dialog.DocumentSignersDialog;
-import org.votingsystem.applet.validationtool.model.SignedFile;
+import java.awt.*;
 
 /**
 * @author jgzornoza

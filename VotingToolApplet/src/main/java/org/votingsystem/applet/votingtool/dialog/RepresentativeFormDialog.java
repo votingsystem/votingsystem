@@ -248,9 +248,9 @@ public class RepresentativeFormDialog extends JDialog {
         else {
             setMessage(null);
             String password = null;
-            PasswordDialog dialogoPassword = new PasswordDialog (new JFrame(), true);
-            dialogoPassword.setVisible(true);
-            password = dialogoPassword.getPassword();
+            PasswordDialog passwordDialog = new PasswordDialog (new JFrame(), true);
+            passwordDialog.setVisible(true);
+            password = passwordDialog.getPassword();
             if (password == null) return;
             showProgressPanel(true, ContextVS.getMessage("progressLabel"));
             SignerWorker signerWorker = new SignerWorker(password);

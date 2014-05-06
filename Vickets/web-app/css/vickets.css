@@ -10,7 +10,7 @@ body {
     font-family: Arial, sans-serif;
     color:#434343;
     margin: 0 auto 0 auto;
-    padding: 0 10px 0 0px;
+    padding: 0 0px 0 0px;
     height: 600px;
 }
 
@@ -56,15 +56,13 @@ body {
 }
 
 #pushobj {
-    padding: 50px;
-    top: 60px;
-    left: 300px;
-    text-align: center;
+
 }
 
 .pageContenDiv {
-    max-width: 1300px;
-    margin:0 auto 0 auto;
+    margin:0px auto 0px auto;
+    padding:0px 30px 0px 30px;
+    max-width: 1400px;
 }
 
 .formFieldError{

@@ -3,9 +3,8 @@ package org.votingsystem.model;
 import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
@@ -71,6 +70,8 @@ public class ContextVS {
     public static String APPTEMPDIR;
     public static String ERROR_DIR;
 
+    public static String SETTINGS_FILE_NAME = "settings.properties";
+    public static String USER_KEYSTORE_FILE_NAME = "userks.jks";
     public static String RECEIPT_FILE_NAME = "receipt";
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";
@@ -154,6 +155,7 @@ public class ContextVS {
     private Map<String, ResponseVS> hashCertVSDataMap;
     private AppHostVS appHost;
     private static Properties appProperties;
+    private static Properties settings;
     private UserVS userVS;
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
@@ -307,6 +309,77 @@ public class ContextVS {
     }
 
     public UserVS getSessionUser() { return userVS; }
+
+
+    private Properties getSettings() {
+        FileInputStream input = null;
+        try {
+            if(settings == null) {
+                settings = new Properties();
+                File settingsFile = new File(APPDIR + File.separator + SETTINGS_FILE_NAME);
+                if(!settingsFile.exists()) settingsFile.createNewFile();
+                input = new FileInputStream(settingsFile);
+                settings.load(input);
+            }
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            ex.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+            return settings;
+        }
+    }
+
+    public String getProperty(String propertyName) {
+        return getSettings().getProperty(propertyName);
+    }
+
+    public Boolean getBoolProperty(String propertyName) {
+        Boolean result = null;
+        String propertyStr = getSettings().getProperty(propertyName);
+        try {
+            if(propertyStr != null) {
+                result = Boolean.valueOf(propertyStr);
+            }
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        } finally {
+            return result;
+        }
+    }
+
+    public void setProperty(String propertyName, String propertyValue) {
+        Properties settings = getSettings();
+        OutputStream output = null;
+        try {
+            output = new FileOutputStream(APPDIR + File.separator + SETTINGS_FILE_NAME);
+            settings.setProperty(propertyName, propertyValue);
+            settings.store(output, null);
+        } catch (IOException ex) {
+            logger.error(ex.getMessage(), ex);
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        }
+    }
+
+    public static void saveUserKeyStore(KeyStore keyStore, String password) throws Exception{
+        byte[] resultBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
+        File destFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+        destFile.createNewFile();
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
+    }
 
     public AppHostVS getAppHost() { return appHost;  }
 

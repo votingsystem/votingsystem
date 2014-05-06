@@ -8,9 +8,7 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.util.DateUtils;
 
-import javax.swing.*;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 
 /**
 * @author jgzornoza

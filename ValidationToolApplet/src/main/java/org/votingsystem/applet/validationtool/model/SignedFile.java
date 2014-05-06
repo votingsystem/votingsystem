@@ -6,31 +6,16 @@ import com.itextpdf.text.pdf.PdfReader;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.cms.Attribute;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationVerifier;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.util.encoders.Base64;
-import org.votingsystem.model.*;
+import org.votingsystem.model.PDFDocumentVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.KeyStore;
-import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
 * @author jgzornoza

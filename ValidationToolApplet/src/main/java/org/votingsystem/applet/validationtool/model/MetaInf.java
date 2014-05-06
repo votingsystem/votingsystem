@@ -11,7 +11,6 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 
-import javax.swing.*;
 import java.text.ParseException;
 import java.util.*;
 

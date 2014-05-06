@@ -1,21 +1,20 @@
 package org.votingsystem.applet.validationtool.panel;
 
-import java.awt.Desktop;
-import java.awt.Frame;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.dialog.MessageDialog;
+import org.votingsystem.applet.validationtool.model.MetaInf;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
+
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-
-import org.votingsystem.applet.validationtool.model.MetaInf;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
 * @author jgzornoza

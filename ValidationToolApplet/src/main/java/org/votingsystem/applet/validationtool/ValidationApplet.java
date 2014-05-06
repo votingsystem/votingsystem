@@ -5,13 +5,15 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.dialog.MainDialog;
 import org.votingsystem.applet.validationtool.panel.AboutPanel;
+import org.votingsystem.model.AppHostVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ResponseVS;
+
 import javax.swing.*;
 import java.applet.Applet;
 import java.lang.reflect.Method;
 import java.security.Security;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -95,8 +97,8 @@ public class ValidationApplet extends JApplet implements AppHostVS {
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     try {
-                        ValidationApplet validationAppletFirma = new ValidationApplet();
-                        validationAppletFirma.start();
+                        ValidationApplet validationApplet = new ValidationApplet();
+                        validationApplet.start();
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
 	<title><g:message code="appTitle"/></title>
     <r:external uri="/images/icon_16/fa-money.png"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <g:if test="${request.getHeader("User-Agent").contains("Android")}">
         <r:require module="applicationMobile"/>
     </g:if>
@@ -80,36 +81,40 @@
                 </ul>
             </nav>
         </div>
-            <div  id="navbar" class="navbar navbar-vickets navbar-fixed-top" role="navigation" style="min-height:30px; margin-bottom: 6px; width: 100%;">
-                <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
-                <div class="container">
-                    <div class="container-fluid">
-                        <div class="navbar-collapse collapse">
-                            <a href="${grailsApplication.config.grails.serverURL}" id="appTitle" class=""
-                               style="font-size: 2.5em; margin: 0 0px 0 30px; color: #f9f9f9; font-weight: bold; ">
-                                <g:message code="appTitle"/>
-                            </a>
-                            <div id="navBarSearchInput" class="navbar-form navbar-right input-group" style="width:15px;visibility: hidden;">
-                                <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl" />"
-                                       style="width:120px; border-color: #f9f9f9;">
-                                <div class="input-group-btn">
-                                    <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
-                                        <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"
-                                            style="background-color: #ba0011; border-color: #f9f9f9; color:#f9f9f9;">
-                                        <span class="caret"></span>
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <ul class="dropdown-menu" role="menu" style="">
-                                        <li><a id="showAdvancedSearchButton" href="#"><g:message code="advancedSearchLbl"/></a></li>
-                                    </ul>
-                                </div>
+
+
+
+                <div class="navbar navbar-vickets" style="display:table; margin: 0px 0px 0px 0px; width:100%;">
+                    <div style="display:table-cell;width: 200px; margin:0px; padding:0px;">
+                        <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
+                    </div>
+                    <div style="display:table-cell; width: 70%; vertical-align: middle;">
+                        <a href="${grailsApplication.config.grails.serverURL}" id="appTitle" class=""
+                           style="font-size:2.2em; ;margin: 0 0px 0px 30px; color: #f9f9f9; font-weight: bold; ">
+                            <g:message code="appTitle"/>
+                        </a>
+                    </div>
+                    <div style="display:table-cell;width: 200px; margin:0px; padding:0px;text-align: right;vertical-align: middle;">
+                        <div id="navBarSearchInput" class="navbar-right input-group" style="width:15px;visibility: hidden;">
+                            <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl" />"
+                                   style="width:90px; border-color: #f9f9f9;">
+                            <div class="input-group-btn">
+                                <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
+                                    <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"
+                                        style="background-color: #ba0011; border-color: #f9f9f9; color:#f9f9f9; margin:0px 15px 0px 0px;">
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" style="">
+                                    <li><a id="showAdvancedSearchButton" href="#"><g:message code="advancedSearchLbl"/></a></li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        <div id="pushobj" style="min-height: 600px; margin-top: 10px;"><g:layoutBody/></div>
+
+        <div id="pushobj" style=""><g:layoutBody/></div>
 
     </div>
 

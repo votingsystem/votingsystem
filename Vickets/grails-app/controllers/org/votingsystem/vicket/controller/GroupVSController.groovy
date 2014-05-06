@@ -132,4 +132,8 @@ class GroupVSController {
         render result as JSON
     }
 
+    def admin() {
+
+    }
+
 }

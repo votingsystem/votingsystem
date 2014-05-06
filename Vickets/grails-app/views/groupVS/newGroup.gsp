@@ -28,6 +28,16 @@
 	
 	<form id="mainForm">
 
+        <div class="form-inline">
+            <div style="margin:0px 0px 20px 0px" class="row">
+                <input type="text" name="subject" id="groupSubject" style="width:400px"  required
+                       title="<g:message code="subjectLbl"/>" class="form-control"
+                       placeholder="<g:message code="newGroupNameLbl"/>"
+                       oninvalid="showGroupNameErrorMsg()"
+                       onchange="this.setCustomValidity('')" />
+            </div>
+        </div>
+
     <div style="position:relative; width:100%;">
         <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
     </div>
@@ -59,23 +69,26 @@
 
         $('#mainForm').submit(function(event){
             event.preventDefault();
+            if(!document.getElementById('groupSubject').validity.valid) {
+                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
+                return
+            }
             var editorDiv = $("#editorDiv")
             var editorContent = getEditor_editorDivData()
             if(editorContent.length == 0) {
                 editorDiv.addClass( "formFieldError" );
-                showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                    '<g:message code="emptyDocumentERRORMsg"/>')
+                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
                 return
             }
 
             console.log("newGroup - sendSignature ")
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SMIME_VICKET_NEWGROUP)
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_NEWGROUP)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
-            webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),
-                        operation:Operation.SMIME_VICKET_NEWGROUP}
+            webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),groupvsName:$("#groupSubject").val(),
+                        operation:Operation.VICKET_NEWGROUP}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
             votingSystemClient.setMessageToSignatureClient(webAppMessage, newGroupVSCallback);

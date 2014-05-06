@@ -1,13 +1,16 @@
 package org.votingsystem.accesscontrol.controller
 
+import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.EnvironmentVS
+import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.ApplicationContextHolder;
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
@@ -23,6 +26,7 @@ class CertificateVSController {
 	
 	def grailsApplication
 	def signatureVSService
+    def keyStoreService
 	
 	/**
 	 * @httpMethod [GET]
@@ -163,6 +167,37 @@ class CertificateVSController {
         log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		return [responseVS:signatureVSService.deleteTestCerts()]
 	}
+
+    /**
+     * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que crea almacenes de claves de pruebas 'JKS'
+     * @httpMethod [GET]
+     * @serviceURL [/certificateVS/createKeystore]
+     * @return Los certificados en formato PEM de las Autoridades Certificadoras en las que
+     *         confía la aplicación.
+     */
+    def createKeystore() {
+        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "serviceDevelopmentModeMsg"))]
+        }
+        log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+        String password = (params.password)? params.password:"ABCDE"
+        String givenName = (params.givenName)? params.givenName:"UserNameTestKeysStore"
+        String surname = (params.surname)? params.surname:"UserSurnameTestKeysStore"
+        String nif = (params.nif)?params.nif:"03455543T"
+        ResponseVS responseVS = keyStoreService.generateUserTestKeysStore(givenName, surname, nif, password)
+        if(ResponseVS.SC_OK == responseVS.statusCode) {
+            /*byte[] resultBytes = KeyStoreUtil.getBytes(responseVS.data, password.toCharArray())
+            File destFile = new File("${System.getProperty('user.home')}/UserTestKeyStore.jks")
+            destFile.createNewFile()
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);*/
+            byte[] base64ResultBytes = Base64.encode(resultBytes)
+            response.outputStream <<  base64ResultBytes
+            response.outputStream.flush()
+            return false
+
+        } else return [responseVS:responseVS]
+    }
 
     /**
      * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que da de alta el certificado del servidor

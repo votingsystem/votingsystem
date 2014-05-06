@@ -18,7 +18,7 @@ import org.votingsystem.model.ContextVS;
 */
 public class PasswordDialog extends javax.swing.JDialog {
 
-    private static Logger logger = Logger.getLogger(MessageDialog.class);
+    private static Logger logger = Logger.getLogger(PasswordDialog.class);
     
     private Container container;
     private JLabel messageLabel;

@@ -57,7 +57,7 @@
                                onchange="this.setCustomValidity('')"/>
 
                         <input type="url" id="vicketServerURL" style="width:280px; margin:10px 20px 0 20px;" required
-                               value="http://vickets:8083/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
+                               value="http://vickets/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
                                placeholder="<g:message code="vicketServerURLMsg"/>" class="form-control col-sm-4"
                                oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
                                onchange="this.setCustomValidity('')"/>

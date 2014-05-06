@@ -104,8 +104,7 @@ public class PreconditionsCheckerDialog extends JDialog {
     class PreconditionsCheckerWorker extends SwingWorker<ResponseVS, Object> {
        
         @Override public ResponseVS doInBackground() {
-            logger.debug("PreconditionsCheckerWorker.doInBackground - operation:" + 
-                    operationVS.getType());
+            logger.debug("PreconditionsCheckerWorker.doInBackground - operation:" + operationVS.getType());
             ResponseVS responseVS = null;
             try {
             switch(operationVS.getType()) {

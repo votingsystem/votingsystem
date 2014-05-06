@@ -29,7 +29,7 @@ class CsrService {
 
 
     private Map checkSubject(String subjectDN) {
-        // OU=DigitalCurrency,OU=CURRENCY:euro,OU=AMOUNT:10,CN=vicketProviderURL:http://vickets:8083/Vickets
+        // OU=DigitalCurrency,OU=CURRENCY:euro,OU=AMOUNT:10,CN=vicketProviderURL:http://vickets/Vickets
         String currency
         String amount
         String vicketProviderURL

@@ -192,7 +192,7 @@ public class VotingAppService extends Service implements Runnable {
             * spawn its own thread in which to do that work.*/
         Thread thr = new Thread(null, runnable, "voting_app_service_thread");
         thr.start();
-        WebsocketListener socketListener = new WebsocketListener("ws://vickets:8083/Vickets/websocket/service");
+        WebsocketListener socketListener = new WebsocketListener("ws://vickets/Vickets/websocket/service");
         Thread websocketThread = new Thread(null, socketListener, "websocket_service_thread");
         websocketThread.start();
         //We want this service to continue running until it is explicitly stopped, so return sticky.

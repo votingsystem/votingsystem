@@ -1,5 +1,5 @@
 var Operation = {
-		SMIME_VICKET_NEWGROUP : "SMIME_VICKET_NEWGROUP"
+		VICKET_NEWGROUP : "VICKET_NEWGROUP"
 }
 
 var WebAppMessage = function (statusCode, operation) {
@@ -376,6 +376,7 @@ VotingSystemApplet.prototype.setMessageToValidationTool = function (message) {
 	}
 
 var androidClienLoaded = false
+var javafxClient = null
 
 VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON, callerCallback) {
 		var callerCallbackName = getFnName(callerCallback)
@@ -408,6 +409,11 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
             }
 			return
 		}
+
+        if(javafxClient != null) {
+            javafxClient.setMessageToSignatureClient(this.messageToSignatureClient)
+            return
+        }
 
 		if(!this.signatureClientToolLoaded) {
 			if(isJavaEnabledClient()) {

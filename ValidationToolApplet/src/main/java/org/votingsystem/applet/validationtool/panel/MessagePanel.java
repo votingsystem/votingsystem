@@ -1,6 +1,7 @@
 package org.votingsystem.applet.validationtool.panel;
 
 import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 
 /**

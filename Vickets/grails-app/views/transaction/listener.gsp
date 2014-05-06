@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <div class="row">
+    <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li class="active"><g:message code="transactionPageTitle"/></li>
@@ -15,12 +15,12 @@
     <button id="loadHistoryButton" type="button" class="btn btn-primary"
             style="margin: 10px 0px 10px 0px;display: none;">
         <g:message code="loadHistoryLbl"/>
-        <i  id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
+        <i id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
     </button>
 
-    <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
+    <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; width: 400px;" class="form-control">
+            <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
                 <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
                 <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
                 <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
@@ -31,20 +31,23 @@
         </div>
     </div>
 
-    <p id="pageInfoPanel" class="" style="margin: 20px 20px 20px 20px; font-size: 1.3em; background-color: #f9f9f9;"></p>
+    <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
+        background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <table class="table dynatable-vickets" id="transaction_table">
-        <thead>
-        <tr style="color: #ff0000;">
-            <th data-dynatable-column="type" style="width:210px;"><g:message code="typeLbl"/></th>
-            <th data-dynatable-column="amount"><g:message code="amountLbl"/></th>
-            <th data-dynatable-column="currency"><g:message code="currencyLbl"/></th>
-            <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
-            <th data-dynatable-column="subject" style="width:300px;"><g:message code="subjectLbl"/></th>
-            <th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>
-        </tr>
-        </thead>
-    </table>
+    <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
+        <table class="table dynatable-vickets" id="transaction_table" style="">
+            <thead>
+            <tr style="color: #ff0000;">
+                <th data-dynatable-column="type" style="width: 220px;"><g:message code="typeLbl"/></th>
+                <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
+                <th data-dynatable-column="currency" style="max-width:60px;"><g:message code="currencyLbl"/></th>
+                <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
+                <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
+                <!--<th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>-->
+            </tr>
+            </thead>
+        </table>
+    </div>
 </div>
 </body>
 
@@ -84,7 +87,6 @@
         })
 
         $("#transaction_table").stickyTableHeaders({fixedOffset: $('.navbar')});
-
 
         $('#transactionvsTypeSelect').on('change', function (e) {
             var transactionvsType = $(this).val()
@@ -163,17 +165,17 @@
 
         var cssClass = "span4", tr;
         if (rowIndex % 3 === 0) { cssClass += ' first'; }
-        tr = '<tr><td title="' + transactionType + '">' +
-            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td>' +
+        tr = '<tr><td title="' + transactionType + '" class="text-center">' +
+            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-center">' +
             jsonTransactionData.amount + '</td>' +
-        '<td>' + jsonTransactionData.currency + '</td><td>' + jsonTransactionData.dateCreated +
-        '</td><td title="' + jsonTransactionData.subject + '">' + jsonTransactionData.subject + '</td><td>' + '<a href="#" onclick="openWindow(\'' +
-        jsonTransactionData.messageSMIMEURL+ '\')"><g:message code="proofLbl"/></a></td></tr>'
+        '<td class="text-center">' + jsonTransactionData.currency + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
+        '</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
         return tr
     }
 
     function processUserSearch(textToSearch) {
         $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
+        $('#pageInfoPanel').css("display", "block")
         dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
         dynatable.paginationPage.set(1);
         dynatable.process();

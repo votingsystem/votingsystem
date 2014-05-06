@@ -54,7 +54,7 @@
                 </div>
                 <div>
                     <input type="url" id="vicketServerURL"  class="form-control" style="width:280px; margin:20px auto 20px auto;" required
-                           value="http://vickets:8083/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
+                           value="http://vickets/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
                            placeholder="<g:message code="vicketServerURLMsg"/>"
                            oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
                            onchange="this.setCustomValidity('')"/>

@@ -16,7 +16,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Future;
 
 /**
 * @author jgzornoza

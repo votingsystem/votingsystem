@@ -3,6 +3,7 @@ package org.votingsystem.applet.validationtool.panel;
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.applet.validationtool.dialog.TimeStampDialog;
 import org.votingsystem.applet.validationtool.model.SignedFile;
 import org.votingsystem.applet.validationtool.util.Formatter;
 import org.votingsystem.model.ContextVS;
@@ -11,7 +12,6 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 
 import javax.swing.*;
-import org.votingsystem.applet.validationtool.dialog.TimeStampDialog;
 
 /**
 * @author jgzornoza

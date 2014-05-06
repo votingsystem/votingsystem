@@ -14,7 +14,6 @@ import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 
 import java.security.KeyStore;
-import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;

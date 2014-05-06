@@ -49,8 +49,6 @@ public class MessageDialog extends javax.swing.JDialog {
         container.add(scrollPane, "width 600::, height 400::, grow, wrap");
         container.add(cancelButton, "width :150:, align right");
     }
-
-
     
     public void showMessage (String message, String caption) {
         logger.debug("--- showMessage - showMessage: " + message + " - caption: " + caption);

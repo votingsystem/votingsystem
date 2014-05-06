@@ -6,7 +6,6 @@ import org.votingsystem.applet.validationtool.model.SignedFile;
 import org.votingsystem.applet.validationtool.panel.SignatureInfoPanel;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
 import javax.swing.*;
 import java.awt.*;
