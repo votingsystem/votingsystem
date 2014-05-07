@@ -154,10 +154,10 @@ public class ActorVS implements java.io.Serializable {
     }
 
     public String getTimeStampServiceURL() {
-        return getUrlTimeStampServer() + "/timeStamp";
+        return getTimeStampServerURL() + "/timeStamp";
     }
 
-    public String getUrlTimeStampServer() {
+    public String getTimeStampServerURL() {
         return urlTimeStampServer;
     }
 

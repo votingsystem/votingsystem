@@ -41,7 +41,7 @@
             </p>
         </div>
         <div>
-            <iframe id="validationToolAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+            <iframe id="AdminToolFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
 
             <div id="tabProgressTemplate" style="display:none;">
                 <g:include view="/include/tabProgress.gsp"/>

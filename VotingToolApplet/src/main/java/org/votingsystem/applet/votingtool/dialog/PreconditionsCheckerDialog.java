@@ -120,7 +120,7 @@ public class PreconditionsCheckerDialog extends JDialog {
                     }
                     break;
                 default:
-                    String serverURL = operationVS.getUrlServer().trim();
+                    String serverURL = operationVS.getServerURL().trim();
                     responseVS = checkActorVS(serverURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         ContextVS.getInstance().setAccessControl((AccessControlVS)responseVS.getData());

@@ -41,7 +41,7 @@ class UserVSService {
 	}
 
     public Map getUserVSDataMap(UserVS userVS){
-
+        return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, nif:userVS?.nif]
     }
 
 	boolean isUserAdmin(String nif) {

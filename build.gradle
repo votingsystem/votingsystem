@@ -16,14 +16,14 @@ subprojects {
 
 ext {
 	votingToolApplet = null
-	validationToolApplet = null
+	AdminTool = null
     validationToolDistZip = null
 	votingSystemLibrary = null
 	votingToolAndroid = null
 	certsDataMap = null
 }
 
-//'ValidationToolApplet:signJar' -> Needs Java8
+//'AdminTool:signJar' -> Needs Java8
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'TimeStampServer:war',
                          'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
@@ -145,7 +145,7 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
     announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
 
-task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':ValidationToolApplet:signJar',
+task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':AdminTool:signJar',
 	':VotingSystemLibrary:publish', ':releaseAndroid']) {
 }
 
@@ -172,9 +172,9 @@ def copyValidationTool(project) {
     File appletDir = project.file("web-app/applet/");
     appletDir.mkdirs()
 
-    File validationToolApplet = project.file("web-app/applet/${rootProject.validationToolName}.jar")
-    if(validationToolApplet.exists()) validationToolApplet.delete()
-    validationToolApplet << rootProject.validationToolApplet?.bytes
+    File AdminTool = project.file("web-app/applet/${rootProject.validationToolName}.jar")
+    if(AdminTool.exists()) AdminTool.delete()
+    AdminTool << rootProject.AdminTool?.bytes
 
     File validationToolDist = project.file("web-app/applet/${rootProject.validationToolName}.zip")
     if(validationToolDist.exists()) validationToolDist.delete()

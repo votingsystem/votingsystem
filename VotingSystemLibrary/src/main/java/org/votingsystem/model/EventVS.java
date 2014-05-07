@@ -73,7 +73,7 @@ public class EventVS implements Serializable {
     private UserVS userVS;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
     //Owning Entity side of the relationship
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinTable(name = "eventvs_tagvs", joinColumns = {
             @JoinColumn(name = "eventvs", referencedColumnName = "id", nullable = false) },
             inverseJoinColumns = { @JoinColumn(name = "tagvs", nullable = false, referencedColumnName = "id") })

@@ -56,7 +56,7 @@ public class OperationVS {
         this.args = args;
     }
 
-    public String getUrlTimeStampServer() {
+    public String getTimeStampServerURL() {
         return urlTimeStampServer;
     }
 
@@ -64,7 +64,7 @@ public class OperationVS {
         this.urlTimeStampServer = urlTimeStampServer;
     }
 
-    public String getUrlServer() {
+    public String getServerURL() {
         return serverURL;
     }
 

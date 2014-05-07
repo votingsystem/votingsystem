@@ -72,7 +72,7 @@ class UrlMappings {
 
         "/groupVS" {
             controller = "groupVS"
-            action = [POST:"add"]
+            action = [POST:"addNewGroup"]
         }
 	}
 }

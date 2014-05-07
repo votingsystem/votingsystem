@@ -6,7 +6,7 @@ dependencies {
     compile (project(':VotingSystemLibrary'))
 }
 
-task copyApps(dependsOn: [':generateVotingSystemApps', ':ValidationToolApplet:copyDistZip']) {
+task copyApps(dependsOn: [':generateVotingSystemApps', ':AdminTool:copyDistZip']) {
 	doLast {
         copyVotingSystemApps(project)
 

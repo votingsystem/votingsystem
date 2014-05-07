@@ -382,7 +382,7 @@ var dynatableFeatures =  {
 
 window.onload=function(){
 	$("#votingSystemAppletFrame").attr("src", "");
-	$("#validationToolAppletFrame").attr("src", "");
+	$("#AdminToolFrame").attr("src", "");
 	checkIEVersion()
 };
 
@@ -474,7 +474,7 @@ VotingSystemApplet.prototype.setMessageToValidationTool = function (message) {
 			if(isJavaEnabledClient()) {
 				console.log("Loading validationTool")
 				window.getMessageToValidationTool = this.getMessageToValidationTool
-				$("#validationToolAppletFrame").attr("src", '${createLink(controller:'applet', action:'validationTool')}');
+				$("#AdminToolFrame").attr("src", '${createLink(controller:'applet', action:'validationTool')}');
 				$("#loadingVotingSystemAppletDialog").dialog("open");
 
 			}

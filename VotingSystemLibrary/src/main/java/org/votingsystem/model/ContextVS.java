@@ -128,8 +128,12 @@ public class ContextVS {
     public static final String HASH_CERTVS_KEY        = "hashCertVSBase64";
     public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";
 
+    //Settings vars
+    public static final String WITH_KEYSTORE_PROPERTY = "WITH_KEYSTORE_PROPERTY";
 
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
+
+    public static final String KEYSTORE_USER_CERT_ALIAS = "UserTestKeysStore";
 
     //For tests environments
     private static final String ROOT_ALIAS = "rootAlias";
@@ -157,6 +161,7 @@ public class ContextVS {
     private static Properties appProperties;
     private static Properties settings;
     private UserVS userVS;
+    private VicketServer vicketServer;
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
     private static ContextVS INSTANCE;
@@ -340,7 +345,7 @@ public class ContextVS {
         return getSettings().getProperty(propertyName);
     }
 
-    public Boolean getBoolProperty(String propertyName) {
+    public Boolean getBoolProperty(String propertyName, Boolean defaultValue) {
         Boolean result = null;
         String propertyStr = getSettings().getProperty(propertyName);
         try {
@@ -350,7 +355,8 @@ public class ContextVS {
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
         } finally {
-            return result;
+            if(result == null) return defaultValue;
+            else return result;
         }
     }
 
@@ -379,6 +385,13 @@ public class ContextVS {
         File destFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
         destFile.createNewFile();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
+    }
+
+    public static KeyStore getUserKeyStore(char[] password) throws Exception{
+        File keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(new FileInputStream(keyStoreFile), password);
+        return keyStore;
     }
 
     public AppHostVS getAppHost() { return appHost;  }
@@ -471,4 +484,11 @@ public class ContextVS {
     }
 
 
+    public VicketServer getVicketServer() {
+        return vicketServer;
+    }
+
+    public void setVicketServer(VicketServer vicketServer) {
+        this.vicketServer = vicketServer;
+    }
 }

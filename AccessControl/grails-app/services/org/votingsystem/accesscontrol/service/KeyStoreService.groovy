@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.service
 
 import org.votingsystem.model.CertificateVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.KeyStoreVS
@@ -87,7 +88,7 @@ class KeyStoreService {
             //X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certSigner, privateKeySigner,  keyAlias);
 
             KeyStore userKeyStore = KeyStoreUtil.createUserKeyStore(validFrom.getTime(),
-                    (validTo.getTime() - validFrom.getTime()), userPassword.toCharArray(), "UserTestKeysStore",
+                    (validTo.getTime() - validFrom.getTime()), userPassword.toCharArray(), ContextVS.KEYSTORE_USER_CERT_ALIAS,
                     rootCAPrivateCredential, testUserDN);
             return new ResponseVS(statusCode:ResponseVS.SC_OK, data:userKeyStore)
         }

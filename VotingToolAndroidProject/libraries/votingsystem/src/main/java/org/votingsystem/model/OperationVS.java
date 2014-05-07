@@ -70,7 +70,7 @@ public class OperationVS {
         this.args = args;
     }
 
-    public String getUrlTimeStampServer() {
+    public String getTimeStampServerURL() {
         return urlTimeStampServer;
     }
     

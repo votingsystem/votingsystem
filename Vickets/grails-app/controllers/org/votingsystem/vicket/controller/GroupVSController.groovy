@@ -3,6 +3,8 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.GroupVS
+import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 
@@ -79,10 +81,29 @@ class GroupVSController {
         render resultMap as JSON
     }
 
-    def newGroup() {}
+    def test() {
+        GroupVS.withTransaction {
+            def groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset) {
+                isNull('description')
+            }
+            log.debug("groupList.totalCount: ${groupList.totalCount}")
+            groupList.each {groupItem ->
+                groupItem.delete()
+            }
+        }
+        render "OK"
+        return false
+    }
 
-    def add(){
+    def newGroup (){}
 
+    def addNewGroup(){
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+        if(!messageSMIMEReq) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        }
+        ResponseVS responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
+        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
     }
 
     def addGroup() {

@@ -58,7 +58,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     break;
                 case ActorVS.Type.VICKETS:
                     responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                            actorVS.getUrlTimeStampServer()),ContentTypeVS.JSON);
+                            actorVS.getTimeStampServerURL()),ContentTypeVS.JSON);
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                     ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
                     ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());

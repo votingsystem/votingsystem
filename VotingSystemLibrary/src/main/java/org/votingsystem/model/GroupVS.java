@@ -20,7 +20,7 @@ public class GroupVS extends UserVS implements java.io.Serializable {
     private UserVS groupRepresentative;
 
     //Owning Entity side of the relationship
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinTable(name = "groupvs_uservs", joinColumns = {
             @JoinColumn(name = "groupvs_id", referencedColumnName = "id", nullable = false) },
             inverseJoinColumns = { @JoinColumn(name = "uservs_id", referencedColumnName = "id", nullable = false) })
