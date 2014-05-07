@@ -23,8 +23,9 @@ ext {
 	certsDataMap = null
 }
 
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'ValidationToolApplet:signJar',
-	 'TimeStampServer:war','AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
+//'ValidationToolApplet:signJar' -> Needs Java8
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'TimeStampServer:war',
+                         'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
 
 task releaseAndroid () {

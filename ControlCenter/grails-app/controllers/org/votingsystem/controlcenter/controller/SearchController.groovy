@@ -32,10 +32,10 @@ class SearchController {
    def subscriptionVSService
    def sessionFactory
    def userVSService
-   
+
    /**
     * ==================================================
-	* (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
+	* (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
 	* ==================================================
 	* Servicio que reindexa el motor de búsqueda
 	* @httpMethod [GET]
@@ -49,12 +49,12 @@ class SearchController {
 	   fullTextSession.createIndexer().startAndWait()
        return [responseVS : new ResponseVS(ResponseVS.SC_OK, "OK")]
    }
-   
+
    /**
 	* Servicio que reindexa los datos del motor de búsqueda.
-	* 
+	*
 	* @httpMethod [POST]
-	* @requestContentType [application/x-pkcs7-signature] Obligatorio. Documento firmado 
+	* @requestContentType [application/x-pkcs7-signature] Obligatorio. Documento firmado
 	*             en formato SMIME con los datos de la solicitud de reindexación.
 	*/
 	def reindex () {
@@ -80,7 +80,7 @@ class SearchController {
             }
         }
 	}
-	
+
 	/**
 	 * Servicio que busca la cadena de texto recibida entre las votaciones publicadas.
 	 *
@@ -104,7 +104,7 @@ class SearchController {
         }
         render eventVSElectionMap as JSON
     }
-	
+
 	/**
 	 * @httpMethod [POST]
 	 * @requestContentType [application/json] Documento JSON con los parámetros de la consulta:<br/><code>
@@ -192,7 +192,7 @@ class SearchController {
 		}
 		render eventsVSMap as JSON
 	}
-	
+
 	/**
 	 * Servicio que busca los eventos que tienen la tagVS que se
 	 * pasa como parámetro.
