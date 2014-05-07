@@ -110,7 +110,7 @@ public class BrowserVS extends Region {
             @Override public void changed(ObservableValue<? extends Worker.State> observableValue,
                                           Worker.State state, Worker.State newState) {
                 logger.debug(" --- newState: " + newState);
-                if (newState.equals(Worker.State.RUNNING)) showProgressDialog(true);
+                if (newState.equals(Worker.State.RUNNING))
                 if (newState.equals(Worker.State.SUCCEEDED)) showProgressDialog(false);
                 if (newState.equals(Worker.State.FAILED)) {
                     showProgressDialog(false);
@@ -118,6 +118,7 @@ public class BrowserVS extends Region {
                 }
             }
         });
+        showProgressDialog(true);
     }
 
     public void showMessage(String message) {
