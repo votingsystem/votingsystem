@@ -145,8 +145,8 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
     announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
 
-task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':AdminTool:signJar',
-	':VotingSystemLibrary:publish', ':releaseAndroid']) {
+//'AdminTool:signJar' -> Needs Java8
+task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':VotingSystemLibrary:publish', ':releaseAndroid']) {
 }
 
 def copyVotingSystemApps(project) {
