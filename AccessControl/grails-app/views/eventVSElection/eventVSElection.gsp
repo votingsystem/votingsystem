@@ -1,5 +1,4 @@
 <%@ page import="org.votingsystem.model.EventVS; grails.converters.JSON" %>
-<%@ page import="org.votingsystem.accesscontrol.model.*" %>
 <%
     def messageToUser = null
     def eventClass = null
@@ -7,7 +6,7 @@
         switch(EventVS.State.valueOf(eventMap?.state)) {
             case EventVS.State.CANCELLED:
                 messageToUser = message(code: 'eventCancelledLbl')
-                eventClass = "eventCancelleddBox"
+                eventClass = "eventCancelledBox"
                 break;
             case EventVS.State.AWAITING:
                 messageToUser = message(code: 'eventPendingLbl')

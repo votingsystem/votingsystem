@@ -51,7 +51,7 @@ public class UserVS implements Serializable {
 
     @Column(name="lastName" ) private String lastName;
 
-    @Column(name="description" ) private String description;
+    @Column(name="description", columnDefinition="TEXT" ) private String description;
     
     @Column(name="representativeMessage" ) private MessageSMIME representativeMessage;
     
@@ -68,9 +68,9 @@ public class UserVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
 
-    @ManyToMany(mappedBy = "userVSSet", fetch = FetchType.LAZY) private Set<GroupVS> groupVSSet;
-
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
+
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateActivated", length=23) private Date dateActivated;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
 
@@ -289,20 +289,20 @@ public class UserVS implements Serializable {
         this.dateCancelled = dateCancelled;
     }
 
-    public Set<GroupVS> getGroupVSSet() {
-        return groupVSSet;
-    }
-
-    public void setGroupVSSet(Set<GroupVS> groupVSSet) {
-        this.groupVSSet = groupVSSet;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getDateActivated() {
+        return dateActivated;
+    }
+
+    public void setDateActivated(Date dateActivated) {
+        this.dateActivated = dateActivated;
     }
 
     @Transient public String getSignatureBase64() {

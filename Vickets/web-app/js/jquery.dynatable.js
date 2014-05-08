@@ -230,6 +230,7 @@
             var _this = this;
             var options = {
                 type: _this.settings.dataset.ajaxMethod,
+                contentType:_this.settings.dataset.ajaxDataType,
                 dataType: _this.settings.dataset.ajaxDataType,
                 data: data,
                 error: function(xhr, error) {

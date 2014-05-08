@@ -1,0 +1,146 @@
+.groupvsMessagePanel {
+    padding: 7px 12px 7px 12px;
+    margin: 20px auto 20px auto;
+    border: 2px solid #cc1606;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 0 8px 6px -6px #888;
+    -webkit-box-shadow: 0 8px 6px -6px #888;
+    box-shadow: 0 8px 6px -6px #888;
+    width: 70%;
+}
+
+.groupvsMessagePanel .messageContent {
+    text-align: center;
+    font-size: 1.3em;
+    font-weight:bold;
+    margin:7px 0px 7px 0px;
+}
+
+.groupvsMessageCancelled {
+    position:absolute;
+    opacity:0.4;
+    left:0px;
+    top:50%;
+    text-transform:uppercase;
+    transform:rotate(20deg);
+    -ms-transform:rotate(20deg);
+    -webkit-transform:rotate(20deg);
+    -moz-transform: rotate(20deg);
+}
+
+.groupvsDiv {
+    display:inline;
+    width:350px;
+    max-width: 400px;
+    background-color: #f2f2f2;
+    margin: 10px 5px 5px 10px;
+    -moz-border-radius: 5px; border-radius: 5px;
+    cursor: pointer; cursor: hand;
+    max-height:150px;
+    overflow:hidden;
+    float:left;
+}
+
+.groupvsInfoDiv {
+    position:relative;
+    font-size: 0.9em;
+    height:75px;
+    padding: 10px;
+    display:table-cell;
+    vertical-align:middle;
+    padding: 0px 5px 0px 5px;
+}
+
+.groupvsSubjectDiv {
+    font-size: 1.1em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    font-weight:bold;
+    color:white;
+    position: relative;
+    padding: 5px 10px 5px 10px;
+    margin: 0 auto 0 auto;
+}
+
+.groupvsInfoDiv .cancelMessage {
+    display:none;
+    transform:rotate(15deg);
+    -ms-transform:rotate(15deg);
+    -webkit-transform:rotate(15deg);
+    -moz-transform:rotate(15deg);
+    padding:3px 5px 3px 5px;
+    margin: 0 0 0 20px;
+    opacity:0.4;
+    text-transform:uppercase;
+    font-weight:bold;
+    font-size: 1.9em;
+}
+
+.groupvsActive {
+    border: 1px solid #388746;
+}
+
+.groupvsActive .groupvsSubjectDiv{
+    background-color:#388746;
+}
+
+
+.groupvsPending {
+    border: 1px solid #fba131;
+}
+
+.groupvsPending .groupvsSubjectDiv{
+    background-color:#fba131;
+}
+
+.numTotalUsersDiv {
+    right: 0px;
+    display: block;
+    color:#388746;
+    margin: 0px 20px 0px 0px;
+}
+
+.groupvsFinished {
+    border: 1px solid #cc1606;
+}
+
+.groupvsFinished .groupvsSubjectDiv{
+    background-color:#cc1606;
+}
+
+.groupvsRepresentativeDiv {
+    position: relative;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+    font-size: 0.9em;
+    padding: 5px;
+    bottom: 0px;
+}
+
+.groupvsPendingBox {
+    border-color: #fba131;
+    color:#fba131;
+}
+
+.groupvsClosedBox {
+    border-color: #cc1606;
+    color:#cc1606;
+}
+
+.groupvsCancelledBox {
+    position: absolute;
+    top: 200px;
+    margin: 0 0 0 150px;
+    width: 600px;
+    border-color: #cc1606;
+    color:#cc1606;
+    opacity:0.4;
+    transform:rotate(20deg);
+    -ms-transform:rotate(20deg);
+    -webkit-transform:rotate(20deg);
+    -moz-transform: rotate(20deg);
+}

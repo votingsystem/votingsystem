@@ -11,7 +11,6 @@ var WebAppMessage = function (statusCode, operation) {
 	this.documentURL;
 	this.receiverName;
 	this.serverURL;
-	this.eventVS;
 	this.message;
 	this.caption;
 	this.callerCallback;
@@ -334,6 +333,7 @@ function VotingSystemApplet () {
 	this.messageToSignatureClient = null;
 	this.signatureClientCallback = null
 }
+
 
 VotingSystemApplet.prototype.getMessageToSignatureClient = function (appMessage) {
 		var result

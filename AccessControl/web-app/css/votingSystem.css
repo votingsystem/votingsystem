@@ -565,7 +565,7 @@ hr {
     color:#cc1606;
 }
 
-.eventCancelleddBox {
+.eventCancelledBox {
     position: absolute;
     top: 200px;
     margin: 0 0 0 150px;

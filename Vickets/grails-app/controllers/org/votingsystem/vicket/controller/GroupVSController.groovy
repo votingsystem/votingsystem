@@ -5,6 +5,8 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.GroupVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.SubscriptionVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 
@@ -19,141 +21,128 @@ class GroupVSController {
 
 	def grailsApplication;
     def groupVSService
+    def userVSService
 
-    def get() {
-        Map resultMap = [:]
-        GroupVS result
-
+    def index() {
         if (params.long('id')) {
-
+            def result
+            Map resultMap = [:]
             GroupVS.withTransaction {
                 result = GroupVS.get(params.long('id'))
             }
             if(result) resultMap = groupVSService.getGroupVSDataMap(result)
-        }
-        //============
-        render result as JSON
-        if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-            //render resultMap as JSON
-            render result as JSON
-        } else {
-            render(view:'get', model: [groupvsMap:resultMap])
-        }
-    }
-
-    def index() {
-        List<GroupVS> groupList = null
-        int totalGroups = 0;
-        GroupVS.withTransaction {
-            if(params.searchText || params.searchFrom || params.searchTo || params.state) {
-                GroupVS.State state = null
-                Date dateFrom = null
-                Date dateTo = null
-                try {state = GroupVS.State.valueOf(params.state)} catch(Exception ex) {}
-                //searchFrom:2014/04/14 00:00:00, max:100, searchTo
-                if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
-                if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
-
-                groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset) {
-                    or {
-                        if(state) eq("state", state)
-                        ilike('name', "%${params.searchText}%")
-                        ilike('description', "%${params.searchText}%")
-                    }
-                    and {
-                        if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
-                        else if(dateFrom) {ge("dateCreated", dateFrom)}
-                        else if(dateTo) {le("dateCreated", dateTo)}
-                    }
-                }
-                totalGroups = groupList.totalCount
+            if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+                render resultMap as JSON
             } else {
-                groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset){ };
-                totalGroups = groupList.totalCount
+                render(view:'group', model: [groupvsMap:resultMap])
             }
-        }
-        def resultList = []
-        groupList.each {groupItem ->
-            resultList.add(groupVSService.getGroupVSDataMap(groupItem))
-        }
-        def resultMap = ["${message(code: 'groupvsRecordsLbl')}":resultList, queryRecordCount: totalGroups,
+        } else if(request.contentType?.contains("json")) {
+            Map resultMap = [:]
+            def result
+            List<GroupVS> groupList = null
+            int totalGroups = 0;
+            GroupVS.withTransaction {
+                if(params.searchText || params.searchFrom || params.searchTo || params.state) {
+                    GroupVS.State state = null
+                    Date dateFrom = null
+                    Date dateTo = null
+                    try {state = GroupVS.State.valueOf(params.state)} catch(Exception ex) {}
+                    //searchFrom:2014/04/14 00:00:00, max:100, searchTo
+                    if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
+                    if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
+
+                    groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset) {
+                        or {
+                            if(state) eq("state", state)
+                            ilike('name', "%${params.searchText}%")
+                            ilike('description', "%${params.searchText}%")
+                        }
+                        and {
+                            if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
+                            else if(dateFrom) {ge("dateCreated", dateFrom)}
+                            else if(dateTo) {le("dateCreated", dateTo)}
+                        }
+                    }
+                    totalGroups = groupList.totalCount
+                } else {
+                    groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset){ };
+                    totalGroups = groupList.totalCount
+                }
+            }
+            def resultList = []
+            groupList.each {groupItem ->
+                resultList.add(groupVSService.getGroupVSDataMap(groupItem))
+            }
+            resultMap = ["${message(code: 'groupvsRecordsLbl')}":resultList, queryRecordCount: totalGroups,
                          numTotalGroups:totalGroups ]
-        render resultMap as JSON
+            render resultMap as JSON
+        }
     }
+
+    def admin() {}
+
+    def newGroup (){
+        if("POST".equals(request.method)) {
+            MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+            if(!messageSMIMEReq) {
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+            }
+            ResponseVS responseVS = null
+            try {
+                responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
+            } catch(Exception ex) {
+                log.error (ex.getMessage(), ex)
+                String msg = message(code:'publishGroupVSErrorMessage')
+                responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:msg, type:TypeVS.VICKET_ERROR)
+            }
+            return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
+        } else {
+
+        }
+    }
+
+    def subscribe() {
+        if(params.long('id')) {
+            MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+            if(!messageSMIMEReq) {
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+            }
+            ResponseVS responseVS = null
+            try {
+                responseVS = groupVSService.subscribe(messageSMIMEReq, request.getLocale())
+            } catch(Exception ex) {
+                log.error (ex.getMessage(), ex)
+                String msg = message(code:'publishGroupVSErrorMessage')
+                responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:msg, type:TypeVS.VICKET_ERROR)
+            }
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                message: message(code: 'requestWithErrors'))]
+    }
+
+
+    def users() {
+        if(params.long('id')) {
+            def result
+            Map resultMap = [:]
+            SubscriptionVS.withTransaction {
+                result = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
+                    eq("groupVS.id", params.long('id'))
+                }
+            }
+            def resultList = []
+            result.each {item ->
+                resultList.add(userVSService.getUserVSDataMap(item.userVS))
+            }
+            int totalCount = result.totalCount
+            resultMap = ["${message(code: 'uservsRecordsLbl')}":resultList, queryRecordCount: totalCount,
+                         numTotalUsers:totalCount ]
+            render resultMap as JSON
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                message: message(code: 'requestWithErrors'))]
+    }
+
 
     def test() {
-        GroupVS.withTransaction {
-            def groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset) {
-                isNull('description')
-            }
-            log.debug("groupList.totalCount: ${groupList.totalCount}")
-            groupList.each {groupItem ->
-                groupItem.delete()
-            }
-        }
-        render "OK"
-        return false
-    }
-
-    def newGroup (){}
-
-    def addNewGroup(){
-        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        ResponseVS responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
-    }
-
-    def addGroup() {
-        GroupVS groupvs
-        UserVS.withTransaction {
-            groupvs = new GroupVS(name:"Grupo 0 de prueba", type:UserVS.Type.GROUP)
-            groupvs.save()
-        }
-        render "Created group ${groupvs?.id}"
-        return false
-    }
-
-    def addUsersToGroup() {
-        GroupVS groupvs = GroupVS.get(12)
-        UserVS user4 = UserVS.get(4)
-        UserVS user5 = UserVS.get(5)
-        groupvs.userVSSet.addAll([user4, user5])
-        UserVS.withTransaction {
-            groupvs.save()
-        }
-        render "Updated Group"
-        return false
-    }
-
-    def searchGroup1() {
-        def result
-
-        UserVS.withTransaction {
-            result = UserVS.createCriteria().list(max: 2, offset: params.offset) {
-                groupVSSet {
-                    eq("id", 12L)
-                }
-            }
-        }
-        render result as JSON
-    }
-
-    def searchGroup() {
-        def result
-        GroupVS.withTransaction {
-            result = GroupVS.createCriteria().listDistinct() {
-                userVSSet {
-                    ilike('name', '%Name%')
-                }
-            }
-        }
-        render result as JSON
-    }
-
-    def admin() {
 
     }
 

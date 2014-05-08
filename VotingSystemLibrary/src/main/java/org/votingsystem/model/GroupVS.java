@@ -19,21 +19,6 @@ public class GroupVS extends UserVS implements java.io.Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     private UserVS groupRepresentative;
 
-    //Owning Entity side of the relationship
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-    @JoinTable(name = "groupvs_uservs", joinColumns = {
-            @JoinColumn(name = "groupvs_id", referencedColumnName = "id", nullable = false) },
-            inverseJoinColumns = { @JoinColumn(name = "uservs_id", referencedColumnName = "id", nullable = false) })
-    private Set<UserVS> userVSSet;
-
-    public Set<UserVS> getUserVSSet() {
-        return userVSSet;
-    }
-
-    public void setUserVSSet(Set<UserVS> userVSSet) {
-        this.userVSSet = userVSSet;
-    }
-
     public UserVS getGroupRepresentative() {
         return groupRepresentative;
     }

@@ -41,7 +41,7 @@ public class FXMessageDialog {
         verticalBox.getChildren().addAll(messageLabel, acceptButton);
         verticalBox.getStyleClass().add("modal-dialog");
         dialog.setScene(new Scene(verticalBox, Color.TRANSPARENT));
-        dialog.getScene().getStylesheets().add(getClass().getResource("../css/modal-dialog.css").toExternalForm());
+        dialog.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
         // allow the dialog to be dragged around.
         final Node root = dialog.getScene().getRoot();
         final Delta dragDelta = new Delta();
@@ -62,10 +62,7 @@ public class FXMessageDialog {
 
     public void showMessage(String message) {
         messageLabel.setText(message);
-
-        dialog.setX(dialog.getOwner().getX() + dialog.getOwner().getWidth() / 2 - dialog.getWidth() / 2);
-        dialog.setY(dialog.getOwner().getY() + dialog.getOwner().getHeight() / 2 - dialog.getHeight() / 2);
-
+        dialog.centerOnScreen();
         dialog.show();
     }
 

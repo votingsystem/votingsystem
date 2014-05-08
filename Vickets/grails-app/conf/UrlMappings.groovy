@@ -56,7 +56,7 @@ class UrlMappings {
 
         "/transaction/$id"{
             controller = "transaction"
-            action = "get"
+            action = "list"
             constraints {
                 id(matches:/\d*/)
             }
@@ -64,15 +64,35 @@ class UrlMappings {
 
         "/groupVS/$id"{
             controller = "groupVS"
-            action = "get"
+            action = "index"
             constraints {
                 id(matches:/\d*/)
             }
         }
 
-        "/groupVS" {
+        "/groupVS/$id/subscribe"{
             controller = "groupVS"
-            action = [POST:"addNewGroup"]
+            action = "subscribe"
+            constraints {
+                id(matches:/\d*/)
+            }
         }
+
+        "/groupVS/$id/users"{
+            controller = "groupVS"
+            action = "users"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/subscriptionVS/$id/activate"{
+            controller = "subscriptionVS"
+            action = "activate"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
 	}
 }

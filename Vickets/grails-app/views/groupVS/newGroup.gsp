@@ -85,7 +85,7 @@
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_NEWGROUP)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}"
+            webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
             webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),groupvsName:$("#groupSubject").val(),
                         operation:Operation.VICKET_NEWGROUP}

@@ -91,8 +91,6 @@ EventVS.prototype.getMessage = function () {
     }
 
 EventVS.prototype.getElement = function() {
-        if(eventTemplate == null) console.log("eventTemplate null")
-
         var $newEvent = $(this.eventHTML)
         var $li = $newEvent.find("li");
 
