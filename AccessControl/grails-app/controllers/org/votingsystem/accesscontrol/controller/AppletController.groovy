@@ -14,12 +14,5 @@ class AppletController {
 	 */
 	def client () { }
 	
-	/**
-	* @httpMethod [GET]
-	* @return Página HTML que sirve para cargar el Applet principal de la herramienta de validación
-	* 		   de archivos firmados y de copias de seguridad.
-	*/
-   def validationTool () { }
-	
 	
 }

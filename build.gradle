@@ -17,7 +17,7 @@ subprojects {
 ext {
 	votingToolApplet = null
 	AdminTool = null
-    validationToolDistZip = null
+    AdminToolDistZip = null
 	votingSystemLibrary = null
 	votingToolAndroid = null
 	certsDataMap = null
@@ -159,7 +159,7 @@ def copyVotingSystemApps(project) {
 	if(votingToolApplet.exists()) votingToolApplet.delete()
 	votingToolApplet << rootProject.votingToolApplet?.bytes
 
-    copyValidationTool(project)
+    copyAdminTool(project)
 	
 	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
@@ -168,17 +168,11 @@ def copyVotingSystemApps(project) {
 	copyAppletDeps(project)
 }
 
-def copyValidationTool(project) {
-    File appletDir = project.file("web-app/applet/");
-    appletDir.mkdirs()
+def copyAdminTool(project) {
 
-    File AdminTool = project.file("web-app/applet/${rootProject.validationToolName}.jar")
-    if(AdminTool.exists()) AdminTool.delete()
-    AdminTool << rootProject.AdminTool?.bytes
-
-    File validationToolDist = project.file("web-app/applet/${rootProject.validationToolName}.zip")
-    if(validationToolDist.exists()) validationToolDist.delete()
-    validationToolDist << rootProject.validationToolDistZip?.bytes
+    File AdminToolDist = project.file("web-app/applet/${rootProject.AdminToolName}.zip")
+    if(AdminToolDist.exists()) AdminToolDist.delete()
+    AdminToolDist << rootProject.AdminToolDistZip?.bytes
 
     copyAppletDeps(project)
 }

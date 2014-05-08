@@ -1,12 +1,7 @@
-HerramientaValidacionCopiasDeSeguridad
+Herramienta de Administración
 ======================================
 
-Herramienta para validar los archivos firmados y las copias de seguridad generadas por el Sistema de Votación.
+Herramienta con tareas de administración relacionadas con el Sistema de Votación y el servicio de Vickets.
 
-* Al tener que acceder a recursos restringidos del sistema el Applet debe ir firmado.
-
-Para generar el Applet firmado hay que ejecutar desde la línea de comandos:
-	
-	$gradle install
 
 

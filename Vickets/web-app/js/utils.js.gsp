@@ -330,10 +330,8 @@ function getFnName(fn) {
 }
 
 function VotingSystemApplet () {
-	this.validationToolLoaded = false
     this.signatureClientToolLoaded = false
 	this.messageToSignatureClient = null;
-	this.messageToValidationTool = null;
 	this.signatureClientCallback = null
 }
 
@@ -347,33 +345,6 @@ VotingSystemApplet.prototype.getMessageToSignatureClient = function (appMessage)
 		return result
 	}
 
-VotingSystemApplet.prototype.getMessageToValidationTool = function (appMessage) {
-		var result
-		if(messageToValidationTool != null) {
-			console.log("getMessageToValidationTool - delivering message to applet: " + appMessage);
-			result = messageToValidationTool
-			messageToValidationTool = null
-		}
-		return result
-	}
-
-
-VotingSystemApplet.prototype.setMessageToValidationTool = function (message) {
-		console.log("utils.js - setMessageToValidationTool - message:" + message);
-		messageToValidationTool = message;
-		if(!validationToolLoaded) {
-			if(isJavaEnabledClient()) {
-				console.log("Loading validationTool")
-				window.getMessageToValidationTool = this.getMessageToValidationTool
-				$("#AdminToolFrame").attr("src", '${createLink(controller:'applet', action:'validationTool')}');
-				$("#loadingVotingSystemAppletDialog").dialog("open");
-
-			}
-    	} else {
-    		console.log("setMessageToValidationTool - validationToolLoaded already loaded");
-    		$("#workingWithAppletDialog").dialog("open");
-	    }
-	}
 
 var androidClienLoaded = false
 var javafxClient = null

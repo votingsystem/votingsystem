@@ -6,7 +6,7 @@ apply plugin: "idea"
 
 sourceCompatibility = 8
 
-mainClassName = "org.votingsystem.applet.validationtool.ValidationApplet"
+mainClassName = "org.votingsystem.admintool.MainDialog"
 
 dependencies {
 
@@ -33,45 +33,16 @@ dependencies {
 	
 }
 
-task buildApplet(type:VotingSystemApplet) {
-
-	manifest {
-		attributes 'Main-Class': 'org.votingsystem.applet.validationtool.ValidationApplet',
-				   'SplashScreen-Image':'resources/icon_32/application-certificate.png',
-				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/AdminTool',
-                   'provider': 'sistemavotacion.org'
-				   //'Class-Path': configurations.runtime.collect { it.name }.join(' ')
-	}
-}
-
-task signJar {
-	
-	doLast {
-		ant.signjar(storepass:rootProject.keyStorePassword,
-			keystore: "$rootProject.projectDir/$rootProject.testUserKeyStorePath",
-			alias:rootProject.signKeyAlias,
-			jar:jar.archivePath,
-			signedjar:"$buildDir/${rootProject.validationToolName}.jar")
-		rootProject.ext.set("AdminTool",file("$buildDir/${rootProject.validationToolName}.jar"))
-		announce.announce("Applet $rootProject.validationToolName signed", "local")
-	}
-	
-}
-
-
 task copyDistZip(dependsOn: ['distZip']) {
     doLast {
-        rootProject.ext.set("validationToolDistZip",
-                file("$buildDir/distributions/${rootProject.validationToolName}.zip"))
+        rootProject.ext.set("AdminToolDistZip",
+                file("$buildDir/distributions/${rootProject.adminToolName}.zip"))
     }
 }
 
 
 cleanCompileJava.dependsOn ':VotingSystemLibrary:install'
 classes.dependsOn cleanCompileJava
-buildApplet.dependsOn classes
-signJar.dependsOn buildApplet
-
 
 sourceSets {
 	main {
@@ -87,5 +58,5 @@ project.ext {
 
 
 distZip {
-    archiveName "${rootProject.validationToolName}.zip"
+    archiveName "${rootProject.adminToolName}.zip"
 }

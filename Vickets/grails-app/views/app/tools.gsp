@@ -12,9 +12,9 @@
         </ol>
     </div>
     <div class="row" style="margin:30px 0px 0px 0px;">
-        <a href="${grailsApplication.config.grails.serverURL}/tools/ValidationTool.zip" class=""
+        <a href="${grailsApplication.config.grails.serverURL}/tools/AdminTool.zip" class=""
            style="margin:40px 20px 0px 0px; width:400px;">
-            <g:message code="downloadValidationToolAppLbl"/> <i class="fa fa-cogs"></i></a>
+            <g:message code="downloadAdminToolAppLbl"/> <i class="fa fa-cogs"></i></a>
     </div>
 </div>
 

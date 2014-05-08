@@ -226,7 +226,7 @@ public class ContextVS {
         VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
 
-    public static void initSignatureApplet (AppHostVS appHost, String logPropertiesFile,
+    public static void initAdminTool (AppHostVS appHost, String logPropertiesFile,
             String localizatedMessagesFileName, String locale){
         try {
             logger.debug("------------- initSignatureApplet ----------------- ");
