@@ -127,7 +127,6 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
 
     private void cancel() {
         logger.debug("cancel");
-        ContextVS.getInstance().sendMessageToHost(new OperationVS(ResponseVS.SC_CANCELLED));
         dispose();
     }
 

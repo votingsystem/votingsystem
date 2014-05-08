@@ -43,7 +43,8 @@ public class FXProgressDialog {
         verticalBox.getChildren().addAll(messageLabel, progressBar);
         verticalBox.getStyleClass().add("modal-dialog");
         progressDialogStage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
-        progressDialogStage.getScene().getStylesheets().add(getClass().getResource("../css/modal-dialog.css").toExternalForm());
+
+        progressDialogStage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
 
 
         // allow the dialog to be dragged around.

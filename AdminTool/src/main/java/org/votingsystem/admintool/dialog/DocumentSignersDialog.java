@@ -91,7 +91,7 @@ public class DocumentSignersDialog extends JDialog {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    ContextVS.init(null, "log4jAdminTool.properties", "validationToolMessages_", "es");
+                    ContextVS.init(null, "log4jAdminTool.properties", "adminToolMessages_", "es");
                     String zipFile = "./representative_00000001R.zip";
                     String outputFolder = ContextVS.APPTEMPDIR +  File.separator + UUID.randomUUID();
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
