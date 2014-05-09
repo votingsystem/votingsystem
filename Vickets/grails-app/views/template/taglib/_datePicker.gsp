@@ -21,6 +21,7 @@
 
     var inputDateSupported${attrs.id} = checkInputType("date")
 
+
     if(inputDateSupported${attrs.id}) {
         $("#dateNotSupportedDiv${attrs.id}").css("display", "none")
         if( ${attrs.id}Required) {

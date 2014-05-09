@@ -120,7 +120,7 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
             public void run() {
                 try {
                     UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    ContextVS.initSignatureClient(null, "log4j.properties", "messages_", "es");
                     final SaveReceiptDialog dialog = new SaveReceiptDialog(new javax.swing.JFrame(), true);
                     dialog.addWindowListener(new java.awt.event.WindowAdapter() {
 

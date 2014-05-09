@@ -30,9 +30,14 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.admintool.dialog.FXMessageDialog;
 import org.votingsystem.admintool.dialog.FXProgressDialog;
+import org.votingsystem.admintool.dialog.PasswordDialog;
+import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.model.*;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
+import org.w3c.dom.Document;
 
+import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,7 +59,6 @@ public class BrowserVS extends Region {
     private WebView webView;
     private WebView smallView;
     private ComboBox comboBox;
-    private BrowserVSOperator browserVSOperator;
     private AtomicBoolean firstLoad = new AtomicBoolean(true);
 
     public BrowserVS() {
@@ -73,7 +77,7 @@ public class BrowserVS extends Region {
         stage = new Stage();
         smallView = new WebView();
         comboBox = new ComboBox();
-        stage.setTitle(ContextVS.getMessage("groupAdminButtonLbl"));
+        stage.setTitle(ContextVS.getMessage("mainDialogCaption"));
         stage.setResizable(true);
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -138,7 +142,7 @@ public class BrowserVS extends Region {
                     @Override
                     public void changed(ObservableValue<? extends Worker.State> ov,
                                         Worker.State oldState, Worker.State newState) {
-                        logger.debug("newState: " + newState);
+                        //logger.debug("newState: " + newState);
                         if (newState == Worker.State.SUCCEEDED) {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("javafxClient", new JavafxClient());
@@ -157,8 +161,28 @@ public class BrowserVS extends Region {
         getChildren().addListener(new ListChangeListener<Node>() {
             @Override public void onChanged(Change<? extends Node> c) {}
         });
+
+        webView.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
+            @Override public void changed(ObservableValue<? extends Document> prop, Document oldDoc, Document newDoc) {
+                enableFirebug( webView.getEngine());
+            }
+        });
     }
 
+    /**
+     * waiting until the WebView has loaded a document before trying to trigger Firebug.
+     * http://stackoverflow.com/questions/17387981/javafx-webview-webengine-firebuglite-or-some-other-debugger
+     * Enables Firebug Lite for debugging a webEngine.
+     * @param engine the webEngine for which debugging is to be enabled.
+     */
+    private static void enableFirebug(final WebEngine engine) {
+        engine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && " +
+                "document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : " +
+                "document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', " +
+                "'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');" +
+                "(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);" +
+                "E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
+    }
 
     public void showMessage(final String message) {
         PlatformImpl.runLater(new Runnable() {
@@ -194,19 +218,11 @@ public class BrowserVS extends Region {
         });
     }
 
-    public BrowserVSOperator getBrowserVSOperator() {
-        return browserVSOperator;
-    }
-
-    public void setBrowserVSOperator(BrowserVSOperator browserVSOperator) {
-        this.browserVSOperator = browserVSOperator;
-    }
-
     // JavaScript interface object
     public class JavafxClient {
         //public void exit() {Platform.exit();}
         public void setMessageToSignatureClient(String messageToSignatureClient) {
-            logger.debug("JavafxClient - messageToSignatureClient: " + messageToSignatureClient);
+            logger.debug("JavafxClient - setMessageToSignatureClient: " + messageToSignatureClient);
             JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(messageToSignatureClient);
             final OperationVS operation = OperationVS.populate(jsonObject);
             try {
@@ -233,7 +249,7 @@ public class BrowserVS extends Region {
                                 ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
                                 break;
                             default:
-                                logger.debug("Unprocessed actor:");
+                                logger.debug("Unprocessed actor:" + actorVS.getType());
                         }
                     } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
 
@@ -243,11 +259,48 @@ public class BrowserVS extends Region {
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
+            showProgressDialog(operation.getSignedMessageSubject(), true);
+            /*switch(operation.getType()) {
+                case VICKET_GROUP_NEW:
+                    break;
+                case VICKET_GROUP_SUBSCRIBE:
+                    break;
+                default:
+                    logger.debug("Unprocessed operation type: " + operation.getType());
+            }*/
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        PasswordDialog passwordDialog = new PasswordDialog (new JFrame(), true);
+                        passwordDialog.setVisible(true);
+                        String password = passwordDialog.getPassword();
+                        if (password != null) processOperation(password, operation);
+                    } catch(final Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        BrowserVS.this.showMessage(ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
+                    } finally {
+                        BrowserVS.this.showProgressDialog(null, false);
+                    }
+                }
+            });
+        }
+    }
 
 
-
-            if(browserVSOperator != null) browserVSOperator.processOperationVS(operation);
-            else logger.debug("JavafxClient - webbAppListener null");
+    private void processOperation(String password, OperationVS operation) throws Exception {
+        JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
+        SMIMEMessageWrapper smimeMessage = SMIMEContentSigner.genMimeMessage(null,
+                operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
+                password.toCharArray(), operation.getSignedMessageSubject(), null);
+        SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getServiceURL(),
+                ContextVS.getInstance().getVicketServer().getTimeStampServiceURL(),
+                ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null,
+                ContextVS.getInstance().getVicketServer().getX509Certificate());
+        ResponseVS responseVS =  senderWorker.call();
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            showMessage(responseVS.getMessage());
+        } else {
+            showMessage(ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage());
         }
     }
 

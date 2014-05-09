@@ -130,7 +130,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
         } else if(getContent() instanceof String){ 
             logger.error("TODO - content instanceof String -> " + getContent()); 
         }
-        checkSignature(); 
+        checkSignature();
+        isValidSignature = true;
     }
     
     public void updateChanges() throws Exception {
@@ -167,19 +168,14 @@ public class SMIMEMessageWrapper extends MimeMessage {
         return smimeSigned;
     }
 
-	private boolean verifySignerCert(SignerInformation signer, X509Certificate cert) {
-    	boolean result = false;
+	private void verifySignerCert(SignerInformation signer, X509Certificate cert) throws Exception{
         try {
-        	if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
-        			ContextVS.PROVIDER).build(cert))){
-                result = true;
-            } else {logger.debug("signature failed!");}
+            signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                    ContextVS.PROVIDER).build(cert));
         } catch(CMSVerifierCertificateNotValidException ex) {
         	logger.debug("-----> cert.getNotBefore(): " + cert.getNotBefore());
         	logger.debug("-----> cert.getNotAfter(): " + cert.getNotAfter());
-    		logger.error(ex.getMessage(), ex);
-        } finally {
-        	return result;
+    		throw ex;
         }
     }
 
@@ -199,7 +195,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
         Collection c = signerInfos.getSigners();
         Iterator it = c.iterator();
         Date firstSignature = null;
-        isValidSignature = false;
         signers = new HashSet<UserVS>();
         while (it.hasNext()) {// check each signer
             SignerInformation   signer = (SignerInformation)it.next();
@@ -208,8 +203,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER)
                     .getCertificate((X509CertificateHolder)certIt.next());
             logger.debug("checkSignature - cert: " + cert.getSubjectDN() + " --- " + certCollection.size() + " match");
-            isValidSignature = verifySignerCert(signer, cert);
-            if(!isValidSignature) return;
+            verifySignerCert(signer, cert);
             UserVS userVS = UserVS.getUserVS(cert);
             userVS.setSignerInformation(signer);
             TimeStampToken timeStampToken = checkTimeStampToken(signer);//method can only be called after verify.

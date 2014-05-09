@@ -6,9 +6,40 @@
     <meta name="layout" content="main" />
 </head>
 <body>
+    <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
+        <ol class="breadcrumbVS pull-left">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li><a href="${createLink(controller: 'groupVS')}"><g:message code="groupvsLbl"/></a></li>
+            <li class="active">
+                <g:if test="${"admin".equals(params.menu)}"><g:message code="groupvsAdminPageLbl"/></g:if>
+                <g:else><g:message code="groupvsPageLbl"/></g:else>
+            </li>
+        </ol>
+    </div>
 <div class="pageContenDiv" style="max-width: 1000px; padding: 20px;">
     <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
     </div>
+
+    <g:if test="${"admin".equals(params.menu)}">
+        <div class="">
+            <button id="editGroupVSButton" type="submit" class="btn btn-warning" onclick="subscribeToGroup();"
+                    style="margin:15px 20px 15px 0px;">
+                <g:message code="editGroupVSLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+            <button id="cancelGroupVSButton" type="submit" class="btn btn-warning" onclick="subscribeToGroup();"
+                    style="margin:15px 20px 15px 0px;">
+                <g:message code="cancelGroupVSLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+            <button id="adminGroupVSUsersButton" type="submit" class="btn btn-warning" onclick="subscribeToGroup();"
+                    style="margin:15px 20px 15px 0px;">
+                <g:message code="adminGroupVSUsersLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+            <button id="makeDepositButton" type="submit" class="btn btn-warning" onclick="subscribeToGroup();"
+                    style="margin:15px 20px 15px 0px;">
+                <g:message code="makeDepositLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+        </div>
+    </g:if>
 
     <div class="pageHeader text-center"> ${groupvsMap?.name}</div>
 
@@ -44,7 +75,9 @@
 <r:script>
 <g:applyCodec encodeAs="none">
 
-    var groupvs = ${groupvsMap as JSON}
+    var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
+    var groupVSData = {id:${groupvsMap.id}, name:"${groupvsMap.name}" , representative:groupvsRepresentative}
+
 
     $(function() {
 
@@ -64,22 +97,20 @@
             $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
             $("#messagePanel").css("display", "visible")
         </g:if>
+
     });
 
     function subscribeToGroup() {
         console.log("sendManifest")
-        var webAppMessage = new WebAppMessage(
-                ResponseVS.SC_PROCESSING,
-                Operation.MANIFEST_SIGN)
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_SUBSCRIBE)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-        webAppMessage.serviceURL = "${createLink( controller:'GroupVSManifestCollector', absolute:true)}/${groupvsMap.id}"
-        webAppMessage.signedMessageSubject = "${groupvsMap.subject}"
+        webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}/${groupvsMap.id}/subscribe"
+        webAppMessage.signedMessageSubject = "<g:message code="subscribeToVicketGroupMsg"/>"
+        webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_SUBSCRIBE, groupvs:groupVSData}
         //signed and encrypted
         webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
-        webAppMessage.GroupVS = groupvs
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        webAppMessage.documentURL = groupvs.URL
         votingSystemClient.setMessageToSignatureClient(webAppMessage, subscribeToGroupCallback);
     }
 

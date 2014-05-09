@@ -43,7 +43,7 @@ public class VotingApplet extends JApplet implements AppHostVS {
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
-            ContextVS.initSignatureApplet(this, "log4jVotingTool.properties", "votingToolMessages.properties", locale);
+            ContextVS.initSignatureClient(this, "log4jVotingTool.properties", "votingToolMessages.properties", locale);
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
@@ -192,11 +192,11 @@ public class VotingApplet extends JApplet implements AppHostVS {
         else {
             JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(messageToHost.getDataMap());
             try {
+                String callbackFunction = "setMessageFromSignatureClient";
+                if(messageToHost.getCallerCallback() != null) callbackFunction = messageToHost.getCallerCallback();
+                logger.debug(" - sendMessageToHost - status: " + messageToHost.getStatusCode() +
+                        " - callbackFunction: " + callbackFunction + " - message: " + messageJSON.toString());
                 if(executionMode == ExecutionMode.APPLET) {
-                    String callbackFunction = "setMessageFromSignatureClient";
-                    if(messageToHost.getCallerCallback() != null) callbackFunction = messageToHost.getCallerCallback();
-                    logger.debug(" - sendMessageToHost - status: " + messageToHost.getStatusCode() +
-                            " - callbackFunction: " + callbackFunction + " - message: " + messageJSON.toString());
                     Object[] args = {messageJSON.toString()};
                     Class JSObjectClass = Class.forName("netscape.javascript.JSObject");
                     Method staticInitializerMethod = JSObjectClass.getMethod("getWindow", Applet.class);

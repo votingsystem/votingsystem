@@ -276,7 +276,7 @@ public class RepresentativeFormDialog extends JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    ContextVS.initSignatureClient(null, "log4j.properties", "messages_", "es");
                     UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                     RepresentativeFormDialog dialog = new RepresentativeFormDialog(new JFrame(), true);
                     dialog.addWindowListener(new WindowAdapter() {

@@ -79,8 +79,6 @@ class GroupVSController {
         }
     }
 
-    def admin() {}
-
     def newGroup (){
         if("POST".equals(request.method)) {
             MessageSMIME messageSMIMEReq = request.messageSMIMEReq
@@ -112,9 +110,10 @@ class GroupVSController {
                 responseVS = groupVSService.subscribe(messageSMIMEReq, request.getLocale())
             } catch(Exception ex) {
                 log.error (ex.getMessage(), ex)
-                String msg = message(code:'publishGroupVSErrorMessage')
+                String msg = message(code:'subscribeGroupVSErrorMessage')
                 responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:msg, type:TypeVS.VICKET_ERROR)
             }
+            return [responseVS:responseVS]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 message: message(code: 'requestWithErrors'))]
     }

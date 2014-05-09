@@ -1,8 +1,9 @@
 var Operation = {
-		VICKET_NEWGROUP : "VICKET_NEWGROUP"
+		VICKET_GROUP_NEW : "VICKET_GROUP_NEW",
+		VICKET_GROUP_SUBSCRIBE : "VICKET_GROUP_SUBSCRIBE"
 }
 
-var WebAppMessage = function (statusCode, operation) {
+function WebAppMessage(statusCode, operation) {
 	this.statusCode = statusCode
 	this.operation = operation
 	this.subject ;
@@ -204,6 +205,7 @@ function validateNIF(nif) {
 }
 
 function checkInputType(inputType) {
+    return false
     if(null == inputType || '' == inputType.trim()) return false
     var isSuppported = true
     var elem = document.createElement("input");
@@ -326,6 +328,44 @@ function getFnName(fn) {
 	  var f = typeof fn == 'function';
 	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
+}
+
+var menuType = 'user'
+
+function updateMenuLinks(selectedMenuType) {
+    menuType = selectedMenuType
+    var elem = 'a'
+    var attr = 'href'
+    var elems = document.getElementsByTagName(elem);
+    var arrayElements = Array.prototype.slice.call(elems);
+    var groupElements = document.getElementsByClassName('groupvsDiv');
+    arrayElements.concat(Array.prototype.slice.call(groupElements))
+    for (var i = 0; i < elems.length; i++) {
+        if(elems[i][attr].indexOf("mailto:") > -1) continue
+        if(elems[i][attr].indexOf("menu=admin") < 0) {
+            if(elems[i][attr].indexOf("?") < 0) {
+                elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
+            } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
+        }
+    }
+    for (var j = 0; j < groupElements.length; j++) {
+        var attrValue = groupElements[j].getAttribute("data-href")
+        if(attrValue == null) continue
+        if(attrValue.indexOf("menu=admin") < 0) {
+            if(attrValue.indexOf("?") < 0) {
+                groupElements[j].setAttribute("data-href", attrValue + "?menu=" + menuType )
+            } else groupElements[j].setAttribute("data-href", attrValue + "&menu=" + menuType );
+        }
+    }
+}
+
+
+//http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 function VotingSystemApplet () {

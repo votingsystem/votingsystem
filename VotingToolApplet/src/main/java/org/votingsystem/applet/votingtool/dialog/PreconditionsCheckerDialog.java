@@ -119,9 +119,14 @@ public class PreconditionsCheckerDialog extends JDialog {
                         ContextVS.getInstance().setControlCenter((ControlCenterVS)responseVS.getData());
                     }
                     break;
+                case VICKET_GROUP_SUBSCRIBE:
+                    responseVS = checkActorVS(operationVS.getServerURL().trim());
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        ContextVS.getInstance().setVicketServer((VicketServer)responseVS.getData());
+                    }
+                    break;
                 default:
-                    String serverURL = operationVS.getServerURL().trim();
-                    responseVS = checkActorVS(serverURL);
+                    responseVS = checkActorVS(operationVS.getServerURL().trim());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         ContextVS.getInstance().setAccessControl((AccessControlVS)responseVS.getData());
                     }
@@ -187,7 +192,7 @@ public class PreconditionsCheckerDialog extends JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    ContextVS.initSignatureClient(null, "log4j.properties", "messages_", "es");
                     UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                     PreconditionsCheckerDialog dialog = new PreconditionsCheckerDialog(new JFrame(), true);
                     dialog.addWindowListener(new java.awt.event.WindowAdapter() {

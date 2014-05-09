@@ -36,5 +36,6 @@ class AppController {
 	}
 
     def tools() {}
-	
+
+    def admin() {}
 }

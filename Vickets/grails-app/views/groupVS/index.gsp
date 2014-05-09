@@ -55,7 +55,7 @@
             },
             dataset: {
                 ajax: true,
-                ajaxUrl: "<g:createLink controller="groupVS"/>",
+                ajaxUrl: "<g:createLink controller="groupVS"/>?menu=" + menuType,
                 ajaxOnLoad: false,
                 perPageDefault: 50,
                 records: []
@@ -73,8 +73,8 @@
             var groupvsType = $(this).val()
             var optionSelected = $("option:selected", this);
             console.log("groupvsTypeSelect - selected: " + groupvsType)
-            var targetURL = "${createLink(controller: 'groupVS', action: 'list')}";
-            if("" != groupvsType) targetURL = targetURL + "?groupvsType=" + groupvsType
+            var targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType;
+            if("" != groupvsType) targetURL = targetURL + "&groupvsType=" + groupvsType
             dynatable.settings.dataset.ajaxUrl= targetURL
             dynatable.paginationPage.set(1);
             dynatable.process();
@@ -82,7 +82,7 @@
 
         $('#groupvsList').bind('dynatable:afterUpdate',  function() {
             $('.groupvsDiv').click(function() {
-                window.location.href = $(this).attr('href')
+                window.location.href = $(this).attr('data-href')
             }
         )})
 
@@ -94,14 +94,15 @@
             this.dateCreated = groupJSON.dateCreated
             this.description = groupJSON.description
             this.representative = groupJSON.representative
-            this.numTotalUsers = groupJSON.numTotalUsers
+            this.numActiveUsers = groupJSON.numActiveUsers
+            this.numPendingUsers = groupJSON.numPendingUsers
             this.state = groupJSON.state
             this.name = groupJSON.name
             this.url = "${createLink( controller:'groupVS')}/" + this.id
         }
 
         if(htmlTemplate != null) {
-            this.groupHTML = htmlTemplate.format(this.name, this.description, this.numTotalUsers,
+            this.groupHTML = htmlTemplate.format(this.name, this.description, this.numActiveUsers,
                 this.representative.firstName + " " + this.representative.lastName);
         }
     }
@@ -123,7 +124,8 @@
             $li.find(".cancelMessage").fadeIn(100)
         }
 
-        $li.attr('href', this.url)
+        $li.attr('id', this.id)
+        $li.attr('data-href', this.url)
         return $newGroup.html();
     }
 
@@ -134,10 +136,11 @@
         return groupVS.getElement()
     }
 
-    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
-        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'groupVS')}?searchText=" +
-            textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo + "&eventvsType=MANIFEST"
+    function processUserSearch(textToSearch) {
+        $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
+        $('#pageInfoPanel').css("display", "block")
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'groupVS')}?searchText=" + textToSearch
+        dynatable.paginationPage.set(1);
         dynatable.process();
     }
 

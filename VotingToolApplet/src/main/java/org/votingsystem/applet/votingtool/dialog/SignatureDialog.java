@@ -26,6 +26,7 @@ import net.miginfocom.swing.MigLayout;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.bouncycastle.cms.CMSVerifierCertificateNotValidException;
 import org.votingsystem.callable.PDFSignedSender;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
@@ -299,7 +300,7 @@ public class SignatureDialog extends JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    ContextVS.initSignatureClient(null, "log4j.properties", "messages_", "es");
                     UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                     SignatureDialog dialog = new SignatureDialog(new JFrame(), true);
                     dialog.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -392,11 +393,12 @@ public class SignatureDialog extends JDialog {
                 }
            } catch(Exception ex) {
                logger.error(ex.getMessage(), ex);
-               String mensajeError = ContextVS.getInstance().getMessage("signDocumentErrorMsg");
-               if(ex.getCause() instanceof VotingSystemException) {
-                   mensajeError = ex.getCause().getMessage();
+               String errorMSg = ContextVS.getInstance().getMessage("signDocumentErrorMsg");
+               if(ex.getCause() instanceof VotingSystemException ||
+                       ex.getCause() instanceof CMSVerifierCertificateNotValidException) {
+                   errorMSg = ex.getCause().getMessage();
                }
-               sendResponse(ResponseVS.SC_ERROR, mensajeError);
+               sendResponse(ResponseVS.SC_ERROR, errorMSg);
             }
             dispose();
        }

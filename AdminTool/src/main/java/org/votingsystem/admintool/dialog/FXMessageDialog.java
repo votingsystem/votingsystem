@@ -9,10 +9,8 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
+import javafx.stage.*;
+import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 
 /**
@@ -20,6 +18,8 @@ import org.votingsystem.model.ContextVS;
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class FXMessageDialog {
+
+    private static Logger logger = Logger.getLogger(FXMessageDialog.class);
 
     private final Stage dialog;
     private Label messageLabel;
@@ -29,6 +29,10 @@ public class FXMessageDialog {
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(window);
 
+        dialog.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
+            @Override public void handle(WindowEvent window) {      }
+        });
+
 
         VBox verticalBox = new VBox(10);
         messageLabel = new Label();
@@ -36,7 +40,7 @@ public class FXMessageDialog {
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                dialog.close();
+                dialog.hide();
             }});
         verticalBox.getChildren().addAll(messageLabel, acceptButton);
         verticalBox.getStyleClass().add("modal-dialog");

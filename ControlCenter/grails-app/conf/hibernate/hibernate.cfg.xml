@@ -28,6 +28,7 @@
      <mapping class="org.votingsystem.model.PDFDocumentVS" />
      <mapping class="org.votingsystem.model.RepresentationDocumentVS" />
      <mapping class="org.votingsystem.model.SignatureVS" />
+     <mapping class="org.votingsystem.model.SubscriptionVS" />
      <mapping class="org.votingsystem.model.TagVS" />
      <mapping class="org.votingsystem.model.UserRequestCsrVS" />
      <mapping class="org.votingsystem.model.UserVS" />

@@ -3,6 +3,7 @@ package org.votingsystem.model;
 import javax.persistence.*;
 
 import java.util.Date;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -15,6 +16,14 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class SubscriptionVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public Set<MessageSMIME> getAdminMessageSMIMESet() {
+        return adminMessageSMIMESet;
+    }
+
+    public void setAdminMessageSMIMESet(Set<MessageSMIME> adminMessageSMIMESet) {
+        this.adminMessageSMIMESet = adminMessageSMIMESet;
+    }
 
     public enum State {ACTIVE, PENDING, CANCELLED}
 
@@ -33,9 +42,8 @@ public class SubscriptionVS implements java.io.Serializable {
 
     @OneToOne private MessageSMIME subscriptionSMIME;
 
-    @OneToOne private MessageSMIME activationSMIME;
-
-    @OneToOne private MessageSMIME cancellationSMIME;
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="subscriptionVS")
+    private Set<MessageSMIME> adminMessageSMIMESet;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
 
@@ -91,22 +99,6 @@ public class SubscriptionVS implements java.io.Serializable {
 
     public void setSubscriptionSMIME(MessageSMIME subscriptionSMIME) {
         this.subscriptionSMIME = subscriptionSMIME;
-    }
-
-    public MessageSMIME getActivationSMIME() {
-        return activationSMIME;
-    }
-
-    public void setActivationSMIME(MessageSMIME activationSMIME) {
-        this.activationSMIME = activationSMIME;
-    }
-
-    public MessageSMIME getCancellationSMIME() {
-        return cancellationSMIME;
-    }
-
-    public void setCancellationSMIME(MessageSMIME cancellationSMIME) {
-        this.cancellationSMIME = cancellationSMIME;
     }
 
     public Date getDateCancelled() {

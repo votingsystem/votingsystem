@@ -178,14 +178,12 @@ public class PasswordDialog extends javax.swing.JDialog {
             public void run() {
                 try {
                     UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    ContextVS.initSignatureClient(null, "log4j.properties", "messages_", "es");
                     final PasswordDialog dialog = new PasswordDialog(new javax.swing.JFrame(), true);
                     dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                         @Override public void windowClosing(java.awt.event.WindowEvent e) { dialog.dispose(); }
                     });
-                    logger.debug("--- Mostrando diálogo ---");
                     dialog.setVisible(true);
-                    logger.debug("--- Diálogo mostrado ---");
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }

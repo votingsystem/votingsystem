@@ -37,7 +37,7 @@ class GroupVSService {
         String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
         def messageJSON = JSON.parse(documentStr)
         if (!messageJSON.groupvsName || !messageJSON.groupvsInfo ||
-                (TypeVS.VICKET_NEWGROUP != TypeVS.valueOf(messageJSON.operation))) {
+                (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
@@ -55,6 +55,8 @@ class GroupVSService {
         groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:GroupVS.State.ACTIVE, groupRepresentative:userSigner,
                 description:messageJSON.groupvsInfo, type:UserVS.Type.GROUP).save()
 
+        new SubscriptionVS(userVS:userSigner, groupVS:groupVS, state:SubscriptionVS.State.ACTIVE).save()
+
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
@@ -63,19 +65,65 @@ class GroupVSService {
 
         MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT,
                 smimeParent:messageSMIMEReq, content:smimeMessageRespBytes).save() }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_NEWGROUP, data:groupVS)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
     }
 
-    ResponseVS subscribe(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS subscribe(MessageSMIME messageSMIMEReq, Locale locale) {
         SubscriptionVS subscriptionVS = null
         UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("saveGroup - signer: ${userSigner?.nif}")
+        log.debug("subscribe - signer: ${userSigner?.nif}")
         String msg = null
         ResponseVS responseVS = null
         String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
         def messageJSON = JSON.parse(documentStr)
+        if (!messageJSON.groupvs || (TypeVS.VICKET_GROUP_SUBSCRIBE != TypeVS.valueOf(messageJSON.operation))) {
+            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            log.error "subscribe - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        GroupVS groupVS = GroupVS.get(messageJSON.groupvs.id)
+        subscriptionVS = SubscriptionVS.findWhere(groupVS:groupVS, userVS:userSigner)
+        if(subscriptionVS) {
+            msg = messageSource.getMessage('userAlreadySubscribedErrorMsg', [userSigner.nif, groupVS.name].toArray(), locale)
+            log.error "subscribe - ERROR - ${msg}"
+            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        subscriptionVS = new SubscriptionVS(userVS:userSigner, groupVS:groupVS, state:SubscriptionVS.State.PENDING,
+                subscriptionSMIME: messageSMIMEReq).save()
+        log.debug("subscribe - OK subsscription: ${subscriptionVS.id} to groupVS: ${groupVS.id}")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK)
     }
 
+    public ResponseVS updateSubscription(MessageSMIME messageSMIMEReq, Locale locale) {
+        UserVS userSigner = messageSMIMEReq.getUserVS()
+        log.debug("updateSubscription - signer: ${userSigner?.nif}")
+        String msg = null
+        ResponseVS responseVS = null
+        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
+        def messageJSON = JSON.parse(documentStr)
+        if ((TypeVS.VICKET_GROUP_UPDATE_SUBSCRIPTION != TypeVS.valueOf(messageJSON.operation))
+            || !messageJSON.groupId || messageJSON.groupName || !messageJSON.subscriptionId || messageJSON.subscriberNIF) {
+            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            log.error "updateSubscription - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        GroupVS groupVS = GroupVS.get(messageJSON.groupId)
+        if(!groupVS.representative?.nif.equals(userSigner.getNif())) {
+            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
+                TypeVS.VICKET_GROUP_UPDATE_SUBSCRIPTION.toString(), groupVS.name].toArray(), locale)
+            log.error "updateSubscription - ERROR - ${msg}"
+            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        SubscriptionVS subscriptionVS = SubscriptionVS.get(messageJSON.subscriptionId)
+        subscriptionVS.setState(SubscriptionVS.State.valueOf(messageJSON.subscriptionState))
+        messageSMIMEReq.setSubscriptionVS(subscriptionVS)
+        subscriptionVS.save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK)
+    }
 
 
  	public Map getGroupVSDataMap(GroupVS groupVS){

@@ -6,11 +6,11 @@ import org.votingsystem.admintool.dialog.DecompressFileDialog;
 import org.votingsystem.admintool.dialog.SettingsDialog;
 import org.votingsystem.admintool.dialog.SignedDocumentsBrowser;
 import org.votingsystem.admintool.util.BrowserVS;
-import org.votingsystem.admintool.util.VicketUserGroupAdminListener;
 import org.votingsystem.model.AppHostVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.NifUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -33,7 +33,7 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
 
     public MainDialog(java.awt.Frame parentFrame, boolean modal) {
         super(parentFrame, modal);
-        ContextVS.initAdminTool(MainDialog.this, "log4jAdminTool.properties",
+        ContextVS.initSignatureClient(MainDialog.this, "log4jAdminTool.properties",
                 "adminToolMessages.properties", locale);
         initComponents();
         setTitle(ContextVS.getInstance().getMessage("mainDialogCaption"));
@@ -59,8 +59,8 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
         });
         container.add(openBackupButton, "cell 0 1, width :400:, wrap 10");
 
-        JButton groupAdminButton = new JButton(ContextVS.getMessage("groupAdminButtonLbl"));
-        groupAdminButton.setIcon(ContextVS.getIcon(this, "group"));
+        JButton groupAdminButton = new JButton(ContextVS.getMessage("vicketAdminLbl"));
+        groupAdminButton.setIcon(ContextVS.getIcon(this, "fa-money"));
         groupAdminButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { openGroupAdmin();}
         });
@@ -85,8 +85,7 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
     private void openGroupAdmin() {
         logger.debug("openGroupAdmin");
         if(browserVS == null) browserVS = new BrowserVS();
-        browserVS.setBrowserVSOperator(new VicketUserGroupAdminListener(browserVS));
-        browserVS.loadURL("http://vickets/Vickets/groupVS/newGroup");
+        browserVS.loadURL("http://vickets/Vickets/app/admin?menu=admin");
     }
 
     private void openSettings() {

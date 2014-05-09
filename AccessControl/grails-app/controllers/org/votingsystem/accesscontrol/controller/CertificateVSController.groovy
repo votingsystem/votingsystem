@@ -187,10 +187,10 @@ class CertificateVSController {
         String nif = (params.nif)?params.nif:"03455543T"
         ResponseVS responseVS = keyStoreService.generateUserTestKeysStore(givenName, surname, nif, password)
         if(ResponseVS.SC_OK == responseVS.statusCode) {
-            /*byte[] resultBytes = KeyStoreUtil.getBytes(responseVS.data, password.toCharArray())
-            File destFile = new File("${System.getProperty('user.home')}/UserTestKeyStore.jks")
+            byte[] resultBytes = KeyStoreUtil.getBytes(responseVS.data, password.toCharArray())
+            File destFile = new File("${System.getProperty('user.home')}/UserTestKeyStore_${nif}.jks")
             destFile.createNewFile()
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);*/
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
             byte[] base64ResultBytes = Base64.encode(resultBytes)
             response.outputStream <<  base64ResultBytes
             response.outputStream.flush()

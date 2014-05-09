@@ -226,10 +226,10 @@ public class ContextVS {
         VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
 
-    public static void initAdminTool (AppHostVS appHost, String logPropertiesFile,
+    public static void initSignatureClient (AppHostVS appHost, String logPropertiesFile,
             String localizatedMessagesFileName, String locale){
         try {
-            logger.debug("------------- initSignatureApplet ----------------- ");
+            logger.debug("------------- initSignatureClient ----------------- ");
             init(appHost, logPropertiesFile,localizatedMessagesFileName, locale);
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + CERT_RAIZ_PATH));

@@ -69,7 +69,7 @@ public class MessageDialog extends javax.swing.JDialog {
             public void run() {
                 try {
                     UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    ContextVS.initSignatureClient(null, "log4j.properties", "messages_", "es");
                     final MessageDialog dialog = new MessageDialog(new javax.swing.JFrame(), true);
                     dialog.addWindowListener(new java.awt.event.WindowAdapter() {
 
