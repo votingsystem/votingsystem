@@ -26,8 +26,8 @@
                         <p id="contentText" style="margin: 40px 0px 0px 0px;">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
                         <p>
                             <img src="${resource(dir:'images/icon_16',file:'java.png')}"/>
-                            <a id="adminToolLink" class="appLink" style="color: #09287e; font-size: 0.9em;">
-                                <g:message code="adminToolLinkText"/>
+                            <a id="clientToolLink" class="appLink" style="color: #09287e; font-size: 0.9em;">
+                                <g:message code="clientToolLinkText"/>
                             </a>
                         </p>
                     </div>
@@ -41,7 +41,6 @@
             </p>
         </div>
         <div>
-            <iframe id="AdminToolFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
 
             <div id="tabProgressTemplate" style="display:none;">
                 <g:include view="/include/tabProgress.gsp"/>

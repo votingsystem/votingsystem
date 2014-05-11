@@ -90,7 +90,7 @@
             collapsed: true,
             fullCollapse: true
         });
-
+        updateMenuLinks()
     })
 
     $("#expandMenuIcon").click(function () {
@@ -109,13 +109,6 @@
     $("#showAdvancedSearchButton").click(function () {
         $('#advancedSearchDialog').modal()
     })
-
-    window.onload = function() {
-        var result = getParameterByName('menu')
-        if("" != result.trim()) {
-            updateMenuLinks(result)
-        }
-    }
 
     function isValidForm() {
  	    //allFields.removeClass("formFieldError");

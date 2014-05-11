@@ -1,5 +1,5 @@
 <div>
-    <li class='groupvsDiv'>
+    <li class='groupvsDiv linkvs'>
         <div class='groupvsSubjectDiv'>{0}</div>
         <div class='numTotalUsersDiv text-right'>{2} <g:message code="usersLbl"/></div>
         <div class='groupvsInfoDiv row'>

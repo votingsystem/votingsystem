@@ -6,15 +6,15 @@ dependencies {
     compile (project(':VotingSystemLibrary'))
 }
 
-task copyApps(dependsOn: [':generateVotingSystemApps', ':AdminTool:copyDistZip']) {
+task copyApps(dependsOn: [':generateVotingSystemApps', ':ClientTool:copyDistZip']) {
 	doLast {
         copyVotingSystemApps(project)
 
         File appletDir = project.file("web-app/tools/");
         appletDir.mkdirs()
-        File adminToolDist = project.file("web-app/tools/${rootProject.adminToolName}.zip")
-        if(adminToolDist.exists()) adminToolDist.delete()
-        adminToolDist << rootProject.adminToolDistZip?.bytes
+        File clientToolDist = project.file("web-app/tools/${rootProject.clientToolName}.zip")
+        if(clientToolDist.exists()) clientToolDist.delete()
+        clientToolDist << rootProject.clientToolDistZip?.bytes
 	}
 }
 

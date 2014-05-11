@@ -129,7 +129,7 @@ public class ContextVS {
     public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";
 
     //Settings vars
-    public static final String WITH_KEYSTORE_PROPERTY = "WITH_KEYSTORE_PROPERTY";
+    public static final String CRYPTO_TOKEN = "CRYPTO_TOKEN";
 
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
 
@@ -341,8 +341,16 @@ public class ContextVS {
         }
     }
 
-    public String getProperty(String propertyName) {
-        return getSettings().getProperty(propertyName);
+    public String getProperty(String propertyName, String defaultValue) {
+        String result = null;
+        try {
+            result = getSettings().getProperty(propertyName);
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        } finally {
+            if(result == null) return defaultValue;
+            else return result;
+        }
     }
 
     public Boolean getBoolProperty(String propertyName, Boolean defaultValue) {

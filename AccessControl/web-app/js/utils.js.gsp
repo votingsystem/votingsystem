@@ -380,7 +380,6 @@ var dynatableFeatures =  {
 
 window.onload=function(){
 	$("#votingSystemAppletFrame").attr("src", "");
-	$("#AdminToolFrame").attr("src", "");
 	checkIEVersion()
 };
 

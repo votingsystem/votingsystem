@@ -1,0 +1,62 @@
+version = '0.7.0'
+
+apply plugin: 'java'
+apply plugin:'application'
+apply plugin: "idea"
+
+sourceCompatibility = 8
+
+mainClassName = "org.votingsystem.client.VotingSystemApp"
+
+dependencies {
+
+    compile (project(':VotingSystemLibrary')) {
+        exclude module: 'hibernate-search'
+        exclude module: 'commons-cli'
+        exclude module: 'groovy-all'
+        exclude module: 'hibernate-jpa-2.0-api'
+    }
+
+	compile ('org.apache.httpcomponents:httpmime:4.2.4',
+		'org.apache.httpcomponents:httpclient:4.2.4',
+		'net.sf.json-lib:json-lib:2.4:jdk15',
+		'org.bouncycastle:bcprov-jdk16:1.46',
+		'org.bouncycastle:bcmail-jdk16:1.46',
+		'javax.mail:mail:1.4.1',
+		'javax.activation:activation:1.1.1',
+		'org.bouncycastle:bctsp-jdk16:1.46',
+		'log4j:log4j:1.2.12',
+		'com.miglayout:miglayout:3.7.4:swing',
+		'com.itextpdf:itextpdf:5.1.3')
+
+	//compile files('../libs/plugin-1.3.jar')
+	
+}
+
+task copyDistZip(dependsOn: ['distZip']) {
+    doLast {
+        rootProject.ext.set("ClientToolDistZip",
+                file("$buildDir/distributions/${rootProject.clientToolName}.zip"))
+    }
+}
+
+
+cleanCompileJava.dependsOn ':VotingSystemLibrary:install'
+classes.dependsOn cleanCompileJava
+
+sourceSets {
+	main {
+	  //to override the defaults:
+	  //output.resourcesDir = "$buildDir/classes"
+	  output.classesDir   = "$buildDir/classes"
+	}
+}
+
+project.ext {
+    mainClass = "ClientTool"
+}
+
+
+distZip {
+    archiveName "${rootProject.clientToolName}.zip"
+}

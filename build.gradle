@@ -16,14 +16,14 @@ subprojects {
 
 ext {
 	votingToolApplet = null
-	AdminTool = null
-    AdminToolDistZip = null
+	ClientTool = null
+    ClientToolDistZip = null
 	votingSystemLibrary = null
 	votingToolAndroid = null
 	certsDataMap = null
 }
 
-//'AdminTool:signJar' -> Needs Java8
+//'ClientTool:signJar' -> Needs Java8
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'TimeStampServer:war',
                          'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
@@ -145,7 +145,7 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
     announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
 
-//'AdminTool:signJar' -> Needs Java8
+//'ClientTool:signJar' -> Needs Java8
 task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':VotingSystemLibrary:publish', ':releaseAndroid']) {
 }
 
@@ -159,7 +159,7 @@ def copyVotingSystemApps(project) {
 	if(votingToolApplet.exists()) votingToolApplet.delete()
 	votingToolApplet << rootProject.votingToolApplet?.bytes
 
-    copyAdminTool(project)
+    copyClientTool(project)
 	
 	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
@@ -168,11 +168,11 @@ def copyVotingSystemApps(project) {
 	copyAppletDeps(project)
 }
 
-def copyAdminTool(project) {
+def copyClientTool(project) {
 
-    File AdminToolDist = project.file("web-app/applet/${rootProject.AdminToolName}.zip")
-    if(AdminToolDist.exists()) AdminToolDist.delete()
-    AdminToolDist << rootProject.AdminToolDistZip?.bytes
+    File ClientToolDist = project.file("web-app/applet/${rootProject.ClientToolName}.zip")
+    if(ClientToolDist.exists()) ClientToolDist.delete()
+    ClientToolDist << rootProject.ClientToolDistZip?.bytes
 
     copyAppletDeps(project)
 }

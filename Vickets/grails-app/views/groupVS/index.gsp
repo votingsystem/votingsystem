@@ -66,8 +66,10 @@
         });
 
         dynatable = $('#groupvsList').data('dynatable');
+
         dynatable.settings.params.records = '<g:message code="groupvsRecordsLbl"/>'
         dynatable.settings.params.queryRecordCount = 'numTotalGroups'
+
 
         $('#groupvsTypeSelect').on('change', function (e) {
             var groupvsType = $(this).val()
@@ -81,12 +83,14 @@
         });
 
         $('#groupvsList').bind('dynatable:afterUpdate',  function() {
+            updateMenuLinks()
             $('.groupvsDiv').click(function() {
                 window.location.href = $(this).attr('data-href')
             }
         )})
 
     })
+
 
     function GroupVS(groupJSON, htmlTemplate) {
         if(groupJSON != null) {
