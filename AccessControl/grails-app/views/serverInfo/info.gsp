@@ -25,8 +25,9 @@
                         </div>
                         <p id="contentText" style="margin: 40px 0px 0px 0px;">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
                         <p>
-                            <img src="${resource(dir:'images/icon_16',file:'java.png')}"/>
-                            <a id="clientToolLink" class="appLink" style="color: #09287e; font-size: 0.9em;">
+                            <i class="fa fa-gears" style="color:#388746;"></i>
+                            <a id="clientToolLink" class="appLink" style="color: #09287e; font-size: 0.9em;"
+                                href="${grailsApplication.config.grails.serverURL}/app/ClientTool.zip">
                                 <g:message code="clientToolLinkText"/>
                             </a>
                         </p>
@@ -41,22 +42,14 @@
             </p>
         </div>
         <div>
-
-            <div id="tabProgressTemplate" style="display:none;">
-                <g:include view="/include/tabProgress.gsp"/>
-            </div>
         </div>
         </div>
 	</body>
 </html>
 <r:script>
-		  $(function() {
-			  $( "#tabs" ).tabs({
-			      beforeLoad: function( event, ui ) {tabProgressTemplate
-			    	  ui.panel.html($('#tabProgressTemplate').html());
-			      }
-			    })
-		  });
+      $(function() {
+          $( "#tabs" ).tabs()
+      });
 
 </r:script>
 <r:layoutResources/>

@@ -3,6 +3,7 @@
 <head>   
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title><g:message code="serverNameLabel"/></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <r:external uri="/images/icon_16/fa-bar-chart-o.png"/>
 	<r:require module="application"/>
     <r:require module="multilevel_menu"/>
@@ -65,7 +66,7 @@
             </div>
         </div>
     </div>
-    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1300px; margin:0 auto;"><g:layoutBody/></div>
+    <div id="" style="min-height: 600px; margin-top: 10px; max-width: 1300px; margin:0 auto;"><g:layoutBody/></div>
 
 </div>
 

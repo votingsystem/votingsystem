@@ -1,4 +1,5 @@
-<div id="requestRepresentativeAccreditationsDialog" title="<g:message code="requestRepresentativeAcreditationsLbl"/>" style="padding:20px 20px 20px 20px">
+<div id="requestRepresentativeAccreditationsDialog" title="<g:message code="requestRepresentativeAcreditationsLbl"/>"
+     style="padding:20px 20px 20px 20px; display:none;">
 	<g:message code="accreditationRequestMsg"/>
 	<form id="accreditationRequestForm">
 		<input type="hidden" autofocus="autofocus" />

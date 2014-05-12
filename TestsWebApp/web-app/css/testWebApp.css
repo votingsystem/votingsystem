@@ -55,13 +55,6 @@ body {
     visibility:hidden;
 }
 
-#pushobj {
-    padding: 50px;
-    top: 60px;
-    left: 300px;
-    text-align: center;
-}
-
 .formFieldError{
     font-weight: bold;
     background: #f6ccd0;

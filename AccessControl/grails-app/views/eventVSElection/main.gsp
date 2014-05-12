@@ -24,6 +24,7 @@
         <g:render template="/template/event" model="[isTemplate:'true']"/>
     </div>
 </div>
+<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 </body>
 </html>
 <r:script>
@@ -74,6 +75,7 @@
             dynatable.paginationPage.set(1);
             dynatable.process();
         });
+        $("#advancedSearchButton").css("visibility", "visible")
     });
 
     $('#mainPageEventList').bind('dynatable:afterUpdate',  function() {
@@ -96,4 +98,10 @@
         dynatable.process();
     }
 
+    function processUserSearchJSON(jsonData) {
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}"
+        dynatable.settings.dataset.ajaxData = jsonData
+        dynatable.paginationPage.set(1);
+        dynatable.process();
+    }
 </r:script>

@@ -49,9 +49,8 @@ tbody tr:hover{
 }
 
 .dynatable-pagination-links {
-    position: relative;
-    display: block;
-    bottom: 0px;
+    max-width: 350px;
+    margin:20px auto 0 auto;
 }
 
 .dynatable-record-count {

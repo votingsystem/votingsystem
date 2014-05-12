@@ -23,7 +23,7 @@
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>
     </div>
-
+    <g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 </div>
 </body>
 </html>
@@ -95,4 +95,10 @@
         dynatable.process();
     }
 
+    function processUserSearchJSON(jsonData) {
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}"
+        dynatable.settings.dataset.ajaxData = jsonData
+        dynatable.paginationPage.set(1);
+        dynatable.process();
+    }
 </r:script>

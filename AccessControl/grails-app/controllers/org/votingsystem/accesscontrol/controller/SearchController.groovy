@@ -20,6 +20,9 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.search.SearchHelper
 import org.votingsystem.util.DateUtils
+
+import static org.votingsystem.model.UserVS.*
+
 /**
  * @infoController Búsquedas mediante
  * @descController Servicios de búsqueda sobre los datos generados por la aplicación
@@ -34,7 +37,7 @@ class SearchController {
    def eventVSService
    def grailsApplication
    def userVSService
-
+   def representativeService
    
    /**
     * ==================================================\n
@@ -107,6 +110,43 @@ class SearchController {
 		}
         render eventsVSMap as JSON
     }
+
+    /**
+     * Servicio que busca entre los representantes la cadena de texto solicitada.
+     *
+     * @httpMethod [GET]
+     * @param [searchText] Opcional. Texto de la búsqueda.
+     * @param [max] Opcional (por defecto 20). Número máximo de documentos que
+     * 		  devuelve la consulta (tamaño de la página).
+     * @param [offset] Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+     * @responseContentType [application/json]
+     */
+    def representative () {
+        List<UserVS> representativeList = null
+        def representativeMap = [:]
+        representativeMap.representatives = []
+        UserVS.withTransaction {
+            representativeList = UserVS.createCriteria().list(max: params.max, offset: params.offset,
+                    sort:params.sort, order:params.order) {
+                or {
+                    ilike('firstName', "%${params.searchText}%")
+                    ilike('lastName', "%${params.searchText}%")
+                    ilike('description', "%${params.searchText}%")
+                }
+                and {
+                    eq('type', UserVS.Type.REPRESENTATIVE)
+                }
+            }
+            representativeMap.offset = params.long('offset')
+            representativeMap.numTotalRepresentatives = representativeList.totalCount
+            representativeMap.numRepresentatives = representativeList.totalCount
+            representativeList.each {representative ->
+                representativeMap.representatives.add(representativeService.getRepresentativeMap(representative))
+            }
+        }
+        render representativeMap as JSON
+    }
+
 
     /**
      * Servicio que busca entre los eventos publicados una cadena de texto en el rango de fechas solicitado.

@@ -28,7 +28,9 @@ import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import net.sf.json.JSONObject;
@@ -60,7 +62,7 @@ public class BrowserVS extends Region {
 
     private static final Map<String, ActorVS> actorMap = new HashMap<String, ActorVS>();
 
-    private Stage stage;
+    private Stage browserStage;
     private HBox toolBar;
     private FXMessageDialog messageDialog;
     private FXProgressDialog progressDialog;
@@ -86,23 +88,27 @@ public class BrowserVS extends Region {
         webView = new WebView();
         webView.setMinHeight(1000);
         final WebHistory history = webView.getEngine().getHistory();
-        stage = new Stage();
         smallView = new WebView();
         comboBox = new ComboBox();
-        stage.setTitle(ContextVS.getMessage("mainDialogCaption"));
-        stage.setResizable(true);
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+        browserStage = new Stage();
+        browserStage.initModality(Modality.WINDOW_MODAL);
+        browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
+        browserStage.setResizable(true);
+        browserStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
                 event.consume();
-                stage.hide();
-                logger.debug("stage.setOnCloseRequest");
+                browserStage.hide();
+                logger.debug("browserStage.setOnCloseRequest");
             }
         });
 
         VBox verticalBox = new VBox();
-        Scene scene = new Scene(verticalBox, 900, 700, Color.web("#666970"));
-        stage.setScene(scene);
+        Scene scene = new Scene(verticalBox, Color.web("#666970"));
+        browserStage.setScene(scene);
+        browserStage.setWidth(1000);
+        //browserStage.setHeight(800);
+
 
         final Button forwardButton = new Button();
         final Button prevButton = new Button();
@@ -203,7 +209,7 @@ public class BrowserVS extends Region {
                         //logger.debug("newState: " + newState);
                         if (newState == Worker.State.SUCCEEDED) {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
-                            win.setMember("javafxClient", new JavafxClient());
+                            win.setMember("clientTool", new JavafxClient());
                         }else if (newState.equals(Worker.State.FAILED)) {
                             showMessage(ContextVS.getMessage("conectionErrorMsg"));
                         }
@@ -282,7 +288,7 @@ public class BrowserVS extends Region {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 webView.getEngine().load(urlToLoad);
-                stage.show();
+                browserStage.show();
                 firstLoad.set(true);
                 showProgressDialog(null, true);
             }
@@ -339,11 +345,11 @@ public class BrowserVS extends Region {
                 default:
                     logger.debug("Unprocessed operation type: " + operation.getType());
             }*/
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                public void run() {
+            PlatformImpl.runLater(new Runnable() {
+                @Override public void run() {
                     try {
-                        PasswordDialog passwordDialog = new PasswordDialog (new JFrame(), true);
-                        passwordDialog.setVisible(true);
+                        PasswordDialog passwordDialog = new PasswordDialog();
+                        passwordDialog.show(SMIMEContentSigner.getPasswordRequestMsg());
                         String password = passwordDialog.getPassword();
                         if (password != null) processOperation(password, operation);
                     } catch(final Exception ex) {

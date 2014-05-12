@@ -95,13 +95,11 @@ public class EditorFragment extends Fragment {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setDomStorageEnabled(true);
-        webView.addJavascriptInterface(javaScriptInterface, "androidClient");
+        webView.addJavascriptInterface(javaScriptInterface, "clientTool");
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 String functionStr = "javascript:setEditorContent('" + editorDataStr + "')";
-                webView.loadUrl(functionStr);
-                functionStr = "javascript:setAndroidClienLoaded(true)";
                 webView.loadUrl(functionStr);
                 if(!isEditable) setEditable(isEditable);
                 isEditorLoaded = true;

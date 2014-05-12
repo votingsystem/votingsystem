@@ -4,25 +4,23 @@
     <r:require module="dynatableModule"/>
 </head>
 <body>
-<div class="row" style="">
-    <ol class="breadcrumbVS pull-left">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li class="active"><g:message code="representativesPageLbl"/></li>
-    </ol>
-</div>
-
-<div class="mainPage" style="margin:0 0 0 0;">
-    <ul id="representativeList" style="display: block; width: 100%; position: relative;" class="row"></ul>
+<div style="margin: 15px 0 0 0;">
+    <g:render template="/template/eventsSearchInfo"/>
+    <div class="mainPage" style="display: table; margin: auto; width: 100%;">
+        <ul id="representativeList" style="display: block; width: 100%; position: relative;" class="row"></ul>
+    </div>
 </div>
 
 <template id="representativeTemplate" style="display:none;">
     <g:render template="/template/representative"/>
 </template>
+<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 </body>
 </html>
 <r:script>
        	
     $(function() {
+        $("#navBarSearchInput").css( "visibility", "visible" );
         dynatableInputs.processingText = '<span class="dynatableLoading" style="position: relative; top:100px;">' +
          '<g:message code="updatingLbl"/> <i class="fa fa-refresh fa-spin"></i></span>'
         $('#representativeList').dynatable({
@@ -48,6 +46,7 @@
         dynatable.settings.params.records = 'representatives'
         dynatable.settings.params.queryRecordCount = 'numRepresentatives'
         dynatable.settings.params.totalRecordCount = 'numTotalRepresentatives'
+
      });
 
     function representativeWriter(rowIndex, jsonAjaxData, columns, cellWriter) {
@@ -63,8 +62,15 @@
     }
 
     $('#representativeList').bind('dynatable:afterUpdate',  function() {
+        updateMenuLinks()
         $('.representativeDiv').click(function() {
-            window.location.href = $(this).attr('href')
+            window.location.href = $(this).attr('data-href')
     })})
+
+    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'representative')}?searchText=" + textToSearch
+        dynatable.process();
+    }
 
 </r:script>

@@ -39,4 +39,20 @@ public class SMIMEContentSigner {
             default: return null;
         }
     }
+
+    public static String getPasswordRequestMsg() {
+        String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
+        CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
+        switch(cryptoToken) {
+            case MOBILE:
+                return ContextVS.getMessage("passwordDialogMobileMsg");
+            case JKS_KEYSTORE:
+                return ContextVS.getMessage("passwordDialogKeyStoreMsg");
+            case DNIe:
+                return ContextVS.getMessage("passwordDialogDNIeMsg");
+            default:
+                return null;
+        }
+    }
+
 }

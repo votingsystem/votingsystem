@@ -323,6 +323,7 @@ function validateNIF(nif) {
 }
 
 function checkInputType(inputType) {
+    if(navigator.userAgent.toLowerCase().indexOf("javafx") > -1) return false;
     if(null == inputType || '' == inputType.trim()) return false
     var isSuppported = true
     var elem = document.createElement("input");
@@ -435,6 +436,48 @@ function getFnName(fn) {
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
 
+var menuType = 'user'
+
+function updateMenuLinks() {
+    var selectedMenuType = getParameterByName('menu')
+    if("" == selectedMenuType.trim()) {
+        return
+    }
+    console.log("updateMenuLinks")
+    menuType = selectedMenuType
+    var elem = 'a'
+    var attr = 'href'
+    var elems = document.getElementsByTagName(elem);
+    var arrayElements = Array.prototype.slice.call(elems);
+    var groupElements = document.getElementsByClassName('linkvs');
+    arrayElements.concat(Array.prototype.slice.call(groupElements))
+    for (var i = 0; i < elems.length; i++) {
+        if(elems[i][attr].indexOf("mailto:") > -1) continue
+        if(elems[i][attr].indexOf("menu=" + selectedMenuType) < 0) {
+            if(elems[i][attr].indexOf("?") < 0) {
+                elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
+            } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
+        }
+    }
+    for (var j = 0; j < groupElements.length; j++) {
+        var attrValue = groupElements[j].getAttribute("data-href")
+        if(attrValue == null) continue
+        if(attrValue.indexOf("menu=" + selectedMenuType) < 0) {
+            if(attrValue.indexOf("?") < 0) {
+                groupElements[j].setAttribute("data-href", attrValue + "?menu=" + menuType )
+            } else groupElements[j].setAttribute("data-href", attrValue + "&menu=" + menuType );
+        }
+    }
+}
+
+//http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
 function VotingSystemApplet () {
     this.signatureClientToolLoaded = false
 	this.messageToSignatureClient = null;
@@ -451,8 +494,14 @@ VotingSystemApplet.prototype.getMessageToSignatureClient = function (appMessage)
 		return result
 	}
 
+var clientTool = null
 
 VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON, callerCallback) {
+        if(clientTool == null) {
+            $('#clientToolAdvertDialog').modal('show')
+            return
+        }
+
 		var callerCallbackName = getFnName(callerCallback)
         messageJSON.callerCallback = callerCallbackName
 		this.signatureClientCallback = callerCallback
@@ -463,19 +512,17 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
 	   	//var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SEND_SMIME_VOTE)
 	   	//this.messageToSignatureClient = JSON.stringify(webAppMessage)
 
-
 		//alert("'" + encodeURIComponent(messageToSignatureClient) + "'")
 		if(isAndroid()) {
-		    if(typeof androidClient === 'undefined'){
-		        console.log("isAndroid browser - androidClient loaded")
-		        //console.log("---- setMessageToSignatureClient: " + messageToSignatureClient);
-		        androidClient.setVotingWebAppMessage(messageToSignatureClient);
+		    console.log("isAndroid browser - androidClienLoaded: " + androidClienLoaded)
+		    if(clientTool != null){
+		        //console.log("---- setMessageToSignatureClient: " + this.messageToSignatureClient);
+		        clientTool.setVotingWebAppMessage(this.messageToSignatureClient);
             } else {
-                console.log("isAndroid browser - androidClient undefined")
-                //to avoid URI too large
-                //if(messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
+                //to avoid too large URIs
+                //if(this.messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
 
-                var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(messageToSignatureClient) +
+                var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(this.messageToSignatureClient) +
                     "&refererURL=" + window.location +
                     "&serverURL=" + "${grailsApplication.config.grails.serverURL}"
 
@@ -484,6 +531,11 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
             }
 			return
 		}
+
+        if(clientTool != null) {
+            clientTool.setMessageToSignatureClient(this.messageToSignatureClient)
+            return
+        }
 
 		if(!this.signatureClientToolLoaded) {
 			if(isJavaEnabledClient()) {

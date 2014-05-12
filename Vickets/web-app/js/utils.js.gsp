@@ -205,7 +205,7 @@ function validateNIF(nif) {
 }
 
 function checkInputType(inputType) {
-    return false
+    if(navigator.userAgent.toLowerCase().indexOf("javafx") > -1) return false;
     if(null == inputType || '' == inputType.trim()) return false
     var isSuppported = true
     var elem = document.createElement("input");
@@ -390,8 +390,7 @@ VotingSystemApplet.prototype.getMessageToSignatureClient = function (appMessage)
 	}
 
 
-var androidClienLoaded = false
-var javafxClient = null
+var clientTool = null
 
 VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON, callerCallback) {
 		var callerCallbackName = getFnName(callerCallback)
@@ -404,13 +403,12 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
 	   	//var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SEND_SMIME_VOTE)
 	   	//this.messageToSignatureClient = JSON.stringify(webAppMessage)
 
-
 		//alert("'" + encodeURIComponent(messageToSignatureClient) + "'")
 		if(isAndroid()) {
 		    console.log("isAndroid browser - androidClienLoaded: " + androidClienLoaded)
-		    if(androidClienLoaded){
+		    if(clientTool != null){
 		        //console.log("---- setMessageToSignatureClient: " + this.messageToSignatureClient);
-		        androidClient.setVotingWebAppMessage(this.messageToSignatureClient);
+		        clientTool.setVotingWebAppMessage(this.messageToSignatureClient);
             } else {
                 //to avoid too large URIs
                 //if(this.messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
@@ -425,8 +423,8 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
 			return
 		}
 
-        if(javafxClient != null) {
-            javafxClient.setMessageToSignatureClient(this.messageToSignatureClient)
+        if(clientTool != null) {
+            clientTool.setMessageToSignatureClient(this.messageToSignatureClient)
             return
         }
 

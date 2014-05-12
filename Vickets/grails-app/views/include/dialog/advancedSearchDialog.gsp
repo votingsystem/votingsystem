@@ -13,17 +13,29 @@
                         <a class="close" onclick="$('#searchErrorPanel').fadeOut()">×</a>
                         <div id="searchErrorMsg"></div>
                     </div>
-                    <div class="form-horizontal">
-                        <div  class="form-inline" style="display:block; margin: 0 0 10px 0;">
-                            <div style="display: block;">
-                                <label style="width:45px;"><g:message code="fromLbl"/></label>
-                                <votingSystem:datePicker id="advancedSearchFrom"></votingSystem:datePicker>
-                                <votingSystem:timePicker id="advancedSearchFromTime" style="margin: 0 0 0 20px;"></votingSystem:timePicker>
+                    <div class="">
+                        <div  class="" style="display:block; margin: 0 0 10px 0;">
+                            <div class="" style="display: table;">
+                                <div style="display:table-cell;vertical-align: middle;">
+                                    <label style="width:45px;"><g:message code="fromLbl"/></label>
+                                </div>
+                                <div style="display:table-cell; vertical-align: middle;">
+                                    <votingSystem:datePicker id="advancedSearchFrom"></votingSystem:datePicker>
+                                </div>
+                                <div style="display:table-cell; vertical-align: middle;">
+                                    <votingSystem:timePicker id="advancedSearchFromTime" style="margin: 0 0 0 20px;"></votingSystem:timePicker>
+                                </div>
                             </div>
-                            <div style="display: block; margin: 7px 0 0 0;">
-                                <label style="margin: 0 0 0 0;width:45px;"><g:message code="toLbl"/></label>
-                                <votingSystem:datePicker id="advancedSearchTo"></votingSystem:datePicker>
-                                <votingSystem:timePicker id="advancedSearchToTime" style="margin: 0 0 0 20px;"></votingSystem:timePicker>
+                            <div class="" style="display: table; margin: 10px 0 0 0;">
+                                <div style="display:table-cell;vertical-align: middle;">
+                                    <label style="width:45px;"><g:message code="toLbl"/></label>
+                                </div>
+                                <div style="display:table-cell; vertical-align: middle;">
+                                    <votingSystem:datePicker id="advancedSearchTo"></votingSystem:datePicker>
+                                </div>
+                                <div style="display:table-cell; vertical-align: middle;">
+                                    <votingSystem:timePicker id="advancedSearchToTime" style="margin: 0 0 0 20px;"></votingSystem:timePicker>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group" style="margin: 0 0 10px 0;">
@@ -51,6 +63,12 @@
             if("" != $("#searchInput").val().trim()) {
                 processUserSearch($("#searchInput").val())
             }
+        }
+    });
+
+    $("#searchButton").click(function(e) {
+        if("" != $("#searchInput").val().trim()) {
+            processUserSearch($("#searchInput").val())
         }
     });
 
@@ -94,12 +112,12 @@
 
         if(errorMessage != null) {
             $("#searchErrorMsg").html('<p>' + errorMessage + '<p>')
-            $("#searchErrorPanel").fadeIn(500)
-        } else {
-            $('#advancedSearchDialog').modal('hide')
-            processUserSearchJSON(userSearch)
-        }
-        return false
-    }
+$("#searchErrorPanel").fadeIn(500)
+} else {
+$('#advancedSearchDialog').modal('hide')
+processUserSearchJSON(userSearch)
+}
+return false
+}
 
 </r:script>

@@ -15,7 +15,7 @@
                 <ul>
                     <li>
                         <a href="${createLink(controller: 'groupVS')}" style="">
-                            <g:message code="adminGroupvsLbl"/> <i class="fa fa-list"></i>
+                            <g:message code="selectGroupvsLbl"/> <i class="fa fa-list"></i>
                         </a>
                     </li>
                     <li>

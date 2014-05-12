@@ -1,38 +1,57 @@
-<div id="selectRepresentativeDialog" title="<g:message code="saveAsRepresentativeLbl"/>" style="padding:20px 20px 20px 20px;display:none;">
-
-    <div id="representativeSelectionFormDiv">
-        <p><g:message code="delegationIntroLbl"/></p>
-
-        <div style="font-size:1.2em;font-weight: bold;"><g:message code="anonymousDelegationLbl"/></div>
-        <div><g:message code="anonymousDelegationMsg"/></div>
-        <div style="margin: 0 0 0 40px;">
-            <div id="moreDetailsMsgDiv" class="linkVS" onclick="seeMoreDetails()"></div>
-            <div id="moreDetailsDiv"><g:message code='anonymousDelegationMoreMsg'/></div>
-        </div>
-
-        <div style="margin:40px 0 0 0;font-size:1.2em;font-weight: bold;"><g:message code="publicDelegationLbl"/></div>
-        <div><g:message code="publicDelegationMsg"/></div>
-
-        <div style="margin:40px 0 0 0;"><g:message code="selectRepresentationCheckboxMsg"/>:</div>
-        <div class="checkBox" style="margin:0 0 0 100px;">
-            <div style="margin:0 0 0 40px;display:block;">
-                <input type="checkbox" id="anonymousDelegationCheckbox" onclick="setRepresentativeModeCheckBox(this)"/>
-                <label for="anonymousDelegationCheckbox"><g:message code="anonymousDelegationCheckboxLbl"/></label>
+<!-- Advanced search Modal dialog -->
+<div class="modal fade" id="selectRepresentativeDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div id="selectRepresentativeDialogDiv" class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel"><g:message code="saveAsRepresentativeLbl"/></h4>
             </div>
-            <div style="margin:0 0 0 40px;display:block;">
-                <input type="checkbox" id="publicDelegationCheckbox" onclick="setRepresentativeModeCheckBox(this)"/>
-                <label for="publicDelegationCheckbox"><g:message code="publicDelegationCheckboxLbl"/></label>
+            <div style="padding: 10px 20px 0px 20px;">
+                <div id="representativeSelectionFormDiv">
+                    <p><g:message code="delegationIntroLbl"/></p>
+
+                    <div style="font-size:1.2em;font-weight: bold;"><g:message code="anonymousDelegationLbl"/></div>
+                    <div><g:message code="anonymousDelegationMsg"/></div>
+                    <div style="margin: 0 0 0 40px;">
+                        <div id="moreDetailsMsgDiv" class="linkVS" onclick="seeMoreDetails()"></div>
+                        <div id="moreDetailsDiv"><g:message code='anonymousDelegationMoreMsg'/></div>
+                    </div>
+
+                    <div style="margin:40px 0 0 0;font-size:1.2em;font-weight: bold;"><g:message code="publicDelegationLbl"/></div>
+                    <div><g:message code="publicDelegationMsg"/></div>
+
+                    <div style="margin:40px 0 0 0;"><g:message code="selectRepresentationCheckboxMsg"/>:</div>
+                    <div class="" style="margin:0 0 0 100px;">
+                        <div style="margin:0 0 0 40px;display:block;">
+                            <input type="checkbox" id="anonymousDelegationCheckbox" onclick="setRepresentativeModeCheckBox(this)"/>
+                            <label><g:message code="anonymousDelegationCheckboxLbl"/></label>
+                        </div>
+                        <div style="margin:0 0 0 40px;display:block;">
+                            <input type="checkbox" id="publicDelegationCheckbox" onclick="setRepresentativeModeCheckBox(this)"/>
+                            <label><g:message code="publicDelegationCheckboxLbl"/></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="confirmRepresentativeSelectionDiv" style="display: none;">
+                    <div id="representativeNameDiv"></div>
+                    <div id="delegationWeeksDiv"  style="margin:25px 0 25px 0;"></div>
+                </div>
             </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal"
+                        onclick="proccessCancelRepresentativeSelection()">
+                    <g:message code="cancelLbl"/>
+                </button>
+                <button type="button" class="btn btn-accept-vs" onclick="submitSelectRepresentativeForm()">
+                    <g:message code="acceptLbl"/>
+                </button>
+            </div>
+
         </div>
     </div>
-
-    <div id="confirmRepresentativeSelectionDiv" style="display: none;">
-        <div id="representativeNameDiv"></div>
-        <div id="delegationWeeksDiv"  style="margin:25px 0 25px 0;"></div>
-        <g:message code="signWithDNIMsg"/>
-    </div>
-
-</div> 
+</div>
 <r:script>
 
 var callerCallback
@@ -40,7 +59,7 @@ var weeksAnonymousDelegation
 var representativeFullName
 
 function showSelectRepresentativeDialog(callback, representativeName) {
-	$("#selectRepresentativeDialog").dialog("open");
+	$("#selectRepresentativeDialog").modal('show')
     $("#confirmRepresentativeSelectionDiv").hide()
     $("#representativeSelectionFormDiv").show()
     weeksAnonymousDelegation = null
@@ -48,20 +67,6 @@ function showSelectRepresentativeDialog(callback, representativeName) {
     seeMoreDetails(false)
 	if(callback != null) callerCallback = callback
 }
-
-$("#selectRepresentativeDialog").dialog({
-  width: 770, autoOpen: false, modal: true,
-  buttons: [{id: "acceptButton",
-            text:"<g:message code="acceptLbl"/>",
-            icons: { primary: "ui-icon-check"},
-            click:function() { submitSelectRepresentativeForm();  }}, {
-                    id: "cancelButton", text:"<g:message code="cancelLbl"/>",
-                    icons: { primary: "ui-icon-closethick"},
-                    click:function() {proccessCancelRepresentativeSelection() }}],
-  show: {effect:"fade", duration: 300},
-  hide: {effect: "fade",duration: 300}
- });
-
 
 function seeMoreDetails(seeDetails) {
     if(seeDetails == null) seeDetails = !$("#moreDetailsDiv").is(":visible")
@@ -91,7 +96,7 @@ function proccessCancelRepresentativeSelection() {
         $("#representativeSelectionFormDiv").show()
         $("#confirmRepresentativeSelectionDiv").hide()
     } else {
-        $("#selectRepresentativeDialog").dialog( "close" );
+    	$("#selectRepresentativeDialog").modal('hide')
     }
 }
 

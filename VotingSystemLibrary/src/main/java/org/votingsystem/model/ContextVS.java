@@ -130,6 +130,7 @@ public class ContextVS {
 
     //Settings vars
     public static final String CRYPTO_TOKEN = "CRYPTO_TOKEN";
+    public static final String USER_NIF = "CRYPTO_TOKEN";
 
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
 

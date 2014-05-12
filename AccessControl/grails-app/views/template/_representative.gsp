@@ -1,5 +1,5 @@
 <div>
-    <li class='representativeDiv' href='{0}'>
+    <li class='representativeDiv linkvs' data-href='{0}'>
         <div class='representativeImgCol'>
             <img src='{1}'></img>
         </div>

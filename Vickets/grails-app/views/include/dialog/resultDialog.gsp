@@ -1,26 +1,39 @@
+<div id='resultDialog' class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="resultCaption" class="modal-title">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <p id='resultMessage' style="text-align: center;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-accept-vs" data-dismiss="modal" onclick="closeResultDialog();">
+                    <g:message code="acceptLbl"/></button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
 <div id='resultDialog' title='' style="display:none;">
-	<p id='resultMessage' style="text-align: center;"></p>
+    <p id='resultMessage' style="text-align: center;"></p>
 </div>
 <r:script>
 
-var clientCallback = null
-$("#resultDialog").dialog({
-	 width: 600, autoOpen: false, modal: true,
-	 buttons: [{text:"<g:message code="acceptLbl"/>",
-	         	icons: { primary: "ui-icon-check"},
-		       	click:function() {
-		       		$(this).dialog( "close" );
-					if(clientCallback != null) clientCallback()
-		       	}}],
-	show: {effect: "fade",duration: 100},
-	hide: { effect: "fade", duration: 100}
-});
+    var clientCallback = null
 
-function showResultDialog(caption, message, callback) {
-	console.log("showResultDialog - caption: " + caption + " - message: "+ message);
-	$('#resultMessage').html(message);
-	$('#resultDialog').dialog('option', 'title', caption);
-	$("#resultDialog").dialog( "open" );
-	clientCallback = callback
-}
+    function closeResultDialog() {
+        if(clientCallback != null) clientCallback()
+        $('#resultDialog').modal('hide')
+    }
+
+    function showResultDialog(caption, message, callback) {
+        console.log("showResultDialog - caption: " + caption + " - message: "+ message);
+        $('#resultMessage').html(message);
+        $("#resultCaption").html(caption);
+        $('#resultDialog').modal('show')
+        clientCallback = callback
+    }
 </r:script>

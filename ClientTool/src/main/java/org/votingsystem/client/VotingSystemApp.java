@@ -1,6 +1,7 @@
 package org.votingsystem.client;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -56,7 +57,19 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         VBox verticalBox = new VBox(10);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
         voteButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-envelope")));
+        voteButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                openVotingPage();
+            }});
         voteButton.setPrefWidth(300);
+
+        Button selectRepresentativeButton = new Button(ContextVS.getMessage("selectRepresentativeButtonLbl"));
+        selectRepresentativeButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-hand-o-right")));
+        selectRepresentativeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                openSelectRepresentativePage();
+            }});
+        selectRepresentativeButton.setPrefWidth(300);
 
         Button openSignedFileButton = new Button(ContextVS.getMessage("openSignedFileButtonLbl"));
         openSignedFileButton.setGraphic(new ImageView(FXUtils.getImage(this, "application-certificate")));
@@ -106,7 +119,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         footerButtonsBox.getChildren().addAll(settingsButton, spacer, cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 0, 0, 0));
 
-        verticalBox.getChildren().addAll(voteButton, openSignedFileButton, openBackupButton,  vicketAdminButton,
+        verticalBox.getChildren().addAll(voteButton, selectRepresentativeButton, openSignedFileButton, openBackupButton,  vicketAdminButton,
                 footerButtonsBox);
         verticalBox.getStyleClass().add("modal-dialog");
 
@@ -183,13 +196,43 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
 
     private void openGroupAdmin() {
         logger.debug("openGroupAdmin");
-        if(browserVS == null) browserVS = new BrowserVS();
-        browserVS.loadURL("http://vickets/Vickets/app/admin?menu=admin");
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                if(browserVS == null) browserVS = new BrowserVS();
+                browserVS.loadURL("http://vickets/Vickets/app/admin?menu=admin");
+            }
+        });
     }
 
+    private void openVotingPage() {
+        logger.debug("openVotingPage");
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                if(browserVS == null) browserVS = new BrowserVS();
+                browserVS.loadURL("http://sistemavotacion.org/AccessControl/");
+            }
+        });
+    }
+
+    private void openSelectRepresentativePage() {
+        logger.debug("openSelectRepresentativePage");
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                if(browserVS == null) browserVS = new BrowserVS();
+                browserVS.loadURL("http://sistemavotacion.org/AccessControl/representative/main?menu=user");
+            }
+        });
+    }
+
+
     private void openSettings() {
-        if (settingsDialog == null) settingsDialog = new FXSettingsDialog();
-        settingsDialog.show();
+        logger.debug("openSettings");
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                if (settingsDialog == null) settingsDialog = new FXSettingsDialog();
+                settingsDialog.show();
+            }
+        });
     }
 
     @Override public void sendMessageToHost(OperationVS operation) {

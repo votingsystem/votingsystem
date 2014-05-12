@@ -1,138 +1,149 @@
 package org.votingsystem.client.dialog;
 
-import net.miginfocom.swing.MigLayout;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.votingsystem.client.util.FXUtils;
 import org.votingsystem.model.ContextVS;
 
-import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.text.html.parser.ParserDelegator;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
-*/
-public class PasswordDialog extends JDialog {
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
+public class PasswordDialog {
 
     private static Logger logger = Logger.getLogger(PasswordDialog.class);
 
-    private Container container;
-    private JLabel messageLabel;
-    private JPanel messagePanel;
-    private JPasswordField password1Field;
-    private JPasswordField password2Field;
-    private JButton cancelButton;
-    private JButton acceptButton;
+    private Stage stage;
+    private VBox dialogVBox;
+    private Label messageLabel;
+    private Label capsLockPressedMessageLabel;
+    private HBox messagePanel;
+    private PasswordField password1Field;
+    private PasswordField password2Field;
+    private Button cancelButton;
     private String password;
     private String mainMessage = null;
     boolean isCapsLockPressed = false;
 
-    public PasswordDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
-        initComponents();
-        password1Field.addKeyListener(new KeyListener(){
-            boolean shiftPressed = false;
-            @Override public void keyPressed(KeyEvent e){
-                if(!shiftPressed) {
-                    if(Character.isUpperCase(e.getKeyChar())) setCapsLockState(true);
-                    else setCapsLockState(false);
-                } else {
-                    if(Character.isUpperCase(e.getKeyChar())) setCapsLockState(false);
-                    else setCapsLockState(true);
+    public PasswordDialog() {
+        stage = new Stage(StageStyle.TRANSPARENT);
+        stage.initModality(Modality.WINDOW_MODAL);
+
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
+            @Override public void handle(WindowEvent window) {      }
+        });
+
+        dialogVBox = new VBox(10);
+        messageLabel = new Label();
+        messageLabel.setWrapText(true);
+
+        capsLockPressedMessageLabel = new Label(ContextVS.getMessage("capsLockKeyPressed"));
+        capsLockPressedMessageLabel.setWrapText(true);
+        capsLockPressedMessageLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #870000;");
+
+        password1Field = new PasswordField();
+
+        password2Field = new PasswordField();
+
+
+        Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
+        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                stage.close();
+            }});
+        cancelButton.setGraphic(new ImageView(FXUtils.getImage(this, "cancel_16")));
+
+        final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
+        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                checkPasswords();
+            }});
+        acceptButton.setGraphic(new ImageView(FXUtils.getImage(this, "accept")));
+
+
+        password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
+            new EventHandler<KeyEvent>() {
+                public void handle(KeyEvent event) {
+                    if ((event.getCode() == KeyCode.ENTER)) {
+                        acceptButton.fire();
+                    }
+                    setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) acceptButton.doClick();
-                if (e.getKeyCode() == KeyEvent.VK_SHIFT) shiftPressed = true;
             }
-            @Override public void keyTyped(KeyEvent ke) {}
-            @Override public void keyReleased(KeyEvent ke) {
-                if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
-                    shiftPressed = false;
+        );
+
+        password2Field.addEventHandler(KeyEvent.KEY_PRESSED,
+            new EventHandler<KeyEvent>() {
+                public void handle(KeyEvent event) {
+                    if ((event.getCode() == KeyCode.ENTER)) {
+                        acceptButton.fire();
+                    }
+                    setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
+            }
+        );
+
+        HBox footerButtonsBox = new HBox();
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
+        VBox.setMargin(footerButtonsBox, new javafx.geometry.Insets(20, 0, 0, 0));
+
+
+        dialogVBox.getChildren().addAll(messageLabel, password1Field, password2Field, footerButtonsBox);
+        dialogVBox.getStyleClass().add("modal-dialog");
+        stage.setScene(new Scene(dialogVBox, Color.TRANSPARENT));
+        stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
+
+
+        dialogVBox.getStyleClass().add("message-lbl-bold");
+
+        // allow the dialog to be dragged around.
+        final Node root = stage.getScene().getRoot();
+        final Delta dragDelta = new Delta();
+        root.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                // record a delta distance for the drag and drop operation.
+                dragDelta.x = stage.getX() - mouseEvent.getScreenX();
+                dragDelta.y = stage.getY() - mouseEvent.getScreenY();
             }
         });
-        password2Field.addKeyListener(new KeyListener(){
-            @Override public void keyPressed(KeyEvent e){
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) acceptButton.doClick();
+        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                stage.setX(mouseEvent.getScreenX() + dragDelta.x);
+                stage.setY(mouseEvent.getScreenY() + dragDelta.y);
             }
-            @Override public void keyTyped(KeyEvent ke) {}
-            @Override public void keyReleased(KeyEvent ke) {}
         });
-        //Bug similar to -> http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6993691
-        ParserDelegator workaround = new ParserDelegator();
-
-        password = null;
-        String dialogTitle = null;
-        if(ContextVS.getInstance().getBoolProperty(ContextVS.CRYPTO_TOKEN, false)) {
-            mainMessage = ContextVS.getInstance().getMessage("adviceKeyStore");
-            dialogTitle = ContextVS.getInstance().getMessage("passwordDialogKeyStoreCaption");
-        } else {
-            mainMessage = ContextVS.getInstance().getMessage("adviceDNIE");
-            dialogTitle = ContextVS.getInstance().getMessage("passwordDialogDNIeCaption");
-        }
-        setTitle(dialogTitle);
-        /*boolean check = false;
-        try {//NOT SUPPORTED IN APPLET
-            check = Toolkit.getDefaultToolkit().
-                getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-        if(check) changeCapsLockState();
-        else messageLabel.setText(getMessage("adviceDNIE")); */
-
-        setMessage(mainMessage);
-        pack();
-        setLocationRelativeTo(null);
+        dialogVBox.setPrefWidth(350);
     }
 
-    private void initComponents() {
-        logger.debug("initComponents");
-        container = getContentPane();
-        container.setLayout(new MigLayout("fill", "", "[][]20[]"));
-
-        messagePanel = new JPanel();
-        Border messagePanelBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
-        messagePanel.setBorder(messagePanelBorder);
-        messagePanel.setLayout(new MigLayout("fill"));
-        messageLabel = new JLabel();
-
-        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        messagePanel.add(messageLabel, "growx, wrap");
-        container.add(messagePanel, "cell 0 0, growx, wrap");
-
-
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new MigLayout("fill", "15[grow]15"));
-        JLabel password1Label = new JLabel(ContextVS.getMessage("password1Lbl"));
-        password1Field = new JPasswordField();
-        formPanel.add(password1Label, "wrap");
-        formPanel.add(password1Field, "growx, wrap");
-
-        JLabel password2Label = new JLabel(ContextVS.getMessage("password2Lbl"));
-        password2Field = new JPasswordField();
-        formPanel.add(password2Label, "wrap");
-        formPanel.add(password2Field, "growx, wrap");
-        container.add(formPanel, "cell 0 1, growx, wrap");
-
-
-        acceptButton = new JButton(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setIcon(ContextVS.getIcon(this, "accept"));
-        acceptButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) { checkPasswords();}
-        });
-        container.add(acceptButton, "width :150:, cell 0 2, split2, align right");
-
-        cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
-        cancelButton.setIcon(ContextVS.getIcon(this, "cancel"));
-        cancelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) { dispose();}
-        });
-        container.add(cancelButton, "width :150:, align right");
-
-
+    private void setCapsLockState (boolean pressed) {
+        this.isCapsLockPressed = pressed;
+        setMessage(null);
     }
 
     public String getPassword() {
@@ -141,48 +152,40 @@ public class PasswordDialog extends JDialog {
 
     private void checkPasswords() {
         logger.debug("checkPasswords");
-        String password1 = new String(password1Field.getPassword());
-        String password2 = new String(password2Field.getPassword());
+        String password1 = new String(password1Field.getText());
+        String password2 = new String(password2Field.getText());
         if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
         else {
             if (password1.equals(password2)) {
                 password = password1;
-                dispose();
+                stage.close();
             } else {
                 setMessage(ContextVS.getMessage("passwordError"));
                 password1Field.setText("");
                 password2Field.setText("");
-                pack();
             }
         }
     }
 
-    public void setMainMessage(String mainMessage, String caption) {
+    public void show(String mainMessage) {
         this.mainMessage = mainMessage;
         setMessage(mainMessage);
-        if(caption != null) setTitle(caption);
+        stage.sizeToScene();
+        stage.centerOnScreen();
+        stage.showAndWait();
     }
 
-    private void setCapsLockState (boolean pressed) {
-        this.isCapsLockPressed = pressed;
-        setMessage(null);
-    }
-
-    private void setMessage (String mensaje) {
-        if (mensaje == null) {
-            if(isCapsLockPressed) {
-                messageLabel.setText("<html><b>" +
-                        ContextVS.getMessage("capsLockKeyPressed") + "</b><br/><br/>" + mainMessage + "</html>");
-            } else {
-                messageLabel.setText(mainMessage);
-            }
-        } else {
-            if(isCapsLockPressed) {
-                messageLabel.setText("<html><b>" + ContextVS.getMessage("capsLockKeyPressed")+ "</b><br/>" +
-                        mensaje + "</html>");
-            }  else messageLabel.setText(mensaje);
+    private void setMessage (String message) {
+        if (message == null) messageLabel.setText(mainMessage);
+        else messageLabel.setText(message);
+        if(isCapsLockPressed) {
+            if(!dialogVBox.getChildren().contains(capsLockPressedMessageLabel))
+                dialogVBox.getChildren().add(0, capsLockPressedMessageLabel);
         }
-        pack();
+        else dialogVBox.getChildren().removeAll(capsLockPressedMessageLabel);
+        stage.sizeToScene();
     }
+
+    class Delta { double x, y; }
 
 }

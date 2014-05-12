@@ -50,7 +50,7 @@
             </div>
         </div>
     </div>
-    <div id="pushobj" style="min-height: 600px; margin-top: 10px; max-width: 1000px; margin:0 auto;"><g:layoutBody/></div>
+    <div style="min-height: 600px; margin-top: 10px; max-width: 1000px; margin:0 auto;"><g:layoutBody/></div>
 	</body>
 
 </html>
