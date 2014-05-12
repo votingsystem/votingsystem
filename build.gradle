@@ -16,8 +16,7 @@ subprojects {
 
 ext {
 	votingToolApplet = null
-	ClientTool = null
-    ClientToolDistZip = null
+    clientToolDistZip = null
 	votingSystemLibrary = null
 	votingToolAndroid = null
 	certsDataMap = null
@@ -170,9 +169,9 @@ def copyVotingSystemApps(project) {
 
 def copyClientTool(project) {
 
-    File ClientToolDist = project.file("web-app/applet/${rootProject.ClientToolName}.zip")
-    if(ClientToolDist.exists()) ClientToolDist.delete()
-    ClientToolDist << rootProject.ClientToolDistZip?.bytes
+    File clientToolDist = project.file("web-app/applet/${rootProject.clientToolName}.zip")
+    if(clientToolDist.exists()) clientToolDist.delete()
+    clientToolDist << rootProject.clientToolDistZip?.bytes
 
     copyAppletDeps(project)
 }
