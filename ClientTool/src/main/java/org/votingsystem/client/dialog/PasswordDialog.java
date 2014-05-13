@@ -2,6 +2,8 @@ package org.votingsystem.client.dialog;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.*;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,6 +18,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -36,7 +40,7 @@ public class PasswordDialog {
 
     private Stage stage;
     private VBox dialogVBox;
-    private Label messageLabel;
+    private Text messageText;
     private Label capsLockPressedMessageLabel;
     private HBox messagePanel;
     private PasswordField password1Field;
@@ -55,17 +59,18 @@ public class PasswordDialog {
         });
 
         dialogVBox = new VBox(10);
-        messageLabel = new Label();
-        messageLabel.setWrapText(true);
+        messageText = new Text();
+        messageText.setWrappingWidth(320);
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #870000;");
+        VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
+        messageText.setTextAlignment(TextAlignment.CENTER);
 
         capsLockPressedMessageLabel = new Label(ContextVS.getMessage("capsLockKeyPressed"));
         capsLockPressedMessageLabel.setWrapText(true);
         capsLockPressedMessageLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #870000;");
 
         password1Field = new PasswordField();
-
         password2Field = new PasswordField();
-
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -80,7 +85,6 @@ public class PasswordDialog {
                 checkPasswords();
             }});
         acceptButton.setGraphic(new ImageView(FXUtils.getImage(this, "accept")));
-
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
             new EventHandler<KeyEvent>() {
@@ -112,11 +116,15 @@ public class PasswordDialog {
         VBox.setMargin(footerButtonsBox, new javafx.geometry.Insets(20, 0, 0, 0));
 
 
-        dialogVBox.getChildren().addAll(messageLabel, password1Field, password2Field, footerButtonsBox);
+        Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
+        Text password2Text = new Text(ContextVS.getMessage("password2Lbl"));
+        password2Text.setStyle("-fx-spacing: 50;");
+
+        dialogVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
+                footerButtonsBox);
         dialogVBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(dialogVBox, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
-
 
         dialogVBox.getStyleClass().add("message-lbl-bold");
 
@@ -176,8 +184,8 @@ public class PasswordDialog {
     }
 
     private void setMessage (String message) {
-        if (message == null) messageLabel.setText(mainMessage);
-        else messageLabel.setText(message);
+        if (message == null) messageText.setText(mainMessage);
+        else messageText.setText(message);
         if(isCapsLockPressed) {
             if(!dialogVBox.getChildren().contains(capsLockPressedMessageLabel))
                 dialogVBox.getChildren().add(0, capsLockPressedMessageLabel);

@@ -7,7 +7,7 @@
 <div style="margin: 15px 0 0 0;">
     <g:render template="/template/eventsSearchInfo"/>
     <div class="mainPage" style="display: table; margin: auto; width: 100%;">
-        <ul id="representativeList" style="display: block; width: 100%; position: relative;" class="row"></ul>
+        <ul id="representativeList" style="display: block; width: 100%; position: relative;margin: auto;" class="row"></ul>
     </div>
 </div>
 
@@ -46,7 +46,6 @@
         dynatable.settings.params.records = 'representatives'
         dynatable.settings.params.queryRecordCount = 'numRepresentatives'
         dynatable.settings.params.totalRecordCount = 'numTotalRepresentatives'
-
      });
 
     function representativeWriter(rowIndex, jsonAjaxData, columns, cellWriter) {

@@ -32,5 +32,7 @@ class AppController {
             return
         }
 	}
+
+    def admin() {}
 	
 }

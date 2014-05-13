@@ -128,7 +128,6 @@ class RepresentativeDelegationService {
     }
 
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
-        log.debug("validateAnonymousRequest")
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
@@ -136,13 +135,14 @@ class RepresentativeDelegationService {
         try {
             ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
             if(ResponseVS.SC_OK != responseVS.statusCode) {
-                log.error(responseVS.message)
+                log.error("validateAnonymousRequest - ${responseVS.message}")
                 messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
                 messageSMIMEReq.setReason(responseVS.message)
                 return responseVS
             }
             def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
             TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
+
             if (!messageJSON.accessControlURL || !messageJSON.weeksOperationActive ||
                     (TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST != operationType)) {
                 msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
@@ -153,8 +153,17 @@ class RepresentativeDelegationService {
                         contentType:ContentTypeVS.JSON,data:[message:msg])
             }
             messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST);
-            Date dateFrom = DateUtils.getDateFromLongDateStr_Es(messageJSON.dateFrom)
-            Date dateTo = DateUtils.getDateFromLongDateStr_Es(messageJSON.dateTo)
+            Calendar calendar = Calendar.getInstance()
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+            Date dateFrom = DateUtils.getMonday(calendar).getTime()
+            calendar.add(Calendar.DAY_OF_YEAR, 7 * Integer.valueOf(messageJSON.weeksOperationActive));
+            Date dateTo = calendar.getTime()
+            msg = messageSource.getMessage('anonymousDelegationRangeMsg', [userVS.getNif(),
+                   DateUtils.getStringFromDate(dateFrom), DateUtils.getStringFromDate(dateTo)].toArray(), locale)
+            log.debug("validateAnonymousRequest - ${msg}")
             anonymousDelegation = new AnonymousDelegation(status:AnonymousDelegation.Status.OK,
                     delegationSMIME:messageSMIMEReq, userVS:userVS, dateFrom:dateFrom, dateTo:dateTo).save();
             return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,

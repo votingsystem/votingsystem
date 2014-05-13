@@ -32,9 +32,9 @@ import java.security.cert.X509Certificate;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class FXSettingsDialog {
+public class SettingsDialog {
 
-    private static Logger logger = Logger.getLogger(FXSettingsDialog.class);
+    private static Logger logger = Logger.getLogger(SettingsDialog.class);
 
     private Stage stage;
     private KeyStore userKeyStore;
@@ -48,7 +48,7 @@ public class FXSettingsDialog {
     private TextField mobileNIFTextField;
     private RadioButton signWithKeystoreRb;
 
-    public FXSettingsDialog() {
+    public SettingsDialog() {
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.initModality(Modality.APPLICATION_MODAL);
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));

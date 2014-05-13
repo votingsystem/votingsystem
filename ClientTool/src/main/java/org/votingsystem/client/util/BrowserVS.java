@@ -6,6 +6,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
@@ -13,40 +14,31 @@ import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
-import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.dialog.FXMessageDialog;
-import org.votingsystem.client.dialog.FXProgressDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
 import org.w3c.dom.Document;
 
-import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,20 +52,39 @@ public class BrowserVS extends Region {
 
     private static Logger logger = Logger.getLogger(BrowserVS.class);
 
-    private static final Map<String, ActorVS> actorMap = new HashMap<String, ActorVS>();
+    private final SignatureService signatureService = new SignatureService();
 
     private Stage browserStage;
     private HBox toolBar;
     private FXMessageDialog messageDialog;
-    private FXProgressDialog progressDialog;
     private WebView webView;
     private WebView smallView;
     private ComboBox comboBox;
-    private AtomicBoolean firstLoad = new AtomicBoolean(true);
     private AtomicInteger offset = new AtomicInteger(0);
 
     public BrowserVS() {
         Platform.setImplicitExit(false);
+        signatureService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override public void handle(WorkerStateEvent t) {
+                logger.debug("signatureService - OnSucceeded");
+            ResponseVS responseVS = signatureService.getValue();
+            sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
+                    signatureService.getOperationVS().getCallerCallback());
+            }
+        });
+
+        signatureService.setOnRunning(new EventHandler<WorkerStateEvent>() {
+            @Override public void handle(WorkerStateEvent t) {
+                logger.debug("signatureService - OnRunning");
+            }
+        });
+
+        signatureService.setOnFailed(new EventHandler<WorkerStateEvent>() {
+            @Override public void handle(WorkerStateEvent t) {
+                logger.debug("signatureService - OnFailed");
+            }
+        });
+
         //Note: Key is that Scene needs to be created and run on "FX user thread" NOT on the AWT-EventQueue Thread
         //https://gist.github.com/anjackson/1640654
         PlatformImpl.startup(new Runnable() {
@@ -85,8 +96,27 @@ public class BrowserVS extends Region {
     }
 
     private void initComponents() {
+        Region progressRegion = new Region();
+        progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
+        progressRegion.setPrefSize(240, 160);
+
+        VBox progressBox = new VBox();
+        progressBox.setAlignment(Pos.CENTER);
+        progressBox.setPrefWidth(400);
+        progressBox.setPrefHeight(300);
+
+        Text progressMessageText = new Text();
+        progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #f9f9f9;");
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setPrefWidth(200);
+        progressBar.setLayoutY(10);
+        progressMessageText.textProperty().bind(signatureService.messageProperty());
+        progressBar.progressProperty().bind(signatureService.progressProperty());
+        progressRegion.visibleProperty().bind(signatureService.runningProperty());
+        progressBox.visibleProperty().bind(signatureService.runningProperty());
+        progressBox.getChildren().addAll(progressMessageText, progressBar);
+
         webView = new WebView();
-        webView.setMinHeight(1000);
         final WebHistory history = webView.getEngine().getHistory();
         smallView = new WebView();
         comboBox = new ComboBox();
@@ -104,11 +134,7 @@ public class BrowserVS extends Region {
         });
 
         VBox verticalBox = new VBox();
-        Scene scene = new Scene(verticalBox, Color.web("#666970"));
-        browserStage.setScene(scene);
-        browserStage.setWidth(1000);
-        //browserStage.setHeight(800);
-
+        VBox.setVgrow(webView, Priority.ALWAYS);
 
         final Button forwardButton = new Button();
         final Button prevButton = new Button();
@@ -124,7 +150,6 @@ public class BrowserVS extends Region {
                 }
             }
         });
-
 
         prevButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-chevron-left")));
         prevButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
@@ -214,13 +239,17 @@ public class BrowserVS extends Region {
                             showMessage(ContextVS.getMessage("conectionErrorMsg"));
                         }
                         if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {
-                            if(firstLoad.get()) showProgressDialog(null, false);
-                            firstLoad.set(false);
                         }
                     }
                 }
         );
         verticalBox.getChildren().addAll(toolBar, webView);
+        StackPane stack = new StackPane();
+        stack.getChildren().addAll(verticalBox, progressRegion, progressBox);
+        //stack.setPrefWidth(1000);
+        //stack.setPrefHeight(1000);
+        Scene scene = new Scene(stack, Color.web("#666970"));
+        browserStage.setScene(scene);
 
         getChildren().addListener(new ListChangeListener<Node>() {
             @Override public void onChanged(Change<? extends Node> c) {}
@@ -228,9 +257,21 @@ public class BrowserVS extends Region {
 
         webView.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
             @Override public void changed(ObservableValue<? extends Document> prop, Document oldDoc, Document newDoc) {
-            enableFirebug( webView.getEngine());
+                if(ContextVS.getInstance().getBoolProperty(ContextVS.IS_DEBUG_ENABLED, false)) enableFirebug( webView.getEngine());
             }
         });
+    }
+
+    public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction) {
+        logger.debug("sendMessageToBrowserApp - statusCode: " + statusCode + " - message: " + message);
+        Map resultMap = new HashMap();
+        resultMap.put("statusCode", statusCode);
+        resultMap.put("message", message);
+        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
+        if(callbackFunction == null) callbackFunction = "setMessageFromSignatureClient";
+        String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
+        logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
+        webView.getEngine().executeScript(jsCommand);
     }
 
     private void openPopUp(WebView popUpWebView) {
@@ -260,6 +301,14 @@ public class BrowserVS extends Region {
                 "E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
     }
 
+
+    public void showMessage(ResponseVS responseVS) {
+        String finalMsg = responseVS.getMessage() == null? "":responseVS.getMessage();
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) finalMsg = responseVS.getMessage();
+        else finalMsg = ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage();
+        showMessage(finalMsg);
+    }
+
     public void showMessage(final String message) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
@@ -269,19 +318,6 @@ public class BrowserVS extends Region {
         });
     }
 
-    public void showProgressDialog(final String message, final boolean isVisible) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                if(BrowserVS.this.getScene() == null) {
-                    logger.debug("showProgressDialog scene null");
-                    return;
-                }
-                if(progressDialog == null) progressDialog = new FXProgressDialog(BrowserVS.this.getScene().getWindow());
-                progressDialog.show(message, isVisible);
-            }
-        });
-
-    }
 
     public void loadURL(final String urlToLoad) {
         logger.debug("loadURL: " + urlToLoad);
@@ -289,97 +325,21 @@ public class BrowserVS extends Region {
             @Override public void run() {
                 webView.getEngine().load(urlToLoad);
                 browserStage.show();
-                firstLoad.set(true);
-                showProgressDialog(null, true);
             }
         });
     }
 
     // JavaScript interface object
     public class JavafxClient {
-        //public void exit() {Platform.exit();}
+
         public void setMessageToSignatureClient(String messageToSignatureClient) {
             logger.debug("JavafxClient - setMessageToSignatureClient: " + messageToSignatureClient);
             JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(messageToSignatureClient);
-            final OperationVS operation = OperationVS.populate(jsonObject);
-            try {
-                ActorVS actorVS = actorMap.get(operation.getServerURL().trim());
-                if(actorVS == null) {
-                    showProgressDialog(ContextVS.getMessage("fetchingServerInfoMsg"), true);
-                    String serverInfoURL = ActorVS.getServerInfoURL(operation.getServerURL());
-                    ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        jsonObject = (JSONObject)JSONSerializer.toJSON(responseVS.getMessage());
-                        actorVS = ActorVS.populate(jsonObject);
-                        responseVS.setData(actorVS);
-                        logger.error("checkActorVS - adding " + operation.getServerURL().trim() + " to actor map");
-                        actorMap.put(operation.getServerURL().trim(), actorVS);
-                        switch(actorVS.getType()) {
-                            case ACCESS_CONTROL:
-                                ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
-                                break;
-                            case VICKETS:
-                                ContextVS.getInstance().setVicketServer((VicketServer) actorVS);
-                                ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
-                                break;
-                            case CONTROL_CENTER:
-                                ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
-                                break;
-                            default:
-                                logger.debug("Unprocessed actor:" + actorVS.getType());
-                        }
-                    } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-
-                    }
-                }
-                showProgressDialog(null, false);
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-            showProgressDialog(operation.getSignedMessageSubject(), true);
-            /*switch(operation.getType()) {
-                case VICKET_GROUP_NEW:
-                    break;
-                case VICKET_GROUP_SUBSCRIBE:
-                    break;
-                default:
-                    logger.debug("Unprocessed operation type: " + operation.getType());
-            }*/
-            PlatformImpl.runLater(new Runnable() {
-                @Override public void run() {
-                    try {
-                        PasswordDialog passwordDialog = new PasswordDialog();
-                        passwordDialog.show(SMIMEContentSigner.getPasswordRequestMsg());
-                        String password = passwordDialog.getPassword();
-                        if (password != null) processOperation(password, operation);
-                    } catch(final Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        BrowserVS.this.showMessage(ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
-                    } finally {
-                        BrowserVS.this.showProgressDialog(null, false);
-                    }
-                }
-            });
+            signatureService.processOperationVS(OperationVS.populate(jsonObject));
         }
     }
 
 
-    private void processOperation(String password, OperationVS operation) throws Exception {
-        JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
-        SMIMEMessageWrapper smimeMessage = SMIMEContentSigner.genMimeMessage(null,
-                operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
-                password.toCharArray(), operation.getSignedMessageSubject(), null);
-        SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getServiceURL(),
-                ContextVS.getInstance().getVicketServer().getTimeStampServiceURL(),
-                ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null,
-                ContextVS.getInstance().getVicketServer().getX509Certificate());
-        ResponseVS responseVS =  senderWorker.call();
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            showMessage(responseVS.getMessage());
-        } else {
-            showMessage(ContextVS.getMessage("errorLbl") + " - " + responseVS.getMessage());
-        }
-    }
 
     private Node createSpacer() {
         Region spacer = new Region();
@@ -396,11 +356,11 @@ public class BrowserVS extends Region {
     }
 
     @Override protected double computePrefWidth(double height) {
-        return 750;
+        return 1000;
     }
 
     @Override protected double computePrefHeight(double width) {
-        return 600;
+        return 1000;
     }
 
 

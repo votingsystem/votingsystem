@@ -185,7 +185,7 @@ public class OperationVS {
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 TypeVS receiptTypeVS = TypeVS.valueOf((String) receiptDataMap.get("operation"));
                 if(!documentToSign.get("weeksOperationActive").equals(receiptDataMap.get("weeksOperationActive")) ||
-                   !documentToSign.get("accessControlURL").equals(receiptDataMap.get("accessControlURL")) ||
+                   !documentToSign.get("UUID").equals(receiptDataMap.get("UUID")) ||
                    !documentToSign.get("representativeNif").equals(receiptDataMap.get("representativeNif")) ||
                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != receiptTypeVS) {
                     return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("receiptDataMismatchErrorMsg"));

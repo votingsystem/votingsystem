@@ -115,7 +115,7 @@ function submitSelectRepresentativeForm() {
             selectedRepresentationLbl = anonymousLbl
             representativeOperation = Operation.ANONYMOUS_REPRESENTATIVE_SELECTION
             if(weeksAnonymousDelegation == null || '' == weeksAnonymousDelegation) {
-                showAnonymousRepresentativeDateRangeDialog()
+                showAnonymousRepresentativeDateRangeDialog(submitSelectRepresentativeForm)
                 return
 	        }
         } else {
@@ -132,6 +132,7 @@ function submitSelectRepresentativeForm() {
             webAppMessage.serviceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDelegationMsgSubject"/>'
             votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback);
+            $("#selectRepresentativeDialog").modal('hide')
         } else {
             var representativeNameLbl = "${representativeName}";
             var msgTemplate = "<g:message code='selectRepresentativeConfirmMsg'/>";

@@ -3,19 +3,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 id="resultCaption" class="modal-title">Modal title</h4>
+                <h4 id="resultCaption" class="modal-title" style="color: #870000; font-weight: bold;"></h4>
             </div>
             <div class="modal-body">
-                <p id='resultMessage' style="text-align: center;"></p>
+                <p id='resultMessage' style="text-align: center;  font-size: 1.2em;"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-accept-vs" data-dismiss="modal" onclick="closeResultDialog();">
                     <g:message code="acceptLbl"/></button>
             </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
+        </div>
+    </div>
+</div>
 
 <div id='resultDialog' title='' style="display:none;">
     <p id='resultMessage' style="text-align: center;"></p>

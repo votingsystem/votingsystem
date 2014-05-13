@@ -18,7 +18,7 @@ body {
 
 .navbar-vickets {
     background-color: #ba0011;
-    border-color: #f9f9f9;
+    border-bottom: 1px solid #f9f9f9;
     color:#f9f9f9;
     height: 40px;
 }
@@ -45,7 +45,7 @@ body {
 }
 
 .navBarMainMenu {
-    position: fixed;
+    position: absolute;
     top: 50px;
     z-index:10;
     visibility:hidden;
@@ -125,6 +125,7 @@ input:focus:valid {
 .errorMsgWrapper {
     width: 90%;
     margin: 10px auto 0px auto;
+    padding: 10px 10px 10px 10px;
     color:#cc1606;
     border: 1pt solid #cc1606;
 }
@@ -218,7 +219,7 @@ hr {
     width:300px;
     background-color: #f2f2f2;
     border: 1px solid #02227a;
-    margin: 10px 5px 5px 10px;
+    margin: 10px 15px 10px 0px;
     -moz-border-radius: 5px; border-radius: 5px;
     cursor: pointer; cursor: hand;
     height:100px;

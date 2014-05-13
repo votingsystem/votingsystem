@@ -13,12 +13,14 @@
             <div  class="representativeNumRepHeader col-md-2" style="">
                 ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/>
             </div>
-            <div class="col-md-1" style="">
-                <button type="button" onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
-                        class="btn btn-default">
-                    <g:message code="saveAsRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i>
-                </button>
-            </div>
+            <g:if test="${"user".equals(params.menu)}">
+                <div class="col-md-1" style="">
+                    <button type="button" onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
+                            class="btn btn-default">
+                        <g:message code="saveAsRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i>
+                    </button>
+                </div>
+            </g:if>
         </div>
         <div id="tabs" style="margin: 0 auto 0 auto;">
             <ul class="nav nav-tabs">
@@ -45,20 +47,22 @@
             </div>
             <div class="tab-pane" id="tabs-2">
                 <div id="tabs-2">
-                    <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
-                        <div style="display:table-cell;">
-                            <button id="votingHistoryButton" type="button" class="btn btn-default"
-                                    style="margin:0px 20px 0px 0px; width:300px;">
-                                <g:message code="requestVotingHistoryLbl"/>
-                            </button>
+                    <g:if test="${"admin".equals(params.menu)}">
+                        <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
+                            <div style="display:table-cell;">
+                                <button id="votingHistoryButton" type="button" class="btn btn-default"
+                                        style="margin:0px 20px 0px 0px; width:300px;">
+                                    <g:message code="requestVotingHistoryLbl"/>
+                                </button>
+                            </div>
+                            <div style="display:table-cell;">
+                                <button type="button" id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                        class="btn btn-default">
+                                    <g:message code="requestRepresentativeAcreditationsLbl"/>
+                                </button>
+                            </div>
                         </div>
-                        <div style="display:table-cell;">
-                            <button type="button" id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                    class="btn btn-default">
-                                <g:message code="requestRepresentativeAcreditationsLbl"/>
-                            </button>
-                        </div>
-                    </div>
+                    </g:if>
                 </div>
             </div>
         </div>
@@ -162,7 +166,6 @@
         console.log("requestAccreditationsCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="operationERRORCaption"/>'
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "<g:message code='operationOKCaption'/>"
