@@ -4,7 +4,7 @@
     <r:require module="dynatableModule"/>
 </head>
 <body>
-<div class="mainPage">
+<div class="">
     <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
             <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
@@ -18,7 +18,7 @@
 
     <g:render template="/template/eventsSearchInfo"/>
 
-    <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
+    <div id="mainPageEventList" class="pageContentDiv"><ul></ul></div>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>
@@ -83,8 +83,9 @@
     }
 
     $('#mainPageEventList').bind('dynatable:afterUpdate',  function() {
+        updateMenuLinks()
         $('.eventDiv').click(function() {
-            window.location.href = $(this).attr('href')
+            window.location.href = $(this).attr('data-href')
         }
     )})
 

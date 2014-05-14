@@ -149,9 +149,8 @@ input:focus:valid {
 }
 
 .pageHeader {
-    font-weight: bold;
-    font-size: 1.4em;
     color: #870000;
+    font-weight: bold;
     text-decoration: underline;
     text-overflow: ellipsis;
 }

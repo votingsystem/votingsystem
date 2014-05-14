@@ -1,71 +1,43 @@
-<div id="adminDocumentDialog" title="<g:message code="cancelEventCaption"/>">
-	<p style="text-align: center;"><g:message code="adminDocumenInfoMsg"/></p>
-	<g:message code="documentStateSelectionMsg"/>:<br/>
-	<div class="checkBox" style="font-size: 0.9em; margin:10px 0 0 10px;">
-		<div style="margin:0px 0 10px 0px;display:block;">
-			<input type="checkbox" id="selectDeleteDocument" onclick="setDocumentStateCheckBox(this)"/>
-                <label for="selectDeleteDocument"><g:message code="selectDeleteDocumentMsg"/></label>
-		</div>
-        <div>
-            <input type="checkbox" id="selectCloseDocument" onclick="setDocumentStateCheckBox(this)"/>
-            <label for="selectCloseDocument"><g:message code="selectCloseDocumentMsg"/></label>
+<div id='adminDocumentDialog' class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="" class="modal-title" style="color: #870000; font-weight: bold;">
+                    <g:message code="cancelEventCaption"/>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center;"><g:message code="adminDocumenInfoMsg"/></p>
+                <g:message code="documentStateSelectionMsg"/>:<br/>
+                <div style="font-size: 0.9em; margin:10px 0 0 10px;">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="optionsRadios" id="selectDeleteDocument" value="">
+                            <g:message code="selectDeleteDocumentMsg"/>
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="optionsRadios" id="selectCloseDocument" value="">
+                            <g:message code="selectCloseDocumentMsg"/>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-accept-vs" data-dismiss="modal" onclick="submitAdminForm();">
+                    <g:message code="acceptLbl"/></button>
+                <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal"><g:message code="cancelLbl"/></button>
+            </div>
         </div>
-	</div>
-</div> 
+    </div>
+</div>
 <r:script>
 
-
-var callerCallback
-
 function showAdminDocumentDialog(callback) {
-	$("#adminDocumentDialog").dialog("open");
-	callerCallback = callback	
+	$("#adminDocumentDialog").modal('show');
 }
-
-
-$("#selectDeleteDocument").click(function () {
-	if($("#selectCloseDocument").is(':checked')) {
-		$("#selectCloseDocument").prop('checked', false);
-	}
-})
-
-$("#selectCloseDocument").click(function () {
-	if($("#selectDeleteDocument").is(':checked')) {
-		$("#selectDeleteDocument").prop('checked', false);
-	}
-})
-
-function setDocumentStateCheckBox(documentStateCheckBox) {
-    console.log("setRepresentativeModeCheckBox: " + documentStateCheckBox.id)
-    if("selectDeleteDocument" == documentStateCheckBox.id &&
-        $("#selectDeleteDocument").is(':checked')) {
-        document.getElementById("selectCloseDocument").checked = false
-    } else if("selectCloseDocument" == documentStateCheckBox.id &&
-        $("#selectCloseDocument").is(':checked')) {
-        document.getElementById("selectDeleteDocument").checked = false
-    }
-}
-
-$("#adminDocumentDialog").dialog({
- 	  width: 600, autoOpen: false, modal: true,
-      buttons: [{
-        		text:"<g:message code="acceptLbl"/>",
-               	icons: { primary: "ui-icon-check"},
-             	click:function() {
-             		submitAdminForm() 	
-             		$(this).dialog( "close" );   	   			   				
- 			        	}
-           },
-           {
-        		text:"<g:message code="cancelLbl"/>",
-               	icons: { primary: "ui-icon-closethick"},
-             	click:function() {
-		   					$(this).dialog( "close" );
-		       	 		}	
-           }],
-      show: {effect:"fade", duration: 300},
-      hide: {effect: "fade",duration: 300}
-    });
 
 function submitAdminForm() {
 	console.log("adminDocumentDialog.submitAdminForm()")
@@ -75,10 +47,13 @@ function submitAdminForm() {
 				"<g:message code='selectDocumentStateERRORMsg'/>", showAdminDocumentDialog)
 	} else {
 		var state
+		var messageSubject
 		if($("#selectDeleteDocument").is(':checked')) {
 			state = EventVS.State.DELETED_FROM_SYSTEM
+			messageSubject = '<g:message code="deleteEventVSMsgSubject"/>'
 		} else if($("#selectCloseDocument").is(':checked')) {
 			state = EventVS.State.CANCELLED
+			messageSubject = '<g:message code="cancelEventVSMsgSubject"/>'
 		}
     	var webAppMessage = new WebAppMessage(
 		    	ResponseVS.SC_PROCESSING,
@@ -91,9 +66,33 @@ function submitAdminForm() {
 				accessControlURL:"${grailsApplication.config.grails.serverURL}",
 				eventId:Number("${eventMap?.id}"), state:state}
 		webAppMessage.signedContent = signedContent
+        webAppMessage.signedMessageSubject = messageSubject
 		pendingOperation = Operation.EVENT_CANCELLATION
-		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-		votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback);
+		console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+		votingSystemClient.setMessageToSignatureClient(webAppMessage, adminDocumentCallback);
 	}
+}
+
+function adminDocumentCallback(appMessage) {
+    console.log("adminDocumentCallback - message from native client: " + appMessage);
+    var appMessageJSON = toJSON(appMessage)
+    if(appMessageJSON != null) {
+        var callBack
+        var caption
+        var msg
+        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+            caption = "<g:message code='operationOKCaption'/>"
+            var msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+            msg = msgTemplate.format('${eventMap?.subject}');
+            callBack = function() {
+                var eventVSService = "${createLink(controller:'eventVSElection')}/"
+                window.location.href = eventVSService.concat(votingEvent.id);
+            }
+        } else {
+            caption = "<g:message code='operationERRORCaption'/>"
+            msg = appMessageJSON.message
+        }
+        showResultDialog(caption, msg, callBack)
+    }
 }
 </r:script>

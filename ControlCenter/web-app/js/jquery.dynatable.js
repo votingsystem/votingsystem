@@ -1422,7 +1422,9 @@
             }
 
             pageLinks += '</ul>';
-
+            //votingsystem
+            var paginationWidth = 40 + (pages * 30) + 40
+            $("#dynatable-pagination-links-representativeList").css("width",   paginationWidth + "px")
             // only bind page handler to non-active and non-disabled page links
             var selector = '#dynatable-pagination-links-' + obj.element.id + ' a.' + pageLinkClass + ':not(.' + activePageClass + ',.' + disabledPageClass + ')';
             // kill any existing delegated-bindings so they don't stack up

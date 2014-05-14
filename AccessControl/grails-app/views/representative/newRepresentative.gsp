@@ -15,9 +15,7 @@
         </ol>
     </div>
 
-	<div class="pageHeader">
-        <g:message code="newRepresentativePageTitle"/>
-	</div>
+    <div class="pageHeader text-center"><h3>$<g:message code="newRepresentativePageTitle"/></h3></div>
 
 	<div class="text-left" style="margin:15px 0 0 0;">
 		<ul>
@@ -43,8 +41,9 @@
 	</div>	
 		
 	</form>
-		
-	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+
+    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 	
 </div>
 
@@ -75,13 +74,14 @@
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             votingSystemClient.setMessageToSignatureClient(webAppMessage, newRepresentativeCallback);
         });
+
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
       });
 
     function newRepresentativeCallback(appMessage) {
         console.log("newRepresentativeCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="publishERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

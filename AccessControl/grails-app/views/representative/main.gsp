@@ -6,7 +6,7 @@
 <body>
 <div style="margin: 15px 0 0 0;">
     <g:render template="/template/eventsSearchInfo"/>
-    <div class="mainPage" style="display: table; margin: auto; width: 100%;">
+    <div class="" style="display: table; margin: auto; width: 100%;">
         <ul id="representativeList" style="display: block; width: 100%; position: relative;margin: auto;" class="row"></ul>
     </div>
 </div>

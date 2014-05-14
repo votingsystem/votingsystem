@@ -12,13 +12,8 @@
                 <button type="button" class="btn btn-accept-vs" data-dismiss="modal" onclick="closeResultDialog();">
                     <g:message code="acceptLbl"/></button>
             </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
-<div id='resultDialog' title='' style="display:none;">
-	<p id='resultMessage' style="text-align: center;"></p>
+        </div>
+    </div>
 </div>
 <r:script>
 

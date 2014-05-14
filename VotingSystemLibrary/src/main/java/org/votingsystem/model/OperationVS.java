@@ -77,7 +77,7 @@ public class OperationVS {
     }
 
     public String getFileName() {
-        if(typeVS == null) return "NULL_APPLET_OPERATION";
+        if(typeVS == null) return "DEFAULT_OPERATION_NAME";
         else return typeVS.toString();
     }
 

@@ -1,49 +1,19 @@
 <%@ page import="org.votingsystem.model.EventVS; grails.converters.JSON" %>
-<%
-	def messageToUser = null
-	def eventClass = null
-    if(eventMap?.state) {
-        switch(EventVS.State.valueOf(eventMap?.state)) {
-            case EventVS.State.CANCELLED:
-                messageToUser = message(code: 'eventCancelledLbl')
-                eventClass = "eventCancelledBox"
-                break;
-            case EventVS.State.AWAITING:
-                messageToUser = message(code: 'eventPendingLbl')
-                eventClass = "eventPendingBox"
-                break;
-            case EventVS.State.TERMINATED:
-                messageToUser =  message(code: 'eventFinishedLbl')
-                eventClass = "eventFinishedBox"
-                break;
-        }
-    }
-%>
 <html>
 <head><meta name="layout" content="main" /></head>
 <body>
+<div class="pageContentDiv" style="max-width: 1000px;">
+    <div style="margin:0 20px 0 20px;">
+        <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
+        </div>
 
-	<g:if test="${messageToUser != null}">
-		<div id="eventMessagePanel" class="eventMessagePanel">
-			<p class="messageContent">
-				${messageToUser}
-			</p>
-		</div>
-	</g:if>
-
-    <div class="pageHeader"> ${eventMap?.subject}</div>
+    <div class="pageHeader text-center"><h3>${eventMap?.subject}</h3></div>
 
     <div style="" class="row">
         <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
         <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
-		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
-			EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
-				<g:message code="adminDocumentLinkLbl"/>
-			</div>
-		</g:if>
 	</div>
 
 	<div class="eventPageContentDiv">
@@ -51,38 +21,30 @@
 			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
 		</div>
 
-        <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;">
+        <div id="eventAuthorDiv" class="text-left" style="margin:0px 20px 20px 0px;">
+            <b><g:message code="accessControlEventvsURL" args="${[eventMap?.URL]}"/></b>
+        </div>
+
+        <div id="eventAuthorDiv" class="text-right" style="margin:0px 20px 20px 0px;">
             <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
         </div>
-	
-		<div class="eventOptionsDiv">
-			<fieldset id="fieldsBox" style="">
+
+        <div class="eventOptionsDiv row text-center" style="">
+            <fieldset id="fieldsBox" class="fieldsBox" style="margin:30px auto 0 auto;">
 				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
 				<div id="fields" style="width:100%;">
-					<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state}">
-						<g:each in="${eventMap?.fieldsEventVS}">
-                            <button class="btn btn-default btn-lg"
-                                    style="width: 90%;margin: 10px auto 30px auto;"
-                                    optionId = "${it.id}" optionContent="${it.content}"  onclick="return false;">
-                                ${it.content}
-                            </button>
-						</g:each>
-					</g:if>
-                    <g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state) ||
-                            EventVS.State.TERMINATED.toString().equals(eventMap?.state) ||
-                            EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-						<g:each in="${eventMap?.fieldsEventVS}">
-							<div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
-								 - ${it.content}
-							</div>
-						</g:each>
-					</g:if>
+                    <g:each in="${eventMap?.fieldsEventVS}">
+                        <div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
+                            - ${it.content}
+                        </div>
+                    </g:each>
 				</div>
 			</fieldset>
 		</div>
 	</div>
+    </div>
+</div>
 
-<g:render template="/template/signatureMechanismAdvert"/>
 <g:include view="/include/dialog/confirmOptionDialog.gsp"/>
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
 
@@ -91,13 +53,35 @@
 <r:script>
 <g:applyCodec encodeAs="none">
 		var votingEvent = ${eventMap as JSON}
-        if(votingEvent.state == "ACTIVE") {
-            $(".pageHeader").css("color", "#388746")
-            var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
-            $("#pendingTimeDiv").text(pendingMsgTemplate.format(votingEvent.dateFinish.getElapsedTime()))
-        }
+        var elapsedTime = votingEvent.dateFinish.getElapsedTime()
+
 		var selectedOption
 		$(function() {
+            <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
+                $(".pageHeader").css("color", "#388746")
+                var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
+                        if(undefined != elapsedTime) $("#pendingTimeDiv").append(pendingMsgTemplate.format(elapsedTime))
+            </g:if>
+            <g:if test="${EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
+                $(".pageHeader").css("color", "#388746")
+                $("#messagePanel").addClass("eventPendingBox");
+                $("#messagePanel").text("<g:message code="eventPendingLbl"/>")
+            </g:if>
+            <g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state)}">
+                $(".pageHeader").css("color", "#fba131")
+                $("#messagePanel").addClass("eventCancelledBox");
+                $("#messagePanel").text("<g:message code="eventCancelledLbl"/>")
+                        $("#messagePanel").css("display", "visible")
+
+            </g:if>
+            <g:if test="${EventVS.State.TERMINATED.toString().equals(eventMap?.state)}">
+                $(".pageHeader").css("color", "#870000")
+                $("#messagePanel").addClass("eventFinishedBox");
+                $("#messagePanel").text("<g:message code="eventFinishedLbl"/>")
+                        $("#messagePanel").css("display", "visible")
+            </g:if>
+
+
 			if(${messageToUser != null?true:false}) {
 				$("#eventMessagePanel").addClass("${eventClass}");
 			}
@@ -133,7 +117,6 @@
 			console.log("sendVoteCallback - message from native client: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
-				$("#workingWithAppletDialog").dialog("close");
 				caption = '<g:message code="voteERRORCaption"/>'
 				var msgTemplate = "<g:message code='voteResultMsg'/>"
 				var msg
@@ -156,7 +139,6 @@
 			console.log("adminDocumentCallback - message from native client: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
-				$("#workingWithAppletDialog").dialog("close");
 				var callBack
 				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 					caption = "<g:message code='operationOKCaption'/>"

@@ -17,9 +17,11 @@
      style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <div id="pageTitle" class="pageHeader">
-            <g:message code="initVicketUserBaseDataSimulationMsg"/>
-        </div>
+        <h3>
+            <div id="pageTitle" class="pageHeader text-center">
+                <g:message code="initVicketUserBaseDataSimulationMsg"/>
+            </div>
+        </h3>
         <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
             <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
                 <g:message code="goToResultViewMsg"/>

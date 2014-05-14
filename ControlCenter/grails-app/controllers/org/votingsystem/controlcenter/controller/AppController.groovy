@@ -37,4 +37,8 @@ class AppController {
 		redirect(uri:uri)
 		return
 	}
+
+    def admin() {}
+
+    def contact() {}
 }

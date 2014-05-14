@@ -18,7 +18,7 @@
         </div>
         <div style="display:table-cell; width: 70%; vertical-align: middle;">
             <a id="selectedSubsystemLink" class=""
-               style="font-size:2.2em; ;margin: 0 0px 0px 30px; color: #f9f9f9; font-weight: bold; ">
+               style="font-size:2em; ;margin: 0 0px 0px 30px; color: #f9f9f9; font-weight: bold; white-space:nowrap;">
             </a>
         </div>
         <div style="display:table-cell;width: 200px; margin:0 20px 0 0; padding:0px;text-align: right;vertical-align: middle;">
@@ -43,19 +43,11 @@
     <div><g:layoutBody/></div>
 </div>
 
-<div id="appletsFrame"  style="width:0px; height:0px;">
-    <iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
-</div>
-
-
 <g:if test="${"admin".equals(params.menu)}"><g:render template="/template/adminMenu"/></g:if>
 <g:else><g:render template="/template/mainMenu"/></g:else>
 
 </body>
 
-<g:include view="/include/dialog/loadingAppletDialog.gsp"/>
-<g:include view="/include/dialog/workingWithAppletDialog.gsp"/>
-<g:include view="/include/dialog/browserWithoutJavaDialog.gsp"/>
 <g:include view="/include/dialog/resultDialog.gsp"/>
 
 </html>
@@ -83,6 +75,7 @@
             selectedSubsystemText = "<g:message code="subscriptionsPageLbl"/>"
         } else {
             console.log("### unknown subsytem -> " + selectedSubsystem)
+            selectedSubsystemText = "<g:message code="votingsystemPageLbl"/>"
         }
 
         <g:if test="${"admin".equals(params.menu)}">

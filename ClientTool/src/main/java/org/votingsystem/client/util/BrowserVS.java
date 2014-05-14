@@ -250,6 +250,8 @@ public class BrowserVS extends Region {
         //stack.setPrefHeight(1000);
         Scene scene = new Scene(stack, Color.web("#666970"));
         browserStage.setScene(scene);
+        browserStage.setWidth(1000);
+        browserStage.setHeight(1000);
 
         getChildren().addListener(new ListChangeListener<Node>() {
             @Override public void onChanged(Change<? extends Node> c) {}
@@ -355,13 +357,12 @@ public class BrowserVS extends Region {
         layoutInArea(toolBar,0,h-tbHeight,w,tbHeight,0,HPos.CENTER,VPos.CENTER);
     }
 
-    @Override protected double computePrefWidth(double height) {
+    @Override protected double computeMinWidth(double height) {
         return 1000;
     }
 
-    @Override protected double computePrefHeight(double width) {
+    @Override protected double computeMinHeight(double width) {
         return 1000;
     }
-
 
 }

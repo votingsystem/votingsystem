@@ -13,9 +13,11 @@
             <li class="active"><g:message code="newGroupVSLbl"/></li>
         </ol>
     </div>
-	<div class="pageHeader">
-        <g:message code="newGroupPageTitle"/>
-	</div>
+    <h3>
+        <div class="pageHeader text-center">
+            <g:message code="newGroupPageTitle"/>
+        </div>
+    </h3>
 	
 	<div class="text-left" style="margin:10px 0 10px 0;">
 		<ul>
@@ -51,21 +53,18 @@
 	</div>	
 		
 	</form>
-		
-	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+
+    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 	
 </div>
-<g:include view="/include/dialog/loadingAppletDialog.gsp"/>
-<g:include view="/include/dialog/workingWithAppletDialog.gsp"/>
 <g:include view="/include/dialog/resultDialog.gsp"/>
-<div id="appletsFrame"  style="width:0px; height:0px;">
-    <iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
-</div>
 </body>
 </html>
 <r:script>
 
     $(function() {
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
 
         $('#mainForm').submit(function(event){
             event.preventDefault();
@@ -93,13 +92,13 @@
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
             votingSystemClient.setMessageToSignatureClient(webAppMessage, newGroupVSCallback);
         });
+
       });
 
     function newGroupVSCallback(appMessage) {
         console.log("newGroupVSCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="publishERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

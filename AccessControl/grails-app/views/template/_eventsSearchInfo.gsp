@@ -1,4 +1,3 @@
-
 <div class="eventSearchInfo" style="">
 	<div style="text-align:center;display:table-cell; width:100%;">
 		<div class="eventSearchText"></div>

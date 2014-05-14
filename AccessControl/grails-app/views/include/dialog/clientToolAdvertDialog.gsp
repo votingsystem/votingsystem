@@ -1,4 +1,3 @@
-<!-- Advanced search Modal dialog -->
 <div class="modal fade" id="clientToolAdvertDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div id="clientToolAdvertDialogDiv" class="modal-dialog">
         <div class="modal-content">

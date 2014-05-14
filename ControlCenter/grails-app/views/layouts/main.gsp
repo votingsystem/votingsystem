@@ -20,7 +20,7 @@
             <ul>
                 <li>
                     <a href="${createLink(controller: 'eventVSElection', action: 'main')}">
-                        <g:message code="homeLbl"/> <i class="a fa fa-home" style="color: #fdd302"></i>
+                        <g:message code="electionSystemLbl"/><i class="fa fa-envelope"></i>
                     </a>
                 </li>
                 <li>
@@ -29,39 +29,38 @@
                     </a>
                 </li>
                 <li>
-                    <a  href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
+                    <a  href="${createLink(controller: 'app', action: 'contact')}"
                         style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-phone"></i>
                     </a>
                 </li>
             </ul>
         </nav>
     </div>
-    <div  id="navbar" class="navbar navbar-vickets navbar-fixed-top" role="navigation" style="min-height:30px; margin-bottom: 6px; width: 100%;">
-        <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
-        <div class="container">
-            <div class="container-fluid">
-                <div class="navbar-default">
-                    <span id="appTitle" class="navbar-text center-block" style="font-size: 2.5em; margin: 0 0px 0 30px;
-                    font-weight: bold; "><a id="selectedSubsystemLink" style="color: #f9f9f9;">
-                        <g:message code="serverNameLabel"/></a>
-                    </span>
-                    <div id="navBarSearchInput" class="navbar-form navbar-right input-group" style=" width:200px;top:0px; visibility: hidden;">
-                        <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl"/>"
-                               style="width:120px; border-color: #f9f9f9;">
-                        <div class="input-group-btn" style="">
-                            <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
-                                <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"
-                                    style="background-color: #ba0011; border-color: #f9f9f9; color:#f9f9f9;">
-                                <span class="caret"></span>
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu" style="">
-                                <li><a id="showAdvancedSearchButton" href="#"><g:message code="advancedSearchLbl"/></a></li>
-                            </ul>
-                        </div>
-                    </div>
-
+    <div class="navbar navbar-vickets" style="display:table; margin: 0px 0px 0px 0px; width:100%;">
+        <div style="display:table-cell;width: 200px; margin:0px; padding:0px;">
+            <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
+        </div>
+        <div style="display:table-cell; width: 70%; vertical-align: middle;">
+            <a id="selectedSubsystemLink" class=""
+               style="font-size:2em; ;margin: 0 0px 0px 30px; color: #f9f9f9; font-weight: bold; white-space:nowrap;">
+                <g:message code="serverNameLabel"/>
+            </a>
+        </div>
+        <div style="display:table-cell;width: 200px; margin:0 20px 0 0; padding:0px;text-align: right;vertical-align: middle;">
+            <div id="navBarSearchInput" class="navbar-right input-group" style="width:15px;visibility: hidden;">
+                <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl" />"
+                       style="width:90px; border-color: #f9f9f9;">
+                <div class="input-group-btn">
+                    <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
+                        <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
+                    <button id="advancedSearchButton" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1"
+                            style="background-color: #ba0011; border-color: #f9f9f9; color:#f9f9f9;visibility:hidden;">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" style="">
+                        <li><a id="showAdvancedSearchButton" href="#"><g:message code="advancedSearchLbl"/></a></li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -70,16 +69,8 @@
 
 </div>
 
-
-    <div id="appletsFrame"  style="width:0px; height:0px;">
-        <iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
-    </div>
 </body>
 
-<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
-<g:include view="/include/dialog/loadingAppletDialog.gsp"/>
-<g:include view="/include/dialog/workingWithAppletDialog.gsp"/>
-<g:include view="/include/dialog/browserWithoutJavaDialog.gsp"/>
 <g:include view="/include/dialog/resultDialog.gsp"/>
 
 </html>
@@ -128,18 +119,6 @@
 		 	getSearchResult(searchQuery)
 		 });
 	})
-	
-	
-	function setMessageFromSignatureClient(appMessage) {
-		var appMessageJSON = toJSON(appMessage)
-		if(appMessageJSON != null) {
-			if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
-				signatureClientToolLoaded = true;
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				$("#workingWithAppletDialog").dialog("open");
-			}
-		}
-	}
 			 
 </r:script>
 <r:layoutResources/>

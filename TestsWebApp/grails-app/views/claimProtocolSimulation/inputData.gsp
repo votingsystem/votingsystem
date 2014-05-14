@@ -18,9 +18,7 @@
      style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <div id="pageTitle" class="pageHeader">
-            <g:message code="initClaimProtocolSimulationMsg"/>
-        </div>
+        <div id="pageTitle" class="pageHeader"><h3><g:message code="initClaimProtocolSimulationMsg"/></h3></div>
         <div  id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
             <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
                 <g:message code="goToResultViewMsg"/>

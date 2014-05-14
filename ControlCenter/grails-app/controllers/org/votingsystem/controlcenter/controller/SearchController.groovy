@@ -28,10 +28,11 @@ import org.votingsystem.util.DateUtils
  * */
 class SearchController {
 
-   SearchHelper searchHelper;
-   def subscriptionVSService
-   def sessionFactory
-   def userVSService
+    SearchHelper searchHelper;
+    def subscriptionVSService
+    def sessionFactory
+    def userVSService
+    def eventVSElectionService
 
    /**
     * ==================================================
@@ -268,7 +269,7 @@ class SearchController {
             }
             totalEventvs = eventvsList.totalCount
             eventvsList.each {eventvsItem ->
-                resultList.add(eventVSService.getEventVSElectionMap(eventvsItem))
+                resultList.add(eventVSElectionService.getEventVSElectionMap(eventvsItem))
             }
         }
         def resultMap = [eventsVSElection:resultList, queryRecordCount: totalEventvs,

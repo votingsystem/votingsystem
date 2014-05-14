@@ -7,9 +7,7 @@
 
 <div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
 
-	<div class="pageHeader" style="margin:15px 0px 25px 0px">
-        <g:message code="publishManifestLbl"/>
-	</div>
+	<div class="pageHeader text-center"><h3><g:message code="publishManifestLbl"/></h3></div>
 	
 	<form id="mainForm" onsubmit="return submitForm(this);">
 	<div class="form-inline">
@@ -40,8 +38,9 @@
 	</div>	
 
 	</form>
-		
-	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+
+    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 
 </div>
 
@@ -49,7 +48,9 @@
 </html>
 <r:script>
 
-    $(function() { });
+    $(function() {
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
+    });
 
     function submitForm(form) {
         var subject = $( "#subject" ),
@@ -93,7 +94,6 @@
         var appMessageJSON = toJSON(appMessage)
         manifestDocumentURL = null
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="publishERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

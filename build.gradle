@@ -15,7 +15,6 @@ subprojects {
 }
 
 ext {
-	votingToolApplet = null
     clientToolDistZip = null
 	votingSystemLibrary = null
 	votingToolAndroid = null
@@ -23,7 +22,7 @@ ext {
 }
 
 //'ClientTool:signJar' -> Needs Java8
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'TimeStampServer:war',
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war',
                          'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
 
@@ -145,39 +144,25 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
 }
 
 //'ClientTool:signJar' -> Needs Java8
-task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':VotingSystemLibrary:publish', ':releaseAndroid']) {
+task generateVotingSystemApps(dependsOn: [':VotingSystemLibrary:publish', ':releaseAndroid']) {
 }
 
 def copyVotingSystemApps(project) {
-	File appletDir = project.file("web-app/applet/");
-	appletDir.mkdirs();
 	File androidDir = project.file("web-app/android/");
 	androidDir.mkdirs();
-	
-	File votingToolApplet = project.file("web-app/applet/VotingToolApplet.jar")
-	if(votingToolApplet.exists()) votingToolApplet.delete()
-	votingToolApplet << rootProject.votingToolApplet?.bytes
-
-    copyClientTool(project)
-	
 	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
 	votingToolAndroid << file("VotingToolAndroidProject/VotingToolAndroid/VotingToolAndroid.apk")?.bytes
 
-	copyAppletDeps(project)
+    copyClientTool(project)
 }
 
 def copyClientTool(project) {
 
-    File clientToolDist = project.file("web-app/applet/${rootProject.clientToolName}.zip")
+    File clientToolDist = project.file("web-app/tools/${rootProject.clientToolName}.zip")
     if(clientToolDist.exists()) clientToolDist.delete()
     clientToolDist << rootProject.clientToolDistZip?.bytes
 
-    copyAppletDeps(project)
-}
-
-def copyAppletDeps(project) {
-	installAppletBcprov(project)
 }
 
 task copyAppsAll(dependsOn: [':AccessControl:copyApps', 'ControlCenter:copyApps', ':Vickets:copyApps']) {}
@@ -192,18 +177,6 @@ initDevEnvironmentApps.mustRunAfter tasks.getByPath('VotingSystemLibrary:classes
 
 task installVotingSystem(dependsOn: ['buildAll', 'initDevEnvironment']) {}
 initDevEnvironment.mustRunAfter buildAll
-
-def installAppletBcprov(project) {
-	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"
-	File jarFile = project.file("web-app/applet/lib/bcprov-${bcprovVersion}.jar")
-	if(!jarFile.exists()) {
-		jarFile.getParentFile().mkdirs()
-		String jarFileURL = "http://central.maven.org/maven2/org/bouncycastle/bcprov-jdk16/1.46/bcprov-${bcprovVersion}.jar"
-		println "--- downloading ${jarFileURL}"
-		ant.get(src:jarFileURL, dest:jarFile)
-		project.announce.announce("Bcprovider installed on project '$project.name'", "local")
-	} else println "--- bcprovVersion '$bcprovVersion' already installed on project '$project.name'"
-}
 
 def installGrailsRestDocPlugin(project) {
 	String fileURL = "https://github.com/jgzornoza/GrailsRestDocPlugin/" + 

@@ -33,7 +33,7 @@
 		</div>
 	</g:if>
 
-    <div class="pageHeader"> ${eventMap?.subject}</div>
+    <div class="pageHeader text-center"><h3>${eventMap?.subject}</h3></div>
 
     <div style="" class="row">
         <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
@@ -103,8 +103,9 @@
 		</g:if>
 		</form>
 	</div>
-	
-	<g:render template="/template/signatureMechanismAdvert"/>	
+
+    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
 <g:include view="/include/dialog/requestEventBackupDialog.gsp"/>
@@ -141,6 +142,7 @@
                 showRequestEventBackupDialog(requestBackupCallback, "<g:message code="backupOnlyForPublisherMsg"/>")
             </g:else>
         })
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
      });
 
     function sendSignature() {
@@ -168,18 +170,12 @@
         console.log("requestBackupCallback");
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
-                $("#loadingVotingSystemAppletDialog").dialog("close");
-                $("#workingWithAppletDialog").dialog("open");
-            } else {
-                $("#workingWithAppletDialog" ).dialog("close");
-                var caption = '<g:message code="operationERRORCaption"/>'
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    caption = "<g:message code='operationOKCaption'/>"
-                }
-                var msg = appMessageJSON.message
-                showResultDialog(caption, msg)
+            var caption = '<g:message code="operationERRORCaption"/>'
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = "<g:message code='operationOKCaption'/>"
             }
+            var msg = appMessageJSON.message
+            showResultDialog(caption, msg)
         }
     }
 
@@ -187,7 +183,6 @@
         console.log("sendSignatureCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="operationERRORCaption"/>'
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "<g:message code='operationOKCaption'/>"
@@ -202,7 +197,6 @@
         console.log("adminDocumentCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog").dialog("close");
             var callBack
             var caption
             var msg

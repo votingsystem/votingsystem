@@ -16,6 +16,11 @@ body {
 
 .linkvs { }
 
+.pageContentDiv {
+    max-width: 1400px;
+    margin:auto;
+}
+
 .navbar-vickets {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
@@ -194,22 +199,10 @@ hr {
 }
 
 .pageHeader {
-    font-weight: bold;
-    font-size: 1.4em;
     color: #870000;
+    font-weight: bold;
     text-decoration: underline;
     text-overflow: ellipsis;
-}
-
-.mainPageEventList {
-    display:block;
-    overflow:hidden;
-    margin:0px 0px 100px 0px;
-    min-height: 100%;
-}
-
-.mainPageEventList ul{
-    margin:0px 0px 0px 0px;
 }
 
 .representativeDiv {
@@ -225,13 +218,6 @@ hr {
     float:left;
 }
 
-.bottomPaginationWrapper {
-    width:100%;
-    position:absolute;
-    display:block;
-    margin:auto;
-    bottom:20px;
-}
 
 .representativeDiv .representativeImgCol{
     display:table-cell;
@@ -626,13 +612,6 @@ hr {
     font-weight:bold;
     float:right;
     position: relative;
-}
-
-.mainPage {
-    position: relative;
-    min-height: 600px;
-    overflow: hidden;
-    margin: 10px 0 0 0;
 }
 
 .breadcrumbVS {

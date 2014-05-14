@@ -20,6 +20,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.dnie.DNIePDFContentSigner;
+import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.signature.util.ContentSignerVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.PDFContentSigner;
@@ -58,7 +59,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private PrivateKey signerPrivatekey;
     private X509Certificate destinationCert = null;
     private Certificate[] signerCertChain;
-    private ContentSignerVS systemSignedGenerator = null;
+    private ContentSignerVS pdfSigner = null;
     
     public PDFSignedSender(String urlToSendDocument, String timeStampServerURL, String reason, String location,
            char[] password, PdfReader reader, PrivateKey signerPrivatekey, Certificate[] signerCertChain,
@@ -79,15 +80,12 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         if(signerPrivatekey != null && signerCertChain != null) {
             logger.debug("Generating PrivateKey VotingSystemSignedGenerator");
-            PDFContentSigner signedGenerator = new PDFContentSigner( signerPrivatekey, signerCertChain,
+            pdfSigner = new PDFContentSigner( signerPrivatekey, signerCertChain,
                     PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
-            systemSignedGenerator = signedGenerator;
         } else {
             logger.debug("Generating smartcard VotingSystemSignedGenerator");
-            DNIePDFContentSigner sessionHelper = null;
-            sessionHelper = DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
-            signerCertChain = sessionHelper.getCertificateChain();
-            systemSignedGenerator = sessionHelper;
+            pdfSigner = ContentSignerHelper.getContentSignerPDF(password, ContextVS.DNIe_SESSION_MECHANISM);
+            signerCertChain = pdfSigner.getCertificateChain();
         }
         File fileToSend = File.createTempFile("signedPDF", ".pdf");
         fileToSend.deleteOnExit();
@@ -172,7 +170,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
 
-        CMSSignedData signedData = systemSignedGenerator.genSignedData(signatureHash, unsAttr);
+        CMSSignedData signedData = pdfSigner.genSignedData(signatureHash, unsAttr);
         //ValidadoraCMS validadora = new ValidadoraCMS(certCA);
         //logger.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
 

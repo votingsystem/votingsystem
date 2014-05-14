@@ -20,10 +20,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal"><g:message code="cancelLbl"/></button>
                 <button type="button" class="btn btn-primary btn-accept-vs" onclick="$('#representativeDateRangeFormDummyButton').click();">
                     <g:message code="acceptLbl"/>
                 </button>
+                <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal"><g:message code="cancelLbl"/></button>
             </div>
         </div>
     </div>

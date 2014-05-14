@@ -229,7 +229,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://sistemavotacion.org/AccessControl/");
+                browserVS.loadURL("http://sistemavotacion.org/AccessControl/eventVSElection/main?menu=user");
             }
         });
     }

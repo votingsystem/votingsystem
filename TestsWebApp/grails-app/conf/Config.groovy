@@ -95,11 +95,11 @@ environments {
     development {
         //grails.logging.jul.usebridge = true
         grails.resources.debug = true
-		grails.serverURL = "http://testwebapp:8082/${appName}"
+		grails.serverURL = "http://testwebapp:8084/${appName}"
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://testwebapp:8082/${appName}"
+        grails.serverURL = "http://testwebapp:8084/${appName}"
     }
 }
 

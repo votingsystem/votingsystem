@@ -45,11 +45,11 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="advancedSearchCancelButton" type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
-                        <g:message code="closeLbl"/>
-                    </button>
                     <button id="advancedSearchButton" type="submit" class="btn btn-accept-vs">
                         <g:message code="doAdvancedSearchLbl"/>
+                    </button>
+                    <button id="advancedSearchCancelButton" type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
+                        <g:message code="closeLbl"/>
                     </button>
                 </div>
             </form>

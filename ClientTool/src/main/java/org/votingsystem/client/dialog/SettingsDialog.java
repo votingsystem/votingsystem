@@ -18,8 +18,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.util.FXUtils;
-import org.votingsystem.client.util.SMIMEContentSigner;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.NifUtils;
@@ -168,8 +168,8 @@ public class SettingsDialog {
     public void show() {
         logger.debug("show");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
-                SMIMEContentSigner.CryptoToken.DNIe.toString());
-        SMIMEContentSigner.CryptoToken cryptoToken = SMIMEContentSigner.CryptoToken.valueOf(cryptoTokenStr);
+                ContentSignerHelper.CryptoToken.DNIe.toString());
+        ContentSignerHelper.CryptoToken cryptoToken = ContentSignerHelper.CryptoToken.valueOf(cryptoTokenStr);
         gridPane.getChildren().remove(keyStoreVBox);
         gridPane.getChildren().remove(mobileVBox);
         switch(cryptoToken) {
@@ -221,9 +221,9 @@ public class SettingsDialog {
     private void validateForm() {
         logger.debug("validateForm");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
-                SMIMEContentSigner.CryptoToken.DNIe.toString());
-        SMIMEContentSigner.CryptoToken cryptoToken = SMIMEContentSigner.CryptoToken.valueOf(cryptoTokenStr);
-        if(signWithKeystoreRb.isSelected() &&  SMIMEContentSigner.CryptoToken.JKS_KEYSTORE != cryptoToken) {
+                ContentSignerHelper.CryptoToken.DNIe.toString());
+        ContentSignerHelper.CryptoToken cryptoToken = ContentSignerHelper.CryptoToken.valueOf(cryptoTokenStr);
+        if(signWithKeystoreRb.isSelected() &&  ContentSignerHelper.CryptoToken.JKS_KEYSTORE != cryptoToken) {
             if(userKeyStore == null) {
                 FXMessageDialog messageDialog = new FXMessageDialog();
                 messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
@@ -239,7 +239,7 @@ public class SettingsDialog {
                     String password = passwordDialog.getPassword();
                     ContextVS.saveUserKeyStore(userKeyStore, password);
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                            SMIMEContentSigner.CryptoToken.JKS_KEYSTORE.toString());
+                            ContentSignerHelper.CryptoToken.JKS_KEYSTORE.toString());
                 } catch(Exception ex) {
                     FXMessageDialog messageDialog = new FXMessageDialog();
                     messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
@@ -250,13 +250,13 @@ public class SettingsDialog {
         }
         if(signWithDNIeRb.isSelected()) {
             ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                    SMIMEContentSigner.CryptoToken.DNIe.toString());
+                    ContentSignerHelper.CryptoToken.DNIe.toString());
         }
         if(signWithMobileRb.isSelected()) {
             String userNif = NifUtils.validate(mobileNIFTextField.getText());
             if(userNif != null) {
                 ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                        SMIMEContentSigner.CryptoToken.MOBILE.toString());
+                        ContentSignerHelper.CryptoToken.MOBILE.toString());
                 ContextVS.getInstance().setProperty(ContextVS.USER_NIF,userNif);
             } else {
                 FXMessageDialog messageDialog = new FXMessageDialog();

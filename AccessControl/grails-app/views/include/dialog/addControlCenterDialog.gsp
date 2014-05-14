@@ -1,40 +1,63 @@
-<div id="addControlCenterDialog" title="<g:message code="controlCenterLbl"/>" style="display:none;">
-  	<div id="formDiv">
-        <p style="text-align: center;">
-            <g:message code="controlCenterDescriptionMsg"/>
-        </p>
-   		<span><g:message code="controlCenterURLLbl"/></span>
-   		<form id="newControlCenter">
-   			<input type="url" id="controlCenterURL" style="width:500px; margin:0px auto 0px auto;" 
-   				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-   				onchange="this.setCustomValidity('')" class="form-control" required/>
-  				<input id="submitControlCenter" type="submit" style="display:none;">
-   		</form>
+<div id='addControlCenterDialog' class="modal fade">
+    <div class="modal-dialog">
+        <form id="newControlCenter">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" style="color: #870000; font-weight: bold;">
+                        <g:message code="controlCenterLbl"/>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div id="addControlCenterDialogMessageDiv" class='text-center'
+                         style="color: #870000; font-size: 1.2em;font-weight: bold; margin-bottom: 15px;"></div>
 
-  	</div>
+                    <div id="formDiv">
+                        <p style="text-align: center;">
+                            <g:message code="controlCenterDescriptionMsg"/>
+                        </p>
+                        <span><g:message code="controlCenterURLLbl"/></span>
+                            <input type="url" id="controlCenterURL" style="width:500px; margin:0px auto 0px auto;"
+                                   oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                                   onchange="this.setCustomValidity('')" class="form-control" required/>
+                            <input id="submitControlCenter" type="submit" style="display:none;">
 
-    <div id="checkControlCenterProgressDiv" style="display:none;">
-        <p style='text-align: center;'><g:message code="checkingControlCenterLbl"/></p>
-        <progress style='display:block;margin:0px auto 10px auto;'></progress>
+                    </div>
+
+                    <div id="checkControlCenterProgressDiv" style="display:none;">
+                        <p style='text-align: center;'><g:message code="checkingControlCenterLbl"/></p>
+                        <progress style='display:block;margin:0px auto 10px auto;'></progress>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="" type="submit" class="btn btn-accept-vs">
+                        <g:message code="acceptLbl"/>
+                    </button>
+                    <button id="" type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
+                        <g:message code="cancelLbl"/>
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-</div> 
+</div>
 <r:script>
 
 function showVoteControlCenterDialog(callback) {
-	$("#addControlCenterDialog").dialog("open");
+    $('#controlCenterURL').val("")
+    $("#formDiv").show()
+    $("#checkRepresentativeDialogProgressDiv").hide()
+	$("#addControlCenterDialog").modal("show");
 }
 
 
 $('#newControlCenter').submit(function(event){
-	event.preventDefault();	      
-	if(!document.getElementById('controlCenterURL').validity.valid) {
-		$("#controlCenterURL").addClass( "formFieldError" );
-		showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-			'<g:message code="emptyFieldMsg"/>', function() {
-			$("#addControlCenterDialog").dialog("open")
-		})
-		return false
-	}	      
+	event.preventDefault();
+    $('#addControlCenterDialogMessageDiv').html("")
+    if(!document.getElementById('newControlCenter').checkValidity()) {
+	    $('#addControlCenterDialogMessageDiv').html("<g:message code="formErrorMsg"/>");
+        return false
+	}
 	var controlCenterURL = $('#controlCenterURL').val()
 	var suffix = "/"
 	if((controlCenterURL.indexOf(suffix, controlCenterURL.length - suffix.length) == -1)) {
@@ -58,7 +81,7 @@ $('#newControlCenter').submit(function(event){
 			console.log( "Server type wrong -> " + data.serverType);
 			showResultDialog('<g:message code="errorLbl"/>',
 				'<g:message code="controlCenterURLERRORMsg"/>', function() {
-					$("#addControlCenterDialog").dialog("open")
+					$("#addControlCenterDialog").modal("show")
 				}) 
 		}
 		}).fail(function(data) {
@@ -67,7 +90,7 @@ $('#newControlCenter').submit(function(event){
 			console.log("error asssociating Control Center");
 			showResultDialog('<g:message code="errorLbl"/>',
 				'<g:message code="controlCenterURLERRORMsg"/>', function() {
-					$("#addControlCenterDialog").dialog("open")
+					$("#addControlCenterDialog").modal("show")
 				}) 
 		}).always(function() {
             $("#formDiv").show()
@@ -75,28 +98,6 @@ $('#newControlCenter').submit(function(event){
 		});
 });
 
-
-$("#addControlCenterDialog").dialog({
-        width: 600, autoOpen: false, modal: true,
-        buttons: [{
-            text:"<g:message code="acceptLbl"/>",
-            icons: { primary: "ui-icon-check"},
-            click:function() {
-            $("#submitControlCenter").click()
-        }},
-        {text:"<g:message code="cancelLbl"/>",
-        icons: { primary: "ui-icon-closethick"},
-        click:function() {
-            $(this).dialog( "close" );
-        }}],
-        show: {effect:"fade", duration: 700},
-        hide: {effect: "fade",duration: 700},
-        open: function( event, ui ) {
-            $('#controlCenterURL').val("")
-            $("#formDiv").show()
-            $("#checkRepresentativeDialogProgressDiv").hide()
-        }
-        });
     
 	function associateControlCenter(controlCenterURL){ 
 		console.log("addControlCenterDialog.associateControlCenter - controlCenterURL: " + controlCenterURL);
@@ -110,6 +111,7 @@ $("#addControlCenterDialog").dialog({
 		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 		webAppMessage.signedContent = signatureContent
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        webAppMessage.signedMessageSubject = '<g:message code="addControlCenterMsgSubject"/>'
 		webAppMessage.serviceURL = "${createLink( controller:'subscriptionVS', absolute:true)}"
 		votingSystemClient.setMessageToSignatureClient(webAppMessage, associateControlCenterCallback)
 	} 
@@ -118,22 +120,16 @@ $("#addControlCenterDialog").dialog({
 		console.log("addControlCenterDialog.associateControlCenterCallback")
 		var appMessageJSON = toJSON(callbackMessage)
 		if(appMessageJSON != null) {
-			if(ResponseVS.SC_PROCESSING ==  appMessageJSON.statusCode){
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				$("#workingWithAppletDialog").dialog("open");
-			} else {
-				$("#workingWithAppletDialog" ).dialog("close");
-				var caption = '<g:message code="operationERRORCaption"/>'
-				var msg = appMessageJSON.message
-				if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
-					caption = '<g:message code="operationOKCaption"/>'
-					var msgArg = 
-			    	msg = "<g:message code='operationOKMsg'/>";
-			    	$("#addControlCenterDialog").dialog("open")
-				}
-                $("#addControlCenterDialog").dialog("close");
-				showResultDialog(caption, msg)
-			}
+            var caption = '<g:message code="operationERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
+                caption = '<g:message code="operationOKCaption"/>'
+                var msgArg =
+                msg = "<g:message code='operationOKMsg'/>";
+                $("#addControlCenterDialog").dialog("open")
+            }
+            $("#addControlCenterDialog").modal("hide");
+            showResultDialog(caption, msg)
 		}
 	}	
 </r:script>

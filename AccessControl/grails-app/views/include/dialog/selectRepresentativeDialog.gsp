@@ -40,12 +40,12 @@
             </div>
 
             <div class="modal-footer">
+                <button type="button" class="btn btn-accept-vs" onclick="submitSelectRepresentativeForm()">
+                    <g:message code="acceptLbl"/>
+                </button>
                 <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal"
                         onclick="proccessCancelRepresentativeSelection()">
                     <g:message code="cancelLbl"/>
-                </button>
-                <button type="button" class="btn btn-accept-vs" onclick="submitSelectRepresentativeForm()">
-                    <g:message code="acceptLbl"/>
                 </button>
             </div>
 

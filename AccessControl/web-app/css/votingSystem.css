@@ -16,6 +16,11 @@ body {
 
 .linkvs{}
 
+.pageContentDiv {
+    max-width: 1400px;
+    margin:auto;
+}
+
 .navbar-vickets {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
@@ -196,22 +201,10 @@ hr {
 }
 
 .pageHeader {
-    font-weight: bold;
-    font-size: 1.4em;
     color: #870000;
+    font-weight: bold;
     text-decoration: underline;
     text-overflow: ellipsis;
-}
-
-.mainPageEventList {
-    display:block;
-    overflow:hidden;
-    margin:0px 0px 100px 0px;
-    min-height: 100%;
-}
-
-.mainPageEventList ul{
-    margin:0px 0px 0px 0px;
 }
 
 .representativeDiv {
@@ -225,14 +218,6 @@ hr {
     height:100px;
     overflow:hidden;
     float:left;
-}
-
-.bottomPaginationWrapper {
-    width:100%;
-    position:absolute;
-    display:block;
-    margin:auto;
-    bottom:20px;
 }
 
 .representativeDiv .representativeImgCol{
@@ -630,17 +615,8 @@ hr {
     position: relative;
 }
 
-.mainPage {
-    position: relative;
-    min-height: 600px;
-    overflow: hidden;
-    margin: 10px 0 0 0;
-}
 
-.breadcrumbVS {}
-
-.breadcrumbVS > ol {
-    margin-bottom: 0px;
+.breadcrumbVS {
     padding: 4px 15px;
     margin-bottom: 0px;
     list-style: none;
@@ -648,15 +624,18 @@ hr {
     border-radius: 4px;
 }
 
-.breadcrumbVS > ol > li {
+.breadcrumbVS > ol {
+    margin-bottom: 0px;
+}
+
+.breadcrumbVS > li {
     display: inline-block;
 }
-.breadcrumbVS > ol > li + li:before {
+.breadcrumbVS > li + li:before {
     padding: 0 5px;
     color: #ccc;
     content: "/\00a0";
 }
-.breadcrumbVS >ol > .active {
+.breadcrumbVS > .active {
     color: #999;
 }
-

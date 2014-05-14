@@ -4,7 +4,7 @@
     <meta name="layout" content="main" />
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <div class="row">
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
@@ -30,6 +30,7 @@
                style="margin:40px 20px 0px 0px; width:400px;">
                 <g:message code="downloadClientToolAppLbl"/> <i class="fa fa-cogs"></i></a>
         </g:else>
+    </div>
 </div>
 
 </body>

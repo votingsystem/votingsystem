@@ -1,4 +1,4 @@
-<%@ page import="org.votingsystem.model.GroupVS; grails.converters.JSON" %>
+<%@ page import="org.votingsystem.model.GroupVS" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,7 +41,7 @@
         </div>
     </g:if>
 
-    <div class="pageHeader text-center"> ${groupvsMap?.name}</div>
+    <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
 
     <div style="margin: 15px 0 15px 0; padding:10px; border: 1px solid #388746;">
         <div class="eventContentDiv">${raw(groupvsMap?.description)}</div>
@@ -62,14 +62,11 @@
         </div>
     </g:if>
 
-    <div class="row"><g:render template="/template/signatureMechanismAdvert"/></div>
+    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
+
 </div>
-<g:include view="/include/dialog/loadingAppletDialog.gsp"/>
-<g:include view="/include/dialog/workingWithAppletDialog.gsp"/>
 <g:include view="/include/dialog/resultDialog.gsp"/>
-<div id="appletsFrame"  style="width:0px; height:0px;">
-    <iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
-</div>
 </body>
 </html>
 <r:script>
@@ -97,13 +94,14 @@
             $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
             $("#messagePanel").css("display", "visible")
         </g:if>
+    if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
 
-    });
+});
 
-    function subscribeToGroup() {
-        console.log("sendManifest")
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_SUBSCRIBE)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+function subscribeToGroup() {
+console.log("sendManifest")
+var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_SUBSCRIBE)
+webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}/${groupvsMap.id}/subscribe"
         webAppMessage.signedMessageSubject = "<g:message code="subscribeToVicketGroupMsg"/>"
@@ -118,7 +116,6 @@
         console.log("eventSignatureCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="groupSubscriptionERRORLbl"/>'
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "<g:message code='groupSubscriptionOKLbl'/>"

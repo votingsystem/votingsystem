@@ -19,12 +19,12 @@
 }
 
 .dynatable-vickets th a {
-  color: #fff;
+    color: #fff;
 }
 
 .dynatable-vickets th a:hover {
-  color: #fff;
-  text-decoration: underline;
+    color: #fff;
+    text-decoration: underline;
 }
 
 .dynatable-vickets td {
@@ -44,12 +44,12 @@ tbody tr:hover{
 }
 
 .dynatable-search {
-  float: right;
-  margin-bottom: 10px;
+    float: right;
+    margin-bottom: 10px;
 }
 
 .dynatable-pagination-links {
-    max-width: 350px;
+    max-width: 250px;
     margin:20px auto 0 auto;
 }
 
@@ -61,13 +61,13 @@ tbody tr:hover{
 
 .dynatable-pagination-links span,
 .dynatable-pagination-links li {
-  display: inline-block;
+    display: inline-block;
 }
 
 .dynatable-page-link,
 .dynatable-page-break {
-  display: block;
-  padding: 5px 7px;
+    display: block;
+    padding: 5px 7px;
 }
 
 .dynatable-page-link {
@@ -76,20 +76,21 @@ tbody tr:hover{
 
 .dynatable-active-page,
 .dynatable-disabled-page {
-  cursor: text;
+    cursor: text;
 }
 .dynatable-active-page:hover,
 .dynatable-disabled-page:hover {
-  text-decoration: none;
+    text-decoration: none;
 }
 
 .dynatable-disabled-page,
 .dynatable-disabled-page:hover {
-  background: none;
-  color: #999;
+    background: none;
+    color: #999;
 }
 
 .dynatableLoading{
+    position: relative;
     background: #f9f9f9;
     color: #870000;
     border: 1px solid #870000;

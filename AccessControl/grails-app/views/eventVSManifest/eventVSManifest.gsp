@@ -1,120 +1,117 @@
-<%@ page import="org.votingsystem.model.EventVS; grails.converters.JSON" %>
-<%
-	def messageToUser = null
-	def eventClass = null
-    if(eventMap?.state) {
-        switch(EventVS.State.valueOf(eventMap?.state)) {
-            case EventVS.State.CANCELLED:
-                messageToUser = message(code: 'eventCancelledLbl')
-                eventClass = "eventCancelledBox"
-                break;
-            case EventVS.State.AWAITING:
-                messageToUser = message(code: 'eventPendingLbl')
-                eventClass = "eventPendingBox"
-                break;
-            case EventVS.State.TERMINATED:
-                messageToUser =  message(code: 'eventFinishedLbl')
-                eventClass = "eventFinishedBox"
-                break;
-        }
-    }
-%>
+<%@ page import="grails.converters.JSON; org.votingsystem.model.EventVS;" %>
 <!DOCTYPE html>
 <html>
 <head>
         <meta name="layout" content="main" />
 </head>
 <body>
+<div class="pageContentDiv" style="max-width: 1000px;">
+    <div style="margin:0 20px 0 20px;">
+        <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
+        </div>
 
-	<g:if test="${messageToUser != null}">
-		<div id="eventMessagePanel" class="eventMessagePanel">
-			<p class="messageContent">
-				${messageToUser}
-			</p>
-		</div>
-	</g:if>
-
-    <div class="pageHeader"> ${eventMap?.subject}</div>
-	
-	<div style="" class="row">
-        <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
-        <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
-			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
-		</div>
-		
-		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)  ||
-			EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 50px 0px 0px;">
-				<g:message code="adminDocumentLinkLbl"/>
-			</div>
-		</g:if>
-	</div>
-
-	<div class="eventPageContentDiv">
-		<div style="width:100%;position:relative;">
-			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
-		</div>
-		
-		<div class="row">
-			<g:if test="${eventMap?.numSignatures > 0}">
-				<div style="float:left;margin:10px 0px 0px 40px;">
-                    <button id="requestBackupButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0;">
-                        <g:message code="numSignaturesForEvent" args="${[eventMap?.numSignatures]}"/>
+        <g:if test="${"admin".equals(params.menu)}">
+            <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
+            <div class="text-center" style="">
+                <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
+                        EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
+                    <button type="submit" class="btn btn-warning" onclick="showAdminDocumentDialog();"
+                            style="margin:15px 20px 15px 0px;">
+                        <g:message code="adminDocumentLinkLbl"/> <i class="fa fa fa-check"></i>
                     </button>
-				</div>
-			</g:if>
-			<div id="eventAuthorDiv" style="float:right;top:0px;">
-				<b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
-			</div>
-		</div>
-		
-		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
-            <button id="signManifestButton" type="submit" class="btn btn-default btn-lg" style="margin:15px 20px 30px 0px; float:right;">
-                <g:message code="signManifest"/> <i class="fa fa fa-check"></i>
-            </button>
-		</g:if>
-	</div>
+                </g:if>
+            </div>
+        </g:if>
 
-	<g:render template="/template/signatureMechanismAdvert"/>
+        <div class="pageHeader text-center"><h3>${eventMap?.subject}</h3></div>
 
+        <div style="" class="row">
+            <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
+            <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
+                <b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
+            </div>
+        </div>
 
+        <div class="eventPageContentDiv">
+            <div style="width:100%;position:relative;">
+                <div class="eventContentDiv">${raw(eventMap?.content)}</div>
+            </div>
+
+            <div class="row">
+                <g:if test="${eventMap?.numSignatures > 0}">
+                    <div style="float:left;margin:10px 0px 0px 40px;">
+                        <button id="requestBackupButton" type="button" class="btn btn-default btn-lg"
+                                onclick="showRequestEventBackupDialog(requestBackupCallback);" style="margin:0px 20px 0px 0;">
+                            <g:message code="numSignaturesForEvent" args="${[eventMap?.numSignatures]}"/>
+                        </button>
+                    </div>
+                </g:if>
+                <div id="eventAuthorDiv" style="float:right;top:0px;">
+                    <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
+                </div>
+            </div>
+
+            <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
+                <button id="signManifestButton" type="submit" class="btn btn-default btn-lg" onclick="sendManifest();"
+                        style="margin:15px 20px 30px 0px; float:right;">
+                    <g:message code="signManifest"/> <i class="fa fa fa-check"></i>
+                </button>
+            </g:if>
+        </div>
+
+        <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+            <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
+
+    </div>
+</div>
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
 <g:include view="/include/dialog/requestEventBackupDialog.gsp"/>
 </body>
 </html>
 <r:script>
 <g:applyCodec encodeAs="none">
+
     var pageEvent = ${eventMap as JSON}
-    if(pageEvent.state == "ACTIVE") {
-        $(".pageHeader").css("color", "#388746")
-        var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
-            $("#pendingTimeDiv").text(pendingMsgTemplate.format(pageEvent.dateFinish.getElapsedTime()))
-    }
+
     $(function() {
-        if(${messageToUser != null?true:false}) {
-            $("#eventMessagePanel").addClass("${eventClass}");
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
+        <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
+            $(".pageHeader").css("color", "#388746")
+            var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
+                pendingMsgTemplate.format(pageEvent.dateFinish.getElapsedTime())
+        </g:if>
+        <g:elseif test="${EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
+            $(".pageHeader").css("color", "#388746")
+            $("#messagePanel").addClass("eventPendingBox");
+            $("#messagePanel").text("<g:message code="eventPendingLbl"/>")
+        </g:elseif>
+        <g:elseif test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state)}">
+            $(".pageHeader").css("color", "#fba131")
+            $("#messagePanel").addClass("eventCancelledBox");
+            $("#messagePanel").text("<g:message code="eventCancelledLbl"/>")
+                        $("#messagePanel").css("display", "visible")
+
+        </g:elseif>
+        <g:elseif test="${EventVS.State.TERMINATED.toString().equals(eventMap?.state)}">
+            $(".pageHeader").css("color", "#870000")
+            $("#messagePanel").addClass("eventFinishedBox");
+            $("#messagePanel").text("<g:message code="eventFinishedLbl"/>")
+                        $("#messagePanel").css("display", "visible")
+        </g:elseif>
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
+        else {
+            $("#signManifestButton").addClass("disabled")
+            //$("#requestBackupButton").addClass("disabled")
+
         }
+    });
 
-        $("#adminDocumentLink").click(function () {
-            showAdminDocumentDialog(adminDocumentCallback)
-        })
-
-        $("#signManifestButton").click(function () {
-            sendManifest();
-        })
-
-        $("#requestBackupButton").click(function () {
-            showRequestEventBackupDialog(requestBackupCallback)
-        })
-
-     });
-
-    function sendManifest() {
-        console.log("sendManifest")
-        var webAppMessage = new WebAppMessage(
-                ResponseVS.SC_PROCESSING,
-                Operation.MANIFEST_SIGN)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+function sendManifest() {
+console.log("sendManifest")
+var webAppMessage = new WebAppMessage(
+ResponseVS.SC_PROCESSING,
+Operation.MANIFEST_SIGN)
+webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink( controller:'eventVSManifestCollector', absolute:true)}/${eventMap.id}"
         webAppMessage.signedMessageSubject = "${eventMap.subject}"
@@ -130,7 +127,6 @@
         console.log("requestBackupCallback");
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="operationERRORCaption"/>'
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "<g:message code='operationOKCaption'/>"
@@ -144,7 +140,6 @@
         console.log("eventSignatureCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="operationERRORCaption"/>'
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "<g:message code='operationOKCaption'/>"
@@ -156,28 +151,5 @@
         }
     }
 
-    function adminDocumentCallback(appMessage) {
-        console.log("adminDocumentCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        if(appMessageJSON != null) {
-            $("#workingWithAppletDialog").dialog("close");
-            var callBack
-            var caption
-            var msg
-            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = "<g:message code='operationOKCaption'/>"
-                var msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
-                msg = msgTemplate.format('${eventMap?.subject}');
-                callBack = function() {
-                    var eventVSService = "${createLink(controller:'eventVSManifest')}/"
-                    window.location.href = eventVSService.concat(pageEvent.id);
-                }
-            } else {
-                caption = "<g:message code='operationERRORCaption'/>"
-                msg = "<g:message code='operationERRORCaption'/>"
-            }
-            showResultDialog(caption, msg, callBack)
-        }
-    }
 </g:applyCodec>
 </r:script>

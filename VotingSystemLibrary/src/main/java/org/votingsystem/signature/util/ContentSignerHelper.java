@@ -1,21 +1,26 @@
-package org.votingsystem.client.util;
+package org.votingsystem.signature.util;
 
+import iaik.pkcs.pkcs11.Mechanism;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
+import org.votingsystem.signature.dnie.DNIePDFContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 
 import javax.mail.Header;
 import java.security.KeyStore;
+import java.security.PrivateKey;
+
+import static org.votingsystem.model.ContextVS.*;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class SMIMEContentSigner {
+public class ContentSignerHelper {
 
-    private static Logger logger = Logger.getLogger(SMIMEContentSigner.class);
+    private static Logger logger = Logger.getLogger(ContentSignerHelper.class);
 
     public enum CryptoToken {MOBILE, DNIe, JKS_KEYSTORE}
 
@@ -34,6 +39,26 @@ public class SMIMEContentSigner {
             case DNIe:
                 return DNIeContentSigner.genMimeMessage(fromUser,
                         toUser, textToSign, password, subject, header);
+            case MOBILE:
+                return null;
+            default: return null;
+        }
+    }
+
+
+    public static ContentSignerVS getContentSignerPDF(char[] password, Mechanism signatureMechanism) throws Exception {
+        String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
+        logger.debug("signPDF - CryptoToken: " + cryptoTokenStr);
+        CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
+        switch(cryptoToken) {
+            case JKS_KEYSTORE:
+                KeyStore keyStore = ContextVS.getUserKeyStore(password);
+                java.security.cert.Certificate[] signerCertChain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
+                PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password);
+                return new PDFContentSigner( signerPrivatekey, signerCertChain,
+                        PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
+            case DNIe:
+                return DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
             case MOBILE:
                 return null;
             default: return null;

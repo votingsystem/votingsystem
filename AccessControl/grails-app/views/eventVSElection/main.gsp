@@ -4,10 +4,10 @@
     <r:require module="dynatableModule"/>
 </head>
 <body>
-<div class="mainPage">
+<div class="">
     <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-        <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
+        <div style="display:table-cell;margin:auto;">
+            <select id="eventsStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;" class="form-control">
                 <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
                 <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
@@ -18,7 +18,7 @@
 
     <g:render template="/template/eventsSearchInfo"/>
 
-    <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
+    <div id="mainPageEventList" class="pageContentDiv"><ul></ul></div>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>
@@ -32,6 +32,7 @@
 
     $(function() {
         $("#navBarSearchInput").css( "visibility", "visible" );
+        $("#advancedSearchButton").css("visibility", "visible")
         $('#mainPageEventList').dynatable({
             features: dynatableFeatures,
             inputs: dynatableInputs,
@@ -75,12 +76,12 @@
             dynatable.paginationPage.set(1);
             dynatable.process();
         });
-        $("#advancedSearchButton").css("visibility", "visible")
     });
 
     $('#mainPageEventList').bind('dynatable:afterUpdate',  function() {
+        updateMenuLinks()
         $('.eventDiv').click(function() {
-            window.location.href = $(this).attr('href')
+            window.location.href = $(this).attr('data-href')
         }
     )})
 

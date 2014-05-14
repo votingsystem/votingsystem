@@ -149,7 +149,6 @@
         console.log("selectRepresentativeCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="operationERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

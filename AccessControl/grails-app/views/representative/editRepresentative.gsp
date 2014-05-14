@@ -14,7 +14,7 @@
 
 <div id="contentDiv" style="visibility:hidden;">
 
-	<div class="pageHeader"></div>
+    <h3><div class="pageHeader text-center"></div></h3>
 	
 	<div class="text-left" style="margin:15px 0 0 0;">
 		<ul>
@@ -38,8 +38,9 @@
             </div>
         </div>
 	</form>
-		
-	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+
+    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 
 </div>
 
@@ -73,6 +74,7 @@
             return false
         });
 
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
       });
 
     var editRepresentativeHeaderTemplate = "<g:message code="editingRepresentativeMsgTitle"/>"
@@ -90,7 +92,6 @@
         console.log("editRepresentativeCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="operationERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

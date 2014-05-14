@@ -102,7 +102,7 @@ EventVS.prototype.getElement = function() {
             $li.find(".cancelMessage").fadeIn(100)
         }
 
-        $li.attr('href', this.getURL())
+        $li.attr('data-href', this.getURL())
         return $newEvent.html();
     }
 
@@ -380,7 +380,6 @@ var dynatableFeatures =  {
 }
 
 window.onload=function(){
-	$("#votingSystemAppletFrame").attr("src", "");
 	checkIEVersion()
 };
 
@@ -421,13 +420,12 @@ function isFirefox () {
 	return (navigator.userAgent.toLowerCase().indexOf("firefox") > - 1);
 }
 
+function isJavaFX () {
+	return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
+}
 
-function isJavaEnabledClient() {
-	if(!(deployJava.versionCheck('1.8') || deployJava.versionCheck('1.7'))) {
-		console.log("---- checkJavaEnabled -> browser without Java7 or Java8 ");
-		$("#browserWithoutJavaDialog").dialog("open")
-		return false
-	} else return true
+function isClientToolLoaded () {
+	return (isJavaFX() || isAndroid() || getParameterByName('clientToolLoaded'));
 }
 
 function getFnName(fn) {
@@ -484,16 +482,6 @@ function VotingSystemApplet () {
 	this.signatureClientCallback = null
 }
 
-VotingSystemApplet.prototype.getMessageToSignatureClient = function (appMessage) {
-		var result
-		if(this.messageToSignatureClient != null) {
-			console.log("getMessageToSignatureClient - delivering message to applet");
-			result = this.messageToSignatureClient
-			this.messageToSignatureClient = null
-		}
-		return result
-	}
-
 var clientTool = null
 
 VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON, callerCallback) {
@@ -536,30 +524,10 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
             clientTool.setMessageToSignatureClient(this.messageToSignatureClient)
             return
         }
-
-		if(!this.signatureClientToolLoaded) {
-			if(isJavaEnabledClient()) {
-				console.log("Loading signature client");
-				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'client')}');
-				$("#loadingVotingSystemAppletDialog").dialog("open");
-			}
-    	} else {
-    		console.log("signature client already loaded");
-    		$("#workingWithAppletDialog").dialog("open");
-	    }
 	}
 
 VotingSystemApplet.prototype.setMessageFromSignatureClient = function (appMessage) {
-		var appMessageJSON = toJSON(appMessage)
-		if(appMessageJSON != null) {
-			if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
-				this.signatureClientToolLoaded = true;
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				$("#workingWithAppletDialog").dialog("open");
-			} else {
-		        this.signatureClientCallback(appMessage)
-		    }
-		}
+		this.signatureClientCallback(appMessage)
 	}
 
 var votingSystemClient = new VotingSystemApplet()

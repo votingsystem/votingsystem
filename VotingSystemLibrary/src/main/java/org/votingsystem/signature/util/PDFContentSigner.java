@@ -49,6 +49,10 @@ public class PDFContentSigner extends CMSSignedGenerator implements ContentSigne
         this.userCert = (X509Certificate) signerCertChain[0];
     }
 
+    public Certificate[] getCertificateChain() {
+        return this.signerCertChain;
+    }
+
     public CMSSignedData getCMSSignedData(String eContentType, CMSProcessable content, boolean encapsulate, Provider sigProvider,
             boolean addDefaultAttributes, List<SignerInfo> signerInfoList) throws NoSuchAlgorithmException, CMSException, Exception {
         // TODO if (signerInfs.isEmpty()){

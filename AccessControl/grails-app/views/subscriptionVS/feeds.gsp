@@ -3,7 +3,7 @@
     <meta name="layout" content="main" />
 </head>
 <body>
-    <div class="mainPage text-left">
+    <div class="text-left" style="max-width: 1000px; margin:auto;">
         <div style="margin: 30px auto;"><votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'elections')}">
             <g:message code="subscribeToVotingFeedsLbl"/></votingSystem:feed>
         </div>

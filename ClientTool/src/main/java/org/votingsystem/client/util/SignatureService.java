@@ -1,5 +1,6 @@
 package org.votingsystem.client.util;
 
+import com.itextpdf.text.pdf.PdfReader;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -7,18 +8,19 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.callable.AnonymousDelegationRequestDataSender;
+import org.votingsystem.callable.PDFSignedSender;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
-import javax.swing.text.html.parser.ParserDelegator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -45,7 +47,7 @@ public class SignatureService extends Service<ResponseVS> {
             @Override
             public void run() {
                 PasswordDialog passwordDialog = new PasswordDialog();
-                passwordDialog.show(SMIMEContentSigner.getPasswordRequestMsg());
+                passwordDialog.show(ContentSignerHelper.getPasswordRequestMsg());
                 password = passwordDialog.getPassword();
                 if (password != null) SignatureService.this.restart();
             }
@@ -94,23 +96,71 @@ public class SignatureService extends Service<ResponseVS> {
                     targetServer =  ContextVS.getInstance().getVicketServer();
                 else targetServer =  ContextVS.getInstance().getAccessControl();
                 updateProgress(25, 100);
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    updateMessage(operationVS.getSignedMessageSubject());
+                    updateProgress(40, 100);
+                    switch(operationVS.getType()) {
+                        case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                            responseVS = processAnonymousDelegation(targetServer, operationVS);
+                            break;
+                        case MANIFEST_PUBLISHING:
+                            responseVS = publishManifest(targetServer, operationVS);
+                            break;
+                        case MANIFEST_SIGN:
+                            responseVS = signManifest(operationVS);
+                            break;
+                        default:
+                            responseVS = sendSMIME(targetServer, operationVS);
+                    }
+                    updateProgress(100, 100);
+                    return responseVS;
+                } else return responseVS;
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
+        }
+
+
+        private ResponseVS signManifest(OperationVS operationVS) throws Exception {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(operationVS.getDocumentURL(), ContentTypeVS.PDF);
+            if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+            byte[] pdfDocumentBytes = responseVS.getMessageBytes();
+            PdfReader readerManifesto = new PdfReader(pdfDocumentBytes);
+            String reason = null;
+            String location = null;
+            PDFSignedSender pdfSignedSender = new PDFSignedSender(operationVS.getServiceURL(),
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
+                    reason, location, password.toCharArray(), readerManifesto, null, null,
+                    ContextVS.getInstance().getAccessControl().getX509Certificate());
+            return pdfSignedSender.call();
+        }
+
+        //we know this is done in a background thread
+        private ResponseVS publishManifest(ActorVS targetServer, OperationVS operationVS) throws Exception {
+            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(jsonObject.toString().getBytes(),
+                    ContentTypeVS.JSON, operationVS.getServiceURL(), "eventId");
+            byte [] pdfDocumentBytes = null;
+            updateProgress(60, 100);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                updateMessage(operationVS.getSignedMessageSubject());
-                updateProgress(40, 100);
-                switch(operationVS.getType()) {
-                    case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                        responseVS = processAnonymousDelegation(targetServer, operationVS);
-                        break;
-                    default:
-                        responseVS = sendSMIME(targetServer, operationVS);
-                }
-                updateProgress(100, 100);
-                return responseVS;
-            } else return responseVS;
+                pdfDocumentBytes = responseVS.getMessageBytes();
+                String eventId = ((List<String>)responseVS.getData()).iterator().next();
+                String serviceURL = operationVS.getServiceURL() +  "/" + eventId;
+                operationVS.setServiceURL(serviceURL);
+            } else {
+                return new ResponseVS(responseVS.getStatusCode(), ContextVS.getInstance().getMessage(
+                        "errorDownloadingDocument") + " - " + responseVS.getMessage());
+            }
+            PdfReader readerManifesto = new PdfReader(pdfDocumentBytes);
+            String reason = null;
+            String location = null;
+            PDFSignedSender pdfSignedSender = new PDFSignedSender(operationVS.getServiceURL(),
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
+                    reason, location, password.toCharArray(), readerManifesto, null, null,
+                    ContextVS.getInstance().getAccessControl().getX509Certificate());
+            responseVS = pdfSignedSender.call();
+            return responseVS;
         }
 
         //we know this is done in a background thread
@@ -127,7 +177,7 @@ public class SignatureService extends Service<ResponseVS> {
                 String fromUser = null;
                 String toUser =  ContextVS.getInstance().getAccessControl().getNameNormalized();
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessageWrapper smimeMessage = SMIMEContentSigner.genMimeMessage(fromUser, toUser, jsonObject.toString(),
+                SMIMEMessageWrapper smimeMessage = ContentSignerHelper.genMimeMessage(fromUser, toUser, jsonObject.toString(),
                         password.toCharArray(), operationVS.getSignedMessageSubject(), null);
                 String originHashCertVS = UUID.randomUUID().toString();
                 String hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
@@ -180,7 +230,7 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS sendSMIME(ActorVS targetServer, OperationVS operationVS) throws Exception {
             JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-            SMIMEMessageWrapper smimeMessage = SMIMEContentSigner.genMimeMessage(null,
+            SMIMEMessageWrapper smimeMessage = ContentSignerHelper.genMimeMessage(null,
                     operationVS.getNormalizedReceiverName(), documentToSignJSON.toString(),
                     password.toCharArray(), operationVS.getSignedMessageSubject(), null);
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),

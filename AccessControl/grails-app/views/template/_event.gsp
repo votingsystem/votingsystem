@@ -1,5 +1,5 @@
 <div>
-    <li class='eventDiv'>
+    <li class='eventDiv linkvs'>
         <div class='eventSubjectDiv'>
             <p style='margin:0px 0px 0px 0px;text-align:center;'>${isTemplate?'{0}':event.subject}</p></div>
         <div class='eventBodyDiv'>

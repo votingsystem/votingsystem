@@ -8,9 +8,7 @@
 
 <div id="contentDiv" style="display:none;padding: 0px 20px 0px 20px;">
 
-    <div class="pageHeader" style="margin:15px 0px 25px 0px">
-        <g:message code="publishVoteLbl"/>
-	</div>
+    <div class="pageHeader text-center"><h3><g:message code="publishVoteLbl"/></h3></div>
 
 	<form id="mainForm" onsubmit="return submitForm(this);">
 	
@@ -83,9 +81,10 @@
 	</div>
 		 
 	</form>
-    <div class="row">
-        <g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
-    </div>
+
+    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
+
 
 </div>
 <g:include view="/include/dialog/addControlCenterDialog.gsp"/>
@@ -106,7 +105,9 @@
         controlCenters["${controlCenterVS.id}"] = ${controlCenterVS as JSON}
     </g:each>
 
-    $(function() { });
+    $(function() {
+        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
+    });
 
     function addVoteOption (voteOptionText) {
         if(voteOptionText == null) return
@@ -225,7 +226,6 @@
         var appMessageJSON = toJSON(appMessage)
         electionDocumentURL = null
         if(appMessageJSON != null) {
-            $("#workingWithAppletDialog" ).dialog("close");
             var caption = '<g:message code="publishERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
