@@ -127,8 +127,10 @@
 			votingEvent.voteVS = voteVS
 			webAppMessage.eventVS = votingEvent
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+            webAppMessage.signedMessageSubject = '<g:message code="sendVoteMsgSubject"/>'
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-			votingSystemClient.setMessageToSignatureClient(webAppMessage, sendVoteCallback); 
+            webAppMessage.callerCallback = 'sendVoteCallback'
+			VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
 		}
 
 		function sendVoteCallback(appMessage) {

@@ -67,9 +67,9 @@ function submitAdminForm() {
 				eventId:Number("${eventMap?.id}"), state:state}
 		webAppMessage.signedContent = signedContent
         webAppMessage.signedMessageSubject = messageSubject
-		pendingOperation = Operation.EVENT_CANCELLATION
 		console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-		votingSystemClient.setMessageToSignatureClient(webAppMessage, adminDocumentCallback);
+        webAppMessage.callerCallback = 'adminDocumentCallback'
+		VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
 	}
 }
 

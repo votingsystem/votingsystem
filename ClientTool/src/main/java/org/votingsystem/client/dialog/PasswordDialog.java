@@ -2,7 +2,6 @@ package org.votingsystem.client.dialog;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.*;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -25,7 +24,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.util.FXUtils;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
 import java.awt.*;
@@ -77,14 +76,14 @@ public class PasswordDialog {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.close();
             }});
-        cancelButton.setGraphic(new ImageView(FXUtils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 checkPasswords();
             }});
-        acceptButton.setGraphic(new ImageView(FXUtils.getImage(this, "accept")));
+        acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
             new EventHandler<KeyEvent>() {

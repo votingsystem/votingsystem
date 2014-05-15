@@ -108,8 +108,9 @@ webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_SUBSCRIBE, groupvs:groupVSData}
         //signed and encrypted
         webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.callerCallback = 'subscribeToGroupCallback'
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        votingSystemClient.setMessageToSignatureClient(webAppMessage, subscribeToGroupCallback);
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function subscribeToGroupCallback(appMessage) {

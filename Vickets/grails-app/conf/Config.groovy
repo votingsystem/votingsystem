@@ -129,7 +129,7 @@ log4j = {
     //System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
 
     appenders {
-        file name:'VicketServerERRORS', threshold:Level.ERROR,
+        file name:'VicketServerERRORS', threshold:org.apache.log4j.Level.ERROR,
                 file:"/var/log/votingsystem/VicketServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketServer", threshold:org.apache.log4j.Level.DEBUG,
@@ -147,7 +147,7 @@ log4j = {
 
     root {
         debug  'stdout', 'VicketServer'
-        error 'VicketServerERRORES', 'smtp'
+        error 'VicketServerERRORS', 'smtp'
     }
 
     environments {
@@ -207,7 +207,7 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://sistemavotacion.org/TimeStampServer'
+VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 VotingSystem.backupCopyPath='./Vickets/backups'
 VotingSystem.errorsBaseDir='./Vickets/errors'
 VotingSystem.keyStorePath='WEB-INF/cms/VicketServer.jks'

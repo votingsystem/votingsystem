@@ -1,47 +1,43 @@
-<div id="editRepresentativeDialog" title="<g:message code="editRepresentativeLbl"/>" style="margin:20px auto 20px auto;display:none;">
-	<div id="editRepresentativeDialogFormDiv" style="margin:0px auto 0px 20px;">
-		<form id="editRepresentativeForm">
-            <input id="resetEditRepresentativeForm" type="reset" style="display:none;">
-	    	<label for="representativeNifText" style="margin:0px 0px 20px 0px"><g:message code="nifForEditRepresentativeLbl"/></label>
-			<input type="text" id="representativeNifText" style="width:350px; margin:0px auto 0px auto;" required
-				oninvalid="this.setCustomValidity('<g:message code="nifERRORMsg"/>')" class="form-control"
-	   			onchange="this.setCustomValidity('')" autofocus="autofocus"/>
-			<input id="submitNifCheck" type="submit" style="display:none;">
-		</form>
-	</div>
-	<div id="editRepresentativeDialogProgressDiv" style="display:none;">
-		<p style='text-align: center;'><g:message code="checkingDataLbl"/></p>
-		<progress style='display:block;margin:0px auto 10px auto;'></progress>
-	</div>
+<div id='editRepresentativeDialog' class="modal fade">
+    <div class="modal-dialog">
+        <form id="editRepresentativeForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" style="color: #870000; font-weight: bold;">
+                        <g:message code="editRepresentativeLbl"/>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div id="editRepresentativeDialogMessageDiv" class='text-center'
+                         style="color: #870000; font-size: 1.2em;font-weight: bold; margin-bottom: 15px;"></div>
+
+                    <div id="editRepresentativeDialogFormDiv" style="margin:0px auto 0px 20px;">
+                        <input id="resetEditRepresentativeForm" type="reset" style="display:none;">
+                        <label style="margin:0px 0px 20px 0px"><g:message code="nifForEditRepresentativeLbl"/></label>
+                        <input type="text" id="representativeNifText" style="width:350px; margin:0px auto 0px auto;" required
+                               oninvalid="this.setCustomValidity('<g:message code="nifERRORMsg"/>')" class="form-control"
+                               onchange="this.setCustomValidity('')" autofocus="autofocus"/>
+                        <input id="submitNifCheck" type="submit" style="display:none;">
+                    </div>
+                    <div id="editRepresentativeDialogProgressDiv" style="display:none;">
+                        <p style='text-align: center;'><g:message code="checkingDataLbl"/></p>
+                        <progress style='display:block;margin:0px auto 10px auto;'></progress>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="" type="submit" class="btn btn-accept-vs">
+                        <g:message code="acceptLbl"/>
+                    </button>
+                    <button id="" type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
+                        <g:message code="cancelLbl"/>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 <r:script>
-
-$("#editRepresentativeDialog").dialog({
-   	  width: 450, autoOpen: false, modal: true,
-      buttons: [{id: "acceptButton",
-        		text:"<g:message code="acceptLbl"/>",
-               	icons: { primary: "ui-icon-check"},
-             	click:function() {
-             		$("#submitNifCheck").click() 
-             		//$(this).dialog( "close" );   	   			   				
-		        	}}, {id: "cancelButton",
-        		text:"<g:message code="cancelLbl"/>",
-               	icons: { primary: "ui-icon-closethick"},
-             	click:function() {
-		   					$(this).dialog( "close" );
-		       	 		}	
-           }],
-      show: {effect:"fade", duration: 300},
-      hide: {effect: "fade",duration: 300},
-      open: function( event, ui ) {
-          $("#resetEditRepresentativeForm").click()
-    	  $("#userNifText").val("");
-          $("#editRepresentativeDialogFormDiv").show()
-          $("#editRepresentativeDialogProgressDiv").hide()
-          $("#acceptButton").button("enable");
-          $("#cancelButton").button("enable"); 
-	  }
-});
 
 var nifValidationResult
 
@@ -57,6 +53,10 @@ var nifValidation = function () {
    $('#editRepresentativeForm').submit(function(event){	
 		console.log("editRepresentativeForm")
 		event.preventDefault();
+        if(!document.getElementById('editRepresentativeForm').checkValidity()) {
+            $('#editRepresentativeDialogMessageDiv').html("<g:message code="nifERRORMsg"/>");
+            return false
+        }
 		$("#acceptButton").button("disable");
 		$("#cancelButton").button("disable");
 		$("#editRepresentativeDialogFormDiv").hide()
@@ -72,7 +72,7 @@ var nifValidation = function () {
 		}).error(function(resultMsg) {
 			showResultDialog('<g:message code="errorLbl"/>',resultMsg.responseText, errorCallback)
 		}).always(function(resultMsg) {
-			$("#editRepresentativeDialog").dialog("close");
+			$("#editRepresentativeDialog").modal("hide");
 		});
 
 	 })

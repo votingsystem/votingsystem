@@ -68,6 +68,8 @@
         </div>
     </div>
 </div>
+
+<g:include view="/include/dialog/anonymousReceiptDialog.gsp"/>
 <g:include view="/include/dialog/clientToolAdvertDialog.gsp"/>
 <g:include view="/include/dialog/selectRepresentativeDialog.gsp" model="${[representativeName:representativeFullName]}" />
 <g:include view="/include/dialog/anonymousRepresentativeDateRangeDialog.gsp"/>
@@ -126,7 +128,8 @@
         webAppMessage.serviceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
         webAppMessage.signedMessageSubject = '<g:message code="requestVotingHistoryLbl"/>'
         webAppMessage.email = $("#userEmailText").val()
-        votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback);
+        webAppMessage.callerCallback = 'representativeOperationCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function requestAccreditations() {
@@ -142,7 +145,8 @@
         webAppMessage.serviceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
         webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
         webAppMessage.email = $("#accreditationReqUserEmailText").val()
-        votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback);
+        webAppMessage.callerCallback = 'representativeOperationCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function selectRepresentativeCallback(appMessage) {
@@ -152,8 +156,14 @@
             var caption = '<g:message code="operationERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = "<g:message code='operationOKCaption'/>"
-                msg = "<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>";
+                if(isAnonymuosDelegation) {
+                    showAnonymousReceiptDialog("<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>",
+                        msg)
+                    return
+                } else {
+                    caption = "<g:message code='operationOKCaption'/>"
+                    msg = "<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>";
+                }
             } else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
                 caption = "<g:message code='operationCANCELLEDLbl'/>"
             }

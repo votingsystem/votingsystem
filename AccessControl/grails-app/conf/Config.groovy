@@ -1,3 +1,6 @@
+import org.apache.log4j.EnhancedPatternLayout
+import org.votingsystem.groovy.util.VotingSystemLogAppender
+
 import java.net.*;
 import org.apache.log4j.net.SMTPAppender
 import org.apache.log4j.Level
@@ -125,9 +128,14 @@ log4j = {
 	
 	//System.setProperty 'mail.smtp.port', mail.error.port.toString()
 	//System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
-  
+
+
     appenders {
-		file name:'AccessControlERRORS', threshold:Level.ERROR,
+        appender new VotingSystemLogAppender(source:'AccessControl', name: 'votingSystemLogAppender',
+                layout:new EnhancedPatternLayout(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} %p %c - %m%n'),
+                threshold: org.apache.log4j.Level.INFO)
+
+        rollingFile name:'AccessControlERRORS', threshold:org.apache.log4j.Level.ERROR,
 			file:"/var/log/votingsystem/AccessControlERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"AccessControl", threshold:org.apache.log4j.Level.DEBUG, 
@@ -141,12 +149,14 @@ log4j = {
 			layout: pattern(conversionPattern:
 			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))*/
 	}
-		
-	
+
+
     root {
+        info 'votingSystemLogAppender'
         debug  'stdout', 'AccessControl'
-        error 'AccessControlERRORES', 'smtp'
+        error 'AccessControlERRORS', 'smtp'
     }
+
 
     environments {
 

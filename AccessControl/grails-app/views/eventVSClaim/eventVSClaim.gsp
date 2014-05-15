@@ -162,8 +162,9 @@
         pageEvent.operation = Operation.SMIME_CLAIM_SIGNATURE
         webAppMessage.signedContent = pageEvent
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        webAppMessage.callerCallback = 'sendSignatureCallback'
         //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-        votingSystemClient.setMessageToSignatureClient(webAppMessage, sendSignatureCallback);
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function requestBackupCallback(appMessage) {

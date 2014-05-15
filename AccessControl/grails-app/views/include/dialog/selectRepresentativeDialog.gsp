@@ -102,6 +102,7 @@ function proccessCancelRepresentativeSelection() {
 
 var publicLbl = "<g:message code='publicLbl'/>";
 var anonymousLbl = "<g:message code='anonymousLbl'/>";
+var isAnonymuosDelegation = null
 
 function submitSelectRepresentativeForm() {
 	console.log("submitSelectRepresentativeForm")
@@ -118,9 +119,11 @@ function submitSelectRepresentativeForm() {
                 showAnonymousRepresentativeDateRangeDialog(submitSelectRepresentativeForm)
                 return
 	        }
+	        isAnonymuosDelegation = true;
         } else {
             selectedRepresentationLbl = publicLbl
             representativeOperation = Operation.REPRESENTATIVE_SELECTION
+            isAnonymuosDelegation = false
         }
         if($("#confirmRepresentativeSelectionDiv").is(":visible")) {
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, representativeOperation)
@@ -131,7 +134,8 @@ function submitSelectRepresentativeForm() {
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             webAppMessage.serviceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDelegationMsgSubject"/>'
-            votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback);
+            webAppMessage.callerCallback = 'selectRepresentativeCallback'
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             $("#selectRepresentativeDialog").modal('hide')
         } else {
             var representativeNameLbl = "${representativeName}";

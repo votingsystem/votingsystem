@@ -19,7 +19,7 @@ public class JavaScriptInterface {
     	this.editorFragment = editorFragment;
     }
     
-    @JavascriptInterface public void setVotingWebAppMessage (String appMessage) {
+    @JavascriptInterface public void setJSONMessageToSignatureClient (String appMessage) {
     	try {
 			OperationVS operationVS = OperationVS.parse(appMessage);
             editorFragment.processOperation(operationVS);
@@ -27,5 +27,7 @@ public class JavaScriptInterface {
 			e.printStackTrace();
 		}
     }
+
+    @JavascriptInterface public void setTEXTMessageToSignatureClient (String appMessage, String callbackFunction) { }
 
 }

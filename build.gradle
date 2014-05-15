@@ -158,11 +158,9 @@ def copyVotingSystemApps(project) {
 }
 
 def copyClientTool(project) {
-
     File clientToolDist = project.file("web-app/tools/${rootProject.clientToolName}.zip")
     if(clientToolDist.exists()) clientToolDist.delete()
     clientToolDist << rootProject.clientToolDistZip?.bytes
-
 }
 
 task copyAppsAll(dependsOn: [':AccessControl:copyApps', 'ControlCenter:copyApps', ':Vickets:copyApps']) {}

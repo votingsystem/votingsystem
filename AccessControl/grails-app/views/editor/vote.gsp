@@ -144,7 +144,8 @@
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         webAppMessage.serviceURL = "${createLink(controller:'eventVSElection', absolute:true)}"
         webAppMessage.signedMessageSubject = "<g:message code="publishVoteSubject"/>"
-        votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback)
+        webAppMessage.callerCallback = 'publishDocumentCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
         return false
     }
 

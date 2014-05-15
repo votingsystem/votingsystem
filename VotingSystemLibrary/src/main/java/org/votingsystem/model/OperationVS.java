@@ -3,6 +3,7 @@ package org.votingsystem.model;
 import org.apache.log4j.Logger;
 import org.votingsystem.util.StringUtils;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class OperationVS {
     private String serviceURL;
     private String receiverName;
     private String email;
+    private File file;
     private String signedMessageSubject;
     private Map documentToSign;
     private String contentType;
@@ -234,7 +236,9 @@ public class OperationVS {
 
         if (dataMap.containsKey("signedMessageSubject"))
             operationVS.setSignedMessageSubject((String)dataMap.get("signedMessageSubject"));
-
+        if (dataMap.containsKey("filePath")) {
+            operationVS.setFile(new File((String)dataMap.get("filePath")));
+        }
         if (dataMap.containsKey("email"))
             operationVS.setEmail((String)dataMap.get("email"));
         return operationVS;
@@ -254,6 +258,14 @@ public class OperationVS {
         if(args != null) dataMap.put("args", args);
         if(eventVS != null) dataMap.put("eventVS", eventVS.getDataMap());
         return dataMap;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 }
 

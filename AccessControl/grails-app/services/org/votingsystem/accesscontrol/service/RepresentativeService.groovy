@@ -517,6 +517,7 @@ class RepresentativeService {
 				}
 			}
 			log.debug "saveRepresentativeData - user:${userVS.nif} - image: ${newImage.id}"
+            //http://sistemavotacion.org/AccessControl/representative/49
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,  type:TypeVS.REPRESENTATIVE_DATA)
 		} catch(Exception ex) {
 			log.error ("${ex.getMessage()} - user: ${userVS.nif}", ex)

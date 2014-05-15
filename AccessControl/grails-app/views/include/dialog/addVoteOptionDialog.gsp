@@ -16,7 +16,7 @@
 
                     <input type="text" id="newOptionText" style="width:350px; margin:10px auto 0px auto;"
                            oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                           onchange="this.setCustomValidity('')" class="form-control" required/>
+                           onchange="this.setCustomValidity('')" class="form-control" required autofocus/>
                     <input id="submitOption" type="submit" style="display:none;">
             </div>
             <div class="modal-footer">
@@ -31,15 +31,14 @@
         </form>
     </div>
 </div>
-
-<div style="display:none;">
-    <div id="" title=""
-         style="display:none;padding:30px 20px 30px 20px; display: table; margin:auto;">
-
-    </div>
-</div>
 <r:script>
     var callerCallback
+
+    function showAddVoteOptionDialog(callback) {
+        $("#newOptionText").val("")
+        $("#addVoteOptionDialog").modal("show");
+        callerCallback = callback
+    }
 
     $('#addVoteOptionForm').submit(function(event){
         event.preventDefault();
@@ -51,11 +50,5 @@
         callerCallback($("#newOptionText").val())
         $("#addVoteOptionDialog").modal("hide");
     })
-
-    function showAddVoteOptionDialog(callback) {
-        $("#newOptionText").val("")
-        $("#addVoteOptionDialog").modal("show");
-        callerCallback = callback
-    }
 
 </r:script>

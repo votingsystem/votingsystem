@@ -22,7 +22,7 @@ import org.votingsystem.client.dialog.DecompressFileDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.dialog.SignedDocumentsBrowser;
 import org.votingsystem.client.util.BrowserVS;
-import org.votingsystem.client.util.FXUtils;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.AppHostVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -57,7 +57,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
 
         VBox verticalBox = new VBox(35);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
-        voteButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-envelope")));
+        voteButton.setGraphic(new ImageView(Utils.getImage(this, "fa-envelope")));
         voteButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openVotingPage();
@@ -65,7 +65,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         voteButton.setPrefWidth(450);
 
         Button selectRepresentativeButton = new Button(ContextVS.getMessage("selectRepresentativeButtonLbl"));
-        selectRepresentativeButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-hand-o-right")));
+        selectRepresentativeButton.setGraphic(new ImageView(Utils.getImage(this, "fa-hand-o-right")));
         selectRepresentativeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openSelectRepresentativePage();
@@ -73,7 +73,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         selectRepresentativeButton.setPrefWidth(450);
 
         Button votingSystemProceduresButton = new Button(ContextVS.getMessage("votingSystemProceduresLbl"));
-        votingSystemProceduresButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-cogs")));
+        votingSystemProceduresButton.setGraphic(new ImageView(Utils.getImage(this, "fa-cogs")));
         votingSystemProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openVotingSystemProceduresPage();
@@ -81,7 +81,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         votingSystemProceduresButton.setPrefWidth(450);
 
         Button openSignedFileButton = new Button(ContextVS.getMessage("openSignedFileButtonLbl"));
-        openSignedFileButton.setGraphic(new ImageView(FXUtils.getImage(this, "application-certificate")));
+        openSignedFileButton.setGraphic(new ImageView(Utils.getImage(this, "application-certificate")));
         openSignedFileButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openSignedFile();
@@ -89,7 +89,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         openSignedFileButton.setPrefWidth(450);
 
         final Button openBackupButton = new Button(ContextVS.getMessage("openBackupButtonLbl"));
-        openBackupButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-archive")));
+        openBackupButton.setGraphic(new ImageView(Utils.getImage(this, "fa-archive")));
         openBackupButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -99,7 +99,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         openBackupButton.setPrefWidth(450);
 
         Button vicketAdminButton = new Button(ContextVS.getMessage("vicketAdminLbl"));
-        vicketAdminButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-money")));
+        vicketAdminButton.setGraphic(new ImageView(Utils.getImage(this, "fa-money")));
         vicketAdminButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openGroupAdmin();
@@ -107,7 +107,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         vicketAdminButton.setPrefWidth(450);
 
         Button settingsButton = new Button(ContextVS.getMessage("settingsLbl"));
-        settingsButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-wrench")));
+        settingsButton.setGraphic(new ImageView(Utils.getImage(this, "fa-wrench")));
         settingsButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openSettings();
@@ -116,7 +116,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         HBox footerButtonsBox = new HBox(10);
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(new ImageView(FXUtils.getImage(this, "cancel_16")));
+        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel_16")));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 VotingSystemApp.this.stop();

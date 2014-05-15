@@ -1,38 +1,41 @@
-<div id="removeRepresentativeDialog" title="<g:message code="removeRepresentativeLbl"/>"  style="padding:20px 20px 20px 20px;display:none;">
-	<p style="text-align: center;"><g:message code="removeRepresentativeMsg"/></p>
-</div> 
+<div id='removeRepresentativeDialog' class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" style="color: #870000; font-weight: bold;">
+                    <g:message code="removeRepresentativeLbl"/>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center;"><g:message code="removeRepresentativeMsg"/></p>
+            </div>
+            <div class="modal-footer">
+                <button id="" type="submit" class="btn btn-accept-vs" onclick="removeRepresentative()">
+                    <g:message code="continuetLbl"/>
+                </button>
+                <button id="" type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
+                    <g:message code="cancelLbl"/>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <r:script>
 
-$("#removeRepresentativeDialog").dialog({
-   	  width: 450, autoOpen: false, modal: true,
-      buttons: [{
-        		text:"<g:message code="continuetLbl"/>",
-               	icons: { primary: "ui-icon-check"},
-             	click:function() {
-             		$("#removeRepresentativeDialog").dialog("close");
-	             	removeRepresentative() 
-	             }},{
-        		text:"<g:message code="cancelLbl"/>",
-               	icons: { primary: "ui-icon-closethick"},
-             	click:function() {
-	   				$(this).dialog( "close" );
-	       	 	}}],
-      show: { effect: "fade", duration: 100 },
-      hide: { effect: "fade", duration: 100 }
-    });
 
 function removeRepresentative() {
 	console.log("removeRepresentative")
-   	var webAppMessage = new WebAppMessage(
-	    	ResponseVS.SC_PROCESSING,
-	    	Operation.REPRESENTATIVE_REVOKE)
+   	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_REVOKE)
    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 	webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 	webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE}
     webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
 	webAppMessage.serviceURL = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
 	webAppMessage.signedMessageSubject = '<g:message code="removeRepresentativeMsgSubject"/>'
-	votingSystemClient.setMessageToSignatureClient(webAppMessage, removeRepresentativeCallback); 
+    webAppMessage.callerCallback = getFnName(removeRepresentativeCallback)
+	VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+	$("#removeRepresentativeDialog").modal("hide");
 }
 
 function removeRepresentativeCallback(appMessage) {

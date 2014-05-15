@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.apache.log4j.Logger
 import org.votingsystem.model.AccessRequestVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
@@ -22,7 +23,9 @@ import static java.util.Calendar.*
 class TestingController {
 
 
-    def index() { }
+    def index() {
+
+    }
 
 
 }

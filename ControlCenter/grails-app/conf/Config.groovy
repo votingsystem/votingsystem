@@ -126,7 +126,7 @@ log4j = {
 	//System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
   
     appenders {
-		file name:'ControlCenterERRORS', threshold:Level.ERROR,
+		file name:'ControlCenterERRORS', threshold:org.apache.log4j.Level.ERROR,
 			file:"/var/log/votingsystem/ControlCenterERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"ControlCenter", threshold:org.apache.log4j.Level.DEBUG, 
@@ -145,7 +145,7 @@ log4j = {
 	
     root {
             debug  'stdout', 'ControlCenter'
-			error 'ControlCenterERRORES', 'smtp'
+			error 'ControlCenterERRORS', 'smtp'
     }
 
     environments {
@@ -202,7 +202,7 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
-VotingSystem.urlTimeStampServer='http://sistemavotacion.org/TimeStampServer'
+VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 VotingSystem.backupCopyPath='./VotingSystem/backup'
 VotingSystem.eventsMetaInfBaseDir='./VotingSystem/EventVS_MetaInf'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'

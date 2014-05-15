@@ -337,11 +337,6 @@ function checkInputType(inputType) {
     return isSuppported
 }
 
-window.onload=function(){
-	checkIEVersion()
-};
-
-
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
 function getInternetExplorerVersion() {
 // Returns the version of Windows Internet Explorer or a -1

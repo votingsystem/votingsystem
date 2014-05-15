@@ -112,7 +112,7 @@ log4j = {
     //}
 	
 	appenders {
-		file name:'TestsWebAppERRORES', threshold:Level.ERROR,
+		file name:'TestsWebAppERRORS', threshold:org.apache.log4j.Level.ERROR,
 			file:"/var/log/votingsystem/TestsWebAppERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"TestsWebApp", threshold:org.apache.log4j.Level.DEBUG,
@@ -130,7 +130,7 @@ log4j = {
 	
 	root {
 			debug  'stdout', 'TestsWebApp'
-			error 'TestsWebAppERRORES', 'smtp'
+			error 'TestsWebAppERRORS', 'smtp'
 	}
 
     environments {

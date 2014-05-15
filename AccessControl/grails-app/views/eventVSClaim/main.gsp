@@ -18,7 +18,7 @@
 
     <g:render template="/template/eventsSearchInfo"/>
 
-    <div id="mainPageEventList" class="pageContentDiv"><ul></ul></div>
+    <div id="mainPageEventList" class="pageContentDiv row"><ul></ul></div>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>

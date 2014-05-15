@@ -94,7 +94,7 @@ environments {
 
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://sistemavotacion.org/TimeStampServer"
+        grails.serverURL = "http://www.sistemavotacion.org/TimeStampServer"
     }
 
 }

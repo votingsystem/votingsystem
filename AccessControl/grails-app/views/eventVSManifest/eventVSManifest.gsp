@@ -120,7 +120,8 @@ webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.eventVS = pageEvent
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         webAppMessage.documentURL = pageEvent.URL
-        votingSystemClient.setMessageToSignatureClient(webAppMessage, sendManifestCallback);
+        webAppMessage.callerCallback = 'sendManifestCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function requestBackupCallback(appMessage) {

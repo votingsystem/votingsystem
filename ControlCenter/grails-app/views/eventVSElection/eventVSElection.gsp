@@ -45,9 +45,6 @@
     </div>
 </div>
 
-<g:include view="/include/dialog/confirmOptionDialog.gsp"/>
-<g:include view="/include/dialog/adminDocumentDialog.gsp"/>
-
 </body>
 </html>
 <r:script>
@@ -85,19 +82,6 @@
 			if(${messageToUser != null?true:false}) {
 				$("#eventMessagePanel").addClass("${eventClass}");
 			}
-
-	  		$(".voteOptionButton").click(function () { 
-	  			$("#optionSelectedDialogMsg").text($(this).attr("optionContent"))
-	  			selectedOption = {id:Number($(this).attr("optionId")),
-	   			content:$(this).attr("optionContent")}
-	  			console.log(" - selectedOption: " +  JSON.stringify(selectedOption))
-	  			$("#confirmOptionDialog").dialog("open");
-	  		});
-		
-	  		$("#adminDocumentLink").click(function () {
-    			showAdminDocumentDialog(adminDocumentCallback)
-		   	})
-
 		 });
 		         
 		function sendVote() {
@@ -109,8 +93,9 @@
 			votingEvent.voteVS = voteVS
 			webAppMessage.eventVS = votingEvent
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+            webAppMessage.callerCallback = 'sendVoteCallback'
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-			votingSystemClient.setMessageToSignatureClient(webAppMessage, sendVoteCallback); 
+			VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
 		}
 
 		function sendVoteCallback(appMessage) {

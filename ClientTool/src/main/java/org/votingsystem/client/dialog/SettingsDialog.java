@@ -17,7 +17,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.util.FXUtils;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -102,7 +102,7 @@ public class SettingsDialog {
         keyStoreVBox = new VBox(10);
 
         Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"));
-        selectKeyStoreButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-key")));
+        selectKeyStoreButton.setGraphic(new ImageView(Utils.getImage(this, "fa-key")));
         selectKeyStoreButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 selectKeystoreFile();
@@ -116,7 +116,7 @@ public class SettingsDialog {
         HBox footerButtonsBox = new HBox(10);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        acceptButton.setGraphic(new ImageView(FXUtils.getImage(this, "accept")));
+        acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 validateForm();

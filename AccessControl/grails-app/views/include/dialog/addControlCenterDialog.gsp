@@ -113,7 +113,8 @@ $('#newControlCenter').submit(function(event){
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         webAppMessage.signedMessageSubject = '<g:message code="addControlCenterMsgSubject"/>'
 		webAppMessage.serviceURL = "${createLink( controller:'subscriptionVS', absolute:true)}"
-		votingSystemClient.setMessageToSignatureClient(webAppMessage, associateControlCenterCallback)
+        webAppMessage.callerCallback = 'associateControlCenterCallback'
+		VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
 	} 
 
 	function associateControlCenterCallback(callbackMessage){ 

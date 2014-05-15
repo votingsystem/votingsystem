@@ -2,6 +2,7 @@ var WebAppMessage = function (statusCode, operation) {
 	this.statusCode = statusCode
 	this.operation = operation
 	this.subject ;
+	this.filePath;
 	this.signedContent;
 	this.serviceURL;
 	this.documentURL;
@@ -260,6 +261,7 @@ var Operation = {
 		SMIME_CLAIM_SIGNATURE: "SMIME_CLAIM_SIGNATURE",
 		VOTING_PUBLISHING: "VOTING_PUBLISHING", 
 		SEND_SMIME_VOTE: "SEND_SMIME_VOTE",
+		SELECT_IMAGE:"SELECT_IMAGE",
 		TERMINATED: "TERMINATED",
 		SAVE_RECEIPT: "SAVE_RECEIPT",
 		ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION", 
@@ -379,11 +381,6 @@ var dynatableFeatures =  {
      paginate: true
 }
 
-window.onload=function(){
-	checkIEVersion()
-};
-
-
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
 function getInternetExplorerVersion() {
 // Returns the version of Windows Internet Explorer or a -1
@@ -476,36 +473,23 @@ function getParameterByName(name) {
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-function VotingSystemApplet () {
-    this.signatureClientToolLoaded = false
-	this.messageToSignatureClient = null;
-	this.signatureClientCallback = null
-}
-
 var clientTool = null
 
-VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON, callerCallback) {
+function VotingSystemClient () { }
+
+VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
         if(clientTool == null) {
             $('#clientToolAdvertDialog').modal('show')
             return
         }
 
-		var callerCallbackName = getFnName(callerCallback)
-        messageJSON.callerCallback = callerCallbackName
-		this.signatureClientCallback = callerCallback
+		var messageToSignatureClient = JSON.stringify(messageJSON)
+		console.log("setJSONMessageToSignatureClient - messageToSignatureClient: " + messageToSignatureClient);
 
-		this.messageToSignatureClient = JSON.stringify(messageJSON)
-		console.log(" - callerCallback: " + callerCallbackName + " - setMessageToSignatureClient: " + this.messageToSignatureClient);
-
-	   	//var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SEND_SMIME_VOTE)
-	   	//this.messageToSignatureClient = JSON.stringify(webAppMessage)
-
-		//alert("'" + encodeURIComponent(messageToSignatureClient) + "'")
 		if(isAndroid()) {
 		    console.log("isAndroid browser - androidClienLoaded: " + androidClienLoaded)
 		    if(clientTool != null){
-		        //console.log("---- setMessageToSignatureClient: " + this.messageToSignatureClient);
-		        clientTool.setVotingWebAppMessage(this.messageToSignatureClient);
+		        clientTool.setJSONMessageToSignatureClient(messageToSignatureClient);
             } else {
                 //to avoid too large URIs
                 //if(this.messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
@@ -517,17 +501,33 @@ VotingSystemApplet.prototype.setMessageToSignatureClient = function (messageJSON
                 alert(redirectURL)
                 window.location.href = redirectURL.replace("\n","")
             }
-			return
-		}
+		} else clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
+	}
 
-        if(clientTool != null) {
-            clientTool.setMessageToSignatureClient(this.messageToSignatureClient)
+
+VotingSystemClient.setTEXTMessageToSignatureClient = function (messageToSignatureClient, callerCallbackStr) {
+        console.log("setTEXTMessageToSignatureClient messageToSignatureClient: " + messageToSignatureClient +
+		    " - callerCallback: " + callerCallbackStr + " - clientTool: " + clientTool);
+        if(clientTool == null) {
+            $('#clientToolAdvertDialog').modal('show')
             return
         }
+		if(isAndroid()) {
+		    console.log("isAndroid browser")
+		    if(clientTool != null){
+		        //console.log("---- setMessageToSignatureClient: " + messageToSignatureClient);
+		        androidClient.setTEXTMessageToSignatureClient(messageToSignatureClient);
+            } else {
+                //to avoid URI too large
+                //if(messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
+                var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(messageToSignatureClient) +
+                    "&refererURL=" + window.location +
+                    "&serverURL=" + "${grailsApplication.config.grails.serverURL}"
+
+                alert(redirectURL)
+                window.location.href = redirectURL.replace("\n","")
+            }
+			return
+		} else clientTool.setTEXTMessageToSignatureClient(messageToSignatureClient, callerCallbackStr)
 	}
 
-VotingSystemApplet.prototype.setMessageFromSignatureClient = function (appMessage) {
-		this.signatureClientCallback(appMessage)
-	}
-
-var votingSystemClient = new VotingSystemApplet()

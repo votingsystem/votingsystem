@@ -54,9 +54,7 @@ $('#requestEventBackupForm').submit(function(event){
 	    $('#requestEventBackupDialogMessageDiv').html("<g:message code="formErrorMsg"/>");
         return false
 	}
-   	var webAppMessage = new WebAppMessage(
-	    	ResponseVS.SC_PROCESSING,
-	    	Operation.BACKUP_REQUEST)
+   	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.BACKUP_REQUEST)
    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 	webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 	webAppMessage.serviceURL = "${createLink(controller:'backupVS', absolute:true)}"
@@ -66,8 +64,9 @@ $('#requestEventBackupForm').submit(function(event){
 	webAppMessage.signedContent = pageEvent
 	webAppMessage.email = $("#eventBackupUserEmailText").val()
     webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-	pendingOperation = Operation.SMIME_CLAIM_SIGNATURE
-	votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback); 
+    webAppMessage.callerCallback = getFnName(callerCallback)
+
+	VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
 });
 
 </r:script>

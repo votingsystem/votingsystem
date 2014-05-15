@@ -89,8 +89,9 @@
             webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),groupvsName:$("#groupSubject").val(),
                         operation:Operation.VICKET_GROUP_NEW}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+            webAppMessage.callerCallback = 'newGroupVSCallback'
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-            votingSystemClient.setMessageToSignatureClient(webAppMessage, newGroupVSCallback);
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         });
 
       });

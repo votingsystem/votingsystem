@@ -25,6 +25,7 @@ import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -34,14 +35,15 @@ import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.FXMessageDialog;
-import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.FileUtils;
 import org.w3c.dom.Document;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -67,9 +69,13 @@ public class BrowserVS extends Region {
         signatureService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 logger.debug("signatureService - OnSucceeded");
-            ResponseVS responseVS = signatureService.getValue();
-            sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
-                    signatureService.getOperationVS().getCallerCallback());
+                PlatformImpl.runLater(new Runnable() {
+                    @Override public void run() {
+                        ResponseVS responseVS = signatureService.getValue();
+                        sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
+                                signatureService.getOperationVS().getCallerCallback());
+                    }
+                });
             }
         });
 
@@ -139,7 +145,7 @@ public class BrowserVS extends Region {
         final Button forwardButton = new Button();
         final Button prevButton = new Button();
 
-        forwardButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-chevron-right")));
+        forwardButton.setGraphic(new ImageView(Utils.getImage(this, "fa-chevron-right")));
         forwardButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 try {
@@ -151,7 +157,7 @@ public class BrowserVS extends Region {
             }
         });
 
-        prevButton.setGraphic(new ImageView(FXUtils.getImage(this, "fa-chevron-left")));
+        prevButton.setGraphic(new ImageView(Utils.getImage(this, "fa-chevron-left")));
         prevButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent ev) {
                 try {
@@ -270,7 +276,6 @@ public class BrowserVS extends Region {
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
-        if(callbackFunction == null) callbackFunction = "setMessageFromSignatureClient";
         String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
         webView.getEngine().executeScript(jsCommand);
@@ -334,14 +339,143 @@ public class BrowserVS extends Region {
     // JavaScript interface object
     public class JavafxClient {
 
-        public void setMessageToSignatureClient(String messageToSignatureClient) {
-            logger.debug("JavafxClient - setMessageToSignatureClient: " + messageToSignatureClient);
-            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(messageToSignatureClient);
-            signatureService.processOperationVS(OperationVS.populate(jsonObject));
+        public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
+            logger.debug("JavafxClient.setJSONMessageToSignatureClient: " + messageToSignatureClient);
+            try {
+                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(messageToSignatureClient);
+                OperationVS operationVS = OperationVS.populate(jsonObject);
+                switch(operationVS.getType()) {
+                    case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                        receiptCancellation(operationVS);
+                        break;
+                    case SELECT_IMAGE:
+                        selectImage(operationVS);
+                        break;
+                    default:
+                        signatureService.processOperationVS(operationVS);
+                }
+            } catch(Exception ex) {
+                showMessage( ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
+            }
+        }
+
+        public void setTEXTMessageToSignatureClient(final String messageToSignatureClient, final String callbackFunction) {
+            logger.debug("JavafxClient.setTEXTMessageToSignatureClient - callbackFunction: " + callbackFunction);
+                PlatformImpl.runLater(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            if(callbackFunction.toLowerCase().contains("receipt")) {
+                                saveReceipt(messageToSignatureClient, callbackFunction);
+                            }
+                        } catch(Exception ex) {
+                            logger.error(ex.getMessage(), ex);
+                            showMessage( ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
+                        }
+                    }
+                });
+
+        }
+
+    }
+
+
+    private void saveReceipt(String messageToSignatureClient, String callbackFunction) throws Exception{
+        logger.debug("saveReceipt");
+        if(callbackFunction.toLowerCase().contains("anonymousdelegation")) {
+            ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(messageToSignatureClient);
+            if(responseVS == null) {
+                logger.error("Missing receipt data for hash: " + messageToSignatureClient);
+                sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
+            } else {
+                File fileToSave = Utils.getAnonymousRepresentativeSelectCancellationFile(responseVS);
+                FileChooser fileChooser = new FileChooser();
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
+                        "*." + ContentTypeVS.ZIP.getExtension());
+                fileChooser.getExtensionFilters().add(extFilter);
+                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                fileChooser.setInitialFileName(ContextVS.getMessage("anonymousDelegationReceiptFileName"));
+                File file = fileChooser.showSaveDialog(browserStage);
+                if(file != null){
+                    FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
+                    sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackFunction);
+                } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
+            }
+        } else {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Signed files (*.p7s)",
+                    "*." + ContentTypeVS.SIGNED.getExtension());
+            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+            fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+            File file = fileChooser.showSaveDialog(browserStage);
+            if(file != null){
+                Utils.saveFile(messageToSignatureClient, file);
+                sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackFunction);
+            } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
         }
     }
 
 
+    private void selectImage(final OperationVS operationVS) throws Exception {
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                try {
+                    FileChooser fileChooser = new FileChooser();
+                    FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter(
+                            "JPG files (*.jpg)", Arrays.asList("*.jpg", "*.JPG"));
+                    FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter(
+                            "PNG files (*.png)", Arrays.asList("*.png", "*.PNG"));
+                    fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
+                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                    File selectedImage = fileChooser.showOpenDialog(null);
+                    if(selectedImage != null){
+                        byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
+                        logger.debug(" - imageFileBytes.length: " + imageFileBytes.length);
+                        if(imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
+                            logger.debug(" - MAX_FILE_SIZE exceeded ");
+                            sendMessageToBrowserApp(ResponseVS.SC_ERROR,
+                                    ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB),
+                                    operationVS.getCallerCallback());
+                        } else sendMessageToBrowserApp(ResponseVS.SC_OK, selectedImage.getAbsolutePath(),
+                                operationVS.getCallerCallback());
+                    } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
+                /*try {
+                    BufferedImage bufferedImage = ImageIO.read(file);
+                    Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+                    myImageView.setImage(image);
+                } catch (IOException ex) {
+                    Logger.getLogger(JavaFXPixel.class.getName()).log(Level.SEVERE, null, ex);
+                }*/
+                } catch(Exception ex) {
+                    sendMessageToBrowserApp(ResponseVS.SC_ERROR, ex.getMessage(), operationVS.getCallerCallback());
+                }
+            }
+        });
+    }
+
+    private void receiptCancellation(final OperationVS operationVS) throws Exception {
+        logger.debug("receiptCancellation");
+        switch(operationVS.getType()) {
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                PlatformImpl.runLater(new Runnable() {
+                    @Override public void run() {
+                        FileChooser fileChooser = new FileChooser();
+                        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
+                                "*." + ContentTypeVS.ZIP.getExtension());
+                        fileChooser.getExtensionFilters().add(extFilter);
+                        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                        File file = fileChooser.showSaveDialog(browserStage);
+                        if(file != null){
+                            operationVS.setFile(file);
+                            signatureService.processOperationVS(operationVS);
+                        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
+                    }
+                });
+                break;
+            default:
+                logger.debug("receiptCancellation - unknown receipt type: " + operationVS.getType());
+        }
+    }
 
     private Node createSpacer() {
         Region spacer = new Region();

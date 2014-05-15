@@ -82,8 +82,8 @@
         webAppMessage.signedContent = eventVS
         webAppMessage.serviceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
         webAppMessage.signedMessageSubject = '<g:message code="publishManifestSubject"/>'
-
-        votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback);
+        webAppMessage.callerCallback = 'publishDocumentCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         return false
     }
 

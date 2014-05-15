@@ -33,6 +33,7 @@
 var callerCallback
 
 function showAnonymousRepresentativeDateRangeDialog(callback) {
+    $('#numWeeksAnonymousDelegation').val('')
 	$("#anonymousRepresentativeDateRangeDialog").modal("show");
 	$("#anonymousRepresentativeDateRangeDialog .errorMsgWrapper").hide()
 	if(callback != null) callerCallback = callback

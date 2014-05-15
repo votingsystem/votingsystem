@@ -1,62 +1,66 @@
-<div id="addClaimFieldDialog" title="<g:message code="addClaimFieldLbl"/>"
+<div id='addClaimFieldDialog' class="modal fade">
+    <div class="modal-dialog">
+        <form id="newFieldClaimForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 id="resultCaption" class="modal-title" style="color: #870000; font-weight: bold;">
+                        <g:message code="addClaimFieldLbl"/>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div id="addClaimFieldDialogMessageDiv" class='text-center'
+                         style="color: #870000; font-size: 1.2em;font-weight: bold; margin-bottom: 15px;"></div>
+
+                    <p style="text-align: center;">
+                        <g:message code="claimFieldDescriptionMsg"/>
+                    </p>
+                    <label><g:message code="addClaimFieldMsg"/></label>
+                    <input type="text" id="claimFieldText" style=""
+                           oninvalid="this.setCustomValidity('')"
+                           onchange="this.setCustomValidity('')" class="form-control"
+                           class="text ui-widget-content ui-corner-all" required/>
+                </div>
+                <div class="modal-footer">
+                    <button id="" type="submit" class="btn btn-accept-vs">
+                        <g:message code="acceptLbl"/>
+                    </button>
+                    <button id="" type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
+                        <g:message code="cancelLbl"/>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div id="" title=""
      style="display:none;padding:30px 20px 30px 20px; margin:auto;">
-	<p style="text-align: center;">
-		<g:message code="claimFieldDescriptionMsg"/>
-	</p>
-	<span><g:message code="addClaimFieldMsg"/></span>
-	<form id="newFieldClaimForm">
-			<input type="text" id="claimFieldText" style="width:400px" 
-				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-				onchange="this.setCustomValidity('')" class="form-control"
-				class="text ui-widget-content ui-corner-all" required/>
+
+
+	<form id="">
+
 			<input id="submitClaimFieldText" type="submit" style="display:none;">
 	</form>
 </div> 
 <r:script>
+    var callerCallback
 
-var callerCallback
+    function showAddClaimFieldDialog(callback) {
+        $("#addClaimFieldDialog").modal("show");
+        callerCallback = callback
+    }
 
-function showAddClaimFieldDialog(callback) {
-	$("#addClaimFieldDialog").dialog("open");
-	callerCallback = callback	
-}
+    $('#newFieldClaimForm').submit(function(event){
+        event.preventDefault();
+        $('#addClaimFieldDialogMessageDiv').html("")
+        if(!document.getElementById('newFieldClaimForm').checkValidity()) {
+            $('#addClaimFieldDialogMessageDiv').html("<g:message code="emptyFieldLbl"/>");
+            return false
+        }
+        callerCallback($("#claimFieldText").val())
+        $("#addClaimFieldDialog").modal("hide");
+    })
 
-$('#newFieldClaimForm').submit(function(event){	
-	event.preventDefault();
-	$("#addClaimFieldDialog").dialog( "close" );
- 		if(!document.getElementById('claimFieldText').validity.valid) {
- 			$("#claimFieldText").addClass( "formFieldError" );
- 			showResultDialog('<g:message code="dataFormERRORLbl"/>', 
- 				'<g:message code="emptyFieldMsg"/>',function() {
- 					$("#addClaimFieldDialog").dialog("open")
-     			})
- 		} else {
-     		if(callerCallback != null) callerCallback($("#claimFieldText").val())
-     		else console.log("addClaimFieldDialog - missing callerCallback")
- 			$("#claimFieldText").removeClass( "formFieldError" );
- 		}
-})
-
-$("#addClaimFieldDialog").dialog({
-   	  width: 450, autoOpen: false, modal: true,
-      buttons: [{text:"<g:message code="acceptLbl"/>",
-               	icons: { primary: "ui-icon-check"},
-             	click:function() {
-             		$("#submitClaimFieldText").click()    			   				
-	        	}},{
-        		text:"<g:message code="cancelLbl"/>",
-               	icons: { primary: "ui-icon-closethick"},
-             	click:function() {
-             		if(callerCallback != null) callerCallback(null)
-             		else console.log("addClaimFieldDialog - missing callerCallback")
-	   				$(this).dialog( "close" );
-	       	 	}	
-           }
-       ],
-      show: { effect: "fade", duration: 500 },
-      hide: { effect: "fade", duration: 500 },
-      open: function( event, ui ) {
-	 		$("#claimFieldText").val("")
-		  }
-    });
 </r:script>

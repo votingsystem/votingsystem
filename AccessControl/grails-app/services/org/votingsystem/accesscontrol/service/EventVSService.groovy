@@ -220,7 +220,7 @@ class EventVSService {
 	public Map getEventVSElectionMap(EventVSElection eventVSItem) {
 		//log.debug("eventVSItem: ${eventVSItem.id} - state ${eventVSItem.state}")
 		def eventVSMap = [id: eventVSItem.id, dateCreated: eventVSItem.dateCreated,
-			URL:"${grailsApplication.config.grails.serverURL}/eventVS/${eventVSItem.id}",
+			URL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSItem.id}",
 			publishRequestURL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSItem.id}/signed",
 			validatedPublishRequestURL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSItem.id}/validated",
 			subject:eventVSItem.subject, content:eventVSItem.content,
@@ -273,7 +273,7 @@ class EventVSService {
 	public Map getEventVSClaimMap(EventVSClaim eventVSItem) {
 		//log.debug("eventVSItem: ${eventVSItem.id} - state ${eventVSItem.state}")
 		def eventVSMap = [id: eventVSItem.id, dateCreated: eventVSItem.dateCreated,
-			URL:"${grailsApplication.config.grails.serverURL}/eventVS/${eventVSItem.id}",
+			URL:"${grailsApplication.config.grails.serverURL}/eventVSClaim/${eventVSItem.id}",
 			publishRequestURL:"${grailsApplication.config.grails.serverURL}/eventVSClaim/${eventVSItem.id}/signed",
 			validatedPublishRequestURL:"${grailsApplication.config.grails.serverURL}/eventVSClaim/${eventVSItem.id}/validated",
 			subject:eventVSItem.subject, content:eventVSItem.content,
