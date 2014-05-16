@@ -35,7 +35,7 @@ task generateRestDocs() << {task ->
 }
 
 task war(dependsOn:['copyApps', 'installEditor']) << {task ->
-	runCommand(project, file(".") ,["grails", "war"])	
+    runCommand(project, file(".") ,["grails", "war"])
 	announce.announce("'$project.name' - WebApp WAR file generated", "local")
 }
 

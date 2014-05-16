@@ -26,19 +26,16 @@ class MessageSMIMEController {
 			messageSMIME = MessageSMIME.get(params.id)
 		}
         if (messageSMIME) {
-            if(true) {
+            if(request.getHeader("User-Agent").toLowerCase().contains("javafx")) {
                 String receiptPageTitle = null;
                 String receipt = new String(messageSMIME.content, "UTF-8")
                 String signedContent = messageSMIME.getSmimeMessage()?.getSignedContent()
-                //if(request.getHeader("User-Agent").toLowerCase().contains("javafx")) {
                 render(view:"receiptViewer" , model:[receiptPageTitle:receiptPageTitle, receipt:receipt,
                          signedContent:signedContent])
             } else {
                 return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
                         messageBytes:messageSMIME.content)]
             }
-
-
         } else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
                 message(code: 'eventVSNotFound', args:[params.id]))]
     }

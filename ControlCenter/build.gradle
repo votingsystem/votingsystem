@@ -35,7 +35,9 @@ task generateRestDocs() << {task ->
 }
 
 task war(dependsOn:['copyApps']) << {task ->
-	runCommand(project, file(".") ,["grails", "war"])	
+    sourceCompatibility = "1.7"
+    targetCompatibility = "1.7"
+    runCommand(project, file(".") ,["grails", "war"])
 	announce.announce("'$project.name' - WebApp WAR file generated", "local")
 }
 
