@@ -35,7 +35,7 @@ dependencies {
 
 task copyDistZip(dependsOn: ['distZip']) {
     doLast {
-        rootProject.ext.set("ClientToolDistZip",
+        rootProject.ext.set("clientToolDistZip",
                 file("$buildDir/distributions/${rootProject.clientToolName}.zip"))
     }
 }
