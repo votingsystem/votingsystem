@@ -144,7 +144,7 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
 }
 
 //'ClientTool:signJar' -> Needs Java8
-task generateVotingSystemApps(dependsOn: [':VotingSystemLibrary:publish', ':releaseAndroid', ':ClientTool:copyDistZip']) {
+task generateVotingSystemApps(dependsOn: [':VotingSystemLibrary:publish', ':releaseAndroid']) {
 }
 
 def copyVotingSystemApps(project) {

@@ -44,17 +44,10 @@ public class SignatureService extends Service<ResponseVS> {
         return new SignatureTask();
     }
 
-    public void processOperationVS(OperationVS operationVS) {
+    public void processOperationVS(String password, OperationVS operationVS) {
         this.operationVS = operationVS;
-        PlatformImpl.runLater(new Runnable() {
-            @Override
-            public void run() {
-                PasswordDialog passwordDialog = new PasswordDialog();
-                passwordDialog.show(ContentSignerHelper.getPasswordRequestMsg());
-                password = passwordDialog.getPassword();
-                if (password != null) SignatureService.this.restart();
-            }
-        });
+        this.password = password;
+        restart();
     }
 
     public OperationVS getOperationVS() {

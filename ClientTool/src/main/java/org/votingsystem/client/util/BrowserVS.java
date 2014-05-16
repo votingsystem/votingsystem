@@ -62,6 +62,7 @@ public class BrowserVS extends Region {
     private WebView webView;
     private WebView smallView;
     private ComboBox comboBox;
+    private BrowserVSStackPane browserHelper;
     private AtomicInteger offset = new AtomicInteger(0);
 
     public BrowserVS() {
@@ -102,26 +103,6 @@ public class BrowserVS extends Region {
     }
 
     private void initComponents() {
-        Region progressRegion = new Region();
-        progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
-        progressRegion.setPrefSize(240, 160);
-
-        VBox progressBox = new VBox();
-        progressBox.setAlignment(Pos.CENTER);
-        progressBox.setPrefWidth(400);
-        progressBox.setPrefHeight(300);
-
-        Text progressMessageText = new Text();
-        progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #f9f9f9;");
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setPrefWidth(200);
-        progressBar.setLayoutY(10);
-        progressMessageText.textProperty().bind(signatureService.messageProperty());
-        progressBar.progressProperty().bind(signatureService.progressProperty());
-        progressRegion.visibleProperty().bind(signatureService.runningProperty());
-        progressBox.visibleProperty().bind(signatureService.runningProperty());
-        progressBox.getChildren().addAll(progressMessageText, progressBar);
-
         webView = new WebView();
         final WebHistory history = webView.getEngine().getHistory();
         smallView = new WebView();
@@ -134,6 +115,7 @@ public class BrowserVS extends Region {
             @Override
             public void handle(WindowEvent event) {
                 event.consume();
+                webView.getEngine().loadContent("");
                 browserStage.hide();
                 logger.debug("browserStage.setOnCloseRequest");
             }
@@ -250,11 +232,10 @@ public class BrowserVS extends Region {
                 }
         );
         verticalBox.getChildren().addAll(toolBar, webView);
-        StackPane stack = new StackPane();
-        stack.getChildren().addAll(verticalBox, progressRegion, progressBox);
-        //stack.setPrefWidth(1000);
-        //stack.setPrefHeight(1000);
-        Scene scene = new Scene(stack, Color.web("#666970"));
+        browserHelper = new BrowserVSStackPane(signatureService);
+        browserHelper.getChildren().add(0, verticalBox);
+
+        Scene scene = new Scene(browserHelper, Color.web("#666970"));
         browserStage.setScene(scene);
         browserStage.setWidth(1000);
         browserStage.setHeight(1000);
@@ -352,7 +333,7 @@ public class BrowserVS extends Region {
                         selectImage(operationVS);
                         break;
                     default:
-                        signatureService.processOperationVS(operationVS);
+                        browserHelper.processOperationVS(operationVS);
                 }
             } catch(Exception ex) {
                 showMessage( ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
@@ -467,7 +448,7 @@ public class BrowserVS extends Region {
                         File file = fileChooser.showSaveDialog(browserStage);
                         if(file != null){
                             operationVS.setFile(file);
-                            signatureService.processOperationVS(operationVS);
+                            browserHelper.processOperationVS(operationVS);
                         } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
                     }
                 });

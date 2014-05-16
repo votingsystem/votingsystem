@@ -6,7 +6,7 @@ dependencies {
     compile (project(':VotingSystemLibrary'))
 }
 
-task copyApps(dependsOn: [':generateVotingSystemApps', ':ClientTool:copyDistZip']) {
+task copyApps(dependsOn: [':generateVotingSystemApps', ':installEditor']) {
 	doLast {
         copyVotingSystemApps(project)
 

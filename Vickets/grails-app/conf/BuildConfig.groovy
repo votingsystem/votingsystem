@@ -16,7 +16,8 @@ grails.project.fork = [
     // configure settings for the test-app JVM, uses the daemon by default
     test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true, source:1.7],
     // configure settings for the run-app JVM
-    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
+    //problems debugging -> run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
+    run:false,
     // configure settings for the run-war JVM
     war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
     // configure settings for the Console UI JVM
@@ -59,6 +60,9 @@ grails.project.dependency.resolution = {
                     'org.bouncycastle:bcpg-jdk16:1.46',
                     'org.bouncycastle:bctsp-jdk16:1.46',
                     'org.hibernate:hibernate-search:4.2.0.Final',
+
+                    'org.apache.tomcat:tomcat-catalina:7.0.47',
+                    'org.apache.tomcat:tomcat-coyote:7.0.27',
                     //'gnu.mail:gnumail:1.1.2',
                     //'gnu.mail:inetlib:1.1.1',
                     //'org.apache.geronimo.specs:geronimo-javamail_1.4_spec:1.7.1',
@@ -77,17 +81,17 @@ grails.project.dependency.resolution = {
 
     plugins {
         // plugins for the build system only
-        build ":tomcat:7.0.47"
+        build ":tomcat:7.0.52.1"
 
         // plugins for the compile step
-        compile ":scaffolding:2.0.1"
-        compile ':cache:1.1.1'
+        compile ":scaffolding:2.0.3"
+        compile ':cache:1.1.3'
         compile ':quartz:1.0-RC11'
 
         // plugins needed at runtime but not for compilation
-        runtime ":hibernate4:4.1.11.4" // or ":hibernate:3.6.10.4"
+        runtime ":hibernate4:4.3.5.1"
         runtime ":database-migration:1.3.8"
-        runtime ":resources:1.2.1"
+        runtime ":resources:1.2.7"
         runtime ":gsp-resources:0.4.4"
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0.1"
