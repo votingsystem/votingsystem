@@ -9,7 +9,7 @@ grails.project.war.file = "target/${appName}.war"
 
 grails.project.fork = [
     // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
-    //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
+    compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true, source:1.7, target:1.7],
 
     // configure settings for the test-app JVM, uses the daemon by default
     test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true, source:1.7],

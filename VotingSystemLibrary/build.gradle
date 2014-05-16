@@ -40,37 +40,6 @@ dependencies {
 
 }
 
-task copydeps(type: Copy) {
-    doFirst {
-        def file = file("$buildDir/librarydeps")
-        file.deleteDir()
-        println "${file.path} deleted"
-    }
-
-    into "$buildDir/librarydeps"
-    def bcJar = project.configurations.runtime.find {
-        it.name.startsWith("bcprov-") }
-    if(bcJar) ant.copy(file:bcJar, todir:file("$buildDir/librarydeps").path)
-
-    /*doLast {
-        def bcJars = ["bcprov-jdk16-1.46.jar", "bcmail-jdk16-1.46.jar",
-            "bctsp-jdk16-1.46.jar"]
-        def depFiles = file("$buildDir/librarydeps")
-        depFiles.eachFile() {
-            if(!bcJars.contains(it.name)) {
-                println "signing: " + it.path
-                ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
-                    storepass:rootProject.keyStorePassword,
-                    alias:rootProject.signKeyAlias,
-                    jar:it.path,
-                    signedjar:it.path)
-            }
-
-        }
-    }*/
-
-}
-
 jar {
     manifest {
         attributes 'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingSystemLibrary',
