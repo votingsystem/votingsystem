@@ -38,15 +38,8 @@ class TimeStampService {
             X509Certificate x509TimeStampServerCert = null;
             CertificateVS timeStampServerCert = null;
             if(!timeStampServer) {
-                ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
-                        ContentTypeVS.JSON);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage())).save();
-                    Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
-                    x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
-                    signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
-                    log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
-                }
+                fetchTimeStampServerInfo(serverURL);
+                return null
             } else {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,
                         type:CertificateVS.Type.TIMESTAMP_SERVER)
@@ -55,12 +48,8 @@ class TimeStampService {
                             new ByteArrayInputStream(timeStampServerCert.content))
                     signingCertPEMBytes = CertUtil.getPEMEncoded(x509TimeStampServerCert)
                 } else {
-                    ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
-                            ContentTypeVS.JSON);
-                    timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
-                    Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
-                    x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
-                    signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
+                    fetchTimeStampServerInfo(serverURL);
+                    return null
                 }
             }
             if(x509TimeStampServerCert) {
@@ -75,6 +64,32 @@ class TimeStampService {
             log.error(ex.getMessage(), ex)
         }
     }
+
+    private void fetchTimeStampServerInfo(String serverURL) {
+        log.debug("fetchTimeStampServerInfo : ${serverURL}")
+        runAsync {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
+                    ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                ActorVS.withTransaction{
+                    ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage())).save();
+                    X509Certificate x509TimeStampServerCert = CertUtil.fromPEMToX509CertCollection(
+                            timeStampServer.certChainPEM.getBytes()).iterator().next()
+                    log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
+                }
+                CertificateVS.withTransaction {
+                    CertificateVS timeStampServerCert = new CertificateVS(actorVS:timeStampServer,
+                            certChainPEM:timeStampServer.certChainPEM.getBytes(),
+                            content:x509TimeStampServerCert?.getEncoded(),state:CertificateVS.State.OK,
+                            serialNumber:x509TimeStampServerCert?.getSerialNumber()?.longValue(),
+                            validFrom:x509TimeStampServerCert?.getNotBefore(), type:CertificateVS.Type.TIMESTAMP_SERVER,
+                            validTo:x509TimeStampServerCert?.getNotAfter()).save();
+                }
+            } else log.error("ERROR fetching TimeStampServerInfo : ${serverURL}")
+        }
+    }
+
+
 
     public byte[] getSigningCertPEMBytes() {
         if(!signingCertPEMBytes) signingCertPEMBytes = init()?.signingCertPEMBytes
@@ -120,6 +135,7 @@ class TimeStampService {
         try {
             String msg = null
             SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
+            if(!sigVerifier) return new ResponseVS(ResponseVS.SC_ERROR, "TimeStamp service not initialized")
             X509CertificateHolder certHolder = sigVerifier.getAssociatedCertificate();
             DigestCalculator calc = sigVerifier.getDigestCalculator(tsToken.certID.getHashAlgorithm());
             OutputStream cOut = calc.getOutputStream();
@@ -181,7 +197,7 @@ class TimeStampService {
     }
 
     public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
-        if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = init().timeStampSignerInfoVerifier
+        if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = init()?.timeStampSignerInfoVerifier
         return timeStampSignerInfoVerifier
     }
 
