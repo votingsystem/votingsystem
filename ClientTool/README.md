@@ -1,7 +1,7 @@
-Herramienta de Administración
-======================================
+Herramienta cliente para PC de los Sistemas de Votación y Vickets 
+=====================================================================
+Sólo funciona con Java 8
 
-Herramienta con tareas de administración relacionadas con el Sistema de Votación y el servicio de Vickets.
-
+Herramienta para PC necesaria para acceder a los servicios de los Sistemas de Votación y Vickets
 
 

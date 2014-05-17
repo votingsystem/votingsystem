@@ -8,6 +8,7 @@ apply plugin: 'maven-publish'
 apply plugin: "idea"
 
 sourceCompatibility = 7
+targetCompatibility = 7
 
 install {
     repositories.mavenInstaller {

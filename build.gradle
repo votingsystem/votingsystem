@@ -102,7 +102,7 @@ task genAppsCerts() {
 //allprojects { tasks.withType(Upload){ allprojects { mustRunAfter tasks.matching {it instanceof VerificationTask } } } }
 //project.tasks.each {task -> if(task.name.endsWith("AppsCerts")) {}}
 
-task installCerts()  {
+task installCerts(dependsOn:['VotingSystemLibrary:publish'])  {
     doFirst { }
     doLast {
         initAppsCertsData()

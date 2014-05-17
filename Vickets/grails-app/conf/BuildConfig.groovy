@@ -91,7 +91,7 @@ grails.project.dependency.resolution = {
         // plugins needed at runtime but not for compilation
         runtime ":hibernate4:4.3.5.1"
         runtime ":database-migration:1.3.8"
-        runtime ":resources:1.2.7"
+        runtime ":resources:1.2.1"
         runtime ":gsp-resources:0.4.4"
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0.1"
