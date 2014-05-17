@@ -86,7 +86,8 @@
             $('#dynatable-record-count-transaction_table').css('visibility', 'visible');
         })
 
-        $("#transaction_table").stickyTableHeaders({fixedOffset: $('.navbar')});
+        //$("#transaction_table").stickyTableHeaders({fixedOffset: $('.navbar')});
+        $("#transaction_table").stickyTableHeaders();
 
         $('#transactionvsTypeSelect').on('change', function (e) {
             var transactionvsType = $(this).val()

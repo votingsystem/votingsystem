@@ -145,7 +145,7 @@ log4j = {
 
     root {
         debug  'stdout', 'TimeStampServer'
-        error 'TimeStampServerERRORES', 'smtp'
+        error 'TimeStampServerERRORS', 'smtp'
     }
 
     environments {

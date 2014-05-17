@@ -96,11 +96,11 @@ environments {
     development {
         grails.logging.jul.usebridge = true
 		grails.resources.debug = true// -> rendering problems
-        grails.serverURL = "http://sistemavotacion.org:8082/ControlCenter"
+        grails.serverURL = "http://sistemavotacion.org/ControlCenter"
     }
 	production {
 		grails.logging.jul.usebridge = false
-		grails.serverURL = "http://sistemavotacion.org/ControlCenter"
+		grails.serverURL = "http://www.sistemavotacion.org/ControlCenter"
 	}
     test {
 		grails.logging.jul.usebridge = true

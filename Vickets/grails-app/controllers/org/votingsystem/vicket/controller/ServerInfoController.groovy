@@ -34,7 +34,8 @@ class ServerInfoController {
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
 		serverInfo.state = ActorVS.State.RUNNING.toString()
         serverInfo.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        serverInfo.timeStampCertPEM = new String(timeStampService.getSigningCertPEMBytes())
+        byte [] signingCertPEMBytes = timeStampService.getSigningCertPEMBytes()
+        if(signingCertPEMBytes) serverInfo.timeStampCertPEM = new String(signingCertPEMBytes)
         serverInfo.environmentMode = ApplicationContextHolder.getEnvironment().toString()
 		response.setHeader('Access-Control-Allow-Origin', "*")
 		if (params.callback) render "${params.callback}(${serverInfo as JSON})"

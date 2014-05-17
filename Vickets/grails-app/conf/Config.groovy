@@ -91,12 +91,12 @@ environments {
 
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "http://vickets/Vickets"
+        grails.serverURL = "http://vickets:8086/Vickets"
     }
 
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://sistemavotacion.org/Vickets"
+        grails.serverURL = "http://www.sistemavotacion.org/Vickets"
     }
 
 }

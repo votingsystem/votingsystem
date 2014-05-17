@@ -52,6 +52,16 @@
         <listener-class>org.codehaus.groovy.grails.web.context.GrailsContextLoaderListener</listener-class>
     </listener>
 
+    <servlet>
+        <servlet-name>socketServletVS</servlet-name>
+        <servlet-class>org.votingsystem.websocket.SocketServletVS</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>socketServletVS</servlet-name>
+        <url-pattern>/websocket/service</url-pattern>
+    </servlet-mapping>
+
     <!-- Grails dispatcher servlet -->
     <servlet>
         <servlet-name>grails</servlet-name>

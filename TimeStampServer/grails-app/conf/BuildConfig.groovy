@@ -1,4 +1,4 @@
-grails.server.port.http = 8084
+grails.server.port.http = 8090
 
 grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)
 grails.project.class.dir = "target/classes"
@@ -62,7 +62,8 @@ grails.project.dependency.resolution = {
                     //'gnu.mail:inetlib:1.1.1',
                     //'org.apache.geronimo.specs:geronimo-javamail_1.4_spec:1.7.1',
                     'javax.mail:mail:1.4.7',
-            ) {excludes "slf4j-api", "log4j", "commons-logging", "xalan",  "xml-apis", "groovy","commons-io"}
+            ) {excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",
+                    'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'}
 
             compile 'org.postgresql:postgresql:9.2-1003-jdbc4'
 
