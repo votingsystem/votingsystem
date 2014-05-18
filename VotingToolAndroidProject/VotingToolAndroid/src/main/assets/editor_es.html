@@ -42,7 +42,7 @@
                 editorContent = editor.getData().trim()
                 var webAppMessage = {statusCode:statusCode, message:editorContent}
                 var message = JSON.stringify(webAppMessage)
-                androidClient.setJSONMessageToSignatureClient(message);
+                androidClientTool.setJSONMessageToSignatureClient(message);
                 return false
             }
         }

@@ -15,10 +15,6 @@
         </div>
     </div>
 </div>
-
-<div id='resultDialog' title='' style="display:none;">
-    <p id='resultMessage' style="text-align: center;"></p>
-</div>
 <r:script>
 
     var clientCallback = null

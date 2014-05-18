@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.contentprovider.Utils;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContextVS;
@@ -47,6 +48,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class VicketUserInfoFragment extends Fragment {
 
 	public static final String TAG = VicketUserInfoFragment.class.getSimpleName();
+
+    private static final int ADMIN_ACCESS_CONTROL = 1;
 
     private BigDecimal amount;
     private CurrencyVS currencyVS = CurrencyVS.EURO;
@@ -255,6 +258,11 @@ public class VicketUserInfoFragment extends Fragment {
                 return true;
             case R.id.send_message:
 
+                return true;
+            case R.id.test_menu_item:
+                Intent intent = new Intent(getActivity(), BrowserVSActivity.class);
+                intent.putExtra(ContextVS.URL_KEY, "http://vickets/Vickets/app/admin?menu=admin");
+                startActivityForResult(intent, ADMIN_ACCESS_CONTROL);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

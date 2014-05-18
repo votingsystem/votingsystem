@@ -219,7 +219,10 @@ class SignatureVSService {
 	
 	public ResponseVS validateSMIMEVote(SMIMEMessageWrapper messageWrapper, Locale locale) {
 		log.debug("validateSMIMEVote -")
-		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+        MessageSMIME messageSMIME = null
+        MessageSMIME.withTransaction {
+            messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+        }
 		if(messageSMIME) {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
 				[messageWrapper.getContentDigestStr()].toArray(), locale)

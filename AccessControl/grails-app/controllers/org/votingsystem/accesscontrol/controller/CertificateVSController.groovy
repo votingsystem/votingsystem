@@ -188,7 +188,7 @@ class CertificateVSController {
         ResponseVS responseVS = keyStoreService.generateUserTestKeysStore(givenName, surname, nif, password)
         if(ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] resultBytes = KeyStoreUtil.getBytes(responseVS.data, password.toCharArray())
-            File destFile = new File("${System.getProperty('user.home')}/UserTestKeyStore_${nif}.jks")
+            File destFile = new File("${System.getProperty('user.home')}/${params.givenName}_${nif}.jks")
             destFile.createNewFile()
             FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), destFile);
             byte[] base64ResultBytes = Base64.encode(resultBytes)

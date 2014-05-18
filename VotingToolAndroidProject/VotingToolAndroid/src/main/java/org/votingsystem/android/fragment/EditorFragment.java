@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -15,7 +16,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.ui.JavaScriptInterface;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
@@ -32,7 +32,6 @@ public class EditorFragment extends Fragment {
 	public static final String TAG = EditorFragment.class.getSimpleName();
 	
 	private WebView webView;
-	private JavaScriptInterface javaScriptInterface;
     private FrameLayout mainLayout;
     private TextView textview;
     private View rootView;
@@ -78,7 +77,6 @@ public class EditorFragment extends Fragment {
     }
 
     private void loadEditor() {
-        javaScriptInterface = new JavaScriptInterface(this);
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient());
         WebSettings webSettings = webView.getSettings();
@@ -95,7 +93,7 @@ public class EditorFragment extends Fragment {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setDomStorageEnabled(true);
-        webView.addJavascriptInterface(javaScriptInterface, "clientTool");
+        webView.addJavascriptInterface(this, "androidClientTool");
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
@@ -117,6 +115,18 @@ public class EditorFragment extends Fragment {
         }
         webView.loadUrl("file:///android_asset/" + editorFileName);
     }
+
+    @JavascriptInterface public void setJSONMessageToSignatureClient (String appMessage) {
+        try {
+            OperationVS operationVS = OperationVS.parse(appMessage);
+            processOperation(operationVS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @JavascriptInterface public void setTEXTMessageToSignatureClient (String appMessage,
+          String callbackFunction) { }
 
     //This is for JavaScriptInterface.java operation processing
     public void processOperation(OperationVS operationVS) {

@@ -73,6 +73,7 @@ public class ContextVS {
     public static final String EDITOR_VISIBLE_KEY = "EDITOR_VISIBLE_KEY";
     public static final String LOADING_KEY = "LOADING_KEY";
     public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
+    public static final String OPERATIONVS_KEY = "OPERATIONVS_KEY";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
     public static final String VICKET_ACCOUNT_LAST_CHECKED_KEY = "VICKET_ACCOUNT_LAST_CHECKED_KEY";

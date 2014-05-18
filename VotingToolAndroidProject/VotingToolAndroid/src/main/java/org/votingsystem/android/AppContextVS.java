@@ -17,12 +17,13 @@ import com.itextpdf.text.Context_iTextVS;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VicketServer;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -70,12 +71,24 @@ public class AppContextVS extends Application {
 
     private State state = State.WITHOUT_CSR;
     private String vicketServerURL;
+    private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
     private VicketServer vicketServer;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private OperationVS operationVS = null;
+
+    public void setServer(ActorVS actorVS) {
+        if(serverMap.get(actorVS.getServerURL()) == null) {
+            serverMap.put(actorVS.getServerURL(), actorVS);
+        } else Log.d(TAG + ".setServer(...)", "ActorVS with URL '" + actorVS.getServerURL() +
+                "' already in context");
+    }
+
+    public ActorVS getServer(String serverURL) {
+        return serverMap.get(serverURL);
+    }
 
 
 	@Override public void onCreate() {
@@ -181,7 +194,7 @@ public class AppContextVS extends Application {
                 byte[] serializedUserData = FileUtils.getBytesFromFile(
                         representativeDataFile);
                 userVS = (UserVS) ObjectUtils.deSerializeObject(serializedUserData);
-            } else Log.d(TAG + ".setAccessControlVS(...)", "user data not found");
+            } else Log.d(TAG + ".loadUser(...)", "user data not found");
         } catch(Exception ex) {
             ex.printStackTrace();
         }

@@ -11,8 +11,8 @@ import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.VicketUserInfoFragment;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
+import org.votingsystem.android.fragment.VicketUserInfoFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 
@@ -55,7 +55,7 @@ public class VicketPagerAdapter extends FragmentStatePagerAdapter
         args.putString(SearchManager.QUERY, searchQuery);
         selectedFragment.setArguments(args);
         Log.d(TAG + ".getItem(...) ", "position:" + position + " - args: " + args +
-                " - selectedFragment.getClass(): " + selectedFragment.getClass());
+                " - selectedFragment.getClass(): " + ((Object)selectedFragment).getClass());
         return selectedFragment;
     }
 

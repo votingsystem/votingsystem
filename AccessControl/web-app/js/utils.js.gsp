@@ -157,6 +157,22 @@ FormUtils.checkIfEmpty = function (param) {
     else return false
 }
 
+//https://github.com/sairam/bootstrap-prompts/blob/master/bootstrap-prompts-alert.js
+window._originalAlert = window.alert;
+window.alert = function(text) {
+    var bootStrapAlert = function() {
+        if(! $.fn.modal.Constructor) return false;
+        if($('#windowAlertModal').length == 1) return true;
+    }
+    if ( bootStrapAlert() ){
+        $('#windowAlertModal .modal-body p').text(text);
+        $('#windowAlertModal').modal('show');
+    }  else {
+        console.log('bootstrap was not found');
+        window._originalAlert(text);
+    }
+}
+
 Date.prototype.format = function() {
 	var curr_date = this.getDate();
     var curr_month = this.getMonth() + 1; //Months are zero based

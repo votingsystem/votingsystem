@@ -111,6 +111,22 @@ function httpGet(theUrl){
     return xmlHttp.responseText;
 }
 
+//https://github.com/sairam/bootstrap-prompts/blob/master/bootstrap-prompts-alert.js
+window._originalAlert = window.alert;
+window.alert = function(text) {
+    var bootStrapAlert = function() {
+        if(! $.fn.modal.Constructor) return false;
+        if($('#windowAlertModal').length == 1) return true;
+    }
+    if ( bootStrapAlert() ){
+        $('#windowAlertModal .modal-body p').text(text);
+        $('#windowAlertModal').modal('show');
+    }  else {
+        console.log('bootstrap was not found');
+        window._originalAlert(text);
+    }
+}
+
 function DateUtils(){}
 
 //parse dates with format "2010-08-30 01:02:03"
@@ -145,6 +161,7 @@ DateUtils.checkDate = function (dateInit, dateFinish) {
 		if(todayDate > dateInit && todayDate < dateFinish) return true;
 		else return false;
 	}
+
 
 Date.prototype.format = function() {
 	var curr_date = this.getDate();

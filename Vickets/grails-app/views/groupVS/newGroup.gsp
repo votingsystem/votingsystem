@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<div id="contentDiv" class="pageContenDiv" style="">
+<div id="contentDiv" class="pageContenDiv" style="min-height: 1000px;">
     <div class="row">
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
@@ -35,7 +35,6 @@
                 <input type="text" name="subject" id="groupSubject" style="width:400px"  required
                        title="<g:message code="subjectLbl"/>" class="form-control"
                        placeholder="<g:message code="newGroupNameLbl"/>"
-                       oninvalid="showGroupNameErrorMsg()"
                        onchange="this.setCustomValidity('')" />
             </div>
         </div>
@@ -53,9 +52,6 @@
 	</div>	
 		
 	</form>
-
-    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
-        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 	
 </div>
 <g:include view="/include/dialog/resultDialog.gsp"/>
@@ -64,8 +60,6 @@
 <r:script>
 
     $(function() {
-        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
-
         $('#mainForm').submit(function(event){
             event.preventDefault();
             if(!document.getElementById('groupSubject').validity.valid) {
@@ -89,7 +83,7 @@
             webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),groupvsName:$("#groupSubject").val(),
                         operation:Operation.VICKET_GROUP_NEW}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = 'newGroupVSCallback'
+            webAppMessage.callerCallback = getFnName(newGroupVSCallback)
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         });
@@ -100,17 +94,19 @@
         console.log("newGroupVSCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            var caption = '<g:message code="publishERRORCaption"/>'
+            var caption = '<g:message code="newGroupERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="publishOKCaption"/>'
-                var msgTemplate = "<g:message code='documentLinkMsg'/>";
-                msg = "<p><g:message code='publishOKMsg'/>.</p>" +
-                    msgTemplate.format(appMessageJSON.message);
+                caption = '<g:message code="newGroupOKCaption"/>'
+                //var msgTemplate = "<g:message code='documentLinkMsg'/>";
+                //msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
             }
             showResultDialog(caption, msg)
         }
     }
 
+    function showGroupNameErrorMsg() {
+        showResultDialog("==== name error caption", "==== name error msg")
+    }
 
 </r:script>

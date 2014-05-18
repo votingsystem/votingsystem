@@ -117,6 +117,10 @@
             android:icon="@drawable/system_users_22"
             android:label="@string/representative_delegation_lbl" android:theme="@style/Theme.AppCompat.Light"/>
 
+        <activity android:name=".activity.BrowserVSActivity"
+            android:icon="@drawable/fa_gears_16"
+            android:label="@string/browswevs_lbl" android:theme="@style/Theme.AppCompat.Light"/>
+
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->
         

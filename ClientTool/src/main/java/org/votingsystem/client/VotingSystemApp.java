@@ -27,6 +27,7 @@ import org.votingsystem.model.AppHostVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.NifUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -55,14 +56,17 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         ContextVS.initSignatureClient(this, "log4jClientTool.properties",
                 "clientToolMessages.properties", locale);
 
-        VBox verticalBox = new VBox(35);
+        logger.debug("NifUtils.getNif(555666): " + NifUtils.getNif(555666));
+
+
+        VBox verticalBox = new VBox(100);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
         voteButton.setGraphic(new ImageView(Utils.getImage(this, "fa-envelope")));
         voteButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 openVotingPage();
             }});
-        voteButton.setPrefWidth(450);
+        voteButton.setPrefWidth(500);
 
         Button selectRepresentativeButton = new Button(ContextVS.getMessage("selectRepresentativeButtonLbl"));
         selectRepresentativeButton.setGraphic(new ImageView(Utils.getImage(this, "fa-hand-o-right")));
@@ -70,7 +74,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
             @Override public void handle(ActionEvent actionEvent) {
                 openSelectRepresentativePage();
             }});
-        selectRepresentativeButton.setPrefWidth(450);
+        selectRepresentativeButton.setPrefWidth(500);
 
         Button votingSystemProceduresButton = new Button(ContextVS.getMessage("votingSystemProceduresLbl"));
         votingSystemProceduresButton.setGraphic(new ImageView(Utils.getImage(this, "fa-cogs")));
@@ -78,7 +82,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
             @Override public void handle(ActionEvent actionEvent) {
                 openVotingSystemProceduresPage();
             }});
-        votingSystemProceduresButton.setPrefWidth(450);
+        votingSystemProceduresButton.setPrefWidth(500);
 
         Button openSignedFileButton = new Button(ContextVS.getMessage("openSignedFileButtonLbl"));
         openSignedFileButton.setGraphic(new ImageView(Utils.getImage(this, "application-certificate")));
@@ -86,7 +90,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
             @Override public void handle(ActionEvent actionEvent) {
                 openSignedFile();
             }});
-        openSignedFileButton.setPrefWidth(450);
+        openSignedFileButton.setPrefWidth(500);
 
         final Button openBackupButton = new Button(ContextVS.getMessage("openBackupButtonLbl"));
         openBackupButton.setGraphic(new ImageView(Utils.getImage(this, "fa-archive")));
@@ -96,15 +100,24 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
                 openBackup();
             }
         });
-        openBackupButton.setPrefWidth(450);
+        openBackupButton.setPrefWidth(500);
 
-        Button vicketAdminButton = new Button(ContextVS.getMessage("vicketAdminLbl"));
-        vicketAdminButton.setGraphic(new ImageView(Utils.getImage(this, "fa-money")));
-        vicketAdminButton.setOnAction(new EventHandler<ActionEvent>() {
+        Button vicketUsersProceduresButton = new Button(ContextVS.getMessage("vicketUsersLbl"));
+        vicketUsersProceduresButton.setGraphic(new ImageView(Utils.getImage(this, "fa-money")));
+        vicketUsersProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openGroupAdmin();
+                openVicketUserProcedures();
             }});
-        vicketAdminButton.setPrefWidth(450);
+        vicketUsersProceduresButton.setPrefWidth(500);
+
+
+        Button vicketAdminProceduresButton = new Button(ContextVS.getMessage("vicketAdminLbl"));
+        vicketAdminProceduresButton.setGraphic(new ImageView(Utils.getImage(this, "fa-money")));
+        vicketAdminProceduresButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                openVicketAdminProcedures();
+            }});
+        vicketAdminProceduresButton.setPrefWidth(500);
 
         Button settingsButton = new Button(ContextVS.getMessage("settingsLbl"));
         settingsButton.setGraphic(new ImageView(Utils.getImage(this, "fa-wrench")));
@@ -129,9 +142,10 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         VBox.setMargin(footerButtonsBox, new Insets(20, 10, 0, 10));
 
         verticalBox.getChildren().addAll(voteButton, selectRepresentativeButton, votingSystemProceduresButton,
-                openSignedFileButton, openBackupButton,  vicketAdminButton,
+                openSignedFileButton, openBackupButton, vicketUsersProceduresButton, vicketAdminProceduresButton,
                 footerButtonsBox);
         verticalBox.getStyleClass().add("modal-dialog");
+        verticalBox.setStyle("-fx-max-width: 1000px;");
 
         primaryStage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
         primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
@@ -214,7 +228,17 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         });
     }
 
-    private void openGroupAdmin() {
+    private void openVicketUserProcedures() {
+        logger.debug("openGroupAdmin");
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                if(browserVS == null) browserVS = new BrowserVS();
+                browserVS.loadURL("http://vickets/Vickets/app/user?menu=user");
+            }
+        });
+    }
+
+    private void openVicketAdminProcedures() {
         logger.debug("openGroupAdmin");
         Platform.runLater(new Runnable() {
             @Override public void run() {
@@ -229,7 +253,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://sistemavotacion.org/AccessControl/eventVSElection/main?menu=user");
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/eventVSElection/main?menu=user");
             }
         });
     }
@@ -239,7 +263,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://sistemavotacion.org/AccessControl/representative/main?menu=user");
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/representative/main?menu=user");
             }
         });
     }

@@ -53,3 +53,5 @@
         </ul>
     </nav>
 </div>
+
+<g:include view="/include/dialog/windowAlertModal.gsp"/>

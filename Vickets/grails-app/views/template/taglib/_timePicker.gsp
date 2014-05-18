@@ -1,7 +1,7 @@
 <div id="timeSupportedDiv${attrs.id}" style='${attrs.style}'>
     <div class="" style="display: table;">
         <div style="display: table-cell;">
-            <input id="${attrs.id}" class="form-control" type="time" style="width: 95px;" value="00:00">
+            <input id="${attrs.id}" class="form-control" type="time" style="width: 85px; padding-right: 0px;" value="00:00">
         </div>
         <div style="display: table-cell;">
             <span style="color: #870000;margin: 0 0 0 4px;" ><g:message code="hourLbl"/>

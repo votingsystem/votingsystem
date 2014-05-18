@@ -310,7 +310,7 @@
     <string name="vote_options_lbl">Opciones de la votación</string>
     <string name="claim_options_lbl">Campos de la reclamación</string>
     <string name="option_repeated_msg">Ya ha introducido una opción con el valor \'%1$s\'</string>
-    <string name="claim_published_ok_msg">La reclmación se ha publicado corréctamente</string>
+    <string name="claim_published_ok_msg">La reclamación se ha publicado corréctamente</string>
     <string name="election_published_ok_msg">La votación se ha publicado corréctamente</string>
     <string name="representative_image_lbl">Imagen del representante</string>
     <string name="new_representative_title">Dar de alta representante</string>
@@ -424,5 +424,8 @@
     <string name="vicket_cancellation_error_msg_subject">Error cancelando Vicket</string>
     <string name="vicket_expended_send_error_msg">Los vickets ya habían sido consumidos</string>
     <string name="vicket_repeated_error_msg">En la operación se han mezclado Vickets usados. Por favor, vuelva a intentarlo</string>
+    <string name="browswevs_lbl">Sistema de Votación</string>
+    <string name="test_lbl">Test</string>
+    <string name="enter_pin_signature_device_msg">Introduzca el PIN de su dispositivo de firma</string>
 
 </resources>

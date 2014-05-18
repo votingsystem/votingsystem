@@ -10,10 +10,13 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
 
 import java.util.List;
@@ -32,12 +35,17 @@ public class SignAndSendService extends IntentService {
 
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
+        contextVS = (AppContextVS) getApplicationContext();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        OperationVS operationVS = (OperationVS)arguments.getSerializable(ContextVS.OPERATIONVS_KEY);
+        if(operationVS != null) {
+            processOperation(operationVS, serviceCaller);
+            return;
+        }
         ResponseVS responseVS = null;
-        int resultIcon = R.drawable.cancel_22;
+        int resultIcon = R.drawable.fa_times_32;
         try {
-            contextVS = (AppContextVS) getApplicationContext();
             Long eventId = arguments.getLong(ContextVS.ITEM_ID_KEY);
             String signatureContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
@@ -142,6 +150,59 @@ public class SignAndSendService extends IntentService {
             contextVS.showNotification(responseVS);
             contextVS.sendBroadcast(responseVS);
         }
+    }
+
+    private void processOperation(OperationVS operation, String serviceCaller) {
+        Log.d(TAG + ".processOperation(...) ", "operation" + operation.getTypeVS() + " - serviceCaller: " +
+                serviceCaller);
+        ActorVS targetServer = getActorVS(operation.getServerURL());
+        ResponseVS responseVS = null;
+        if(targetServer == null) {
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, contextVS.getString(
+                    R.string.connection_error_msg));
+            responseVS.setIconId(R.drawable.fa_times_32);
+        } else {
+            responseVS = sendSMIME(targetServer, operation);
+        }
+        responseVS.setTypeVS(operation.getTypeVS());
+        responseVS.setServiceCaller(serviceCaller);
+        contextVS.showNotification(responseVS);
+        contextVS.sendBroadcast(responseVS);
+    }
+
+
+    private ResponseVS sendSMIME(ActorVS targetServer, OperationVS operationVS, String... header) {
+        Log.d(TAG + ".sendSMIME(...) ", "sendSMIME");
+        String toUser = operationVS.getNormalizedReceiverName();
+        String serviceURL = operationVS.getServiceURL();
+        ContentTypeVS contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED;
+        String messageSubject = operationVS.getSignedMessageSubject();
+        String signatureContent = operationVS.getSignedContent().toString();
+        SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
+                contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
+                contentType, messageSubject, targetServer.getCertificate(),
+                (AppContextVS)getApplicationContext());
+        ResponseVS responseVS = smimeSignedSender.call();
+        if(ResponseVS.SC_ERROR == responseVS.getStatusCode()) {
+            responseVS.setIconId(R.drawable.fa_times_32);
+        } else responseVS.setIconId(R.drawable.fa_check_32);
+        return responseVS;
+    }
+
+    public ActorVS getActorVS(String serverURL) {
+        ActorVS targetServer = contextVS.getServer(serverURL);
+        if(targetServer == null) {
+            try {
+                ResponseVS responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    targetServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                    contextVS.setServer(targetServer);
+                }
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return targetServer;
     }
 
 }

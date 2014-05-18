@@ -38,4 +38,9 @@ class AppController {
     def tools() {}
 
     def admin() {}
+
+    def user() {}
+
+    def contact() {}
+
 }

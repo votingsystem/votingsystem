@@ -57,7 +57,7 @@ public class SignatureService extends Service<ResponseVS> {
     class SignatureTask extends Task<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
-            logger.debug("PreconditionsCheckerService.CheckTask - call:" + operationVS.getType());
+            logger.debug("SignatureService.SignatureTask - call:" + operationVS.getType());
             ResponseVS responseVS = null;
             ActorVS targetServer = null;
             updateProgress(5, 100);

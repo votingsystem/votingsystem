@@ -6,8 +6,8 @@ import android.util.Log;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
-import org.votingsystem.model.Vicket;
 import org.votingsystem.model.TransactionVS;
+import org.votingsystem.model.Vicket;
 import org.votingsystem.util.ObjectUtils;
 
 import java.util.ArrayList;

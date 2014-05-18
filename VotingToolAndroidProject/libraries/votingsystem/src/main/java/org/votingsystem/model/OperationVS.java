@@ -7,15 +7,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.util.StringUtils;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.ParseException;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class OperationVS {
+public class OperationVS implements Serializable{
 
-	public static final String TAG = "OperationVS";
+	public static final String TAG = OperationVS.class.getSimpleName();
     
     private TypeVS typeVS;
     private Integer statusCode;
@@ -23,9 +27,10 @@ public class OperationVS {
     private String message;
     private String urlTimeStampServer;
     private String serviceURL;
+    private String serverURL;
     private String receiverName;
     private String signedMessageSubject;
-    private JSONObject signedContent;
+    private transient JSONObject signedContent;
     private EventVS eventVS;
     private String sessionId;
     private Uri uriData;
@@ -167,6 +172,8 @@ public class OperationVS {
         if (operationJSON.has("receiverName")) {
             operation.setReceiverName(operationJSON.getString("receiverName"));
         }
+
+        if (operationJSON.has("serverURL")) operation.setServerURL(operationJSON.getString("serverURL"));
         if (operationJSON.has("signedMessageSubject")) {
             operation.setSignedMessageSubject(operationJSON.getString("signedMessageSubject"));
         }
@@ -234,6 +241,33 @@ public class OperationVS {
     public void setUriData(Uri uriData) {
         this.uriData = uriData;
     }
+
+    public String getServerURL() {
+        return serverURL;
+    }
+
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(signedContent != null) s.writeObject(signedContent.toString());
+            else s.writeObject(null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException,
+            JSONException {
+        s.defaultReadObject();
+        String signedContentStr = (String) s.readObject();
+        if(signedContentStr != null) signedContent = new JSONObject(signedContentStr);
+    }
+
+
 }
 
 

@@ -53,17 +53,23 @@
         </div>
     </div>
 
-    <g:if test="${GroupVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
-        <div class="row text-right">
-            <button id="subscribeButton" type="submit" class="btn btn-default btn-lg" onclick="subscribeToGroup();"
-                    style="margin:15px 20px 15px 0px;">
-                <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
-            </button>
-        </div>
+    <g:if test="${"user".equals(params.menu)}">
+        <g:if test="${GroupVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
+            <div class="row text-right">
+                <button id="subscribeButton" type="submit" class="btn btn-default btn-lg" onclick="subscribeToGroup();"
+                        style="margin:15px 20px 15px 0px;">
+                    <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
+                </button>
+            </div>
+        </g:if>
+    </g:if>
+    <g:if test="${!"admin".equals(params.menu) && !"user".equals(params.menu)}">
+        <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;margin:30px 0 0 0;">
+            <g:message code="clientToolNeededMsg"/>.
+            <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
     </g:if>
 
-    <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
-        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
+
 
 </div>
 <g:include view="/include/dialog/resultDialog.gsp"/>
@@ -79,7 +85,7 @@
     $(function() {
 
         <g:if test="${GroupVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
-            $(".pageHeader").css("color", "#388746")
+            $(".pageHeader").css("color", "#89a98e")
         </g:if>
         <g:if test="${GroupVS.State.PENDING.toString().equals(groupvsMap?.state)}">
             $(".pageHeader").css("color", "#fba131")
@@ -94,7 +100,6 @@
             $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
             $("#messagePanel").css("display", "visible")
         </g:if>
-    if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
 
 });
 

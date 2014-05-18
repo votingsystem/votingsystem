@@ -43,6 +43,7 @@ public enum TypeVS {
     VICKET_SEND,
     VICKET_USER_INFO,
     VICKET_CANCEL,
+    VICKET_GROUP_NEW,
 
     TRANSACTION,
 

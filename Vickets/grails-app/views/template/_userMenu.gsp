@@ -27,7 +27,7 @@
             </li>
             <li>
                 <a  href="${createLink(controller: 'app', action: 'contact')}"
-                    style="color:#f9f9f9;"><g:message code="contactLbl"/> <i class="fa fa-phone"></i>
+                    style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-phone"></i>
                 </a>
             </li>
         </ul>

@@ -19,20 +19,20 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
-import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.Utils;
+import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VicketAccount;
-import org.votingsystem.model.VicketServer;
-import org.votingsystem.model.Vicket;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.Vicket;
+import org.votingsystem.model.VicketAccount;
+import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.Encryptor;
@@ -539,6 +539,7 @@ public class VicketService extends IntentService {
         VicketServer vicketServer = contextVS.getVicketServer();
         if(vicketServer != null) {
             responseVS = new ResponseVS(ResponseVS.SC_OK);
+            responseVS.setData(vicketServer);
         } else {
             try {
                 responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(contextVS.getVicketServerURL()),

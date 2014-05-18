@@ -10,4 +10,9 @@
         android:showAsAction="never"
         android:title="@string/send_message_lbl"/>
 
+    <item android:id="@+id/test_menu_item"
+        android:orderInCategory="2"
+        android:showAsAction="never"
+        android:title="@string/test_lbl"/>
+
 </menu>
