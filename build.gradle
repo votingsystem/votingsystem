@@ -22,7 +22,7 @@ ext {
 }
 
 //TODO 'ClientTool:signJar' -> Needs Java8
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', 'TestWebApp:war',
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', 'TestsWebApp:war',
                          'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
 
