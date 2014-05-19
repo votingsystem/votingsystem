@@ -21,6 +21,8 @@ import org.votingsystem.util.HttpHelper;
 
 import java.util.List;
 
+import javax.mail.internet.ContentType;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -166,6 +168,7 @@ public class SignAndSendService extends IntentService {
         }
         responseVS.setTypeVS(operation.getTypeVS());
         responseVS.setServiceCaller(serviceCaller);
+        responseVS.setOperation(operation);
         contextVS.showNotification(responseVS);
         contextVS.sendBroadcast(responseVS);
     }

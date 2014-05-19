@@ -6,34 +6,30 @@
     <r:require module="dynatableModule"/>
 </head>
 <body>
-<div class="pageContenDiv">
-    <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
-        <ol class="breadcrumbVS pull-left">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li class="active"><g:message code="groupvsLbl"/></li>
-        </ol>
-    </div>
-    <button id="loadHistoryButton" type="button" class="btn btn-primary"
-            style="margin: 10px 0px 10px 0px;display: none;">
-        <g:message code="loadHistoryLbl"/>
-        <i id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
-    </button>
-
-    <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
-        <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
-                <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
-                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
-                <option value="CLOSED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
-            </select>
+<div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
+    <div style="margin:0px 30px 0px 30px;">
+        <div class="row">
+            <ol class="breadcrumbVS pull-left">
+                <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+                <li class="active"><g:message code="groupvsLbl"/></li>
+            </ol>
         </div>
+
+        <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
+            <div style="display:table-cell;margin: auto; vertical-align: top;">
+                <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
+                    <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
+                    <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
+                    <option value="CLOSED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
+                </select>
+            </div>
+        </div>
+
+        <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
+            background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
+
+        <div id="groupvsList" class="row container"><ul></ul></div>
     </div>
-
-    <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
-    background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
-
-    <div id="groupvsList" class="row container"><ul></ul></div>
-
 </div>
 
 <div id="groupvsTemplate" style="display:none;">

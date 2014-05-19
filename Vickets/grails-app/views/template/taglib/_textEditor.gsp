@@ -23,6 +23,8 @@ function getEditor_${attrs.id}Data() {
 }
 
 function setDataEditor_${attrs.id}(value) {
+    console.log("==== setDataEdito: " + editor + " - valuie: " + value)
+    ${attrs.id}Content = value
     editor.insertHtml( value );
 }
 
@@ -33,6 +35,7 @@ $(function() {
         var height = $("#${attrs.id}").height() - 75
         $("#contentDiv").fadeIn(500)
         editor.resize( '100%', height, true )
+        editor.insertHtml(${attrs.id}Content);
         editor.focus();
     });
 

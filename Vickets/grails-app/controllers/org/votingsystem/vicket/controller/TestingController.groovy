@@ -2,8 +2,10 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.apache.avro.generic.GenericData
+import org.apache.log4j.Logger
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.vicket.TransactionVS
@@ -26,6 +28,7 @@ class TestingController {
     def grailsApplication
     def transactionVSService
     def auditingService
+
 
     def index() {}
 

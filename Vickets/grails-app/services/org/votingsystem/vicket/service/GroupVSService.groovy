@@ -28,7 +28,40 @@ class GroupVSService {
 
 	public void init() { }
 
-    ResponseVS saveGroup(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS editGroup(GroupVS groupVS, MessageSMIME messageSMIMEReq, Locale locale) {
+        UserVS userSigner = messageSMIMEReq.getUserVS()
+        log.debug("editGroup '${groupVS.id}' - signer: ${userSigner?.nif}")
+        String msg = null
+        ResponseVS responseVS = null
+        if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif)) {
+            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
+                 TypeVS.VICKET_GROUP_UPDATE_SUBSCRIPTION.toString(), groupVS.name].toArray(), locale)
+            log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
+        def messageJSON = JSON.parse(documentStr)
+        if (!messageJSON.groupvsName || !messageJSON.groupvsInfo ||!messageJSON.id ||
+                (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
+            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        if(messageJSON.id != groupVS.id) {
+            msg = messageSource.getMessage('identifierErrorMsg', [groupVS.id, messageJSON.id].toArray(), locale)
+            log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        groupVS.setDescription(messageJSON.groupvsInfo)
+        groupVS.save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS,
+                reason: "editGroup_${groupVS.id}")
+    }
+
+    public ResponseVS saveGroup(MessageSMIME messageSMIMEReq, Locale locale) {
         GroupVS groupVS = null
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("saveGroup - signer: ${userSigner?.nif}")
@@ -65,7 +98,8 @@ class GroupVSService {
 
         MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT,
                 smimeParent:messageSMIMEReq, content:smimeMessageRespBytes).save() }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS,
+                reason: "saveGroup_${groupVS.id}")
     }
 
     public ResponseVS subscribe(MessageSMIME messageSMIMEReq, Locale locale) {

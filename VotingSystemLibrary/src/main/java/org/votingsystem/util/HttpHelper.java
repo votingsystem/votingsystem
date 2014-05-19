@@ -1,5 +1,6 @@
 package org.votingsystem.util;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -108,6 +109,7 @@ public class HttpHelper {
         ResponseVS responseVS = null;
         HttpResponse response = null;
         HttpGet httpget = null;
+        ContentTypeVS responseContentType = null;
         try {
             httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
@@ -119,12 +121,14 @@ public class HttpHelper {
             }*/
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
             } else {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
+                        EntityUtils.toString(response.getEntity()), responseContentType);
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -192,6 +196,7 @@ public class HttpHelper {
         logger.debug("sendFile - contentType: " + contentTypeVS +  " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
+        ContentTypeVS responseContentType = null;
         try {
             httpPost = new HttpPost(serverURL);
             ContentType contentType = null;
@@ -201,9 +206,11 @@ public class HttpHelper {
             HttpResponse response = httpclient.execute(httpPost);
             logger.debug("----------------------------------------");
             logger.debug(response.getStatusLine().toString());
-            logger.debug("----------------------------------------"); 
+            logger.debug("----------------------------------------");
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
             if(headerNames != null) {
                 List<String> headerValues = new ArrayList<String>();
                 for(String headerName: headerNames) {
@@ -235,15 +242,13 @@ public class HttpHelper {
             httpPost.setEntity(entity);
             response = httpclient.execute(httpPost);
             ContentTypeVS responseContentType = null;
-            if(response.getFirstHeader("Content-Type") != null) {
-                responseContentType = ContentTypeVS.getByName(response.getFirstHeader("Content-Type").getValue());
-            }
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             logger.debug("------------------------------------------------");
-            logger.debug(response.getStatusLine().toString() + " - contentType: " + responseContentType);
+            logger.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
             logger.debug("------------------------------------------------");
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
-            responseVS.setContentType(responseContentType);
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
             if(headerNames != null && headerNames.length > 0) {
                 List<String> headerValues = new ArrayList<String>();
                 for(String headerName: headerNames) {
@@ -276,6 +281,7 @@ public class HttpHelper {
                 ContextVS.getInstance().getMessage("requestWithoutFileMapErrorMsg"));
         HttpPost httpPost = null;
         HttpResponse response = null;
+        ContentTypeVS responseContentType = null;
         try {
             httpPost = new HttpPost(serverURL);
             Set<String> fileNames = fileMap.keySet();
@@ -293,12 +299,14 @@ public class HttpHelper {
                 }
             }
             httpPost.setEntity(reqEntity);
-            response = httpclient.execute(httpPost);     
+            response = httpclient.execute(httpPost);
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             logger.debug("----------------------------------------");
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
             //EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
             String statusLine = null;

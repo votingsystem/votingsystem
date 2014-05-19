@@ -393,7 +393,7 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
 
                 alert(redirectURL)
                 window.location.href = redirectURL.replace("\n","")
-            } else $('#clientToolAdvertDialog').modal('show')
+            }  else alert(e)
             return
         }
 		var messageToSignatureClient = JSON.stringify(messageJSON)
@@ -415,7 +415,7 @@ VotingSystemClient.setTEXTMessageToSignatureClient = function (messageToSignatur
 
                 alert(redirectURL)
                 window.location.href = redirectURL.replace("\n","")
-            } else $('#clientToolAdvertDialog').modal('show')
+            } else alert(e)
             return
         }
 

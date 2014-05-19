@@ -1,4 +1,8 @@
+import org.apache.log4j.EnhancedPatternLayout
 import org.apache.log4j.Level
+import org.votingsystem.groovy.util.VotingSystemLogAppender
+import org.votingsystem.util.SimpleJsonLayout
+
 
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
@@ -129,12 +133,19 @@ log4j = {
     //System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
 
     appenders {
+        appender new VotingSystemLogAppender(source:'Vickets', name: 'VotingSystemLogAppender',
+                layout:pattern(conversionPattern: '%m%n'), threshold: org.apache.log4j.Level.INFO)
+
         file name:'VicketServerERRORS', threshold:org.apache.log4j.Level.ERROR,
                 file:"/var/log/votingsystem/VicketServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketServer", threshold:org.apache.log4j.Level.DEBUG,
                 layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
                 file:"/var/log/votingsystem/VicketServer.log", datePattern: '\'_\'yyyy-MM-dd'
+
+        rollingFile name:"VicketServerReports", threshold:org.apache.log4j.Level.INFO,
+                layout:pattern(conversionPattern: '%m%n'),
+                file:"./VicketReports/VicketServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
             subject: mail.error.subject, threshold: Level.ERROR,
@@ -146,7 +157,8 @@ log4j = {
 
 
     root {
-        debug  'stdout', 'VicketServer'
+        info 'VotingSystemLogAppender'
+        debug 'stdout', 'VicketServer'
         error 'VicketServerERRORS', 'smtp'
     }
 
@@ -158,6 +170,7 @@ log4j = {
             //debug   'org.hibernate'
             //debug   'org.apache'
 
+            info  additivity: false, VicketServerReports: 'reportsLog'
 
             error   'org.codehaus.groovy.grails.web.servlet',  //  controllers
                     'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -173,9 +186,12 @@ log4j = {
                     'grails.app.taglib.org.grails.plugin.resource',
                     'grails.app.resourceMappers.org.grails.plugin.resource'
             error   'org.hibernate'
+
         }
 
         production {
+            info  additivity: false, VicketServerReports: 'reportsLog'
+
             debug   'org.votingsystem','filters', 'grails.app'
             //debug   'org.springframework.security'
             //debug   'org.hibernate'

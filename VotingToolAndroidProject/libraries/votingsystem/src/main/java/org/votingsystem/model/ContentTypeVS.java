@@ -13,7 +13,7 @@ public enum ContentTypeVS {
     BACKUP("application/backup", "zip"),
     JAVASCRIPT("application/javascript", "js"),
 
-    JSON("application/json", "json"),
+    JSON("application/json;charset=UTF-8", "json"),
     JSON_SIGNED("application/json;application/pkcs7-signature","p7s"),
     JSON_ENCRYPTED("application/json;application/pkcs7-mime","p7m"),//.p7c
     JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-mime", "p7m"),

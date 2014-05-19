@@ -427,5 +427,7 @@
     <string name="browswevs_lbl">Sistema de Votación</string>
     <string name="test_lbl">Test</string>
     <string name="enter_pin_signature_device_msg">Introduzca el PIN de su dispositivo de firma</string>
+    <string name="admin_vickets_menu_item">Administración de Vickets</string>
+    <string name="connecting_lbl">Conectando...</string>
 
 </resources>

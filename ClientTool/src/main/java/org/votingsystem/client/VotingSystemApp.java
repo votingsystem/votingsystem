@@ -56,9 +56,6 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         ContextVS.initSignatureClient(this, "log4jClientTool.properties",
                 "clientToolMessages.properties", locale);
 
-        logger.debug("NifUtils.getNif(555666): " + NifUtils.getNif(555666));
-
-
         VBox verticalBox = new VBox(100);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
         voteButton.setGraphic(new ImageView(Utils.getImage(this, "fa-envelope")));

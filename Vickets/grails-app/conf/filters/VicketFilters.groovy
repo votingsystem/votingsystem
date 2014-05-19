@@ -205,6 +205,7 @@ class VicketFilters {
                         return printOutput(response, responseVS)
                     case ContentTypeVS.JSON:
                         response.status = responseVS.statusCode
+                        response.setContentType(ContentTypeVS.JSON.name)
                         render responseVS.getData() as JSON
                         return false
                     case ContentTypeVS.ZIP:

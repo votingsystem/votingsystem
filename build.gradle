@@ -21,8 +21,8 @@ ext {
 	certsDataMap = null
 }
 
-//'ClientTool:signJar' -> Needs Java8
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war',':ClientTool:copyDistZip',
+//TODO 'ClientTool:signJar' -> Needs Java8
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', 'TestWebApp:war',
                          'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
 

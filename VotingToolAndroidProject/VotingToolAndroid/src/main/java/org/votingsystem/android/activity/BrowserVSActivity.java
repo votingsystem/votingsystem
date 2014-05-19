@@ -26,6 +26,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
@@ -55,16 +56,23 @@ public class BrowserVSActivity extends ActionBarActivity {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            Log.d(TAG + ".broadcastReceiver.onReceive(...)",
-                    "intent.getExtras(): " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-            if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
-            else {
-                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getNotificationMessage());
-            }
+        Log.d(TAG + ".broadcastReceiver.onReceive(...)",
+                "intent.getExtras(): " + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        OperationVS operationVS = responseVS.getOperation();
+        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
+        else {
+            if(operationVS != null && ContentTypeVS.JSON == responseVS.getContentType()) {
+                sendMessageToBrowserApp(responseVS.getJSONMessage(),
+                        operationVS.getCallerCallback());
+            } else if(operationVS != null) {
+                sendMessageToBrowserApp(responseVS.getStatusCode(),
+                        responseVS.getNotificationMessage(), operationVS.getCallerCallback());
+            } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    responseVS.getNotificationMessage());
+        }
         }
     };
 
@@ -212,6 +220,16 @@ public class BrowserVSActivity extends ActionBarActivity {
         JSONObject messageJSON = new JSONObject(resultMap);
         String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
         webView.loadUrl(jsCommand);
+        showProgress(false, true);
+    }
+
+
+    public void sendMessageToBrowserApp(JSONObject messageJSON, String callbackFunction) {
+        Log.d(TAG + ".sendMessageToBrowserApp(...) ", "statusCode: " + messageJSON.toString() +
+                " - callbackFunction: " + callbackFunction);
+        String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
+        webView.loadUrl(jsCommand);
+        showProgress(false, true);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

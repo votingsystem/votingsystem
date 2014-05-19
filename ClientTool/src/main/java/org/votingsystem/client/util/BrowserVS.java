@@ -73,7 +73,10 @@ public class BrowserVS extends Region {
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
                         ResponseVS responseVS = signatureService.getValue();
-                        sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
+                        if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                            sendMessageToBrowserApp(responseVS.getJSONMessage(),
+                                    signatureService.getOperationVS().getCallerCallback());
+                        } else sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
                                 signatureService.getOperationVS().getCallerCallback());
                     }
                 });
@@ -257,6 +260,13 @@ public class BrowserVS extends Region {
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
+        String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
+        logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
+        webView.getEngine().executeScript(jsCommand);
+    }
+
+    public void sendMessageToBrowserApp(JSONObject messageJSON, String callbackFunction) {
+        logger.debug("sendMessageToBrowserApp - messageJSON: " + messageJSON.toString());
         String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
         webView.getEngine().executeScript(jsCommand);

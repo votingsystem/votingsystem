@@ -10,13 +10,11 @@
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li><a href="${createLink(controller: 'groupVS', action: 'index')}"><g:message code="groupvsLbl"/></a></li>
-            <li class="active"><g:message code="newGroupVSLbl"/></li>
+            <li class="active"><g:message code="editGroupVSLbl"/></li>
         </ol>
     </div>
     <h3>
-        <div class="pageHeader text-center">
-            <g:message code="newGroupPageTitle"/>
-        </div>
+        <div class="pageHeader text-center"></div>
     </h3>
 	
 	<div class="text-left" style="margin:10px 0 10px 0;">
@@ -29,15 +27,6 @@
 	
 	<form id="mainForm">
 
-        <div class="form-inline">
-            <div style="margin:0px 0px 20px 0px" class="row">
-                <input type="text" name="subject" id="groupSubject" style="width:400px"  required
-                       title="<g:message code="subjectLbl"/>" class="form-control"
-                       placeholder="<g:message code="newGroupNameLbl"/>"
-                       onchange="this.setCustomValidity('')" />
-            </div>
-        </div>
-
     <div style="position:relative; width:100%;">
         <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
     </div>
@@ -45,7 +34,7 @@
 	<div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
 		<div style="position:absolute; right:0;">
             <button type="submit" class="btn btn-default">
-                <g:message code="newGroupVSLbl"/> <i class="fa fa fa-check"></i>
+                <g:message code="saveChangesLbl"/> <i class="fa fa fa-check"></i>
             </button>
 		</div>	
 	</div>	
@@ -59,12 +48,10 @@
 <r:script>
 
     $(function() {
+        showGroupData()
+
         $('#mainForm').submit(function(event){
             event.preventDefault();
-            if(!document.getElementById('groupSubject').validity.valid) {
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
-                return
-            }
             var editorDiv = $("#editorDiv")
             var editorContent = getEditor_editorDivData()
             if(editorContent.length == 0) {
@@ -72,31 +59,29 @@
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
                 return
             }
-
-            console.log("newGroup - sendSignature ")
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_NEW)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
+            webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/${groupvsMap.id}"
             webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
             webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),groupvsName:$("#groupSubject").val(),
                         operation:Operation.VICKET_GROUP_NEW}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = getFnName(newGroupVSCallback)
+            webAppMessage.callerCallback = getFnName(editGroupVSCallback)
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         });
 
       });
 
-    function newGroupVSCallback(appMessage) {
-        console.log("newGroupVSCallback - message from native client: " + appMessage);
+    function editGroupVSCallback(appMessage) {
+        console.log("editGroupVSCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
-            var caption = '<g:message code="newGroupERRORCaption"/>'
+            var caption = '<g:message code="editGroupERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="newGroupOKCaption"/>'
+                caption = '<g:message code="editGroupOKCaption"/>'
                 var msgTemplate = '<g:message code='accessLinkMsg'/>';
                 msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
             }
@@ -105,4 +90,12 @@
         window.scrollTo(0,0);
     }
 
+    var editGroupHeaderTemplate = "<g:message code="editingGroupMsgTitle"/>"
+
+    function showGroupData() {
+        console.log("showGroupData")
+        var editRepresentativeHeader = editGroupHeaderTemplate.format('${groupvsMap.name}')
+        $(".pageHeader").append(editRepresentativeHeader)
+        setDataEditor_editorDiv('${raw(groupvsMap?.description)}')
+    }
 </r:script>

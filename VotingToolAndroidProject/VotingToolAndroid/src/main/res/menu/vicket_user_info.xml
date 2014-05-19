@@ -5,13 +5,19 @@
         android:showAsAction="never"
         android:title="@string/update_signers_info_lbl"/>
 
-    <item android:id="@+id/send_message"
+    <item android:id="@+id/admin_vickets_menu_item"
         android:orderInCategory="2"
+        android:showAsAction="never"
+        android:title="@string/admin_vickets_menu_item"/>
+
+
+    <item android:id="@+id/send_message"
+        android:orderInCategory="3"
         android:showAsAction="never"
         android:title="@string/send_message_lbl"/>
 
     <item android:id="@+id/test_menu_item"
-        android:orderInCategory="2"
+        android:orderInCategory="4"
         android:showAsAction="never"
         android:title="@string/test_lbl"/>
 

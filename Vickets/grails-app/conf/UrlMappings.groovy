@@ -10,7 +10,6 @@ class UrlMappings {
         "/"(controller:"/app")
         "500"(view:'/error')
 
-
         "/certificateVS/vicket/hashHex/$hashHex" {
             controller = "certificateVS"
             action = "voteVS"
@@ -81,6 +80,14 @@ class UrlMappings {
         "/groupVS/$id/users"{
             controller = "groupVS"
             action = "users"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/groupVS/edit/$id"{
+            controller = "groupVS"
+            action = "edit"
             constraints {
                 id(matches:/\d*/)
             }

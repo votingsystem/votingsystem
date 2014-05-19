@@ -4,7 +4,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
@@ -63,6 +62,12 @@ public class ResponseVS<T> implements Serializable {
         this.message = msg;
     }
 
+    public ResponseVS (int statusCode, String msg, ContentTypeVS contentType) {
+        this.statusCode = statusCode;
+        this.message = msg;
+        this.contentType = contentType;
+    }
+
     public ResponseVS (int statusCode, StatusVS<?> status, String msg) {
         this.statusCode = statusCode;
         this.status = status;
@@ -79,14 +84,28 @@ public class ResponseVS<T> implements Serializable {
         this.data = data;
     }
         
-    public ResponseVS (int statusCode, byte[] messageBytes) {
+    public ResponseVS (int statusCode, byte[] messageBytes, ContentTypeVS contentType) {
         this.statusCode = statusCode;
         this.messageBytes = messageBytes;
+        this.contentType = contentType;
     }
 
     public String getMessage() {
-        if(message == null && messageBytes != null) message = new String(messageBytes);
+        if(message == null && messageBytes != null) {
+            try {
+                message = new String(messageBytes, "UTF-8");
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
         return message;
+    }
+
+    public JSONObject getJSONMessage() {
+        JSONObject result = null;
+        String message = getMessage();
+        if(message != null) result = (JSONObject)JSONSerializer.toJSON(message);
+        return result;
     }
 
     public JSONObject getSignedJSON() {

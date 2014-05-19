@@ -259,7 +259,7 @@ public class VicketUserInfoFragment extends Fragment {
             case R.id.send_message:
 
                 return true;
-            case R.id.test_menu_item:
+            case R.id.admin_vickets_menu_item:
                 Intent intent = new Intent(getActivity(), BrowserVSActivity.class);
                 intent.putExtra(ContextVS.URL_KEY, "http://vickets/Vickets/app/admin?menu=admin");
                 startActivityForResult(intent, ADMIN_ACCESS_CONTROL);

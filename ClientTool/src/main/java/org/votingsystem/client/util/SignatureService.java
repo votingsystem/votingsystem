@@ -384,8 +384,7 @@ public class SignatureService extends Service<ResponseVS> {
                 String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
                 ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
-                    actorVS = ActorVS.populate(jsonObject);
+                    actorVS = ActorVS.populate(responseVS.getJSONMessage());
                     responseVS.setData(actorVS);
                     logger.error("checkServer - adding " + serverURL.trim() + " to sever map");
                     serverMap.put(serverURL.trim(), actorVS);

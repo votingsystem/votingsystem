@@ -3,7 +3,9 @@ package org.votingsystem.model;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import org.json.JSONObject;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
 import java.io.ByteArrayInputStream;
@@ -16,6 +18,8 @@ import java.io.ByteArrayInputStream;
 public class ResponseVS<T> implements Parcelable {
 
     private static final long serialVersionUID = 1L;
+
+    public static final String TAG = ResponseVS.class.getSimpleName();
 
     public static final int SC_OK                       = 200;
     public static final int SC_OK_WITHOUT_BODY          = 204;
@@ -39,6 +43,7 @@ public class ResponseVS<T> implements Parcelable {
     private int statusCode;
     private Integer iconId = -1;
     private StatusVS<?> status;
+    private OperationVS operation;
     private EventVSResponse eventQueryResponse;
     private String caption;
     private String notificationMessage;
@@ -109,12 +114,24 @@ public class ResponseVS<T> implements Parcelable {
         this.statusCode = statusCode;
         this.message = message;
     }
-    
+
+    public ResponseVS(int statusCode, String message, ContentTypeVS contentType) {
+        this.statusCode = statusCode;
+        this.message = message;
+        this.contentType = contentType;
+    }
+
     public ResponseVS(int statusCode, byte[] messageBytes) {
         this.statusCode = statusCode;
         this.messageBytes = messageBytes;
     }
-    
+
+    public ResponseVS(int statusCode, byte[] messageBytes, ContentTypeVS contentType) {
+        this.statusCode = statusCode;
+        this.messageBytes = messageBytes;
+        this.contentType = contentType;
+    }
+
     public ResponseVS(int statusCode) {
         this.statusCode = statusCode;
     }
@@ -143,6 +160,19 @@ public class ResponseVS<T> implements Parcelable {
             return result;
         }
     }
+
+    public JSONObject getJSONMessage() {
+        JSONObject result = null;
+        try {
+            String message = getMessage();
+            if(message != null) result = new JSONObject(message);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Log.e(TAG + ".getJSONMessage() ", ex.getMessage(), ex);
+        }
+        return result;
+    }
+
 
     public void setMessage(String message) {
         this.message = message;
@@ -229,7 +259,10 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public String getCaption() {
-        return caption;
+        String result = null;
+        if(caption == null && operation != null)  result = operation.getSignedMessageSubject();
+        else result = caption;
+        return result;
     }
 
     public void setCaption(String caption) {
@@ -283,6 +316,7 @@ public class ResponseVS<T> implements Parcelable {
         caption = source.readString();
         notificationMessage = source.readString();
         message = source.readString();
+        operation = (OperationVS) source.readSerializable();
         eventQueryResponse = (EventVSResponse) source.readSerializable();
         typeVS = (TypeVS) source.readSerializable();
         contentType = (ContentTypeVS) source.readSerializable();
@@ -300,6 +334,7 @@ public class ResponseVS<T> implements Parcelable {
         parcel.writeString(caption);
         parcel.writeString(notificationMessage);
         parcel.writeString(message);
+        parcel.writeSerializable(operation);
         parcel.writeSerializable(eventQueryResponse);
         parcel.writeSerializable(typeVS);
         parcel.writeSerializable(contentType);
@@ -326,7 +361,15 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public String getNotificationMessage() {
-        if(notificationMessage == null) return getMessage();
+        if(notificationMessage == null) {
+            if (ContentTypeVS.JSON == contentType) {
+                try {
+                    notificationMessage = getJSONMessage().getString("message");
+                } catch(Exception ex) {
+                    Log.e(TAG + ".getJSONMessage() ", ex.getMessage(), ex);
+                }
+            } else notificationMessage = getMessage();
+        }
         return notificationMessage;
     }
 
@@ -334,4 +377,11 @@ public class ResponseVS<T> implements Parcelable {
         this.notificationMessage = notificationMessage;
     }
 
+    public OperationVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(OperationVS operation) {
+        this.operation = operation;
+    }
 }

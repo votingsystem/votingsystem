@@ -76,6 +76,7 @@ public class HttpHelper {
                 " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
+        ContentTypeVS responseContentType = null;
         try {
             HttpGet httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
@@ -85,19 +86,20 @@ public class HttpHelper {
             for (int i = 0; i < headers.length; i++) {
             System.out.println(headers[i]);
             }*/
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             Log.d(TAG + ".getData" ,"Connections in pool: " + cm.getConnectionsInPool());
             Log.d(TAG + ".getData" ,response.getStatusLine().toString() + " - " +
-                    response.getFirstHeader("Content-Type"));
+                    response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
             Log.d(TAG + ".getData" ,"----------------------------------------");
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
+                        responseBytes, responseContentType);
             } else {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
+                        EntityUtils.toString(response.getEntity()),responseContentType);
             }
-            Header header = response.getFirstHeader("Content-Type");
-            if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
         } catch(ConnectTimeoutException ex) {
             responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
         } catch(Exception ex) {
@@ -115,20 +117,21 @@ public class HttpHelper {
                 " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
+        ContentTypeVS responseContentType = null;
         try {
             ByteArrayEntity reqEntity = new ByteArrayEntity(data);
             if(contentType != null) reqEntity.setContentType(contentType.getName());
             httpPost.setEntity(reqEntity);
             httpPost.setEntity(reqEntity);
             response = httpclient.execute(httpPost);
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                    EntityUtils.toByteArray(response.getEntity()));
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
+            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             Log.d(TAG + ".sendData(...)" ,"----------------------------------------");
             Log.d(TAG + ".sendData(...)" , response.getStatusLine().toString() + " - " +
-                    response.getFirstHeader("Content-Type"));
+                    response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
             Log.d(TAG + ".sendData(...)" , "----------------------------------------");
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
+                    EntityUtils.toByteArray(response.getEntity()), responseContentType);
             if(headerNames != null && headerNames.length > 0) {
                 List<String> headerValues = new ArrayList<String>();
                 for(String headerName: headerNames) {
@@ -148,6 +151,7 @@ public class HttpHelper {
 
     public static ResponseVS sendFile (File file, String serverURL) throws IOException {
         ResponseVS responseVS = null;
+        ContentTypeVS responseContentType = null;
         try {
             HttpPost httpPost = new HttpPost(serverURL);
             Log.d(TAG + ".sendFile(...)" , " - serverURL: " + httpPost.getURI()
@@ -157,19 +161,20 @@ public class HttpHelper {
             reqEntity.addPart(SIGNED_FILE_NAME, fileBody);
             httpPost.setEntity(reqEntity);
             HttpResponse response = httpclient.execute(httpPost);
+            Header header = response.getFirstHeader("Content-Type");
+            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             Log.d(TAG + ".sendFile" , "----------------------------------------");
             Log.d(TAG + ".sendFile" , response.getStatusLine().toString() + " - " +
-                    response.getFirstHeader("Content-Type"));
+                    response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
             Log.d(TAG + ".sendFile" , "----------------------------------------");
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),responseBytes);
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),responseBytes,
+                        responseContentType);
             } else {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
+                        EntityUtils.toString(response.getEntity()), responseContentType);
             }
-            Header header = response.getFirstHeader("Content-Type");
-            if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
         } catch(ConnectTimeoutException ex) {
             responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
         }  catch(Exception ex) {
@@ -183,6 +188,7 @@ public class HttpHelper {
              Map<String, Object> fileMap, String serverURL) throws Exception {
     	 Log.d(TAG + ".sendObjectMap(...)" , "serverURL: " + serverURL);
          ResponseVS responseVS = null;
+         ContentTypeVS responseContentType = null;
          if(fileMap == null || fileMap.isEmpty()) throw new Exception("Empty Map");
          HttpPost httpPost = new HttpPost(serverURL);
          HttpResponse response = null;
@@ -204,15 +210,16 @@ public class HttpHelper {
                  }
              }
              httpPost.setEntity(reqEntity);
-             response = httpclient.execute(httpPost);     
+             response = httpclient.execute(httpPost);
+             Header header = response.getFirstHeader("Content-Type");
+             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
              Log.d(TAG + ".sendObjectMap" ,"----------------------------------------");
              Log.d(TAG + ".sendObjectMap" ,response.getStatusLine().toString() + " - " +
-                     response.getFirstHeader("Content-Type"));
+                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
              Log.d(TAG + ".sendObjectMap" ,"----------------------------------------");
              byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
-             Header header = response.getFirstHeader("Content-Type");
-             if(header != null)responseVS.setContentType(ContentTypeVS.getByName(header.getValue()));
+             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes,
+                     responseContentType);
              //EntityUtils.consume(response.getEntity());
          } catch(ConnectTimeoutException ex) {
              responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());

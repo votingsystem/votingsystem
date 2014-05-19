@@ -20,10 +20,13 @@ import java.text.ParseException;
 public class OperationVS implements Serializable{
 
 	public static final String TAG = OperationVS.class.getSimpleName();
+
+    private static final long serialVersionUID = 1L;
     
     private TypeVS typeVS;
     private Integer statusCode;
     private String caption;
+    private String callerCallback;
     private String message;
     private String urlTimeStampServer;
     private String serviceURL;
@@ -172,6 +175,9 @@ public class OperationVS implements Serializable{
         if (operationJSON.has("receiverName")) {
             operation.setReceiverName(operationJSON.getString("receiverName"));
         }
+        if (operationJSON.has("callerCallback")) {
+            operation.setCallerCallback(operationJSON.getString("callerCallback"));
+        }
 
         if (operationJSON.has("serverURL")) operation.setServerURL(operationJSON.getString("serverURL"));
         if (operationJSON.has("signedMessageSubject")) {
@@ -268,6 +274,13 @@ public class OperationVS implements Serializable{
     }
 
 
+    public String getCallerCallback() {
+        return callerCallback;
+    }
+
+    public void setCallerCallback(String callerCallback) {
+        this.callerCallback = callerCallback;
+    }
 }
 
 
