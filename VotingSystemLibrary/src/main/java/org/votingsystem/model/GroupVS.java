@@ -17,6 +17,7 @@ public class GroupVS extends UserVS implements java.io.Serializable {
     @Column(name="state") @Enumerated(EnumType.STRING) private State state;
 
     @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="groupRepresentative")
     private UserVS groupRepresentative;
 
     public UserVS getGroupRepresentative() {

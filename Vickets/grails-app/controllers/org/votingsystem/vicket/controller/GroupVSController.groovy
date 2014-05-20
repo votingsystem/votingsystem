@@ -56,7 +56,7 @@ class GroupVSController {
                 if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
                 groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset) {
                     or {
-                        if(state) eq("state", state)
+                        eq("state", state)
                         ilike('name', "%${params.searchText}%")
                         ilike('description', "%${params.searchText}%")
                     }

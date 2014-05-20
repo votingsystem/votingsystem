@@ -1,62 +1,58 @@
+<%@ page import="org.votingsystem.model.SubscriptionVS" %>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>
-        <g:if test="${receiptPageTitle != null}">${receiptPageTitle}</g:if>
-        <g:else><g:message code="receiptPageLbl"/></g:else>
-    </title>
+    <title><g:message code="groupUserPageLbl"/></title>
     <r:require module="application"/>
     <r:layoutResources />
 </head>
 <body style="max-width: 600px; margin:30px auto 0px auto;">
-    <div id="receiptContentDiv" style="border: 1px solid #870000; width: 500px;margin:auto; padding: 15px;">
-        <div id="operationTypeDiv" style="font-size: 1.2em; color:#870000; font-weight: bold;"></div>
-        <div id="nameDiv" style="font-size: 1.2em; color:#870000; font-weight: bold;"></div>
-        <div id="contentDiv" style=""></div>
+    <div id="messageDiv" class="text-center" style="font-size: 1.4em; color:#870000; font-weight: bold;"></div>
+    <div id="" style="border: 1px solid #870000; width: 500px;margin:auto; padding: 15px;">
+        <div id="" style="font-size: 1.2em; font-weight: bold;">${subscriptionMap.nif}</div>
+        <div id="nameDiv" style="font-size: 1.2em;font-weight: bold;">${subscriptionMap.name}</div>
+        <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>: ${subscriptionMap.subscriptionDateCreated}</div>
     </div>
-    <button id="saveReceiptButton" type="button" class="btn btn-accept-vs" onclick="saveReceipt();"
-            style="display:none; margin:10px 0px 0px 0px; float: right;"><g:message code="saveReceiptLbl"/>
+    <button id="activateUserButton" type="button" class="btn btn-warning" onclick="activateUser();"
+            style="margin:10px 0px 0px 0px; "><g:message code="activateUserLbl"/> <i class="fa fa-thumbs-o-up"></i>
+    </button>
+    <button id="deActivateUserButton" type="button" class="btn btn-warning" onclick="deActivateUser();"
+            style="margin:10px 0px 0px 0px; "><g:message code="deActivateUserLbl"/> <i class="fa fa-thumbs-o-down"></i>
+    </button>
+    <button id="makeDepositButton" type="button" class="btn btn-warning" onclick="makeDeposit();"
+            style="margin:10px 0px 0px 0px; "><g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
     </button>
 
-
     <div id="receipt" style="display:none;">
-        ${receipt}
+
     </div>
 </body>
 </html>
 <r:script>
-    var signedContent = toJSON('${raw(signedContent)}')
 
     $(function() {
-        if(signedContent.operation) {
-            //$("#receiptContentDiv").text(JSON.stringify(signedContent))
-            $("#operationTypeDiv").text(signedContent.operation)
+        <g:if test="${SubscriptionVS.State.ACTIVE.toString().equals(subscriptionMap.state)}">
+            $("#messageDiv").text("<g:message code="userStateActiveLbl"/>")
+            $("#activateUserButton").css("display", "none")
+        </g:if>
+        <g:if test="${SubscriptionVS.State.PENDING.toString().equals(subscriptionMap.state)}">
+            $("#messageDiv").text("<g:message code="userStatePendingLbl"/>")
+            $("#makeDepositButton").css("display", "none")
 
-
-            if('VICKET_GROUP_NEW' == signedContent.operation) {
-                $("#nameDiv").text(signedContent.groupvsName)
-                $("#contentDiv").html(signedContent.groupvsInfo)
-
-                //$("#pollPage").attr("href", signedContent.eventURL)
-            } else {
-
-            }
-            $("#saveReceiptButton").css("display" , "visible")
-            $("#receiptContentDiv").css("display" , "visible")
-            console.log(signedContent)
-        }
+        </g:if>
+        <g:if test="${SubscriptionVS.State.CANCELLED.toString().equals(subscriptionMap.state)}">
+            $("#messageDiv").text("<g:message code="userStateCancelledLbl"/>")
+            $("#deActivateUserButton").css("display", "none")
+            $("#makeDepositButton").css("display", "none")
+        </g:if>
     })
 
-    function saveReceipt() {
-        console.log("saveReceipt")
-        VotingSystemClient.setTEXTMessageToSignatureClient($("#receipt").text().trim(), getFnName(saveReceiptCallback))
-    }
+    function activateUser () { }
 
-    function saveReceiptCallback(appMessage) {
-        console.log("saveReceiptCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-                console.log("saveReceiptCallback - message from native client: " + appMessage);
-    }
+    function deActivateUser () { }
+
+    function makeDeposit () { }
+
 
 </r:script>
 <r:layoutResources/>

@@ -36,9 +36,6 @@
             </thead>
         </table>
     </div>
-
-    ${subscriptionMap}
-
 </div>
 </body>
 
