@@ -4,7 +4,7 @@
     <meta name="layout" content="main" />
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContenDiv" style="margin:0px auto 0px auto;">
     <div class="row">
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>

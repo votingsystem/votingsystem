@@ -49,7 +49,7 @@ class GroupVSService {
             return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        if(messageJSON.id != groupVS.id) {
+        if(Long.valueOf(messageJSON.id) != groupVS.id) {
             msg = messageSource.getMessage('identifierErrorMsg', [groupVS.id, messageJSON.id].toArray(), locale)
             log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg, reason:msg,

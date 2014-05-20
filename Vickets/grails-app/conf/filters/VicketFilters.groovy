@@ -151,77 +151,82 @@ class VicketFilters {
             }
 
             after = { model ->
-                MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-                ResponseVS responseVS = model?.responseVS
-                if(messageSMIMEReq && responseVS){
-                    MessageSMIME.withTransaction {
-                        messageSMIMEReq = messageSMIMEReq.merge()
-                        messageSMIMEReq.getSmimeMessage().setMessageID(
-                                "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
-                        messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
-                        if(responseVS.type) messageSMIMEReq.type = responseVS.type
-                        messageSMIMEReq.setReason(responseVS.getReason())
-                        messageSMIMEReq.save(flush:true)
-                    }
-                    log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"
-                }
-                if(!responseVS) return;
-                log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
-                switch(responseVS.getContentType()) {
-                    case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
-                    case ContentTypeVS.SIGNED_AND_ENCRYPTED:
-                        ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
-                                responseVS.getMessageBytes(), model.receiverCert, request.getLocale())
-                        if(ResponseVS.SC_OK == encryptResponse.statusCode) {
-                            encryptResponse.setStatusCode(responseVS.getStatusCode())
-                            encryptResponse.setContentType(responseVS.getContentType())
-                            return printOutputStream(response, encryptResponse)
+                try {
+                    MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+                    ResponseVS responseVS = model?.responseVS
+                    if(messageSMIMEReq && responseVS){
+                        MessageSMIME.withTransaction {
+                            messageSMIMEReq = messageSMIMEReq.merge()
+                            messageSMIMEReq.getSmimeMessage().setMessageID(
+                                    "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
+                            messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
+                            if(responseVS.type) messageSMIMEReq.type = responseVS.type
+                            messageSMIMEReq.setReason(responseVS.getReason())
+                            messageSMIMEReq.save(flush:true)
                         }
-                    case ContentTypeVS.JSON_SIGNED:
-                    case ContentTypeVS.SIGNED:
-                        if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)
-                        else return printOutput(response, responseVS)
-                    case ContentTypeVS.JSON_ENCRYPTED:
-                    case ContentTypeVS.ENCRYPTED:
-                    case ContentTypeVS.MULTIPART_ENCRYPTED:
-                        ResponseVS encryptResponse
-                        if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
-                            if(model.receiverPublicKey) {
-                                encryptResponse =  signatureVSService.encryptToCMS(
-                                        responseVS.messageBytes, model.receiverPublicKey)
-                            } else if(model.receiverCert) {
-                                encryptResponse = signatureVSService.encryptToCMS(
-                                        responseVS.messageBytes,model.receiverCert)
-                            }
-                            if(ResponseVS.SC_OK == encryptResponse.getStatusCode()) {
+                        log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"
+                    }
+                    if(!responseVS) return;
+                    log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
+                    switch(responseVS.getContentType()) {
+                        case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
+                        case ContentTypeVS.SIGNED_AND_ENCRYPTED:
+                            ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
+                                    responseVS.getMessageBytes(), model.receiverCert, request.getLocale())
+                            if(ResponseVS.SC_OK == encryptResponse.statusCode) {
                                 encryptResponse.setStatusCode(responseVS.getStatusCode())
                                 encryptResponse.setContentType(responseVS.getContentType())
+                                return printOutputStream(response, encryptResponse)
                             }
-                            return printOutputStream(response, encryptResponse)
-                        } else log.error("missing params - messageBytes && (receiverCert ||receiverPublicKey)")
-                        return printOutput(response, responseVS)
-                    case ContentTypeVS.HTML:
-                    case ContentTypeVS.TEXT:
-                        return printOutput(response, responseVS)
-                    case ContentTypeVS.JSON:
-                        response.status = responseVS.statusCode
-                        response.setContentType(ContentTypeVS.JSON.name)
-                        render responseVS.getData() as JSON
-                        return false
-                    case ContentTypeVS.ZIP:
-                        response.setHeader("Content-Disposition", "inline; filename='${responseVS.message}'");
-                        return printOutputStream(response, responseVS)
-                    case ContentTypeVS.PDF:
-                        //response.setHeader("Content-disposition", "attachment; filename='${responseVS.message}'")
-                        return printOutputStream(response, responseVS)
-                    case ContentTypeVS.PEM:
-                    case ContentTypeVS.CMS_SIGNED:
-                    case ContentTypeVS.TIMESTAMP_RESPONSE:
-                    case ContentTypeVS.IMAGE:
-                    case ContentTypeVS.TEXT_STREAM:
-                        return printOutputStream(response, responseVS)
+                        case ContentTypeVS.JSON_SIGNED:
+                        case ContentTypeVS.SIGNED:
+                            if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)
+                            else return printOutput(response, responseVS)
+                        case ContentTypeVS.JSON_ENCRYPTED:
+                        case ContentTypeVS.ENCRYPTED:
+                        case ContentTypeVS.MULTIPART_ENCRYPTED:
+                            ResponseVS encryptResponse
+                            if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
+                                if(model.receiverPublicKey) {
+                                    encryptResponse =  signatureVSService.encryptToCMS(
+                                            responseVS.messageBytes, model.receiverPublicKey)
+                                } else if(model.receiverCert) {
+                                    encryptResponse = signatureVSService.encryptToCMS(
+                                            responseVS.messageBytes,model.receiverCert)
+                                }
+                                if(ResponseVS.SC_OK == encryptResponse.getStatusCode()) {
+                                    encryptResponse.setStatusCode(responseVS.getStatusCode())
+                                    encryptResponse.setContentType(responseVS.getContentType())
+                                }
+                                return printOutputStream(response, encryptResponse)
+                            } else log.error("missing params - messageBytes && (receiverCert ||receiverPublicKey)")
+                            return printOutput(response, responseVS)
+                        case ContentTypeVS.HTML:
+                        case ContentTypeVS.TEXT:
+                            return printOutput(response, responseVS)
+                        case ContentTypeVS.JSON:
+                            response.status = responseVS.statusCode
+                            response.setContentType(ContentTypeVS.JSON.name)
+                            render responseVS.getData() as JSON
+                            return false
+                        case ContentTypeVS.ZIP:
+                            response.setHeader("Content-Disposition", "inline; filename='${responseVS.message}'");
+                            return printOutputStream(response, responseVS)
+                        case ContentTypeVS.PDF:
+                            //response.setHeader("Content-disposition", "attachment; filename='${responseVS.message}'")
+                            return printOutputStream(response, responseVS)
+                        case ContentTypeVS.PEM:
+                        case ContentTypeVS.CMS_SIGNED:
+                        case ContentTypeVS.TIMESTAMP_RESPONSE:
+                        case ContentTypeVS.IMAGE:
+                        case ContentTypeVS.TEXT_STREAM:
+                            return printOutputStream(response, responseVS)
+                    }
+                    log.debug("### responseVS not processed ###");
+                } catch(Exception ex) {
+                    log.error(ex.getMessage(), ex)
+                    return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage()))
                 }
-                log.debug("### responseVS not processed ###");
             }
         }
     }

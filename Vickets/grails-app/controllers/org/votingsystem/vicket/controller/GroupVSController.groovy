@@ -31,6 +31,10 @@ class GroupVSController {
                 result = GroupVS.get(params.long('id'))
             }
             if(result) resultMap = groupVSService.getGroupVSDataMap(result)
+            else {
+                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                        message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
+            }
             if(request.contentType?.contains("json")) {
                 render resultMap as JSON
             } else {
@@ -80,20 +84,23 @@ class GroupVSController {
     }
 
     def newGroup (){
-        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
         ResponseVS responseVS = null
         try {
-            responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                GroupVS newGroupVS = responseVS.data
-                String URL = "${createLink(controller: 'groupVS', absolute:true)}/${newGroupVS.id}"
-                responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg',
-                        args:[newGroupVS.name]), URL:URL]
-                responseVS.setContentType(ContentTypeVS.JSON)
+            if("POST".equals(request.method)) {
+                MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+                if(!messageSMIMEReq) {
+                    return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+                }
+                responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    GroupVS newGroupVS = responseVS.data
+                    String URL = "${createLink(controller: 'groupVS', absolute:true)}/${newGroupVS.id}"
+                    responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg',
+                            args:[newGroupVS.name]), URL:URL]
+                    responseVS.setContentType(ContentTypeVS.JSON)
+                }
             }
+
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
             String msg = message(code:'publishGroupVSErrorMessage')

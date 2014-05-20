@@ -31,7 +31,7 @@
 
 .groupvsDiv {
     display:inline;
-    width:320px;
+    width:280px;
     max-width: 400px;
     background-color: #f2f2f2;
     margin: 10px 5px 5px 10px;
@@ -47,9 +47,10 @@
     font-size: 0.9em;
     height:75px;
     padding: 10px;
-    display:table-cell;
     vertical-align:middle;
     padding: 0px 5px 0px 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .groupvsSubjectDiv {

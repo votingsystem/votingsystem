@@ -45,7 +45,7 @@ class SubscriptionVSService {
                     type:CertificateVS.Type.USER, authorityCertificate:userVS.getCertificateCA(),
 				    validFrom:x509Cert.getNotBefore(), validTo:x509Cert.getNotAfter())
 			certificate.save();
-			log.debug "- checkUser ### NEW USER CertificateVS id '${certificate.id}'"
+			log.debug "- checkUser ### NEW UserVS CertificateVS id '${certificate.id}'"
 		} else {
 			certificate = CertificateVS.findWhere(userVS:userVSDB, state:CertificateVS.State.OK)
 			if (!certificate?.serialNumber == x509Cert.getSerialNumber()?.longValue()) {

@@ -20,6 +20,7 @@
     var clientCallback = null
 
     function closeResultDialog() {
+        console.log("closeResultDialog " + clientCallback)
         if(clientCallback != null) clientCallback()
         $('#resultDialog').modal('hide')
     }

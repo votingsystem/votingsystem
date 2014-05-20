@@ -416,7 +416,7 @@ class  SignatureVSService {
         UserVS checkedSigner = null
         UserVS anonymousSigner = null
         CertExtensionCheckerVS extensionChecker
-        String signerNIF = messageWrapper.getSigner().getNif()
+        String signerNIF = org.votingsystem.util.NifUtils.validate(messageWrapper.getSigner().getNif())
 		for(UserVS userVS: signersVS) {
 			try {
                 if(userVS.getTimeStampToken() != null) {
@@ -449,7 +449,7 @@ class  SignatureVSService {
                 } else {
                     responseVS = subscriptionVSService.checkUser(userVS, locale)
                     if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-                    if(userVS.getNif().equals(signerNIF)) checkedSigner = responseVS.userVS;
+                    if(responseVS.userVS.nif.equals(signerNIF)) checkedSigner = responseVS.userVS;
                 }
                 checkedSigners.add(responseVS.userVS)
 			} catch (CertPathValidatorException ex) {
