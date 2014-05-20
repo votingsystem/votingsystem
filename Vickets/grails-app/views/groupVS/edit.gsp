@@ -27,7 +27,6 @@
         </div>
 
         <form id="mainForm">
-
             <div style="position:relative; width:100%;">
                 <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
             </div>
@@ -42,7 +41,10 @@
 
         </form>
     </div>
+
+
 </div>
+
 <g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
@@ -60,7 +62,7 @@
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
                 return
             }
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_NEW)
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_EDIT)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/${groupvsMap.id}"

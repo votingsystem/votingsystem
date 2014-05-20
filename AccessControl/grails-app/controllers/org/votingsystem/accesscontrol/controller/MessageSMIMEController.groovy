@@ -42,12 +42,11 @@ class MessageSMIMEController {
 	
 	
 	/**
-	 * Servicio que devuelve el recibo con el que respondió el servidor al un message
+     * Servicio que devuelve el recibo con el que el servidor respondió un message
 	 * 
 	 * @httpMethod [GET]
 	 * @serviceURL [/messageSMIME/receipt/$requestMessageId]
-	 * @param [requestMessageId] Obligatorio. Identificador del message origen del recibo 
-	 *                         en la base de datos
+	 * @param [requestMessageId] Obligatorio. Identificador del message origen del recibo en la base de datos
 	 * @return El recibo asociado al message pasado como parámetro.
 	 */
 	def receipt() {

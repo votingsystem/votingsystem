@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.service
 
+import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.UserVS
 
 /**
@@ -8,10 +9,11 @@ import org.votingsystem.model.UserVS
 */
 class UserVSService {
 	
-	static transactional = true
+	//static transactional = true
 	
 	List<String> systemAdmins
 	def grailsApplication
+    def grailsLinkGenerator
 
     UserVS systemUser
 
@@ -42,6 +44,23 @@ class UserVSService {
 
     public Map getUserVSDataMap(UserVS userVS){
         return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, nif:userVS?.nif]
+    }
+
+    public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){
+        Map resultMap = [subscriptionId:subscriptionVS.id, id:subscriptionVS.userVS.id, nif:subscriptionVS.userVS.nif,
+                name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}",
+                         state:subscriptionVS.state.toString(), subscriptionDateCreated:subscriptionVS.dateCreated]
+        return resultMap
+    }
+
+    public Map getSubscriptionVSDetailedDataMap(SubscriptionVS subscriptionVS){
+        String subscriptionMessageURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${subscriptionVS.subscriptionSMIME.id}"
+        Map resultMap = [subscriptionId:subscriptionVS.id, id:subscriptionVS.userVS.id, nif:subscriptionVS.userVS.nif,
+                name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}",
+                state:subscriptionVS.state.toString(), subscriptionDateCreated:subscriptionVS.dateCreated,
+                subscriptionDateActivated:subscriptionVS.dateActivated, subscriptionDateCancelled:subscriptionVS.dateCancelled,
+                subscriptionLastUpdated:subscriptionVS.lastUpdated, subscriptionMessageURL:subscriptionMessageURL]
+        return resultMap
     }
 
 	boolean isUserAdmin(String nif) {

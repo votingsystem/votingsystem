@@ -22,16 +22,16 @@
         </div>
 
         <g:if test="${"admin".equals(params.menu)}">
-            <div class="">
+            <div id="adminButtonsDiv" class="">
                 <button id="editGroupVSButton" type="submit" class="btn btn-warning" onclick="editGroup();"
                         style="margin:10px 20px 0px 0px;">
                     <g:message code="editGroupVSLbl"/> <i class="fa fa fa-check"></i>
                 </button>
-                <button id="cancelGroupVSButton" type="submit" class="btn btn-warning" onclick="cancelGroup();"
-                        style="margin:10px 20px 0px 0px;">
+                <button id="cancelGroupVSButton" type="submit" class="btn btn-warning"
+                        style="margin:10px 20px 0px 0px;" onclick="showCancelGroupVSDialog('${groupvsMap.name}', '${groupvsMap.id}')">
                     <g:message code="cancelGroupVSLbl"/> <i class="fa fa fa-check"></i>
                 </button>
-                <button id="adminGroupVSUsersButton" type="submit" class="btn btn-warning" onclick="adminGroup();"
+                <button id="adminGroupVSUsersButton" type="submit" class="btn btn-warning" onclick="adminGroupUsers('${groupvsMap.id}');"
                         style="margin:10px 20px 0px 0px;">
                     <g:message code="adminGroupVSUsersLbl"/> <i class="fa fa fa-check"></i>
                 </button>
@@ -73,6 +73,7 @@
     </div>
 </div>
 <g:include view="/include/dialog/resultDialog.gsp"/>
+<g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>
 </body>
 </html>
 <r:script>
@@ -99,11 +100,16 @@
             $("#messagePanel").addClass("groupvsClosedBox");
             $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
             $("#messagePanel").css("display", "visible")
+            $("#adminButtonsDiv").css("display", "none")
         </g:if>
     });
 
     function editGroup() {
         window.location.href = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/${groupvsMap.id}?menu=admin"
+    }
+
+    function adminGroupUsers(groupId) {
+        window.location.href = "${createLink( controller:'groupVS', absolute:true)}/" + groupId + "/users?menu=admin"
     }
 
     function subscribeToGroup() {
@@ -128,8 +134,6 @@
             var caption = '<g:message code="groupSubscriptionERRORLbl"/>'
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "<g:message code='groupSubscriptionOKLbl'/>"
-            } else if (ResponseVS.SC_CANCELLED == appMessageJSON.statusCode) {
-                caption = "<g:message code='groupSubscriptionCANCELLEDLbl'/>"
             }
             var msg = appMessageJSON.message
             showResultDialog(caption, msg)

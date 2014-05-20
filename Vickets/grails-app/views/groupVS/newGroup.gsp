@@ -92,6 +92,10 @@
 
     var groupURL = null
 
+    function resultOKCallback() {
+        window.location.href = groupURL + "?menu=admin"
+    }
+
     function newGroupVSCallback(appMessage) {
         console.log("newGroupVSCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
@@ -109,10 +113,6 @@
             showResultDialog(caption, msg, callBackResult)
         }
         window.scrollTo(0,0);
-    }
-
-    function resultOKCallback() {
-        window.location.href = groupURL + "?menu=admin"
     }
 
 </r:script>

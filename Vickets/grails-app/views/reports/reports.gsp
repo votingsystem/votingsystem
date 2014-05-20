@@ -78,14 +78,9 @@
 
     })
 
-    $("#loadHistoryButton").click(function() {
-    });
-
     function loadHTTPTransactions()  {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open( "GET", "${createLink(controller: 'reports', action: 'index')}", true );
-        $('#loadHistoryButtonIcon').show()
-        $("#loadHistoryButton").prop("disabled", true);
 
         xmlHttp.onreadystatechange=function() {
             if (xmlHttp.readyState==4 && xmlHttp.status == 200) {

@@ -12,11 +12,6 @@
             <li class="active"><g:message code="transactionPageTitle"/></li>
         </ol>
     </div>
-    <button id="loadHistoryButton" type="button" class="btn btn-primary"
-            style="margin: 10px 0px 10px 0px;display: none;">
-        <g:message code="loadHistoryLbl"/>
-        <i id="loadHistoryButtonIcon" class="fa fa-refresh fa-spin" style="display: none;"></i>
-    </button>
 
     <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
@@ -102,14 +97,9 @@
 
     })
 
-    $("#loadHistoryButton").click(function() {
-    });
-
     function loadHTTPTransactions()  {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open( "GET", "${createLink(controller: 'transaction', action: 'index')}", true );
-        $('#loadHistoryButtonIcon').show()
-        $("#loadHistoryButton").prop("disabled", true);
 
         xmlHttp.onreadystatechange=function() {
             if (xmlHttp.readyState==4 && xmlHttp.status == 200) {
@@ -117,8 +107,6 @@
                 dynatable.records.updateFromJson({Transacciones: jsonResult.Transacciones});
                 dynatable.records.init();
                 dynatable.process();
-                $('#loadHistoryButtonIcon').hide()
-                $("#loadHistoryButton").prop("disabled", false);
             }
         }
         xmlHttp.send();

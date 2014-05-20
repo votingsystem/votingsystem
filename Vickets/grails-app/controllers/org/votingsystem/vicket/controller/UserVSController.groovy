@@ -21,6 +21,9 @@ class UserVSController {
 	def subscriptionVSService
     def transactionVSService
 
+    def admin() {
+
+    }
 
     /**
      * Servicio que sirve para añadir usuarios de pruebas.

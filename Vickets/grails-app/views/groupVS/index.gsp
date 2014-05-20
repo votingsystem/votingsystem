@@ -72,7 +72,7 @@
             var optionSelected = $("option:selected", this);
             console.log("groupvsTypeSelect - selected: " + groupvsType)
             var targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType;
-            if("" != groupvsType) targetURL = targetURL + "&groupvsType=" + groupvsType
+            if("" != groupvsType) targetURL = targetURL + "&state=" + groupvsType
             dynatable.settings.dataset.ajaxUrl= targetURL
             dynatable.paginationPage.set(1);
             dynatable.process();

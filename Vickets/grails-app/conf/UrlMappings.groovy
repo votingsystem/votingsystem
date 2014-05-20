@@ -38,6 +38,11 @@ class UrlMappings {
             }
         }
 
+        "/messageSMIME/receipt/$requestMessageId" {
+            controller = "messageSMIME"
+            action = "receipt"
+        }
+
         "/userVS" {
             controller = "userVS"
             action = [POST:"save"]
@@ -90,6 +95,31 @@ class UrlMappings {
             action = "edit"
             constraints {
                 id(matches:/\d*/)
+            }
+        }
+
+        "/groupVS/cancel/$id"{
+            controller = "groupVS"
+            action = "cancel"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/groupVS/$id/users"{
+            controller = "groupVS"
+            action = "listUsers"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/groupVS/$id/user/$userId" {
+            controller = "groupVS"
+            action = "user"
+            constraints {
+                id(matches:/\d*/)
+                userId(matches:/\d*/)
             }
         }
 

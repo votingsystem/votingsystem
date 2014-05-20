@@ -17,14 +17,6 @@ public class SubscriptionVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Set<MessageSMIME> getAdminMessageSMIMESet() {
-        return adminMessageSMIMESet;
-    }
-
-    public void setAdminMessageSMIMESet(Set<MessageSMIME> adminMessageSMIMESet) {
-        this.adminMessageSMIMESet = adminMessageSMIMESet;
-    }
-
     public enum State {ACTIVE, PENDING, CANCELLED}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -131,6 +123,14 @@ public class SubscriptionVS implements java.io.Serializable {
 
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public Set<MessageSMIME> getAdminMessageSMIMESet() {
+        return adminMessageSMIMESet;
+    }
+
+    public void setAdminMessageSMIMESet(Set<MessageSMIME> adminMessageSMIMESet) {
+        this.adminMessageSMIMESet = adminMessageSMIMESet;
     }
 
 }

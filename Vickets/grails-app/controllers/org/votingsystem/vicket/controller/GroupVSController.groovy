@@ -44,41 +44,35 @@ class GroupVSController {
             Map resultMap = [:]
             def result
             List<GroupVS> groupList = null
-            int totalGroups = 0;
             GroupVS.withTransaction {
-                if(params.searchText || params.searchFrom || params.searchTo || params.state) {
-                    GroupVS.State state = null
-                    Date dateFrom = null
-                    Date dateTo = null
-                    try {state = GroupVS.State.valueOf(params.state)} catch(Exception ex) {}
-                    //searchFrom:2014/04/14 00:00:00, max:100, searchTo
-                    if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
-                    if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
-
-                    groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset) {
-                        or {
-                            if(state) eq("state", state)
-                            ilike('name', "%${params.searchText}%")
-                            ilike('description', "%${params.searchText}%")
-                        }
-                        and {
-                            if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
-                            else if(dateFrom) {ge("dateCreated", dateFrom)}
-                            else if(dateTo) {le("dateCreated", dateTo)}
-                        }
+                GroupVS.State state = null
+                Date dateFrom = null
+                Date dateTo = null
+                try {state = GroupVS.State.valueOf(params.state)} catch(Exception ex) {
+                    state = GroupVS.State.ACTIVE
+                }
+                //searchFrom:2014/04/14 00:00:00, max:100, searchTo
+                if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
+                if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
+                groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset) {
+                    or {
+                        if(state) eq("state", state)
+                        ilike('name', "%${params.searchText}%")
+                        ilike('description', "%${params.searchText}%")
                     }
-                    totalGroups = groupList.totalCount
-                } else {
-                    groupList = GroupVS.createCriteria().list(max: params.max, offset: params.offset){ };
-                    totalGroups = groupList.totalCount
+                    and {
+                        if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
+                        else if(dateFrom) {ge("dateCreated", dateFrom)}
+                        else if(dateTo) {le("dateCreated", dateTo)}
+                    }
                 }
             }
             def resultList = []
             groupList.each {groupItem ->
                 resultList.add(groupVSService.getGroupVSDataMap(groupItem))
             }
-            resultMap = ["${message(code: 'groupvsRecordsLbl')}":resultList, queryRecordCount: totalGroups,
-                         numTotalGroups:totalGroups ]
+            resultMap = ["${message(code: 'groupvsRecordsLbl')}":resultList, queryRecordCount: groupList.totalCount,
+                         numTotalGroups:groupList.totalCount ]
             render resultMap as JSON
         }
     }
@@ -99,6 +93,7 @@ class GroupVSController {
                             args:[newGroupVS.name]), URL:URL]
                     responseVS.setContentType(ContentTypeVS.JSON)
                 }
+                return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
             }
 
         } catch(Exception ex) {
@@ -106,7 +101,6 @@ class GroupVSController {
             String msg = message(code:'publishGroupVSErrorMessage')
             responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:msg, type:TypeVS.VICKET_ERROR)
         }
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
     }
 
     def edit() {
@@ -140,7 +134,34 @@ class GroupVSController {
             log.error(ex.getMessage(), ex)
             return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())]
         }
+    }
 
+    def cancel() {
+        try {
+            if(params.long('id')) {
+                GroupVS groupVS
+                Map resultMap = [:]
+                GroupVS.withTransaction {
+                    groupVS = GroupVS.get(params.long('id'))
+                }
+                MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+                if(!messageSMIMEReq) {
+                    return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+                }
+                ResponseVS responseVS = groupVSService.cancelGroup(groupVS, messageSMIMEReq, request.getLocale())
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
+                    responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupCancelledOKMsg',
+                            args:[groupVS.name]), URL:URL]
+                    responseVS.setContentType(ContentTypeVS.JSON)
+                }
+                return [responseVS:responseVS]
+            } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    message: message(code: 'requestWithErrors'))]
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())]
+        }
     }
 
     def subscribe() {
@@ -163,6 +184,23 @@ class GroupVSController {
     }
 
 
+    def user() {
+        GroupVS groupVS = null
+        UserVS userVS = null
+        SubscriptionVS subscriptionVS = null
+        GroupVS.withTransaction {groupVS = GroupVS.get(params.long('id')) }
+        UserVS.withTransaction { userVS = UserVS.get(params.long('userId'))}
+        SubscriptionVS.withTransaction { subscriptionVS = SubscriptionVS.findWhere(userVS:userVS, groupVS:groupVS)}
+        if(!subscriptionVS) {
+            return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                    message: message(code: 'groupUserNotFoundMsg', args:[params.id, params.userId]))]
+        }
+        Map subscriptionMap = userVSService.getSubscriptionVSDetailedDataMap(subscriptionVS)
+        if(request.contentType?.contains("json")) {
+            render subscriptionMap as JSON
+        } else render(view:'user', model: [subscriptionMap:subscriptionMap])
+    }
+
     def users() {
         if(params.long('id')) {
             def result
@@ -184,6 +222,45 @@ class GroupVSController {
                 message: message(code: 'requestWithErrors'))]
     }
 
+    def listUsers() {
+        try {
+            if(params.long('id')) {
+                GroupVS groupVS = null
+                Map resultMap = [:]
+                GroupVS.withTransaction {
+                    groupVS = GroupVS.get(params.long('id'))
+                }
+                if(!groupVS) {
+                    return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                            message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
+                }
+                resultMap = [groupName: groupVS.name, id:groupVS.id]
+
+                if(request.contentType?.contains("json")) {
+                    def userList
+                    SubscriptionVS.withTransaction {
+                        userList = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
+                            eq("groupVS", groupVS)
+                        }
+                    }
+
+                    def resultList = []
+                    userList.each {userItem ->
+                        resultList.add(userVSService.getSubscriptionVSDataMap(userItem))
+                    }
+                    resultMap = ["${message(code: 'uservsRecordsLbl')}":resultList, queryRecordCount: userList.totalCount,
+                                 numTotalUsers:userList.totalCount ]
+                    render resultMap as JSON
+                } else {
+                    render(view:'listUsers', model: [subscriptionMap:resultMap])
+                }
+            } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    message: message(code: 'requestWithErrors'))]
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())]
+        }
+    }
 
     def test() {
 
