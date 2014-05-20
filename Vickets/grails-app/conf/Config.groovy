@@ -1,7 +1,6 @@
 import org.apache.log4j.EnhancedPatternLayout
 import org.apache.log4j.Level
 import org.votingsystem.groovy.util.VotingSystemLogAppender
-import org.votingsystem.util.SimpleJsonLayout
 
 
 // locations to search for config files that get merged into the main config;
