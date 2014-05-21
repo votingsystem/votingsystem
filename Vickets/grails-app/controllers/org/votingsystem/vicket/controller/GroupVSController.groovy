@@ -262,6 +262,22 @@ class GroupVSController {
         }
     }
 
+    def activateUser () {
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+        if(!messageSMIMEReq) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        }
+        ResponseVS responseVS = groupVSService.activateUser(messageSMIMEReq, request.getLocale())
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            SubscriptionVS subscription = responseVS.data
+            String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
+            responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupUserActivatedMsg',
+                    args:[subscription.userVS.nif, subscription.groupVS.name]), URL:URL]
+            responseVS.setContentType(ContentTypeVS.JSON)
+        }
+        return [responseVS:responseVS]
+    }
+
     def test() {
 
     }

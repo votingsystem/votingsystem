@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.util.NifUtils
 
 /**
 * @author jgzornoza
@@ -9,13 +10,13 @@ import org.votingsystem.model.UserVS
 */
 class UserVSService {
 	
-	//static transactional = true
+	static transactional = false
 	
-	List<String> systemAdmins
+	def systemAdmins
 	def grailsApplication
     def grailsLinkGenerator
 
-    UserVS systemUser
+    private UserVS systemUser
 
     public synchronized Map init() throws Exception {
         log.debug("init")
@@ -47,9 +48,12 @@ class UserVSService {
     }
 
     public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){
-        Map resultMap = [subscriptionId:subscriptionVS.id, id:subscriptionVS.userVS.id, nif:subscriptionVS.userVS.nif,
-                name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}",
-                         state:subscriptionVS.state.toString(), subscriptionDateCreated:subscriptionVS.dateCreated]
+        Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,
+             dateCancelled:subscriptionVS.dateCancelled, lastUpdated:subscriptionVS.lastUpdated,
+             uservs:[id:subscriptionVS.userVS.id, NIF:subscriptionVS.userVS.nif,
+                   name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}"],
+             groupvs:[name:subscriptionVS.groupVS.name, id:subscriptionVS.groupVS.id],
+                state:subscriptionVS.state.toString(), dateCreated:subscriptionVS.dateCreated]
         return resultMap
     }
 
@@ -59,23 +63,28 @@ class UserVSService {
         subscriptionVS.adminMessageSMIMESet.each {adminMessage ->
             adminMessages.add("${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${adminMessage.id}")
         }
-        Map resultMap = [subscriptionId:subscriptionVS.id, id:subscriptionVS.userVS.id, nif:subscriptionVS.userVS.nif,
-                name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}",
-                state:subscriptionVS.state.toString(), subscriptionDateCreated:subscriptionVS.dateCreated,
-                subscriptionDateActivated:subscriptionVS.dateActivated, subscriptionDateCancelled:subscriptionVS.dateCancelled,
-                subscriptionLastUpdated:subscriptionVS.lastUpdated, subscriptionMessageURL:subscriptionMessageURL,
-                adminMessages:adminMessages]
+
+        Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,
+                dateCancelled:subscriptionVS.dateCancelled, lastUpdated:subscriptionVS.lastUpdated,
+                messageURL:subscriptionMessageURL,adminMessages:adminMessages,
+                uservs:[id:subscriptionVS.userVS.id, NIF:subscriptionVS.userVS.nif,
+                      name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}"],
+                groupvs:[name:subscriptionVS.groupVS.name, id:subscriptionVS.groupVS.id],
+                state:subscriptionVS.state.toString(), dateCreated:subscriptionVS.dateCreated]
         return resultMap
     }
 
 	boolean isUserAdmin(String nif) {
+        nif = NifUtils.validate(nif);
 		if(!systemAdmins) {
             systemAdmins = new ArrayList<String>();
             "${grailsApplication.config.VotingSystem.adminsDNI}".split(",")?.each {
-                systemAdmins.add(it.trim())
+                systemAdmins.add(NifUtils.validate(it.trim()))
             }
 		}
-		return systemAdmins.contains(nif)
+        boolean result = systemAdmins.contains(nif)
+        if(result) log.debug("isUserAdmin - nif: ${nif}")
+		return result
 	}
 
 }

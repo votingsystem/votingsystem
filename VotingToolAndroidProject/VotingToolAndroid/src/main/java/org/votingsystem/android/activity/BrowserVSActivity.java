@@ -143,6 +143,17 @@ public class BrowserVSActivity extends ActionBarActivity {
         }
     }
 
+    @Override public void onBackPressed() {
+        String webUrl = webView.getUrl();
+        Log.d(TAG + ".onBackPressed(...) ", "webUrl: " + webUrl);
+        if (webView.isFocused() && webView.canGoBack() && webUrl.contains("mode=details")) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+            finish();
+        }
+    }
+
     private void processSignatureOperation(OperationVS operationVS) {
         Log.d(TAG + ".processSignatureOperation(...) ", "processSignatureOperation");
         PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,

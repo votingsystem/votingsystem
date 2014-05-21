@@ -2,6 +2,9 @@ var Operation = {
 		VICKET_GROUP_NEW : "VICKET_GROUP_NEW",
 		VICKET_GROUP_EDIT: "VICKET_GROUP_EDIT",
 		VICKET_GROUP_CANCEL: "VICKET_GROUP_CANCEL",
+		VICKET_GROUP_USER_ACTIVATE: "VICKET_GROUP_USER_ACTIVATE",
+		VICKET_GROUP_USER_DEACTIVATE: "VICKET_GROUP_USER_DEACTIVATE",
+		VICKET_GROUP_USER_DEPOSIT: "VICKET_GROUP_USER_DEPOSIT",
 		VICKET_GROUP_SUBSCRIBE : "VICKET_GROUP_SUBSCRIBE"
 }
 
@@ -337,6 +340,17 @@ function getFnName(fn) {
 }
 
 var menuType = 'user'
+
+
+function getMenuURL(baseURL) {
+    var selectedMenuType = getParameterByName('menu')
+    if(baseURL.indexOf("?") < 0) {
+        baseURL = baseURL + "?menu=" + menuType;
+    } else {
+        baseURL = baseURL + "&menu=" + menuType;
+    }
+    return baseURL
+}
 
 function updateMenuLinks() {
     var selectedMenuType = getParameterByName('menu')

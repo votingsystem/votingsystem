@@ -38,6 +38,13 @@ modules = {
         resource url: 'js/utils.js.gsp'
     }
 
+    details {
+        dependsOn 'jquery', 'bootstrap', 'jquery_ui'
+        resource url: 'font-awesome/css/font-awesome.min.css'
+        resource 'css/vickets.css'
+        resource url: 'js/utils.js.gsp'
+    }
+
     applicationMobile {
         dependsOn 'jquery', 'bootstrap', 'jquery_ui', 'multilevel_menu'
         resource url: 'font-awesome/css/font-awesome.min.css'

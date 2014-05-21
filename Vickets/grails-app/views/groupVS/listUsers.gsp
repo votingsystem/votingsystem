@@ -31,7 +31,7 @@
                 <th data-dynatable-column="nif" style="width: 120px;"><g:message code="nifLbl"/></th>
                 <th data-dynatable-column="name" style="max-width:80px;"><g:message code="nameLbl"/></th>
                 <th data-dynatable-column="state" style="max-width:60px;"><g:message code="stateLbl"/></th>
-                <th data-dynatable-column="subscriptionDate" style="width:170px;"><g:message code="subscriptionDateLbl"/></th>
+                <th data-dynatable-column="lastUpdate" style="width:200px;"><g:message code="lastUpdateLbl"/></th>
             </tr>
             </thead>
         </table>
@@ -70,6 +70,7 @@
         $('#uservs_table').bind('dynatable:afterUpdate',  function() {
             console.log("page loaded")
             $('#dynatable-record-count-uservs_table').css('visibility', 'visible');
+            updateMenuLinks()
         })
 
         //$("#uservs_table").stickyTableHeaders({fixedOffset: $('.navbar')});
@@ -101,13 +102,12 @@
     }
 
 
-    function rowWriter(rowIndex, jsonUservsData, columns, cellWriter) {
+    function rowWriter(rowIndex, jsonSubscriptionData, columns, cellWriter) {
         var transactionType
-        console.log(jsonUservsData)
-        var userURL = "user/" + jsonUservsData.id
+        var userURL = getMenuURL("user/" + jsonSubscriptionData.uservs.id + "?mode=details")
 
         var userState
-        switch(jsonUservsData.state) {
+        switch(jsonSubscriptionData.state) {
             case 'ACTIVE':
                 userState = '<g:message code="activeUserLbl"/>'
                 break;
@@ -118,15 +118,15 @@
                 userState = '<g:message code="cancelledUserLbl"/>'
                 break;
             default:
-                userState = jsonUservsData.state
+                userState = jsonSubscriptionData.state
         }
 
         var cssClass = "span4", tr;
         if (rowIndex % 3 === 0) { cssClass += ' first'; }
-        tr = '<tr><td class="text-center"><a href="#" onclick="openWindow(\'' + userURL + '\')">' + jsonUservsData.nif + '</a></td>' +
-            '<td class="text-center">' + jsonUservsData.name + '</td>' +
+        tr = '<tr><td class="text-center"><a href="#" onclick="openWindow(\'' + userURL + '\')">' + jsonSubscriptionData.uservs.NIF + '</a></td>' +
+            '<td class="text-center">' + jsonSubscriptionData.uservs.name + '</td>' +
             '<td class="text-center">' + userState + '</td>' +
-            '<td class="text-center">' + jsonUservsData.subscriptionDateCreated + '</td></tr>'
+            '<td class="text-center">' + jsonSubscriptionData.lastUpdated + '</td></tr>'
         return tr
     }
 

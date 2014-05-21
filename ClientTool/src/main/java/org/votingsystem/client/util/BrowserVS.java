@@ -62,10 +62,17 @@ public class BrowserVS extends Region {
     private WebView webView;
     private WebView smallView;
     private ComboBox comboBox;
+    private VBox mainVBox;
     private BrowserVSStackPane browserHelper;
     private AtomicInteger offset = new AtomicInteger(0);
 
+
     public BrowserVS() {
+        this(new WebView());
+    }
+
+    private BrowserVS(WebView webView) {
+        this.webView = webView;
         Platform.setImplicitExit(false);
         signatureService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
@@ -106,7 +113,6 @@ public class BrowserVS extends Region {
     }
 
     private void initComponents() {
-        webView = new WebView();
         final WebHistory history = webView.getEngine().getHistory();
         smallView = new WebView();
         comboBox = new ComboBox();
@@ -124,7 +130,7 @@ public class BrowserVS extends Region {
             }
         });
 
-        VBox verticalBox = new VBox();
+        mainVBox = new VBox();
         VBox.setVgrow(webView, Priority.ALWAYS);
 
         final Button forwardButton = new Button();
@@ -186,7 +192,7 @@ public class BrowserVS extends Region {
                     @Override
                     public WebEngine call(PopupFeatures config) {
                         //smallView.setFontScale(0.8);
-                        openPopUp(smallView);
+                        new BrowserVS(smallView).show(700, 700, false);
                         return smallView.getEngine();
                     }
                 }
@@ -234,9 +240,9 @@ public class BrowserVS extends Region {
                     }
                 }
         );
-        verticalBox.getChildren().addAll(toolBar, webView);
+        mainVBox.getChildren().addAll(toolBar, webView);
         browserHelper = new BrowserVSStackPane(signatureService);
-        browserHelper.getChildren().add(0, verticalBox);
+        browserHelper.getChildren().add(0, mainVBox);
 
         Scene scene = new Scene(browserHelper, Color.web("#666970"));
         browserStage.setScene(scene);
@@ -272,7 +278,7 @@ public class BrowserVS extends Region {
         webView.getEngine().executeScript(jsCommand);
     }
 
-    private void openPopUp(WebView popUpWebView) {
+    private void openPopUp1(WebView popUpWebView) {
         //popUpWebView.setPrefSize(400, 400);
         final Stage stage = new Stage();
         //create root node of scene
@@ -322,6 +328,18 @@ public class BrowserVS extends Region {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 webView.getEngine().load(urlToLoad);
+                browserStage.show();
+            }
+        });
+    }
+
+
+    private void show(final int width, final int height, final boolean isToolbarVisible) {
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                browserStage.setWidth(width);
+                browserStage.setHeight(height);
+                if(!isToolbarVisible) mainVBox.getChildren().removeAll(toolBar);
                 browserStage.show();
             }
         });

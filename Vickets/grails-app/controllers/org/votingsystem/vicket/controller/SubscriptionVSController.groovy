@@ -6,6 +6,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.util.NifUtils
 
 /**
  * @infoController SubscriptionVS
@@ -18,37 +19,21 @@ class SubscriptionVSController {
 
     def groupVSService
 
-	/**
-	 * @httpMethod [POST]
-	 * @return
-	 */
-	def update () {
-        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-        if(!messageSMIMEReq) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-        }
-        ResponseVS responseVS = null
-        try {
-            responseVS = groupVSService.updateSubscription(messageSMIMEReq, request.getLocale())
-        } catch(Exception ex) {
-            log.error (ex.getMessage(), ex)
-            String msg = message(code:'subscribeGroupVSErrorMessage')
-            responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:msg, type:TypeVS.VICKET_ERROR)
-        }
-        return [responseVS:responseVS]
-    }
 
     def test() {
-        def result
-        Map resultMap = [:]
-
-        UserVS uservs = UserVS.get(4L)
-        GroupVS groupvs = GroupVS.get(21L)
-
-        SubscriptionVS.withTransaction {
-            new SubscriptionVS(userVS:uservs, groupVS:groupvs, state:SubscriptionVS.State.ACTIVE).save()
+        String nif = "7553172H"
+        nif = NifUtils.validate(nif).toUpperCase();
+        def systemAdmins
+        if(!systemAdmins) {
+            systemAdmins = new ArrayList<String>();
+            "${grailsApplication.config.VotingSystem.adminsDNI}".split(",")?.each {
+                systemAdmins.add(NifUtils.validate(it.trim()).toUpperCase())
+            }
         }
-        render "OK"
+        log.debug(" ====== systemAdmins: ${systemAdmins}")
+        boolean result = systemAdmins.contains(nif)
+        render "isUserAdmin : ${result}"
+        return false
     }
 	
 }

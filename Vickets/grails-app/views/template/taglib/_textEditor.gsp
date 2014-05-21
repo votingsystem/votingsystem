@@ -23,7 +23,6 @@ function getEditor_${attrs.id}Data() {
 }
 
 function setDataEditor_${attrs.id}(value) {
-    console.log("==== setDataEdito: " + editor + " - valuie: " + value)
     ${attrs.id}Content = value
     editor.insertHtml( value );
 }

@@ -47,6 +47,8 @@ La dirección del servidor de sello de tiempo de las aplicaciones **AccessContro
 
 
 =======================================================================================================
-*   Las aplicaciones que utilizan **Hibernate** y **Grails** (**TimeStampServer**, **AccessControl**, **ControlCenter** y **TestsWebApp**
+
+* Las aplicaciones necesitan ser ejecutadas con usuarios con privilegios para escribir los logs en el directorio '/var/log/votingsystem'
+* Las aplicaciones que utilizan **Hibernate** y **Grails** (**TimeStampServer**, **AccessControl**, **ControlCenter** y **TestsWebApp**
 dan problemas con OpenJDK 1.7.0_25).
 
