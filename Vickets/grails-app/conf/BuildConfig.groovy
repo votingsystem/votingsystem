@@ -81,7 +81,7 @@ grails.project.dependency.resolution = {
         compile ':executor:0.3'
 
         // plugins needed at runtime but not for compilation
-        runtime ":hibernate4:4.3.5.1"  // or ":hibernate:3.6.10.2"
+        runtime ":hibernate4:4.1.11.2"  // or ":hibernate:3.6.10.2"
         runtime ":resources:1.2.1"
         runtime ':gsp-resources:0.4.4'
 
