@@ -14,6 +14,7 @@ public enum TypeVS {
     EVENT_WITH_ERRORS,
     OK,
     TEST,
+    SIGNATURE_ERROR,
     ERROR,
     CANCELLED,
     USER_ERROR,

@@ -7,7 +7,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.vicket.Reason
+import org.votingsystem.model.vicket.MetaInfMsg
 
 /**
 * @author jgzornoza
@@ -21,6 +21,7 @@ class GroupVSService {
     def messageSource
     def grailsApplication
     def signatureVSService
+    def subscriptionVSService
 
 	public void init() { }
 
@@ -33,8 +34,8 @@ class GroupVSService {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                              TypeVS.VICKET_GROUP_CANCEL.toString(), groupVS.name].toArray(), locale)
             log.error "cancelGroup - ${msg}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, reason:Reason.cancelVicketGroup_ERROR_userWithoutPrivilege,
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.VICKET_GROUP_ERROR, message:msg,
+                    metaInf: MetaInfMsg.cancelVicketGroup_ERROR_userWithoutPrivilege)
         }
         String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
         def messageJSON = JSON.parse(documentStr)
@@ -42,13 +43,13 @@ class GroupVSService {
                 (TypeVS.VICKET_GROUP_CANCEL != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "cancelGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, reason:Reason.cancelVicketGroup_ERROR_params,
-                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.VICKET_GROUP_ERROR,
+                    message:msg, metaInf: MetaInfMsg.cancelVicketGroup_ERROR_params)
         }
         groupVS.state = GroupVS.State.CLOSED
         groupVS.save()
-        return new ResponseVS(type:TypeVS.VICKET_GROUP_CANCEL, message:msg, reason:Reason.cancelVicketGroup_OK + groupVS.id,
-                statusCode:ResponseVS.SC_OK)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_CANCEL, message:msg,
+                metaInf:MetaInfMsg.cancelVicketGroup_OK + groupVS.id)
     }
 
 
@@ -62,7 +63,7 @@ class GroupVSService {
                  TypeVS.VICKET_GROUP_EDIT.toString(), groupVS.name].toArray(), locale)
             log.error "editGroup - ${msg}"
             return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    reason:Reason.editVicketGroup_ERROR_userWithoutPrivileges)
+                    metaInf:MetaInfMsg.editVicketGroup_ERROR_userWithoutPrivileges)
         }
         String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
         def messageJSON = JSON.parse(documentStr)
@@ -70,85 +71,19 @@ class GroupVSService {
                 (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, reason:Reason.editVicketGroup_ERROR_params,
+            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, metaInf:MetaInfMsg.editVicketGroup_ERROR_params,
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         if(Long.valueOf(messageJSON.id) != groupVS.id) {
             msg = messageSource.getMessage('identifierErrorMsg', [groupVS.id, messageJSON.id].toArray(), locale)
             log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, reason:Reason.editVicketGroup_ERROR_id,
+            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, metaInf:MetaInfMsg.editVicketGroup_ERROR_id,
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         groupVS.setDescription(messageJSON.groupvsInfo)
         groupVS.save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_EDIT, data:groupVS,
-                reason:Reason.editVicketGroup_OK + groupVS.id)
-    }
-
-    public ResponseVS deActivateUser(MessageSMIME messageSMIMEReq, Locale locale) {
-        GroupVS groupVS = null
-        UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("saveGroup - signer: ${userSigner?.nif}")
-        String msg = null
-        ResponseVS responseVS = null
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        log.debug("activateUser - documentStr: ${documentStr}")
-        def messageJSON = JSON.parse(documentStr)
-        if (!messageJSON.groupvsName || !messageJSON.groupvsInfo ||
-                (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    reason:Reason.deActivateVicketGroupUser_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-
-        groupVS = GroupVS.findWhere(name:messageJSON.groupvsName.trim())
-        return responseVS
-    }
-
-    public ResponseVS activateUser(MessageSMIME messageSMIMEReq, Locale locale) {
-        UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("saveGroup - signer: ${userSigner?.nif}")
-        String msg = null
-        ResponseVS responseVS = null
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        def messageJSON = JSON.parse(documentStr)
-        if (!messageJSON.groupvs.name || !messageJSON.groupvs.id ||
-            !messageJSON.uservs.name || !messageJSON.uservs.NIF ||
-                (TypeVS.VICKET_GROUP_USER_ACTIVATE != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    reason:Reason.activateVicketGroupUser_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-        GroupVS groupVS = GroupVS.get(Long.valueOf(messageJSON.groupvs.id))
-        if(!groupVS || !messageJSON.groupvs.name.equals(groupVS.name)) {
-            msg = messageSource.getMessage('itemNotFoundMsg', [messageJSON.groupvs.id].toArray(), locale)
-            log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    reason:Reason.activateVicketGroupUser_ERROR_groupNotFound, statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-        if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
-                messageSMIMEReq.userVS.nif)) {
-            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
-                 TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), locale)
-            log.error "activateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    reason:Reason.activateVicketGroupUser_ERROR_userWithoutPrivilege, statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-        UserVS userToActivate = UserVS.findWhere(nif:messageJSON.uservs.NIF)
-        SubscriptionVS subscription = SubscriptionVS.findWhere(groupVS: groupVS, userVS:userToActivate)
-        if(!userToActivate || SubscriptionVS.State.PENDING != subscription.state) {
-            msg = messageSource.getMessage('groupUserNotPendingErrorMsg',
-                    [groupVS.name, userSigner.getNif()].toArray(), locale)
-            log.error "activateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    reason:Reason.activateVicketGroupUser_ERROR_groupUserNotPending)
-        }
-        messageSMIMEReq.setSubscriptionVS(subscription)
-        log.debug("activateUser OK - userToActivate: ${userToActivate.nif} - group: ${groupVS.name}")
-        return new ResponseVS(type:TypeVS.VICKET_GROUP_USER_ACTIVATE, message:msg, statusCode:ResponseVS.SC_OK,
-                reason:Reason.activateVicketGroupUser_OK + subscription.id, data:subscription)
+                metaInf:MetaInfMsg.editVicketGroup_OK + groupVS.id)
     }
 
     public ResponseVS saveGroup(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -164,7 +99,7 @@ class GroupVSService {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    reason:Reason.saveVicketGroup_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
+                    metaInf:MetaInfMsg.saveVicketGroup_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
 
         groupVS = GroupVS.findWhere(name:messageJSON.groupvsName.trim())
@@ -172,7 +107,7 @@ class GroupVSService {
             msg = messageSource.getMessage('nameGroupRepeatedMsg', [messageJSON.groupvsName].toArray(), locale)
             log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    reason:Reason.saveVicketGroup_ERROR_nameGroupRepeatedMsg)
+                    metaInf:MetaInfMsg.saveVicketGroup_ERROR_nameGroupRepeatedMsg)
         }
 
         groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:GroupVS.State.ACTIVE, groupRepresentative:userSigner,
@@ -187,7 +122,7 @@ class GroupVSService {
         MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT,
                 smimeParent:messageSMIMEReq, content:smimeMessageRespBytes).save() }
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS,
-                reason: Reason.saveVicketGroup_OK + groupVS.id)
+                metaInf: MetaInfMsg.saveVicketGroup_OK + groupVS.id)
     }
 
     public ResponseVS subscribe(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -202,7 +137,7 @@ class GroupVSService {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "subscribe - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    reason:Reason.subscribeToVicketGroup_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
+                    metaInf:MetaInfMsg.subscribeToVicketGroup_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         GroupVS groupVS = GroupVS.get(messageJSON.groupvs.id)
 
@@ -211,7 +146,7 @@ class GroupVSService {
                     [groupVS.groupRepresentative.nif, groupVS.name].toArray(), locale)
             log.error "subscribe - ERROR - ${msg}"
             return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    reason:Reason.subscribeToVicketGroup_ERROR_representativeSubscribed)
+                    metaInf:MetaInfMsg.subscribeToVicketGroup_ERROR_representativeSubscribed)
         }
 
         subscriptionVS = SubscriptionVS.findWhere(groupVS:groupVS, userVS:userSigner)
@@ -219,12 +154,14 @@ class GroupVSService {
             msg = messageSource.getMessage('userAlreadySubscribedErrorMsg', [userSigner.nif, groupVS.name].toArray(), locale)
             log.error "subscribe - ERROR - ${msg}"
             return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    reason:Reason.subscribeToVicketGroup_ERROR_userAlreadySubscribed)
+                    metaInf:MetaInfMsg.subscribeToVicketGroup_ERROR_userAlreadySubscribed)
         }
         subscriptionVS = new SubscriptionVS(userVS:userSigner, groupVS:groupVS, state:SubscriptionVS.State.PENDING,
                 subscriptionSMIME: messageSMIMEReq).save()
+        msg = messageSource.getMessage('groupvsSubscriptionOKMsg', [userSigner.nif, groupVS.name].toArray(), locale)
         log.debug("subscribe - OK subsscription: ${subscriptionVS.id} to groupVS: ${groupVS.id}")
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, reason:Reason.subscribeToVicketGroup_OK + subscriptionVS.id)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type: TypeVS.VICKET_GROUP_SUBSCRIBE, message: msg,
+                metaInf:MetaInfMsg.subscribeToVicketGroup_OK + subscriptionVS.id)
     }
 
  	public Map getGroupVSDataMap(GroupVS groupVS){

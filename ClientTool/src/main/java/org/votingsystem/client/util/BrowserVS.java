@@ -173,7 +173,7 @@ public class BrowserVS extends Region {
                         if(urlInputText.getText().startsWith("http://")) {
                             targetURL = urlInputText.getText().trim();
                         } else targetURL = "http://" + urlInputText.getText().trim();
-                        loadURL(targetURL);
+                        loadURL(targetURL, null);
                     }
                 }
             }
@@ -278,18 +278,6 @@ public class BrowserVS extends Region {
         webView.getEngine().executeScript(jsCommand);
     }
 
-    private void openPopUp1(WebView popUpWebView) {
-        //popUpWebView.setPrefSize(400, 400);
-        final Stage stage = new Stage();
-        //create root node of scene
-        Group rootGroup = new Group();
-        Scene scene = new Scene(rootGroup, 800, 600, Color.WHITESMOKE);
-        stage.setScene(scene);
-        stage.centerOnScreen();
-        stage.show();
-        rootGroup.getChildren().add(popUpWebView);
-    }
-
     /**
      * waiting until the WebView has loaded a document before trying to trigger Firebug.
      * http://stackoverflow.com/questions/17387981/javafx-webview-webengine-firebuglite-or-some-other-debugger
@@ -323,11 +311,12 @@ public class BrowserVS extends Region {
     }
 
 
-    public void loadURL(final String urlToLoad) {
+    public void loadURL(final String urlToLoad, final String caption) {
         logger.debug("loadURL: " + urlToLoad);
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 webView.getEngine().load(urlToLoad);
+                if(caption != null) browserStage.setTitle(caption);
                 browserStage.show();
             }
         });

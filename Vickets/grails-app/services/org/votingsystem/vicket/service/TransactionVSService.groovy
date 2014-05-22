@@ -130,14 +130,17 @@ class TransactionVSService {
                     smimeParent: messageSMIMEReq,
                     content:responseVS.getSmimeMessage().getBytes())
             MessageSMIME.withTransaction { messageSMIMEResp.save(); }
-
+            log.debug("processUserAllocation - ${messageJSON}")
             BigDecimal numUsersBigDecimal = new BigDecimal(numUsers)
             CurrencyVS currency = CurrencyVS.valueOf(messageJSON.currency)
             String subject = messageJSON.subject
             BigDecimal amount = new BigDecimal(messageJSON.amount)
+            if(numUsersBigDecimal == BigDecimal.ZERO) {
+                log.error("Users not found")
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:"Transaction without target users")
+            }
             BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
             BigDecimal totalUsers = userPart.multiply(numUsersBigDecimal)
-            log.debug("processUserAllocation - ${messageJSON}")
             if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
 
             TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEResp,

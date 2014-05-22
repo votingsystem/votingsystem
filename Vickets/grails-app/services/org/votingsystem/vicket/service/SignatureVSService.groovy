@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.service
 
+import grails.transaction.Transactional
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.cms.CMSAlgorithm
 import org.bouncycastle.cms.CMSEnvelopedData
@@ -15,6 +16,7 @@ import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
+import org.votingsystem.model.vicket.MetaInfMsg
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertExtensionCheckerVS
@@ -36,6 +38,8 @@ import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
 class  SignatureVSService {
+
+    static transactional = false
 	
 	private SignedMailGenerator signedMailGenerator;
 	static Set<X509Certificate> trustedCerts;
@@ -55,33 +59,36 @@ class  SignatureVSService {
 	def sessionFactory
 	
 	public ResponseVS deleteTestCerts () {
-		log.debug(" - deleteTestCerts - ")
+		log.debug("deleteTestCerts")
         /*def d = new DefaultGrailsDomainClass(CertificateVS.class)
         d.persistentProperties.each { log.debug("============ ${it}") }*/
 		int numTestCerts = CertificateVS.countByType(CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
-		log.debug(" - deleteTestCerts - numTestCerts: ${numTestCerts}")
+		log.debug("deleteTestCerts - numTestCerts: ${numTestCerts}")
 		def testCerts = CertificateVS.createCriteria().scroll { eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST) }
-		while (testCerts.next()) {
-			CertificateVS cert = (CertificateVS) testCerts.get(0);
-			int numCerts = CertificateVS.countByAuthorityCertificateVS(cert)
-			def userCertCriteria = CertificateVS.createCriteria()
-			def userTestCerts = userCertCriteria.scroll { eq("authorityCertificateVS", cert) }
-			while (userTestCerts.next()) { 
-				CertificateVS userCert = (CertificateVS) userTestCerts.get(0);
-				userCert.delete()
-				if((userTestCerts.getRowNumber() % 100) == 0) {
-					sessionFactory.currentSession.flush()
-					sessionFactory.currentSession.clear()
-					log.debug(" - processed ${userTestCerts.getRowNumber()}/${numCerts} user certs from auth. cert ${cert.id}");
-				}
-			}
-			CertificateVS.withTransaction { cert.delete() }
-		}
+        CertificateVS.withTransaction {
+            while (testCerts.next()) {
+                CertificateVS cert = (CertificateVS) testCerts.get(0);
+                int numCerts = CertificateVS.countByAuthorityCertificateVS(cert)
+                def userCertCriteria = CertificateVS.createCriteria()
+                def userTestCerts = userCertCriteria.scroll { eq("authorityCertificateVS", cert) }
+                while (userTestCerts.next()) {
+                    CertificateVS userCert = (CertificateVS) userTestCerts.get(0);
+                    userCert.delete()
+                    if((userTestCerts.getRowNumber() % 100) == 0) {
+                        sessionFactory.currentSession.flush()
+                        sessionFactory.currentSession.clear()
+                        log.debug(" - processed ${userTestCerts.getRowNumber()}/${numCerts} user certs from auth. cert ${cert.id}");
+                    }
+                }
+                cert.delete()
+            }
+        }
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 
+    @Transactional
 	public synchronized Map init() throws Exception {
-		log.debug(" - init - ")
+		log.debug("init")
         deleteTestCerts()
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
@@ -119,8 +126,8 @@ class  SignatureVSService {
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
 		initCertAuthorities();
         return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, trustedCerts:trustedCerts,
-                serverCertificateVS:serverCertificateVS,
-                localServerCertSigner:localServerCertSigner, serverPrivateKey:serverPrivateKey];
+                serverCertificateVS:serverCertificateVS, localServerCertSigner:localServerCertSigner,
+                serverPrivateKey:serverPrivateKey];
 	}
 
     public X509Certificate getServerCert() {
@@ -239,7 +246,7 @@ class  SignatureVSService {
 	}
 	
 	def checkCancelledCerts () {
-		log.debug "checkCancelledCerts - checkCancelledCerts"
+		log.debug "checkCancelledCerts"
 		File directory = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.certAuthoritiesDirPath).getFile()
 		String cancelSufix = "_CANCELLED"
@@ -278,14 +285,14 @@ class  SignatureVSService {
 		CertificateVS.withTransaction {
 			CertificateVS certificate = CertificateVS.findWhere(serialNumber:serialNumberCert)
 			if(certificate) {
-				log.debug "Comprobando certificateVS.id '${certificate?.id}'  --- "
+				log.debug "cancelCert - certificateVS.id '${certificate?.id}'  --- "
 				if(CertificateVS.State.OK == certificate.state) {
 					certificate.cancelDate = new Date(System.currentTimeMillis());
 					certificate.state = CertificateVS.State.CANCELLED;
 					certificate.save()
-					log.debug "cancelado certificateVS '${certificate?.id}'"
-				} else log.debug "El certificateVS.id '${certificate?.id}' ya estaba cancelado"
-			} else log.debug "No hay ningún certificateVS con num. serie '${serialNumberCert}'"
+					log.debug "cancelCert - certificateVS '${certificate?.id}' cancelled"
+				} else log.debug "CertificateVS.id '${certificate?.id}' already cancelled"
+			} else log.debug "CertificateVS with num. serie '${serialNumberCert}' not found"
 		}
 	}
 	
@@ -403,7 +410,8 @@ class  SignatureVSService {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIME - ${message} - messageSMIME.id: ${messageSMIME.id}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message,
+                    metaInf: MetaInfMsg.signature_ERROR_hashRepeated)
 		}
 		return validateSignersCertificate(messageWrapper, locale)
 	}
@@ -431,7 +439,8 @@ class  SignatureVSService {
                 } else {
                     String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
                     log.error("ERROR - validateSignersCertificate - ${msg}")
-                    return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
+                    return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
+                            metaInf: MetaInfMsg.signature_ERROR_timestampMissing)
                 }
 				ResponseVS validationResponse = CertUtil.verifyCertificate(userVS.getCertificate(),
                         getTrustedCerts(), false)
@@ -454,11 +463,12 @@ class  SignatureVSService {
                 checkedSigners.add(responseVS.userVS)
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-					messageSource.getMessage('unknownCAErrorMsg', null, locale))
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, metaInf: MetaInfMsg.signature_EXCEPTION_certPathValidator,
+                        message: messageSource.getMessage('unknownCAErrorMsg', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR)
+				return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR,
+                        metaInf: MetaInfMsg.signature_EXCEPTION)
 			}
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:messageWrapper,
@@ -481,8 +491,8 @@ class  SignatureVSService {
             if(contenType && ContentTypeVS.VICKET == contenType) typeVS = TypeVS.VICKET;
             MessageSMIME messageSMIME
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
-                messageSMIME = new MessageSMIME(metaInf:certValidationResponse.message, type:TypeVS.ERROR,
-                        content:smimeMessageReq.getBytes())
+                messageSMIME = new MessageSMIME(reason:certValidationResponse.message, type:TypeVS.SIGNATURE_ERROR,
+                        metaInf:certValidationResponse.metaInf ,content:smimeMessageReq.getBytes())
                 MessageSMIME.withTransaction { messageSMIME.save() }
                 log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
                         " - message: ${certValidationResponse.message}"
@@ -532,7 +542,7 @@ class  SignatureVSService {
 
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
-        log.debug("--- - encryptMessage(...) - ");
+        log.debug("encryptMessage(...) - ");
         try {
             return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
         } catch(Exception ex) {
@@ -558,7 +568,7 @@ class  SignatureVSService {
      * Method to decrypt files attached to SMIME (not signed) messages
      */
     public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug " - decryptMessage"
+        log.debug "decryptMessage"
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
@@ -620,7 +630,7 @@ class  SignatureVSService {
      * Method to encrypt SMIME signed messages
      */
     ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug(" - encryptSMIMEMessage(...) ");
+        log.debug("encryptSMIMEMessage(...) ");
         try {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
@@ -634,7 +644,7 @@ class  SignatureVSService {
      * Method to decrypt SMIME signed messages
      */
     ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        log.debug(" - decryptSMIMEMessage ")
+        log.debug("decryptSMIMEMessage ")
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {

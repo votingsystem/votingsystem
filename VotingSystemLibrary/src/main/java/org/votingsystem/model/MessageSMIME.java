@@ -56,8 +56,7 @@ public class MessageSMIME implements Serializable {
     @Column(name="base64ContentDigest", unique=true) 
     private String base64ContentDigest;
 
-    @Column(name="reason")
-    private String reason;
+    @Column(name="reason", columnDefinition="TEXT") private String reason;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23, insertable=true)

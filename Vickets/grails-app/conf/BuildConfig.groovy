@@ -75,15 +75,14 @@ grails.project.dependency.resolution = {
         build   ":tomcat:7.0.52.1"
 
         // plugins for the compile step
-        compile ":scaffolding:2.0.3"
-        compile ':cache:1.1.2'
-        compile ':quartz:1.0.1'
-        compile ':executor:0.3'
+        compile(':scaffolding:2.0.3', ':cache:1.1.2', ':quartz:1.0.1', ':executor:0.3') {
+            //excludes "hibernate"
+        }
 
         // plugins needed at runtime but not for compilation
-        runtime ":hibernate4:4.1.11.2"  // or ":hibernate:3.6.10.2"
-        runtime ":resources:1.2.1"
-        runtime ':gsp-resources:0.4.4'
+        runtime(':hibernate4:4.1.11.2', ':resources:1.2.1', ':gsp-resources:0.4.4') {
+            //excludes "hibernate"
+        }
 
         //runtime ":database-migration:1.3.5"
         // Uncomment these (or add new ones) to enable additional resources capabilities

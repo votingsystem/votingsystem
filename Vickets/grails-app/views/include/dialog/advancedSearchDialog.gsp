@@ -94,7 +94,6 @@
         var advancedSearchToTimeValue = advancedSearchToTime.getTime()
         var advancedSearchTextValue = ("" == $("#advancedSearchText").val().trim())? null: $("#advancedSearchText").val();
 
-
         var errorMessage = null
 
         var userSearch
@@ -112,11 +111,11 @@
 
         if(errorMessage != null) {
             $("#searchErrorMsg").html('<p>' + errorMessage + '<p>')
-$("#searchErrorPanel").fadeIn(500)
-} else {
-$('#advancedSearchDialog').modal('hide')
-processUserSearchJSON(userSearch)
-}
+            $("#searchErrorPanel").fadeIn(500)
+        } else {
+            $('#advancedSearchDialog').modal('hide')
+            processUserSearchJSON(userSearch)
+        }
 return false
 }
 

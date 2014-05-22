@@ -8,6 +8,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.vicket.MetaInfMsg
 import org.votingsystem.util.DateUtils
 
 /**
@@ -22,6 +23,7 @@ class GroupVSController {
 	def grailsApplication;
     def groupVSService
     def userVSService
+    def subscriptionVSService
 
     def index() {
         if (params.long('id')) {
@@ -99,7 +101,8 @@ class GroupVSController {
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
             String msg = message(code:'publishGroupVSErrorMessage')
-            responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:msg, type:TypeVS.VICKET_ERROR)
+            responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:ex.getMessage(),
+                    metaInf: MetaInfMsg.saveVicketGroup_EXCEPTION, type:TypeVS.VICKET_ERROR)
         }
     }
 
@@ -176,7 +179,8 @@ class GroupVSController {
             } catch(Exception ex) {
                 log.error (ex.getMessage(), ex)
                 String msg = message(code:'subscribeGroupVSErrorMessage')
-                responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:msg, type:TypeVS.VICKET_ERROR)
+                responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:ex.getMessage(),
+                        metaInf: MetaInfMsg.subscribeToVicketGroup_EXCEPTION, type:TypeVS.VICKET_ERROR)
             }
             return [responseVS:responseVS]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
@@ -267,19 +271,31 @@ class GroupVSController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = groupVSService.activateUser(messageSMIMEReq, request.getLocale())
+        ResponseVS responseVS = subscriptionVSService.activateUser(messageSMIMEReq, request.getLocale())
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SubscriptionVS subscription = responseVS.data
-            String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
             responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupUserActivatedMsg',
-                    args:[subscription.userVS.nif, subscription.groupVS.name]), URL:URL]
+                    args:[subscription.userVS.nif, subscription.groupVS.name])]
             responseVS.setContentType(ContentTypeVS.JSON)
         }
         return [responseVS:responseVS]
     }
 
-    def test() {
-
+    def deActivateUser () {
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+        if(!messageSMIMEReq) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        }
+        ResponseVS responseVS = subscriptionVSService.deActivateUser(messageSMIMEReq, request.getLocale())
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            SubscriptionVS subscription = responseVS.data
+            responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupUserdeActivatedMsg',
+                    args:[subscription.userVS.nif, subscription.groupVS.name])]
+            responseVS.setContentType(ContentTypeVS.JSON)
+        }
+        return [responseVS:responseVS]
     }
+
+    def test() { }
 
 }

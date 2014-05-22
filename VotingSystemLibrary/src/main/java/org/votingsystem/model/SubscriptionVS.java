@@ -30,7 +30,7 @@ public class SubscriptionVS implements java.io.Serializable {
 
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
-    @Column(name="reason") private String reason;
+    @Column(name="reason", columnDefinition="TEXT") private String reason;
 
     @OneToOne private MessageSMIME subscriptionSMIME;
 

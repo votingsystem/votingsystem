@@ -60,8 +60,10 @@ class UserVSService {
     public Map getSubscriptionVSDetailedDataMap(SubscriptionVS subscriptionVS){
         String subscriptionMessageURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${subscriptionVS.subscriptionSMIME.id}"
         def adminMessages = []
-        subscriptionVS.adminMessageSMIMESet.each {adminMessage ->
-            adminMessages.add("${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${adminMessage.id}")
+        SubscriptionVS.withTransaction {
+            subscriptionVS.adminMessageSMIMESet.each {adminMessage ->
+                adminMessages.add("${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${adminMessage.id}")
+            }
         }
 
         Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,

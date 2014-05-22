@@ -15,6 +15,7 @@ import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
+import org.votingsystem.model.vicket.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
@@ -31,7 +32,7 @@ class TimeStampService {
     private byte[] signingCertPEMBytes
 
     public synchronized Map init() {
-        log.debug(" - init - init - init");
+        log.debug("init");
         try {
             String serverURL = StringUtils.checkURL(grailsApplication.config.VotingSystem.urlTimeStampServer)
             ActorVS timeStampServer = ActorVS.findWhere(serverURL:serverURL)
@@ -201,7 +202,7 @@ class TimeStampService {
             log.error(ex.getMessage(), ex)
             log.debug("validateToken - token issuer: ${tsToken?.getSID()?.getIssuer()}" +
                     " - timeStampSignerInfoVerifier: ${timeStampSignerInfoVerifier?.associatedCertificate?.subject}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, metaInf: MetaInfMsg.signature_ERROR_timestamp,
                     message:messageSource.getMessage('timeStampErrorMsg', null, locale))
         }
     }

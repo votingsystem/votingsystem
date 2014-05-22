@@ -161,7 +161,8 @@ class VicketFilters {
                                     "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
                             messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
                             if(responseVS.type) messageSMIMEReq.type = responseVS.type
-                            messageSMIMEReq.setReason(responseVS.getReason())
+                            if(responseVS.reason) messageSMIMEReq.setReason(responseVS.getReason())
+                            if(responseVS.metaInf) messageSMIMEReq.setMetaInf(responseVS.getMetaInf())
                             messageSMIMEReq.save(flush:true)
                         }
                         log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"

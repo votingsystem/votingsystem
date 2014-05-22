@@ -40,6 +40,7 @@ public class ResponseVS<T> implements Serializable {
     private StatusVS<?> status;
     private String message;
     private String reason;
+    private String metaInf;
     private SMIMEMessageWrapper smimeMessage;
     private EventVS eventVS;
     private T data;
@@ -234,5 +235,13 @@ public class ResponseVS<T> implements Serializable {
 
     public void setSize(Integer size) {
         this.size = size;
+    }
+
+    public String getMetaInf() {
+        return metaInf;
+    }
+
+    public void setMetaInf(String metaInf) {
+        this.metaInf = metaInf;
     }
 }

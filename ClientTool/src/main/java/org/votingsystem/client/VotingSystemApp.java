@@ -15,6 +15,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
@@ -148,6 +149,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
                 "/resources/css/modal-dialog.css").toExternalForm());
         primaryStage.initStyle(StageStyle.UNDECORATED);
+        primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
 
         // allow the UNDECORATED Stage to be dragged around.
         final Node root = primaryStage.getScene().getRoot();
@@ -220,7 +222,8 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/app/admin?menu=admin");
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/app/admin?menu=admin",
+                        ContextVS.getMessage("votingSystemProceduresLbl"));
             }
         });
     }
@@ -230,7 +233,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://vickets/Vickets/app/user?menu=user");
+                browserVS.loadURL("http://vickets/Vickets/app/user?menu=user", ContextVS.getMessage("vicketUsersLbl"));
             }
         });
     }
@@ -240,7 +243,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://vickets/Vickets/app/admin?menu=admin");
+                browserVS.loadURL("http://vickets/Vickets/app/admin?menu=admin", ContextVS.getMessage("vicketAdminLbl"));
             }
         });
     }
@@ -250,7 +253,8 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/eventVSElection/main?menu=user");
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/eventVSElection/main?menu=user",
+                        ContextVS.getMessage("voteButtonLbl"));
             }
         });
     }
@@ -260,7 +264,8 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/representative/main?menu=user");
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/representative/main?menu=user",
+                        ContextVS.getMessage("selectRepresentativeButtonLbl"));
             }
         });
     }
