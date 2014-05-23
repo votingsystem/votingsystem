@@ -2,7 +2,8 @@ package org.votingsystem.groovy.util
 
 import org.apache.log4j.Logger
 import org.apache.log4j.spi.LoggingEvent
-import grails.converters.JSON
+import org.votingsystem.model.vicket.LogMsg
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -12,21 +13,25 @@ import grails.converters.JSON
 class VotingSystemLogAppender extends org.apache.log4j.AppenderSkeleton implements org.apache.log4j.Appender {
 
     private static Logger reportslog = Logger.getLogger("reportsLog");
+    private static Logger transactionslog = Logger.getLogger("transactionsLog");
 
     public String source
 
     @Override protected void append(LoggingEvent event) {
         //EventLog.withNewTransaction {}
-        //String logStatement = getLayout().format(event);
-        if(event.getRenderedMessage().contains("REPORT_MSG")) {
-            Map<String,Object> eventMap = new LinkedHashMap();
-            eventMap.put("timestamp", event.timeStamp);
-            eventMap.put("date", new Date(event.timeStamp));
-            eventMap.put("message", event.getRenderedMessage());
-            String msg = new JSON(eventMap);
-            reportslog.info(msg + ",")
+        def matcher = LogMsg.regExPattern.matcher(event.getRenderedMessage())
+        if(matcher.matches()) {
+            switch(matcher[0][2]) {
+                case LogMsg.REPORT_MSG:
+                    reportslog.info(matcher[0][3] + ",")
+                    break;
+                case LogMsg.TRSANSACTIONVS_MSG:
+                    transactionslog.info(matcher[0][3] + ",")
+                    break;
+            }
         }
     }
+
 
     /**
      * Set the source value for the logger (e.g. which application the logger belongs to)

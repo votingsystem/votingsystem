@@ -68,7 +68,8 @@ grails {
         }
     }
 }
-grails.reload.enabled = true
+
+//grails.reload.enabled = true
 
 grails.converters.encoding = "UTF-8"
 // scaffolding templates configuration
@@ -147,6 +148,11 @@ log4j = {
                 layout:pattern(conversionPattern: '%m%n'),
                 file:"./VicketReports/VicketServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
+        rollingFile name:"VicketTransactionsReports", threshold:org.apache.log4j.Level.INFO,
+                layout:pattern(conversionPattern: '%m%n'),
+                file:"./VicketReports/VicketTransactionsReports.log", datePattern: '\'_\'yyyy-MM-dd'
+
+
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
             subject: mail.error.subject, threshold: Level.ERROR,
             SMTPHost: mail.error.server, SMTPUsername: mail.error.username,
@@ -171,6 +177,8 @@ log4j = {
             //debug   'org.apache'
 
             info  additivity: false, VicketServerReports: 'reportsLog'
+
+            info  additivity: false, VicketTransactionsReports: 'transactionsLog'
 
             error   'org.codehaus.groovy.grails.web.servlet',  //  controllers
                     'org.codehaus.groovy.grails.web.pages', //  GSP
