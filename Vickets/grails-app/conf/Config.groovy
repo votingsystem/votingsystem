@@ -1,7 +1,8 @@
 import org.apache.log4j.EnhancedPatternLayout
 import org.apache.log4j.Level
-import org.votingsystem.groovy.util.VotingSystemLogAppender
 
+
+grails.reload.enabled = true
 
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
@@ -69,8 +70,6 @@ grails {
     }
 }
 
-//grails.reload.enabled = true
-
 grails.converters.encoding = "UTF-8"
 // scaffolding templates configuration
 grails.scaffolding.templates.domainSuffix = 'Instance'
@@ -134,9 +133,6 @@ log4j = {
     //System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
 
     appenders {
-        appender new VotingSystemLogAppender(source:'Vickets', name: 'VotingSystemLogAppender',
-                layout:pattern(conversionPattern: '%m%n'), threshold: org.apache.log4j.Level.INFO)
-
         file name:'VicketServerERRORS', threshold:org.apache.log4j.Level.ERROR,
                 file:"/var/log/votingsystem/VicketServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 
@@ -163,7 +159,6 @@ log4j = {
 
 
     root {
-        info 'VotingSystemLogAppender'
         debug 'stdout', 'VicketServer'
         error 'VicketServerERRORS', 'smtp'
     }

@@ -75,7 +75,7 @@ grails.project.dependency.resolution = {
         build   ":tomcat:7.0.47"
 
         // plugins for the compile step
-        compile(':scaffolding:2.0.3', ':cache:1.1.2', ':quartz:1.0.1', ':executor:0.3') {
+        compile(':scaffolding:2.0.1', ':cache:1.1.1', ':quartz:1.0.1', ':executor:0.3') {
             //excludes "hibernate"
         }
 
@@ -89,6 +89,7 @@ grails.project.dependency.resolution = {
         //runtime ":zipped-resources:1.0.1"
         //runtime ":cached-resources:1.1"
         //runtime ":yui-minify-resources:0.1.5"
+        if (Environment.current == Environment.DEVELOPMENT) {}
     }
 }
 grails.tomcat.jvmArgs = [ '-Xmx512m', '-XX:MaxPermSize=256m' ]

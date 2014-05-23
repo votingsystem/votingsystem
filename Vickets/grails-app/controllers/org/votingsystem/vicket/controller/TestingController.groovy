@@ -8,6 +8,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.vicket.LoggerVS
 import org.votingsystem.model.vicket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.ApplicationContextHolder
@@ -30,7 +31,13 @@ class TestingController {
     def auditingService
 
 
-    def index() {}
+    def index() {
+        LoggerVS.logTransactionVS([status:3232, message:"111proband11o 111probadno"])
+        LoggerVS.logReportVS([status:0000, message:"logReportVS logReportVS"])
+        LoggerVS.logReportVS(111, "pruebaded", "mensaje")
+
+        render "OK"
+    }
 
     def accounts() {}
 

@@ -1,5 +1,4 @@
 import org.apache.log4j.EnhancedPatternLayout
-import org.votingsystem.groovy.util.VotingSystemLogAppender
 
 import java.net.*;
 import org.apache.log4j.net.SMTPAppender
@@ -131,9 +130,6 @@ log4j = {
 
 
     appenders {
-        appender new VotingSystemLogAppender(source:'AccessControl', name: 'votingSystemLogAppender',
-                layout:new EnhancedPatternLayout(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} %p %c - %m%n'),
-                threshold: org.apache.log4j.Level.INFO)
 
         rollingFile name:'AccessControlERRORS', threshold:org.apache.log4j.Level.ERROR,
 			file:"/var/log/votingsystem/AccessControlERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
@@ -152,7 +148,6 @@ log4j = {
 
 
     root {
-        info 'votingSystemLogAppender'
         debug  'stdout', 'AccessControl'
         error 'AccessControlERRORS', 'smtp'
     }

@@ -38,16 +38,15 @@
     </g:applyCodec>
 
     $(function() {
-        $("#dateCreatedDiv").text(subscriptionDataJSON.dateCreated)
+        document.getElementById("dateCreatedDiv").innerHTML = subscriptionDataJSON.dateCreated
 
         <g:if test="${SubscriptionVS.State.ACTIVE.toString().equals(subscriptionMap.state)}">
-            $("#messageDiv").text("<g:message code="userStateActiveLbl"/>")
-            $("#activateUserButton").css("display", "none")
+            document.getElementById("messageDiv").innerHTML = "<g:message code="userStateActiveLbl"/>"
+            document.getElementById("activateUserButton").style.display = 'none'
         </g:if>
         <g:if test="${SubscriptionVS.State.PENDING.toString().equals(subscriptionMap.state)}">
-            $("#messageDiv").text("<g:message code="userStatePendingLbl"/>")
-            $("#makeDepositButton").css("display", "none")
-
+            document.getElementById("messageDiv").innerHTML = "<g:message code="userStatePendingLbl"/>"
+            document.getElementById("makeDepositButton").style.display = 'none'
         </g:if>
         <g:if test="${SubscriptionVS.State.CANCELLED.toString().equals(subscriptionMap.state)}">
             $("#messageDiv").text("<g:message code="userStateCancelledLbl"/>")
