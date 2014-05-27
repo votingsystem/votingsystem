@@ -9,9 +9,9 @@
     <r:layoutResources />
 </head>
 <body style="max-width: 600px; margin:30px auto 0px auto;">
-    <div id="receiptContentDiv" style="border: 1px solid #870000; width: 500px;margin:auto; padding: 15px;">
-        <div id="operationTypeDiv" style="font-size: 1.2em; color:#870000; font-weight: bold;"></div>
-        <div id="nameDiv" style="font-size: 1.2em; color:#870000; font-weight: bold;"></div>
+    <div id="receiptContentDiv" style="border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
+        <div id="operationTypeDiv" style="font-size: 1.2em; color:#6c0404; font-weight: bold;"></div>
+        <div id="nameDiv" style="font-size: 1.2em; color:#6c0404; font-weight: bold;"></div>
         <div id="contentDiv" style=""></div>
     </div>
     <button id="saveReceiptButton" type="button" class="btn btn-accept-vs" onclick="saveReceipt();"
@@ -55,7 +55,7 @@
     function saveReceiptCallback(appMessage) {
         console.log("saveReceiptCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
-                console.log("saveReceiptCallback - message from native client: " + appMessage);
+        console.log("saveReceiptCallback - message from native client: " + appMessage);
     }
 
 </r:script>

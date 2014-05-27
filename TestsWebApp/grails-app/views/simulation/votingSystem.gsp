@@ -14,7 +14,7 @@
             </ol>
         </div>
 		<div class="pageContent row" style="position:relative;">
-            <div style="margin: 0px 0 0px 0; font-weight: bold; font-size: 2em; color: #870000;">
+            <div style="margin: 0px 0 0px 0; font-weight: bold; font-size: 2em; color: #6c0404;">
                 <g:message code="votingSystemOperationsLbl"/>
             </div>
 			<div class="" style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">

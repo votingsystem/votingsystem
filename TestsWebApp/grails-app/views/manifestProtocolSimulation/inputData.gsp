@@ -17,7 +17,7 @@
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #870000;
+        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #6c0404;
                 text-align:center;vertical-align: middle;">
             <g:message code="initManifestProtocolSimulationMsg"/>
         </div>

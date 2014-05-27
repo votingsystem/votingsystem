@@ -10,8 +10,8 @@
 </head>
 
 <body style="max-width: 600px; margin:30px auto 0px auto;">
-<div id="voteReceiptContentDiv"  style="display:none; border: 1px solid #870000; width: 500px;margin:auto; padding: 15px;">
-    <div style="font-size: 1.2em; color:#870000; font-weight: bold;"><g:message code="voteReceiptLbl"/></div>
+<div id="voteReceiptContentDiv"  style="display:none; border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
+    <div style="font-size: 1.2em; color:#6c0404; font-weight: bold;"><g:message code="voteReceiptLbl"/></div>
     <a id="pollPage"><g:message code="voteReceiptContentPollPageLbl"/></a>
     <div><g:message code="optionSelectedLbl"/>: <span id="optionSlected"></span></div>
 </div>

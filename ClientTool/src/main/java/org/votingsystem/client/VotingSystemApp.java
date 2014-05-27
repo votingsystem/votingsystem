@@ -15,23 +15,18 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.dialog.DecompressFileDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
-import org.votingsystem.client.dialog.SignedDocumentsBrowser;
+import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.util.BrowserVS;
+import org.votingsystem.client.util.SignedDocumentsBrowser;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.AppHostVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.NifUtils;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.io.File;
 import java.util.UUID;
 
@@ -39,13 +34,14 @@ import java.util.UUID;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class VotingSystemApp extends Application implements DecompressFileDialog.Listener, AppHostVS {
+public class VotingSystemApp extends Application implements DecompressBackupPane.Listener, AppHostVS {
 
     private static Logger logger = Logger.getLogger(VotingSystemApp.class);
 
     private BrowserVS browserVS;
     private SettingsDialog settingsDialog;
     public static String locale = "es";
+    private static VotingSystemApp INSTANCE;
 
     @Override public void stop() {
         logger.debug("stop");
@@ -53,7 +49,12 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         System.exit(0);
     }
 
+    public static VotingSystemApp getInstance() {
+        return INSTANCE;
+    }
+
     @Override public void start(final Stage primaryStage) throws Exception {
+        INSTANCE = this;
         ContextVS.initSignatureClient(this, "log4jClientTool.properties",
                 "clientToolMessages.properties", locale);
 
@@ -86,16 +87,16 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
         openSignedFileButton.setGraphic(new ImageView(Utils.getImage(this, "application-certificate")));
         openSignedFileButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                openSignedFile();
+                SignedDocumentsBrowser.showDialog();
+
             }});
         openSignedFileButton.setPrefWidth(500);
 
         final Button openBackupButton = new Button(ContextVS.getMessage("openBackupButtonLbl"));
         openBackupButton.setGraphic(new ImageView(Utils.getImage(this, "fa-archive")));
         openBackupButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                openBackup();
+            @Override public void handle(ActionEvent actionEvent) {
+                DecompressBackupPane.showDialog(VotingSystemApp.this);
             }
         });
         openBackupButton.setPrefWidth(500);
@@ -168,53 +169,6 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
             }
         });
         primaryStage.show();
-    }
-
-    private void openSignedFile() {
-        logger.debug("openSignedFile");
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                    SignedDocumentsBrowser documentBrowser =  new SignedDocumentsBrowser(new JFrame(), false);
-                    documentBrowser.openSignedFile();
-                } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            }
-        });
-    }
-
-    private void openBackup() {
-        logger.debug("openBackup");
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                    final JFileChooser chooser = new JFileChooser();
-                    chooser.setFileFilter(new FileFilter() {
-                        @Override
-                        public boolean accept(File f) {
-                            return f.getName().toLowerCase().endsWith(".zip") || f.isDirectory();
-                        }
-
-                        public String getDescription() {
-                            return "ZIP Files";
-                        }
-                    });
-                    int returnVal = chooser.showOpenDialog(new JFrame());
-                    if (returnVal == JFileChooser.APPROVE_OPTION) {
-                        File result = chooser.getSelectedFile();
-                        String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
-                        DecompressFileDialog dialog = new DecompressFileDialog(new JFrame(), true);
-                        dialog.unZipBackup(VotingSystemApp.this, result.getAbsolutePath(), outputFolder);
-                    }
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            }
-        });
-
     }
 
     private void openVotingSystemProceduresPage() {
@@ -300,7 +254,7 @@ public class VotingSystemApp extends Application implements DecompressFileDialog
     @Override public void processDecompressedFile(ResponseVS response) {
         logger.debug("processDecompressedFile - statusCode:" + response.getStatusCode());
         if(ResponseVS.SC_OK == response.getStatusCode()) {
-            SignedDocumentsBrowser documentBrowser = new SignedDocumentsBrowser(new JFrame(), false);
+            SignedDocumentsBrowser documentBrowser = new SignedDocumentsBrowser();
             documentBrowser.setVisible((String) response.getData());
         }
     }

@@ -16,7 +16,7 @@
 		<div class="pageContent" style="position:relative;">
 
 			<div style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">
-                <div style="margin: 50px 0 20 0; font-weight: bold; font-size: 2em; color: #870000;">
+                <div style="margin: 50px 0 20 0; font-weight: bold; font-size: 2em; color: #6c0404;">
                     <g:message code="vicketsOperationsLbl"/>
                 </div>
                 <a id="initUserBaseDataButton" href="${createLink(controller: 'vicket', action:'initUserBaseData', absolute:true)}"

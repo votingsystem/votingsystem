@@ -14,7 +14,7 @@
 
 
 <div class="form-group has-error">
-    <i style="color:#870000; font-size: 4em;" class="fa fa-cog fa-spin"></i>
+    <i style="color:#6c0404; font-size: 4em;" class="fa fa-cog fa-spin"></i>
 </div>
 </body>
 </html>

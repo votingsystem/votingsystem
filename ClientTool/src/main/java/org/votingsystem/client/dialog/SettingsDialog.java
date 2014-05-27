@@ -6,9 +6,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -114,6 +111,14 @@ public class SettingsDialog {
         keyStoreVBox.getStyleClass().add("settings-vbox");
 
         HBox footerButtonsBox = new HBox(10);
+
+        Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
+        cancelButton.setGraphic(new ImageView(Utils.getImage(this, "cancel")));
+        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                stage.close();
+            }});
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
@@ -121,9 +126,8 @@ public class SettingsDialog {
             @Override public void handle(ActionEvent actionEvent) {
                 validateForm();
             }});
-        footerButtonsBox.getChildren().addAll(spacer, acceptButton);
-        VBox.setMargin(footerButtonsBox, new Insets(20, 10, 0, 0));
-
+        footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
+        gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
 
         gridPane.add(signWithDNIeRb,0,0);
         gridPane.add(signWithMobileRb,0,2);
@@ -202,7 +206,7 @@ public class SettingsDialog {
                 try {
                     userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
                 } catch(Exception ex) {
-                    FXMessageDialog messageDialog = new FXMessageDialog();
+                    MessageDialog messageDialog = new MessageDialog();
                     messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
                             ContextVS.getMessage("keyStoreNotValidErrorMsg"));
                 }
@@ -225,7 +229,7 @@ public class SettingsDialog {
         ContentSignerHelper.CryptoToken cryptoToken = ContentSignerHelper.CryptoToken.valueOf(cryptoTokenStr);
         if(signWithKeystoreRb.isSelected() &&  ContentSignerHelper.CryptoToken.JKS_KEYSTORE != cryptoToken) {
             if(userKeyStore == null) {
-                FXMessageDialog messageDialog = new FXMessageDialog();
+                MessageDialog messageDialog = new MessageDialog();
                 messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
                         ContextVS.getMessage("keyStoreNotSelectedErrorLbl"));
                 return;
@@ -241,7 +245,7 @@ public class SettingsDialog {
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                             ContentSignerHelper.CryptoToken.JKS_KEYSTORE.toString());
                 } catch(Exception ex) {
-                    FXMessageDialog messageDialog = new FXMessageDialog();
+                    MessageDialog messageDialog = new MessageDialog();
                     messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
                             ContextVS.getMessage("errorStoringKeyStoreMsg"));
                     return;
@@ -259,7 +263,7 @@ public class SettingsDialog {
                         ContentSignerHelper.CryptoToken.MOBILE.toString());
                 ContextVS.getInstance().setProperty(ContextVS.USER_NIF,userNif);
             } else {
-                FXMessageDialog messageDialog = new FXMessageDialog();
+                MessageDialog messageDialog = new MessageDialog();
                 messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
                         ContextVS.getMessage("nifWithErrorsLbl"));
                 return;

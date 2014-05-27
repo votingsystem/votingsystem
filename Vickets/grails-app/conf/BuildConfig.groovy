@@ -14,14 +14,15 @@ grails.project.fork = [
         //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
 
         // configure settings for the test-app JVM, uses the daemon by default
-        test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true, source:1.7],
+        test: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, daemon:true, source:1.7],
         // configure settings for the run-app JVM
-        //problems debugging -> run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
-        run:false,
+        //if there are problems debugging -> run:false,
+        run: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
+
         // configure settings for the run-war JVM
-        war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
+        war: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
         // configure settings for the Console UI JVM
-        console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, source:1.7]
+        console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, source:1.7]
 ]
 
 grails.project.dependency.resolver = "ivy" // or maven

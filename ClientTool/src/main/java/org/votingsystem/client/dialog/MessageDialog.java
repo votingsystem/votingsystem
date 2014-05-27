@@ -1,86 +1,77 @@
 package org.votingsystem.client.dialog;
 
-import net.miginfocom.swing.MigLayout;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 
-import javax.swing.*;
-import java.awt.*;
-
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
-*/
-public class MessageDialog extends javax.swing.JDialog {
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
+public class MessageDialog {
 
-    private static Logger logger = Logger.getLogger(MessageDialog.class); 
-    
-    
-    private Container container;
-    private JEditorPane editorPane;
-    
-    public MessageDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
-        initComponents();
-        pack();
-        setLocationRelativeTo(null);
-    }
-    
-    private void initComponents() {
-        logger.debug("initComponents");
-        container = getContentPane();   
-        container.setLayout(new MigLayout("fill"));
-        JScrollPane scrollPane = new JScrollPane();
-        editorPane = new JEditorPane();
-        editorPane.setEditable(false);
-        //editorPane.setLineWrap(true);
-        //editorPane.setWrapStyleWord(true);
-        editorPane.setContentType("text/html");
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        editorPane.setBackground(java.awt.Color.white);
-        scrollPane.setViewportView(editorPane);
+    private static Logger logger = Logger.getLogger(MessageDialog.class);
 
-        JButton cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
-        cancelButton.setIcon(ContextVS.getIcon(this, "cancel"));
-        cancelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) { dispose();}
+    private final Stage stage;
+    private Label messageLabel;
+
+    public MessageDialog() {
+        stage = new Stage(StageStyle.TRANSPARENT);
+        stage.initModality(Modality.WINDOW_MODAL);
+        //stage.initOwner(window);
+
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
+            @Override public void handle(WindowEvent window) {      }
         });
-        
-        container.add(scrollPane, "width 600::, height 400::, grow, wrap");
-        container.add(cancelButton, "width :150:, align right");
-    }
-    
-    public void showMessage (String message, String caption) {
-        logger.debug("--- showMessage - showMessage: " + message + " - caption: " + caption);
-        if (caption != null) setTitle(caption);
-        if (message != null) editorPane.setText(message);
-        editorPane.updateUI();
-        setVisible(true);
-    }
-    
-    public static void main(String args[]) {
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                    ContextVS.init(null, "log4j.properties", "messages_", "es");
-                    final MessageDialog dialog = new MessageDialog(new javax.swing.JFrame(), true);
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                        @Override
-                        public void windowClosing(java.awt.event.WindowEvent e) {
-                            dialog.dispose();
-                        }
-                    });
-                    dialog.showMessage("Message", "Caption");
-                } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
+        VBox verticalBox = new VBox(10);
+        messageLabel = new Label();
+        messageLabel.setWrapText(true);
+        Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
+        acceptButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                stage.hide();
+            }});
+        verticalBox.getChildren().addAll(messageLabel, acceptButton);
+        verticalBox.getStyleClass().add("modal-dialog");
+        stage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
+        stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
+        // allow the dialog to be dragged around.
+        final Node root = stage.getScene().getRoot();
+        final Delta dragDelta = new Delta();
+        root.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override public void handle(MouseEvent mouseEvent) {
+                // record a delta distance for the drag and drop operation.
+                dragDelta.x = stage.getX() - mouseEvent.getScreenX();
+                dragDelta.y = stage.getY() - mouseEvent.getScreenY();
+            }
+        });
+        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override public void handle(MouseEvent mouseEvent) {
+                stage.setX(mouseEvent.getScreenX() + dragDelta.x);
+                stage.setY(mouseEvent.getScreenY() + dragDelta.y);
             }
         });
     }
 
-    
+    public void showMessage(String message) {
+        messageLabel.setText(message);
+        stage.centerOnScreen();
+        stage.show();
+    }
+
+    class Delta { double x, y; }
+
 }

@@ -5,8 +5,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -14,17 +12,13 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 
-import java.awt.*;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author jgzornoza
@@ -75,13 +69,13 @@ public class BrowserVSStackPane extends StackPane {
         passwordVBox = new VBox(10);
         messageText = new Text();
         messageText.setWrappingWidth(320);
-        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #870000;");
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
         VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
 
         capsLockPressedMessageLabel = new Label(ContextVS.getMessage("capsLockKeyPressed"));
         capsLockPressedMessageLabel.setWrapText(true);
-        capsLockPressedMessageLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #870000;");
+        capsLockPressedMessageLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #6c0404;");
 
         password1Field = new PasswordField();
         password2Field = new PasswordField();
@@ -101,25 +95,27 @@ public class BrowserVSStackPane extends StackPane {
         acceptButton.setGraphic(new ImageView(Utils.getImage(this, "accept")));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
-                new EventHandler<KeyEvent>() {
-                    public void handle(KeyEvent event) {
-                        if ((event.getCode() == KeyCode.ENTER)) {
-                            acceptButton.fire();
-                        }
-                        setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
+            new EventHandler<KeyEvent>() {
+                public void handle(KeyEvent event) {
+                    if ((event.getCode() == KeyCode.ENTER)) {
+                        acceptButton.fire();
                     }
+                    setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
+                            java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
+            }
         );
 
         password2Field.addEventHandler(KeyEvent.KEY_PRESSED,
-                new EventHandler<KeyEvent>() {
-                    public void handle(KeyEvent event) {
-                        if ((event.getCode() == KeyCode.ENTER)) {
-                            acceptButton.fire();
-                        }
-                        setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
+            new EventHandler<KeyEvent>() {
+                public void handle(KeyEvent event) {
+                    if ((event.getCode() == KeyCode.ENTER)) {
+                        acceptButton.fire();
                     }
+                    setCapsLockState(java.awt.Toolkit.getDefaultToolkit().getLockingKeyState(
+                            java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
+            }
         );
 
         HBox footerButtonsBox = new HBox();
@@ -128,7 +124,6 @@ public class BrowserVSStackPane extends StackPane {
 
         footerButtonsBox.getChildren().addAll(acceptButton, spacer, cancelButton);
         VBox.setMargin(footerButtonsBox, new Insets(20, 20, 10, 20));
-
 
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         Text password2Text = new Text(ContextVS.getMessage("password2Lbl"));

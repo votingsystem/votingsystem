@@ -19,6 +19,7 @@ public enum TypeVS {
     CANCELLED,
     USER_ERROR,
     RECEIPT,
+    RECEIPT_VIEW,
     VOTING_EVENT,
     VOTING_EVENT_ERROR,
     VOTEVS,

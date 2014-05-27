@@ -9,8 +9,8 @@
 </head>
 <body style="max-width: 600px; margin:30px auto 0px auto;">
     <div style="margin:0px 30px 0px 30px;">
-        <div id="messageDiv" class="text-center" style="font-size: 1.4em; color:#870000; font-weight: bold;"></div>
-        <div id="" style="border: 1px solid #870000; width: 500px;margin:auto; padding: 15px;">
+        <div id="messageDiv" class="text-center" style="font-size: 1.4em; color:#6c0404; font-weight: bold;"></div>
+        <div id="" style="border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
             <div id="" style="font-size: 1.2em; font-weight: bold;">${subscriptionMap.uservs.NIF}</div>
             <div id="nameDiv" style="font-size: 1.2em;font-weight: bold;">${subscriptionMap.uservs.name}</div>
             <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>: <span id="dateCreatedDiv"></span></div>
@@ -40,18 +40,21 @@
     $(function() {
         document.getElementById("dateCreatedDiv").innerHTML = subscriptionDataJSON.dateCreated
 
+        var menuType = getParameterByName('menu')
+
         <g:if test="${SubscriptionVS.State.ACTIVE.toString().equals(subscriptionMap.state)}">
             document.getElementById("messageDiv").innerHTML = "<g:message code="userStateActiveLbl"/>"
             document.getElementById("activateUserButton").style.display = 'none'
+            if("admin" != menuType) document.getElementById("deActivateUserButton").style.display = 'none'
         </g:if>
         <g:if test="${SubscriptionVS.State.PENDING.toString().equals(subscriptionMap.state)}">
             document.getElementById("messageDiv").innerHTML = "<g:message code="userStatePendingLbl"/>"
             document.getElementById("makeDepositButton").style.display = 'none'
         </g:if>
         <g:if test="${SubscriptionVS.State.CANCELLED.toString().equals(subscriptionMap.state)}">
-            $("#messageDiv").text("<g:message code="userStateCancelledLbl"/>")
-            $("#deActivateUserButton").css("display", "none")
-            $("#makeDepositButton").css("display", "none")
+            document.getElementById("messageDiv").innerHTML = "<g:message code="userStateCancelledLbl"/>"
+            document.getElementById("deActivateUserButton").style.display = 'none'
+            document.getElementById("makeDepositButton").style.display = 'none'
         </g:if>
 
     })
@@ -99,7 +102,8 @@
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink(controller:'transaction', action:'deposit',absolute:true)}/" + subscriptionDataJSON.groupvs.id
         webAppMessage.signedMessageSubject = "<g:message code="makeUserGroupDepositMessageSubject"/>" + " '" + subscriptionDataJSON.groupvs.name + "'"
-        webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEPOSIT, groupvsName:groupVSName, id:groupVSId}
+        webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEPOSIT,
+                groupvsName:subscriptionDataJSON.groupvs.name , id:subscriptionDataJSON.groupvs.id}
         //signed and encrypted
         webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
         webAppMessage.callerCallback = 'makeDepositCallback'

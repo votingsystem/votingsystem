@@ -14,7 +14,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <r:require module="bootstrap"/>
+    <r:require module="details"/>
 </head>
 <r:layoutResources />
 <body>
@@ -42,11 +42,17 @@
     <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.toUserVS.name}</div>
     <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.toUserVS.nif}</div>
 </div>
+    <button id="saveReceiptButton" type="button" class="btn btn-accept-vs" onclick="saveReceipt();"
+            style="margin:10px 0px 0px 0px;"><g:message code="saveReceiptLbl"/>
+    </button>
     <div style="margin:20px 0px 0px 20px; font-size: 1.2em;">
-        <a href="${transactionvsMap.messageSMIMEURL}"><g:message code="proofLbl"/></a>
+        <a href="${transactionvsMap.messageSMIMEURL}" oncli><g:message code="proofLbl"/></a>
     </div>
 </div>
 
+<div id="receipt" style="display:none;">
+    ${receipt}
+</div>
 </body>
 </html>
 <r:script>
@@ -54,6 +60,17 @@
     $(function() {
 
     })
+
+    function saveReceipt() {
+        console.log("saveReceipt")
+        VotingSystemClient.setTEXTMessageToSignatureClient($("#receipt").text().trim(), getFnName(saveReceiptCallback))
+    }
+
+    function saveReceiptCallback(appMessage) {
+        console.log("saveReceiptCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        console.log("saveReceiptCallback - message from native client: " + appMessage);
+    }
 
 </r:script>
 <r:layoutResources />

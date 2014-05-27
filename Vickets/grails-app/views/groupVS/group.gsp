@@ -66,7 +66,7 @@
             </g:if>
         </g:if>
         <g:if test="${!"admin".equals(params.menu) && !"user".equals(params.menu)}">
-            <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;margin:30px 0 0 0;">
+            <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
                 <g:message code="clientToolNeededMsg"/>.
                 <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
         </g:if>
@@ -96,7 +96,7 @@
 
         </g:if>
         <g:if test="${GroupVS.State.CLOSED.toString().equals(groupvsMap?.state)}">
-            $(".pageHeader").css("color", "#870000")
+            $(".pageHeader").css("color", "#6c0404")
             $("#messagePanel").addClass("groupvsClosedBox");
             $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
             $("#messagePanel").css("display", "visible")

@@ -72,7 +72,7 @@
 
             </g:if>
             <g:if test="${EventVS.State.TERMINATED.toString().equals(eventMap?.state)}">
-                $(".pageHeader").css("color", "#870000")
+                $(".pageHeader").css("color", "#6c0404")
                 $("#messagePanel").addClass("eventFinishedBox");
                 $("#messagePanel").text("<g:message code="eventFinishedLbl"/>")
                         $("#messagePanel").css("display", "visible")

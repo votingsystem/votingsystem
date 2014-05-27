@@ -38,7 +38,7 @@
                     TEST
                 </a>
 
-                <div style="margin: 30px 0 10px 0; font-weight: bold; font-size: 2em; color: #870000;">
+                <div style="margin: 30px 0 10px 0; font-weight: bold; font-size: 2em; color: #6c0404;">
                     <g:message code="vicketsOperationsLbl"/>
                 </div>
                 <a id="initUserBaseDataButton" href="${createLink(controller: 'vicket', action:'initUserBaseData', absolute:true)}"

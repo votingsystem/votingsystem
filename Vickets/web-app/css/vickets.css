@@ -30,7 +30,7 @@ body {
 }
 
 .navBar-vicket-icon:hover {
-    color: #870000;
+    color: #6c0404;
     cursor: pointer;
 }
 
@@ -41,7 +41,7 @@ body {
 
 .navbar-vickets .navbar-nav > li > a:hover, .nav > li > a:focus {
     text-decoration: none;
-    background-color: #870000;
+    background-color: #6c0404;
 }
 
 #menu {
@@ -65,7 +65,7 @@ body {
 .formFieldError{
     font-weight: bold;
     background: #f6ccd0;
-    border-color: #870000;
+    border-color: #6c0404;
 }
 
 .userAdvert {
@@ -78,7 +78,7 @@ body {
 }
 
 .btn-cancel-vs {
-    color: #870000;
+    color: #6c0404;
 }
 
 .btn-cancel-vs:after {
@@ -90,7 +90,7 @@ body {
 .btn-accept-vs {
     background-color: #ba0011;
     color: #f9f9f9;
-    border-color: #870000;
+    border-color: #6c0404;
 }
 
 .btn-accept-vs:after {
@@ -105,7 +105,7 @@ body {
 .btn-accept-vs.active,
 .open .dropdown-toggle.btn-accept-vs {
     background-color: #f2dede;
-    border-color: #870000;
+    border-color: #6c0404;
     color: #f9f9f9;
 }
 .btn-accept-vs:active,
@@ -129,7 +129,7 @@ fieldset[disabled] .btn-accept-vs:active,
 .btn-accept-vs[disabled].active,
 fieldset[disabled] .btn-accept-vs.active {
     background-color: #ba0011;
-    border-color: #870000;
+    border-color: #6c0404;
 }
 .btn-accept-vs .badge {
     color: #ba0011;
@@ -149,7 +149,7 @@ input:focus:valid {
 }
 
 .pageHeader {
-    color: #870000;
+    color: #6c0404;
     font-weight: bold;
     text-decoration: underline;
     text-overflow: ellipsis;

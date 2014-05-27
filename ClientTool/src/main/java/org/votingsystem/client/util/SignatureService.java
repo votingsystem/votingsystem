@@ -1,7 +1,6 @@
 package org.votingsystem.client.util;
 
 import com.itextpdf.text.pdf.PdfReader;
-import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import net.sf.json.JSONObject;
@@ -9,7 +8,6 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.callable.*;
-import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CMSUtils;

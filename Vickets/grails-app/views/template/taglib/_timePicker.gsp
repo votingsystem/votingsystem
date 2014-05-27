@@ -4,7 +4,7 @@
             <input id="${attrs.id}" class="form-control" type="time" style="width: 85px; padding-right: 0px;" value="00:00">
         </div>
         <div style="display: table-cell;">
-            <span style="color: #870000;margin: 0 0 0 4px;" ><g:message code="hourLbl"/>
+            <span style="color: #6c0404;margin: 0 0 0 4px;" ><g:message code="hourLbl"/>
                 <i class="fa fa-clock-o"></i></span>
         </div>
     </div>
@@ -17,14 +17,14 @@
                    oninvalid="this.setCustomValidity('<g:message code="timePickerHourValidationMsg"/>')" maxlength="2" value="00">
         </div>
         <div style="display: table-cell;vertical-align: middle;">
-            <span style="color: #870000; font-weight: bold;">:</span>
+            <span style="color: #6c0404; font-weight: bold;">:</span>
         </div>
         <div style="display: table-cell;">
             <input type="text" id="${attrs.id}MinuteInput" class="form-control" style="width: 45px;" pattern="\d{1,2}"
                    oninvalid="this.setCustomValidity('<g:message code="timePickerMinuteValidationMsg"/>')" maxlength="2" value="00">
         </div>
         <div style="display: table-cell; vertical-align: middle;">
-            <span style="color: #870000;"><g:message code="hourLbl"/>
+            <span style="color: #6c0404;"><g:message code="hourLbl"/>
                 <i class="fa fa-clock-o"></i></span>
         </div>
     </div>

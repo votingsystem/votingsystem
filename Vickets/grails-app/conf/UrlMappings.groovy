@@ -60,7 +60,7 @@ class UrlMappings {
 
         "/transaction/$id"{
             controller = "transaction"
-            action = "list"
+            action = "get"
             constraints {
                 id(matches:/\d*/)
             }

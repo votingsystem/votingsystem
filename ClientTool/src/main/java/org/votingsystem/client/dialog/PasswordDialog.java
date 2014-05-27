@@ -60,13 +60,13 @@ public class PasswordDialog {
         dialogVBox = new VBox(10);
         messageText = new Text();
         messageText.setWrappingWidth(320);
-        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #870000;");
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
         VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
 
         capsLockPressedMessageLabel = new Label(ContextVS.getMessage("capsLockKeyPressed"));
         capsLockPressedMessageLabel.setWrapText(true);
-        capsLockPressedMessageLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #870000;");
+        capsLockPressedMessageLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #6c0404;");
 
         password1Field = new PasswordField();
         password2Field = new PasswordField();

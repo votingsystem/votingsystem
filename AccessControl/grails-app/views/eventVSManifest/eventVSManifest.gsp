@@ -59,7 +59,7 @@
             </g:if>
         </div>
 
-        <div id="clientToolMsg" class="text-center" style="color:#870000; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+        <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
             <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 
     </div>
@@ -93,7 +93,7 @@
 
         </g:elseif>
         <g:elseif test="${EventVS.State.TERMINATED.toString().equals(eventMap?.state)}">
-            $(".pageHeader").css("color", "#870000")
+            $(".pageHeader").css("color", "#6c0404")
             $("#messagePanel").addClass("eventFinishedBox");
             $("#messagePanel").text("<g:message code="eventFinishedLbl"/>")
                         $("#messagePanel").css("display", "visible")

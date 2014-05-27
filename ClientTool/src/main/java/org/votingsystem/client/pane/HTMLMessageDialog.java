@@ -1,17 +1,16 @@
-package org.votingsystem.client.dialog;
+package org.votingsystem.client.pane;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
@@ -20,15 +19,15 @@ import org.votingsystem.model.ContextVS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class FXMessageDialog {
+public class HTMLMessageDialog {
 
-    private static Logger logger = Logger.getLogger(FXMessageDialog.class);
+    private static Logger logger = Logger.getLogger(HTMLMessageDialog.class);
 
     private final Stage stage;
-    private Label messageLabel;
+    private WebView webView;
 
-    public FXMessageDialog() {
-        stage = new Stage(StageStyle.TRANSPARENT);
+    public HTMLMessageDialog() {
+        stage = new Stage();
         stage.initModality(Modality.WINDOW_MODAL);
         //stage.initOwner(window);
 
@@ -37,14 +36,14 @@ public class FXMessageDialog {
         });
 
         VBox verticalBox = new VBox(10);
-        messageLabel = new Label();
-        messageLabel.setWrapText(true);
+        webView = new WebView();
+        webView.setPrefHeight(400);
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.hide();
             }});
-        verticalBox.getChildren().addAll(messageLabel, acceptButton);
+        verticalBox.getChildren().addAll(webView, acceptButton);
         verticalBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
@@ -66,8 +65,9 @@ public class FXMessageDialog {
         });
     }
 
-    public void showMessage(String message) {
-        messageLabel.setText(message);
+    public void showMessage(String message, String caption) {
+        webView.getEngine().loadContent(message);
+        stage.setTitle(caption);
         stage.centerOnScreen();
         stage.show();
     }

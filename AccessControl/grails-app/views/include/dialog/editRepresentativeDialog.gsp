@@ -4,13 +4,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" style="color: #870000; font-weight: bold;">
+                    <h4 class="modal-title" style="color: #6c0404; font-weight: bold;">
                         <g:message code="editRepresentativeLbl"/>
                     </h4>
                 </div>
                 <div class="modal-body">
                     <div id="editRepresentativeDialogMessageDiv" class='text-center'
-                         style="color: #870000; font-size: 1.2em;font-weight: bold; margin-bottom: 15px;"></div>
+                         style="color: #6c0404; font-size: 1.2em;font-weight: bold; margin-bottom: 15px;"></div>
 
                     <div id="editRepresentativeDialogFormDiv" style="margin:0px auto 0px 20px;">
                         <input id="resetEditRepresentativeForm" type="reset" style="display:none;">

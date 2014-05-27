@@ -39,7 +39,7 @@ modules = {
     }
 
     details {
-        dependsOn 'jquery', 'bootstrap', 'jquery_ui'
+        dependsOn 'bootstrap'
         resource url: 'font-awesome/css/font-awesome.min.css'
         resource 'css/vickets.css'
         resource url: 'js/utils.js.gsp'

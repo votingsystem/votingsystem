@@ -22,19 +22,19 @@
 .multilevelpushmenu_wrapper .ltr {
 	margin-left: -100%;
 	left: 0;
-	-moz-box-shadow: 5px 0 5px -5px #870000;
-	-webkit-box-shadow: 5px 0 5px -5px #870000;
-	box-shadow: 5px 0 5px -5px #870000;
-	filter: progid:DXImageTransform.Microsoft.Shadow(color=#870000,direction=90,strength=2);
+	-moz-box-shadow: 5px 0 5px -5px #6c0404;
+	-webkit-box-shadow: 5px 0 5px -5px #6c0404;
+	box-shadow: 5px 0 5px -5px #6c0404;
+	filter: progid:DXImageTransform.Microsoft.Shadow(color=#6c0404,direction=90,strength=2);
 }
 
 .multilevelpushmenu_wrapper .rtl {
 	margin-right: -100%;
 	right: 0;
-	-moz-box-shadow: 5px 0 5px 5px #870000;
-	-webkit-box-shadow: 5px 0 5px 5px #870000;
-	box-shadow: 5px 0 5px 5px #870000;
-	filter: progid:DXImageTransform.Microsoft.Shadow(color=#870000,direction=270,strength=2);
+	-moz-box-shadow: 5px 0 5px 5px #6c0404;
+	-webkit-box-shadow: 5px 0 5px 5px #6c0404;
+	box-shadow: 5px 0 5px 5px #6c0404;
+	filter: progid:DXImageTransform.Microsoft.Shadow(color=#6c0404,direction=270,strength=2);
 }
 
 .multilevelpushmenu_wrapper .multilevelpushmenu_inactive {
@@ -57,16 +57,16 @@
 
 .multilevelpushmenu_wrapper li {
 	cursor: pointer;
-	border-top: 1px solid #870000;
+	border-top: 1px solid #6c0404;
 	padding: .4em .4em .4em .4em;
 }
 
 .multilevelpushmenu_wrapper li:last-child {
-	border-bottom: 1px solid #870000;
+	border-bottom: 1px solid #6c0404;
 }
 
 .multilevelpushmenu_wrapper li:hover {
-	background-color: #870000;
+	background-color: #6c0404;
 }
 
 .multilevelpushmenu_wrapper a {
@@ -88,7 +88,7 @@
 	display: block;
 	padding: .4em .4em .4em .4em;
 	background: #ba0011;
-	border-top: 1px solid #870000;
+	border-top: 1px solid #6c0404;
 }
 
 .multilevelpushmenu_wrapper .floatRight {

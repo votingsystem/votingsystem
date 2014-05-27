@@ -145,7 +145,7 @@ log4j = {
                 file:"./VicketReports/VicketServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketTransactionsReports", threshold:org.apache.log4j.Level.INFO,
-                layout:pattern(conversionPattern: '%m%n'),
+                layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
                 file:"./VicketReports/VicketTransactionsReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
 

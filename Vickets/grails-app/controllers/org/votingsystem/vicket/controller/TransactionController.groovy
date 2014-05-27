@@ -29,17 +29,21 @@ class TransactionController {
 
     def get() {
         Map resultMap = [:]
+        String receipt
         if (params.long('id')) {
             TransactionVS result
             TransactionVS.withTransaction {
                 result = TransactionVS.get(params.long('id'))
             }
-            if(result) resultMap = transactionVSService.getTransactionMap(result)
+            if(result) {
+                receipt = new String(result.messageSMIME.content, "UTF-8")
+                resultMap = transactionVSService.getTransactionMap(result)
+            }
         }
         if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
             render resultMap as JSON
         } else {
-            render(view:'get', model: [transactionvsMap:resultMap])
+            render(view:'transactionViewer', model: [transactionvsMap:resultMap, receipt:receipt])
         }
     }
 

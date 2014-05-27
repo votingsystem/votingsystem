@@ -9,7 +9,7 @@
            placeholder='${attrs.placeholder}'
            oninvalid='${attrs.oninvalid}'
            onchange='${attrs.onchange}'/>
-    <i class="fa fa-calendar form-control-feedback" style="color:#870000; margin: 0 0 0 -20px;"></i>
+    <i class="fa fa-calendar form-control-feedback" style="color:#6c0404; margin: 0 0 0 -20px;"></i>
     <span>&nbsp;</span>
 </div>
 

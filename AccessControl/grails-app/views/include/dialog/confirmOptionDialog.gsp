@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 id="resultCaption" class="modal-title" style="color: #870000; font-weight: bold;">
+                <h4 id="resultCaption" class="modal-title" style="color: #6c0404; font-weight: bold;">
                     <g:message code="confirmOptionDialogCaption"/>
                 </h4>
             </div>

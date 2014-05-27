@@ -60,7 +60,7 @@ public class SignedFile {
                 }
             }
             
-        } else if(name.toLowerCase().endsWith(".p7m")){
+        } else if(name.toLowerCase().endsWith(".p7s")){
             smimeMessageWraper = new SMIMEMessageWrapper(new ByteArrayInputStream(signedFileBytes));
             signatureVerified = smimeMessageWraper.isValidSignature();
             if(signatureVerified) timeStampToken = smimeMessageWraper.getSigner().getTimeStampToken();

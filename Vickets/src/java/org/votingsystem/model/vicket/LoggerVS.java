@@ -39,17 +39,20 @@ public class LoggerVS {
         transactionslog.info(new JSON(dataMap) + ",");
     }
 
-    public static void logTransactionVS(int status, String type, String fromUser, String toUser,
-         String currency, BigDecimal amount, String msg) {
+    public static void logTransactionVS(long id, int status, String type, String fromUser, String toUser,
+         String currency, BigDecimal amount, String msg, Date dateCreated, String subject) {
         Map<String,Object> dataMap = new HashMap();
+        dataMap.put("id", id);
         dataMap.put("status", status);
         dataMap.put("date", Calendar.getInstance().getTime());
         dataMap.put("fromUser", fromUser);
         dataMap.put("toUser", toUser);
         dataMap.put("type", type);
+        dataMap.put("subject", subject);
         dataMap.put("currency", currency);
         dataMap.put("amount", amount.setScale(2));
         dataMap.put("message", msg);
+        dataMap.put("dateCreated", dateCreated);
         transactionslog.info(new JSON(dataMap) + ",");
     }
 

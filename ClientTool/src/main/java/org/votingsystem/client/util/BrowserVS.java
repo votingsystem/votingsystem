@@ -11,16 +11,19 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebHistory;
@@ -34,8 +37,11 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
-import org.votingsystem.client.dialog.FXMessageDialog;
-import org.votingsystem.model.*;
+import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.FileUtils;
 import org.w3c.dom.Document;
 
@@ -58,7 +64,7 @@ public class BrowserVS extends Region {
 
     private Stage browserStage;
     private HBox toolBar;
-    private FXMessageDialog messageDialog;
+    private MessageDialog messageDialog;
     private WebView webView;
     private WebView smallView;
     private ComboBox comboBox;
@@ -101,9 +107,6 @@ public class BrowserVS extends Region {
                 logger.debug("signatureService - OnFailed");
             }
         });
-
-        //Note: Key is that Scene needs to be created and run on "FX user thread" NOT on the AWT-EventQueue Thread
-        //https://gist.github.com/anjackson/1640654
         PlatformImpl.startup(new Runnable() {
             @Override
             public void run() {
@@ -304,7 +307,7 @@ public class BrowserVS extends Region {
     public void showMessage(final String message) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
-                if(messageDialog == null) messageDialog = new FXMessageDialog();
+                if(messageDialog == null) messageDialog = new MessageDialog();
                 messageDialog.showMessage(message);
             }
         });
@@ -437,13 +440,6 @@ public class BrowserVS extends Region {
                         } else sendMessageToBrowserApp(ResponseVS.SC_OK, selectedImage.getAbsolutePath(),
                                 operationVS.getCallerCallback());
                     } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operationVS.getCallerCallback());
-                /*try {
-                    BufferedImage bufferedImage = ImageIO.read(file);
-                    Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                    myImageView.setImage(image);
-                } catch (IOException ex) {
-                    Logger.getLogger(JavaFXPixel.class.getName()).log(Level.SEVERE, null, ex);
-                }*/
                 } catch(Exception ex) {
                     sendMessageToBrowserApp(ResponseVS.SC_ERROR, ex.getMessage(), operationVS.getCallerCallback());
                 }

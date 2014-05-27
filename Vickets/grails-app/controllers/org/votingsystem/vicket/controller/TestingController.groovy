@@ -6,6 +6,8 @@ import org.apache.log4j.Logger
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.CurrencyVS
+import org.votingsystem.model.FieldEventVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.vicket.LoggerVS
@@ -29,13 +31,35 @@ class TestingController {
     def grailsApplication
     def transactionVSService
     def auditingService
+    def filesService
 
+
+    //logTransactionVS(int status, String type, String fromUser, String toUser, String currency, BigDecimal amount, String msg, Date dateCreated, String subject)
 
     def index() {
-        LoggerVS.logTransactionVS([status:3232, message:"111proband11o 111probadno"])
-        LoggerVS.logReportVS([status:0000, message:"logReportVS logReportVS"])
-        LoggerVS.logReportVS(111, "pruebaded", "mensaje")
+        Long init = System.currentTimeMillis()
+        Random randomGenerator = new Random();
 
+        TransactionVS.Type[] transactionTypes = TransactionVS.Type.values()
+
+
+        int numVotes = 1000
+        for (int idx = 1; idx <= numVotes; ++idx){
+            int randomInt = randomGenerator.nextInt(100);
+            int transactionvsItemId = new Random().nextInt(transactionTypes.length);
+            TransactionVS.Type transactionType = transactionTypes[transactionvsItemId]
+            LoggerVS.logTransactionVS(Long.valueOf(idx), ResponseVS.SC_OK, transactionType.toString(), "fromUser${randomInt}",
+                    "toUser${randomInt}", CurrencyVS.EURO.toString(), new BigDecimal(randomInt), "message ${randomInt}",
+                    Calendar.getInstance().getTime(), "Subject - ${randomInt}")
+        }
+        Long finish = System.currentTimeMillis()
+        Long duration = finish - init;
+        String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
+        render " --- Done numVotes : ${numVotes} - duration in millis: ${duration} - duration: ${durationStr}"
+    }
+
+    def monitor() {
+        filesService.monitorFile(new File("/home/jgzornoza/github/SistemaVotacion/Vickets/VicketReports/VicketTransactionsReports.log"))
         render "OK"
     }
 
