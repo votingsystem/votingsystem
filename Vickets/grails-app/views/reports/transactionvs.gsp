@@ -47,7 +47,7 @@
 </body>
 
 </html>
-<r:script>
+<asset:script>
 
     var dynatable
 
@@ -164,4 +164,4 @@
         dynatable.process();
     }
 
-</r:script>
+</asset:script>

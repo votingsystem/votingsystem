@@ -5,7 +5,8 @@ import org.apache.http.HttpResponse
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 
-import javax.servlet.http.HttpServletResponseWrapper
+import javax.servlet.http.HttpServletResponse
+
 import java.security.cert.X509Certificate;
 import org.votingsystem.model.TypeVS
 import org.springframework.web.multipart.MultipartHttpServletRequest
@@ -27,6 +28,7 @@ class AccessControlFilters {
     def filters = {
         paramsCheck(controller:'*', action:'*') {
             before = {
+                if("assets".equals(params.controller) || params.isEmpty()) return
                 log.debug "###########################<${params.controller}> - before ################################"
                 log.debug "Method: " + request.method
                 log.debug "Params: " + params
@@ -107,6 +109,7 @@ class AccessControlFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
+                if("assets".equals(params.controller) || params.isEmpty()) return
                 ResponseVS responseVS = null
                 try {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
@@ -245,7 +248,7 @@ class AccessControlFilters {
         }
     }
 
-    private boolean printOutput(HttpServletResponseWrapper response, ResponseVS responseVS) {
+    private boolean printOutput(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.statusCode
         response.setContentType(responseVS.getContentType()?.getName()+";charset=UTF-8")
         String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
@@ -255,7 +258,7 @@ class AccessControlFilters {
         return false
     }
 
-    private boolean printOutputStream(HttpServletResponseWrapper response, ResponseVS responseVS) {
+    private boolean printOutputStream(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.getStatusCode()
         if(!(responseVS?.data instanceof MessageSMIME) && responseVS?.data?.fileName) response.setHeader(
                 "Content-Disposition", "inline; filename='${responseVS.data.fileName}'");

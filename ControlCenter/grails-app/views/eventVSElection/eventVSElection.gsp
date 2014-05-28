@@ -47,7 +47,7 @@
 
 </body>
 </html>
-<r:script>
+<asset:script>
 <g:applyCodec encodeAs="none">
 		var votingEvent = ${eventMap as JSON}
         var elapsedTime = votingEvent.dateFinish.getElapsedTime()
@@ -137,4 +137,4 @@
 			}
 		}
 </g:applyCodec>
-</r:script>
+</asset:script>

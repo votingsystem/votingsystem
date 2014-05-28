@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-	<title><g:message code="appTitle"/></title>
-    <r:external uri="/images/icon_16/fa-money.png"/>
-
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-money.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <g:if test="${request.getHeader("User-Agent").contains("Android")}">
-        <r:require module="applicationMobile"/>
-    </g:if>
-    <g:else>
-        <r:require module="application"/>
-    </g:else>
-	<g:layoutHead/>
-	<r:layoutResources />
+	<title><g:message code="appTitle"/></title>
+    <g:javascript library="jquery" plugin="jquery"/>
+    <asset:stylesheet src="jquery-ui-1.10.4.custom.min.css"/>
+    <asset:javascript src="jquery-ui-1.10.4.custom.min.js"/>
+    <link rel="stylesheet" href="/Vickets/font-awesome/css/font-awesome.min.css" type="text/css"/>
+
+    <asset:stylesheet src="bootstrap.min.css"/>
+    <asset:javascript src="bootstrap.min.js"/>
+
+    <asset:javascript src="jquery.multilevelpushmenu.min.js"/>
+    <asset:stylesheet src="jquery.multilevelpushmenu.css"/>
+
+    <asset:stylesheet src="vickets.css"/>
+    <asset:javascript src="utilsVS.js"/>
+    <g:include view="/include/utils_js.gsp"/>
+    <g:layoutHead/>
 </head>
 	<body class="">
     <div>
@@ -55,15 +61,15 @@
 
         <g:if test="${"admin".equals(params.menu)}">
             <g:render template="/template/adminMenu"/>
-            <r:script>
+            <asset:script>
                 document.getElementById('appTitle').innerHTML = "<g:message code="adminPageTitle"/>"
-            </r:script>
+            </asset:script>
         </g:if>
         <g:elseif test="${"user".equals(params.menu)}">
             <g:render template="/template/userMenu"/>
-            <r:script>
+            <asset:script>
                 document.getElementById('appTitle').innerHTML = "<g:message code="usersPageTitle"/>"
-            </r:script>
+            </asset:script>
         </g:elseif>
         <g:else><g:render template="/template/mainMenu"/></g:else>
 
@@ -75,7 +81,7 @@
     <g:include view="/include/dialog/windowAlertModal.gsp"/>
 
 </html>
-<r:script>
+<asset:script>
     var isMenuVisible = false
     var isSearchInputVisible = false
 
@@ -130,19 +136,19 @@
         $('#advancedSearchButton').popover('hide')
     }
 
-    var isSerachPanelVisible = false
+    var isSearchPanelVisible = false
     function toggleSearchPanel() {
         //$("#searchPanel").hide('slide',{direction:'right'},1000);
-        if(!isSerachPanelVisible) {
+        if(!isSearchPanelVisible) {
             $("#searchPanel").slideDown("");
             $("#searchInput").val("")
         } else $("#searchPanel").slideUp("");
-        isSerachPanelVisible = !isSerachPanelVisible
+        isSearchPanelVisible = !isSearchPanelVisible
     }
 
     function isValidForm() {
  	    //allFields.removeClass("formFieldError");
  	}
 
-</r:script>
-<r:layoutResources/>
+</asset:script>
+<asset:deferredScripts/>

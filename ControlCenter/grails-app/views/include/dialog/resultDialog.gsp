@@ -19,7 +19,7 @@
 <div id='resultDialog' title='' style="display:none;">
     <p id='resultMessage' style="text-align: center;"></p>
 </div>
-<r:script>
+<asset:script>
 
     var clientCallback = null
 
@@ -35,4 +35,4 @@
         $('#resultDialog').modal('show')
         clientCallback = callback
     }
-</r:script>
+</asset:script>

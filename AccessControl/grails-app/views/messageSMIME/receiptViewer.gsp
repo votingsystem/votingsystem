@@ -5,8 +5,15 @@
         <g:if test="${receiptPageTitle != null}">${receiptPageTitle}</g:if>
         <g:else><g:message code="receiptPageLbl"/></g:else>
     </title>
-    <r:require module="application"/>
-    <r:layoutResources />
+    <g:javascript library="jquery" plugin="jquery"/>
+    <link rel="stylesheet" href="/ControlCenter/font-awesome/css/font-awesome.min.css" type="text/css"/>
+
+    <asset:stylesheet src="bootstrap.min.css"/>
+    <asset:javascript src="bootstrap.min.js"/>
+
+    <asset:stylesheet src="votingSystem.css"/>
+    <asset:javascript src="utilsVS.js"/>
+    <g:include view="/include/utils_js.gsp"/>
 </head>
 
 <body style="max-width: 600px; margin:30px auto 0px auto;">
@@ -26,7 +33,7 @@
 
 </body>
 </html>
-<r:script>
+<asset:script>
     var signedContent = toJSON('${raw(signedContent)}')
 
     $(function() {
@@ -54,5 +61,4 @@
                 console.log("saveReceiptCallback - message from native client: " + appMessage);
     }
 
-</r:script>
-<r:layoutResources/>
+</asset:script>

@@ -46,7 +46,7 @@
 
 </body>
 </html>
-<r:script>
+<asset:script>
 
     $(function() {
         if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
@@ -111,4 +111,4 @@
         if(manifestDocumentURL != null) window.location.href = manifestDocumentURL
     }
 
-</r:script>
+</asset:script>

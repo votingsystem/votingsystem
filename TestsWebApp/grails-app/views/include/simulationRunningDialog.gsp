@@ -17,7 +17,7 @@
   	
 </div>
 
-<r:script>
+<asset:script>
 
 $("#listenButton").click(function() {	
 	messageToService = {service:"manifestSimulationService", status:"LISTEN"}
@@ -123,4 +123,4 @@ function showSimulationRunningDialog(simulationData) {
 	SimulationService.initialize();
 }
 
-</r:script>
+</asset:script>

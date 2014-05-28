@@ -52,7 +52,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 var callerCallback
 var weeksAnonymousDelegation
@@ -152,4 +152,4 @@ function submitSelectRepresentativeForm() {
 	}
 }
 
-</r:script>
+</asset:script>

@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <asset:javascript src="jquery.stickytableheaders.js"/>
+    <asset:javascript src="jquery.dynatable.js"/>
+    <asset:stylesheet src="jquery.dynatable.css"/>
     <meta name="layout" content="main" />
-    <r:require module="dynatableModule"/>
 </head>
 <body>
 <div class="pageContenDiv">
@@ -47,7 +49,7 @@
 </body>
 
 </html>
-<r:script>
+<asset:script>
     var socketService = new SocketService()
     socketService.connect()
 
@@ -178,4 +180,4 @@
     }
 
 
-</r:script>
+</asset:script>

@@ -13,7 +13,7 @@
     <span>&nbsp;</span>
 </div>
 
-<r:script>
+<asset:script>
 
     var ${attrs.id}Required = true
     if("false" == '${attrs.required}'.toLowerCase()) ${attrs.id}Required = false;
@@ -67,7 +67,7 @@
         $('#dateNotSupportedDiv${attrs.id}').removeClass( "has-error" );
     }
 
-</r:script>
+</asset:script>
 
 
 

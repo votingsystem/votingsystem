@@ -1,6 +1,5 @@
-<r:require modules="textEditor"/>
 <div id='${attrs.id}' style="${attrs.style}"></div>
-<r:script>
+<asset:script>
 <g:if test="${'mobile'.equals(attrs.type)}">
     var editorConfig = {
         toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
@@ -39,4 +38,4 @@ $(function() {
     });
 
 })
-</r:script>
+</asset:script>

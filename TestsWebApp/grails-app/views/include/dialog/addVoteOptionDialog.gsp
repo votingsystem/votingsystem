@@ -8,7 +8,7 @@
 		<input id="submitOption" type="submit" style="display:none;">
 	</form>
 </div>
-<r:script>
+<asset:script>
 var callerCallback
 
 
@@ -54,4 +54,4 @@ $("#addVoteOptionDialog").dialog({
  		$("#newOptionText").val("")
 	  }
   });
-</r:script>
+</asset:script>

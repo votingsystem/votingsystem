@@ -73,7 +73,7 @@ class TimeStampService {
 		];
 
 	private synchronized Map init() {
-		log.debug(" - init - init - init");
+		log.debug("init");
         try {
             File keyStoreFile = grailsApplication.mainContext.getResource(
                     grailsApplication.config.VotingSystem.keyStorePath).getFile()
@@ -189,8 +189,9 @@ class TimeStampService {
                 return new ResponseVS(ResponseVS.SC_ERROR, messageSource.getMessage('timestampGenErrorMsg', null, locale))
 			}
 		}
-		new TimeStampVS(serialNumber:serialNumber.longValue(), tokenBytes:token.getEncoded(),
-                state:TimeStampVS.State.OK, timeStampRequestBytes:timeStampRequestBytes).save()
+        TimeStampVS timeStampVS = new TimeStampVS(serialNumber:serialNumber.longValue(), tokenBytes:token.getEncoded(),
+                state:TimeStampVS.State.OK, timeStampRequestBytes:timeStampRequestBytes)
+        timeStampVS.save()
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:token.getEncoded(),
                 contentType:ContentTypeVS.TIMESTAMP_RESPONSE)
 	}

@@ -1,7 +1,9 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <r:require module="dynatableModule"/>
+    <asset:javascript src="jquery.stickytableheaders.js"/>
+    <asset:javascript src="jquery.dynatable.js"/>
+    <asset:stylesheet src="jquery.dynatable.css"/>
 </head>
 <body>
 <div class="">
@@ -27,7 +29,7 @@
 <g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 </body>
 </html>
-<r:script>
+<asset:script>
     var dynatable
 
     $(function() {
@@ -81,7 +83,7 @@
 
     $('#mainPageEventList').bind('dynatable:afterUpdate',  function() {
         $('.eventDiv').click(function() {
-            window.location.href = $(this).attr('href')
+            window.location.href = $(this).attr('data-href')
         }
     )})
 
@@ -99,4 +101,4 @@
         dynatable.process();
     }
 
-</r:script>
+</asset:script>

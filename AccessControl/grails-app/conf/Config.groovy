@@ -1,9 +1,3 @@
-import org.apache.log4j.EnhancedPatternLayout
-
-import java.net.*;
-import org.apache.log4j.net.SMTPAppender
-import org.apache.log4j.Level
-
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
 // in the classpath in ConfigSlurper format
@@ -17,15 +11,14 @@ import org.apache.log4j.Level
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 
-grails.converters.default.pretty.print=true
-grails.gorm.failOnError=true
+grails.reload.enabled = true
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 
 // The ACCEPT header will not be used for content negotiation for user agents containing the following strings (defaults to the 4 major rendering engines)
 grails.mime.disable.accept.header.userAgents = ['Gecko', 'WebKit', 'Presto', 'Trident']
-grails.mime.types = [
-    all:           '*/*',
+grails.mime.types = [ // the first one is the default format
+    all:           '*/*', // 'all' maps to '*' or the first available format in withFormat
     atom:          'application/atom+xml',
     css:           'text/css',
     csv:           'text/csv',
@@ -42,9 +35,6 @@ grails.mime.types = [
 
 // URL Mapping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
-
-// What URL patterns should be processed by the resources plugin
-grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
 
 // Legacy setting for codec used to encode data with ${}
 grails.views.default.codec = "html"
@@ -67,12 +57,11 @@ grails {
             }
         }
         // escapes all not-encoded output at final stage of outputting
-        filteringCodecForContentType {
-            //'text/html' = 'html'
-        }
+        // filteringCodecForContentType.'text/html' = 'html'
     }
 }
- 
+
+
 grails.converters.encoding = "UTF-8"
 // scaffolding templates configuration
 grails.scaffolding.templates.domainSuffix = 'Instance'
@@ -92,21 +81,26 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
-//To make tests on production environments. One of DEVELOPMENT, PRODUCTION, TEST
+// configure passing transaction's read-only attribute to Hibernate session, queries and criterias
+// set "singleSession = false" OSIV mode in hibernate configuration after enabling
+grails.hibernate.pass.readonly = false
+// configure passing read-only to OSIV session by default, requires "singleSession = false" OSIV mode
+grails.hibernate.osiv.readonly = false
+
 VotingSystemEnvironment="DEVELOPMENT"
 
 environments {
     development {
         grails.logging.jul.usebridge = true
-		grails.resources.debug = true// -> rendering problems
+        grails.resources.debug = true// -> rendering problems
         grails.serverURL = "http://sistemavotacion.org/AccessControl"
     }
-	production {
-		grails.logging.jul.usebridge = false
-		grails.serverURL = "http://www.sistemavotacion.org/AccessControl"
-	}
+    production {
+        grails.logging.jul.usebridge = false
+        grails.serverURL = "http://www.sistemavotacion.org/AccessControl"
+    }
     test {
-		grails.logging.jul.usebridge = true
+        grails.logging.jul.usebridge = true
         grails.serverURL = "http://sistemavotacion.org/AccessControl"
     }
 }
@@ -124,27 +118,27 @@ mail.error.debug = false
 
 // log4j configuration
 log4j = {
-	
-	//System.setProperty 'mail.smtp.port', mail.error.port.toString()
-	//System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
+
+    //System.setProperty 'mail.smtp.port', mail.error.port.toString()
+    //System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
 
 
     appenders {
 
         rollingFile name:'AccessControlERRORS', threshold:org.apache.log4j.Level.ERROR,
-			file:"/var/log/votingsystem/AccessControlERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
-		
-		rollingFile name:"AccessControl", threshold:org.apache.log4j.Level.DEBUG, 
-			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-            file:"/var/log/votingsystem/AccessControl.log", datePattern: '\'_\'yyyy-MM-dd'
-			
-		/*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
-			subject: mail.error.subject, threshold: Level.ERROR,
-			SMTPHost: mail.error.server, SMTPUsername: mail.error.username,
-			SMTPDebug: mail.error.debug.toString(), SMTPPassword: mail.error.password,
-			layout: pattern(conversionPattern:
-			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))*/
-	}
+                file:"/var/log/votingsystem/AccessControlERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
+
+        rollingFile name:"AccessControl", threshold:org.apache.log4j.Level.DEBUG,
+                layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
+                file:"/var/log/votingsystem/AccessControl.log", datePattern: '\'_\'yyyy-MM-dd'
+
+        /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
+            subject: mail.error.subject, threshold: Level.ERROR,
+            SMTPHost: mail.error.server, SMTPUsername: mail.error.username,
+            SMTPDebug: mail.error.debug.toString(), SMTPPassword: mail.error.password,
+            layout: pattern(conversionPattern:
+               '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))*/
+    }
 
 
     root {
@@ -223,4 +217,4 @@ VotingSystem.serverName='Primer AccessControlVS'
 VotingSystem.blogURL = 'http://www.sistemavotacion.org/blog.html'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
 //_ TODO _
-VotingSystem.adminsDNI='07553172H'
+VotingSystem.adminsDNI=['07553172H']

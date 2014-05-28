@@ -1,13 +1,13 @@
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
-*/
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 dataSource {
-	pooled = true
-	driverClassName = "org.postgresql.Driver"
-	username = "userVS"
-	password = "userVS"
-	//dataSource.logSql = true
+    pooled = true
+    driverClassName = "org.postgresql.Driver"
+    username = "userVS"
+    password = "userVS"
+    //dataSource.logSql = true
 }
 
 hibernate {
@@ -16,21 +16,23 @@ hibernate {
     //cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory' // Hibernate 3
     cache.region.factory_class = 'org.hibernate.cache.ehcache.EhCacheRegionFactory' // Hibernate 4
 
-	hibernate.search.default.indexBase = new File("./VotingSystem/searchIndexAccessControl").absolutePath
-	//hibernate.show_sql=true
+    hibernate.search.default.indexBase = new File("./VotingSystem/searchIndexAccessControl").absolutePath
+    singleSession = true // configure OSIV singleSession mode
+    //hibernate.show_sql=true
 }
+
 // environment specific settings
 environments {
     development {
         dataSource {
             dbCreate = "update" // one of 'create', 'create-drop','update'
-			url="jdbc:postgresql://localhost:5432/AccessControl"
+            url="jdbc:postgresql://localhost:5432/AccessControl"
         }
     }
     test {
         dataSource {
             dbCreate = "create-drop"
-			url="jdbc:postgresql://localhost:5432/AccessControlTest"
+            url="jdbc:postgresql://localhost:5432/AccessControlTest"
         }
     }
     /*production {
@@ -51,17 +53,12 @@ environments {
 		}
     }*/
 
-	production {
-		dataSource {
-			pooled = true
-			dbCreate = "update"
-			jndiName = "java:comp/env/jdbc/accesscontrol"
-		}
-	}
-	/*production {
-		dataSource {
-			dbCreate = "update" // one of 'create', 'create-drop','update'
-			url="jdbc:postgresql://localhost:5432/AccessControl"
-		}
-	}*/
+    production {
+        dataSource {
+            pooled = true
+            dbCreate = "update"
+            jndiName = "java:comp/env/jdbc/accesscontrol"
+        }
+    }
+
 }

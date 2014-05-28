@@ -68,7 +68,7 @@
 <g:include view="/include/dialog/requestEventBackupDialog.gsp"/>
 </body>
 </html>
-<r:script>
+<asset:script>
 <g:applyCodec encodeAs="none">
 
     var pageEvent = ${eventMap as JSON}
@@ -153,4 +153,4 @@ webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
     }
 
 </g:applyCodec>
-</r:script>
+</asset:script>

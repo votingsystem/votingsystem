@@ -1,7 +1,7 @@
 <div id="imageDialog" title="" style="padding:20px 20px 20px 20px">
 	<img id="dialogRepresentativeImg" style="width:100%; height: 100%;"></img>
 </div> 
-<r:script>
+<asset:script>
    $("#imageDialog").dialog({
 	   	  width: 500, autoOpen: false, modal: true,
 	      buttons: [{id: "acceptButton",
@@ -13,4 +13,4 @@
 	      show: {effect:"fade", duration: 300},
 	      hide: {effect: "fade",duration: 300}
  });
-</r:script>
+</asset:script>

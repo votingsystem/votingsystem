@@ -3,7 +3,7 @@ package filters
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 
-import javax.servlet.http.HttpServletResponseWrapper
+import javax.servlet.http.HttpServletResponse
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +21,7 @@ class VotingSystemTestFilters {
     def filters = {
         paramsCheck(controller:'*', action:'*') {
             before = {
+                if("assets".equals(params.controller) || params.isEmpty()) return
                 log.debug "###########################<${params.controller}> - before ###################################"
                 log.debug "Method: " + request.method
                 log.debug "Params: " + params
@@ -53,7 +54,7 @@ class VotingSystemTestFilters {
 
     }
 
-    private boolean printText(HttpServletResponseWrapper response, ResponseVS responseVS) {
+    private boolean printText(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.statusCode
         response.setContentType(ContentTypeVS.TEXT.getName())
         String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"

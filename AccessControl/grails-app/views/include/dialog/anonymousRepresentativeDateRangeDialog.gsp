@@ -28,7 +28,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 var callerCallback
 
@@ -61,4 +61,4 @@ function showRepresentativeDateRangeErrorMsg(errorMsg) {
     $("#anonymousRepresentativeDateRangeDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
     $("#anonymousRepresentativeDateRangeDialog .errorMsgWrapper").fadeIn()
 }
-</r:script>
+</asset:script>

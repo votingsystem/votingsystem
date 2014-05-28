@@ -20,7 +20,7 @@
 		<input id="submitAccreditationRequest" type="submit" style="display:none;">
 	</form>
 </div> 	
-<r:script>
+<asset:script>
    $("#requestRepresentativeAccreditationsDialog").dialog({
 	   	  width: 500, autoOpen: false, modal: true,
 	      buttons: [{id: "acceptButton",
@@ -37,4 +37,4 @@
 	      show: {effect:"fade", duration: 300},
 	      hide: {effect: "fade",duration: 300}
  });
-</r:script>
+</asset:script>

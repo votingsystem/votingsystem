@@ -56,7 +56,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
     $("#searchInput").bind('keypress', function(e) {
         if (e.which == 13) {
@@ -119,4 +119,4 @@
 return false
 }
 
-</r:script>
+</asset:script>

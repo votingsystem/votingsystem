@@ -79,10 +79,7 @@ class UserVSService {
 	boolean isUserAdmin(String nif) {
         nif = NifUtils.validate(nif);
 		if(!systemAdmins) {
-            systemAdmins = new ArrayList<String>();
-            "${grailsApplication.config.VotingSystem.adminsDNI}".split(",")?.each {
-                systemAdmins.add(NifUtils.validate(it.trim()))
-            }
+            systemAdmins = grailsApplication.config.VotingSystem.adminsDNI
 		}
         boolean result = systemAdmins.contains(nif)
         if(result) log.debug("isUserAdmin - nif: ${nif}")

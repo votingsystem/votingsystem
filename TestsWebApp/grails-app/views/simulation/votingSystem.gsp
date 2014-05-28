@@ -2,9 +2,7 @@
 <html>
 	<head>
 		<meta name="layout" content="main"/>
-        <r:require modules="application"/>
 		<title><g:message code="simulationWebAppCaption"/></title>
-		<style type="text/css" media="screen"></style>
 	</head>
 	<body>
         <div class="row">
@@ -53,7 +51,7 @@
         <g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
 	</div>
 	</body>
-	<r:script>
+	<asset:script>
 
 		$(function() { });
 
@@ -69,5 +67,5 @@
                     ', height='+ height  +', top='+ top +', left='+ left + '');
         }
 
-	</r:script>
+	</asset:script>
 </html>

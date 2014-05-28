@@ -83,8 +83,7 @@ class EventVSService {
 	
 	boolean isUserAdmin(String nif) {
 		if(!systemAdmins) {
-			systemAdmins = Arrays.asList(
-			"${grailsApplication.config.VotingSystem.adminsDNI}".split(","))
+			systemAdmins = grailsApplication.config.VotingSystem.adminsDNI
 		}
 		return systemAdmins.contains(nif)
 	}

@@ -20,20 +20,6 @@ class SubscriptionVSController {
     def groupVSService
 
 
-    def test() {
-        String nif = "7553172H"
-        nif = NifUtils.validate(nif).toUpperCase();
-        def systemAdmins
-        if(!systemAdmins) {
-            systemAdmins = new ArrayList<String>();
-            "${grailsApplication.config.VotingSystem.adminsDNI}".split(",")?.each {
-                systemAdmins.add(NifUtils.validate(it.trim()).toUpperCase())
-            }
-        }
-        log.debug(" ====== systemAdmins: ${systemAdmins}")
-        boolean result = systemAdmins.contains(nif)
-        render "isUserAdmin : ${result}"
-        return false
-    }
+    def test() { }
 	
 }

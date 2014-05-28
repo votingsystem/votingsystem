@@ -2,22 +2,21 @@
 <html>
 <head>
   	<title>pruebaTemplate</title>
-   	<r:require modules="application"/>
     <style>
 	  	textarea { }
 	  	input[id="subject"] { }
   	</style>
-  	<r:script>
+  	<asset:script>
 	  	$(document).ready(function(){
 	  		$('#testForm').submit(function(event){event.preventDefault();});
 	
 		  	$("#submitButton").click(function(){});
 	  	});
-  	</r:script>
+  	</asset:script>
 </head>
 <body>
 	<form id="testForm" style="display:block;margin:20px auto 30px auto; width:40%;">
-		    <label for="one">URL: </label>
+		    <label>URL: </label>
 		    	<input type="text" id="urlControlCenter">
 		    <button id="submitButton">Submit</button>
 	</form>

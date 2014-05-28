@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <r:require module="charts"/>
-    <r:layoutResources />
+    <asset:stylesheet src="charts.css"/>
+    <asset:javascript src="jsapi.js"/>
 </head>
 <body>
 <div id="chart_div">
@@ -12,7 +12,7 @@
 </div>
 </body>
 </html>
-<r:script>
+<asset:script>
     <g:applyCodec encodeAs="none">
         var jsonData = ${statisticsJSON}
         google.load('visualization', '1', {'packages':['corechart']});
@@ -38,5 +38,4 @@
         chart.draw(data, options);
     }
     </g:applyCodec>
-</r:script>
-<r:layoutResources />
+</asset:script>

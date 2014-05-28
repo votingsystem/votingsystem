@@ -1,8 +1,7 @@
 <html>
     <head>
-        <title>${message(code: 'serverNameLabel', null)}</title>
+        <title>${message(code: 'serverNameLbl', null)}</title>
         <meta name="layout" content="main" />
-        <r:layoutResources disposition="defer"/>
     </head>
     <body>
 	   <p><b>Comisaría Local de la población</b><br/>

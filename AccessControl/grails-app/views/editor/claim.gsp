@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta name="layout" content="main" />
-   	<r:require modules="textEditorPC"/>
+    <script type="text/javascript" src="/AccessControl/ckeditor/ckeditor.js"></script>
 </head>
 <body>
 
@@ -73,7 +73,7 @@
 	</div> 
 </body>
 </html>
-<r:script>
+<asset:script>
     var numClaimFields = 0
 
     $(function() {
@@ -183,4 +183,4 @@
         if(claimDocumentURL != null) window.location.href = claimDocumentURL
     }
 
-</r:script>
+</asset:script>

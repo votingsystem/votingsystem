@@ -84,7 +84,7 @@
 
 </body>
 </html>
-<r:script>
+<asset:script>
 
 //$("#resetvicketDepositSimulationDataForm").click()
 //This is for number validation in Firefox
@@ -177,4 +177,4 @@ function showErrorMsg(errorMsg) {
 	$("#vicketDepositSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 
-</r:script>
+</asset:script>

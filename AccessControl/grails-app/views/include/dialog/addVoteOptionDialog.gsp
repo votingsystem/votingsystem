@@ -31,7 +31,7 @@
         </form>
     </div>
 </div>
-<r:script>
+<asset:script>
     var callerCallback
 
     function showAddVoteOptionDialog(callback) {
@@ -51,4 +51,4 @@
         $("#addVoteOptionDialog").modal("hide");
     })
 
-</r:script>
+</asset:script>

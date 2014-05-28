@@ -24,7 +24,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 var hashReceiptAnonymousDelegation
 
@@ -43,4 +43,4 @@ function showAnonymousReceiptDialog(message, hashReceipt) {
 function anonymousDelegationReceiptCallback() {
 }
 
-</r:script>
+</asset:script>

@@ -83,7 +83,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             pdfSigner = new PDFContentSigner( signerPrivatekey, signerCertChain,
                     PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
         } else {
-            logger.debug("Generating smartcard VotingSystemSignedGenerator");
+            logger.debug("Generating System VotingSystemSignedGenerator");
             pdfSigner = ContentSignerHelper.getContentSignerPDF(password, ContextVS.DNIe_SESSION_MECHANISM);
             signerCertChain = pdfSigner.getCertificateChain();
         }

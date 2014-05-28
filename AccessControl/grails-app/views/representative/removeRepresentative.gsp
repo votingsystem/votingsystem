@@ -22,8 +22,8 @@
 
 </body>
 </html>
-<r:script>
+<asset:script>
 	$(function() {
         $("#removeRepresentativeDialog").modal("show");
 	});
-</r:script>
+</asset:script>

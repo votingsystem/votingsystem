@@ -1,7 +1,9 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <r:require module="dynatableModule"/>
+    <asset:stylesheet src="jquery.dynatable.css"/>
+    <asset:javascript src="jquery.dynatable.js"/>
+    <asset:javascript src="jquery.stickytableheaders.js"/>
 </head>
 <body>
 <div style="margin: 15px 0 0 0;">
@@ -17,7 +19,7 @@
 <g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 </body>
 </html>
-<r:script>
+<asset:script>
        	
     $(function() {
         $("#navBarSearchInput").css( "visibility", "visible" );
@@ -72,4 +74,4 @@
         dynatable.process();
     }
 
-</r:script>
+</asset:script>

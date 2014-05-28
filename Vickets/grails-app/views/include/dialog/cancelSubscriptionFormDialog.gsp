@@ -19,7 +19,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
     var clientCallback = null
 
@@ -34,4 +34,4 @@
         $("#cancelUserSubscriptionReason").val("")
         $('#cancelSubscriptionFormDialog').modal('show')
     }
-</r:script>
+</asset:script>

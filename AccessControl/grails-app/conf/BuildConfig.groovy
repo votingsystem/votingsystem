@@ -3,30 +3,29 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.work.dir = "target/work"
-grails.project.target.level = 1.7
-grails.project.source.level = 1.7
+grails.project.target.level = 1.8
+grails.project.source.level = 1.8
 grails.project.war.file = "target/${appName}.war"
 
 grails.project.fork = [
     // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
-    compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true, source:1.7, target:1.7],
+    //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
 
     // configure settings for the test-app JVM, uses the daemon by default
-    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true, source:1.7],
+    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
     // configure settings for the run-app JVM
-    //problems debugging -> run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
-    run:false,
+    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
     // configure settings for the run-war JVM
-    war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, source:1.7],
+    war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
     // configure settings for the Console UI JVM
-    console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, source:1.7]
+    console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
 ]
 
-grails.project.dependency.resolver = "ivy" // or maven -> problems with excludes
+grails.project.dependency.resolver = "ivy"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
-		excludes 'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
+        excludes 'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
     }
     log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
@@ -47,53 +46,55 @@ grails.project.dependency.resolution = {
     }
 
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
-		
-		compile(
-			'org.votingsystem:votingsystemlibrary:0.2.0',
-			'org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',
-			'org.apache.httpcomponents:httpmime:4.2.4',
-			'org.apache.httpcomponents:httpclient:4.2.4',
-			'org.bouncycastle:bcprov-jdk16:1.46',
-			'org.bouncycastle:bcmail-jdk16:1.46',
-			'org.bouncycastle:bcpg-jdk16:1.46',
-			'org.bouncycastle:bctsp-jdk16:1.46',
-			//'gnu.mail:gnumail:1.1.2',
-			//'gnu.mail:inetlib:1.1.1',
-			//'org.apache.geronimo.specs:geronimo-javamail_1.4_spec:1.7.1',
-			'javax.mail:mail:1.4.7',
-			'org.hibernate:hibernate-search:4.2.0.Final',
-			'com.itextpdf:itextpdf:5.1.3',
-			'org.xhtmlrenderer:core-renderer:R8',
-			'org.rometools:rome-modules:1.0',
-			//for rendering plugin
-			'org.springframework:spring-test:3.2.5.RELEASE',
-			) {excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",
+        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes
+
+        compile(
+                'org.votingsystem:votingsystemlibrary:0.2.0',
+                'org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',
+                'org.apache.httpcomponents:httpmime:4.2.4',
+                'org.apache.httpcomponents:httpclient:4.2.4',
+                'org.bouncycastle:bcprov-jdk16:1.46',
+                'org.bouncycastle:bcmail-jdk16:1.46',
+                'org.bouncycastle:bcpg-jdk16:1.46',
+                'org.bouncycastle:bctsp-jdk16:1.46',
+                //'gnu.mail:gnumail:1.1.2',
+                //'gnu.mail:inetlib:1.1.1',
+                //'org.apache.geronimo.specs:geronimo-javamail_1.4_spec:1.7.1',
+                'javax.mail:mail:1.4.7',
+                'org.hibernate:hibernate-search:4.2.0.Final',
+                'com.itextpdf:itextpdf:5.1.3',
+                'org.xhtmlrenderer:core-renderer:R8',
+                'org.rometools:rome-modules:1.0'
+        ) {excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",
                 'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'}
-			
-			runtime 'org.postgresql:postgresql:9.2-1003-jdbc4'
+
+        runtime 'org.postgresql:postgresql:9.3-1101-jdbc41'
+
+        compile ("org.springframework:spring-orm:$springVersion", "org.springframework:spring-expression:$springVersion",
+                "org.springframework:spring-aop:$springVersion", "org.springframework:spring-test:$springVersion")
     }
 
     plugins {
         // plugins for the build system only
-        build   ":tomcat:7.0.47"
+        build ":tomcat8:8.0.5"
 
         // plugins for the compile step
-        compile ":scaffolding:2.0.1"
-        compile ':cache:1.1.1'
-		compile ':executor:0.3'
-		compile ':rendering:0.4.4'
-		//runtime 'org.votingsystem:rest-doc-plugin:0.5'
-		
+        compile ":scaffolding:2.1.0"
+        compile ':cache:1.1.6'
+        compile ":asset-pipeline:1.8.7"
+        compile ':executor:0.3'
+        compile ':rendering:1.0.0'
 
         // plugins needed at runtime but not for compilation
-        runtime ":hibernate4:4.1.11.2" // or ":hibernate:3.6.10.3"
-        runtime ":resources:1.2.1"
-		runtime ":gsp-resources:0.4.4"
-		//runtime ":database-migration:1.3.5"
-        // Uncomment these (or add new ones) to enable additional resources capabilities
-        //runtime ":zipped-resources:1.0.1"
-        //runtime ":cached-resources:1.1"
+        runtime ":hibernate4:4.3.5.3" // or ":hibernate:3.6.10.15"
+        runtime ":database-migration:1.4.0"
+        runtime ":jquery:1.11.1"
+
+        // Uncomment these to enable additional asset-pipeline capabilities
+        //compile ":sass-asset-pipeline:1.7.4"
+        //compile ":less-asset-pipeline:1.7.0"
+        //compile ":coffee-asset-pipeline:1.7.0"
+        //compile ":handlebars-asset-pipeline:1.3.0.3"
         if (Environment.current == Environment.DEVELOPMENT) {}
     }
 }

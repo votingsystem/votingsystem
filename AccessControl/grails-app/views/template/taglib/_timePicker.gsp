@@ -30,7 +30,7 @@
         </div>
     </div>
 
-<r:script>
+<asset:script>
 
     var ${attrs.id}Required = true
     if ("" == '${attrs.required}'.trim())  ${attrs.id}Required = false;
@@ -103,7 +103,7 @@
         $("#${attrs.id}MinuteInput").val("00")
     }
 
-</r:script>
+</asset:script>
 
 
 

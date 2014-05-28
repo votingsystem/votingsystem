@@ -18,7 +18,7 @@
 
 	</div>
 	</body>
-	<r:script>
+	<asset:script>
 
         function initTransaction(transactionSubject) {
             var encodedIBAN = encodeURIComponent("GR16 0110 1250 0000 0001 2300 695")
@@ -30,5 +30,5 @@
             return false
         }
 
-	</r:script>
+	</asset:script>
 </html>

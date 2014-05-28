@@ -112,7 +112,7 @@
 	
 </body>
 </html>
-<r:script>
+<asset:script>
 <g:applyCodec encodeAs="none">
     var pageEvent = ${eventMap as JSON}
     if(pageEvent.state == "ACTIVE") {
@@ -217,4 +217,4 @@
         }
     }
 </g:applyCodec>
-</r:script>
+</asset:script>

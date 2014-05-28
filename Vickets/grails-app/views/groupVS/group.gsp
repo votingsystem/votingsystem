@@ -76,7 +76,7 @@
 <g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>
 </body>
 </html>
-<r:script>
+<asset:script>
 <g:applyCodec encodeAs="none">
 
     var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
@@ -141,4 +141,4 @@
     }
 
 </g:applyCodec>
-</r:script>
+</asset:script>

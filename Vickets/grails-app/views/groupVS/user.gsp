@@ -32,7 +32,7 @@
 <g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
-<r:script>
+<asset:script>
     <g:applyCodec encodeAs="none">
         var subscriptionDataJSON = ${subscriptionMap as JSON}
     </g:applyCodec>
@@ -153,5 +153,5 @@
         }
     }
 
-</r:script>
+</asset:script>
 <r:layoutResources/>

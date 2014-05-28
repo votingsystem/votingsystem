@@ -41,7 +41,7 @@
         </form>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 function showVoteControlCenterDialog(callback) {
     $('#controlCenterURL').val("")
@@ -133,4 +133,4 @@ $('#newControlCenter').submit(function(event){
             showResultDialog(caption, msg)
 		}
 	}	
-</r:script>
+</asset:script>

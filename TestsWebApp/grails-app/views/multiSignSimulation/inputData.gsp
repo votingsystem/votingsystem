@@ -4,97 +4,100 @@
     <title><g:message code="initMultiSignProtocolSimulationButton"/></title>
     <meta name="layout" content="main" />
 </head>
-<div class="row">
-    <ol class="breadcrumbVS pull-left">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
-            <g:message code="votingSystemOperationsLbl"/></a></li>
-        <li class="active"><g:message code="initMultiSignProtocolSimulationButton"/></li>
-    </ol>
-</div>
-<div id="multiSignProtocolSimulationDataDialog" title="<g:message code="initMultiSignProtocolSimulationButton"/>"
-	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
-	<div class="errorMsgWrapper" style="display:none;"></div>
-    <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <h3>
-            <div id="pageTitle" class="pageHeader text-center">
-                <g:message code="initMultiSignProtocolSimulationMsg"/>
-            </div>
-        </h3>
-        <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
-            <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
-                <g:message code="goToResultViewMsg"/>
-            </button>
-        </div>
+<body>
+<div class="pageContenDiv">
+    <div class="row">
+        <ol class="breadcrumbVS pull-left">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
+                <g:message code="votingSystemOperationsLbl"/></a></li>
+            <li class="active"><g:message code="initMultiSignProtocolSimulationButton"/></li>
+        </ol>
     </div>
-  	<div id="formDataDiv">
-   		<form id="multiSignProtocolSimulationDataForm">
-			<input type="hidden" autofocus="autofocus" />
-			<input id="resetMultiSignProtocolSimulationDataForm" type="reset" style="display:none;">
-
-            <div style="display: block;">
-                <label><g:message code="numRequestsProjectedLbl"/></label>
-                <input type="number" id="numRequestsProjected" min="1" value="1" required
-                       style="width:110px;margin:0px 20px 0px 3px;"
-                       title="<g:message code="numRequestsProjectedLbl"/>"
-                       placeholder="<g:message code="numRequestsProjectedLbl"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')">
-                <label><g:message code="maxPendingResponsesLbl"/></label>
-                <input type="number" id="maxPendingResponses" min="1" value="10" required
-                       style="width:110px;margin:10px 20px 0px 3px;"
-                       title="<g:message code="maxPendingResponsesLbl"/>"
-                       placeholder="<g:message code="maxPendingResponsesLbl"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')">
-            </div>
-
-
-            <div style="margin:10px 0px 10px 0px">
-                <label><g:message code="serverURLMsg"/></label>
-                <input type="url" id="serverURL" style="width:500px; margin:0px 0px 0px 3px;" required
-                       value="http://sistemavotacion.org/AccessControl"
-                       title="<g:message code="serverURLMsg"/>"
-                       placeholder="<g:message code="serverURLMsg"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')"/>
-            </div>
-
-            <div id="timerDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
-                <div class="checkBox" style="display:table-cell;vertical-align: middle;">
-                    <input type="checkbox" id="isWithTimer"/><label for="isWithTimer"><g:message code="simulationTimerDataMsg"/></label>
+    <div id="multiSignProtocolSimulationDataDialog" title="<g:message code="initMultiSignProtocolSimulationButton"/>"
+         style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
+        <div class="errorMsgWrapper" style="display:none;"></div>
+        <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
+            <h3>
+                <div id="pageTitle" class="pageHeader text-center">
+                    <g:message code="initMultiSignProtocolSimulationMsg"/>
                 </div>
-                <div id="timerInputDiv" style="display:table-cell;vertical-align: middle;">
-
-                </div>
-            </div>
-
-            <div style="position: relative; overflow:hidden; ">
-                <button id="submitButton" type="submit" class="btn btn-default"
-                        style="margin:15px 20px 20px 0px; width:400px; float:right;">
-                    <g:message code="initMultiSignProtocolSimulationButton"/>
+            </h3>
+            <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
+                <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                    <g:message code="goToResultViewMsg"/>
                 </button>
             </div>
+        </div>
+        <div id="formDataDiv">
+            <form id="multiSignProtocolSimulationDataForm">
+                <input type="hidden" autofocus="autofocus" />
+                <input id="resetMultiSignProtocolSimulationDataForm" type="reset" style="display:none;">
 
-   		</form>
+                <div style="display: block;">
+                    <label><g:message code="numRequestsProjectedLbl"/></label>
+                    <input type="number" id="numRequestsProjected" min="1" value="1" required
+                           style="width:110px;margin:0px 20px 0px 3px;"
+                           title="<g:message code="numRequestsProjectedLbl"/>"
+                           placeholder="<g:message code="numRequestsProjectedLbl"/>"
+                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                           onchange="this.setCustomValidity('')">
+                    <label><g:message code="maxPendingResponsesLbl"/></label>
+                    <input type="number" id="maxPendingResponses" min="1" value="10" required
+                           style="width:110px;margin:10px 20px 0px 3px;"
+                           title="<g:message code="maxPendingResponsesLbl"/>"
+                           placeholder="<g:message code="maxPendingResponsesLbl"/>"
+                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                           onchange="this.setCustomValidity('')">
+                </div>
 
-  	</div>
+
+                <div style="margin:10px 0px 10px 0px">
+                    <label><g:message code="serverURLMsg"/></label>
+                    <input type="url" id="serverURL" style="width:500px; margin:0px 0px 0px 3px;" required
+                           value="http://sistemavotacion.org/AccessControl"
+                           title="<g:message code="serverURLMsg"/>"
+                           placeholder="<g:message code="serverURLMsg"/>"
+                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                           onchange="this.setCustomValidity('')"/>
+                </div>
+
+                <div id="timerDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
+                    <div class="checkBox" style="display:table-cell;vertical-align: middle;">
+                        <input type="checkbox" id="isWithTimer"/><label for="isWithTimer"><g:message code="simulationTimerDataMsg"/></label>
+                    </div>
+                    <div id="timerInputDiv" style="display:table-cell;vertical-align: middle;">
+
+                    </div>
+                </div>
+
+                <div style="position: relative; overflow:hidden; ">
+                    <button id="submitButton" type="submit" class="btn btn-default"
+                            style="margin:15px 20px 20px 0px; width:400px; float:right;">
+                        <g:message code="initMultiSignProtocolSimulationButton"/>
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <div id="simulationListenerDiv" style="display: none;">
+        <g:include view="/include/listenSimulation.gsp"/>
+    </div>
+
+    <template id="timerTemplate" style="display:none;">
+        <input type="time" id="timerData" style="" required
+               title="<g:message code="simulationTimerDataMsg"/>"
+               placeholder="<g:message code="simulationTimerDataMsg"/>"
+               oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+               onchange="this.setCustomValidity('')">
+    </template>
 </div>
-
-<div id="simulationListenerDiv" style="display: none;">
-    <g:include view="/include/listenSimulation.gsp"/>
-</div>
-
-<template id="timerTemplate" style="display:none;">
-    <input type="time" id="timerData" style="" required
-           title="<g:message code="simulationTimerDataMsg"/>"
-           placeholder="<g:message code="simulationTimerDataMsg"/>"
-           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-           onchange="this.setCustomValidity('')">
-</template>
-
+</body>
 </html> 
-<r:script>
+<asset:script>
 
 $("#isWithTimer").click(function () {
 	if($("#isWithTimer").is(':checked')) {
@@ -169,4 +172,4 @@ function showErrorMsg(errorMsg) {
 	$("#multiSignProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
-</r:script>
+</asset:script>

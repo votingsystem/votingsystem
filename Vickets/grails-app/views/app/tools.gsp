@@ -34,11 +34,11 @@
 
 </body>
 </html>
-<r:script>
+<asset:script>
 
     $(function() {
 
     })
 
-</r:script>
+</asset:script>
 

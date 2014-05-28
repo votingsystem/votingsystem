@@ -79,7 +79,7 @@
 
 </body>
 </html>
-<r:script>
+<asset:script>
     $(function() {
 
         $("#representativeImg").click(function() {
@@ -186,4 +186,4 @@
         }
     }
 
-</r:script>
+</asset:script>

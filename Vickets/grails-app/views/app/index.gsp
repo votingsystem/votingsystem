@@ -35,7 +35,7 @@
     </div>
 </body>
 </html>
-<r:script>
+<asset:script>
 
-</r:script>
+</asset:script>
 

@@ -5,7 +5,7 @@
 		<div class="eventSearchDateFinish"></div>
 	</div>
 </div>
-<r:script>
+<asset:script>
 
 var searchResultMsgTemplate = "<g:message code="searchResultMsg"/>"
 var beginSearchMsgTemplate = "<g:message code="beginSearchInfoLbl"/>"
@@ -32,4 +32,4 @@ function showEventsSearchInfoMsg(textQuery, dateBeginFrom, dateBeginTo, dateFini
 function hideEventsSearchInfoMsg() {
     $(".eventSearchInfo").hide()
 }
-</r:script>
+</asset:script>

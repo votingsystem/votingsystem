@@ -17,6 +17,6 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
-</r:script>
+</asset:script>

@@ -96,7 +96,7 @@
 	
 </body>
 </html>
-<r:script>
+<asset:script>
 <g:applyCodec encodeAs="none">
     var numVoteOptions = 0
     var controlCenters = {};
@@ -244,4 +244,4 @@
     }
 
 </g:applyCodec>
-</r:script>   
+</asset:script>

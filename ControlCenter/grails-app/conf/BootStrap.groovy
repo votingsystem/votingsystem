@@ -5,20 +5,20 @@ import grails.util.Metadata
 
 class BootStrap {
 
-	def grailsApplication
-	def filesService
+    def grailsApplication
+    def filesService
     def signatureVSService
     def timeStampService
-	
+
     def init = { servletContext ->
-		JSON.registerObjectMarshaller(Date) {
+        JSON.registerObjectMarshaller(Date) {
             return it?.format("yyyy/MM/dd' 'HH:mm:ss")
         }
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init()
-		filesService.init()
+        filesService.init()
         signatureVSService.init();
     }
-	
+
     def destroy = { }
 }

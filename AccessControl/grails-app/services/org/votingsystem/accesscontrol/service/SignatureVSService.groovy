@@ -603,13 +603,13 @@ class SignatureVSService {
 
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
-        log.debug(" - encryptToCMS ${new String(dataToEncrypt)}")
+        log.debug("encryptToCMS ${new String(dataToEncrypt)}")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
 
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
-        log.debug("--- - encryptMessage(...) - ");
+        log.debug("encryptMessage(...) - ");
         try {
             return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
         } catch(Exception ex) {
@@ -623,7 +623,7 @@ class SignatureVSService {
      * Method to decrypt files attached to SMIME (not signed) messages
      */
     public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug " - decryptMessage}"
+        log.debug "decryptMessage"
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
@@ -637,7 +637,7 @@ class SignatureVSService {
      * Method to encrypt SMIME signed messages
      */
     ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
-        log.debug(" - encryptSMIMEMessage(...) ");
+        log.debug("encryptSMIMEMessage(...) ");
         try {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
@@ -651,7 +651,7 @@ class SignatureVSService {
      * Method to decrypt SMIME signed messages
      */
     ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        log.debug(" - decryptSMIMEMessage ")
+        log.debug("decryptSMIMEMessage ")
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {

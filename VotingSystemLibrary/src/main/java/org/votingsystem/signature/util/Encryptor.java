@@ -346,7 +346,7 @@ public class Encryptor {
     }
     
     public static byte[] encryptFile(File fileToEncrypt, X509Certificate receiverCert) throws Exception {
-        logger.debug(" - encryptFile(...)");
+        logger.debug("encryptFile(...)");
         MimeMessage mimeMessage = new MimeMessage(ContextVS.MAIL_SESSION);
         MimeBodyPart mimeBodyPart = new MimeBodyPart();
         FileDataSource fds = new FileDataSource(fileToEncrypt);

@@ -29,7 +29,7 @@
 		<input id="submitVotingHistoryRequest" type="submit" style="display:none;">
 	</form> 	   
 </div> 
-<r:script>
+<asset:script>
 
   $("#requestRepresentativeVotingHistoryDialog").dialog({
    	  width: 550, autoOpen: false, modal: true,
@@ -70,4 +70,4 @@
         } else return true
     }
 
-</r:script>
+</asset:script>

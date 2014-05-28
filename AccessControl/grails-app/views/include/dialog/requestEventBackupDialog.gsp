@@ -37,7 +37,7 @@
         </form>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 var callerCallback
 
@@ -69,4 +69,4 @@ $('#requestEventBackupForm').submit(function(event){
 	VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
 });
 
-</r:script>
+</asset:script>

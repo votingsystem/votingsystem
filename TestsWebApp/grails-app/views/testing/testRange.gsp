@@ -2,12 +2,11 @@
 <html>
 <head>
   	<title>pruebaTemplate</title>
-   	<r:require modules="application"/>
     <style>
 	  	textarea { }
 	  	input[id="subject"] { }
   	</style>
-  	<r:script>
+  	<asset:script>
         //This is number validation in for Firefox
         $("#resetForm").click()
         var allNumberFields = document.getElementsByClassName('userBaseDataInputNumber');
@@ -64,8 +63,7 @@
 	  	});
 
 	  	
-  	</r:script>
-	<r:layoutResources />
+  	</asset:script>
 </head>
 <body>
 	<form id="testForm" style="display:block;margin:20px auto 30px auto; width:40%;">
@@ -94,4 +92,3 @@
 	<div><input id="date" type="date" name="date" /></div>
 </body>
 </html>
-<r:layoutResources />

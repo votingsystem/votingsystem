@@ -23,7 +23,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
     var cancelGroupVSDialogMsgTemplate = "<g:message code="cancelGroupVSDialogMsg"/>"
     var groupVSName = null
@@ -75,4 +75,4 @@
         }
     }
 
-</r:script>
+</asset:script>

@@ -21,7 +21,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 
 function removeRepresentative() {
@@ -54,4 +54,4 @@ function removeRepresentativeCallback(appMessage) {
 	}
 }
 
-</r:script>
+</asset:script>

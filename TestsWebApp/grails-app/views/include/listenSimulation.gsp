@@ -54,7 +54,7 @@
     </div>
 </template>
 </div>
-<r:script>
+<asset:script>
 
 $("#listenButton").click(function() {	
 	messageToService = {service:"claimSimulationService", operation:"LISTEN"}
@@ -180,4 +180,4 @@ function showErrorMsg(errorMsg) {
 	$(".errorMsgWrapper").fadeIn()
 }
 	
-</r:script>
+</asset:script>

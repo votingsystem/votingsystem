@@ -1,9 +1,6 @@
-<g:if test="${'mobile'.equals(attrs.type)}">
-    <r:require modules="textEditorPC"/>
-</g:if>
-<g:else><r:require modules="textEditorPC"/></g:else>
+<script type="text/javascript" src="/TestWebApp/ckeditor/ckeditor.js"></script>
 <div id='${attrs.id}' style="${attrs.style}"></div>
-<r:script>
+<asset:script>
     <g:if test="${'mobile'.equals(attrs.type)}">
         var editorConfig = {
             toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
@@ -32,4 +29,4 @@ function getEditor_${attrs.id}Data() {
 }
 
 $(function() {showEditor_${attrs.id}() })
-</r:script>
+</asset:script>

@@ -11,7 +11,7 @@
 			<input id="submitClaimFieldText" type="submit" style="display:none;">
 	</form>
 </div> 
-<r:script>
+<asset:script>
 
 var callerCallback
 
@@ -58,4 +58,4 @@ $("#addClaimFieldDialog").dialog({
 	 		$("#claimFieldText").val("")
 		  }
     });
-</r:script>
+</asset:script>

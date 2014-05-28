@@ -1,7 +1,7 @@
 <html>
 <head>
-        <meta name="layout" content="main" />
-   		<r:require modules="textEditorPC"/>
+    <meta name="layout" content="main" />
+    <script type="text/javascript" src="/AccessControl/ckeditor/ckeditor.js"></script>
 </head>
 <body>
 <div id="contentDiv" style="margin: 0px auto 0px auto; max-width: 1200px;">
@@ -49,7 +49,7 @@
 </div>
 </body>
 </html>
-<r:script>
+<asset:script>
 
     var selectedImagePath = null
 
@@ -117,4 +117,4 @@
             showResultDialog(caption, msg)
         }
     }
-</r:script>
+</asset:script>

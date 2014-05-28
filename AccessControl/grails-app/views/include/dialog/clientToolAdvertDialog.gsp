@@ -16,9 +16,9 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
     function disposeClientToolAdvertDialog() {
         $('#clientToolAdvertDialog').modal('hide')
     }
 
-</r:script>
+</asset:script>

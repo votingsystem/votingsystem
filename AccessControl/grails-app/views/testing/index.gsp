@@ -2,9 +2,16 @@
 <html>
 <head>
   	<title>pruebaTemplate</title>
-   	<r:require modules="application"/>
+    <g:javascript library="jquery" plugin="jquery"/>
+    <link rel="stylesheet" href="/ControlCenter/font-awesome/css/font-awesome.min.css" type="text/css"/>
+
+    <asset:stylesheet src="bootstrap.min.css"/>
+    <asset:javascript src="bootstrap.min.js"/>
+
+    <asset:stylesheet src="votingSystem.css"/>
+    <asset:javascript src="utilsVS.js"/>
+    <g:include view="/include/utils_js.gsp"/>
 </head>
-<r:layoutResources />
 <body>
 
 <form id="advancedSearchForm" class="" onsubmit="return submitAdvancedSearchForm(this);">
@@ -47,7 +54,7 @@
 <div id="dialog" title="Basic dialog">
     <!-- Advanced search Modal dialog -->fdsfsdfsdf
 
-    <r:script>
+    <asset:script>
 
     $("#searchInput").bind('keypress', function(e) {
         if (e.which == 13) {
@@ -105,14 +112,13 @@
         return false
     }
 
-    </r:script>
+    </asset:script>
 </div>
 
 </body>
 </html>
-<r:script>
+<asset:script>
     $(function() {
         $( "#dialog" ).dialog();
     });
-</r:script>
-<r:layoutResources />
+</asset:script>

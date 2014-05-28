@@ -1,7 +1,4 @@
 package votingsystem
-
-import org.votingsystem.util.StringUtils;
-
 //http://sysgears.com/articles/tag-libraries-grails/
 class VotingSystemTagLib {
 	

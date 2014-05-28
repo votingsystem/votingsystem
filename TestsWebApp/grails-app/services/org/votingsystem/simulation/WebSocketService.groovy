@@ -1,99 +1,111 @@
 package org.votingsystem.simulation
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicBoolean
-import grails.transaction.Transactional
-import org.votingsystem.websocket.SocketServletVS.SocketMessageInbound;
-import org.votingsystem.model.ResponseVS;
-import org.apache.catalina.websocket.MessageInbound;
-import org.codehaus.groovy.grails.web.json.JSONElement
-import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.votingsystem.simulation.model.*
-
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.util.ExceptionVS
+import javax.websocket.CloseReason
+import java.nio.ByteBuffer
+import java.util.concurrent.ConcurrentHashMap
+import javax.websocket.Session;
 
-import java.util.concurrent.ConcurrentHashMap;
 
 class WebSocketService {
-	
 
-	private static final ConcurrentHashMap<String, MessageInbound> connectionsMap = new ConcurrentHashMap<String, MessageInbound>();
+    private static final ConcurrentHashMap<String, Session> connectionsMap = new ConcurrentHashMap<String, Session>();
+    def grailsApplication
+    def messageSource
 
-	def grailsApplication
-	
+    public void onTextMessage(Session session, String msg , boolean last) {
+        log.debug("onTextMessage - session id: ${session.getId()} - last: ${last}")
+        def messageJSON = JSON.parse(msg)
+        messageJSON.userId = session.getId()
+        processRequest(messageJSON)
+    }
 
-	public void init() throws Exception {
-		log.debug("--- init")
+    public void onBinaryMessage(Session session, ByteBuffer bb, boolean last) {
+        log.debug("onBinaryMessage")
+        //session.getBasicRemote().sendBinary(bb, last);
+    }
 
-	}
+    public void onOpen(Session session) {
+        log.debug("onOpen - session id: ${session.getId()}")
+        connectionsMap.put(session.getId(), session);
+    }
 
-	public void onOpen(SocketMessageInbound messageInbound) {
-		connectionsMap.put(messageInbound.getBrowserId(), messageInbound);
-	}
+    public void onClose(Session session, CloseReason closeReason) {
+        log.debug("onClose - session id: ${session.getId()} - closeReason: ${closeReason}")
+        connectionsMap.remove(session.getId());
+    }
 
-	public void onClose(SocketMessageInbound messageInbound, int status) {
-		log.debug("onClose - status: " + status + " - BrowserId: " + messageInbound.getBrowserId())
-		connectionsMap.remove(messageInbound.getBrowserId());
-	}
 
-	public void onBinaryMessage(SocketMessageInbound messageInbound,
-			ByteBuffer message) {
-		log.debug("onBinaryMessage")
-	}
+    public void broadcast(JSONObject messageJSON) {
+        String messageStr = messageJSON.toString()
+        log.debug("broadcast - message: " + messageStr)
+        Enumeration<Session> sessions = connectionsMap.elements()
+        while(sessions.hasMoreElements()) {
+            Session session = sessions.nextElement()
+            try {
+                session.getBasicRemote().sendText(messageJSON.toString())
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex)
+                try {
+                    connectionsMap.remove(messageJSON.userId)
+                    session.close();
+                } catch (IOException ex1) {// Ignore
+                }
+            }
+        }
+    }
 
-	public void onTextMessage(SocketMessageInbound messageInbound, CharBuffer message) {
-		String messageStr = new String(message.array());
-		def mensajeJSON = JSON.parse(messageStr)
-		mensajeJSON.userId = messageInbound.getBrowserId()
-		processRequest(mensajeJSON)
-	}
-	
-	public void broadcast(JSONObject messageJSON) {
-		String messageStr = messageJSON.toString()
-		log.debug("--- broadcast - message: " + messageStr)
-		Enumeration<MessageInbound> connections = connectionsMap.elements()
-		while(connections.hasMoreElements()) {
-			MessageInbound connection = connections.nextElement()
-			CharBuffer buffer = CharBuffer.wrap(messageStr);
-			try {
-				connection.getWsOutbound().writeTextMessage(buffer);
-			} catch (IOException ex) {
-				log.error(ex.getMessage(), ex);
-			}
-		}
-	}
-	
-	public Map broadcastList(Map dataMap, Set<String> listeners) {
-		String messageStr = "${dataMap as JSON}"
-		//log.debug("--- broadcastList - message: " + messageStr)
-		Map resultMap = [statusCode:ResponseVS.SC_OK]
-		def errorList = []
-		listeners.each {
-            CharBuffer messageBuffer = CharBuffer.wrap(messageStr);
-			//log.debug("broadcastList - ${it} messageBuffer: ${messageBuffer}")
-			MessageInbound messageInbound = connectionsMap.get(it)
-			if(messageInbound) {
-				try {
-					messageInbound.getWsOutbound().writeTextMessage(messageBuffer);
-				} catch (IOException ex) {
-					log.error(ex.getMessage(), ex);
-				}
-			} else {
-				resultMap.statusCode = ResponseVS.SC_ERROR
-				errorList.add(it)
-			}
-		}
-		resultMap.errorList = errorList
-		return resultMap
-	}
-	
+    public Map broadcastList(Map dataMap, Set<String> listeners) {
+        String messageStr = "${dataMap as JSON}"
+        //log.debug("--- broadcastList - message: " + messageStr)
+        Map resultMap = [statusCode:ResponseVS.SC_OK]
+        def errorList = []
+        listeners.each {
+            Session session = connectionsMap.get(it)
+            if(session?.isOpen()) {
+                try {
+                    session.getBasicRemote().sendText(messageStr)
+                } catch (Exception ex) {
+                    log.error(ex.getMessage(), ex)
+                    try {
+                        connectionsMap.remove(messageJSON.userId)
+                        session.close();
+                    } catch (IOException e1) {// Ignore
+                    }
+                }
+            } else {
+                connectionsMap.remove(it)
+                resultMap.statusCode = ResponseVS.SC_ERROR
+                errorList.add(it)
+            }
+        }
+        resultMap.errorList = errorList
+        return resultMap
+    }
+
+    public void processResponse(JSONObject messageJSON) {
+        Session session = connectionsMap.get(messageJSON.userId)
+        if(session?.isOpen()) {
+            try {
+                session.getBasicRemote().sendText(messageJSON.toString())
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex)
+                try {
+                    connectionsMap.remove(messageJSON.userId)
+                    session.close();
+                } catch (IOException e1) {// Ignore
+                }
+            }
+        } else {
+            log.debug (" **** Lost message for session '${messageJSON.userId}' " +
+                    " - message: " + messageJSON.toString())
+            connectionsMap.remove(messageJSON.userId)
+        }
+    }
+
 	/*
 	 * references to services from grailsApplication to avoid circular references
 	 */
@@ -123,19 +135,5 @@ class WebSocketService {
             processResponse(messageJSON)
         }
 	}
-
-	public void processResponse(JSONObject messageJSON) {
-		MessageInbound connection = connectionsMap.get(messageJSON.userId)
-		if(connection) {
-			CharBuffer buffer = CharBuffer.wrap(messageJSON.toString());
-			try {
-				connection.getWsOutbound().writeTextMessage(buffer);
-			} catch (IOException ex) {
-				log.error(ex.getMessage(), ex);
-			}
-		} else log.debug (" **** Lost message for user '${messageJSON.userId}' " + 
-			" - message: " + messageJSON.toString())
-	}
-
 
 }

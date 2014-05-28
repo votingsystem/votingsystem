@@ -44,7 +44,7 @@
 			<input id="submitClaimFieldText" type="submit" style="display:none;">
 	</form>
 </div> 
-<r:script>
+<asset:script>
     var callerCallback
 
     function showAddClaimFieldDialog(callback) {
@@ -63,4 +63,4 @@
         $("#addClaimFieldDialog").modal("hide");
     })
 
-</r:script>
+</asset:script>

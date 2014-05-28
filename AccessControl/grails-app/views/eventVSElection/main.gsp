@@ -1,7 +1,9 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <r:require module="dynatableModule"/>
+    <asset:stylesheet src="jquery.dynatable.css"/>
+    <asset:javascript src="jquery.dynatable.js"/>
+    <asset:javascript src="jquery.stickytableheaders.js"/>
 </head>
 <body>
 <div class="">
@@ -27,7 +29,7 @@
 <g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 </body>
 </html>
-<r:script>
+<asset:script>
     var dynatable
 
     $(function() {
@@ -105,4 +107,4 @@
         dynatable.paginationPage.set(1);
         dynatable.process();
     }
-</r:script>
+</asset:script>

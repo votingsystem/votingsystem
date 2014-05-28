@@ -3,8 +3,8 @@ package filters
 import grails.converters.JSON
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
+import javax.servlet.http.HttpServletResponse
 
-import javax.servlet.http.HttpServletResponseWrapper
 import java.security.cert.X509Certificate;
 import org.votingsystem.model.TypeVS
 import org.springframework.web.multipart.MultipartHttpServletRequest
@@ -27,6 +27,7 @@ class ControlCenterFilters {
     def filters = {
         paramsCheck(controller:'*', action:'*') {
             before = {
+                if("assets".equals(params.controller) || params.isEmpty()) return
                 log.debug "###########################<${params.controller}> - before ################################"
                 log.debug "Method: " + request.method
                 log.debug "Params: " + params
@@ -46,6 +47,7 @@ class ControlCenterFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
+                if("assets".equals(params.controller) || params.isEmpty()) return
                 ResponseVS responseVS = null
                 try {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
@@ -160,7 +162,7 @@ class ControlCenterFilters {
         }
     }
 
-    private boolean printOutput(HttpServletResponseWrapper response, ResponseVS responseVS) {
+    private boolean printOutput(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.statusCode
         response.setContentType(responseVS.getContentType()?.getName()+";charset=UTF-8")
         String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
@@ -170,7 +172,7 @@ class ControlCenterFilters {
         return false
     }
 
-    private boolean printOutputStream(HttpServletResponseWrapper response, ResponseVS responseVS) {
+    private boolean printOutputStream(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.getStatusCode()
         response.contentLength = responseVS.getMessageBytes().length
         response.setContentType(responseVS.getContentType().getName())

@@ -80,7 +80,7 @@
 </div>
 
 </html> 
-<r:script>
+<asset:script>
 
 $("#testButtonDiv").hide()
 
@@ -144,4 +144,4 @@ function showErrorMsg(errorMsg) {
 	$("#timeStampProtocolSimulationDataDialog .errorMsgWrapper").fadeIn()
 }
 	
-</r:script>
+</asset:script>

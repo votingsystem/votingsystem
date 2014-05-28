@@ -33,7 +33,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 function showAdminDocumentDialog(callback) {
 	$("#adminDocumentDialog").modal('show');
@@ -95,4 +95,4 @@ function adminDocumentCallback(appMessage) {
         showResultDialog(caption, msg, callBack)
     }
 }
-</r:script>
+</asset:script>

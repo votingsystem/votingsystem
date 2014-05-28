@@ -72,7 +72,7 @@
 </div>
 </body>
 </html>
-<r:script>
+<asset:script>
     <g:applyCodec encodeAs="none">
         var votingEvent = ${eventMap as JSON}
         var selectedOption
@@ -152,4 +152,4 @@
 		}
 
     </g:applyCodec>
-</r:script>
+</asset:script>

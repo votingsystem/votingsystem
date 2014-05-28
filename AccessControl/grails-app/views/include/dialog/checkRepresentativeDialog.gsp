@@ -25,7 +25,7 @@
 		</div>
 	</div>
 </div>
-<r:script>
+<asset:script>
    $('#checkRepresentativeForm').submit(function(event){	
 		console.log("checkRepresentativeForm")
 		event.preventDefault();
@@ -109,4 +109,4 @@ $("#checkRepresentativeDialog").dialog({
 
  	document.getElementById('userNifText').addEventListener('change', nifValidation, false);
 
-</r:script>
+</asset:script>

@@ -1,9 +1,6 @@
-<g:if test="${'mobile'.equals(attrs.type)}">
-    <r:require modules="textEditorMobile"/>
-</g:if>
-<g:else><r:require modules="textEditorPC"/></g:else>
+<script type="text/javascript" src="/AccessControl/ckeditor/ckeditor.js"></script>
 <div id='${attrs.id}' style="${attrs.style}"></div>
-<r:script>
+<asset:script>
 <g:if test="${'mobile'.equals(attrs.type)}">
     var editorConfig = {
         toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
@@ -40,4 +37,4 @@ $(function() {
     });
 
 })
-</r:script>
+</asset:script>

@@ -32,7 +32,7 @@
 </body>
 
 </html>
-<r:script>
+<asset:script>
 
     var dynatable
 
@@ -107,4 +107,4 @@
         return tr
     }
 
-</r:script>
+</asset:script>

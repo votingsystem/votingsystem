@@ -14,9 +14,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <r:require module="details"/>
+    <link rel="stylesheet" href="/Vickets/font-awesome/css/font-awesome.min.css" type="text/css"/>
+    <g:javascript library="jquery" plugin="jquery"/>
+    <asset:javascript src="utilsVS.js"/>
+    <g:include view="/include/utils_js.gsp"/>
+    <asset:stylesheet src="bootstrap.min.css"/>
+    <asset:javascript src="bootstrap.min.js"/>
+    <asset:stylesheet src="vickets.css"/>
 </head>
-<r:layoutResources />
 <body>
 <div class="" style="margin: 20px;">
     <div style="font-size: 1.5em; font-weight: bold;">${transactionTypeMsg}</div>
@@ -55,7 +60,7 @@
 </div>
 </body>
 </html>
-<r:script>
+<asset:script>
 
     $(function() {
 
@@ -72,5 +77,5 @@
         console.log("saveReceiptCallback - message from native client: " + appMessage);
     }
 
-</r:script>
-<r:layoutResources />
+</asset:script>
+<asset:deferredScripts/>

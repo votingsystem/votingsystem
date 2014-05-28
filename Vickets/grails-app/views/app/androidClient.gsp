@@ -13,10 +13,10 @@
     </div>
 </div>
 </body>
-<r:script>
+<asset:script>
     function goBack() {
         window.history.back()
         return false
     }
-</r:script>
+</asset:script>
 </html>

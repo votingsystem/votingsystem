@@ -45,10 +45,7 @@ class UserVSService {
 
     boolean isUserAdmin(String nif) {
         if(!systemAdmins) {
-            systemAdmins = new ArrayList<String>();
-            "${grailsApplication.config.VotingSystem.adminsDNI}".split(",")?.each {
-                systemAdmins.add(it.trim())
-            }
+            systemAdmins = grailsApplication.config.VotingSystem.adminsDNI
         }
         return systemAdmins.contains(nif)
     }

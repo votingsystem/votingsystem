@@ -1,92 +1,97 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import org.apache.catalina.websocket.MessageInbound
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.websocket.SocketServletVS.SocketMessageInbound
-
+import javax.websocket.CloseReason
 import java.nio.ByteBuffer
-import java.nio.CharBuffer
 import java.util.concurrent.ConcurrentHashMap
+import javax.websocket.Session;
 
 class WebSocketService {
 
     public enum SocketOperation {LISTEN_TRANSACTIONS}
 
-	private static final ConcurrentHashMap<String, MessageInbound> connectionsMap = new ConcurrentHashMap<String, MessageInbound>();
-
-	def grailsApplication
+    private static final ConcurrentHashMap<String, Session> connectionsMap = new ConcurrentHashMap<String, Session>();
+    def grailsApplication
     def messageSource
 
-	public void init() throws Exception {
-		log.debug("init")
-	}
+    public void onTextMessage(Session session, String msg , boolean last) {
+        log.debug("onTextMessage - session id: ${session.getId()} - last: ${last}")
+        def messageJSON = JSON.parse(msg)
+        messageJSON.userId = session.getId()
+        processRequest(messageJSON)
+    }
 
-	public void onOpen(SocketMessageInbound messageInbound) {
-		connectionsMap.put(messageInbound.getBrowserId(), messageInbound);
-	}
+    public void onBinaryMessage(Session session, ByteBuffer bb, boolean last) {
+        log.debug("onBinaryMessage")
+        //session.getBasicRemote().sendBinary(bb, last);
+    }
 
-	public void onClose(SocketMessageInbound messageInbound, int status) {
-		log.debug("onClose - status: " + status + " - BrowserId: " + messageInbound.getBrowserId())
-		connectionsMap.remove(messageInbound.getBrowserId());
-	}
+    public void onOpen(Session session) {
+        log.debug("onOpen - session id: ${session.getId()}")
+        connectionsMap.put(session.getId(), session);
+    }
 
-	public void onBinaryMessage(SocketMessageInbound messageInbound, ByteBuffer message) {
-		log.debug("onBinaryMessage")
-	}
+    public void onClose(Session session, CloseReason closeReason) {
+        log.debug("onClose - session id: ${session.getId()} - closeReason: ${closeReason}")
+        connectionsMap.remove(session.getId());
+    }
 
-	public void onTextMessage(SocketMessageInbound messageInbound, CharBuffer message) {
-		String messageStr = new String(message.array());
-		def messageJSON = JSON.parse(messageStr)
-		messageJSON.userId = messageInbound.getBrowserId()
-		processRequest(messageJSON)
-	}
-	
-	public void broadcast(JSONObject messageJSON) {
-		String messageStr = messageJSON.toString()
-		log.debug("broadcast - message: " + messageStr)
-		Enumeration<MessageInbound> connections = connectionsMap.elements()
-		while(connections.hasMoreElements()) {
-			MessageInbound connection = connections.nextElement()
-			CharBuffer buffer = CharBuffer.wrap(messageStr);
-			try {
-				connection.getWsOutbound().writeTextMessage(buffer);
-			} catch (IOException ex) {
-				log.error(ex.getMessage(), ex);
-			}
-		}
-	}
-	
-	public Map broadcastList(Map dataMap, Set<String> listeners) {
-		String messageStr = "${dataMap as JSON}"
-		//log.debug("--- broadcastList - message: " + messageStr)
-		Map resultMap = [statusCode:ResponseVS.SC_OK]
-		def errorList = []
-		listeners.each {
-            CharBuffer messageBuffer = CharBuffer.wrap(messageStr);
-            MessageInbound messageInbound = connectionsMap.get(it)
-			if(messageInbound) {
-				try {
-					messageInbound.getWsOutbound().writeTextMessage(messageBuffer);
-				} catch (IOException ex) {
-					log.error(ex.getMessage(), ex);
-				}
-			} else {
-				resultMap.statusCode = ResponseVS.SC_ERROR
-				errorList.add(it)
-			}
-		}
-		resultMap.errorList = errorList
-		return resultMap
-	}
-	
-	/*
-	 * references to services from grailsApplication to avoid circular references
-	 */
-	public void processRequest(JSONObject messageJSON) {
-		String message = null;
+
+    public void broadcast(JSONObject messageJSON) {
+        String messageStr = messageJSON.toString()
+        log.debug("broadcast - message: " + messageStr)
+        Enumeration<Session> sessions = connectionsMap.elements()
+        while(sessions.hasMoreElements()) {
+            Session session = sessions.nextElement()
+            try {
+                session.getBasicRemote().sendText(messageJSON.toString())
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex)
+                try {
+                    connectionsMap.remove(messageJSON.userId)
+                    session.close();
+                } catch (IOException ex1) {// Ignore
+                }
+            }
+        }
+    }
+
+    public Map broadcastList(Map dataMap, Set<String> listeners) {
+        String messageStr = "${dataMap as JSON}"
+        //log.debug("--- broadcastList - message: " + messageStr)
+        Map resultMap = [statusCode:ResponseVS.SC_OK]
+        def errorList = []
+        listeners.each {
+            Session session = connectionsMap.get(it)
+            if(session?.isOpen()) {
+                try {
+                    session.getBasicRemote().sendText(messageStr)
+                } catch (Exception ex) {
+                    log.error(ex.getMessage(), ex)
+                    try {
+                        connectionsMap.remove(messageJSON.userId)
+                        session.close();
+                    } catch (IOException e1) {// Ignore
+                    }
+                }
+            } else {
+                connectionsMap.remove(it)
+                resultMap.statusCode = ResponseVS.SC_ERROR
+                errorList.add(it)
+            }
+        }
+        resultMap.errorList = errorList
+        return resultMap
+    }
+
+    /*
+    * references to services from grailsApplication to avoid circular references
+    */
+    public void processRequest(JSONObject messageJSON) {
+        String message = null;
         Locale locale = null
         try {
             locale = Locale.forLanguageTag(messageJSON.locale)
@@ -105,20 +110,26 @@ class WebSocketService {
             messageJSON.message = ex.getMessage()
             processResponse(messageJSON)
         }
-	}
+    }
 
-	public void processResponse(JSONObject messageJSON) {
-		MessageInbound connection = connectionsMap.get(messageJSON.userId)
-		if(connection) {
-			CharBuffer buffer = CharBuffer.wrap(messageJSON.toString());
-			try {
-				connection.getWsOutbound().writeTextMessage(buffer);
-			} catch (IOException ex) {
-				log.error(ex.getMessage(), ex);
-			}
-		} else log.debug (" **** Lost message for user '${messageJSON.userId}' " + 
-			" - message: " + messageJSON.toString())
-	}
-
+    public void processResponse(JSONObject messageJSON) {
+        Session session = connectionsMap.get(messageJSON.userId)
+        if(session?.isOpen()) {
+            try {
+                session.getBasicRemote().sendText(messageJSON.toString())
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex)
+                try {
+                    connectionsMap.remove(messageJSON.userId)
+                    session.close();
+                } catch (IOException e1) {// Ignore
+                }
+            }
+        } else {
+            log.debug (" **** Lost message for session '${messageJSON.userId}' " +
+                    " - message: " + messageJSON.toString())
+            connectionsMap.remove(messageJSON.userId)
+        }
+    }
 
 }

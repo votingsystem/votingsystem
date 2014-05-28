@@ -1,7 +1,7 @@
 <html>
 <head>
-        <meta name="layout" content="main" />
-   		<r:require modules="textEditor"/>
+    <script type="text/javascript" src="/Vickets/ckeditor/ckeditor.js"></script>
+    <meta name="layout" content="main" />
 </head>
 <body>
 
@@ -48,7 +48,7 @@
 <g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
-<r:script>
+<asset:script>
 
     $(function() {
         showGroupData()
@@ -101,4 +101,4 @@
         $(".pageHeader").append(editRepresentativeHeader)
         setDataEditor_editorDiv('${raw(groupvsMap?.description)}')
     }
-</r:script>
+</asset:script>

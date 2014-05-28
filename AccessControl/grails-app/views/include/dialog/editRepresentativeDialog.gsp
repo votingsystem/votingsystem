@@ -37,7 +37,7 @@
         </form>
     </div>
 </div>
-<r:script>
+<asset:script>
 
 var nifValidationResult
 
@@ -82,4 +82,4 @@ var nifValidation = function () {
     }
 
 document.getElementById('representativeNifText').addEventListener('change', nifValidation, false);
-</r:script>
+</asset:script>

@@ -4,16 +4,16 @@ import org.votingsystem.model.ContextVS
 
 class BootStrap {
 
-	def simulationService
-	
+    def simulationService
+
     def init = { servletContext ->
-		JSON.registerObjectMarshaller(Date) {
-			return it?.format("yyyy/MM/dd' 'HH:mm:ss")
-		}
-		
-		ContextVS.init()
+        JSON.registerObjectMarshaller(Date) {
+            return it?.format("yyyy/MM/dd' 'HH:mm:ss")
+        }
+
+        ContextVS.init()
     }
-	
+
     def destroy = { }
 
 }

@@ -1,14 +1,21 @@
 <html>
     <head>
-   		<r:require modules="application"/>
+        <g:javascript library="jquery" plugin="jquery"/>
+        <link rel="stylesheet" href="/ControlCenter/font-awesome/css/font-awesome.min.css" type="text/css"/>
+
+        <asset:stylesheet src="bootstrap.min.css"/>
+        <asset:javascript src="bootstrap.min.js"/>
+
+        <asset:stylesheet src="votingSystem.css"/>
+        <asset:javascript src="utilsVS.js"/>
+        <g:include view="/include/utils_js.gsp"/>
         <style type="text/css" media="screen">
         	#content a{margin: 0px 100px 0px 0px;}
-        </style>        
-        <r:layoutResources/>
+        </style>
     </head>
     <body>
     <div class="container">
-        <a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'serverNameLabel', null)}</a>
+        <a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'serverNameLbl', null)}</a>
         <div id="tabs" style="min-height: 700px;">
             <ul>
                 <li><a href="#tabs-1" style="font-size: 0.8em;"><span><g:message code="infoLabel"/></span></a></li>
@@ -46,10 +53,9 @@
         </div>
 	</body>
 </html>
-<r:script>
+<asset:script>
       $(function() {
           $( "#tabs" ).tabs()
       });
 
-</r:script>
-<r:layoutResources/>
+</asset:script>

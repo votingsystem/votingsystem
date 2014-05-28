@@ -1,7 +1,8 @@
 <html>
     <head>
-        <title>${message(code: 'serverNameLabel', null)}</title>
-       	<r:require module="charts"/>
+        <title>${message(code: 'serverNameLbl', null)}</title>
+        <asset:stylesheet src="charts.css"/>
+        <asset:javascript src="jsapi.js"/>
 </head>
     <body>    
         <div id="subject" class='statisticData'>${statisticsMap.subject}</div>

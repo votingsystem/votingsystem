@@ -24,7 +24,7 @@
     </div>
 </body>
 </html>
-<r:script>
+<asset:script>
     var signedContent = toJSON('${raw(signedContent)}')
 
     $(function() {
@@ -58,5 +58,5 @@
         console.log("saveReceiptCallback - message from native client: " + appMessage);
     }
 
-</r:script>
+</asset:script>
 <r:layoutResources/>

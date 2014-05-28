@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link href="${resource(dir: 'css', file: 'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
     <meta name="layout" content="main" />
-    <r:require module="dynatableModule"/>
+    <asset:javascript src="jquery.stickytableheaders.js"/>
+    <asset:javascript src="jquery.dynatable.js"/>
+    <asset:stylesheet src="jquery.dynatable.css"/>
+    <asset:stylesheet src="vicket_groupvs.css"/>
 </head>
 <body>
 <div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
@@ -37,7 +39,7 @@
 </div>
 </body>
 </html>
-<r:script>
+<asset:script>
     var dynatable
 
     $(function() {
@@ -144,4 +146,4 @@
         dynatable.process();
     }
 
-</r:script>
+</asset:script>

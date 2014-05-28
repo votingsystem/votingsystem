@@ -38,6 +38,7 @@ import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -69,7 +70,7 @@ public class BrowserVS extends Region {
     private WebView smallView;
     private ComboBox comboBox;
     private VBox mainVBox;
-    private BrowserVSStackPane browserHelper;
+    private BrowserVSPane browserHelper;
     private AtomicInteger offset = new AtomicInteger(0);
 
 
@@ -244,7 +245,7 @@ public class BrowserVS extends Region {
                 }
         );
         mainVBox.getChildren().addAll(toolBar, webView);
-        browserHelper = new BrowserVSStackPane(signatureService);
+        browserHelper = new BrowserVSPane(signatureService);
         browserHelper.getChildren().add(0, mainVBox);
 
         Scene scene = new Scene(browserHelper, Color.web("#666970"));

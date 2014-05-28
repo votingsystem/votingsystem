@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <r:require module="application"/>
-  	<title>pruebaTemplate</title>
+  	<title>TestingTemplate</title>
     <style>
 	  	textarea { }
 	  	input[id="subject"] { }
   	</style>
-    <r:layoutResources />
 </head>
 <body>
 
@@ -18,19 +16,17 @@
 </div>
 </body>
 </html>
-<r:script>
+<asset:script>
 
     function submitForm(form) {
         var result = document.getElementById("testTime").getValidatedTime()
-        console.log("=========== result: " + result)
+        console.log("result: " + result)
         return false
     }
 
     $(document).ready(function(){
         $('#testForm').submit(function(event){event.preventDefault();});
-
         $("#submitButton").click(function(){});
     });
 
-</r:script>
-<r:layoutResources />
+</asset:script>

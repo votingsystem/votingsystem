@@ -16,6 +16,7 @@ hibernate {
     //cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory' // Hibernate 3
     cache.region.factory_class = 'org.hibernate.cache.ehcache.EhCacheRegionFactory' // Hibernate 4
     //hibernate.show_sql=true
+    singleSession = true // configure OSIV singleSession mode
 }
 
 // environment specific settings

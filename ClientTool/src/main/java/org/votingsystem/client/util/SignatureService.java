@@ -235,12 +235,13 @@ public class SignatureService extends Service<ResponseVS> {
                 return new ResponseVS(responseVS.getStatusCode(), ContextVS.getInstance().getMessage(
                         "errorDownloadingDocument") + " - " + responseVS.getMessage());
             }
-            PdfReader readerManifesto = new PdfReader(pdfDocumentBytes);
+            PdfReader readerManifest = new PdfReader(pdfDocumentBytes);
+
             String reason = null;
             String location = null;
             PDFSignedSender pdfSignedSender = new PDFSignedSender(operationVS.getServiceURL(),
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                    reason, location, password.toCharArray(), readerManifesto, null, null,
+                    reason, location, password.toCharArray(), readerManifest, null, null,
                     ContextVS.getInstance().getAccessControl().getX509Certificate());
             responseVS = pdfSignedSender.call();
             return responseVS;

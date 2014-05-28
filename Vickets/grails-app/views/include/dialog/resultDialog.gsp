@@ -15,7 +15,7 @@
         </div>
     </div>
 </div>
-<r:script>
+<asset:script>
 
     var clientCallback = null
 
@@ -32,4 +32,4 @@
         $('#resultDialog').modal('show')
         clientCallback = callback
     }
-</r:script>
+</asset:script>

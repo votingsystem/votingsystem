@@ -115,12 +115,11 @@ class CsrController {
 		if(!messageSMIME) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
-		List<String> administradores = Arrays.asList(
-			grailsApplication.config.VotingSystem.adminsDNI.split(","))
+		List<String> admins = grailsApplication.config.VotingSystem.adminsDNI
 		UserVS userVS = messageSMIME.getUserVS()
 		def docValidacionJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
 		SMIMEMessageWrapper smimeMessageReq = messageSMIME.getSmimeMessage()
-		if (administradores.contains(userVS.nif) || userVS.nif.equals(docValidacionJSON.nif)) {
+		if (admins.contains(userVS.nif) || userVS.nif.equals(docValidacionJSON.nif)) {
 			DeviceVS dispositivo = DeviceVS.findWhere(deviceId: docValidacionJSON.deviceId)
 			if (!dispositivo?.userVS) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:"csrRequestNotFound",
