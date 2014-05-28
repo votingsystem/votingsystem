@@ -4,6 +4,10 @@
 /grails-app/views/restDoc
 /grails-app/views/restDocTemplates
 
+/web-app/tools
+/web-app/android
+/web-app/ckeditor
+
 /build
 /logs
 /target
