@@ -1,12 +1,10 @@
 package org.votingsystem.accesscontrol.service
 
+import org.votingsystem.model.ActorVS
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ControlCenterVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.ActorVS
-import org.votingsystem.signature.util.CertUtil
 
-import java.security.cert.X509Certificate
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

@@ -1,16 +1,13 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
-import org.votingsystem.model.PDFDocumentVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSManifest
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 
 import java.security.cert.X509Certificate
 import java.text.DecimalFormat
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

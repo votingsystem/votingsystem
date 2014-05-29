@@ -1,12 +1,6 @@
 package org.votingsystem.simulation
 
-import org.codehaus.groovy.grails.web.json.JSONObject
-import grails.converters.JSON
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.FieldEventVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.VoteVS
+import org.votingsystem.model.*
 import org.votingsystem.util.HttpHelper
 
 class TestingController {

@@ -1,25 +1,6 @@
 package org.votingsystem.controlcenter.service
 
-import org.bouncycastle.cms.CMSAlgorithm
-import org.bouncycastle.cms.RecipientId
-import org.bouncycastle.cms.RecipientInformation
-import org.bouncycastle.cms.RecipientInformationStore
-import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
-import org.bouncycastle.mail.smime.SMIMEEnveloped
-import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
-import org.bouncycastle.mail.smime.SMIMEUtil
-import org.bouncycastle.util.Strings
-import org.votingsystem.model.AccessControlVS
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VoteVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
@@ -29,14 +10,11 @@ import org.votingsystem.util.FileUtils
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.cert.CertPathValidatorException
-import java.security.cert.PKIXCertPathValidatorResult
-import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
 class SignatureVSService {

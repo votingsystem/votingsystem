@@ -6,6 +6,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
+
 import java.security.cert.X509Certificate
 
 class RepresentativeDelegationService {

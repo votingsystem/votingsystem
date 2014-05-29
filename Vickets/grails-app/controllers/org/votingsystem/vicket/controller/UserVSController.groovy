@@ -2,13 +2,7 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import net.sf.json.JSONObject
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.RepresentationDocumentVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ApplicationContextHolder

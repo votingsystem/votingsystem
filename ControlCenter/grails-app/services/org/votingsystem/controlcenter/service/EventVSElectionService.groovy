@@ -3,22 +3,14 @@ package org.votingsystem.controlcenter.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.votingsystem.model.AccessControlVS
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.FieldEventVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TagVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.StringUtils
 
 import java.security.cert.X509Certificate
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

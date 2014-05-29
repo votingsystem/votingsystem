@@ -1,14 +1,8 @@
 package org.votingsystem.accesscontrol.service
 
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.KeyStoreVS
-import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.ApplicationContextHolder
-import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 
 import javax.security.auth.x500.X500PrivateCredential

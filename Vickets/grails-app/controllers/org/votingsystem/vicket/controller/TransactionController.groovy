@@ -1,18 +1,12 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONArray
 import org.bouncycastle.util.encoders.Base64
-import org.votingsystem.model.BatchRequest
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.CurrencyVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
+import org.codehaus.groovy.grails.web.json.JSONArray
+import org.votingsystem.model.*
+import org.votingsystem.model.vicket.TransactionVS
 import org.votingsystem.model.vicket.Vicket
 import org.votingsystem.model.vicket.VicketBatchRequest
-import org.votingsystem.model.vicket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 

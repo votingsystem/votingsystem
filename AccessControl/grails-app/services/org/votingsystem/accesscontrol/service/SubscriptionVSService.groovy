@@ -1,20 +1,13 @@
 package org.votingsystem.accesscontrol.service
 
-import org.votingsystem.util.HttpHelper
-import org.votingsystem.util.StringUtils
-import org.votingsystem.model.ActorVS
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ControlCenterVS
-import org.votingsystem.model.DeviceVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import grails.converters.JSON
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.util.HttpHelper
+import org.votingsystem.util.StringUtils
+
 import java.security.cert.X509Certificate
-import grails.converters.JSON
 
 /**
 * @author jgzornoza

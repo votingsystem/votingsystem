@@ -1,21 +1,12 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
-import org.apache.log4j.Logger
-import org.bouncycastle.util.encoders.Base64
-import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.CurrencyVS
-import org.votingsystem.model.FieldEventVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.vicket.LoggerVS
 import org.votingsystem.model.vicket.TransactionVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
-
-import java.text.SimpleDateFormat
 
 /**
  * @infoController TestingController

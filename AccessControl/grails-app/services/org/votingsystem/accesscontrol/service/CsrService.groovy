@@ -1,8 +1,6 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
-import org.bouncycastle.asn1.ASN1ObjectIdentifier
-import org.bouncycastle.asn1.ASN1Set
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
@@ -15,7 +13,6 @@ import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.StringUtils
 
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey

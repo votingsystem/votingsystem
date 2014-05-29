@@ -3,18 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.votingsystem.model.AccessRequestVS
-import org.votingsystem.model.BackupRequestVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.ImageVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.RepresentationDocumentVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VoteVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
@@ -23,7 +12,6 @@ import java.security.MessageDigest
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
-
 
 class RepresentativeService {
 	

@@ -3,11 +3,10 @@ package org.votingsystem.accesscontrol.service
 import com.itextpdf.text.Rectangle
 import com.itextpdf.text.pdf.*
 import org.bouncycastle.tsp.TimeStampToken
-import org.bouncycastle.tsp.TimeStampTokenInfo
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.PDFDocumentVS
-import org.votingsystem.model.UserVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
@@ -47,7 +46,8 @@ class PdfService {
 		PdfReader reader = new PdfReader(signedPDF);
 		AcroFields acroFields = reader.getAcroFields();
 		ArrayList<String> names = acroFields.getSignatureNames();
-		responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+        String msg = null;
+        responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 			message:messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale));
 		for (String name : names) {
 			log.debug("checkSignature - Signature name: " + name + " - covers whole document:" +
@@ -74,7 +74,7 @@ class PdfService {
                     return timestampValidationResp
                 }
             } else {
-                String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
+                msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
                 log.error("ERROR - validateSignersCertificate - ${msg}")
                 return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
             }
@@ -89,7 +89,8 @@ class PdfService {
 					String notBefore = DateUtils.getStringFromDate(cert.getNotBefore())
 					log.debug("checkSignature - fails - Cert: ${cert.getSubjectDN()} - NotBefore: ${notBefore} - NotAfter: ${notAfter}")
 				}
-				return new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST, message:fails[1])
+                msg = messageSource.getMessage('pdfSignedCertsErrorMsg', null, locale)
+				return new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 			}
 			CertificateVS certificate = CertificateVS.findWhere(serialNumber:signingCert.getSerialNumber()?.longValue())
 			if (!certificate) {

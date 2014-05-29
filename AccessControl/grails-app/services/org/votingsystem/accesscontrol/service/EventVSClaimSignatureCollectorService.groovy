@@ -2,16 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.FieldValueEventVS
-import org.votingsystem.model.SignatureVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSClaim
-import org.votingsystem.model.FieldEventVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
 class EventVSClaimSignatureCollectorService {

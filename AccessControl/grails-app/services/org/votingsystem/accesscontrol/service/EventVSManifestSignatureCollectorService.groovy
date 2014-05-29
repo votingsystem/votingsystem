@@ -1,10 +1,6 @@
 package org.votingsystem.accesscontrol.service
 
-import org.votingsystem.model.PDFDocumentVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
+import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 
 class EventVSManifestSignatureCollectorService {

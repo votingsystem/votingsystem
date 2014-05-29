@@ -1,15 +1,10 @@
 package org.votingsystem.controlcenter.service
 
 import grails.converters.JSON
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.model.*
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
-import org.votingsystem.model.ActorVS
-import org.votingsystem.model.AccessControlVS
-import org.votingsystem.model.ResponseVS
+
 import java.security.cert.X509Certificate
 
 /**

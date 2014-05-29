@@ -123,7 +123,7 @@ class AccessControlFilters {
                         case ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED:
                             responseVS = signatureVSService.decryptMessage(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.statusCode) {
-                                requestBytes = responseVS.messageBytes
+                                requestBytes = responseVS.data
                                 responseVS = pdfService.checkSignature(requestBytes, request.getLocale())
                                 if(ResponseVS.SC_OK == responseVS.statusCode) request.pdfDocument = responseVS?.data
                             }

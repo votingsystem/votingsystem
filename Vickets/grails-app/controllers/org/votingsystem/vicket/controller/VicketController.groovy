@@ -7,10 +7,6 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.vicket.TransactionVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
 class VicketController {
 

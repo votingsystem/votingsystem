@@ -3,7 +3,6 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.apache.log4j.Logger
 import org.apache.log4j.RollingFileAppender
-import org.votingsystem.model.ContentTypeVS
 
 /**
  * @infoController Reports
