@@ -1,7 +1,6 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
-import org.apache.avro.generic.GenericData
 import org.apache.log4j.Logger
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
