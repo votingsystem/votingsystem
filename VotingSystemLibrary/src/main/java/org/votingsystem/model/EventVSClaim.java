@@ -1,7 +1,5 @@
 package org.votingsystem.model;
 
-//import org.hibernate.search.annotations.Indexed;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;

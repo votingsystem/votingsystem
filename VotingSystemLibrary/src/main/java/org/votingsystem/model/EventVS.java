@@ -11,8 +11,6 @@ import java.text.ParseException;
 import java.util.*;
 
 import static javax.persistence.GenerationType.IDENTITY;
-//import org.hibernate.search.annotations.*;
-
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

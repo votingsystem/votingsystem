@@ -1,6 +1,5 @@
 package org.votingsystem.model;
 
-//import org.hibernate.search.annotations.Indexed;
 import org.votingsystem.signature.util.CertUtil;
 
 import javax.persistence.*;

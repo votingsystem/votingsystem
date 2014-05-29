@@ -1,10 +1,7 @@
 package org.votingsystem.controlcenter.controller
 
-import org.apache.lucene.search.SortField
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
-import org.hibernate.search.FullTextQuery
-import org.hibernate.search.FullTextSession
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
@@ -13,10 +10,7 @@ import org.votingsystem.model.TagVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.search.SearchHelper;
-
 import grails.converters.JSON
-import org.hibernate.search.Search
-import org.apache.lucene.search.Sort
 import org.votingsystem.util.DateUtils
 
 /**
