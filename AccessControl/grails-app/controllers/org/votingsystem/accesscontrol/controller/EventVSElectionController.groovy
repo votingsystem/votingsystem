@@ -1,20 +1,11 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
-import org.votingsystem.model.AccessRequestVS
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.SubSystemVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.VoteVS
-import org.votingsystem.model.VoteVSCanceller
+import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
+
 /**
  * @infoController Votaciones
  * @descController Servicios relacionados con la publicación de votaciones.

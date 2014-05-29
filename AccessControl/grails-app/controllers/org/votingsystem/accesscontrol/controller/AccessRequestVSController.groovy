@@ -1,14 +1,9 @@
 package org.votingsystem.accesscontrol.controller
 
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.AccessRequestVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
+import org.votingsystem.model.*
+
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
+
 /**
  * @infoController Solicitudes de acceso
  * @descController Servicios relacionados con las solicitudes de acceso recibidas en una votación.

@@ -1,13 +1,8 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSClaim
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.EventVSManifest
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.*
+
 /**
  * @infoController Eventos
  * @descController Servicios relacionados con los eventos del sistema.

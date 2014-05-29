@@ -1,9 +1,4 @@
 package org.votingsystem.controlcenter.controller
-
-import grails.converters.JSON;
-
-import org.votingsystem.model.ResponseVS;
-
 /**
  * @infoController Aplicación
  * @descController Servicios de acceso a la aplicación web principal 

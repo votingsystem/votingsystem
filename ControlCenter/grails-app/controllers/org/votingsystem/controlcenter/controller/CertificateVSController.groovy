@@ -1,18 +1,12 @@
 package org.votingsystem.controlcenter.controller
 
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ApplicationContextHolder
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
-
-import org.votingsystem.model.ResponseVS
-
 import java.security.cert.X509Certificate
+
 /**
 * @infoController Servicio de Certificados
 * @descController Servicios relacionados con los certificados manejados por la aplicación

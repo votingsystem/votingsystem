@@ -2,8 +2,9 @@ package org.votingsystem.controlcenter.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.AccessControlVS
-import org.votingsystem.util.ApplicationContextHolder;
 import org.votingsystem.model.ActorVS
+import org.votingsystem.util.ApplicationContextHolder
+
 /**
  * @infoController Información de la aplicación
  * @descController Servicios que ofrecen datos sobre la aplicación

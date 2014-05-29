@@ -1,19 +1,11 @@
 package org.votingsystem.controlcenter.controller
 
 import grails.converters.JSON
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.VoteVS
-import org.votingsystem.model.VoteVSCanceller
+import org.votingsystem.model.*
 import org.votingsystem.util.ApplicationContextHolder
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
-import java.security.cert.X509Certificate
+
 /**
  * @infoController Servicio de Votos
  * @descController Servicio que procesa los votesVS recibidos.

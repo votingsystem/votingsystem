@@ -6,16 +6,9 @@ import com.sun.syndication.feed.synd.SyndFeed
 import com.sun.syndication.feed.synd.SyndFeedImpl
 import com.sun.syndication.io.SyndFeedOutput
 import grails.converters.JSON
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ControlCenterVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSClaim
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.EventVSManifest
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.SubSystemVS
+import org.votingsystem.model.*
 import org.votingsystem.util.StringUtils
+
 /**
  * @infoController Subscripciones
  * @descController Servicios relacionados con los feeds generados por la aplicación y

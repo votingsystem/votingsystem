@@ -1,12 +1,10 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.VoteVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.VoteVS
 
-import java.security.cert.X509Certificate
 /**
  * @infoController Servicio de Votos
  * @descController Servicio que procesa los votos recibidos.

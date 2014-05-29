@@ -1,9 +1,8 @@
 package org.votingsystem.accesscontrol.controller
 
 import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
+
 /**
  * @infoController Recogida de reclamaciones
  * @descController Servicios relacionados con la recogida de reclamaciones.

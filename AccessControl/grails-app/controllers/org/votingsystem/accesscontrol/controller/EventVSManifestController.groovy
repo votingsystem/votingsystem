@@ -1,13 +1,9 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.PDFDocumentVS
-import org.votingsystem.model.SubSystemVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSManifest
-import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
+
 /**
  * @infoController Manifiestos
  * @descController Servicios relacionados con la publicación de manifiestos.

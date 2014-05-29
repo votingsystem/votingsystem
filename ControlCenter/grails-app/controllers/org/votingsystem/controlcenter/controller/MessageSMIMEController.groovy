@@ -1,8 +1,8 @@
 package org.votingsystem.controlcenter.controller
 
 import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.ResponseVS
 
 /**
  * @infoController Messages firmados

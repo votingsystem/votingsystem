@@ -1,25 +1,18 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.util.StringUtils
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.DeviceVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.UserRequestCsrVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.util.ApplicationContextHolder;
-import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.KeyStoreUtil
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
 
 import java.security.KeyStore
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
+
 /**
  * @infoController Validación de solicitudes de certificación
  * @descController Servicios relacionados con validación y signatureVS de certificados.

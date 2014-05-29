@@ -1,21 +1,14 @@
 package org.votingsystem.controlcenter.controller
 
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.TypeVS
+import grails.converters.JSON
+import org.bouncycastle.util.encoders.Base64
+import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.ApplicationContextHolder
 
-import java.security.Key
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
-
-import org.bouncycastle.openssl.PEMWriter
-import grails.converters.JSON
-import org.bouncycastle.util.encoders.Base64
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
 class EncryptorController {
 	

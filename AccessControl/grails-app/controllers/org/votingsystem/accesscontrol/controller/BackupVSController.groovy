@@ -2,16 +2,9 @@ package org.votingsystem.accesscontrol.controller
 
 import com.itextpdf.text.pdf.AcroFields
 import com.itextpdf.text.pdf.PdfReader
-import org.votingsystem.model.BackupRequestVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSClaim
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.EventVSManifest
-import org.votingsystem.model.PDFDocumentVS
-import org.votingsystem.util.ApplicationContextHolder;
-import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.*
+import org.votingsystem.util.ApplicationContextHolder
+
 /**
  * @infoController Solicitud de copias de seguridad
  * @descController Servicios que gestiona solicitudes de copias de seguridad.

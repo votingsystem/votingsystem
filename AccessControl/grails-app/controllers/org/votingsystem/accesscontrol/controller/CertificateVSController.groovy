@@ -1,17 +1,13 @@
 package org.votingsystem.accesscontrol.controller
 
 import org.bouncycastle.util.encoders.Base64
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.EnvironmentVS
-import org.votingsystem.signature.util.KeyStoreUtil
-import org.votingsystem.util.ApplicationContextHolder;
-import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.KeyStoreUtil
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
+
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
 

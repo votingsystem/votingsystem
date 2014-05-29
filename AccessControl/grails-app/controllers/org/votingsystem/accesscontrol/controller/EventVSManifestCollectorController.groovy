@@ -1,9 +1,10 @@
 package org.votingsystem.accesscontrol.controller
 
 import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.PDFDocumentVS
 import org.votingsystem.model.EventVSManifest
+import org.votingsystem.model.PDFDocumentVS
 import org.votingsystem.model.ResponseVS
+
 /**
  * @infoController Recogida de firmas
  * @descController Servicios relacionados con la recogida de firmas.

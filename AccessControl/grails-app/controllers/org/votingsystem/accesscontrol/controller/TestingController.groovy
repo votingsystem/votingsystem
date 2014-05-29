@@ -1,17 +1,6 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
-import org.apache.log4j.Logger
-import org.votingsystem.model.AccessRequestVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.util.DateUtils
-import java.util.Calendar
-import static java.util.Calendar.*
-
 
 /**
  * @infoController TestingController

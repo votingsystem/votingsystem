@@ -1,13 +1,10 @@
 package org.votingsystem.controlcenter.controller
 
-import org.votingsystem.model.EventVSElection
+import grails.converters.JSON
 import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.model.VoteVSCanceller
-import java.security.cert.X509Certificate
-import grails.converters.JSON
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.signature.util.CertUtil
 
 /**
  * @infoController Anulación de Votos

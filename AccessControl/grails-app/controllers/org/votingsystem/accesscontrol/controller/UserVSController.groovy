@@ -1,15 +1,11 @@
 package org.votingsystem.accesscontrol.controller
 
-import grails.converters.JSON
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.RepresentationDocumentVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.util.ApplicationContextHolder;
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.util.DateUtils
-import org.votingsystem.util.NifUtils
-import org.votingsystem.util.StringUtils
+import org.votingsystem.util.ApplicationContextHolder
 
 import java.security.cert.X509Certificate
 
