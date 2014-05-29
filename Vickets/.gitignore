@@ -13,6 +13,7 @@
 /target
 /target-eclipse
 /VotingSystem
+.VicketReports
 wrapper
 .VotingSystem
 .idea
