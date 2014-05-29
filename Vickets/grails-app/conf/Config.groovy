@@ -113,11 +113,11 @@ log4j = {
 
     appenders {
         file name:'VicketServerERRORS', threshold:org.apache.log4j.Level.ERROR,
-                file:"/var/log/votingsystem/VicketServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"${System.getProperty("user.home")}/VotingSystem/logs/VicketServerERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketServer", threshold:org.apache.log4j.Level.DEBUG,
                 layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-                file:"/var/log/votingsystem/VicketServer.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"${System.getProperty("user.home")}/VotingSystem/logs/VicketServer.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketServerReports", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'),

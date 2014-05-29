@@ -123,11 +123,11 @@ log4j = {
 
     appenders {
         file name:'ControlCenterERRORS', threshold:org.apache.log4j.Level.ERROR,
-                file:"/var/log/votingsystem/ControlCenterERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"${System.getProperty("user.home")}/VotingSystem/logs/ControlCenterERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"ControlCenter", threshold:org.apache.log4j.Level.DEBUG,
                 layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-                file:"/var/log/votingsystem/ControlCenter.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"${System.getProperty("user.home")}/VotingSystem/logs/ControlCenter.log", datePattern: '\'_\'yyyy-MM-dd'
 
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
             subject: mail.error.subject, threshold: Level.ERROR,

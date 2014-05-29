@@ -2,8 +2,6 @@
 
 [Wiki](https://github.com/jgzornoza/SistemaVotacion/wiki)
 
-Para construir el proyecto se necesita tener instalado la versión 1.8 del
-[el entorno de construción Gradle](http://www.gradle.org/)
 
 ### Pasos necesarios para ejecutar las aplicaciones del servidor
 
@@ -13,9 +11,15 @@ Si no se modifican los archivos <b>grails-app/conf/DataSource.groovy</b> las apl
 ejecutando en el servidor una instancia de la base de datos PostgreSQL según se explica en [este documento]
 (https://github.com/jgzornoza/SistemaVotacion/wiki/Configuraci%C3%B3n-de-la-base-de-datos)
 
-#### Generación de las aplicaciones
+#### Generación de los certificados de pruebas
 
-Para generar las aplicaciones
+Para generar los certificados de pruebas:
+    
+    SistemaVotacion$gradle installCerts
+
+#### Construcción de las aplicaciones
+
+Para construir las aplicaciones
 
     SistemaVotacion$gradle buildAll
 
@@ -48,7 +52,5 @@ La dirección del servidor de sello de tiempo de las aplicaciones **AccessContro
 
 =======================================================================================================
 
-* Las aplicaciones necesitan ser ejecutadas con usuarios con privilegios para escribir los logs en el directorio '/var/log/votingsystem'
-* Las aplicaciones que utilizan **Hibernate** y **Grails** (**TimeStampServer**, **AccessControl**, **ControlCenter** y **TestsWebApp**
-dan problemas con OpenJDK 1.7.0_25).
+* Para construir las aplicaciones se debe emplear un entorno con **Java 8**, **Grails 2.4.0** y **Gradle 1.11** 
 

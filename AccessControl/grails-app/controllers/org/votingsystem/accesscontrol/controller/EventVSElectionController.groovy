@@ -110,8 +110,8 @@ class EventVSElectionController {
                         }
                     }
                 }
-                eventsVSMap.totalEventVS = resultList.totalCount
             }
+            eventsVSMap.totalEventVS = resultList?.totalCount
             eventsVSMap.offset = params.long('offset')
             resultList.each {eventVSItem ->
                 eventsVSMap.eventVS.add(eventVSService.getEventVSElectionMap(eventVSItem))
