@@ -49,7 +49,7 @@
             </div>
         </div>
     </div>
-    <div id="searchPanel" class="" style="position: absolute;left: 40%; background:#ba0011; padding:10px 10px 10px 10px;display:none;">
+    <div id="searchPanel" class="" style="position: absolute;left: 40%; background:#ba0011; padding:10px 10px 10px 10px;display:none; z-index: 10;">
         <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl" />"
                style="width:160px; border-color: #f9f9f9;display:inline; vertical-align: middle;">
         <i id="searchPanelCloseIcon" onclick="toggleSearchPanel()" class="fa fa-times text-right navBar-vicket-icon"

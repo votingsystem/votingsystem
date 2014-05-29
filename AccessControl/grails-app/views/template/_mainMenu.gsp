@@ -9,7 +9,7 @@
                     <g:message code="electionSystemLbl"/><i class="fa fa-envelope"></i>
                 </a>
             </li>
-            <li>
+            <!--<li>
                 <a href="${createLink(controller: 'eventVSManifest', action: 'main')}">
                     <g:message code="manifestSystemLbl"/><i class="fa fa-file-text"></i>
                 </a>
@@ -18,7 +18,7 @@
                 <a href="${createLink(controller: 'eventVSClaim', action: 'main')}">
                     <g:message code="claimSystemLbl"/><i class="fa fa-exclamation-triangle"></i>
                 </a>
-            </li>
+            </li>-->
             <li>
                 <a href="${createLink(controller: 'representative', action: 'main')}" style="">
                     <g:message code="representativesPageLbl"/> <i class="fa fa-hand-o-right"></i></a>

@@ -146,7 +146,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         verticalBox.getStyleClass().add("modal-dialog");
         verticalBox.setStyle("-fx-max-width: 1000px;");
 
-        primaryStage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
+        primaryStage.setScene(new Scene(verticalBox));
         primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
                 "/resources/css/modal-dialog.css").toExternalForm());
         primaryStage.initStyle(StageStyle.UNDECORATED);
