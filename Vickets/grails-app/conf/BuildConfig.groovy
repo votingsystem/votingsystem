@@ -64,14 +64,13 @@ grails.project.dependency.resolution = {
                 'org.bouncycastle:bcpg-jdk16:1.46',
                 'javax.mail:mail:1.4.7',
                 'org.bouncycastle:bctsp-jdk16:1.46') {
-            excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",
+            excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy-all","commons-io",
                     'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
         }
 
         runtime 'org.postgresql:postgresql:9.3-1101-jdbc41'
 
-        compile ("org.springframework:spring-orm:$springVersion", "org.springframework:spring-expression:$springVersion",
-                "org.springframework:spring-aop:$springVersion")
+        compile ("org.springframework:spring-expression:$springVersion", "org.springframework:spring-aop:$springVersion")
 
     }
 

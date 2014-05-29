@@ -30,7 +30,7 @@ dependencies {
     compile ('com.itextpdf:itextpdf:5.1.3',
             'org.apache.httpcomponents:httpmime:4.2.4',
             'org.apache.httpcomponents:httpclient:4.2.4',
-            'org.hibernate:hibernate-search:4.2.0.Final',
+            'org.hibernate:hibernate-core:4.3.5.Final',
             'net.sf.json-lib:json-lib:2.4:jdk15',
             'org.bouncycastle:bcprov-jdk16:1.46',
             'org.bouncycastle:bcmail-jdk16:1.46',
