@@ -65,7 +65,7 @@ grails.project.dependency.resolution = {
                 'com.itextpdf:itextpdf:5.1.3',
                 'org.xhtmlrenderer:core-renderer:R8',
                 'org.rometools:rome-modules:1.0',
-        ) {excludes "slf4j-api", "log4j", "commons-logging", "xalan",  "xml-apis", "groovy-all","commons-io"}
+        ) {excludes "slf4j-api", "log4j", "commons-logging", "xalan",  "xml-apis", "groovy","commons-io"}
 
         runtime 'org.postgresql:postgresql:9.3-1101-jdbc41'
 

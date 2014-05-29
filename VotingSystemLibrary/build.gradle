@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
 
-    compile 'org.codehaus.groovy:groovy-all:2.1.9'
+    compile 'org.codehaus.groovy:groovy-all:2.3.1'
 
     compile 'commons-cli:commons-cli:1.2'
 
