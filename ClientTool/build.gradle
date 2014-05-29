@@ -31,14 +31,6 @@ dependencies {
 	
 }
 
-task copyDistZip(dependsOn: ['distZip']) {
-    doLast {
-        rootProject.ext.set("clientToolDistZip",
-                file("$buildDir/distributions/${rootProject.clientToolName}.zip"))
-    }
-}
-
-
 cleanCompileJava.dependsOn ':VotingSystemLibrary:install'
 classes.dependsOn cleanCompileJava
 

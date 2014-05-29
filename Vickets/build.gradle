@@ -9,12 +9,6 @@ dependencies {
 task copyApps(dependsOn: [':generateVotingSystemApps', ':installEditor']) {
 	doLast {
         copyVotingSystemApps(project)
-
-        File clientToolDir = project.file("web-app/tools/");
-        clientToolDir.mkdirs()
-        File clientToolDist = project.file("web-app/tools/${rootProject.clientToolName}.zip")
-        if(clientToolDist.exists()) clientToolDist.delete()
-        clientToolDist << rootProject.clientToolDistZip?.bytes
 	}
 }
 
@@ -38,7 +32,7 @@ task generateRestDocs() << {task ->
 	runCommand(project, file(".") ,["grails", "generate-rest-docs"])
 }
 
-task war(dependsOn:['copyApps']) << {task ->
+task war(dependsOn:['copyApps', 'installEditor']) << {task ->
 	runCommand(project, file(".") ,["grails", "war"])	
 	announce.announce("'$project.name' - WebApp WAR file generated", "local")
 }

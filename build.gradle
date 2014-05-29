@@ -15,14 +15,12 @@ subprojects {
 }
 
 ext {
-    clientToolDistZip = null
 	votingSystemLibrary = null
 	votingToolAndroid = null
 	certsDataMap = null
 }
 
-//TODO 'ClientTool:signJar' -> Needs Java8
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', 'TestsWebApp:war',
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 'TimeStampServer:war', 'TestsWebApp:war', ':ClientTool:distZip',
                          'AccessControl:war', 'ControlCenter:war', 'Vickets:war', ':releaseAndroid']) << { }
 
 
@@ -143,8 +141,7 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
     announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
 
-//'ClientTool:signJar' -> Needs Java8
-task generateVotingSystemApps(dependsOn: [':VotingSystemLibrary:publish', ':releaseAndroid']) {
+task generateVotingSystemApps(dependsOn: [':VotingSystemLibrary:publish', ':ClientTool:distZip', ':releaseAndroid']) {
 }
 
 def copyVotingSystemApps(project) {
@@ -152,7 +149,6 @@ def copyVotingSystemApps(project) {
 	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
 	votingToolAndroid << file("VotingToolAndroidProject/VotingToolAndroid/VotingToolAndroid.apk")?.bytes
-
     copyClientTool(project)
 }
 
@@ -160,7 +156,7 @@ def copyClientTool(project) {
     project.file("web-app/tools/").mkdirs();
     File clientToolDist = project.file("web-app/tools/${rootProject.clientToolName}.zip")
     if(clientToolDist.exists()) clientToolDist.delete()
-    clientToolDist << rootProject.clientToolDistZip?.bytes
+    clientToolDist << file("ClientTool/build/distributions/${rootProject.clientToolName}.zip")?.bytes
 }
 
 task copyAppsAll(dependsOn: [':AccessControl:copyApps', 'ControlCenter:copyApps', ':Vickets:copyApps']) {}

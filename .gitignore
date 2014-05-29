@@ -3,7 +3,6 @@
 /buildSrc/build
 /buildSrc/.gradle
 
-/libs_dev
 /templates/*.jks
 
 GrailsRestDoc*
