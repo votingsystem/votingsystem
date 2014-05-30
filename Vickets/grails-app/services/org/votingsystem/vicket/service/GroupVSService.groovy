@@ -41,7 +41,7 @@ class GroupVSService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.VICKET_GROUP_ERROR,
                     message:msg, metaInf: MetaInfMsg.cancelVicketGroup_ERROR_params)
         }
-        groupVS.state = GroupVS.State.CLOSED
+        groupVS.state = UserVS.State.CLOSED
         groupVS.save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_CANCEL, message:msg,
                 metaInf:MetaInfMsg.cancelVicketGroup_OK + groupVS.id)
@@ -105,8 +105,8 @@ class GroupVSService {
                     metaInf:MetaInfMsg.saveVicketGroup_ERROR_nameGroupRepeatedMsg)
         }
 
-        groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:GroupVS.State.ACTIVE, groupRepresentative:userSigner,
-                description:messageJSON.groupvsInfo, type:UserVS.Type.GROUP).save()
+        groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, groupRepresentative:userSigner,
+                description:messageJSON.groupvsInfo).save()
         String metaInf =  MetaInfMsg.saveVicketGroup_OK + groupVS.id
 
         String fromUser = grailsApplication.config.VotingSystem.serverName

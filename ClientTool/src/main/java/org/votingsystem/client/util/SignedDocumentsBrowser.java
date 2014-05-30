@@ -199,10 +199,9 @@ public class SignedDocumentsBrowser extends StackPane{
                 primaryStage.initModality(Modality.WINDOW_MODAL);
                 primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
                 primaryStage.setResizable(true);
-
                 FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Signed files (*.p7s)",
-                        "*.p7s");
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                        ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
                 fileChooser.getExtensionFilters().add(extFilter);
                 fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                 //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));

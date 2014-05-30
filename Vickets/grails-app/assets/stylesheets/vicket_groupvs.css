@@ -37,7 +37,7 @@
     margin: 10px 5px 5px 10px;
     -moz-border-radius: 5px; border-radius: 5px;
     cursor: pointer; cursor: hand;
-    max-height:150px;
+    max-height:165px;
     overflow:hidden;
     float:left;
 }
@@ -45,7 +45,7 @@
 .groupvsInfoDiv {
     position:relative;
     font-size: 0.9em;
-    height:75px;
+    height:80px;
     padding: 10px;
     vertical-align:middle;
     padding: 0px 5px 0px 5px;

@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 
@@ -98,10 +99,9 @@ public class DecompressBackupPane extends StackPane {
                 stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
                     @Override public void handle(WindowEvent window) { }
                 });
-
                 FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)",
-                        "*.zip");
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                        ContextVS.getMessage("backupFileFilterMsg"), "*" + ContentTypeVS.ZIP.getExtension());
                 fileChooser.getExtensionFilters().add(extFilter);
                 fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                 //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));

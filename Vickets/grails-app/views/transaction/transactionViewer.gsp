@@ -35,11 +35,8 @@
     <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.toUserVS.nif}</div>
 </div>
     <button id="saveReceiptButton" type="button" class="btn btn-accept-vs" onclick="saveReceipt();"
-            style="margin:10px 0px 0px 0px;"><g:message code="saveReceiptLbl"/>
+            style="margin:10px 0px 0px 0px; float:right;"><g:message code="saveReceiptLbl"/>
     </button>
-    <div style="margin:20px 0px 0px 20px; font-size: 1.2em;">
-        <a href="${transactionvsMap.messageSMIMEURL}" oncli><g:message code="proofLbl"/></a>
-    </div>
 </div>
 
 <div id="receipt" style="display:none;">
@@ -70,7 +67,7 @@
     function saveReceipt() {
         console.log("saveReceipt")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT)
-        webAppMessage.message = document.getElementById("receipt").innerHTML
+        webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
         webAppMessage.callerCallback = 'saveReceiptCallback'
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }

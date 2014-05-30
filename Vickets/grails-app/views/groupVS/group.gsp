@@ -1,4 +1,4 @@
-<%@ page import="org.votingsystem.model.GroupVS" %>
+<%@ page import="org.votingsystem.model.UserVS; org.votingsystem.model.GroupVS" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -56,7 +56,7 @@
         </div>
 
         <g:if test="${"user".equals(params.menu)}">
-            <g:if test="${GroupVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
+            <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
                 <div class="row text-right">
                     <button id="subscribeButton" type="submit" class="btn btn-default btn-lg" onclick="subscribeToGroup();"
                             style="margin:15px 20px 15px 0px;">
@@ -85,17 +85,17 @@
 
     $(function() {
 
-        <g:if test="${GroupVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
+        <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
 
         </g:if>
-        <g:if test="${GroupVS.State.PENDING.toString().equals(groupvsMap?.state)}">
+        <g:if test="${UserVS.State.PENDING.toString().equals(groupvsMap?.state)}">
             $(".pageHeader").css("color", "#fba131")
             $("#messagePanel").addClass("groupvsPendingBox");
             $("#messagePanel").text("<g:message code="groupvsPendingLbl"/>")
             $("#messagePanel").css("display", "visible")
 
         </g:if>
-        <g:if test="${GroupVS.State.CLOSED.toString().equals(groupvsMap?.state)}">
+        <g:if test="${UserVS.State.CLOSED.toString().equals(groupvsMap?.state)}">
             $(".pageHeader").css("color", "#6c0404")
             $("#messagePanel").addClass("groupvsClosedBox");
             $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")

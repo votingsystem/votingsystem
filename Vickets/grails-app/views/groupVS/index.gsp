@@ -109,7 +109,9 @@
         }
     }
 
-    GroupVS.State = {
+    function UserVS() {}
+
+    UserVS.State = {
         ACTIVE:"ACTIVE",
         PENDING:"PENDING",
         CLOSED:"CLOSED"
@@ -119,9 +121,9 @@
         var $newGroup = $(this.groupHTML)
         var $li = $newGroup.find("li");
 
-        if(GroupVS.State.ACTIVE == this.state) $li.addClass("groupvsActive");
-        if(GroupVS.State.PENDING == this.state) $li.addClass("groupvsPending");
-        if(GroupVS.State.CLOSED == this.state) {
+        if(UserVS.State.ACTIVE == this.state) $li.addClass("groupvsActive");
+        if(UserVS.State.PENDING == this.state) $li.addClass("groupvsPending");
+        if(UserVS.State.CLOSED == this.state) {
             $li.addClass("groupvsFinished");
             $li.find(".cancelMessage").fadeIn(100)
         }

@@ -1,6 +1,8 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import org.iban4j.CountryCode
+import org.iban4j.Iban
 import org.votingsystem.model.*
 import org.votingsystem.model.vicket.MetaInfMsg
 
@@ -46,6 +48,13 @@ class SubscriptionVSService {
             userVS.nif = validatedNIF.toUpperCase()
             userVS.type = UserVS.Type.USER
 			userVS.save();
+            String accountNumberStr = String.format("%010d", userVS.id);
+            Iban iban = new Iban.Builder().countryCode(CountryCode.ES)
+                    .bankCode(grailsApplication.config.VotingSystem.IBAN_bankCode)
+                    .branchCode(grailsApplication.config.VotingSystem.IBAN_branchCode)
+                    .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
+            userVS.setIBAN(iban.toString())
+            userVS.save()
             userVSDB = userVS
 			log.debug "- checkUser ### NEW USER ${userVSDB.nif} - id '${userVSDB.id}'"
 			certificate = new CertificateVS(userVS:userVS, content:x509Cert.getEncoded(),

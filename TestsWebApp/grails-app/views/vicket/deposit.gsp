@@ -15,10 +15,9 @@
                 <li class="active"><g:message code="makeDepositButton"/></li>
             </ol>
         </div>
-        <div id="vicketDepositSimulationDataDialog"
-             style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
+        <div id="vicketDepositSimulationDataDialog" style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;">
             <div class="errorMsgWrapper" style="display:none;"></div>
-            <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
+            <div style="margin: 0px 0px 30px 0px;display: table; width: 100%;">
                 <h3>
                     <div id="pageTitle" class="pageHeader text-center">
                         <g:message code="initVicketDepositSimulationMsg"/>
@@ -37,30 +36,26 @@
                     <fieldset id="Deposit">
                         <legend style="font-size: 1.2em; font-weight: bold;"><g:message code="depositCaption"/></legend>
                         <div style="margin: 0px 0px 5px 0px;">
-                            <div class="form-group">
-                                <label class="col-sm-3"><g:message code="depositAmount"/></label>
+                            <div class="form-inline">
+                                <label style="margin:0px 0px 0px 20px;"><g:message code="depositAmount"/></label>
                                 <input type="number" id="depositAmount" min="0" value="1" required
-                                       class="DepositInputNumber form-control col-sm-10"
+                                       class="DepositInputNumber form-control"
                                        style="width:150px;margin:0px 20px 0px 7px;"
                                        title="<g:message code="depositAmount"/>"
                                        placeholder="<g:message code="depositAmount"/>"
                                        oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
                                        onchange="this.setCustomValidity('')">
-                            </div>
-
-                            <select id="currencySelect" style="margin:0px 20px 0px 0px; width:280px;"
-                                    class="form-control" title="<g:message code="currencyLbl"/>">
-                                <option value="<g:message code="euroLbl"/>"> - <g:message code="euroLbl"/> - </option>
-                            </select>
-
-                            <div class="form-group">
-                                <input type="text" id="subject" style="width:280px; margin:10px 20px 0 20px;" required
+                                <select id="currencySelect" style="margin:0px 20px 0px 0px; width:280px;"
+                                        class="form-control" title="<g:message code="currencyLbl"/>">
+                                    <option value="<g:message code="euroLbl"/>"> - <g:message code="euroLbl"/> - </option>
+                                </select>
+                                <input type="text" id="subject" style="width:280px;" required
                                        title="<g:message code="transactionSubjectMsg"/>" class="form-control col-sm-4"
                                        placeholder="<g:message code="transactionSubjectMsg"/>"
                                        oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
                                        onchange="this.setCustomValidity('')"/>
 
-                                <input type="url" id="vicketServerURL" style="width:280px; margin:10px 20px 0 20px;" required
+                                <input type="url" id="vicketServerURL" style="margin:0px 0px 0px 20px;width:280px;" required
                                        value="http://vickets/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
                                        placeholder="<g:message code="vicketServerURLMsg"/>" class="form-control col-sm-4"
                                        oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
@@ -68,13 +63,9 @@
                             </div>
                         </div>
                     </fieldset>
-
-                    <div style="position: relative; overflow:hidden; ">
-                        <button id="submitButton" type="submit" class="btn btn-warning" style="margin:25px 20px 20px 0px; float:right;">
-                            <g:message code="initVicketDepositButton"/>
-                        </button>
-                    </div>
-
+                    <button id="submitButton" type="submit" class="btn btn-warning" style="margin:25px 20px 20px 0px; float:right;">
+                        <g:message code="initVicketDepositButton"/>
+                    </button>
                 </form>
 
             </div>

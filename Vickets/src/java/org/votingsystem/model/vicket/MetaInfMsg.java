@@ -52,4 +52,7 @@ public class MetaInfMsg {
     public static final String subscribeToVicketGroup_ERROR_params = "subscribeToVicketGroup_ERROR_params";
     public static final String subscribeToVicketGroup_OK = "subscribeToVicketGroup_OK_";
 
+    public static final String processVicketDeposit_ERROR_IBAN_code = "processVicketDeposit_ERROR_IBAN_code";
+    public static final String processDeposit_ERROR_IBAN_code = "processDeposit_ERROR_IBAN_code";
+
 }

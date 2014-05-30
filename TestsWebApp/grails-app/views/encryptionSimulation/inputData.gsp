@@ -15,9 +15,9 @@
         </ol>
     </div>
     <div id="encryptionProtocolSimulationDataDialog" title="<g:message code="initEncryptionProtocolSimulationButton"/>"
-         style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
+         style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
         <div class="errorMsgWrapper" style="display:none;"></div>
-        <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
+        <div style="margin:0px 0px 30px 0px;display: table; width: 100%;">
             <h3>
                 <div id="pageTitle"  class="pageHeader text-center">
                     <g:message code="initEncryptionProtocolSimulationMsg"/>
@@ -70,16 +70,10 @@
 
                     </div>
                 </div>
-
-                <div style="position: relative; overflow:hidden; ">
-                    <button id="testButton" type="submit" class="btn btn-default"
-                            style="margin:15px 20px 20px 0px; width:400px; float:right;">
-                        <g:message code="initEncryptionProtocolSimulationButton"/>
-                    </button>
-                </div>
-
+                <button id="testButton" type="submit" class="btn btn-warning" style="margin:15px 20px 20px 0px; float:right;">
+                    <g:message code="initEncryptionProtocolSimulationButton"/>
+                </button>
             </form>
-
         </div>
     </div>
 

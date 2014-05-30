@@ -64,20 +64,16 @@
 
                 <div id="timerDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
                     <div class="checkBox" style="display:table-cell;vertical-align: middle;">
-                        <input type="checkbox" id="isWithTimer"/><label for="isWithTimer"><g:message code="simulationTimerDataMsg"/></label>
+                        <input type="checkbox" id="isWithTimer"/><label><g:message code="simulationTimerDataMsg"/></label>
                     </div>
                     <div id="timerInputDiv" style="display:table-cell;vertical-align: middle;">
 
                     </div>
                 </div>
-
-                <div style="position: relative; overflow:hidden; ">
-                    <button id="submitButton" type="submit" class="btn btn-default"
-                            style="margin:15px 20px 20px 0px; width:400px; float:right;">
-                        <g:message code="initMultiSignProtocolSimulationButton"/>
-                    </button>
-                </div>
-
+                <button id="submitButton" type="submit" class="btn btn-warning"
+                        style="margin:15px 20px 20px 0px; float:right;">
+                    <g:message code="initMultiSignProtocolSimulationButton"/>
+                </button>
             </form>
 
         </div>

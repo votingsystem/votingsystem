@@ -32,7 +32,10 @@ public class UserVS implements Serializable {
 
     private static Logger log = Logger.getLogger(UserVS.class);
 
-    public enum Type {USER, GROUP, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, CANCELLED ,EX_REPRESENTATIVE}
+    public enum Type {USER, GROUP, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, CANCELLED,
+        EX_REPRESENTATIVE, VICKET_SOURCE}
+
+    public enum State {ACTIVE, PENDING, SUSPENDED, CLOSED}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -64,6 +67,8 @@ public class UserVS implements Serializable {
     @Column(name="cn") private String cn;
 
     @Column(name="reason") private String reason;
+
+    @Column(name="state") @Enumerated(EnumType.STRING) private State state;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
@@ -303,6 +308,14 @@ public class UserVS implements Serializable {
 
     public void setDateActivated(Date dateActivated) {
         this.dateActivated = dateActivated;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 
     @Transient public String getSignatureBase64() {

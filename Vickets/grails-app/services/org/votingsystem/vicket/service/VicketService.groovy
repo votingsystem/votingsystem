@@ -5,7 +5,9 @@ import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
+import org.iban4j.IbanUtil
 import org.votingsystem.model.*
+import org.votingsystem.model.vicket.MetaInfMsg
 import org.votingsystem.model.vicket.TransactionVS
 import org.votingsystem.model.vicket.Vicket
 import org.votingsystem.model.vicket.VicketBatchRequest
@@ -160,6 +162,19 @@ class VicketService {
         X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         String msg;
         ResponseVS resultResponseVS;
+
+        try {
+            IbanUtil.validate(toUser);
+        } catch(Exception ex) {
+            msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
+                    locale)
+            log.error("${msg} - ${ex.getMessage()}", ex)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
+                    metaInf:MetaInfMsg.processVicketDeposit_ERROR_IBAN_code,
+                    contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.VICKET_DEPOSIT_ERROR)
+        }
+
+
         try {
             String fromUser = grailsApplication.config.VotingSystem.serverName
             String toUser = smimeMessageReq.getFrom().toString()

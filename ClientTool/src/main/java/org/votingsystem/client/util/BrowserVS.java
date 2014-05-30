@@ -139,6 +139,7 @@ public class BrowserVS extends Region {
 
         final Button forwardButton = new Button();
         final Button prevButton = new Button();
+        final Button reloadButton = new Button();
 
         forwardButton.setGraphic(new ImageView(Utils.getImage(this, "fa-chevron-right")));
         forwardButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
@@ -161,6 +162,13 @@ public class BrowserVS extends Region {
                 } catch(Exception ex) {
                     prevButton.setDisable(true);
                 }
+            }
+        });
+
+        reloadButton.setGraphic(new ImageView(Utils.getImage(this, "fa-refresh")));
+        reloadButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
+            @Override public void handle(javafx.event.ActionEvent ev) {
+                webView.getEngine().reload();
             }
         });
 
@@ -188,7 +196,7 @@ public class BrowserVS extends Region {
         toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
-        toolBar.getChildren().addAll(prevButton, forwardButton, urlInputText, comboBox , createSpacer());
+        toolBar.getChildren().addAll(prevButton, forwardButton, urlInputText, reloadButton, comboBox , createSpacer());
 
         //handle popup windows
         webView.getEngine().setCreatePopupHandler(
@@ -270,16 +278,24 @@ public class BrowserVS extends Region {
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
-        String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
+        final String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
-        webView.getEngine().executeScript(jsCommand);
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                webView.getEngine().executeScript(jsCommand);
+            }
+        });
     }
 
     public void sendMessageToBrowserApp(JSONObject messageJSON, String callbackFunction) {
         logger.debug("sendMessageToBrowserApp - messageJSON: " + messageJSON.toString());
-        String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
+        final String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
-        webView.getEngine().executeScript(jsCommand);
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                webView.getEngine().executeScript(jsCommand);
+            }
+        });
     }
 
     /**
@@ -356,6 +372,8 @@ public class BrowserVS extends Region {
                     case SAVE_RECEIPT:
                         saveReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
                         break;
+                    case SAVE_RECEIPT_ANONYMOUS_DELEGATION:
+                        break;
                     default:
                         browserHelper.processOperationVS(operationVS);
                 }
@@ -366,41 +384,41 @@ public class BrowserVS extends Region {
 
     }
 
-
-    private void saveReceipt(String messageToSignatureClient, String callbackFunction) throws Exception{
-        logger.debug("saveReceipt");
-        if(callbackFunction.toLowerCase().contains("anonymousdelegation")) {
-            ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(messageToSignatureClient);
-            if(responseVS == null) {
-                logger.error("Missing receipt data for hash: " + messageToSignatureClient);
-                sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
-            } else {
-                File fileToSave = Utils.getAnonymousRepresentativeSelectCancellationFile(responseVS);
-                FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
-                        "*." + ContentTypeVS.ZIP.getExtension());
-                fileChooser.getExtensionFilters().add(extFilter);
-                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                fileChooser.setInitialFileName(ContextVS.getMessage("anonymousDelegationReceiptFileName"));
-                File file = fileChooser.showSaveDialog(browserStage);
-                if(file != null){
-                    FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
-                    sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackFunction);
-                } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
-            }
+    private void saveReceiptAnonymousDelegation(String messageToSignatureClient, String callbackFunction) throws Exception{
+        logger.debug("saveReceiptAnonymousDelegation");
+        ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(messageToSignatureClient);
+        if(responseVS == null) {
+            logger.error("Missing receipt data for hash: " + messageToSignatureClient);
+            sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
         } else {
+            File fileToSave = Utils.getAnonymousRepresentativeSelectCancellationFile(responseVS);
             FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Signed files (*.p7s)",
-                    "*." + ContentTypeVS.SIGNED.getExtension());
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
+                    "*" + ContentTypeVS.ZIP.getExtension());
             fileChooser.getExtensionFilters().add(extFilter);
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-            fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+            fileChooser.setInitialFileName(ContextVS.getMessage("anonymousDelegationReceiptFileName"));
             File file = fileChooser.showSaveDialog(browserStage);
             if(file != null){
-                Utils.saveFile(messageToSignatureClient, file);
+                FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
                 sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackFunction);
             } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
         }
+    }
+
+    private void saveReceipt(String messageToSignatureClient, String callbackFunction) throws Exception{
+        logger.debug("saveReceipt");
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+        File file = fileChooser.showSaveDialog(browserStage);
+        if(file != null){
+            Utils.saveFile(messageToSignatureClient, file);
+            sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackFunction);
+        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
     }
 
 
@@ -410,9 +428,9 @@ public class BrowserVS extends Region {
                 try {
                     FileChooser fileChooser = new FileChooser();
                     FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter(
-                            "JPG files (*.jpg)", Arrays.asList("*.jpg", "*.JPG"));
+                            "JPG (*.jpg)", Arrays.asList("*.jpg", "*.JPG"));
                     FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter(
-                            "PNG files (*.png)", Arrays.asList("*.png", "*.PNG"));
+                            "PNG (*.png)", Arrays.asList("*.png", "*.PNG"));
                     fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
                     fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                     File selectedImage = fileChooser.showOpenDialog(null);
@@ -442,7 +460,7 @@ public class BrowserVS extends Region {
                     @Override public void run() {
                         FileChooser fileChooser = new FileChooser();
                         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
-                                "*." + ContentTypeVS.ZIP.getExtension());
+                                "*" + ContentTypeVS.ZIP.getExtension());
                         fileChooser.getExtensionFilters().add(extFilter);
                         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                         File file = fileChooser.showSaveDialog(browserStage);

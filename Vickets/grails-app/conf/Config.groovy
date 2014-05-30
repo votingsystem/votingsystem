@@ -205,6 +205,9 @@ log4j = {
 
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
+
+VotingSystem.IBAN_bankCode = 7878
+VotingSystem.IBAN_branchCode = 8989
 VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 VotingSystem.backupCopyPath='./Vickets/backups'
 VotingSystem.errorsBaseDir='./Vickets/errors'

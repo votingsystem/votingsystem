@@ -53,7 +53,7 @@
     function saveReceipt() {
         console.log("saveReceipt")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SAVE_RECEIPT)
-        webAppMessage.message = document.getElementById("receipt").innerHTML
+        webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
         webAppMessage.callerCallback = 'saveReceiptCallback'
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }

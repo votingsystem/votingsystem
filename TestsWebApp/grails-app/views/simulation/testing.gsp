@@ -16,7 +16,7 @@
 </head>
 <body>
 	<form id="testForm" style="display:block;margin:20px auto 30px auto; width:40%;">
-		    <label for="one">URL: </label>
+		    <label>URL: </label>
 		    	<input type="text" id="urlControlCenter">
 		    <button id="submitButton">Submit</button>
 	</form>

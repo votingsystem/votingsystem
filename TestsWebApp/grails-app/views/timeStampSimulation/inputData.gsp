@@ -4,81 +4,79 @@
     <title><g:message code="initTimeStampProtocolSimulationButton"/></title>
     <meta name="layout" content="main" />
 </head>
-
-<div class="row">
-    <ol class="breadcrumbVS pull-left">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
-            <g:message code="votingSystemOperationsLbl"/></a></li>
-        <li class="active"><g:message code="initTimeStampProtocolSimulationButton"/></li>
-    </ol>
-</div>
-<div id="timeStampProtocolSimulationDataDialog" title="<g:message code="initTimeStampProtocolSimulationButton"/>"
-	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
-	<div class="errorMsgWrapper" style="display:none;"></div>
-    <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <h3>
-            <div id="pageTitle" class="pageHeader text-center">
-                <g:message code="initTimeStampProtocolSimulationMsg"/>
+<div class="pageContenDiv">
+    <div style="padding: 0px 30px 0px 30px;">
+        <div class="row">
+            <ol class="breadcrumbVS pull-left">
+                <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+                <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
+                    <g:message code="votingSystemOperationsLbl"/></a></li>
+                <li class="active"><g:message code="initTimeStampProtocolSimulationButton"/></li>
+            </ol>
+        </div>
+        <div id="timeStampProtocolSimulationDataDialog" title="<g:message code="initTimeStampProtocolSimulationButton"/>"
+             style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
+            <div class="errorMsgWrapper" style="display:none;"></div>
+            <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
+                <h3>
+                    <div id="pageTitle" class="pageHeader text-center">
+                        <g:message code="initTimeStampProtocolSimulationMsg"/>
+                    </div>
+                </h3>
+                <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
+                    <button id="testButton" type="submit" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                        <g:message code="goToResultViewMsg"/>
+                    </button>
+                </div>
             </div>
-        </h3>
-        <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
-            <button id="testButton" type="submit" class="btn btn-default" style="margin:0px 0px 0px 30px;">
-                <g:message code="goToResultViewMsg"/>
-            </button>
+            <div id="formDataDiv">
+                <form id="timeStampProtocolSimulationDataForm">
+                    <input type="hidden" autofocus="autofocus" />
+                    <input id="resetTimeStampProtocolSimulationDataForm" type="reset" style="display:none;">
+
+                    <div style="display: block;">
+                        <label><g:message code="numRequestsProjectedLbl"/></label>
+                        <input type="number" id="numRequestsProjected" min="1" value="1" required
+                               style="width:110px;margin:0px 20px 0px 3px;"
+                               title="<g:message code="numRequestsProjectedLbl"/>"
+                               placeholder="<g:message code="numRequestsProjectedLbl"/>"
+                               oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                               onchange="this.setCustomValidity('')">
+                        <label><g:message code="maxPendingResponsesLbl"/></label>
+                        <input type="number" id="maxPendingResponses" min="1" value="10" required
+                               style="width:110px;margin:10px 20px 0px 3px;"
+                               title="<g:message code="maxPendingResponsesLbl"/>"
+                               placeholder="<g:message code="maxPendingResponsesLbl"/>"
+                               oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                               onchange="this.setCustomValidity('')">
+                    </div>
+
+                    <div style="margin:10px 0px 10px 0px">
+                        <input type="number" name="eventId" id="eventId" min="1" value="1" style="width:350px"  required
+                               title="<g:message code="eventIdLbl"/>"
+                               placeholder="<g:message code="eventIdLbl"/>"/>
+                        <input type="url" id="accessControlURL" style="width:300px; margin:0px 0px 0px 20px;" required
+                               value="http://sistemavotacion.org/AccessControl"
+                               title="<g:message code="accessControlURLMsg"/>"
+                               placeholder="<g:message code="accessControlURLMsg"/>"
+                               oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                               onchange="this.setCustomValidity('')"/>
+                    </div>
+
+                    <button id="submitButton" type="submit" class="btn btn-warning"
+                            style="margin:15px 20px 20px 0px; float:right;">
+                        <g:message code="initTimeStampProtocolSimulationButton"/>
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+        <div id="simulationListenerDiv" style="display: none;">
+            <g:include view="/include/listenSimulation.gsp"/>
         </div>
     </div>
-  	<div id="formDataDiv">
-   		<form id="timeStampProtocolSimulationDataForm">
-			<input type="hidden" autofocus="autofocus" />
-			<input id="resetTimeStampProtocolSimulationDataForm" type="reset" style="display:none;">
-
-            <div style="display: block;">
-                <label><g:message code="numRequestsProjectedLbl"/></label>
-                <input type="number" id="numRequestsProjected" min="1" value="1" required
-                       style="width:110px;margin:0px 20px 0px 3px;"
-                       title="<g:message code="numRequestsProjectedLbl"/>"
-                       placeholder="<g:message code="numRequestsProjectedLbl"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')">
-                <label><g:message code="maxPendingResponsesLbl"/></label>
-                <input type="number" id="maxPendingResponses" min="1" value="10" required
-                       style="width:110px;margin:10px 20px 0px 3px;"
-                       title="<g:message code="maxPendingResponsesLbl"/>"
-                       placeholder="<g:message code="maxPendingResponsesLbl"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')">
-            </div>
-
-
-
-            <div style="margin:10px 0px 10px 0px">
-                <input type="number" name="eventId" id="eventId" min="1" value="1" style="width:350px"  required
-                    title="<g:message code="eventIdLbl"/>"
-                    placeholder="<g:message code="eventIdLbl"/>"/>
-                <input type="url" id="accessControlURL" style="width:300px; margin:0px 0px 0px 20px;" required
-                       value="http://sistemavotacion.org/AccessControl"
-                       title="<g:message code="accessControlURLMsg"/>"
-                       placeholder="<g:message code="accessControlURLMsg"/>"
-                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                       onchange="this.setCustomValidity('')"/>
-            </div>
-
-            <div style="position: relative; overflow:hidden; ">
-                <button id="submitButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:400px; float:right;">
-                    <g:message code="initTimeStampProtocolSimulationButton"/>
-                </button>
-            </div>
-
-   		</form>
-
-  	</div>
 </div>
-
-<div id="simulationListenerDiv" style="display: none;">
-    <g:include view="/include/listenSimulation.gsp"/>
-</div>
-
 </html> 
 <asset:script>
 

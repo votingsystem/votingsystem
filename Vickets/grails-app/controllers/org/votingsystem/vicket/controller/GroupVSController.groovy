@@ -41,11 +41,11 @@ class GroupVSController {
             def result
             List<GroupVS> groupList = null
             GroupVS.withTransaction {
-                GroupVS.State state = null
+                UserVS.State state = null
                 Date dateFrom = null
                 Date dateTo = null
-                try {state = GroupVS.State.valueOf(params.state)} catch(Exception ex) {
-                    state = GroupVS.State.ACTIVE
+                try {state = UserVS.State.valueOf(params.state)} catch(Exception ex) {
+                    state = UserVS.State.ACTIVE
                 }
                 //searchFrom:2014/04/14 00:00:00, max:100, searchTo
                 if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}

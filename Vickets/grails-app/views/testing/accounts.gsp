@@ -13,6 +13,9 @@
                     <g:message code="testWebAccountLbl"/></a>
 				
 			</div>
+
+
+            <g:include view="/include/help/userTypes_${request.locale}.gsp"/>
 		</div>
 	<div style="display:none;">
 
