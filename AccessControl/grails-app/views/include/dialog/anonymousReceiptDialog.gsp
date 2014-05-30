@@ -29,8 +29,10 @@
 var hashReceiptAnonymousDelegation
 
 function saveReceipt() {
-    VotingSystemClient.setTEXTMessageToSignatureClient(hashReceiptAnonymousDelegation,
-            getFnName(anonymousDelegationReceiptCallback));
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SAVE_RECEIPT)
+        webAppMessage.message = document.getElementById("receipt").innerHTML
+        webAppMessage.callerCallback = 'saveReceiptCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
 }
 
 function showAnonymousReceiptDialog(message, hashReceipt) {

@@ -3,7 +3,6 @@
 <head>
     <title><g:message code="claimProtocolSimulationCaption"/></title>
     <meta name="layout" content="main" />
-    <script type="text/javascript" src="/TestWebApp/ckeditor/ckeditor.js"></script>
 </head>
 <body style="overflow-y: scroll;">
 <div class="pageContenDiv" style="max-width: 1300px;">
@@ -78,7 +77,7 @@
 
                 <div id="backupDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
                     <div class="checkBox" style="display:table-cell;vertical-align: middle;">
-                        <input type="checkbox" id="requestBackup"/><label for="requestBackup"><g:message code="requestBackupLbl"/></label>
+                        <input type="checkbox" id="requestBackup"/><label><g:message code="requestBackupLbl"/></label>
                     </div>
                     <div id="emailDiv" style="display:table-cell;vertical-align: middle;"></div>
                 </div>

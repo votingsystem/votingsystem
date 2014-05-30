@@ -2,7 +2,9 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <r:require module="dynatableModule"/>
+    <asset:stylesheet src="jquery.dynatable.css"/>
+    <asset:javascript src="jquery.dynatable.js"/>
+    <asset:javascript src="jquery.stickytableheaders.js"/>
 </head>
 <body>
 <div class="pageContenDiv">

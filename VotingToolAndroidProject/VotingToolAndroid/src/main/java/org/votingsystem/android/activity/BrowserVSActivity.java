@@ -160,11 +160,6 @@ public class BrowserVSActivity extends ActionBarActivity {
                 getString(R.string.enter_pin_signature_device_msg), false, null);
     }
 
-    @JavascriptInterface public void setTEXTMessageToSignatureClient (String appMessage, String callbackFunction) {
-        Log.d(TAG + ".setTEXTMessageToSignatureClient(...) ", "appMessage: " + appMessage +
-                " - callbackFunction: " + callbackFunction);
-    }
-
     private void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
                 " - message: " + message);

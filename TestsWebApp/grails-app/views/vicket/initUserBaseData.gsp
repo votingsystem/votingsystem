@@ -5,76 +5,78 @@
     <meta name="layout" content="main" />
 </head>
 <body style="">
-<div class="row" style="">
-    <ol class="breadcrumbVS pull-left">
-        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-        <li><a href="${createLink(controller: 'simulation', action:'vickets', absolute:true)}">
-            <g:message code="vicketsOperationsLbl"/></a></li>
-        <li class="active"><g:message code="initUserBaseDataButton"/></li>
-    </ol>
-</div>
-<div id="vicketUserBaseDataSimulationDataDialog"  class="row"
-     style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
-    <div class="errorMsgWrapper" style="display:none;"></div>
-    <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-        <h3>
-            <div id="pageTitle" class="pageHeader text-center">
-                <g:message code="initVicketUserBaseDataSimulationMsg"/>
+<div class="pageContenDiv">
+    <div style="padding: 0px 30px 0px 30px;">
+        <div class="row" style="">
+            <ol class="breadcrumbVS pull-left">
+                <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+                <li><a href="${createLink(controller: 'simulation', action:'vickets', absolute:true)}">
+                    <g:message code="vicketsOperationsLbl"/></a></li>
+                <li class="active"><g:message code="initUserBaseDataButton"/></li>
+            </ol>
+        </div>
+        <div id="vicketUserBaseDataSimulationDataDialog"  class="row"
+             style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
+            <div class="errorMsgWrapper" style="display:none;"></div>
+            <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
+                <h3>
+                    <div id="pageTitle" class="pageHeader text-center">
+                        <g:message code="initVicketUserBaseDataSimulationMsg"/>
+                    </div>
+                </h3>
+                <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
+                    <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                        <g:message code="goToResultViewMsg"/>
+                    </button>
+                </div>
             </div>
-        </h3>
-        <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
-            <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
-                <g:message code="goToResultViewMsg"/>
-            </button>
+            <div id="formDataDiv">
+                <form id="vicketUserBaseDataSimulationDataForm">
+                    <input type="hidden" autofocus="autofocus" />
+                    <input id="resetvicketUserBaseDataSimulationDataForm" type="reset" style="display:none;">
+                    <fieldset id="userBaseData">
+                        <legend style="font-size: 1.2em; font-weight: bold;"><g:message code="userBaseDataCaption"/></legend>
+                        <div  class="form-inline" style="display: block; margin: 0px 0px 5px 0px;">
+                            <label><g:message code="firstUserIndexMsg"/></label>
+                            <input type="number" id="firstUserIndex" min="1" value="1" readonly required
+                                   class="userBaseDataInputNumber form-control"
+                                   style="width:120px;margin:10px 20px 0px 7px;"
+                                   title="<g:message code="firstUserIndexMsg"/>"
+                                   placeholder="<g:message code="firstUserIndexMsg"/>"
+                                   oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                   onchange="this.setCustomValidity('')">
+                            <label><g:message code="numUsersMsg"/></label>
+                            <input type="number" id="numUsers" min="0" value="1" required
+                                   class="userBaseDataInputNumber form-control"
+                                   style="width:120px;margin:10px 20px 0px 7px;"
+                                   title="<g:message code="numRepresentativesMsg"/>"
+                                   placeholder="<g:message code="numRepresentativesMsg"/>"
+                                   oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                   onchange="this.setCustomValidity('')">
+                            <input type="url" id="vicketServerURL"  class="form-control" style="width:280px;margin:10px 20px 0px 7px;" required
+                                   value="http://vickets/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
+                                   placeholder="<g:message code="vicketServerURLMsg"/>"
+                                   oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                                   onchange="this.setCustomValidity('')"/>
+                        </div>
+                        <div>
+                        </div>
+                    </fieldset>
+
+                    <div style="position: relative; overflow:hidden; ">
+                        <button id="testButton" type="submit" class="btn btn-warning" style="margin:15px 20px 20px 0px; float:right;">
+                            <g:message code="initVicketuserBaseDataButton"/>
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <div id="simulationListenerDiv" style="display: none;">
+            <g:include view="/include/listenSimulation.gsp"/>
         </div>
     </div>
-    <div id="formDataDiv">
-        <form id="vicketUserBaseDataSimulationDataForm">
-            <input type="hidden" autofocus="autofocus" />
-            <input id="resetvicketUserBaseDataSimulationDataForm" type="reset" style="display:none;">
-            <fieldset id="userBaseData">
-                <legend style="font-size: 1.2em"><g:message code="userBaseDataCaption"/></legend>
-                <div  class="form-inline" style="display: block; margin: 0px 0px 5px 0px;">
-                    <label><g:message code="firstUserIndexMsg"/></label>
-                    <input type="number" id="firstUserIndex" min="1" value="1" readonly required
-                           class="userBaseDataInputNumber form-control"
-                           style="width:120px;margin:10px 20px 0px 7px;"
-                           title="<g:message code="firstUserIndexMsg"/>"
-                           placeholder="<g:message code="firstUserIndexMsg"/>"
-                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                           onchange="this.setCustomValidity('')">
-                    <label><g:message code="numUsersMsg"/></label>
-                    <input type="number" id="numUsers" min="0" value="1" required
-                           class="userBaseDataInputNumber form-control"
-                           style="width:120px;margin:10px 20px 0px 7px;"
-                           title="<g:message code="numRepresentativesMsg"/>"
-                           placeholder="<g:message code="numRepresentativesMsg"/>"
-                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                           onchange="this.setCustomValidity('')">
-
-
-                </div>
-                <div>
-                    <input type="url" id="vicketServerURL"  class="form-control" style="width:280px; margin:20px auto 20px auto;" required
-                           value="http://vickets/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
-                           placeholder="<g:message code="vicketServerURLMsg"/>"
-                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                           onchange="this.setCustomValidity('')"/>
-                </div>
-            </fieldset>
-
-            <div style="position: relative; overflow:hidden; ">
-                <button id="testButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:450px; float:right;">
-                    <g:message code="initVicketuserBaseDataButton"/>
-                </button>
-            </div>
-        </form>
-
-    </div>
-</div>
-
-<div id="simulationListenerDiv" style="display: none;">
-    <g:include view="/include/listenSimulation.gsp"/>
 </div>
 
 </body>

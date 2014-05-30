@@ -106,6 +106,7 @@ class VicketUserBaseDataSimulationService {
         //Prepare UserBase Data
         //String serviceURL = simulationData.getUserBaseSimulationData().getUserBaseInitServiceURL()
         ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(), ActorVS.Type.VICKETS);
+        userList = new ArrayList<String>();
         ResponseVS responseVS = serverInitializer.call();
         vicketServer = responseVS.getData();
         responseVS.setStatus(Status.INITIALIZE_SERVER)
@@ -116,7 +117,6 @@ class VicketUserBaseDataSimulationService {
         log.debug("createUsers ### Enter status CREATE_USER_BASE_DATA - " +
                 "Num. Users:" + simulationData.getUserBaseSimulationData().getNumUsers());
         ResponseVS responseVS = null;
-        userList = new ArrayList<String>();
         for(int i = 1; i <= simulationData.getUserBaseSimulationData().getNumUsers(); i++ ) {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             try {

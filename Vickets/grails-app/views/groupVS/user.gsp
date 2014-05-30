@@ -4,8 +4,13 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="groupUserPageLbl"/></title>
-    <r:require module="details"/>
-    <r:layoutResources />
+    <g:javascript library="jquery" plugin="jquery"/>
+    <link rel="stylesheet" href="/Vickets/font-awesome/css/font-awesome.min.css" type="text/css"/>
+    <asset:stylesheet src="bootstrap.min.css"/>
+    <asset:javascript src="bootstrap.min.js"/>
+    <asset:stylesheet src="vickets.css"/>
+    <asset:javascript src="utilsVS.js"/>
+    <g:include view="/include/utils_js.gsp"/>
 </head>
 <body style="max-width: 600px; margin:30px auto 0px auto;">
     <div style="margin:0px 30px 0px 30px;">
@@ -154,4 +159,4 @@
     }
 
 </asset:script>
-<r:layoutResources/>
+<asset:deferredScripts/>

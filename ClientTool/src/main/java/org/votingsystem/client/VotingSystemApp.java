@@ -176,7 +176,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://localhost:8080/AccessControl/app/admin?menu=admin",
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/app/admin?menu=admin",
                         ContextVS.getMessage("votingSystemProceduresLbl"));
             }
         });
@@ -207,7 +207,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://localhost:8080/AccessControl/eventVSElection/main?menu=user",
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/eventVSElection/main?menu=user",
                         ContextVS.getMessage("voteButtonLbl"));
             }
         });
@@ -218,7 +218,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://localhost:8080/AccessControl/representative/main?menu=user",
+                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/representative/main?menu=user",
                         ContextVS.getMessage("selectRepresentativeButtonLbl"));
             }
         });

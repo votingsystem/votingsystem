@@ -11,8 +11,7 @@ import org.votingsystem.util.NifUtils
 class UserVSService {
 	
 	static transactional = false
-	
-	def systemAdmins
+
 	def grailsApplication
     def grailsLinkGenerator
 
@@ -78,10 +77,7 @@ class UserVSService {
 
 	boolean isUserAdmin(String nif) {
         nif = NifUtils.validate(nif);
-		if(!systemAdmins) {
-            systemAdmins = grailsApplication.config.VotingSystem.adminsDNI
-		}
-        boolean result = systemAdmins.contains(nif)
+        boolean result = grailsApplication.config.VotingSystem.adminsDNI.contains(nif)
         if(result) log.debug("isUserAdmin - nif: ${nif}")
 		return result
 	}

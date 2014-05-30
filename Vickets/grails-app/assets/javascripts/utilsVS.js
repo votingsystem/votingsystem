@@ -1,13 +1,3 @@
-var Operation = {
-		VICKET_GROUP_NEW : "VICKET_GROUP_NEW",
-		VICKET_GROUP_EDIT: "VICKET_GROUP_EDIT",
-		VICKET_GROUP_CANCEL: "VICKET_GROUP_CANCEL",
-		VICKET_GROUP_USER_ACTIVATE: "VICKET_GROUP_USER_ACTIVATE",
-		VICKET_GROUP_USER_DEACTIVATE: "VICKET_GROUP_USER_DEACTIVATE",
-		VICKET_GROUP_USER_DEPOSIT: "VICKET_GROUP_USER_DEPOSIT",
-		VICKET_GROUP_SUBSCRIBE : "VICKET_GROUP_SUBSCRIBE"
-}
-
 function WebAppMessage(statusCode, operation) {
 	this.statusCode = statusCode
 	this.operation = operation
@@ -20,6 +10,18 @@ function WebAppMessage(statusCode, operation) {
 	this.message;
 	this.caption;
 	this.callerCallback;
+}
+
+var Operation = {
+    SAVE_RECEIPT: "SAVE_RECEIPT",
+    OPEN_RECEIPT: "OPEN_RECEIPT",
+    VICKET_GROUP_NEW : "VICKET_GROUP_NEW",
+    VICKET_GROUP_EDIT: "VICKET_GROUP_EDIT",
+    VICKET_GROUP_CANCEL: "VICKET_GROUP_CANCEL",
+    VICKET_GROUP_USER_ACTIVATE: "VICKET_GROUP_USER_ACTIVATE",
+    VICKET_GROUP_USER_DEACTIVATE: "VICKET_GROUP_USER_DEACTIVATE",
+    VICKET_GROUP_USER_DEPOSIT: "VICKET_GROUP_USER_DEPOSIT",
+    VICKET_GROUP_SUBSCRIBE : "VICKET_GROUP_SUBSCRIBE"
 }
 
 function httpGet(theUrl){
@@ -319,35 +321,14 @@ function getParameterByName(name) {
 function VotingSystemClient () { }
 
 VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
-        try {
-            console.log("setJSONMessageToSignatureClient - clientTool: " + clientTool)
-        } catch(e) {
-            console.log(e)
-            alert(e)
-            return
-        }
-		var messageToSignatureClient = JSON.stringify(messageJSON)
-		console.log("setJSONMessageToSignatureClient - messageToSignatureClient: " + messageToSignatureClient);
-        clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
-	}
-
-
-VotingSystemClient.setTEXTMessageToSignatureClient = function (messageToSignatureClient, callerCallbackStr) {
-        try {
-            console.log("setTEXTMessageToSignatureClient - clientTool: " + clientTool)
-        } catch(e) {
-            if(isAndroid()) {
-                //to avoid URI too large
-                //if(messageToSignatureClient.eventVS != null) messageToSignatureClient.eventVS.content = null;
-                var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(messageToSignatureClient) +
-                    "&refererURL=" + window.location +
-                    "&serverURL=" + "${grailsApplication.config.grails.serverURL}"
-
-                alert(redirectURL)
-                window.location.href = redirectURL.replace("\n","")
-            } else alert(e)
-            return
-        }
-
-        clientTool.setTEXTMessageToSignatureClient(messageToSignatureClient, callerCallbackStr)
-	}
+    try {
+        console.log("setJSONMessageToSignatureClient - clientTool: " + clientTool)
+    } catch(e) {
+        console.log(e)
+        alert(e)
+        return
+    }
+    var messageToSignatureClient = JSON.stringify(messageJSON)
+    console.log("setJSONMessageToSignatureClient - messageToSignatureClient: " + messageToSignatureClient);
+    clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
+}

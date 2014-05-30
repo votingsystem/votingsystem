@@ -125,9 +125,6 @@ public class EditorFragment extends Fragment {
         }
     }
 
-    @JavascriptInterface public void setTEXTMessageToSignatureClient (String appMessage,
-          String callbackFunction) { }
-
     //This is for JavaScriptInterface.java operation processing
     public void processOperation(OperationVS operationVS) {
         try {

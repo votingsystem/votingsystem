@@ -2,17 +2,12 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.bouncycastle.asn1.DERTaggedObject
-import org.bouncycastle.cms.CMSAlgorithm
-import org.bouncycastle.cms.CMSEnvelopedData
 import org.bouncycastle.cms.CMSEnvelopedDataParser
 import org.bouncycastle.cms.CMSTypedStream
 import org.bouncycastle.cms.RecipientInformation
 import org.bouncycastle.cms.RecipientInformationStore
-import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
 import org.bouncycastle.jce.PKCS10CertificationRequest
-import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
@@ -27,9 +22,7 @@ import org.votingsystem.util.FileUtils
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
-import javax.servlet.http.HttpServletRequest
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -89,7 +82,7 @@ class  SignatureVSService {
     @Transactional
 	public synchronized Map init() throws Exception {
 		log.debug("init")
-        deleteTestCerts()
+        if(EnvironmentVS.DEVELOPMENT  !=  ApplicationContextHolder.getEnvironment())  deleteTestCerts()
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias

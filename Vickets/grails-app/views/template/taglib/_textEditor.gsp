@@ -1,3 +1,4 @@
+<script type="text/javascript" src="/Vickets/ckeditor/ckeditor.js"></script>
 <div id='${attrs.id}' style="${attrs.style}"></div>
 <asset:script>
 <g:if test="${'mobile'.equals(attrs.type)}">

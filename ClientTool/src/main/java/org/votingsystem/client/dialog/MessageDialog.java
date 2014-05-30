@@ -7,6 +7,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -44,7 +47,13 @@ public class MessageDialog {
             @Override public void handle(ActionEvent actionEvent) {
                 stage.hide();
             }});
-        verticalBox.getChildren().addAll(messageLabel, acceptButton);
+
+        HBox footerButtonsBox = new HBox(10);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        footerButtonsBox.getChildren().addAll(spacer, acceptButton);
+
+        verticalBox.getChildren().addAll(messageLabel, footerButtonsBox);
         verticalBox.getStyleClass().add("modal-dialog");
         stage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());

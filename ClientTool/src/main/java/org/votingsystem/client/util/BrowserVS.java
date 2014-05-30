@@ -353,29 +353,15 @@ public class BrowserVS extends Region {
                     case SELECT_IMAGE:
                         selectImage(operationVS);
                         break;
+                    case SAVE_RECEIPT:
+                        saveReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
+                        break;
                     default:
                         browserHelper.processOperationVS(operationVS);
                 }
             } catch(Exception ex) {
                 showMessage( ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
             }
-        }
-
-        public void setTEXTMessageToSignatureClient(final String messageToSignatureClient, final String callbackFunction) {
-            logger.debug("JavafxClient.setTEXTMessageToSignatureClient - callbackFunction: " + callbackFunction);
-                PlatformImpl.runLater(new Runnable() {
-                    @Override public void run() {
-                        try {
-                            if(callbackFunction.toLowerCase().contains("receipt")) {
-                                saveReceipt(messageToSignatureClient, callbackFunction);
-                            }
-                        } catch(Exception ex) {
-                            logger.error(ex.getMessage(), ex);
-                            showMessage( ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
-                        }
-                    }
-                });
-
         }
 
     }

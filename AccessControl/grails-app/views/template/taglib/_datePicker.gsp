@@ -1,11 +1,10 @@
-<div id="dateSupportedDiv${attrs.id}" class="" style='width: 165px; display: inline;'>
-    <input type="date" id='${attrs.id}Native' class="form-control has-error" style='width: 150px; display: inline;'>
-    <i id='${attrs.id}NativeIcon' class="fa fa-calendar form-control-feedback" style="color:#6c0404; margin: 0 0 0 -20px;"></i>
+<div id="dateSupportedDiv${attrs.id}" class="" style='width: 135px; display: inline;'>
+    <input type="date" id='${attrs.id}Native' class="form-control has-error" style='width: 135px; display: inline; padding-right: 0px;  padding-left: 2px;'>
 </div>
 
-<div id="dateNotSupportedDiv${attrs.id}" class="form-inline" role="form" style="width: 160px; display: inline;">
+<div id="dateNotSupportedDiv${attrs.id}" class="form-inline" role="form" style="width: 135px; display: inline;">
     <input class="datePickerVS form-control" type="text" id='${attrs.id}' readonly
-           style='width: 150px; display: inline; cursor: pointer;'
+           style='width: 135px; display: inline; cursor: pointer;'
            title='${attrs.title}'
            placeholder='${attrs.placeholder}'
            oninvalid='${attrs.oninvalid}'

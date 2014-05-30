@@ -6,10 +6,9 @@ import grails.transaction.Transactional
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.vicket.Vicket
 import org.votingsystem.model.vicket.TransactionVS
+import org.votingsystem.model.vicket.Vicket
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.StringUtils
 

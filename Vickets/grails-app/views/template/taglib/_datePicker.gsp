@@ -1,10 +1,10 @@
-<div id="dateSupportedDiv${attrs.id}" class="" style='width: 145px; display: inline;'>
-    <input type="date" id='${attrs.id}Native' class="form-control has-error" style='width: 145px; display: inline; padding-right: 0px;'>
+<div id="dateSupportedDiv${attrs.id}" class="" style='width: 135px; display: inline;'>
+    <input type="date" id='${attrs.id}Native' class="form-control has-error" style='width: 135px; display: inline; padding-right: 0px;  padding-left: 2px;'>
 </div>
 
-<div id="dateNotSupportedDiv${attrs.id}" class="form-inline" role="form" style="width: 145px; display: inline;">
+<div id="dateNotSupportedDiv${attrs.id}" class="form-inline" role="form" style="width: 135px; display: inline;">
     <input class="datePickerVS form-control" type="text" id='${attrs.id}' readonly
-           style='width: 145px; display: inline; cursor: pointer;'
+           style='width: 135px; display: inline; cursor: pointer;'
            title='${attrs.title}'
            placeholder='${attrs.placeholder}'
            oninvalid='${attrs.oninvalid}'

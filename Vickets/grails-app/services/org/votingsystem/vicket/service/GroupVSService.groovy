@@ -1,12 +1,7 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import org.votingsystem.model.GroupVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.SubscriptionVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.model.*
 import org.votingsystem.model.vicket.MetaInfMsg
 
 /**
@@ -112,17 +107,16 @@ class GroupVSService {
 
         groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:GroupVS.State.ACTIVE, groupRepresentative:userSigner,
                 description:messageJSON.groupvsInfo, type:UserVS.Type.GROUP).save()
+        String metaInf =  MetaInfMsg.saveVicketGroup_OK + groupVS.id
 
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(
-                fromUser, toUser, documentStr, subject, null)
+        byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(fromUser, toUser, documentStr, subject, null)
 
-        MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT,
+        MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf,
                 smimeParent:messageSMIMEReq, content:smimeMessageRespBytes).save() }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS,
-                metaInf: MetaInfMsg.saveVicketGroup_OK + groupVS.id)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
     }
 
     public ResponseVS subscribe(MessageSMIME messageSMIMEReq, Locale locale) {

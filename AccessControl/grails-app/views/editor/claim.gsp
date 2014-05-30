@@ -2,7 +2,6 @@
 <html>
 <head>
 	<meta name="layout" content="main" />
-    <script type="text/javascript" src="/AccessControl/ckeditor/ckeditor.js"></script>
 </head>
 <body>
 

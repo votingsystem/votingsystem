@@ -1,30 +1,15 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import grails.transaction.Transactional
-import net.sf.json.JSONSerializer
-import org.bouncycastle.asn1.DERTaggedObject
-import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.util.encoders.Base64
-import org.bouncycastle.x509.extension.X509ExtensionUtil
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.CurrencyVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VoteVS
-import org.votingsystem.model.vicket.Vicket
+import org.votingsystem.model.*
 import org.votingsystem.model.vicket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 
 import java.math.RoundingMode
-import java.security.cert.X509Certificate
 
 /**
 * @author jgzornoza

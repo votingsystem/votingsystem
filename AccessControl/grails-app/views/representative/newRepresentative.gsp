@@ -1,7 +1,6 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <script type="text/javascript" src="/AccessControl/ckeditor/ckeditor.js"></script>
 </head>
 <body>
 <div id="contentDiv" style="margin: 0px auto 0px auto; max-width: 1200px;">

@@ -1,6 +1,5 @@
 <html>
 <head>
-    <script type="text/javascript" src="/Vickets/ckeditor/ckeditor.js"></script>
     <meta name="layout" content="main" />
 </head>
 <body>

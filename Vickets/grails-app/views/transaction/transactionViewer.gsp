@@ -1,16 +1,3 @@
-<%
-    def transactionTypeMsg
-    if('VICKET_SEND'.equals(transactionvsMap.type))
-        transactionTypeMsg =  message(code: "selectVicketSendLbl")
-    else if('USER_ALLOCATION_INPUT'.equals(transactionvsMap.type))
-        transactionTypeMsg =  message(code: "selectUserAllocationInputLbl")
-    else if('USER_ALLOCATION'.equals(transactionvsMap.type))
-        transactionTypeMsg =  message(code: "selectUserAllocationLbl")
-    else if('VICKET_REQUEST'.equals(transactionvsMap.type))
-        transactionTypeMsg =  message(code: "selectVicketRequestLbl")
-    else if('VICKET_CANCELLATION'.equals(transactionvsMap.type))
-        transactionTypeMsg =  message(code: "selectVicketCancellationLbl")
-%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +11,7 @@
 </head>
 <body>
 <div class="" style="margin: 20px;">
-    <div style="font-size: 1.5em; font-weight: bold;">${transactionTypeMsg}</div>
+    <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
     <div style=""><b><g:message code="subjectLbl"/>: </b>${transactionvsMap.subject}</div>
     <div style=""><b><g:message code="amountLbl"/>: </b>${transactionvsMap.amount} ${transactionvsMap.currency}</div>
     <div style=""><b><g:message code="dateCreatedLbl"/>: </b>${transactionvsMap.dateCreated}</div>
@@ -62,13 +49,30 @@
 </html>
 <asset:script>
 
-    $(function() {
+    $(function() { })
 
-    })
+    <g:if test="${'VICKET_SEND'.equals(transactionvsMap.type)}">
+        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectVicketSendLbl"/>"
+    </g:if>
+    <g:elseif test="${'USER_ALLOCATION_INPUT'.equals(transactionvsMap.type)}">
+        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectUserAllocationInputLbl"/>"
+    </g:elseif>
+    <g:elseif test="${'USER_ALLOCATION'.equals(transactionvsMap.type)}">
+        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectUserAllocationLbl"/>"
+    </g:elseif>
+    <g:elseif test="${'VICKET_REQUEST'.equals(transactionvsMap.type)}">
+        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectVicketRequestLbl"/>"
+    </g:elseif>
+    <g:elseif test="${'VICKET_CANCELLATION'.equals(transactionvsMap.type)}">
+        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectVicketCancellationLbl"/>"
+    </g:elseif>
 
     function saveReceipt() {
         console.log("saveReceipt")
-        VotingSystemClient.setTEXTMessageToSignatureClient($("#receipt").text().trim(), getFnName(saveReceiptCallback))
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT)
+        webAppMessage.message = document.getElementById("receipt").innerHTML
+        webAppMessage.callerCallback = 'saveReceiptCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function saveReceiptCallback(appMessage) {

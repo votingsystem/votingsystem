@@ -5,8 +5,13 @@
         <g:if test="${receiptPageTitle != null}">${receiptPageTitle}</g:if>
         <g:else><g:message code="receiptPageLbl"/></g:else>
     </title>
-    <r:require module="application"/>
-    <r:layoutResources />
+    <g:javascript library="jquery" plugin="jquery"/>
+    <link rel="stylesheet" href="/Vickets/font-awesome/css/font-awesome.min.css" type="text/css"/>
+    <asset:stylesheet src="bootstrap.min.css"/>
+    <asset:javascript src="bootstrap.min.js"/>
+    <asset:stylesheet src="vickets.css"/>
+    <asset:javascript src="utilsVS.js"/>
+    <g:include view="/include/utils_js.gsp"/>
 </head>
 <body style="max-width: 600px; margin:30px auto 0px auto;">
     <div id="receiptContentDiv" style="border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
@@ -49,7 +54,10 @@
 
     function saveReceipt() {
         console.log("saveReceipt")
-        VotingSystemClient.setTEXTMessageToSignatureClient($("#receipt").text().trim(), getFnName(saveReceiptCallback))
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SAVE_RECEIPT)
+        webAppMessage.message = document.getElementById("receipt").innerHTML
+        webAppMessage.callerCallback = 'saveReceiptCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function saveReceiptCallback(appMessage) {
@@ -59,4 +67,4 @@
     }
 
 </asset:script>
-<r:layoutResources/>
+<asset:deferredScripts/>
