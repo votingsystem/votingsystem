@@ -35,7 +35,8 @@ class  SignatureVSService {
     static transactional = false
 	
 	private SignedMailGenerator signedMailGenerator;
-	static Set<X509Certificate> trustedCerts;
+    private static Set<X509Certificate> trustedCerts;
+    private static Set<TrustAnchor> trustAnchors;
 	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, CertificateVS> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
@@ -150,9 +151,21 @@ class  SignatureVSService {
 	}
 	
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = init().trustedCerts
+		if(!trustedCerts) trustedCerts = init().trustedCerts
 		return trustedCerts;
 	}
+
+    public Set<TrustAnchor> getTrustAnchors() {
+        if(!trustAnchors) {
+            Set<X509Certificate> trustedCerts = getTrustedCerts()
+            trustAnchors = new HashSet<TrustAnchor>();
+            for(X509Certificate certificate: trustedCerts) {
+                TrustAnchor anchor = new TrustAnchor(certificate, null);
+                trustAnchors.add(anchor);
+            }
+        }
+        return trustAnchors;
+    }
 
     /**
      * Generate V3 Certificate from CSR
@@ -393,6 +406,14 @@ class  SignatureVSService {
 		log.debug("getCACertificate - serialNumber: '${serialNumber}'")
 		return trustedCertsHashMap.get(serialNumber)
 	}
+
+    public ResponseVS validateCertificates(List<X509Certificate> certificateList) {
+        log.debug("validateCertificates")
+        ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, certificateList)
+        //X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+        return validationResponse
+    }
+
 		
 	public ResponseVS validateSMIME(SMIMEMessageWrapper messageWrapper, Locale locale) {
 		MessageSMIME messageSMIME = null

@@ -74,11 +74,16 @@ def initWebAppsCertsData() {
             distinguishedName:timeStampServerDN, alias:timeStampServerCertAlias,
             isTimeStampingCert:true]
 
+    Map testWebAppMap = [file:"$projectDir/TestsWebApp/web-app/WEB-INF/cms/TestWebApp.jks",
+        distinguishedName:testWebAppDN, alias:testWebAppServerCertAlias,
+        isTimeStampingCert:false]
+
     Map vicketServerMap = [file:"$projectDir/Vickets/web-app/WEB-INF/cms/VicketServer.jks",
             distinguishedName:vicketServerDN, alias:vicketServerCertAlias,
             isTimeStampingCert:true]
 
-    List certs = [accessControlMap, controlCenterMap, timeStampServerMap, vicketServerMap]
+    List certs = [accessControlMap, controlCenterMap, timeStampServerMap, testWebAppMap, vicketServerMap]
+
     rootProject.certsDataMap.certs = certs
 }
 
@@ -108,30 +113,6 @@ task installCerts(dependsOn:['VotingSystemLibrary:publish'])  {
         tasks.getByPath('VotingSystemLibrary:generateCertificates').execute()
         /*project(':VotingSystemLibrary').tasks.each {task ->  println task.path}*/
     }
-}
-
-
-task uploadApps(dependsOn:['uploadAccessControl', 'uploadControlCenter']) << {}
-
-task uploadAccessControl(dependsOn:['AccessControl:war']) << {
-	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/AccessControl.war
-    def warFilePath = "AccessControl/target/AccessControl.war"
-    File warFile = project.file(warFilePath)
-    if(warFile.exists()) {
-        runCommand(project, file(".") ,["ncftpput", "-u", "jgzornoza",
-                "-p", "", "$rootProject.testServerIP", ".", warFilePath])
-    } else println "${warFilePath} not found"
-}
-
-task uploadControlCenter(dependsOn:['ControlCenter:war']) << {
-	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/ControlCenter.war
-	def warFilePath = "ControlCenter/target/ControlCenter.war"
-    File warFile = project.file(warFilePath)
-    if(warFile.exists()) {
-        runCommand(project, file(".") ,["ncftpput", "-u", "jgzornoza",
-                "-p", "", "$rootProject.testServerIP", ".", warFilePath])
-    } else println "${warFilePath} not found"
-
 }
 
 task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {

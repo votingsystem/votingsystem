@@ -213,7 +213,7 @@ VotingSystem.signKeysPassword='PemPass'
 VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
 VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 VotingSystem.requestTimeOut = 500
-VotingSystem.serverName='Primer AccessControlVS'
+VotingSystem.serverName='Voting System Access Control'
 VotingSystem.blogURL = 'http://www.sistemavotacion.org/blog.html'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
 //_ TODO _

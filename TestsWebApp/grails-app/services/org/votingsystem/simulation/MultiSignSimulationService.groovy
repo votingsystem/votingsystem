@@ -1,5 +1,6 @@
 package org.votingsystem.simulation
 
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.simulation.callable.MultiSignTestSender
@@ -10,8 +11,6 @@ import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
 
 import java.util.concurrent.*
-
-import org.apache.log4j.Logger;
 
 class MultiSignSimulationService {
 

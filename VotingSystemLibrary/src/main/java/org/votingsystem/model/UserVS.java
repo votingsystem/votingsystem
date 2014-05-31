@@ -32,10 +32,9 @@ public class UserVS implements Serializable {
 
     private static Logger log = Logger.getLogger(UserVS.class);
 
-    public enum Type {USER, GROUP, SYSTEM,REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, CANCELLED,
-        EX_REPRESENTATIVE, VICKET_SOURCE}
+    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, VICKET_SOURCE}
 
-    public enum State {ACTIVE, PENDING, SUSPENDED, CLOSED}
+    public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -68,7 +67,7 @@ public class UserVS implements Serializable {
 
     @Column(name="reason") private String reason;
 
-    @Column(name="state") @Enumerated(EnumType.STRING) private State state;
+    @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.PENDING;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
@@ -357,6 +356,10 @@ public class UserVS implements Serializable {
         return DatatypeConverter.printBase64Binary(signerInformation.getContentDigest());
     }
 
+    @Transient public static String getServerInfoURL(String serverURL, Long userId) {
+        return serverURL + "/userVS/" + userId;
+    }
+
     public static UserVS getUserVS (X509Certificate certificate) {
         UserVS userVS = new UserVS();
         userVS.setCertificate(certificate);
@@ -377,14 +380,17 @@ public class UserVS implements Serializable {
 
     public static UserVS populate (Map userVSDataMap) {
         UserVS userVS = new UserVS();
-        if(userVSDataMap.containsKey("name")) userVS.setName((String) userVSDataMap.get("name"));
+        if(userVSDataMap.containsKey("id")) userVS.setId(((Integer) userVSDataMap.get("id")).longValue());
         if(userVSDataMap.containsKey("nif")) userVS.setNif((String) userVSDataMap.get("nif"));
-        if(userVSDataMap.containsKey("nif")) userVS.setId(((Integer) userVSDataMap.get("id")).longValue());
+        if(userVSDataMap.containsKey("IBAN")) userVS.setIBAN((String) userVSDataMap.get("IBAN"));
+        if(userVSDataMap.containsKey("name")) userVS.setName((String) userVSDataMap.get("name"));
         if(userVSDataMap.containsKey("email")) userVS.setEmail((String) userVSDataMap.get("email"));
         if(userVSDataMap.containsKey("phone")) userVS.setPhone((String) userVSDataMap.get("phone"));
         if(userVSDataMap.containsKey("firstName")) userVS.setFirstName((String) userVSDataMap.get("firstName"));
+        if(userVSDataMap.containsKey("lastName")) userVS.setFirstName((String) userVSDataMap.get("lastName"));
         if(userVSDataMap.containsKey("metaInf")) userVS.setMetaInf((String) userVSDataMap.get("metaInf"));
         if(userVSDataMap.containsKey("country")) userVS.setCountry((String) userVSDataMap.get("country"));
+        if(userVSDataMap.containsKey("state")) userVS.setState(State.valueOf((String)userVSDataMap.get("state")));
         if(userVSDataMap.containsKey("type")) {
             Type type = Type.valueOf((String) userVSDataMap.get("type"));
             userVS.setType(type);

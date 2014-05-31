@@ -10,13 +10,13 @@
                 </a>
             </li>
             <li>
-                <a href="${createLink(controller: 'groupVS')}" style="">
-                    <g:message code="selectGroupvsLbl"/> <i class="fa fa-list"></i>
+                <a  href="${createLink(controller: 'userVS', action: 'newVicketSource')}"
+                    style="color:#f9f9f9;"><g:message code="newVicketSourceLbl"/> <i class="fa fa-university"></i>
                 </a>
             </li>
             <li>
-                <a  href="${createLink(controller: 'app', action: 'contact')}"
-                    style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-phone"></i>
+                <a  href="${createLink(controller: 'userVS', action: 'search')}"
+                    style="color:#f9f9f9;"><g:message code="locateUserVSLbl"/> <i class="fa fa-users"></i>
                 </a>
             </li>
         </ul>

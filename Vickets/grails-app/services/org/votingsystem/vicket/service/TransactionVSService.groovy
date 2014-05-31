@@ -3,13 +3,13 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.iban4j.IbanUtil
 import org.votingsystem.model.*
 import org.votingsystem.model.vicket.MetaInfMsg
 import org.votingsystem.model.vicket.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
+import org.votingsystem.util.IbanVSUtil
 
 import java.math.RoundingMode
 
@@ -65,7 +65,7 @@ class TransactionVSService {
             def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
             String toUser = smimeMessageReq.getFrom().toString().replace(" ", "")
             try {
-                IbanUtil.validate(toUser);
+                IbanVSUtil.validate(toUser);
             } catch(Exception ex) {
                 msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
                         locale)

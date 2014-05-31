@@ -15,57 +15,6 @@ class UrlMappings {
             action = "voteVS"
         }
 
-        "/testing/$year/$month/$day" {
-            controller = "testing"
-            action = "index"
-            constraints {
-                year(matches:/\d*/)
-                month(matches:/\d*/)
-                day(matches:/\d*/)
-            }
-        }
-
-        "/vicket/request" {
-            controller = "vicket"
-            action = [POST:"processRequestFileMap"]
-        }
-
-        "/messageSMIME/$id" {
-            controller = "messageSMIME"
-            action = [GET:"index"]
-            constraints {
-                id(matches:/\d*/)
-            }
-        }
-
-        "/messageSMIME/receipt/$requestMessageId" {
-            controller = "messageSMIME"
-            action = "receipt"
-        }
-
-        "/userVS" {
-            controller = "userVS"
-            action = [POST:"save"]
-        }
-
-        "/userVS/$year/$month/$day" {
-            controller = "userVS"
-            action = "userInfo"
-            constraints {
-                year(matches:/\d*/)
-                month(matches:/\d*/)
-                day(matches:/\d*/)
-            }
-        }
-
-        "/transaction/$id"{
-            controller = "transaction"
-            action = "get"
-            constraints {
-                id(matches:/\d*/)
-            }
-        }
-
         "/groupVS/$id"{
             controller = "groupVS"
             action = "index"
@@ -123,12 +72,72 @@ class UrlMappings {
             }
         }
 
+        "/messageSMIME/$id" {
+            controller = "messageSMIME"
+            action = [GET:"index"]
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/messageSMIME/receipt/$requestMessageId" {
+            controller = "messageSMIME"
+            action = "receipt"
+        }
+
         "/subscriptionVS/$id/activate"{
             controller = "subscriptionVS"
             action = "activate"
             constraints {
                 id(matches:/\d*/)
             }
+        }
+
+        "/testing/$year/$month/$day" {
+            controller = "testing"
+            action = "index"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
+
+        "/transaction/$id"{
+            controller = "transaction"
+            action = "get"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/userVS" {
+            controller = "userVS"
+            action = [POST:"save"]
+        }
+
+        "/userVS/$year/$month/$day" {
+            controller = "userVS"
+            action = "userInfo"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
+        "/userVS/$id"{
+            controller = "userVS"
+            action = "index"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+        "/vicket/request" {
+            controller = "vicket"
+            action = [POST:"processRequestFileMap"]
         }
 
     }

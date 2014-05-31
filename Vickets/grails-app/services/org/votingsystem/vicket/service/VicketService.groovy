@@ -5,7 +5,6 @@ import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
-import org.iban4j.IbanUtil
 import org.votingsystem.model.*
 import org.votingsystem.model.vicket.MetaInfMsg
 import org.votingsystem.model.vicket.TransactionVS
@@ -162,9 +161,8 @@ class VicketService {
         X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         String msg;
         ResponseVS resultResponseVS;
-
         try {
-            IbanUtil.validate(toUser);
+            IbanVSUtil.validate(toUser);
         } catch(Exception ex) {
             msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
                     locale)

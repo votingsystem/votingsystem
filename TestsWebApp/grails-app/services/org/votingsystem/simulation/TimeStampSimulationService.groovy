@@ -3,7 +3,6 @@ package org.votingsystem.simulation
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.callable.TimeStamperTestSender
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.util.DateUtils

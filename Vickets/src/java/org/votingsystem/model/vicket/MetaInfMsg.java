@@ -55,4 +55,14 @@ public class MetaInfMsg {
     public static final String processVicketDeposit_ERROR_IBAN_code = "processVicketDeposit_ERROR_IBAN_code";
     public static final String processDeposit_ERROR_IBAN_code = "processDeposit_ERROR_IBAN_code";
 
+
+    public static String getErrorParamsMsg(String methodName) {
+        return methodName + "_ERROR_params";
+    }
+
+    public static String getExceptionMsg(String methodName) {
+        return methodName + "_EXCEPTION";
+    }
+
+
 }

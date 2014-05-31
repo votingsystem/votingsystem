@@ -1,17 +1,6 @@
 package org.votingsystem.simulation
 
 import com.sun.mail.pop3.POP3Store
-
-import javax.mail.Flags;
-import javax.mail.Folder;
-import javax.mail.Header;
-import javax.mail.Message
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
-
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.EventVS
@@ -21,7 +10,13 @@ import org.votingsystem.simulation.model.POP3SimulationData
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.util.DateUtils
 
-import java.util.concurrent.*
+import javax.mail.*
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
+import java.util.concurrent.CompletionService
+import java.util.concurrent.ExecutorCompletionService
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class MailSimulationService {
 

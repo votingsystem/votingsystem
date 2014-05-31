@@ -36,8 +36,26 @@
                     <fieldset id="Deposit">
                         <legend style="font-size: 1.2em; font-weight: bold;"><g:message code="depositCaption"/></legend>
                         <div style="margin: 0px 0px 5px 0px;">
-                            <div class="form-inline">
-                                <label style="margin:0px 0px 0px 20px;"><g:message code="depositAmount"/></label>
+                            <div class="form-inline row">
+                                <input type="number" id="receptorId" style="width:180px; margin: 0px 0px 0px 10px;" required
+                                       title="<g:message code="userIdLbl"/>" class="form-control"
+                                       placeholder="<g:message code="userIdLbl"/>"
+                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                                       onchange="this.setCustomValidity('')"/>
+                                <input type="text" id="subject" style="width:280px;" required
+                                       title="<g:message code="transactionSubjectMsg"/>" class="form-control"
+                                       placeholder="<g:message code="transactionSubjectMsg"/>"
+                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                                       onchange="this.setCustomValidity('')"/>
+
+                                <input type="url" id="vicketServerURL" style="margin:0px 0px 0px 20px;width:280px;" required
+                                       value="http://vickets/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
+                                       placeholder="<g:message code="vicketServerURLMsg"/>" class="form-control col-sm-4"
+                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                                       onchange="this.setCustomValidity('')"/>
+                            </div>
+                            <div class="form-inline row" style="margin:10px 0px 0px 0px;">
+                                <label style="margin:0px 0px 0px 0px;"><g:message code="depositAmount"/></label>
                                 <input type="number" id="depositAmount" min="0" value="1" required
                                        class="DepositInputNumber form-control"
                                        style="width:150px;margin:0px 20px 0px 7px;"
@@ -49,17 +67,6 @@
                                         class="form-control" title="<g:message code="currencyLbl"/>">
                                     <option value="<g:message code="euroLbl"/>"> - <g:message code="euroLbl"/> - </option>
                                 </select>
-                                <input type="text" id="subject" style="width:280px;" required
-                                       title="<g:message code="transactionSubjectMsg"/>" class="form-control col-sm-4"
-                                       placeholder="<g:message code="transactionSubjectMsg"/>"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')"/>
-
-                                <input type="url" id="vicketServerURL" style="margin:0px 0px 0px 20px;width:280px;" required
-                                       value="http://vickets/Vickets/" title="<g:message code="vicketServerURLMsg"/>"
-                                       placeholder="<g:message code="vicketServerURLMsg"/>" class="form-control col-sm-4"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')"/>
                             </div>
                         </div>
                     </fieldset>
@@ -112,6 +119,7 @@ $('#vicketDepositSimulationDataForm').submit(function(event){
  	$(".errorMsgWrapper").fadeOut()
 
 	 var simulationData = {service:'vicketDepositSimulationService', status:"INIT_SIMULATION",
+	         receptorId:$('#receptorId').val(),
 	 		 serverURL:$('#vicketServerURL').val(),  depositAmount: $('#depositAmount').val(),
 	 		 subject:$('#subject').val(), currency:$( "#currencySelect option:selected").val()}
 

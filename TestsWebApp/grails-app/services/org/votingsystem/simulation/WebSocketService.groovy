@@ -3,12 +3,11 @@ package org.votingsystem.simulation
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.util.ExceptionVS
+
 import javax.websocket.CloseReason
+import javax.websocket.Session
 import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentHashMap
-import javax.websocket.Session;
-
 
 class WebSocketService {
 

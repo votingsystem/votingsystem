@@ -6,26 +6,17 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.callable.SMIMESignedSender
-import org.votingsystem.model.ActorVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSElection
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.StatusVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VoteVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-
 import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.callable.VoteSender
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.simulation.model.UserBaseSimulationData
 import org.votingsystem.simulation.model.VotingSimulationData
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.PdfFormHelper
-import org.votingsystem.util.DateUtils
 import org.votingsystem.util.StringUtils
 
 import java.security.KeyStore

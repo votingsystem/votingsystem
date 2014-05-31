@@ -686,7 +686,6 @@ class RepresentativeService {
 				}
 				while (representedUsers.next()) {
 					UserVS representedUser = (UserVS) representedUsers.get(0);
-					representedUsers.type = UserVS.Type.USER_WITH_CANCELLED_REPRESENTATIVE
 					representedUser.representative = null
 					representedUser.save()
 					if((representedUsers.getRowNumber() % 100) == 0) {
@@ -719,7 +718,7 @@ class RepresentativeService {
 			}
 			
 			userVS.representativeMessage = messageSMIMEReq
-			userVS.type = UserVS.Type.EX_REPRESENTATIVE
+			userVS.type = UserVS.Type.USER
 			
 			UserVS.withTransaction  {
 				userVS.save()

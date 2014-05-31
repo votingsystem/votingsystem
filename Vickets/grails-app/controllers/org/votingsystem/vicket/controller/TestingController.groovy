@@ -1,12 +1,15 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.vicket.LoggerVS
 import org.votingsystem.model.vicket.TransactionVS
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.IbanVSUtil
 
 /**
  * @infoController TestingController
@@ -25,6 +28,11 @@ class TestingController {
 
 
     //logTransactionVS(int status, String type, String fromUser, String toUser, String currency, BigDecimal amount, String msg, Date dateCreated, String subject)
+
+    def IBAN() {
+        render IbanVSUtil.getInstance().getIBAN(12)
+        return false
+    }
 
     def index() {
         Long init = System.currentTimeMillis()

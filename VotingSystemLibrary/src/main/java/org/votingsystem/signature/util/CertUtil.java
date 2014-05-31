@@ -276,8 +276,7 @@ public class CertUtil {
         return kp.getPrivate();
     }
 
-    public static Collection<X509Certificate> fromPEMToX509CertCollection (
-    		byte[] pemChainFileBytes) throws Exception {
+    public static Collection<X509Certificate> fromPEMToX509CertCollection (byte[] pemChainFileBytes) throws Exception {
         InputStream in = new ByteArrayInputStream(pemChainFileBytes);
         CertificateFactory fact = CertificateFactory.getInstance("X.509",ContextVS.PROVIDER);
         Collection<X509Certificate> x509Certs = (Collection<X509Certificate>)fact.generateCertificates(in);

@@ -10,6 +10,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
 
@@ -99,11 +100,23 @@ class VicketDepositSimulationService {
 
     private void initializeServer() {
         log.debug("initializeServer ### Enter INITIALIZE_SERVER status")
-        ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(), ActorVS.Type.VICKETS);
-        ResponseVS responseVS = serverInitializer.call();
-        vicketServer = responseVS.getData();
-        responseVS.setStatus(Status.INITIALIZE_SERVER)
-        changeSimulationStatus(responseVS)
+        ResponseVS responseVS = null;
+        try {
+            String userURL = "${simulationData.getServerURL()}/userVS/${simulationData.getReceptorId()}"
+            responseVS = HttpHelper.getInstance().getData(userURL, ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                UserVS userVS = UserVS.populate(new JSONObject(responseVS.getMessage()));
+                ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(), ActorVS.Type.VICKETS);
+                responseVS = serverInitializer.call();
+                vicketServer = responseVS.getData();
+                responseVS.setStatus(Status.INITIALIZE_SERVER)
+            }
+
+        } catch(Exception ex) {
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage())
+            responseVS.setStatus(Status.INITIALIZE_SERVER)
+            log.error(ex.getMessage(), ex)
+        } finally {changeSimulationStatus(responseVS)}
     }
 
     private void makeDeposit() {

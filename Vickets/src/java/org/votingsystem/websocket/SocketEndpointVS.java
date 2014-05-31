@@ -54,8 +54,7 @@ public class SocketEndpointVS {
 
     @OnOpen public void onOpen(Session session) {
         if(webSocketService == null) {
-            webSocketService = ((WebSocketService)((GrailsApplication) ApplicationContextHolder.
-                    getBean("grailsApplication")).getMainContext().getBean("webSocketService"));
+            webSocketService = (WebSocketService) ApplicationContextHolder.getBean("webSocketService");
         }
         webSocketService.onOpen(session);
     }

@@ -3,6 +3,7 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import org.votingsystem.model.*
 import org.votingsystem.model.vicket.MetaInfMsg
+import org.votingsystem.util.IbanVSUtil
 
 /**
 * @author jgzornoza
@@ -107,6 +108,7 @@ class GroupVSService {
 
         groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, groupRepresentative:userSigner,
                 description:messageJSON.groupvsInfo).save()
+        groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
         String metaInf =  MetaInfMsg.saveVicketGroup_OK + groupVS.id
 
         String fromUser = grailsApplication.config.VotingSystem.serverName
@@ -159,8 +161,9 @@ class GroupVSService {
     }
 
  	public Map getGroupVSDataMap(GroupVS groupVS){
-        Map resultMap = [id:groupVS.id, name:groupVS.name, description:groupVS.description, state:groupVS.state.toString(),
-            dateCreated:groupVS.dateCreated, representative:userVSService.getUserVSDataMap(groupVS.groupRepresentative)]
+        Map resultMap = [id:groupVS.id, IBAN:groupVS.IBAN, name:groupVS.name, description:groupVS.description,
+            state:groupVS.state.toString(), dateCreated:groupVS.dateCreated,
+            representative:userVSService.getUserVSDataMap(groupVS.groupRepresentative), type:groupVS.type.toString()]
         SubscriptionVS.withTransaction {
             def result = SubscriptionVS.createCriteria().list(offset: 0) {
                 eq("groupVS", groupVS)

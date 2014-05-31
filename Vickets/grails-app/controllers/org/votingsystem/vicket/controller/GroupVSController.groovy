@@ -134,31 +134,26 @@ class GroupVSController {
     }
 
     def cancel() {
-        try {
-            if(params.long('id')) {
-                GroupVS groupVS
-                Map resultMap = [:]
-                GroupVS.withTransaction {
-                    groupVS = GroupVS.get(params.long('id'))
-                }
-                MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-                if(!messageSMIMEReq) {
-                    return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-                }
-                ResponseVS responseVS = groupVSService.cancelGroup(groupVS, messageSMIMEReq, request.getLocale())
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
-                    responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupCancelledOKMsg',
-                            args:[groupVS.name]), URL:URL]
-                    responseVS.setContentType(ContentTypeVS.JSON)
-                }
-                return [responseVS:responseVS]
-            } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    message: message(code: 'requestWithErrors'))]
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex)
-            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())]
-        }
+        if(params.long('id')) {
+            GroupVS groupVS
+            Map resultMap = [:]
+            GroupVS.withTransaction {
+                groupVS = GroupVS.get(params.long('id'))
+            }
+            MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+            if(!messageSMIMEReq) {
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+            }
+            ResponseVS responseVS = groupVSService.cancelGroup(groupVS, messageSMIMEReq, request.getLocale())
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
+                responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupCancelledOKMsg',
+                        args:[groupVS.name]), URL:URL]
+                responseVS.setContentType(ContentTypeVS.JSON)
+            }
+            return [responseVS:responseVS]
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                message: message(code: 'requestWithErrors'))]
     }
 
     def subscribe() {
@@ -221,43 +216,38 @@ class GroupVSController {
     }
 
     def listUsers() {
-        try {
-            if(params.long('id')) {
-                GroupVS groupVS = null
-                Map resultMap = [:]
-                GroupVS.withTransaction {
-                    groupVS = GroupVS.get(params.long('id'))
-                }
-                if(!groupVS) {
-                    return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-                            message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
-                }
-                resultMap = [groupName: groupVS.name, id:groupVS.id]
+        if(params.long('id')) {
+            GroupVS groupVS = null
+            Map resultMap = [:]
+            GroupVS.withTransaction {
+                groupVS = GroupVS.get(params.long('id'))
+            }
+            if(!groupVS) {
+                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                        message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
+            }
+            resultMap = [groupName: groupVS.name, id:groupVS.id]
 
-                if(request.contentType?.contains("json")) {
-                    def userList
-                    SubscriptionVS.withTransaction {
-                        userList = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
-                            eq("groupVS", groupVS)
-                        }
+            if(request.contentType?.contains("json")) {
+                def userList
+                SubscriptionVS.withTransaction {
+                    userList = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
+                        eq("groupVS", groupVS)
                     }
-
-                    def resultList = []
-                    userList.each {userItem ->
-                        resultList.add(userVSService.getSubscriptionVSDataMap(userItem))
-                    }
-                    resultMap = ["${message(code: 'uservsRecordsLbl')}":resultList, queryRecordCount: userList.totalCount,
-                                 numTotalUsers:userList.totalCount ]
-                    render resultMap as JSON
-                } else {
-                    render(view:'listUsers', model: [subscriptionMap:resultMap])
                 }
-            } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    message: message(code: 'requestWithErrors'))]
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex)
-            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())]
-        }
+
+                def resultList = []
+                userList.each {userItem ->
+                    resultList.add(userVSService.getSubscriptionVSDataMap(userItem))
+                }
+                resultMap = ["${message(code: 'uservsRecordsLbl')}":resultList, queryRecordCount: userList.totalCount,
+                             numTotalUsers:userList.totalCount ]
+                render resultMap as JSON
+            } else {
+                render(view:'listUsers', model: [subscriptionMap:resultMap])
+            }
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                message: message(code: 'requestWithErrors'))]
     }
 
     def activateUser () {
@@ -290,6 +280,14 @@ class GroupVSController {
         return [responseVS:responseVS]
     }
 
-    def test() { }
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+    }
 
 }

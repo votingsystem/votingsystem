@@ -62,6 +62,7 @@ grails.project.dependency.resolution = {
                 'org.bouncycastle:bcprov-jdk16:1.46',
                 'org.bouncycastle:bcmail-jdk16:1.46',
                 'org.bouncycastle:bcpg-jdk16:1.46',
+                'org.iban4j:iban4j:2.1.1',
                 'javax.mail:mail:1.4.7',
                 'org.bouncycastle:bctsp-jdk16:1.46') {
             excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",

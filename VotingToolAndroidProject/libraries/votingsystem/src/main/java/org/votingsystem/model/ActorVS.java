@@ -31,7 +31,7 @@ public class ActorVS implements java.io.Serializable {
 
     public enum Type {CONTROL_CENTER, ACCESS_CONTROL, VICKETS, TIMESTAMP_SERVER;}
 
-    public enum State {CANCELLED, ACTIVE, PAUSED, RUNNING}
+    public enum State { SUSPENDED, RUNNING, PAUSED;}
 
     private Long id;
     private EnvironmentVS environment;

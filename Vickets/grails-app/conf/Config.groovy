@@ -206,8 +206,10 @@ log4j = {
 grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
 
-VotingSystem.IBAN_bankCode = 7878
-VotingSystem.IBAN_branchCode = 8989
+VotingSystem.IBAN_bankCode = "7878"
+VotingSystem.IBAN_branchCode = "8989"
+VotingSystem.systemNIF = "VICKET_SYSTEM_NIF"
+VotingSystem.serverName='Voting System Vicket Server'
 VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 VotingSystem.backupCopyPath='./Vickets/backups'
 VotingSystem.errorsBaseDir='./Vickets/errors'
@@ -217,6 +219,5 @@ VotingSystem.signKeysPassword='PemPass'
 VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
 VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 VotingSystem.requestTimeOut = 500
-VotingSystem.serverName='Voting System Vicket Server'
 //_ TODO _
-VotingSystem.adminsDNI=['07553172H','08888888D']
+VotingSystem.adminsDNI=['07553172H']

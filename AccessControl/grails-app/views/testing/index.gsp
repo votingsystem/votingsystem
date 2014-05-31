@@ -3,7 +3,7 @@
 <head>
   	<title>pruebaTemplate</title>
     <g:javascript library="jquery" plugin="jquery"/>
-    <link rel="stylesheet" href="/ControlCenter/font-awesome/css/font-awesome.min.css" type="text/css"/>
+    <link rel="stylesheet" href="${resource(dir: 'font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
 
     <asset:stylesheet src="bootstrap.min.css"/>
     <asset:javascript src="bootstrap.min.js"/>

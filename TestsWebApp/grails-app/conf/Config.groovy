@@ -162,3 +162,9 @@ log4j = {
 }
 
 VotingSystem.simulationFilesBaseDir='./simulationFiles'
+VotingSystem.keyStorePath='WEB-INF/cms/TestWebApp.jks'
+VotingSystem.signKeysAlias='TestWebAppServerKeys'
+VotingSystem.signKeysPassword='PemPass'
+VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
+VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
+VotingSystem.serverName='Voting System Test WebApp Server'

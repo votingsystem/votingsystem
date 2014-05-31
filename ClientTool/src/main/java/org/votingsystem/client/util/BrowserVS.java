@@ -39,6 +39,7 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
+import org.votingsystem.client.pane.PEMCertFormPane;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -374,6 +375,14 @@ public class BrowserVS extends Region {
                         break;
                     case SAVE_RECEIPT_ANONYMOUS_DELEGATION:
                         break;
+                    /*case VICKET_SOURCE_NEW:
+                        PEMCertFormPane.showDialog();
+                        String pemCert = PEMCertFormPane.getCertChainPEM();
+                        if(pemCert != null) {
+                            operationVS.getDocumentToSignMap().put("certChainPEM", pemCert);
+                            browserHelper.processOperationVS(operationVS);
+                        }
+                        break;*/
                     default:
                         browserHelper.processOperationVS(operationVS);
                 }

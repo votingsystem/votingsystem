@@ -9,9 +9,8 @@ import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.callable.RepresentativeDelegatorDataSender
 import org.votingsystem.simulation.callable.RepresentativeTestDataSender
 import org.votingsystem.simulation.model.UserBaseSimulationData
-import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.FileUtils
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
 
@@ -19,14 +18,8 @@ import java.lang.management.ManagementFactory
 import java.security.KeyStore
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
-import java.util.concurrent.CompletionService
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.ExecutorCompletionService
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Transactional
 class UserBaseDataSimulationService {

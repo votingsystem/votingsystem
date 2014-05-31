@@ -210,7 +210,7 @@ VotingSystem.signKeysPassword='PemPass'
 //milliseconds
 VotingSystem.requestTimeOut = 500
 //Name decriptivo del servidor
-VotingSystem.serverName='Primer ControlCenter'
+VotingSystem.serverName='Voting System Control Center'
 VotingSystem.blogURL ='http://www.sistemavotacion.org/blog.html'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
 //_ TODO _

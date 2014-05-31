@@ -1,34 +1,25 @@
 package org.votingsystem.simulation
 
+import com.itextpdf.text.pdf.PdfReader
+import grails.converters.JSON
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.callable.SMIMESignedSender
+import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SignedMailGenerator
+import org.votingsystem.simulation.callable.ClaimSignedSender
+import org.votingsystem.simulation.callable.ServerInitializer
+import org.votingsystem.simulation.model.SimulationData
+import org.votingsystem.util.*
 
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.cert.Certificate
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.concurrent.CompletionService
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future
-import java.security.cert.Certificate
-
-import org.codehaus.groovy.grails.web.json.JSONObject;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.simulation.callable.ClaimSignedSender
-import org.votingsystem.simulation.callable.ServerInitializer
-import org.votingsystem.model.*
-import org.votingsystem.util.*
-import org.votingsystem.simulation.model.*
-import org.votingsystem.util.PdfFormHelper;
-
-import com.itextpdf.text.pdf.PdfReader;
-import grails.converters.JSON
+import java.util.concurrent.*
 
 class ClaimSimulationService {
 

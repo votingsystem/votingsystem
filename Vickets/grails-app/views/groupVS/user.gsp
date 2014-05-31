@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="groupUserPageLbl"/></title>
     <g:javascript library="jquery" plugin="jquery"/>
-    <link rel="stylesheet" href="/Vickets/font-awesome/css/font-awesome.min.css" type="text/css"/>
+    <link rel="stylesheet" href="${resource(dir: 'font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
     <asset:stylesheet src="bootstrap.min.css"/>
     <asset:javascript src="bootstrap.min.js"/>
     <asset:stylesheet src="vickets.css"/>

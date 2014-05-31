@@ -1,10 +1,9 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import org.iban4j.CountryCode
-import org.iban4j.Iban
 import org.votingsystem.model.*
 import org.votingsystem.model.vicket.MetaInfMsg
+import org.votingsystem.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
 
@@ -13,14 +12,14 @@ import java.security.cert.X509Certificate
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 class SubscriptionVSService {
-		
-	static transactional = true
+
+	static transactional = false
 
     def grailsApplication
 	def messageSource
     def userVSService
-	
-	ResponseVS checkUser(UserVS userVS, Locale locale) {
+
+    public ResponseVS checkUser(UserVS userVS, Locale locale) {
 		log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
 		String msg
         CertificateVS certificate = null;
@@ -48,12 +47,7 @@ class SubscriptionVSService {
             userVS.nif = validatedNIF.toUpperCase()
             userVS.type = UserVS.Type.USER
 			userVS.save();
-            String accountNumberStr = String.format("%010d", userVS.id);
-            Iban iban = new Iban.Builder().countryCode(CountryCode.ES)
-                    .bankCode(grailsApplication.config.VotingSystem.IBAN_bankCode)
-                    .branchCode(grailsApplication.config.VotingSystem.IBAN_branchCode)
-                    .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
-            userVS.setIBAN(iban.toString())
+            userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
             userVS.save()
             userVSDB = userVS
 			log.debug "- checkUser ### NEW USER ${userVSDB.nif} - id '${userVSDB.id}'"
@@ -82,8 +76,8 @@ class SubscriptionVSService {
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:certificate)
 	}
-	
-	ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email,
+
+    public ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email,
                String deviceId, Locale locale) {
 		log.debug "checkDevice - givenname: ${givenname} - surname: ${surname} - nif:${nif} - phone:${phone} " +
                 "- email:${email} - deviceId:${deviceId}"
