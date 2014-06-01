@@ -88,7 +88,6 @@
 
         $('#transactionvsTypeSelect').on('change', function (e) {
             var transactionvsType = $(this).val()
-            var optionSelected = $("option:selected", this);
             console.log("transactionvs selected: " + transactionvsType)
             var targetURL = "${createLink(controller: 'transaction', action: 'index')}";
             if("" != transactionvsType) targetURL = targetURL + "?transactionvsType=" + transactionvsType

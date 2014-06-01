@@ -44,9 +44,7 @@ class GroupVSController {
                 UserVS.State state = null
                 Date dateFrom = null
                 Date dateTo = null
-                try {state = UserVS.State.valueOf(params.state)} catch(Exception ex) {
-                    state = UserVS.State.ACTIVE
-                }
+                try {state = UserVS.State.valueOf(params.state)} catch(Exception ex) {state = UserVS.State.ACTIVE}
                 //searchFrom:2014/04/14 00:00:00, max:100, searchTo
                 if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
                 if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
@@ -74,63 +72,49 @@ class GroupVSController {
     }
 
     def newGroup (){
-        ResponseVS responseVS = null
-        try {
+        if("POST".equals(request.method)) {
+            MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+            if(!messageSMIMEReq) {
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+            }
+            ResponseVS responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                GroupVS newGroupVS = responseVS.data
+                String URL = "${createLink(controller: 'groupVS', absolute:true)}/${newGroupVS.id}"
+                responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg',
+                        args:[newGroupVS.name]), URL:URL]
+                responseVS.setContentType(ContentTypeVS.JSON)
+            }
+            return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
+        }
+    }
+
+    def edit() {
+        if(params.long('id')) {
+            GroupVS groupVS
+            Map resultMap = [:]
+            GroupVS.withTransaction {
+                groupVS = GroupVS.get(params.long('id'))
+            }
             if("POST".equals(request.method)) {
                 MessageSMIME messageSMIMEReq = request.messageSMIMEReq
                 if(!messageSMIMEReq) {
                     return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
                 }
-                responseVS = groupVSService.saveGroup(messageSMIMEReq, request.getLocale())
+                ResponseVS responseVS = groupVSService.editGroup(groupVS, messageSMIMEReq, request.getLocale())
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    GroupVS newGroupVS = responseVS.data
-                    String URL = "${createLink(controller: 'groupVS', absolute:true)}/${newGroupVS.id}"
-                    responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg',
-                            args:[newGroupVS.name]), URL:URL]
+                    String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
+                    responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupEditedOKMsg',
+                            args:[groupVS.name]), URL:URL]
                     responseVS.setContentType(ContentTypeVS.JSON)
                 }
-                return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
+                return [responseVS:responseVS]
+            } else {
+                if(groupVS) resultMap = groupVSService.getGroupVSDataMap(groupVS)
+                render(view:'edit', model: [groupvsMap:resultMap])
             }
-
-        } catch(Exception ex) {
-            log.error (ex.getMessage(), ex)
-            String msg = message(code:'publishGroupVSErrorMessage')
-            responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:ex.getMessage(),
-                    metaInf: MetaInfMsg.saveVicketGroup_EXCEPTION, type:TypeVS.VICKET_ERROR)
-        }
-    }
-
-    def edit() {
-        try {
-            if(params.long('id')) {
-                GroupVS groupVS
-                Map resultMap = [:]
-                GroupVS.withTransaction {
-                    groupVS = GroupVS.get(params.long('id'))
-                }
-                if("POST".equals(request.method)) {
-                    MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-                    if(!messageSMIMEReq) {
-                        return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
-                    }
-                    ResponseVS responseVS = groupVSService.editGroup(groupVS, messageSMIMEReq, request.getLocale())
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        String URL = "${createLink(controller: 'groupVS', absolute:true)}/${groupVS.id}"
-                        responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'vicketGroupEditedOKMsg',
-                                args:[groupVS.name]), URL:URL]
-                        responseVS.setContentType(ContentTypeVS.JSON)
-                    }
-                    return [responseVS:responseVS]
-                } else {
-                    if(groupVS) resultMap = groupVSService.getGroupVSDataMap(groupVS)
-                    render(view:'edit', model: [groupvsMap:resultMap])
-                }
-            } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-                    message: message(code: 'requestWithErrors'))]
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex)
-            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())]
-        }
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                message: message(code: 'requestWithErrors'))]
     }
 
     def cancel() {
@@ -162,15 +146,7 @@ class GroupVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            ResponseVS responseVS = null
-            try {
-                responseVS = groupVSService.subscribe(messageSMIMEReq, request.getLocale())
-            } catch(Exception ex) {
-                log.error (ex.getMessage(), ex)
-                String msg = message(code:'subscribeGroupVSErrorMessage')
-                responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR, message: msg, reason:ex.getMessage(),
-                        metaInf: MetaInfMsg.subscribeToVicketGroup_EXCEPTION, type:TypeVS.VICKET_ERROR)
-            }
+            ResponseVS responseVS = groupVSService.subscribe(messageSMIMEReq, request.getLocale())
             return [responseVS:responseVS]
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 message: message(code: 'requestWithErrors'))]
@@ -287,7 +263,7 @@ class GroupVSController {
         log.error "Exception occurred. ${exception?.message}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+                metaInf:metaInf, type:TypeVS.VICKET_ERROR, reason:exception.getMessage())]
     }
 
 }

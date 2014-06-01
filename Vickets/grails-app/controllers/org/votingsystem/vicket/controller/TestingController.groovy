@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.vicket.LoggerVS
 import org.votingsystem.model.vicket.TransactionVS
@@ -25,7 +26,6 @@ class TestingController {
     def transactionVSService
     def auditingService
     def filesService
-
 
     //logTransactionVS(int status, String type, String fromUser, String toUser, String currency, BigDecimal amount, String msg, Date dateCreated, String subject)
 
@@ -94,6 +94,5 @@ class TestingController {
         def result = userVSService.getUserVS(calendar.getTime())
         render result as JSON
     }
-
 
 }

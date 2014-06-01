@@ -2,6 +2,8 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ApplicationContextHolder
 
@@ -41,5 +43,15 @@ class ServerInfoController {
 		if (params.callback) render "${params.callback}(${serverInfo as JSON})"
         else render serverInfo as JSON
 	}
+
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.VICKET_ERROR, reason:exception.getMessage())]
+    }
 
 }

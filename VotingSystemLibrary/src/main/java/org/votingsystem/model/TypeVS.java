@@ -77,6 +77,8 @@ public enum TypeVS {
     REPRESENTATIVE_REVOKE,
     TERMINATED,
 
+    NEW_CA_CERT,
+
     VICKET,
     VICKET_USER_INFO,
     VICKET_CANCEL,

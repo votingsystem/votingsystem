@@ -53,12 +53,18 @@ public class CertificateVS implements Serializable {
 
     @Column(name="messageSMIME" ) private MessageSMIME messageSMIME;
 
+    @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
+
+    @Column(name="description", columnDefinition="TEXT")  private String description;
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
 
     @Lob @Column(name="certChainPEM") private byte[] certChainPEM;
 
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
+
+    @Column(name="isRoot") private Boolean isRoot;
 
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
@@ -250,6 +256,31 @@ public class CertificateVS implements Serializable {
 
     public void setCertChainPEM(byte[] certChain) {
         this.certChainPEM = certChain;
+    }
+
+
+    public Boolean getIsRoot() {
+        return isRoot;
+    }
+
+    public void setIsRoot(Boolean isRoot) {
+        this.isRoot = isRoot;
+    }
+
+    public String getMetaInf() {
+        return metaInf;
+    }
+
+    public void setMetaInf(String metaInf) {
+        this.metaInf = metaInf;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

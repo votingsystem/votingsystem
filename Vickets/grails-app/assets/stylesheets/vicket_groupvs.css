@@ -36,7 +36,7 @@
     background-color: #f2f2f2;
     margin: 10px 5px 5px 10px;
     -moz-border-radius: 5px; border-radius: 5px;
-    cursor: pointer; cursor: hand;
+    cursor: pointer;
     max-height:165px;
     overflow:hidden;
     float:left;

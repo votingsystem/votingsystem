@@ -13,6 +13,8 @@
 
 grails.views.javascript.library="jquery"
 
+grails.converters.default.pretty.print=true
+grails.gorm.failOnError=true
 grails.reload.enabled = true
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
@@ -105,6 +107,17 @@ environments {
 
 }
 
+
+mail.error.server = 'localhost'
+mail.error.port = 25
+//mail.error.username = 'AccessControl@sistemavotacion.org'
+//mail.error.password = '*****'
+mail.error.to = 'admin@sistemavotacion.org'
+mail.error.from = 'AccessControl@sistemavotacion.org'
+mail.error.subject = '[Access Control Application Error]'
+mail.error.starttls = false
+mail.error.debug = false
+
 // log4j configuration
 log4j = {
 
@@ -121,11 +134,11 @@ log4j = {
 
         rollingFile name:"VicketServerReports", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'),
-                file:"./VicketReports/VicketServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"./Vickets/reports/VicketServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketTransactionsReports", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
-                file:"./VicketReports/VicketTransactionsReports.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"./Vickets/reports/VicketTransactionsReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
 
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,

@@ -103,7 +103,7 @@
         });
 
         $( '#menu' ).multilevelpushmenu({
-            menuWidth: 300,
+            menuWidth: 320,
             onItemClick: function() {
                 var event = arguments[0], // First argument is original event object
                 $menuLevelHolder = arguments[1], // Second argument is menu level object containing clicked item (<div> element)

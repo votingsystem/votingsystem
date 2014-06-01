@@ -15,6 +15,14 @@ class UrlMappings {
             action = "voteVS"
         }
 
+        "/certificateVS/cert/$serialNumber"{
+            controller = "certificateVS"
+            action = "cert"
+            constraints {
+                serialNumber(matches:/\d*/)
+            }
+        }
+
         "/groupVS/$id"{
             controller = "groupVS"
             action = "index"
