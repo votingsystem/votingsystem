@@ -1,16 +1,13 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.vicket.LoggerVS
-import org.votingsystem.model.vicket.TransactionVS
-import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.vicket.util.LoggerVS
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.IbanVSUtil
+import org.votingsystem.vicket.util.IbanVSUtil
 
 /**
  * @infoController TestingController

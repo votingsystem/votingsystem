@@ -1,7 +1,8 @@
-<div id="menu" class="navBarMainMenu" style="">
+<div id="navBarMainMenu" style="">
     <nav>
         <h2><i class="fa fa-reorder"></i>
-            <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
+            <span style="text-decoration: underline; font-size: 1.2em;">
+                <div style="margin: 60px 0px 0px 0px;"><g:message code="sectionsLbl"/></div></span>
         </h2>
         <ul>
             <li>

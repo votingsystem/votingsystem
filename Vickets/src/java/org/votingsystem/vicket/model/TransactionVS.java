@@ -1,13 +1,12 @@
-package org.votingsystem.model.vicket;
+package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.vicket.service.TransactionVSService;
-import org.votingsystem.util.ApplicationContextHolder;
+import org.votingsystem.vicket.util.ApplicationContextHolder;
 
 import javax.persistence.*;
 import java.io.Serializable;

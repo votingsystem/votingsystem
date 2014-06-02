@@ -136,7 +136,6 @@ class CertificateVSController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		signatureVSService.deleteTestCerts()
         return [responseVS : signatureVSService.addCertificateAuthority(
 			"${request.getInputStream()}".getBytes(), request.getLocale())]
 	}

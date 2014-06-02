@@ -8,7 +8,7 @@
     <style type="text/css" media="screen">
         .certDiv {
             display:inline;
-            width:550px;
+            width:580px;
             height: 300px;
             padding: 10px;
             background-color: #f2f2f2;
@@ -22,8 +22,8 @@
     </style>
 </head>
 <body>
-<div class="pageContenDiv">
-    <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
+<div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
+    <div class="row">
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li class="active"><g:message code="certsPageTitle"/></li>
@@ -42,7 +42,7 @@
 
     <h3><div id="pageHeader" class="pageHeader text-center"><g:message code="trustedCertsPageTitle"/></div></h3>
 
-    <div id="certList" class="row container" style="width:1200px;"><ul></ul></div>
+    <div id="certList" class="row container" style="width:1300px;"><ul></ul></div>
 
     <div style="margin:0px auto 0px auto;">
         <g:each in="${certsMap.certList}">
@@ -70,8 +70,6 @@
                     <span style="font-weight: bold;"><g:message code="noAfterLbl"/>: </span>{7}</div>
             </div>
             <div>
-                <a href="{8}" style="display: inline; ">
-                    <g:message code="downloadPEMCertLbl"/></a>
                     <div class="text-center" style="font-weight: bold; display: {9};
                     margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;"><g:message code="rootCertLbl"/></div>
             </div>
@@ -125,7 +123,6 @@
 
         var newCertificateVSTemplate = $('#certificateVSTemplate').html()
         function certificateVSWriter(rowIndex, jsonAjaxData, columns, cellWriter) {
-            console.log(" ======= " + jsonAjaxData.serialNumber)
 
             var targetURL = "${createLink( controller:'certificateVS', action:'cert')}/" + jsonAjaxData.serialNumber
             var stateLbl
@@ -133,14 +130,12 @@
             else if("${CertificateVS.State.CANCELLED.toString()}" == jsonAjaxData.state) stateLbl = "<g:message code="certCancelledLbl"/>"
             else stateLbl = jsonAjaxData.state
 
-            var pemCertURL = "${createLink( controller:'certificateVS', action:'trusted')}/" + jsonAjaxData.serialNumber + "?format=pem"
-
             var displayValue = "none"
             if(jsonAjaxData.isRoot) displayValue = "inline"
 
             var newCertificateVSHTML = newCertificateVSTemplate.format(targetURL, jsonAjaxData.serialNumber, stateLbl,
                     jsonAjaxData.subjectDN, jsonAjaxData.issuerDN, jsonAjaxData.sigAlgName, jsonAjaxData.notBefore,
-                    jsonAjaxData.notAfter, pemCertURL, displayValue);
+                    jsonAjaxData.notAfter, displayValue);
             return newCertificateVSHTML
         }
 
@@ -155,8 +150,12 @@
             var optionSelected = $(this).val()
             console.log("transactionvs selected: " + optionSelected)
             var targetURL = "${createLink(controller: 'certificateVS', action: 'certs')}?menu=" + menuType;
-            if("" != optionSelected)  targetURL = targetURL + optionSelected
+            if("" != optionSelected) {
+                history.pushState(null, null, targetURL);
+                targetURL = targetURL + optionSelected
+            }
             dynatable.settings.dataset.ajaxUrl= targetURL
+            history.pushState(null, null, targetURL);
             setPageHeader(targetURL)
             dynatable.paginationPage.set(1);
             dynatable.process();

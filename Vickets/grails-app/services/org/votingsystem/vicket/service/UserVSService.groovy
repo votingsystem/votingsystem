@@ -6,9 +6,9 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.vicket.MetaInfMsg
+import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.util.IbanVSUtil
+import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.util.NifUtils
 
 import java.security.cert.X509Certificate
@@ -58,8 +58,8 @@ class UserVSService {
                 (TypeVS.VICKET_SOURCE_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - PARAMS ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_ERROR, message:msg,
-                    metaInf:MetaInfMsg.getErrorParamsMsg(methodName), statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
         responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
@@ -77,22 +77,22 @@ class UserVSService {
                 (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    metaInf:MetaInfMsg.saveVicketGroup_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "params"), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
 
         groupVS = GroupVS.findWhere(name:messageJSON.groupvsName.trim())
         if(groupVS) {
             msg = messageSource.getMessage('nameGroupRepeatedMsg', [messageJSON.groupvsName].toArray(), locale)
             log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.saveVicketGroup_ERROR_nameGroupRepeatedMsg)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "nameGroupRepeatedMsg"))
         }
 
         groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, groupRepresentative:userSigner,
                 description:messageJSON.groupvsInfo).save()
         groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
-        String metaInf =  MetaInfMsg.saveVicketGroup_OK + groupVS.id
+        String metaInf =  MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}")
 
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()

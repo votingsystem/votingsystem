@@ -1,4 +1,4 @@
-package org.votingsystem.model.vicket;
+package org.votingsystem.vicket.util;
 
 import grails.converters.JSON;
 import org.apache.log4j.Logger;
@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * @author jgzornoza

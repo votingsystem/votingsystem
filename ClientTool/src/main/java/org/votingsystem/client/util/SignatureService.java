@@ -57,7 +57,6 @@ public class SignatureService extends Service<ResponseVS> {
         @Override protected ResponseVS call() throws Exception {
             logger.debug("SignatureService.SignatureTask - call:" + operationVS.getType());
             ResponseVS responseVS = null;
-            ActorVS targetServer = null;
             updateProgress(5, 100);
             try {
                 switch (operationVS.getType()) {
@@ -65,30 +64,21 @@ public class SignatureService extends Service<ResponseVS> {
                         String accessControlURL = operationVS.getEventVS().getAccessControlVS().getServerURL();
                         responseVS = checkServer(accessControlURL);
                         if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-                        else ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
+                        else ContextVS.getInstance().setServer((AccessControlVS) responseVS.getData());
+                        operationVS.setTargetServer((AccessControlVS) responseVS.getData());
                         String controlCenterURL = operationVS.getEventVS().getControlCenterVS().getServerURL();
                         responseVS = checkServer(controlCenterURL);
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
                         }
                         break;
-                    case VICKET_GROUP_SUBSCRIBE:
-                        responseVS = checkServer(operationVS.getServerURL().trim());
-                        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            ContextVS.getInstance().setVicketServer((VicketServer) responseVS.getData());
-                        }
-                        break;
                     default:
                         responseVS = checkServer(operationVS.getServerURL().trim());
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            if(operationVS.getType().toString().contains("VICKET_"))
-                                ContextVS.getInstance().setVicketServer((VicketServer) responseVS.getData());
-                            else ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
+                            ContextVS.getInstance().setServer((ActorVS) responseVS.getData());
+                            operationVS.setTargetServer((ActorVS) responseVS.getData());
                         }
                 }
-                if(operationVS.getType() != null && operationVS.getType().toString().contains("VICKET_"))
-                    targetServer =  ContextVS.getInstance().getVicketServer();
-                else targetServer =  ContextVS.getInstance().getAccessControl();
                 updateProgress(25, 100);
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     updateMessage(operationVS.getSignedMessageSubject());
@@ -101,23 +91,23 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = processNewRepresentative(operationVS);
                             break;
                         case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                            responseVS = processAnonymousDelegation(targetServer, operationVS);
+                            responseVS = processAnonymousDelegation(operationVS.getTargetServer(), operationVS);
                             break;
                         case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
-                            responseVS = processCancelAnonymousDelegation(targetServer, operationVS);
+                            responseVS = processCancelAnonymousDelegation(operationVS.getTargetServer(), operationVS);
                             break;
                         case MANIFEST_PUBLISHING:
-                            responseVS = publishManifest(targetServer, operationVS);
+                            responseVS = publishManifest(operationVS.getTargetServer(), operationVS);
                             break;
                         case MANIFEST_SIGN:
                             responseVS = signManifest(operationVS);
                             break;
                         case CLAIM_PUBLISHING:
                         case VOTING_PUBLISHING:
-                            responseVS = publishSMIME(targetServer, operationVS);
+                            responseVS = publishSMIME(operationVS.getTargetServer(), operationVS);
                             break;
                         default:
-                            responseVS = sendSMIME(targetServer, operationVS);
+                            responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
                     }
                     updateProgress(100, 100);
                     return responseVS;

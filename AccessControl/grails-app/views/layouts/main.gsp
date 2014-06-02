@@ -103,7 +103,7 @@
 	    $('#selectedSubsystemLink').text(selectedSubsystemText)
 
 		
-        $( '#menu' ).multilevelpushmenu({
+        $( '#navBarMainMenu' ).multilevelpushmenu({
                 menuWidth: 330,
                 onItemClick: function() {
                     var event = arguments[0], // First argument is original event object
@@ -126,9 +126,9 @@
 
 
         $("#expandMenuIcon").click(function () {
-            $('#menu').css("visibility", "visible")
-            if(isMenuVisible) $('#menu').multilevelpushmenu( 'collapse' );
-            else $('#menu').multilevelpushmenu( 'expand' );
+            $('#navBarMainMenu').css("visibility", "visible")
+            if(isMenuVisible) $('#navBarMainMenu').multilevelpushmenu( 'collapse' );
+            else $('#navBarMainMenu').multilevelpushmenu( 'expand' );
         })
 
 

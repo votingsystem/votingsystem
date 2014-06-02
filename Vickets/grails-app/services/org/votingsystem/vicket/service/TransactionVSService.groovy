@@ -4,12 +4,12 @@ import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.model.vicket.MetaInfMsg
-import org.votingsystem.model.vicket.TransactionVS
+import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.IbanVSUtil
+import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.math.RoundingMode
 
@@ -32,25 +32,19 @@ class TransactionVSService {
 
 
     public ResponseVS cancelVicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         //messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
-        String msg;
-        try {
-            log.debug(smimeMessageReq.getSignedContent())
-            String fromUser = grailsApplication.config.VotingSystem.serverName
-            String toUser = smimeMessageReq.getFrom().toString()
-            String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
-            SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
-                    smimeMessageReq, subject)
-            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                    content:smimeMessageResp.getBytes()).save()
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.VICKET_CANCEL, data:messageSMIMEResp,
-                    contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            msg = messageSource.getMessage('depositDataError', null, locale)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_CANCEL_ERROR)
-        }
+        log.debug(smimeMessageReq.getSignedContent())
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = smimeMessageReq.getFrom().toString()
+        String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
+        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                smimeMessageReq, subject)
+        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
+                content:smimeMessageResp.getBytes()).save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.VICKET_CANCEL, data:messageSMIMEResp,
+                contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
     }
 
     public void addTransactionListener (String listenerId) {
@@ -58,6 +52,7 @@ class TransactionVSService {
     }
 
     public ResponseVS processDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
         String msg;
@@ -71,8 +66,8 @@ class TransactionVSService {
                         locale)
                 log.error("${msg} - ${ex.getMessage()}", ex)
                 return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                        metaInf:MetaInfMsg.processDeposit_ERROR_IBAN_code,
-                        contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.DEPOSIT_ERROR)
+                        metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"),
+                        contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.ERROR)
             }
 
             TypeVS transactionType = TypeVS.valueOf(messageJSON.typeVS)

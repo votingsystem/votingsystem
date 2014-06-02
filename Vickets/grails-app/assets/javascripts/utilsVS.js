@@ -24,7 +24,8 @@ var Operation = {
     VICKET_GROUP_SUBSCRIBE : "VICKET_GROUP_SUBSCRIBE",
     VICKET_SOURCE:"VICKET_SOURCE",
     VICKET_SOURCE_NEW:"VICKET_SOURCE_NEW",
-    NEW_CA_CERT:"NEW_CA_CERT"
+    CERT_CA_NEW:"CERT_CA_NEW",
+    CERT_EDIT:"CERT_EDIT"
 }
 
 function httpGet(theUrl){
@@ -285,7 +286,6 @@ function updateMenuLinks() {
     if("" == selectedMenuType.trim()) {
         return
     }
-    console.log("updateMenuLinks")
     menuType = selectedMenuType
     var elem = 'a'
     var attr = 'href'

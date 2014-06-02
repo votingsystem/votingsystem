@@ -235,11 +235,11 @@ public class ActorVS implements Serializable {
     }
 
     @Transient public String getVicketRequestServiceURL() {
-        return getServerURL() + "/vicket/request";
+        return getServerURL() + "/model/request";
     }
 
     @Transient public String getVicketDepositServiceURL() {
-        return getServerURL() + "/vicket/deposit";
+        return getServerURL() + "/model/deposit";
     }
 
     @Transient public String getUserCertServiceURL() {

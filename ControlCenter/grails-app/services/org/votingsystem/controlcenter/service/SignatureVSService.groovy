@@ -70,60 +70,13 @@ class SignatureVSService {
                 signedMailGenerator:signedMailGenerator, trustedCerts:trustedCerts, encryptor:encryptor];
 	}
 	
-	public ResponseVS deleteTestCerts () {
-		log.debug(" - deleteTestCerts - ")
-		def certificatesTest = null
-		CertificateVS.withTransaction {
-			certificatesTest = CertificateVS.findAllWhere(type:CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST);
-			certificatesTest.each { it.delete() }
-		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK)
-	}
-	
 	/*
 	 * Método para poder añadir certificados de confianza en las pruebas de carga.
 	 * El procedimiento para añadir una autoridad certificadora consiste en
 	 * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
 	 */
 	public ResponseVS addCertificateAuthority (byte[] caPEM, Locale locale)  {
-		log.debug("addCertificateAuthority");
-		/*if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
-			log.debug(" ### ADDING CERTS NOT ALLOWED IN PRODUCTION ENVIRONMENTS ###")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-				message: messageSource.getMessage('serviceDevelopmentModeMsg', null, locale))
-		}*/
-		if(!caPEM) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-			message: messageSource.getMessage('nullCertificateErrorMsg', null, locale))
-		try {
-			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
-			for(X509Certificate cert: certX509CertCollection) {
-				log.debug(" ------- addCertificateAuthority - adding cert: ${cert.getSubjectDN()}" );
-				CertificateVS certificate = null
-				CertificateVS.withTransaction {
-					certificate = CertificateVS.findBySerialNumber(
-						cert?.getSerialNumber()?.longValue())
-					if(!certificate) {
-						boolean isRoot = CertUtil.isSelfSigned(cert)
-						certificate = new CertificateVS(isRoot:isRoot,
-							type:CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST,
-							state:CertificateVS.State.OK,
-							content:cert.getEncoded(),
-							serialNumber:cert.getSerialNumber()?.longValue(),
-							validFrom:cert.getNotBefore(),
-							validTo:cert.getNotAfter())
-						certificate.save()
-						trustedCertsHashMap.put(cert?.getSerialNumber()?.longValue(), certificate)
-					}
-				}
-				trustedCerts.addAll(certX509CertCollection)
-				log.debug "Almacenada Autoridad Certificadora de pruebas con id:'${certificate?.id}'"
-			}
-			return new ResponseVS(statusCode:ResponseVS.SC_OK,
-				message:messageSource.getMessage('cert.newCACertMsg', null, locale))
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
-		}
+		log.debug("TODO - addCertificateAuthority");
 	}
 
     private synchronized ResponseVS initCertAuthorities() {
@@ -143,12 +96,7 @@ class SignatureVSService {
 				def criteria = CertificateVS.createCriteria()
 				def trustedCertsDB = criteria.list {
 					eq("state", CertificateVS.State.OK)
-					or {
-						eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
-                        if(EnvironmentVS.DEVELOPMENT  ==  ApplicationContextHolder.getEnvironment()) {
-							eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
-						}
-					}
+                    eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
 				}
 				trustedCertsDB.each { certificate ->
 					ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)

@@ -1,9 +1,10 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.votingsystem.model.*
-import org.votingsystem.model.vicket.MetaInfMsg
-import org.votingsystem.util.IbanVSUtil
+import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
 
@@ -19,7 +20,9 @@ class SubscriptionVSService {
 	def messageSource
     def userVSService
 
+    @Transactional
     public ResponseVS checkUser(UserVS userVS, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
 		String msg
         CertificateVS certificate = null;
@@ -27,20 +30,20 @@ class SubscriptionVSService {
 			msg = messageSource.getMessage('userDataWithErrors', null, locale)
 			log.error("checkUser - ${msg}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
-                metaInf: MetaInfMsg.user_ERROR_missingNif)
+                metaInf: MetaInfMsg.getErrorMsg(methodName, "missingNif"))
 		}
 		X509Certificate x509Cert = userVS.getCertificate()
 		if (!x509Cert) {
 			log.debug("Missing certificate!!!")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:"Missing certificate!!!",
-                    metaInf: MetaInfMsg.user_ERROR_missingCert)
+                    metaInf: MetaInfMsg.getErrorMsg(methodName, "missingCert"))
 		}
 		String validatedNIF = org.votingsystem.util.NifUtils.validate(userVS.getNif())
 		if(!validatedNIF) {
 			msg = messageSource.getMessage('NIFWithErrorsMsg', [userVS.getNif()].toArray(), locale)
 			log.error("- checkUser - ${msg}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
-                    metaInf: MetaInfMsg.user_ERROR_nif)
+                    metaInf: MetaInfMsg.getErrorMsg(methodName,"nif"))
 		}
 		UserVS userVSDB = UserVS.findByNif(validatedNIF.toUpperCase())
 		if (!userVSDB) {
@@ -54,8 +57,7 @@ class SubscriptionVSService {
 			certificate = new CertificateVS(userVS:userVS, content:x509Cert.getEncoded(),
                     serialNumber:x509Cert.getSerialNumber()?.longValue(), state:CertificateVS.State.OK,
                     type:CertificateVS.Type.USER, authorityCertificate:userVS.getCertificateCA(),
-				    validFrom:x509Cert.getNotBefore(), validTo:x509Cert.getNotAfter())
-			certificate.save();
+				    validFrom:x509Cert.getNotBefore(), validTo:x509Cert.getNotAfter()).save();
 			log.debug "- checkUser ### NEW UserVS CertificateVS id '${certificate.id}'"
 		} else {
 			certificate = CertificateVS.findWhere(userVS:userVSDB, state:CertificateVS.State.OK)
@@ -103,6 +105,7 @@ class SubscriptionVSService {
 	}
 
     public ResponseVS deActivateUser(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("deActivateUser - signer: ${userSigner?.nif}")
         String msg = null
@@ -115,24 +118,24 @@ class SubscriptionVSService {
                 (TypeVS.VICKET_GROUP_USER_DEACTIVATE != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "deActivateUser - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    metaInf:MetaInfMsg.deActivateVicketGroupUser_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "params"), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         GroupVS groupVS = GroupVS.findWhere(name:messageJSON.groupvs.name.trim(), id:Long.valueOf(messageJSON.groupvs.id))
         if(!groupVS) {
             msg = messageSource.getMessage('itemNotFoundMsg', [messageJSON.groupvs.id].toArray(), locale)
             log.error "deActivateUser - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    metaInf:MetaInfMsg.deActivateVicketGroupUser_ERROR_groupNotFound, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "groupNotFound"), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
 
         if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
                 messageSMIMEReq.userVS.nif)) {
-            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
+            msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                  TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), locale)
             log.error "deActivateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    metaInf:MetaInfMsg.activateVicketGroupUser_ERROR_userWithoutPrivilege, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivilege"))
         }
         UserVS userToActivate = UserVS.findWhere(nif:messageJSON.uservs.NIF)
         SubscriptionVS subscription = SubscriptionVS.findWhere(groupVS: groupVS, userVS:userToActivate)
@@ -141,8 +144,8 @@ class SubscriptionVSService {
             msg = messageSource.getMessage('groupUserAlreadyCencelledErrorMsg',
                     [groupVS.name, userSigner.getNif()].toArray(), locale)
             log.error "deActivateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.deActivateVicketGroupUser_ERROR_groupUserAlreadyCancelled)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "groupUserAlreadyCancelled"))
         }
         subscription.setReason(messageJSON.reason)
         subscription.setState(SubscriptionVS.State.CANCELLED)
@@ -150,11 +153,12 @@ class SubscriptionVSService {
         messageSMIMEReq.setSubscriptionVS(subscription)
         log.debug("deActivateUser OK - userToActivate: ${userToActivate.nif} - group: ${groupVS.name}")
         return new ResponseVS(type:TypeVS.VICKET_GROUP_USER_DEACTIVATE, message:msg, statusCode:ResponseVS.SC_OK,
-                metaInf:MetaInfMsg.deActivateVicketGroupUser_OK + subscription.id, data:subscription)
+                metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"), data:subscription)
         return responseVS
     }
 
     public ResponseVS activateUser(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("activateUser - signer: ${userSigner?.nif}")
         String msg = null
@@ -166,23 +170,23 @@ class SubscriptionVSService {
                 (TypeVS.VICKET_GROUP_USER_ACTIVATE != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "activateUser - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    metaInf:MetaInfMsg.activateVicketGroupUser_ERROR_params, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "params"), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         GroupVS groupVS = GroupVS.get(Long.valueOf(messageJSON.groupvs.id))
         if(!groupVS || !messageJSON.groupvs.name.equals(groupVS.name)) {
             msg = messageSource.getMessage('itemNotFoundMsg', [messageJSON.groupvs.id].toArray(), locale)
             log.error "activateUser - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    metaInf:MetaInfMsg.activateVicketGroupUser_ERROR_groupNotFound, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, groupNotFound), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
                 messageSMIMEReq.userVS.nif)) {
-            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
+            msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                      TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), locale)
             log.error "activateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg,
-                    metaInf:MetaInfMsg.activateVicketGroupUser_ERROR_userWithoutPrivilege, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivilege"))
         }
         UserVS userToActivate = UserVS.findWhere(nif:messageJSON.uservs.NIF)
         SubscriptionVS subscription = SubscriptionVS.findWhere(groupVS: groupVS, userVS:userToActivate)
@@ -190,15 +194,15 @@ class SubscriptionVSService {
             msg = messageSource.getMessage('groupUserNotPendingErrorMsg',
                     [groupVS.name, userSigner.getNif()].toArray(), locale)
             log.error "activateUser - ${msg}"
-            return new ResponseVS(type:TypeVS.VICKET_GROUP_ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.activateVicketGroupUser_ERROR_groupUserNotPending)
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "groupUserNotPending"))
         }
         subscription.setState(SubscriptionVS.State.ACTIVE)
         subscription.dateActivated = Calendar.getInstance().getTime()
         messageSMIMEReq.setSubscriptionVS(subscription)
         log.debug("activateUser OK - userToActivate: ${userToActivate.nif} - group: ${groupVS.name}")
         return new ResponseVS(type:TypeVS.VICKET_GROUP_USER_ACTIVATE, message:msg, statusCode:ResponseVS.SC_OK,
-                metaInf:MetaInfMsg.activateVicketGroupUser_OK + subscription.id, data:subscription)
+                metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscription.id}"), data:subscription)
     }
 
 }

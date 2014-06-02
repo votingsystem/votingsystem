@@ -40,7 +40,7 @@ class VicketController {
      * Servicio que valida las solicitudes de vickets de los usuarios.
      *
      * @httpMethod [POST]
-     * @serviceURL [/vicket/request]
+     * @serviceURL [/model/request]
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de certificado de delegación.
      * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
      * @return La solicitud de certificado de delegación anónima firmada.
@@ -64,6 +64,6 @@ class VicketController {
         log.error "Exception occurred. ${exception?.message}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.VICKET_ERROR, reason:exception.getMessage())]
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
 }

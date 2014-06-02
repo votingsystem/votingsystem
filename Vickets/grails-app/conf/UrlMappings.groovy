@@ -10,7 +10,8 @@ class UrlMappings {
         "/"(controller:"/app")
         "500"(view:'/error')
 
-        "/certificateVS/vicket/hashHex/$hashHex" {
+
+        "/certificateVS/model/hashHex/$hashHex" {
             controller = "certificateVS"
             action = "voteVS"
         }
@@ -143,8 +144,8 @@ class UrlMappings {
             }
         }
 
-        "/vicket/request" {
-            controller = "vicket"
+        "/model/request" {
+            controller = "model"
             action = [POST:"processRequestFileMap"]
         }
 

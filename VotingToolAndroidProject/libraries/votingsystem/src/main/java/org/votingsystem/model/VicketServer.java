@@ -21,19 +21,19 @@ public class VicketServer extends ActorVS implements Serializable {
     }
 
     public String getVicketRequestServiceURL() {
-        return getServerURL() + "/vicket/request";
+        return getServerURL() + "/model/request";
     }
 
     public String getVicketDepositServiceURL() {
-        return getServerURL() + "/vicket/deposit";
+        return getServerURL() + "/model/deposit";
     }
 
     public String getVicketBatchCancellationServiceURL() {
-        return getServerURL() + "/vicket/cancelBatch";
+        return getServerURL() + "/model/cancelBatch";
     }
 
     public String getVicketCancelServiceURL() {
-        return getServerURL() + "/vicket/cancel";
+        return getServerURL() + "/model/cancel";
     }
 
     public String getVicketBatchServiceURL() {

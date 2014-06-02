@@ -1,13 +1,10 @@
-package org.votingsystem.model.vicket;
+package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.model.BatchRequest;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
-
-import static javax.persistence.GenerationType.IDENTITY;
 
 /**
  * @author jgzornoza

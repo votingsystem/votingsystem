@@ -21,6 +21,7 @@ body {
     border-bottom: 1px solid #f9f9f9;
     color:#f9f9f9;
     height: 50px;
+    z-index: 20;
 }
 
 .navBar-vicket-icon {
@@ -44,16 +45,10 @@ body {
     background-color: #6c0404;
 }
 
-#menu {
+#navBarMainMenu {
     position: fixed;
-    top: 50px;
+    top: 0px;
     z-index:10;
-}
-.navBarMainMenu {
-    position: absolute;
-    top: 50px;
-    z-index:10;
-    visibility:hidden;
 }
 
 .pageContenDiv {
@@ -196,4 +191,11 @@ input:focus:valid {
     font-size: 1.3em;
     font-weight:bold;
     margin:7px 0px 7px 0px;
+}
+
+.dialogAdviceMsg {
+    font-size: 1.3em;
+    font-weight:bold;
+    color: #6c0404;
+    margin:10px auto 15px auto;
 }

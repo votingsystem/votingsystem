@@ -39,34 +39,6 @@ class SignatureVSService {
 	def subscriptionVSService
 	def timeStampService
 	def sessionFactory
-	
-	public ResponseVS deleteTestCerts () {
-		log.debug(" - deleteTestCerts - ")
-        /*def d = new DefaultGrailsDomainClass(CertificateVS.class)
-        d.persistentProperties.each { log.debug("============ ${it}") }*/
-		int numTestCerts = CertificateVS.countByType(CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
-		log.debug(" - deleteTestCerts - numTestCerts: ${numTestCerts}")
-		def criteria = CertificateVS.createCriteria()
-		def testCerts = criteria.scroll { eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST) }
-		while (testCerts.next()) {
-			CertificateVS cert = (CertificateVS) testCerts.get(0);
-			int numCerts = CertificateVS.countByAuthorityCertificateVS(cert)
-			def userCertCriteria = CertificateVS.createCriteria()
-			def userTestCerts = userCertCriteria.scroll { eq("authorityCertificateVS", cert) }
-			while (userTestCerts.next()) { 
-				CertificateVS userCert = (CertificateVS) userTestCerts.get(0);
-				userCert.delete()
-				if((userTestCerts.getRowNumber() % 100) == 0) {
-					sessionFactory.currentSession.flush()
-					sessionFactory.currentSession.clear()
-					log.debug(" - processed ${userTestCerts.getRowNumber()}/${numCerts} user certs from auth. cert ${cert.id}");
-				}
-			}
-			CertificateVS.withTransaction { cert.delete() }
-		}
-        init();
-		return new ResponseVS(statusCode:ResponseVS.SC_OK)
-	}
 
 	public synchronized Map init() throws Exception {
 		log.debug(" - init - ")
@@ -231,12 +203,7 @@ class SignatureVSService {
 				def criteria = CertificateVS.createCriteria()
 				def trustedCertsDB = criteria.list {
 					eq("state", CertificateVS.State.OK)
-					or {
-						eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
-						if(EnvironmentVS.DEVELOPMENT  ==  ApplicationContextHolder.getEnvironment()) {
-							eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
-						}
-					}
+                    eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
 				}
 				trustedCertsDB.each { certificate ->
 					ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
@@ -250,41 +217,6 @@ class SignatureVSService {
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
-		}
-	}
-	
-	def checkCancelledCerts () {
-		log.debug "checkCancelledCerts - checkCancelledCerts"
-		File directory = grailsApplication.mainContext.getResource(
-			grailsApplication.config.VotingSystem.certAuthoritiesDirPath).getFile()
-		String cancelSufix = "_CANCELLED"
-		directory.eachFile() { file ->
-			String fileName = file.getName().toUpperCase()
-			if(fileName.endsWith(cancelSufix)) {
-				int idx = fileName.indexOf(cancelSufix)
-				fileName = fileName.substring(0, idx);
-				if(fileName.endsWith("JKS")) {
-					log.debug ("--- cancelando JKS -> " + fileName)
-					KeyStore ks = KeyStore.getInstance("JKS");
-					String password = grailsApplication.config.VotingSystem.signKeysPassword
-					String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
-					ks.load(new FileInputStream(file), password.toCharArray());
-					java.security.cert.Certificate[] chain = ks.getCertificateChain(aliasClaves);				
-					for (int i = 0; i < chain.length; i++) {
-						X509Certificate cert = chain[i]
-						cancelCert(cert.getSerialNumber().longValue())
-					}
-					file.delete();
-				} else if (fileName.endsWith("PEM")) {
-					log.debug ("--- cancel PEM -> " + fileName)
-					Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
-						FileUtils.getBytesFromFile(file))
-					for (X509Certificate cert :certificates) {
-						cancelCert(cert.getSerialNumber().longValue())
-					}
-					file.delete();
-				}
-			}
 		}
 	}
 	
@@ -346,45 +278,8 @@ class SignatureVSService {
 	 * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
 	 */
 	public ResponseVS addCertificateAuthority (byte[] caPEM, Locale locale)  {
-		log.debug("addCertificateAuthority");
-		/*if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
-			log.debug(" ### ADDING CERTS NOT ALLOWED IN PRODUCTION ENVIRONMENTS ###")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-				message: messageSource.getMessage('serviceDevelopmentModeMsg', null, locale))
-		}*/
-		if(!caPEM) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-			message: messageSource.getMessage('nullCertificateErrorMsg', null, locale))
-		try {
-			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
-			for(X509Certificate cert: certX509CertCollection) {
-				log.debug(" ------- addCertificateAuthority - adding cert: ${cert.getSubjectDN()}" + 
-					" - serial number: ${cert.getSerialNumber()}");
-				CertificateVS certificate = null
-				CertificateVS.withTransaction {
-					certificate = CertificateVS.findBySerialNumber(
-						cert?.getSerialNumber()?.longValue())
-					if(!certificate) {
-						boolean isRoot = CertUtil.isSelfSigned(cert)
-						certificate = new CertificateVS(isRoot:isRoot,
-							type:CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST,
-							state:CertificateVS.State.OK,
-							content:cert.getEncoded(),
-							serialNumber:cert.getSerialNumber()?.longValue(),
-							validFrom:cert.getNotBefore(),
-							validTo:cert.getNotAfter())
-						certificate.save()
-						trustedCertsHashMap.put(cert?.getSerialNumber()?.longValue(), certificate)
-					}
-				}
-				log.debug "Almacenada Autoridad Certificadora de pruebas con id:'${certificate?.id}'"
-			}
-            trustedCerts.addAll(certX509CertCollection)
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, 
-				message:messageSource.getMessage('cert.newCACertMsg', null, locale))
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
-		}
+		log.debug("TODO - addCertificateAuthority");
+
 	}
 	
 	public CertificateVS getCACertificate(long numSerie) {

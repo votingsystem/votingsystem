@@ -501,4 +501,11 @@ public class ContextVS {
     public void setVicketServer(VicketServer vicketServer) {
         this.vicketServer = vicketServer;
     }
+
+    public void setServer(ActorVS server) {
+        if(server instanceof VicketServer) setVicketServer((VicketServer) server);
+        else if(server instanceof AccessControlVS) setAccessControl((AccessControlVS) server);
+        else if(server instanceof ControlCenterVS) setControlCenter((ControlCenterVS) server);
+        else logger.error("setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
+    }
 }

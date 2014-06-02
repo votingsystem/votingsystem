@@ -21,7 +21,7 @@
         <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
         </div>
 
-        <g:if test="${"admin".equals(params.menu)}">
+        <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
             <div id="adminButtonsDiv" class="">
                 <button id="editGroupVSButton" type="submit" class="btn btn-warning" onclick="editGroup();"
                         style="margin:10px 20px 0px 0px;">

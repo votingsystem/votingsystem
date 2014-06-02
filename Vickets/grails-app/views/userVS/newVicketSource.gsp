@@ -22,7 +22,7 @@
         <div class="text-left" style="margin:10px 0 10px 0;">
             <ul>
                 <li><g:message code="systemAdminReservedOperationMsg"/></li>
-                <li><g:message code="newVicketSourceAdviceMsg1"/></li>
+                <li><g:message code="signatureRequiredMsg"/></li>
                 <li><g:message code="newVicketSourceAdviceMsg2"/></li>
                 <li><g:message code="newVicketSourceAdviceMsg3"/></li>
             </ul>
@@ -34,7 +34,7 @@
             </div>
 
             <div class="form-group" style="margin:15px 0px 0px 0px;">
-                <label><g:message code="vicketSourcePEMCertMsg"/></label>
+                <label><g:message code="pemCertLbl"/></label>
                 <textarea id="pemCert" class="form-control" rows="8" required=""></textarea>
             </div>
 

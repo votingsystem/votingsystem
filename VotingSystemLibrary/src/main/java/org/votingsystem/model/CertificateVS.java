@@ -6,9 +6,11 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.votingsystem.signature.util.CertUtil;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
@@ -30,7 +32,7 @@ public class CertificateVS implements Serializable {
 
     public enum State {OK, ERROR, CANCELLED, USED, UNKNOWN}
 
-    public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_TEST, ACTOR_VS,
+    public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
         ANONYMOUS_REPRESENTATIVE_DELEGATION, VICKET, TIMESTAMP_SERVER}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -281,6 +283,11 @@ public class CertificateVS implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public X509Certificate getX509Cert() throws Exception {
+        X509Certificate x509Cert = CertUtil.loadCertificate(content);
+        return x509Cert;
     }
 
 }

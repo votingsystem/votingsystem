@@ -24,10 +24,11 @@
 </head>
 <body>
 <div>
-    <div id="menu" class="navBarMainMenu" style="">
+    <div id="navBarMainMenu">
         <nav>
             <h2><i class="fa fa-reorder"></i>
-                <span style="text-decoration: underline; font-size: 1.2em;"><g:message code="sectionsLbl"/></span>
+                <span style="text-decoration: underline; font-size: 1.2em;">
+                    <div style="margin: 60px 0px 0px 0px;"><g:message code="sectionsLbl"/></div></span>
             </h2>
             <ul>
                 <li>
@@ -97,7 +98,7 @@
 	        
 	$(function() {
         $('#advancedSearchButton').popover()
-        $( '#menu' ).multilevelpushmenu({
+        $( '#navBarMainMenu' ).multilevelpushmenu({
                 menuWidth: 250,
                 onItemClick: function() {
                     var event = arguments[0], // First argument is original event object
@@ -120,9 +121,9 @@
 
 
         $("#expandMenuIcon").click(function () {
-            $('#menu').css("visibility", "visible")
-            if(isMenuVisible) $('#menu').multilevelpushmenu( 'collapse' );
-            else $('#menu').multilevelpushmenu( 'expand' );
+            $('#navBarMainMenu').css("visibility", "visible")
+            if(isMenuVisible) $('#navBarMainMenu').multilevelpushmenu( 'collapse' );
+            else $('#navBarMainMenu').multilevelpushmenu( 'expand' );
 
         })
 

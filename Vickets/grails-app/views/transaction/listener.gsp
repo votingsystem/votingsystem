@@ -90,7 +90,10 @@
             var transactionvsType = $(this).val()
             console.log("transactionvs selected: " + transactionvsType)
             var targetURL = "${createLink(controller: 'transaction', action: 'index')}";
-            if("" != transactionvsType) targetURL = targetURL + "?transactionvsType=" + transactionvsType
+            if("" != transactionvsType) {
+                history.pushState(null, null, targetURL);
+                targetURL = targetURL + "?transactionvsType=" + transactionvsType
+            }
             dynatable.settings.dataset.ajaxUrl= targetURL
             dynatable.paginationPage.set(1);
             dynatable.process();

@@ -27,6 +27,7 @@ public class OperationVS {
     private String serviceURL;
     private String receiverName;
     private String email;
+    private ActorVS targetServer;
     private File file;
     private String signedMessageSubject;
     private Map documentToSign;
@@ -266,6 +267,14 @@ public class OperationVS {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public ActorVS getTargetServer() {
+        return targetServer;
+    }
+
+    public void setTargetServer(ActorVS targetServer) {
+        this.targetServer = targetServer;
     }
 }
 

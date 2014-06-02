@@ -1,8 +1,7 @@
-package org.votingsystem.websocket;
+package org.votingsystem.vicket.websocket;
 
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-import org.votingsystem.util.ApplicationContextHolder;
+import org.votingsystem.vicket.util.ApplicationContextHolder;
 import org.votingsystem.vicket.service.WebSocketService;
 
 import java.io.IOException;

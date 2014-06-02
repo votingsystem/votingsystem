@@ -22,26 +22,25 @@
         <div class="text-left" style="margin:10px 0 10px 0;">
             <ul>
                 <li><g:message code="systemAdminReservedOperationMsg"/></li>
-                <li><g:message code="newVicketSourceAdviceMsg1"/></li>
-                <li><g:message code="newVicketSourceAdviceMsg2"/></li>
-                <li><g:message code="newVicketSourceAdviceMsg3"/></li>
+                <li><g:message code="signatureRequiredMsg"/></li>
             </ul>
         </div>
 
         <form id="mainForm">
             <div style="position:relative; width:100%;">
+                <label><g:message code="interestInfoLbl"/></label>
                 <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
             </div>
 
             <div class="form-group" style="margin:15px 0px 0px 0px;">
-                <label><g:message code="vicketSourcePEMCertMsg"/></label>
+                <label><g:message code="pemCertLbl"/></label>
                 <textarea id="pemCert" class="form-control" rows="8" required=""></textarea>
             </div>
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
                     <button type="submit" class="btn btn-default">
-                        <g:message code="newVicketSourceLbl"/> <i class="fa fa fa-check"></i>
+                        <g:message code="doOperationLbl"/> <i class="fa fa fa-check"></i>
                     </button>
                 </div>
             </div>
@@ -70,39 +69,39 @@
             }
 
             console.log("newCA - sendSignature ")
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.NEW_CA_CERT)
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_CA_NEW)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newVicketSource", absolute:true)}"
-            webAppMessage.signedMessageSubject = "<g:message code='newVicketSourceMsgSubject'/>"
+            webAppMessage.serviceURL = "${createLink( controller:'certificateVS', action:"addCertificateAuthority", absolute:true)}"
+            webAppMessage.signedMessageSubject = "<g:message code='newCertificateAuthorityMsgSubject'/>"
             webAppMessage.signedContent = {info:getEditor_editorDivData(),certChainPEM:$("#pemCert").val(),
-                        operation:Operation.VICKET_SOURCE_NEW}
+                        operation:Operation.CERT_CA_NEW}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = 'newVicketSourceCallback'
+            webAppMessage.callerCallback = 'newCACertCallback'
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         });
 
       });
 
-    var vicketSourceURL = null
+    var newCertURL = null
 
     function resultOKCallback() {
-        window.location.href = vicketSourceURL + "?menu=superadmin"
+        window.location.href = newCertURL
     }
 
-    function newVicketSourceCallback(appMessage) {
+    function newCACertCallback(appMessage) {
         console.log("newGroupVSCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         var callBackResult = null
         if(appMessageJSON != null) {
-            var caption = '<g:message code="newVicketSourceERRORCaption"/>'
+            var caption = '<g:message code="newCACertERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="newVicketSourceOKCaption"/>'
+                caption = '<g:message code="newCACertOKCaption"/>'
                 var msgTemplate = '<g:message code='accessLinkMsg'/>';
                 callBackResult = resultOKCallback
-                vicketSourceURL = appMessageJSON.URL
+                newCertURL = updateMenuLink(appMessageJSON.URL)
             }
             showResultDialog(caption, msg, callBackResult)
         }

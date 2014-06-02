@@ -57,6 +57,8 @@ public class MessageSMIME implements Serializable {
     private String base64ContentDigest;
 
     @Column(name="reason", columnDefinition="TEXT") private String reason;
+    @Column(name="messageSubject") private String messageSubject;
+    @Column(name="signedContent", columnDefinition="TEXT") private String signedContent;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23, insertable=true)
@@ -210,5 +212,30 @@ public class MessageSMIME implements Serializable {
 
     public void setSubscriptionVS(SubscriptionVS subscriptionVS) {
         this.subscriptionVS = subscriptionVS;
+    }
+
+    public String getMessageSubject() {
+        return messageSubject;
+    }
+
+    public void setMessageSubject(String messageSubject) {
+        this.messageSubject = messageSubject;
+    }
+
+    public String getSignedContent() {
+        return signedContent;
+    }
+
+    public void setSignedContent(String signedContent) {
+        this.signedContent = signedContent;
+    }
+
+    public void beforeInsert() {
+        try {
+            setSignedContent(getSmimeMessage().getSignedContent());
+            setMessageSubject(getSmimeMessage().getSubject());
+        }catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
 }

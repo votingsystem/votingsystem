@@ -204,7 +204,7 @@ public class VicketFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected vicket type:" + selectedVicket.getTypeVS());
+        Log.d(TAG + ".onCreateOptionsMenu(...) ", " selected model type:" + selectedVicket.getTypeVS());
         menuInflater.inflate(R.menu.vicket_fragment, menu);
         try {
             if(selectedVicket.getReceipt() == null) {

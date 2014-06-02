@@ -22,7 +22,7 @@ class SearchController {
         log.error "Exception occurred. ${exception?.message}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.VICKET_ERROR, reason:exception.getMessage())]
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
 
 }

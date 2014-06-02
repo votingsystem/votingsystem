@@ -6,10 +6,10 @@ import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
 import org.votingsystem.model.*
-import org.votingsystem.model.vicket.MetaInfMsg
-import org.votingsystem.model.vicket.TransactionVS
-import org.votingsystem.model.vicket.Vicket
-import org.votingsystem.model.vicket.VicketBatchRequest
+import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.Vicket
+import org.votingsystem.vicket.model.VicketBatchRequest
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.util.DateUtils
@@ -31,6 +31,7 @@ class VicketService {
     def userVSService
 
 	public ResponseVS processRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
         def dataRequestJSON
@@ -92,71 +93,65 @@ class VicketService {
     }
 
     public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
-        try {
-            def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
-            if(TypeVS.VICKET_CANCEL != TypeVS.valueOf(requestJSON.operation))
-                throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
-                        [TypeVS.VICKET_CANCEL.toString(),requestJSON.operation ].toArray(), locale))
-            def hashCertVSBase64 = CMSUtils.getHashBase64(requestJSON.originHashCertVS, ContextVS.VOTING_DATA_DIGEST)
-            if(!hashCertVSBase64.equals(requestJSON.hashCertVSBase64))
-                throw new ExceptionVS(messageSource.getMessage("originHashErrorMsg", null, locale))
-            Vicket vicket = Vicket.findWhere(hashCertVS: requestJSON.hashCertVSBase64,
-                    serialNumber:Long.valueOf(requestJSON.vicketCertSerialNumber))
-            if(Vicket.State.OK == vicket.getState()) {
-                String fromUser = grailsApplication.config.VotingSystem.serverName
-                String toUser = smimeMessageReq.getFrom().toString()
-                String subject = messageSource.getMessage('cancelVicketReceiptSubject', null, locale)
-                vicket.setState(Vicket.State.CANCELLED)
-                SMIMEMessageWrapper receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
-                        smimeMessageReq, subject)
-                MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                        content:receipt.getBytes()).save()
-                vicket.cancelMessage = messageSMIMEReq
-                vicket.save()
-                TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
-                        subject:messageSource.getMessage('cancelVicketTransactionSubject', null, locale),
-                        fromUserVS:signer, toUserVS:signer, state:TransactionVS.State.OK,
-                        currency:vicket.currency, type:TransactionVS.Type.VICKET_CANCELLATION, validTo:vicket.validTo).save()
-                log.debug("cancelVicket - vicket: ${vicket.id} - transactionVS: ${transaction.id}");
-                return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
-                        messageBytes: vicket.cancelMessage.content, type:TypeVS.VICKET_CANCEL)
-            } else {
-                log.error("cancelVicket - ERROR - request for cancel vicket: ${vicket.id} - with state: ${vicket.state}");
-                byte[] messageBytes
-                ContentTypeVS contentType = ContentTypeVS.ENCRYPTED
-                int statusCode = ResponseVS.SC_ERROR_REQUEST
-                //ResponseVS.
-                if(Vicket.State.CANCELLED == vicket.getState()) {
-                    contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
-                    messageBytes = vicket.cancelMessage.content
-                } else if(Vicket.State.EXPENDED == vicket.getState()) {
-                    contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
-                    messageBytes = vicket.messageSMIME.content
-                }
-                if(Vicket.State.LAPSED == vicket.getState()) {
-                    contentType = ContentTypeVS.ENCRYPTED
-                    messageBytes = messageSource.getMessage("vicketLapsedErrorMsg",
-                            [vicket.serialNumber].toArray(), locale).getBytes()
-                }
-                return new ResponseVS(statusCode:statusCode, messageBytes: messageBytes, contentType: contentType,
-                        type:TypeVS.VICKET_CANCEL_ERROR)
+        def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        if(TypeVS.VICKET_CANCEL != TypeVS.valueOf(requestJSON.operation))
+            throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
+                    [TypeVS.VICKET_CANCEL.toString(),requestJSON.operation ].toArray(), locale))
+        def hashCertVSBase64 = CMSUtils.getHashBase64(requestJSON.originHashCertVS, ContextVS.VOTING_DATA_DIGEST)
+        if(!hashCertVSBase64.equals(requestJSON.hashCertVSBase64))
+            throw new ExceptionVS(messageSource.getMessage("originHashErrorMsg", null, locale))
+        Vicket vicket = Vicket.findWhere(hashCertVS: requestJSON.hashCertVSBase64,
+                serialNumber:Long.valueOf(requestJSON.vicketCertSerialNumber))
+        if(Vicket.State.OK == vicket.getState()) {
+            String fromUser = grailsApplication.config.VotingSystem.serverName
+            String toUser = smimeMessageReq.getFrom().toString()
+            String subject = messageSource.getMessage('cancelVicketReceiptSubject', null, locale)
+            vicket.setState(Vicket.State.CANCELLED)
+            SMIMEMessageWrapper receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                    smimeMessageReq, subject)
+            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
+                    content:receipt.getBytes()).save()
+            vicket.cancelMessage = messageSMIMEReq
+            vicket.save()
+            TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
+                    subject:messageSource.getMessage('cancelVicketTransactionSubject', null, locale),
+                    fromUserVS:signer, toUserVS:signer, state:TransactionVS.State.OK,
+                    currency:vicket.currency, type:TransactionVS.Type.VICKET_CANCELLATION, validTo:vicket.validTo).save()
+            log.debug("cancelVicket - model: ${vicket.id} - transactionVS: ${transaction.id}");
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    messageBytes: vicket.cancelMessage.content, type:TypeVS.VICKET_CANCEL)
+        } else {
+            log.error("cancelVicket - ERROR - request for cancel model: ${vicket.id} - with state: ${vicket.state}");
+            byte[] messageBytes
+            ContentTypeVS contentType = ContentTypeVS.ENCRYPTED
+            int statusCode = ResponseVS.SC_ERROR_REQUEST
+            //ResponseVS.
+            if(Vicket.State.CANCELLED == vicket.getState()) {
+                contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
+                messageBytes = vicket.cancelMessage.content
+            } else if(Vicket.State.EXPENDED == vicket.getState()) {
+                contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
+                messageBytes = vicket.messageSMIME.content
             }
-        } catch(ExceptionVS ex) {
-            log.error(ex.getMessage(), ex);
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, messageBytes: ex.getMessage().getBytes("UTF-8"),
-                    contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.VICKET_CANCEL_ERROR)
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.VICKET_CANCEL_ERROR, contentType:
-                    ContentTypeVS.ENCRYPTED, messageBytes: messageSource.getMessage(
-                    'vicketRequestDataError', null, locale).getBytes("UTF-8"))
+            if(Vicket.State.LAPSED == vicket.getState()) {
+                contentType = ContentTypeVS.ENCRYPTED
+                messageBytes = messageSource.getMessage("vicketLapsedErrorMsg",
+                        [vicket.serialNumber].toArray(), locale).getBytes()
+            }
+            return new ResponseVS(statusCode:statusCode, messageBytes: messageBytes, contentType: contentType,
+                    type:TypeVS.VICKET_CANCEL_ERROR)
+            return new ResponseVS(type:TypeVS.ERROR, messageBytes: messageBytes, contentType: contentType,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "VicketState_" + vicket.getState().toString()),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
 
 
     public ResponseVS processVicketDeposit(MessageSMIME messageSMIMEReq, VicketBatchRequest batchRequest, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         String msg;
@@ -168,7 +163,7 @@ class VicketService {
                     locale)
             log.error("${msg} - ${ex.getMessage()}", ex)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                    metaInf:MetaInfMsg.processVicketDeposit_ERROR_IBAN_code,
+                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"),
                     contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.VICKET_DEPOSIT_ERROR)
         }
 
@@ -206,7 +201,7 @@ class VicketService {
                 Map dataMap = [vicketReceipt:messageSMIMEResp, vicket:vicket]
                 resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET, data:dataMap)
             } else if (Vicket.State.EXPENDED == vicket.state) {
-                log.error("processVicketDeposit - vicket '${vicket.id}' state ${vicket.state}")
+                log.error("processVicketDeposit - model '${vicket.id}' state ${vicket.state}")
                 Map dataMap = [message:messageSource.getMessage("vicketExpendedErrorMsg", null, locale),
                         messageSMIME:new String(Base64.encode(vicket.messageSMIME.content))]
                 resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,

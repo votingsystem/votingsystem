@@ -5,7 +5,7 @@ import net.sf.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.vicket.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 
 import java.security.cert.X509Certificate
@@ -236,7 +236,7 @@ class UserVSController {
         log.error "Exception occurred. ${exception?.message}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.VICKET_ERROR, reason:exception.getMessage())]
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
 	
 }

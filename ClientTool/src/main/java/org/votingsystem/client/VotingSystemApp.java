@@ -183,7 +183,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     private void openVicketUserProcedures() {
-        logger.debug("openGroupAdmin");
+        logger.debug("openVicketUserProcedures");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if(browserVS == null) browserVS = new BrowserVS();

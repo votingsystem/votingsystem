@@ -19,7 +19,7 @@
 
         <div class="text-left" style="margin:10px 0 10px 0;">
             <ul>
-                <li><g:message code="newGroupVSAdviceMsg1"/></li>
+                <li><g:message code="signatureRequiredMsg"/></li>
                 <li><g:message code="newGroupVSAdviceMsg2"/></li>
                 <li><g:message code="newGroupVSAdviceMsg3"/></li>
             </ul>

@@ -12,7 +12,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.model.vicket.Vicket
+import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -113,6 +113,7 @@ class CsrService {
 
     public synchronized ResponseVS signVicketBatchRequest (byte[] vicketBatchRequest, BigDecimal expectedAmount,
             CurrencyVS expectedCurrency, Locale locale){
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ResponseVS responseVS = null;
         String msg = null;
         List<Vicket> issuedVicketList = new ArrayList<Vicket>()

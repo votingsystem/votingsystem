@@ -40,10 +40,10 @@ public class VicketServer extends ActorVS implements Serializable {
     }
 
     public String getVicketRequestServiceURL() {
-        return getServerURL() + "/vicket/request";
+        return getServerURL() + "/model/request";
     }
 
     public String getVicketDepositServiceURL() {
-        return getServerURL() + "/vicket/deposit";
+        return getServerURL() + "/model/deposit";
     }
 }

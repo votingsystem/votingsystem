@@ -4,9 +4,10 @@ import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.votingsystem.model.*
-import org.votingsystem.model.vicket.TransactionVS
-import org.votingsystem.model.vicket.Vicket
-import org.votingsystem.model.vicket.VicketBatchRequest
+import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.Vicket
+import org.votingsystem.vicket.model.VicketBatchRequest
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 
@@ -108,10 +109,11 @@ class TransactionController {
      * @httpMethod [POST]
      * @serviceURL [/transaction/vicketBatch]
      * @requestContentType Documento JSON con la extructura https://github.com/jgzornoza/SistemaVotacion/wiki/Lote-de-Vickets
-     * @responseContentType [application/pkcs7-mime]. Documento JSON cifrado en el que figuran los recibos de los vicket recibidos.
+     * @responseContentType [application/pkcs7-mime]. Documento JSON cifrado en el que figuran los recibos de los model recibidos.
      * @return
      */
     def vicketBatch() {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(!params.requestBytes) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
@@ -142,10 +144,11 @@ class TransactionController {
         }
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             String msg = message(code: "vicketBatchErrorMsg") + "--- ${responseVS.getMessage()}"
-            cancelVicketBatchRequest(responseList, batchRequest, TypeVS.VICKET_SIGNATURE_ERROR, msg)
+            String metaInfMsg = MetaInfMsg.getErrorMsg(methodName, "vicketBatchError")
+            cancelVicketBatchRequest(responseList, batchRequest, TypeVS.ERROR, msg, metaInfMsg)
             return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    type: TypeVS.VICKET_SIGNATURE_ERROR,
-                    contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
+                    type: TypeVS.ERROR, metaInf: metaInfMsg, contentType: ContentTypeVS.MULTIPART_ENCRYPTED,
+                    messageBytes: msg.getBytes())]
         } else {
             List<ResponseVS> depositResponseList = new ArrayList<ResponseVS>()
             for(ResponseVS response : responseList) {
@@ -160,10 +163,11 @@ class TransactionController {
             }
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+                    String metaInfMsg = MetaInfMsg.getErrorMsg(methodName, TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED.toString())
                     cancelVicketBatchRequest(responseList, batchRequest, TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED,
-                            responseVS.data.message)
+                            responseVS.data.message, metaInfMsg)
                     cancelVicketBatchDeposit(depositResponseList, batchRequest,TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED,
-                            responseVS.data.message)
+                            responseVS.data.message, metaInfMsg)
                     return [receiverPublicKey:receiverPublic, responseVS:responseVS];
                 } else {
                     String msg = message(code: "vicketBatchErrorMsg") + " ${responseVS.getMessage()}"
@@ -176,7 +180,7 @@ class TransactionController {
             } else {
                 List<String> vicketReceiptList = new ArrayList<String>()
                 for(ResponseVS response: depositResponseList) {
-                    //Map dataMap = [vicketReceipt:messageSMIMEResp, vicket:vicket]
+                    //Map dataMap = [vicketReceipt:messageSMIMEResp, model:model]
                     vicketReceiptList.add(new String(Base64.encode(((MessageSMIME)response.getData().vicketReceipt).content)))
                 }
                 Map responseMap = [vickets:vicketReceiptList]
@@ -188,7 +192,7 @@ class TransactionController {
     }
 
     private void cancelVicketBatchDeposit(List<ResponseVS> responseList, VicketBatchRequest batchRequest, TypeVS typeVS,
-                                          String reason) {
+              String reason, String metaInf) {
         log.error("cancelVicketBatchDeposit - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
         for(ResponseVS responseVS: responseList) {
             if(responseVS.data instanceof Map) {
@@ -206,7 +210,7 @@ class TransactionController {
     }
 
     private void cancelVicketBatchRequest(List<ResponseVS> responseList, VicketBatchRequest batchRequest, TypeVS typeVS,
-               String reason) {
+               String reason, String metaInf) {
         log.error("cancelVicketBatch - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
         for(ResponseVS responseVS: responseList) {
             if(responseVS.data instanceof MessageSMIME) {
@@ -228,7 +232,7 @@ class TransactionController {
      * @httpMethod [POST]
      * @serviceURL [/transaction/deposit]
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
-     *                     documento SMIME firmado con un vicket emitido por el sistema.
+     *                     documento SMIME firmado con un model emitido por el sistema.
      * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
      * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
      */
@@ -252,7 +256,7 @@ class TransactionController {
         log.error "Exception occurred. ${exception?.message}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.VICKET_ERROR, reason:exception.getMessage())]
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
 
 }

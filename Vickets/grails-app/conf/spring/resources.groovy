@@ -1,6 +1,8 @@
+import org.votingsystem.vicket.util.ApplicationContextHolder
+
 // Place your Spring DSL code here
 beans = {
-    votingSystemApplicationContex(org.votingsystem.util.ApplicationContextHolder) { bean ->
+    votingSystemApplicationContex(ApplicationContextHolder) { bean ->
         bean.factoryMethod = 'getInstance'
     }
 

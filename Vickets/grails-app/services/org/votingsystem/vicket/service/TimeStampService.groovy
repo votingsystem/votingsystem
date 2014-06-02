@@ -15,7 +15,7 @@ import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.model.vicket.MetaInfMsg
+import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
@@ -45,8 +45,7 @@ class TimeStampService {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,
                         type:CertificateVS.Type.TIMESTAMP_SERVER)
                 if(timeStampServerCert) {
-                    x509TimeStampServerCert = CertUtil.loadCertificateFromStream (
-                            new ByteArrayInputStream(timeStampServerCert.content))
+                    x509TimeStampServerCert = CertUtil.loadCertificate(timeStampServerCert.content)
                     signingCertPEMBytes = CertUtil.getPEMEncoded(x509TimeStampServerCert)
                 } else {
                     fetchTimeStampServerInfo(timeStampServer);
@@ -143,6 +142,7 @@ class TimeStampService {
 	}
 
     public ResponseVS validateToken(TimeStampToken tsToken, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         try {
             String msg = null
             SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
@@ -202,7 +202,7 @@ class TimeStampService {
             log.error(ex.getMessage(), ex)
             log.debug("validateToken - token issuer: ${tsToken?.getSID()?.getIssuer()}" +
                     " - timeStampSignerInfoVerifier: ${timeStampSignerInfoVerifier?.associatedCertificate?.subject}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, metaInf: MetaInfMsg.signature_ERROR_timestamp,
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, metaInf: MetaInfMsg.getExceptionMsg(methodName, ex),
                     message:messageSource.getMessage('timeStampErrorMsg', null, locale))
         }
     }

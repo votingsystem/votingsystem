@@ -1,4 +1,4 @@
-package org.votingsystem.model.vicket;
+package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ActorVS;

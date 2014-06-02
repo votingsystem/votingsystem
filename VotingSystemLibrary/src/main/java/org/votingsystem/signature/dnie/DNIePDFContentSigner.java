@@ -280,10 +280,10 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
                 X509PublicKeyCertificate cert =
                         (X509PublicKeyCertificate)tokenCertificateObjects[0];
                 if (CERT_SIGN.equals(cert.getLabel().toString())) {
-                    certUser = (X509Certificate)CertUtil.loadCertificateFromBytes(value);
+                    certUser = (X509Certificate)CertUtil.loadCertificate(value);
                     ContextVS.getInstance().setSessionUser(UserVS.getUserVS(certUser));
                 } else if (CERT_CA.equals(cert.getLabel().toString())) {
-                    certIntermediate = (X509Certificate)CertUtil.loadCertificateFromBytes(value);
+                    certIntermediate = (X509Certificate)CertUtil.loadCertificate(value);
                 }
             }
             pkcs11Session.findObjectsFinal();

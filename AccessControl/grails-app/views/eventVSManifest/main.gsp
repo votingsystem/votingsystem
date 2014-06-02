@@ -70,7 +70,10 @@
                 }
             }
             var targetURL = "${createLink( controller:'eventVSManifest')}";
-            if("" != eventState) targetURL = targetURL + "?eventVSState=" + $(this).val()
+            if("" != eventState) {
+                history.pushState(null, null, targetURL);
+                targetURL = targetURL + "?eventVSState=" + $(this).val()
+            }
             dynatable.settings.dataset.ajaxUrl= targetURL
             dynatable.paginationPage.set(1);
             dynatable.process();

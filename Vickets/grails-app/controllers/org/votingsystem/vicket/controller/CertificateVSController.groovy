@@ -3,8 +3,7 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.util.ApplicationContextHolder
-import org.votingsystem.util.DateUtils
+import org.votingsystem.vicket.util.ApplicationContextHolder
 import org.votingsystem.util.HttpHelper
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
@@ -28,7 +27,7 @@ class CertificateVSController {
 	 * Servicio de consulta de certificates de vickets.
 	 *
 	 * @httpMethod [GET]
-	 * @serviceURL [/certificateVS/vicket/hashHex/$hashHex]
+	 * @serviceURL [/certificateVS/model/hashHex/$hashHex]
 	 * @param	[hashHex] Obligatorio. Hash en hexadecimal asociado al
 	 *          certificado del voto consultado.
 	 * @return El certificado en formato PEM.
@@ -40,8 +39,7 @@ class CertificateVSController {
 			CertificateVS certificate;
 			CertificateVS.withTransaction{certificate = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64)}
 			if (certificate) {
-				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
-				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+				X509Certificate certX509 = CertUtil.loadCertificate (certificate.content)
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
                     messageBytes: CertUtil.getPEMEncoded (certX509))]
 			}
@@ -68,15 +66,13 @@ class CertificateVSController {
             CertificateVS.withTransaction{certificate = CertificateVS.findWhere(
                     userVS:userVS, state:CertificateVS.State.OK)}
             if (certificate) {
-                ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
-                X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+                X509Certificate certX509 = CertUtil.loadCertificate (certificate.content)
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
                         messageBytes: CertUtil.getPEMEncoded (certX509))]
             } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code:'userWithoutCert',args:[params.userId]))]
         }
 	}
-
 
 	/**
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que añade Autoridades de Confianza.<br/>
@@ -99,10 +95,28 @@ class CertificateVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            ResponseVS responseVS = signatureVSService.addCertificateAuthority(messageSMIMEReq, request.getLocale())
+            ResponseVS responseVS = certificateVSService.addCertificateAuthority(messageSMIMEReq, request.getLocale())
             return [responseVS:responseVS]
         }
 	}
+
+    /**
+     * Servicio disponible sólo para administradores de sistema
+     *
+     * @httpMethod [POST]
+     * @serviceURL [/certificateVS/editCert]
+     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo con los datos
+     *                  datos del nuevo estado del certificado
+     * @responseContentType [application/x-pkcs7-signature,application/x-pkcs7-mime]
+     */
+    def editCert() {
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+        if(!messageSMIMEReq) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        }
+        ResponseVS responseVS = certificateVSService.editCert(messageSMIMEReq, request.getLocale())
+        return [responseVS:responseVS]
+    }
 
 	/**
 	 * @httpMethod [GET]
@@ -141,7 +155,7 @@ class CertificateVSController {
             def resultList = []
             if(request.contentType?.contains("pem") || 'pem'.equals(params.format)) {
                 certList.each {certItem ->
-                    resultList.add(certificateVSService.getX509Cert(certItem))
+                    resultList.add(certItem.getX509Cert())
                 }
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
                         messageBytes: CertUtil.getPEMEncoded (resultList))]
@@ -166,68 +180,27 @@ class CertificateVSController {
      * @return El certificado en formato PEM.
      */
     def cert () {
-
         if(params.long('serialNumber')) {
             CertificateVS certificate
             CertificateVS.withTransaction {
                 certificate = CertificateVS.findWhere(serialNumber:params.long('serialNumber'))
             }
             if(certificate) {
-                X509Certificate x509Cert = certificateVSService.getX509Cert(certificate)
+                X509Certificate x509Cert = certificate.getX509Cert()
                 if(request.contentType?.contains("pem") || 'pem'.equals(params.format)) {
-                    response.setHeader("Content-Disposition", "inline; filename='trustedCert_${params.numSerie}'")
+                    response.setHeader("Content-Disposition", "inline; filename='trustedCert_${params.serialNumber}'")
                     if(x509Cert) return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
                             messageBytes: CertUtil.getPEMEncoded (x509Cert))]
                 } else {
                     def certMap = certificateVSService.getCertificateVSDataMap(certificate)
-                    render(view:'cert', model: [certMap:certMap])
+                    if(request.contentType?.contains("json")) {
+                        render certMap as JSON
+                    } else render(view:'cert', model: [certMap:certMap])
                 }
             }
         }
         return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 message: message(code: 'requestWithErrors'))]
-    }
-
-    /**
-     * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que borra los certificados generados en una
-     * simualcion
-     * @httpMethod [GET]
-     * @serviceURL [/certificateVS/deleteTestCerts]
-     * @return Los certificados en formato PEM de las Autoridades Certificadoras en las que
-     *         confía la aplicación.
-     */
-	def deleteTestCerts() {
-        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "serviceDevelopmentModeMsg"))]
-        }
-        log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		return [responseVS:signatureVSService.deleteTestCerts()]
-	}
-
-    /**
-     * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que da de alta el certificado del servidor
-     * en el servidor que recibe como parámetro.
-     * @httpMethod [GET]
-     * @serviceURL [/certificateVS/sendCA]
-     * @param [serverURL] Obligatorio. la URL base del servidor en el que se desea dar de alta el certificado.
-     */
-    def sendCA() {
-        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "serviceDevelopmentModeMsg"))]
-        }
-        log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-        if(!params.serverURL) return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                message(code: "missingParamErrorMsg", args:["serverURL"]))]
-        else {
-            X509Certificate serverCert = signatureVSService.getServerCert()
-            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (serverCert);
-            //String serviceURL = ActorVS.getRootCAServiceURL(params.serverURL)
-            String serviceURL = "${params.serverURL}/certificateVS/addCertificateAuthority"
-            return [responseVS:HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA,
-                    serviceURL)]
-        }
     }
 
     /**
@@ -237,7 +210,7 @@ class CertificateVSController {
         log.error "Exception occurred. ${exception?.message}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.VICKET_ERROR, reason:exception.getMessage())]
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
 
 }

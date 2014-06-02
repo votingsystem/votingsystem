@@ -1,4 +1,4 @@
-package org.votingsystem.util;
+package org.votingsystem.vicket.util;
 
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.iban4j.*;

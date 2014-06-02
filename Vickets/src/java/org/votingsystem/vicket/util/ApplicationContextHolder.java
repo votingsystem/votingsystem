@@ -1,4 +1,4 @@
-package org.votingsystem.util;
+package org.votingsystem.vicket.util;
 
 import groovy.util.ConfigObject;
 import org.apache.log4j.Logger;
@@ -7,7 +7,6 @@ import org.codehaus.groovy.grails.plugins.GrailsPluginManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.votingsystem.model.EnvironmentVS;
 
 import javax.servlet.ServletContext;

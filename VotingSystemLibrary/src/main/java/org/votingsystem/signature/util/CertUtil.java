@@ -289,14 +289,18 @@ public class CertUtil {
                 (Collection<X509Certificate>) certificateFactory.generateCertificates(inputStream);
         X509Certificate cert = certificateChain.iterator().next();
         return cert;
-    }    
-    
-    public static Certificate loadCertificateFromBytes (byte[] certBytes) throws Exception {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        Certificate cert = cf.generateCertificate(new ByteArrayInputStream(certBytes)) ;
-        return cert;
     }
-    
+
+    public static X509Certificate loadCertificate (byte[] certBytes) throws Exception {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(certBytes);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        Collection<X509Certificate> certificateChain =
+                (Collection<X509Certificate>) certificateFactory.generateCertificates(inputStream);
+        X509Certificate x509Cert = certificateChain.iterator().next();
+        inputStream.close();
+        return x509Cert;
+    }
+
     /**
      * Verifies the validity of the given certificate, checking its signature
      * against the issuer's certificate.

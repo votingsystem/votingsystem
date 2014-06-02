@@ -1,9 +1,6 @@
 package vickets
 
-import org.votingsystem.model.vicket.Vicket
-
-import java.util.Calendar;
-
+import org.votingsystem.vicket.model.Vicket
 
 class ChangeWeekLapseJob {
     static triggers = {

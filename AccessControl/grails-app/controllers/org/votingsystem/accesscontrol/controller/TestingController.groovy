@@ -11,11 +11,4 @@ import grails.converters.JSON
  * */
 class TestingController {
 
-
-    def index() {
-        List<String> admins = grailsApplication.config.VotingSystem.adminsDNI
-        render admins as JSON
-    }
-
-
 }
