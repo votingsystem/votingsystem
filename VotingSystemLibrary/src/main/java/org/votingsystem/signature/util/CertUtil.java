@@ -11,6 +11,7 @@ import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
@@ -267,12 +268,21 @@ public class CertUtil {
         InputStream in = new ByteArrayInputStream(pemFileBytes);
         CertificateFactory fact = CertificateFactory.getInstance("X.509",ContextVS.PROVIDER);
         X509Certificate x509Cert = (X509Certificate)fact.generateCertificate(in);
+        in.close();
         return x509Cert;
     }
 
     public static PrivateKey fromPEMToRSAPrivateKey(File file) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(file));
         KeyPair kp = (KeyPair) new PEMReader(br).readObject();
+        br.close();
+        return kp.getPrivate();
+    }
+
+    public static PrivateKey fromPEMToRSAPrivateKey(File file, PasswordFinder pFinder) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        KeyPair kp = (KeyPair) new PEMReader(br, pFinder).readObject();
+        br.close();
         return kp.getPrivate();
     }
 
@@ -280,6 +290,7 @@ public class CertUtil {
         InputStream in = new ByteArrayInputStream(pemChainFileBytes);
         CertificateFactory fact = CertificateFactory.getInstance("X.509",ContextVS.PROVIDER);
         Collection<X509Certificate> x509Certs = (Collection<X509Certificate>)fact.generateCertificates(in);
+        in.close();
         return x509Certs;
     }
     	

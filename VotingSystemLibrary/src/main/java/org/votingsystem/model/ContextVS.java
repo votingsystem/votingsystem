@@ -12,6 +12,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.FileUtils;
@@ -159,6 +160,8 @@ public class ContextVS {
 
 
     private Map<String, ResponseVS> hashCertVSDataMap;
+    private Collection<X509Certificate> votingSystemSSLCerts;
+    private Set<TrustAnchor> votingSystemSSLTrustAnchors;
     private AppHostVS appHost;
     private static Properties appProperties;
     private static Properties settings;
@@ -202,10 +205,26 @@ public class ContextVS {
                 appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
                         providedProperties));
             }
+            votingSystemSSLCerts =  CertUtil.fromPEMToX509CertCollection(
+                    FileUtils.getBytesFromInputStream(Thread.currentThread().
+                    getContextClassLoader().getResourceAsStream("VotingSystemSSLCert.pem")));
+            votingSystemSSLTrustAnchors = new HashSet<TrustAnchor>();
+            for(X509Certificate certificate: votingSystemSSLCerts) {
+                TrustAnchor anchor = new TrustAnchor(certificate, null);
+                votingSystemSSLTrustAnchors.add(anchor);
+            }
         } catch (Exception ex) {
             logger.error("localizatedMessagesFileName: " + localizatedMessagesFileName);
             logger.error(ex.getMessage(), ex);
         }
+    }
+
+    public Collection<X509Certificate> getVotingSystemSSLCerts() {
+        return votingSystemSSLCerts;
+    }
+
+    public Set<TrustAnchor> getVotingSystemSSLTrustAnchors() {
+        return votingSystemSSLTrustAnchors;
     }
 
     private void initDirs(String baseDir) {

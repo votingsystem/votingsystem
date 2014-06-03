@@ -16,12 +16,9 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.HttpHelper;
 
 import java.util.List;
-
-import javax.mail.internet.ContentType;
 
 /**
  * @author jgzornoza

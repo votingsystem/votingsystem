@@ -69,15 +69,6 @@ class SignatureVSService {
         return [serverCert:serverCert, serverCertChainFile:serverCertChainFile ,
                 signedMailGenerator:signedMailGenerator, trustedCerts:trustedCerts, encryptor:encryptor];
 	}
-	
-	/*
-	 * Método para poder añadir certificados de confianza en las pruebas de carga.
-	 * El procedimiento para añadir una autoridad certificadora consiste en
-	 * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
-	 */
-	public ResponseVS addCertificateAuthority (byte[] caPEM, Locale locale)  {
-		log.debug("TODO - addCertificateAuthority");
-	}
 
     private synchronized ResponseVS initCertAuthorities() {
 		try {

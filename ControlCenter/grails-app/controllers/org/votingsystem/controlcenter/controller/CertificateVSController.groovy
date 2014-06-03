@@ -122,21 +122,5 @@ class CertificateVSController {
 		render  message(code: 'eventVSNotFoundByURL', args:[params.eventAccessControlURL])
 		return false
 	}
-	
-	/**
-	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que añade Autoridades de Confianza.<br/>
-	 * Sirve para poder validar los certificados enviados en las simulaciones.
-	 *
-	 * @httpMethod [POST]
-	 * @param pemCertificate certificado en formato PEM de la Autoridad de Confianza que se desea añadir.
-	 * @return Si todo va bien devuelve un código de estado HTTP 200.
-	 */
-	def addCertificateAuthority () {
-		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
-		}
-		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-        return [responseVS : signatureVSService.addCertificateAuthority(
-			"${request.getInputStream()}".getBytes(), request.getLocale())]
-	}
+
 }

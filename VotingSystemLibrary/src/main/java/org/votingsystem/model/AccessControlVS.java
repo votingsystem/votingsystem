@@ -108,5 +108,16 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/voteVS";
     }
 
+    @Transient public String getProceduresPageURL() {
+        return getServerURL() + "/app/admin?menu=admin";
+    }
+
+    @Transient public String getVotingPageURL() {
+        return getServerURL() + "/eventVSElection/main?menu=user";
+    }
+
+    @Transient public String getSelectRepresentativePageURL() {
+        return getServerURL() + "/representative/main?menu=user";
+    }
 
 }

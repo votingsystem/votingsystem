@@ -1,7 +1,9 @@
 package org.votingsystem.client;
 
+import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -18,16 +20,23 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
+import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
-import org.votingsystem.client.util.BrowserVS;
-import org.votingsystem.client.util.SignedDocumentsBrowser;
-import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.AppHostVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.client.util.*;
+import org.votingsystem.model.*;
+import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.util.HttpHelper;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.File;
+import java.security.GeneralSecurityException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -43,6 +52,27 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
 
+    // Create a trust manager that does not validate certificate chains
+    TrustManager[] trustAllCerts = new TrustManager[] {
+        new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return ContextVS.getInstance().getVotingSystemSSLCerts().toArray(new X509Certificate[]{});
+            }
+            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                logger.debug("trustAllCerts - checkClientTrusted");
+            }
+            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType ) throws CertificateException {
+                logger.debug("trustAllCerts - checkServerTrusted");
+                try {
+                    CertUtil.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
+                            Arrays.asList(certs));
+                } catch(Exception ex) {
+                    throw new CertificateException(ex.getMessage());
+                }
+            }
+        }
+    };
+
     @Override public void stop() {
         logger.debug("stop");
         //Platform.exit();
@@ -55,8 +85,43 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
-        ContextVS.initSignatureClient(this, "log4jClientTool.properties",
-                "clientToolMessages.properties", locale);
+        ContextVS.initSignatureClient(this, "log4jClientTool.properties", "clientToolMessages.properties", locale);
+        browserVS = new BrowserVS();
+        new Thread(new Runnable() {
+            @Override public void run() {
+                boolean loadedFromJar = false;
+                if(VotingSystemApp.class.getResource(VotingSystemApp.this.getClass().getSimpleName() +
+                        ".class").toString().contains("jar:file")) {
+                    loadedFromJar = true;
+                }
+                logger.debug("ServerLoaderTask - loadedFromJar: " + loadedFromJar);
+                try {
+                    SSLContext sslContext = SSLContext.getInstance("SSL");
+                    sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+                } catch (GeneralSecurityException ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+
+                WebSocketService webSocketService = new WebSocketService(ContextVS.getInstance().
+                        getVotingSystemSSLCerts().iterator().next(), "wss://vickets:8443/Vickets/websocket/service");
+                webSocketService.restart();
+
+                String accessControlServerURL = null;
+                String vicketsServerURL = null;
+                if(loadedFromJar) {
+                    accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
+                    vicketsServerURL = ContextVS.getMessage("prodVicketsServerURL");
+                } else {
+                    accessControlServerURL = ContextVS.getMessage("devAccessControlServerURL");
+                    vicketsServerURL = ContextVS.getMessage("devVicketsServerURL");
+                }
+                try {SignatureService.checkServer(accessControlServerURL);}
+                catch(Exception ex) {logger.error(ex.getMessage(), ex);}
+                try {SignatureService.checkServer(vicketsServerURL);}
+                catch(Exception ex) {logger.error(ex.getMessage(), ex);}
+            }
+        }).start();
 
         VBox verticalBox = new VBox(100);
         Button voteButton = new Button(ContextVS.getMessage("voteButtonLbl"));
@@ -173,41 +238,27 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     private void openVotingSystemProceduresPage() {
         logger.debug("openVotingSystemProceduresPage");
+        if(ContextVS.getInstance().getAccessControl() == null) {
+            showMessage(ContextVS.getMessage("connectionErrorMsg"));
+            return;
+        }
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/app/admin?menu=admin",
+                browserVS.loadURL(ContextVS.getInstance().getAccessControl().getProceduresPageURL(),
                         ContextVS.getMessage("votingSystemProceduresLbl"));
-            }
-        });
-    }
-
-    private void openVicketUserProcedures() {
-        logger.debug("openVicketUserProcedures");
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://vickets:8086/Vickets/app/user?menu=user", ContextVS.getMessage("vicketUsersLbl"));
-            }
-        });
-    }
-
-    private void openVicketAdminProcedures() {
-        logger.debug("openGroupAdmin");
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://vickets:8086/Vickets/app/admin?menu=admin", ContextVS.getMessage("vicketAdminLbl"));
             }
         });
     }
 
     private void openVotingPage() {
         logger.debug("openVotingPage");
+        if(ContextVS.getInstance().getAccessControl() == null) {
+            showMessage(ContextVS.getMessage("connectionErrorMsg"));
+            return;
+        }
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/eventVSElection/main?menu=user",
+                browserVS.loadURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(),
                         ContextVS.getMessage("voteButtonLbl"));
             }
         });
@@ -215,11 +266,43 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     private void openSelectRepresentativePage() {
         logger.debug("openSelectRepresentativePage");
+        if(ContextVS.getInstance().getAccessControl() == null) {
+            showMessage(ContextVS.getMessage("connectionErrorMsg"));
+            return;
+        }
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                if(browserVS == null) browserVS = new BrowserVS();
-                browserVS.loadURL("http://www.sistemavotacion.org/AccessControl/representative/main?menu=user",
+                browserVS.loadURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(),
                         ContextVS.getMessage("selectRepresentativeButtonLbl"));
+            }
+        });
+    }
+
+    private void openVicketUserProcedures() {
+        logger.debug("openVicketUserProcedures");
+        if(ContextVS.getInstance().getVicketServer() == null) {
+            showMessage(ContextVS.getMessage("connectionErrorMsg"));
+            return;
+        }
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                browserVS.loadURL(ContextVS.getInstance().getVicketServer().getUserProceduresPageURL(),
+                        ContextVS.getMessage("vicketUsersLbl"));
+            }
+        });
+    }
+
+    private void openVicketAdminProcedures() {
+        logger.debug("openVicketAdminProcedures");
+        if(ContextVS.getInstance().getVicketServer() == null) {
+            showMessage(ContextVS.getMessage("connectionErrorMsg"));
+            return;
+        }
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                browserVS.loadURL(ContextVS.getInstance().getVicketServer().getAdminProceduresPageURL(),
+                        ContextVS.getMessage("vicketAdminLbl"));
+
             }
         });
     }
@@ -231,6 +314,17 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             @Override public void run() {
                 if (settingsDialog == null) settingsDialog = new SettingsDialog();
                 settingsDialog.show();
+            }
+        });
+    }
+
+    MessageDialog messageDialog;
+    public void showMessage(final String message) {
+        PlatformImpl.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (messageDialog == null) messageDialog = new MessageDialog();
+                messageDialog.showMessage(message);
             }
         });
     }

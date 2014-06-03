@@ -47,8 +47,13 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.FileUtils;
 import org.w3c.dom.Document;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.FileInputStream;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +78,7 @@ public class BrowserVS extends Region {
     private VBox mainVBox;
     private BrowserVSPane browserHelper;
     private AtomicInteger offset = new AtomicInteger(0);
+
 
 
     public BrowserVS() {
@@ -183,7 +189,7 @@ public class BrowserVS extends Region {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     if(!"".equals(urlInputText.getText())) {
                         String targetURL = null;
-                        if(urlInputText.getText().startsWith("http://")) {
+                        if(urlInputText.getText().startsWith("http://") || urlInputText.getText().startsWith("https://")) {
                             targetURL = urlInputText.getText().trim();
                         } else targetURL = "http://" + urlInputText.getText().trim();
                         loadURL(targetURL, null);
@@ -246,7 +252,7 @@ public class BrowserVS extends Region {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("clientTool", new JavafxClient());
                         }else if (newState.equals(Worker.State.FAILED)) {
-                            showMessage(ContextVS.getMessage("conectionErrorMsg"));
+                            showMessage(ContextVS.getMessage("connectionErrorMsg"));
                         }
                         if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {
                         }
@@ -343,6 +349,14 @@ public class BrowserVS extends Region {
         });
     }
 
+    public void loadBackgroundURL(final String urlToLoad) {
+        logger.debug("loadBackgroundURL: " + urlToLoad);
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                webView.getEngine().load(urlToLoad);
+            }
+        });
+    }
 
     private void show(final int width, final int height, final boolean isToolbarVisible) {
         PlatformImpl.runLater(new Runnable() {

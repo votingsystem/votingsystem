@@ -272,16 +272,6 @@ class SignatureVSService {
 		return multiSignedMessage
 	}
 	
-	/*
-	 * Método para poder añadir certificados de confianza en las pruebas de carga.
-	 * El procedimiento para añadir una autoridad certificadora consiste en 
-	 * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
-	 */
-	public ResponseVS addCertificateAuthority (byte[] caPEM, Locale locale)  {
-		log.debug("TODO - addCertificateAuthority");
-
-	}
-	
 	public CertificateVS getCACertificate(long numSerie) {
 		log.debug("getCACertificate - numSerie: '${numSerie}'")
 		return trustedCertsHashMap.get(numSerie)

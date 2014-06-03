@@ -14,9 +14,9 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.eclipse.jetty.websocket.WebSocket;
-import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
+import org.glassfish.grizzly.ssl.SSLContextConfigurator;
+import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
+import org.glassfish.tyrus.client.ClientManager;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -33,15 +33,25 @@ import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
+import java.io.IOException;
 import java.net.URI;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+
+import javax.websocket.ClientEndpointConfig;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.MessageHandler;
+import javax.websocket.Session;
 
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;
@@ -59,6 +69,8 @@ public class VotingAppService extends Service implements Runnable {
     public static final String TAG = VotingAppService.class.getSimpleName();
 
     public enum SocketOperation {LISTEN_TRANSACTIONS}
+
+    public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 
     private AppContextVS appContextVS;
     private GregorianCalendar lastCheckedTime; // Time we last checked our feeds.
@@ -192,7 +204,9 @@ public class VotingAppService extends Service implements Runnable {
             * spawn its own thread in which to do that work.*/
         Thread thr = new Thread(null, runnable, "voting_app_service_thread");
         thr.start();
-        WebsocketListener socketListener = new WebsocketListener("ws://vickets/Vickets/websocket/service");
+        //WebsocketListener socketListener = new WebsocketListener("ws://vickets/Vickets/websocket/service");
+        WebSocketListener socketListener = new WebSocketListener("wss://vickets:8443/Vickets/websocket/service");
+
         Thread websocketThread = new Thread(null, socketListener, "websocket_service_thread");
         websocketThread.start();
         //We want this service to continue running until it is explicitly stopped, so return sticky.
@@ -230,42 +244,54 @@ public class VotingAppService extends Service implements Runnable {
     @Override public void run() {
         checkForPendingOperations();
     }
+    private class WebSocketListener implements Runnable {
 
-    private class WebsocketListener implements Runnable {
-
-        private WebsocketListener socketListener = null;
         private String serviceURL = null;
 
-        public WebsocketListener(String serviceURL) {
+        final ClientManager client = ClientManager.createClient();
+
+        public WebSocketListener(String serviceURL) {
             this.serviceURL = serviceURL;
+            try {
+                KeyStore p12Store = KeyStore.getInstance("PKCS12");
+                p12Store.load(null, null);
+                byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open("VotingSystemSSLCert.pem"));
+                Collection<X509Certificate> votingSystemSSLCerts =  CertUtil.fromPEMToX509CertCollection(certBytes);
+                X509Certificate serverCert = votingSystemSSLCerts.iterator().next();
+                p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
+                byte[] p12KeyStoreBytes = KeyStoreUtil.getBytes(p12Store, "".toCharArray());
+
+                // Grizzly ssl configuration
+                SSLContextConfigurator sslContext = new SSLContextConfigurator();
+                sslContext.setTrustStoreType("PKCS12");
+                sslContext.setTrustStoreBytes(p12KeyStoreBytes);
+                sslContext.setTrustStorePass("");
+                SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContext, true, false, false);
+                client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
         @Override public void run() {
-            WebSocketClientFactory factory = new WebSocketClientFactory();
             try {
-                factory.start();
-                WebSocketClient client = factory.newWebSocketClient();
-                Log.d(TAG +  ".WebsocketListener", " - getMaxTextMessageSize: " + client.getMaxTextMessageSize());
-                WebSocket.Connection connection = client.open(new URI(serviceURL), new WebSocket.OnTextMessage() {
-                    public void onOpen(Connection connection) {
-                        Log.d(TAG +  ".WebsocketListener.onOpen(...)", "onOpen");
+                Log.d(TAG + ".WebsocketListener", "run");
+                client.connectToServer(new Endpoint() {
+                    @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
+                        try {
+                            session.addMessageHandler(new MessageHandler.Whole<String>() {
+                                @Override public void onMessage(String message) {
+                                    Log.d(TAG + ".WebsocketListener", "onMessage: " + message);
+                                }
+                            });
+                            session.getBasicRemote().sendText("Test message from Android Websocket client");
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
                     }
+                }, ClientEndpointConfig.Builder.create().build(), URI.create(serviceURL));
 
-                    public void onClose(int closeCode, String message) {
-                        Log.d(TAG + ".WebsocketListener.onClose(...)", "onClose");
-                    }
-
-                    public void onMessage(String data) {
-                        Log.d(TAG + ".WebsocketListener.onMessage(...)", "data: " + data);
-                    }
-                }).get(10, TimeUnit.SECONDS);
-                Map connectMsgMap = new HashMap();
-                connectMsgMap.put("operation", SocketOperation.LISTEN_TRANSACTIONS.toString());
-                connectMsgMap.put("locale", "es");
-                JSONObject requestJSON = new JSONObject(connectMsgMap);
-                connection.sendMessage(requestJSON.toString());
-
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }

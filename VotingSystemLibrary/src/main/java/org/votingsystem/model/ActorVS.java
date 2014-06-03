@@ -49,6 +49,7 @@ public class ActorVS implements Serializable {
 
     @Transient private Type serverType;
     @Transient private String certChainPEM;
+    @Transient private String webSocketURL;
     @Transient private String urlTimeStampServer;
     @Transient private Collection<X509Certificate> certChain;
     @Transient private transient X509Certificate x509Certificate;
@@ -192,6 +193,14 @@ public class ActorVS implements Serializable {
         timeStampCert = CertUtil.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
     }
 
+    public String getWebSocketURL() {
+        return webSocketURL;
+    }
+
+    public void setWebSocketURL(String webSocketURL) {
+        this.webSocketURL = webSocketURL;
+    }
+
     public void setCertChainPEM(String certChainPEM) throws Exception {
         certChain = CertUtil.fromPEMToX509CertCollection(certChainPEM.getBytes());
         x509Certificate = certChain.iterator().next();
@@ -317,6 +326,9 @@ public class ActorVS implements Serializable {
         if (actorVSMap.containsKey("serverURL")) {
             String serverURL = StringUtils.checkURL((String) actorVSMap.get("serverURL"));
             actorVS.setServerURL(serverURL);
+        }
+        if (actorVSMap.containsKey("webSocketURL")) {
+            actorVS.setWebSocketURL((String) actorVSMap.get("webSocketURL"));
         }
         if (actorVSMap.containsKey("name")) actorVS.setName((String) actorVSMap.get("name"));
         if(actorVSMap.containsKey("voteVSInfoURL"))

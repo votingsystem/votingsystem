@@ -364,42 +364,42 @@ public class SignatureService extends Service<ResponseVS> {
             }
             return responseVS;
         }
+    }
 
-        //we know this is done in a background thread
-        private ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
-            logger.debug(" - checkServer: " + serverURL);
-            ActorVS actorVS = serverMap.get(serverURL.trim());
-            if (actorVS == null) {
-                String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
-                ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    actorVS = ActorVS.populate(responseVS.getJSONMessage());
-                    responseVS.setData(actorVS);
-                    logger.error("checkServer - adding " + serverURL.trim() + " to sever map");
-                    serverMap.put(serverURL.trim(), actorVS);
-                    switch (actorVS.getType()) {
-                        case ACCESS_CONTROL:
-                            ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
-                            break;
-                        case VICKETS:
-                            ContextVS.getInstance().setVicketServer((VicketServer) actorVS);
-                            ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
-                            break;
-                        case CONTROL_CENTER:
-                            ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
-                            break;
-                        default:
-                            logger.debug("Unprocessed actor:" + actorVS.getType());
-                    }
-                } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                    responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
-                }
-                return responseVS;
-            } else {
-                ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
+    //we know this is done in a background thread
+    public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
+        logger.debug(" - checkServer: " + serverURL);
+        ActorVS actorVS = serverMap.get(serverURL.trim());
+        if (actorVS == null) {
+            String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                actorVS = ActorVS.populate(responseVS.getJSONMessage());
                 responseVS.setData(actorVS);
-                return responseVS;
+                logger.error("checkServer - adding " + serverURL.trim() + " to sever map");
+                serverMap.put(serverURL.trim(), actorVS);
+                switch (actorVS.getType()) {
+                    case ACCESS_CONTROL:
+                        ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
+                        break;
+                    case VICKETS:
+                        ContextVS.getInstance().setVicketServer((VicketServer) actorVS);
+                        ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
+                        break;
+                    case CONTROL_CENTER:
+                        ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
+                        break;
+                    default:
+                        logger.debug("Unprocessed actor:" + actorVS.getType());
+                }
+            } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
+                responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
             }
+            return responseVS;
+        } else {
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
+            responseVS.setData(actorVS);
+            return responseVS;
         }
     }
 }

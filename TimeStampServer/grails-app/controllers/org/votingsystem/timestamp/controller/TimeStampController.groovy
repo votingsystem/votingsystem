@@ -119,22 +119,6 @@ class TimeStampController {
      * Sirve para poder validar documentos firmados con sellos de tiempo emitidos por el servidor.
      *
      * @httpMethod [POST]
-     * @param pemCertificate certificado en formato PEM de la Autoridad de Confianza que se desea añadir.
-     * @return Si todo va bien devuelve un código de estado HTTP 200.
-     */
-    def addCertificateTestAuthority() {
-        ResponseVS responseVS = timeStampTestService.addCertificateAuthority(
-                "${request.getInputStream()}".getBytes(), request.getLocale())
-        response.status = responseVS.statusCode
-        render responseVS.message
-        return false
-    }
-
-    /**
-     * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que añade Autoridades de Confianza.<br/>
-     * Sirve para poder validar documentos firmados con sellos de tiempo emitidos por el servidor.
-     *
-     * @httpMethod [POST]
      * @param documento firmado en formato SMIME
      *
      * @return Si todo va bien devuelve un código de estado HTTP 200.

@@ -34,6 +34,7 @@ class ServerInfoController {
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.VICKETS.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
+        serverInfo.webSocketURL = "${grailsApplication.config.webSocketURL}"
 		serverInfo.state = ActorVS.State.RUNNING.toString()
         serverInfo.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         byte [] signingCertPEMBytes = timeStampService.getSigningCertPEMBytes()

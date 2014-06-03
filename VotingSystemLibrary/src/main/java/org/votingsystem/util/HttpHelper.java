@@ -8,6 +8,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
@@ -27,12 +29,14 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.KeyStoreUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.KeyStore;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -66,10 +70,20 @@ public class HttpHelper {
         connEvictor.start();
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
-        httpclient = new DefaultHttpClient(cm, httpParams);
+        try {
+            KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
+            X509Certificate sslServerCert = ContextVS.getInstance().getVotingSystemSSLCerts().iterator().next();
+            trustStore.setCertificateEntry(sslServerCert.getSubjectDN().toString(), sslServerCert);
+            SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+            Scheme sch = new Scheme("https", 8443, socketFactory);
+            logger.debug("Added Scheme https with port 8443 to Apache httpclient");
+            httpclient = new DefaultHttpClient(cm, httpParams);
+            httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+        }catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
-    
-
     
     public static HttpHelper getInstance() {
         if(INSTANCE == null) INSTANCE = new HttpHelper();

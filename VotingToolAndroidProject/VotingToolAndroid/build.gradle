@@ -55,13 +55,10 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:support-v4:18.0.0'
+    compile "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.6"
     compile project(':libraries:bc')
     compile project(':libraries:itext')
     compile project(':libraries:votingsystem')
-    compile files('libs/jetty-http-8.1.13.v20130916.jar')
-    compile files('libs/jetty-io-8.1.13.v20130916.jar')
-    compile files('libs/jetty-util-8.1.13.v20130916.jar')
-    compile files('libs/jetty-websocket-8.1.13.v20130916.jar')
 }
 
 preBuild.dependsOn 'setAndroidEnv'

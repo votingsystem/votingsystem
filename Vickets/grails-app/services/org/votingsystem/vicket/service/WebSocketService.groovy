@@ -94,6 +94,7 @@ class WebSocketService {
     public void processRequest(JSONObject messageJSON) {
         String message = null;
         Locale locale = null
+        log.debug("messageJSON: ${messageJSON}")
         try {
             locale = Locale.forLanguageTag(messageJSON.locale)
             SocketOperation socketOperation = SocketOperation.valueOf(messageJSON.operation)
