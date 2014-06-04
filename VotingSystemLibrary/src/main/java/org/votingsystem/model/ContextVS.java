@@ -2,9 +2,6 @@ package org.votingsystem.model;
 
 import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
-
-import java.io.*;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
@@ -16,8 +13,14 @@ import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.OSValidator;
+import org.votingsystem.util.StringUtils;
 
 import javax.mail.Session;
+import javax.security.auth.x500.X500PrivateCredential;
+import javax.swing.*;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -32,13 +35,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
-import javax.security.auth.x500.X500PrivateCredential;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
-import org.votingsystem.util.NifUtils;
-import org.votingsystem.util.OSValidator;
-import org.votingsystem.util.StringUtils;
 
 /**
  * @author jgzornoza
@@ -56,6 +52,7 @@ public class ContextVS {
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
     public static final int VICKET_TAG                              = 3;
+    public static final int DEVICEVS_TAG                            = 4;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
@@ -63,6 +60,7 @@ public class ContextVS {
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
     public static final String VICKET_OID = VOTING_SYSTEM_BASE_OID + VICKET_TAG;
+    public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
 
     public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
     public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;

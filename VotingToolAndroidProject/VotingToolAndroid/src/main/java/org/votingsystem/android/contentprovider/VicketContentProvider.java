@@ -30,8 +30,8 @@ public class VicketContentProvider extends ContentProvider {
 
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME       = "voting_system_vicket.db";
-    private static final String TABLE_NAME    = "model";
-    public static final String AUTHORITY      = "votingsystem.org.model";
+    private static final String TABLE_NAME    = "vicket";
+    public static final String AUTHORITY      = "votingsystem.org.vicket";
 
     public static final String ID_COL                = "_id";
     public static final String TYPE_COL              = "type";
@@ -50,7 +50,7 @@ public class VicketContentProvider extends ContentProvider {
     private static final int ALL_ITEMS = 1;
     private static final int SPECIFIC_ITEM = 2;
 
-    private static final String BASE_PATH = "model";
+    private static final String BASE_PATH = "vicket";
 
     private static final UriMatcher URI_MATCHER;
     static{
@@ -89,7 +89,7 @@ public class VicketContentProvider extends ContentProvider {
             case ALL_ITEMS:
                 return "vnd.android.cursor.dir/vickets"; // List of items.
             case SPECIFIC_ITEM:
-                return "vnd.android.cursor.item/model"; // Specific item.
+                return "vnd.android.cursor.item/vicket"; // Specific item.
             default:
                 return null;
         }
@@ -228,7 +228,7 @@ public class VicketContentProvider extends ContentProvider {
     }
 
     public static int updateVicket(AppContextVS contextVS, Vicket vicket) {
-        Log.d(TAG + ".updateVicket(...) ", "model id: " + vicket.getLocalId() +
+        Log.d(TAG + ".updateVicket(...) ", "vicket id: " + vicket.getLocalId() +
                 " - state: " + vicket.getState());
         ContentValues values = populateVicketContentValues(contextVS, vicket);
         return contextVS.getContentResolver().update(VicketContentProvider.getVicketURI(vicket.getLocalId()),

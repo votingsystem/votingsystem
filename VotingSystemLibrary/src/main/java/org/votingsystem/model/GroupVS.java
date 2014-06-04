@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import javax.persistence.*;
-import java.util.Set;
 
 /**
  * @author jgzornoza

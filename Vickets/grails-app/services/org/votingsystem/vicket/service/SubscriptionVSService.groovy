@@ -2,7 +2,15 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import net.sf.json.JSONObject
+import net.sf.json.JSONSerializer
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.DERObject
+import org.bouncycastle.asn1.DEROctetString
+import org.bouncycastle.asn1.DERTaggedObject
+import org.bouncycastle.asn1.DERUTF8String
 import org.votingsystem.model.*
+import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
 
@@ -20,8 +28,7 @@ class SubscriptionVSService {
 	def messageSource
     def userVSService
 
-    @Transactional
-    public ResponseVS checkUser(UserVS userVS, Locale locale) {
+    @Transactional public ResponseVS checkUser(UserVS userVS, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
 		String msg
@@ -41,11 +48,12 @@ class SubscriptionVSService {
 		String validatedNIF = org.votingsystem.util.NifUtils.validate(userVS.getNif())
 		if(!validatedNIF) {
 			msg = messageSource.getMessage('NIFWithErrorsMsg', [userVS.getNif()].toArray(), locale)
-			log.error("- checkUser - ${msg}")
+			log.error("checkUser - ${msg}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
                     metaInf: MetaInfMsg.getErrorMsg(methodName,"nif"))
 		}
 		UserVS userVSDB = UserVS.findByNif(validatedNIF.toUpperCase())
+        JSONObject deviceData = CertUtil.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
 		if (!userVSDB) {
             userVS.nif = validatedNIF.toUpperCase()
             userVS.type = UserVS.Type.USER
@@ -53,31 +61,40 @@ class SubscriptionVSService {
             userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
             userVS.save()
             userVSDB = userVS
-			log.debug "- checkUser ### NEW USER ${userVSDB.nif} - id '${userVSDB.id}'"
-			certificate = new CertificateVS(userVS:userVS, content:x509Cert.getEncoded(),
-                    serialNumber:x509Cert.getSerialNumber()?.longValue(), state:CertificateVS.State.OK,
-                    type:CertificateVS.Type.USER, authorityCertificate:userVS.getCertificateCA(),
-				    validFrom:x509Cert.getNotBefore(), validTo:x509Cert.getNotAfter()).save();
-			log.debug "- checkUser ### NEW UserVS CertificateVS id '${certificate.id}'"
+			certificate = saveUserCertificate(userVS);
+			log.debug "checkUser ### NEW UserVS '${userVSDB.nif}' CertificateVS id '${certificate.id}'"
 		} else {
-			certificate = CertificateVS.findWhere(userVS:userVSDB, state:CertificateVS.State.OK)
-			if (!certificate?.serialNumber == x509Cert.getSerialNumber()?.longValue()) {
-				certificate.state = CertificateVS.State.CANCELLED
-				certificate.save()
-				log.debug "- checkUser - CANCELLED CertificateVS id '${certificate.id}'"
-				certificate = new CertificateVS(userVS:userVSDB, content:x509Cert?.getEncoded(),
-                    state:CertificateVS.State.OK, serialNumber:x509Cert?.getSerialNumber()?.longValue(),
-                    authorityCertificate:userVS.getCertificateCA(), validFrom:x509Cert?.getNotBefore(),
-                    validTo:x509Cert?.getNotAfter())
-				certificate.save();
-				log.debug "- checkUser - UPDATED CertificateVS id '${certificate.id}'"
-			}
             userVSDB.setCertificateCA(userVS.getCertificateCA())
             userVSDB.setCertificate(userVS.getCertificate())
             userVSDB.setTimeStampToken(userVS.getTimeStampToken())
+			certificate = CertificateVS.findWhere(userVS:userVSDB, state:CertificateVS.State.OK,
+                    serialNumber:x509Cert.getSerialNumber()?.longValue(), authorityCertificateVS: userVS.getCertificateCA())
+            if (!certificate) {
+				certificate = saveUserCertificate(userVSDB, deviceData);
+				log.debug "checkUser - NEW CertificateVS id '${certificate.id}' for user '${userVSDB.nif}'"
+			}
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:certificate)
 	}
+
+    private CertificateVS saveUserCertificate(UserVS userVS, JSONObject deviceData) {
+        log.debug "saveUserCertificate - deviceData: ${deviceData}"
+        X509Certificate x509Cert = userVS.getCertificate()
+        CertificateVS certificate = new CertificateVS(userVS:userVS, content:x509Cert?.getEncoded(),
+                state:CertificateVS.State.OK, type:CertificateVS.Type.USER,
+                serialNumber:x509Cert?.getSerialNumber()?.longValue(),
+                authorityCertificateVS:userVS.getCertificateCA(), validFrom:x509Cert?.getNotBefore(),
+                validTo:x509Cert?.getNotAfter()).save();
+        if(deviceData) {
+            DeviceVS deviceVS = DeviceVS.findWhere(userVS:userVS, deviceId:deviceData.deviceId)
+            if(!deviceVS) {
+                deviceVS = new DeviceVS(userVS:userVS, deviceId:deviceData.deviceId,email:deviceData.email,
+                        phone:deviceData.mobilePhone, deviceName:deviceData.deviceName, certificateVS: certificate).save()
+                log.debug "saveUserCertificate - new device with id '${deviceVS.id}'"
+            }
+        }
+        return certificate
+    }
 
     public ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email,
                String deviceId, Locale locale) {

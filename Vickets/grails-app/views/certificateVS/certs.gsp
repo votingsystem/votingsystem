@@ -61,7 +61,7 @@
                 </div>
             </div>
             <div class='groupvsSubjectDiv'><span style="font-weight: bold;"><g:message code="subjectLbl"/>: </span>{3}</div>
-            <div class=''><span style="font-weight: bold;"><g:message code="issuerLbl"/>: </span>{4}</div>
+            <div class=''><span style="font-weight: bold;"><g:message code="issuerLbl"/>: </span><a href="{9}">{4}</a></div>
             <div class=''><span style="font-weight: bold;"><g:message code="signatureAlgotithmLbl"/>: </span>{5}</div>
             <div>
                 <div class='' style="display: inline;">
@@ -70,8 +70,9 @@
                     <span style="font-weight: bold;"><g:message code="noAfterLbl"/>: </span>{7}</div>
             </div>
             <div>
-                    <div class="text-center" style="font-weight: bold; display: {9};
+                    <div class="text-center" style="font-weight: bold; display: {8};
                     margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;"><g:message code="rootCertLbl"/></div>
+
             </div>
         </li>
     </div>
@@ -95,7 +96,7 @@
             },
             dataset: {
                 ajax: true,
-                ajaxUrl: "<g:createLink controller="certificateVS" action="certs"/>?menu=" + menuType + optionValue,
+                ajaxUrl: updateMenuLink("<g:createLink controller="certificateVS" action="certs"/>?" + optionValue),
                 ajaxOnLoad: false,
                 perPageDefault: 50,
                 records: []
@@ -125,6 +126,10 @@
         function certificateVSWriter(rowIndex, jsonAjaxData, columns, cellWriter) {
 
             var targetURL = "${createLink( controller:'certificateVS', action:'cert')}/" + jsonAjaxData.serialNumber
+            var issuerTargetURL = "#"
+            if(jsonAjaxData.issuerSerialNumber != null) issuerTargetURL =
+                    "${createLink( controller:'certificateVS', action:'cert')}/" + jsonAjaxData.issuerSerialNumber
+
             var stateLbl
             if("${CertificateVS.State.OK.toString()}" == jsonAjaxData.state) stateLbl = "<g:message code="certOKLbl"/>"
             else if("${CertificateVS.State.CANCELLED.toString()}" == jsonAjaxData.state) stateLbl = "<g:message code="certCancelledLbl"/>"
@@ -135,7 +140,7 @@
 
             var newCertificateVSHTML = newCertificateVSTemplate.format(targetURL, jsonAjaxData.serialNumber, stateLbl,
                     jsonAjaxData.subjectDN, jsonAjaxData.issuerDN, jsonAjaxData.sigAlgName, jsonAjaxData.notBefore,
-                    jsonAjaxData.notAfter, displayValue);
+                    jsonAjaxData.notAfter, displayValue, issuerTargetURL);
             return newCertificateVSHTML
         }
 
@@ -149,7 +154,7 @@
         $('#certTypeSelect').on('change', function (e) {
             var optionSelected = $(this).val()
             console.log("transactionvs selected: " + optionSelected)
-            var targetURL = "${createLink(controller: 'certificateVS', action: 'certs')}?menu=" + menuType;
+            var targetURL = updateMenuLink("${createLink(controller: 'certificateVS', action: 'certs')}")
             if("" != optionSelected) {
                 history.pushState(null, null, targetURL);
                 targetURL = targetURL + optionSelected

@@ -163,7 +163,9 @@
         un certificado de usuario. ¿Desea solicitar el certificado?</string>
     <string name="cert_data_confirm_msg"><![CDATA[<b>Nombre: </b>%1$s<br/>
         <b>Apellidos: </b>%2$s<br/>
-        <b>Nif: </b>%3$s]]></string>
+        <b>Nif: </b>%3$s<br/>
+        <b>Teléfono móvil: </b>%4$s<br/>
+        <b>Email: </b>%5$s<br/>]]></string>
     <string name="request_cert_result_activity"><![CDATA[Para poder votar necesita tener
         instalado un certificado.<br/><br/>Usted ya ha solicitado el certificado, ahora hace falta verificar
         su identidad, para ello puede presentarse en cualquiera de <br/><br/>
@@ -429,5 +431,16 @@
     <string name="enter_pin_signature_device_msg">Introduzca el PIN de su dispositivo de firma</string>
     <string name="admin_vickets_menu_item">Administración de Vickets</string>
     <string name="connecting_lbl">Conectando...</string>
+    <string name="phone_lbl">Teléfono móvil</string>
+    <string name="mail_lbl">Correo electrónico</string>
+    <string name="phone_missing_msg">Intorduzca un número de telefono móvil</string>
+    <string name="mail_missing_msg">Introduzca una dirección de correo electrónico válida</string>
+    <string name="publish_poll_lbl">Publicar votación</string>
+    <string name="hint_phone">teléfono móvil</string>
+    <string name="hint_email">email</string>
+    <string name="hint_nif">NIF</string>
+    <string name="hint_surname">Apellidos</string>
+    <string name="hint_name">Nombre</string>
+    <string name="hint_pin">PIN</string>
 
 </resources>

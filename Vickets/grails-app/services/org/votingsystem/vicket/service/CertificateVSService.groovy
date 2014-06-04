@@ -139,16 +139,19 @@ class CertificateVSService {
         }
     }
 
+    @Transactional
     public Map getCertificateVSDataMap(CertificateVS certificate) {
         X509Certificate x509Cert = CertUtil.loadCertificate (certificate.content)
         //SerialNumber as String to avoid Javascript problem handling such big numbers
-        def certMap = [serialNumber:"${x509Cert.getSerialNumber()}", isRoot:CertUtil.isSelfSigned(x509Cert),
+        def certMap = [serialNumber:"${certificate.serialNumber}",
+               isRoot:CertUtil.isSelfSigned(x509Cert),
                pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8"),
                type:certificate.type.toString(), state:certificate.state.toString(),
                subjectDN:x509Cert.getSubjectDN().toString(),
                issuerDN: x509Cert.getIssuerDN().toString(), sigAlgName:x509Cert.getSigAlgName(),
                notBefore:DateUtils.getStringFromDate(x509Cert.getNotBefore()),
                notAfter:DateUtils.getStringFromDate(x509Cert.getNotAfter())]
+        if(certificate.getAuthorityCertificateVS()) certMap.issuerSerialNumber = "${certificate.getAuthorityCertificateVS()?.serialNumber}"
         return certMap
     }
 

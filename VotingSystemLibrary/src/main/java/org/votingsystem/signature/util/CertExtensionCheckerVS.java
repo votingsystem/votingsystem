@@ -1,6 +1,5 @@
 package org.votingsystem.signature.util;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.votingsystem.model.ContextVS;
 
@@ -18,9 +17,11 @@ import java.util.Set;
  */
 public class CertExtensionCheckerVS extends PKIXCertPathChecker {
 
+    private boolean isAnonymousSigner = false;
+
     public enum ExtensionVS {VOTE(ContextVS.VOTE_OID), REPRESENTATIVE_VOTE(ContextVS.REPRESENTATIVE_VOTE_OID),
         ANONYMOUS_REPRESENTATIVE_DELEGATION(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID),
-        VICKET(ContextVS.VICKET_OID);
+        VICKET(ContextVS.VICKET_OID), DEVICEVS(ContextVS.DEVICEVS_OID);
 
         String OID = null;
         ExtensionVS(String OID) { this.OID = OID; }
@@ -34,6 +35,7 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
             if(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID.equals(extensionVS_OID))
                 return ANONYMOUS_REPRESENTATIVE_DELEGATION;
             if(ContextVS.VICKET_OID.equals(extensionVS_OID)) return VICKET;
+            if(ContextVS.DEVICEVS_OID.equals(extensionVS_OID)) return DEVICEVS;
             return null;
         }
 
@@ -50,6 +52,7 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
         supportedExtensions.add(ExtensionVS.REPRESENTATIVE_VOTE.getOID());
         supportedExtensions.add(ExtensionVS.ANONYMOUS_REPRESENTATIVE_DELEGATION.getOID());
         supportedExtensions.add(ExtensionVS.VICKET.getOID());
+        supportedExtensions.add(ExtensionVS.DEVICEVS.getOID());
     }
 
     public void init(boolean forward) throws CertPathValidatorException {
@@ -64,6 +67,14 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
         return extensionsVS;
     }
 
+    private void addExtensionVS(ExtensionVS extensionVS) {
+        extensionsVS.add(extensionVS);
+        if(ExtensionVS.DEVICEVS != extensionVS) isAnonymousSigner = true;
+    }
+
+    public boolean isAnonymousSigner() {
+        return isAnonymousSigner;
+    }
 
     public Set getSupportedExtensions()	{
         return null;
@@ -76,7 +87,7 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
                 //logger.debug("------------- ExtendedKeyUsage removed from validation");
                 unresolvedCritExts.remove(ext);
                 ExtensionVS extensionVS = ExtensionVS.getExtensionVS(ext);
-                if(extensionVS != null) extensionsVS.add(extensionVS);
+                if(extensionVS != null) addExtensionVS(extensionVS);
             }
         }
     }

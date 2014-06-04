@@ -2,6 +2,11 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import net.sf.json.JSONObject
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.DERObject
+import org.bouncycastle.asn1.DEROctetString
+import org.bouncycastle.asn1.DERTaggedObject
+import org.bouncycastle.asn1.DERUTF8String
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
@@ -17,7 +22,35 @@ class UserVSController {
     def groupVSService
     def userVSService
 
-    def search() { }
+    def search() {
+        if(request.contentType?.contains('json')) {
+            if(params.searchText) {
+                def userList
+                UserVS.withTransaction {
+                    userList = UserVS.createCriteria().list(max: params.max, offset: params.offset) {
+                        or {
+                            ilike('name', "%${params.searchText}%")
+                            ilike('firstName', "%${params.searchText}%")
+                            ilike('lastName', "%${params.searchText}%")
+                            ilike('nif', "%${params.searchText}%")
+                        }
+                        and {
+                            eq("state", UserVS.State.ACTIVE)
+                            eq("type", UserVS.Type.USER)
+                        }
+                    }
+                    def resultList = []
+                    userList.each {userItem ->
+                        resultList.add(userVSService.getUserVSDataMap(userItem))
+                    }
+                    int totalUsers = userList.totalCount
+                    Map resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
+                    render resultMap as JSON
+                }
+
+            }
+        }
+    }
 
     def index() {
         if (params.long('id')) {
@@ -131,13 +164,23 @@ class UserVSController {
         } else calendar = DateUtils.getMonday(calendar)
 
         Map responseMap = transactionVSService.getUserInfoMap(userVS, calendar)
-        String result = new JSONObject(responseMap).toString()
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, result)
-        responseVS.setContentType(ContentTypeVS.JSON_ENCRYPTED)
+        ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap)
+        responseVS.setContentType(ContentTypeVS.JSON)
+        X509Certificate cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
+
+
+
+
+
         responseVS.setType(TypeVS.VICKET_USER_INFO)
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+        return [responseVS:responseVS]
     }
 
+    private DERObject toDERObject(byte[] data) throws IOException, IOException {
+        ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+        ASN1InputStream DIS = new ASN1InputStream(inStream);
+        return DIS.readObject();
+    }
 
 	/**
 	 * Servicio que sirve para añadir usuarios de pruebas.

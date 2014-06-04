@@ -39,7 +39,7 @@ class GroupVSService {
         if (!messageJSON.groupvsName || !messageJSON.id ||
                 (TypeVS.VICKET_GROUP_CANCEL != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "cancelGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }

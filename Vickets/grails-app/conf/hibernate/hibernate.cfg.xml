@@ -34,10 +34,12 @@
         <mapping class="org.votingsystem.model.VoteVSCanceller"/>
         <mapping class="org.votingsystem.model.VoteVS" />
 
-        <mapping class="org.votingsystem.vicket.model.Vicket" />
-        <mapping class="org.votingsystem.vicket.model.VicketBatchRequest" />
+
+        <mapping class="org.votingsystem.vicket.model.MessageVS" />
         <mapping class="org.votingsystem.vicket.model.TransactionVS" />
         <mapping class="org.votingsystem.vicket.model.UserVSAccount" />
+        <mapping class="org.votingsystem.vicket.model.Vicket" />
+        <mapping class="org.votingsystem.vicket.model.VicketBatchRequest" />
 
     </session-factory>
 </hibernate-configuration>

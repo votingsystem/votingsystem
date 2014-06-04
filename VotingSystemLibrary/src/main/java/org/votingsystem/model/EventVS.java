@@ -1,8 +1,6 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
-//import org.apache.solr.analysis.HTMLStripCharFilterFactory;
-//import org.apache.solr.analysis.StandardTokenizerFactory;
 import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
@@ -11,6 +9,9 @@ import java.text.ParseException;
 import java.util.*;
 
 import static javax.persistence.GenerationType.IDENTITY;
+
+//import org.apache.solr.analysis.HTMLStripCharFilterFactory;
+//import org.apache.solr.analysis.StandardTokenizerFactory;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

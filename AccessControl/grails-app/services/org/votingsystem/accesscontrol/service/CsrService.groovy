@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import net.sf.json.JSONObject
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
@@ -167,21 +168,9 @@ class CsrService {
 		}
 		return null
 	}
-	
-	public X509Certificate getUserCert(byte[] pemCertCollection) throws Exception {
-		Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(pemCertCollection);
-		for (X509Certificate certificate : certificates) {
-			if (certificate.subjectDN.toString().contains("UID=deviceId:")) {
-				return certificate;
-			}
-		}
-		return null
-	}
-
 
     /*  C=ES, ST=State or Province, L=locality name, O=organization name, OU=org unit, CN=common name,
-        emailAddress=user@votingsystem.org, SERIALNUMBER=1234, mobilePhone=555555555, deviceId=4321, SN=surname,
-        GN=given name, GN=name given */
+        emailAddress=user@votingsystem.org, SERIALNUMBER=1234, SN=surname, GN=given name, GN=name given */
 	public ResponseVS saveUserCSR(byte[] csrPEMBytes, Locale locale) {
 		PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		CertificationRequestInfo info = csr.getCertificationRequestInfo();
@@ -193,18 +182,26 @@ class CsrService {
 		String deviceId;
 		String subjectDN = info.getSubject().toString();
 		log.debug("saveUserCSR - subject: " + subjectDN)
-
         if(subjectDN.split("GIVENNAME=").length > 1)  givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0]
         if(subjectDN.split("SURNAME=").length > 1)  surname = subjectDN.split("SURNAME=")[1].split(",")[0]
-		if(subjectDN.split("emailAddress=").length > 1)  email = subjectDN.split("emailAddress=")[1].split(",")[0]
 		if(subjectDN.split("SERIALNUMBER=").length > 1) {
 			nif = subjectDN.split("SERIALNUMBER=")[1];
 			if (nif.split(",").length > 1)  nif = nif.split(",")[0];
 		}
-		if (subjectDN.split("mobilePhone=").length > 1)  phone = subjectDN.split("mobilePhone=")[1].split(",")[0];
-		if (subjectDN.split("UID=deviceId:").length > 1) deviceId = subjectDN.split("UID=deviceId:")[1].split(",")[0];
-		ResponseVS responseVS = subscriptionVSService.checkDevice(
-                givenname, surname, nif, phone, email, deviceId, locale)
+
+        Enumeration csrAttributes = info.getAttributes().getObjects()
+        def deviceDataJSON
+        while(csrAttributes.hasMoreElements()) {
+            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
+            switch(attribute.getTagNo()) {
+                case ContextVS.DEVICEVS_TAG:
+                    deviceDataJSON = JSON.parse(((DERUTF8String)attribute.getObject()).getString())
+                    break;
+            }
+        }
+
+		ResponseVS responseVS = subscriptionVSService.checkDevice(givenname, surname, nif, deviceDataJSON?.mobilePhone,
+                deviceDataJSON?.email,  deviceDataJSON?.deviceId, locale)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
 		UserRequestCsrVS requestCSR
 		def previousRequest = UserRequestCsrVS.findAllByDeviceVSAndUserVSAndState(

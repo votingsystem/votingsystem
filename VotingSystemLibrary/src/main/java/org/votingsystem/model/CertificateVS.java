@@ -1,17 +1,9 @@
 package org.votingsystem.model;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.signature.util.CertUtil;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;

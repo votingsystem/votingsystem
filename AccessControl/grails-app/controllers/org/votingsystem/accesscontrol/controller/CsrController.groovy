@@ -76,12 +76,12 @@ class CsrController {
         if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
         }
-		String consulta = "${request.getInputStream()}"
-		if (!consulta) {
+		String csrRequest = "${request.getInputStream()}"
+		if (!csrRequest) {
             return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                     args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
-		} else return [responseVS:csrService.saveUserCSR(consulta.getBytes(), request.getLocale())]
+		} else return [responseVS:csrService.saveUserCSR(csrRequest.getBytes(), request.getLocale())]
 	}
 	
 	/**

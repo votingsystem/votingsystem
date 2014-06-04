@@ -9,6 +9,8 @@ import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.IbanVSUtil
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * @infoController TestingController
  * @descController Servicios de acceso a la aplicación web principal

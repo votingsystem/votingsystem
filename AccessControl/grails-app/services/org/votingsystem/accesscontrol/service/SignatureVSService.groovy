@@ -324,7 +324,7 @@ class SignatureVSService {
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
                 extensionChecker = validationResponse.data.extensionChecker
                 ResponseVS responseVS = null
-                if(!extensionChecker.supportedExtensionsVS.isEmpty()) {
+                if(extensionChecker.isAnonymousSigner()) {
                     log.debug("validateSignersCertificate - anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK)

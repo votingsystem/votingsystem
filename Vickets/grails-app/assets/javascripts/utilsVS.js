@@ -312,6 +312,15 @@ function updateMenuLinks() {
     }
 }
 
+function updateMenuLink(urlToUpdate) {
+    var selectedMenuType = getParameterByName('menu')
+    if("" == selectedMenuType.trim() || urlToUpdate == null || "" == urlToUpdate.trim()) {
+        return urlToUpdate
+    }
+    if(urlToUpdate.indexOf("?") < 0) urlToUpdate = urlToUpdate + "?menu=" + selectedMenuType
+    else urlToUpdate = urlToUpdate + "&menu=" + selectedMenuType
+    return urlToUpdate
+}
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 function getParameterByName(name) {

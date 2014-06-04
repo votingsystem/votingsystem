@@ -55,7 +55,7 @@
     var groupURL = null
 
     function cancelGroupResultOKCallback() {
-        window.location.href = groupURL + "?menu=admin"
+        window.location.href = updateMenuLink(groupURL)
     }
 
     function showCancelGroupVSDialogCallback(appMessage) {

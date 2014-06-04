@@ -88,7 +88,7 @@
     var vicketSourceURL = null
 
     function resultOKCallback() {
-        window.location.href = vicketSourceURL + "?menu=superadmin"
+        window.location.href = updateMenuLink(vicketSourceURL)
     }
 
     function newVicketSourceCallback(appMessage) {

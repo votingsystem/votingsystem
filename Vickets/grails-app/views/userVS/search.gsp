@@ -11,178 +11,97 @@
     <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li class="active"><g:message code="transactionPageTitle"/></li>
+            <li class="active"><g:message code="userSearchPageTitle"/></li>
         </ol>
     </div>
 
-    <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
-        <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
-                <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
-                <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
-                <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
-                <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
-                <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
-                <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
-            </select>
-        </div>
+    <div id="searchPanel" class="" style="background:#ba0011; padding:10px 10px 10px 10px; width: 300px; margin:0px auto 0px auto;">
+        <input id="userSearchInput" type="text" class="form-control" placeholder="<g:message code="userSearchLbl" />"
+               style="width:220px; border-color: #f9f9f9;display:inline; vertical-align: middle;">
+        <i id="searchPanelCloseIcon" onclick="processUserSearch()" class="fa fa-search text-right navBar-vicket-icon"
+           style="margin:0px 0px 0px 15px; display:inline;vertical-align: middle;"></i>
     </div>
-
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-        <table class="table dynatable-vickets" id="transaction_table" style="">
+    <div id="uservs_tableDiv" style="margin: 20px auto 0px auto; max-width: 800px; overflow:auto; visibility: hidden;">
+        <table class="table dynatable-vickets" id="uservs_table" style="">
             <thead>
             <tr style="color: #ff0000;">
-                <th data-dynatable-column="type" style="width: 220px;"><g:message code="typeLbl"/></th>
-                <th data-dynatable-column="nif" style="max-width:80px;"><g:message code="nifLbl"/></th>
-                <th data-dynatable-column="IBAN" style="max-width:60px;"><g:message code="IBANLbl"/></th>
-                <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
-                <th data-dynatable-column="name" style="min-width:200px;"><g:message code="nameLbl"/></th>
-                <th data-dynatable-column="firstName" style="min-width:200px;"><g:message code="firstNameLbl"/></th>
-                <th data-dynatable-column="lastName" style="min-width:200px;"><g:message code="lastNameLbl"/></th>
+                <th data-dynatable-column="uservsNIF" style="width: 60px;"><g:message code="nifLbl"/></th>
+                <th data-dynatable-column="uservsName" style=""><g:message code="nameLbl"/></th>
                 <!--<th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>-->
             </tr>
             </thead>
         </table>
     </div>
+
 </div>
 </body>
 
 </html>
 <asset:script>
-    var socketService = new SocketService()
-    socketService.connect()
-
-    var dynatable
-
     $(function() {
-        $("#navBarSearchInput").css( "visibility", "visible" );
-        $('#transaction_table').dynatable({
-                features: dynatableFeatures,
-                inputs: dynatableInputs,
-                params: dynatableParams,
-                dataset: {
-                    ajax: true,
-                    ajaxUrl: "${createLink(controller: 'transaction', action: 'index')}",
-                    ajaxOnLoad: false,
-                    perPageDefault: 50,
-                    records: []
-                },
-                writers: {
-                    _rowWriter: rowWriter
-                }
+
+
+        $("#userSearchInput").bind('keypress', function(e) {
+            if (e.which == 13) {
+                processUserSearch()
+            }
         });
-        dynatable = $('#transaction_table').data('dynatable');
-        dynatable.settings.params.records = '<g:message code="transactionRecordsLbl"/>'
+
+        $('#uservs_table').dynatable({
+            features: dynatableFeatures,
+            inputs: dynatableInputs,
+            params: dynatableParams,
+            dataset: {
+                ajax: false,
+                ajaxOnLoad: false,
+                perPageDefault: 50,
+                records: []
+            },
+            writers: {
+                _rowWriter: rowWriter
+            }
+        });
+        dynatable = $('#uservs_table').data('dynatable');
+        dynatable.settings.params.records = 'userVSList'
         dynatable.settings.params.queryRecordCount = 'queryRecordCount'
-        dynatable.settings.params.totalRecordCount = 'numTotalTransactions'
+        dynatable.settings.params.totalRecordCount = 'numTotalUsers'
 
 
-        $('#transaction_table').bind('dynatable:afterUpdate',  function() {
+        $('#uservs_table').bind('dynatable:afterUpdate',  function() {
             console.log("page loaded")
-            $('#dynatable-record-count-transaction_table').css('visibility', 'visible');
+            document.getElementById('uservs_table').style.visibility = 'visible'
         })
 
-        //$("#transaction_table").stickyTableHeaders({fixedOffset: $('.navbar')});
-        $("#transaction_table").stickyTableHeaders();
-
-        $('#transactionvsTypeSelect').on('change', function (e) {
-            var transactionvsType = $(this).val()
-            var optionSelected = $("option:selected", this);
-            console.log("transactionvs selected: " + transactionvsType)
-            var targetURL = "${createLink(controller: 'transaction', action: 'index')}";
-            if("" != transactionvsType) {
-                history.pushState(null, null, targetURL);
-                targetURL = targetURL + "?transactionvsType=" + transactionvsType
-            }
-            dynatable.settings.dataset.ajaxUrl= targetURL
-            dynatable.paginationPage.set(1);
-            dynatable.process();
-        });
+        //$("#uservs_table").stickyTableHeaders({fixedOffset: $('.navbar')});
+        $("#uservs_table").stickyTableHeaders();
 
     })
 
-    function loadHTTPTransactions()  {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open( "GET", "${createLink(controller: 'transaction', action: 'index')}", true );
-
-        xmlHttp.onreadystatechange=function() {
-            if (xmlHttp.readyState==4 && xmlHttp.status == 200) {
-                var jsonResult = JSON.parse(xmlHttp.responseText);
-                dynatable.records.updateFromJson({Transacciones: jsonResult.Transacciones});
-                dynatable.records.init();
-                dynatable.process();
-            }
-        }
-        xmlHttp.send();
-    }
-
-    function addRecordToTable(record)  {
-        //dynatable.settings.dataset.originalRecords.push(record);
-        dynatable.settings.dataset.records.push(record);
-        dynatable.process();
-    }
-
-    socketService.socket.onmessage = function (message) {
-        console.log('socket.onmessage - message.data: ' + message.data);
-        var messageJSON = toJSON(message.data)
-        addRecordToTable(messageJSON)
-    }
-
-    socketService.socket.onopen = function () {
-        console.log('listener - WebSocket connection opened');
-        socketService.sendMessage({operation:SocketOperation.LISTEN_TRANSACTIONS, locale:navigator.language})
-    };
-
-    function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
-        var transactionType
-        switch(jsonTransactionData.type) {
-            case 'VICKET_SEND':
-                transactionType = '<g:message code="selectVicketSendLbl"/>'
-                break;
-            case 'USER_ALLOCATION':
-                transactionType = '<g:message code="selectUserAllocationLbl"/>'
-                break;
-            case 'USER_ALLOCATION_INPUT':
-                transactionType = '<g:message code="selectUserAllocationInputLbl"/>'
-                break;
-            case 'VICKET_REQUEST':
-                transactionType = '<g:message code="selectVicketRequestLbl"/>'
-                break;
-            case 'VICKET_CANCELLATION':
-                transactionType = '<g:message code="selectVicketCancellationLbl"/>'
-                break;
-            default:
-                transactionType = jsonTransactionData.type
-        }
-        var transactionURL = jsonTransactionData.id
-
-        var cssClass = "span4", tr;
-        if (rowIndex % 3 === 0) { cssClass += ' first'; }
-        tr = '<tr><td title="' + transactionType + '" class="text-center">' +
-            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-center">' +
-            jsonTransactionData.amount + '</td>' +
-        '<td class="text-center">' + jsonTransactionData.currency + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
-        '</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
+    function rowWriter(rowIndex, jsonUserData, columns, cellWriter) {
+        var name = jsonUserData.name
+        if(jsonUserData.firstName != null && "" != jsonUserData.firstName.trim()) name = jsonUserData.firstName + " " +
+            jsonUserData.lastName
+        var tr = '<tr onclick="showUserData(\'' + jsonUserData.id + '\')"><td title="" class="text-center">' +
+            '<a href="#" onclick="">' + jsonUserData.nif + '</a></td><td class="text-center">' + name + '</td></tr>'
         return tr
     }
 
-    function processUserSearch(textToSearch) {
-        $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
-        $('#pageInfoPanel').css("display", "block")
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
+    function showUserData(userId) {
+        window.location.href = updateMenuLink("${createLink(controller: 'userVS')}/" + userId.toString())
+    }
+
+//{ "userVSList": [ { "id": 4, "nif": "07553172H", "firstName": "Name7553172H", "lastName": "SurName7553172H", "name": "Name7553172H", "IBAN": "ES8978788989450000000004", "state": "ACTIVE", "type": "USER" } ], "queryRecordCount": 1, "numTotalTransactions": 1 }
+    function processUserSearch() {
+        var textToSearch = document.getElementById("userSearchInput").value
+        if(textToSearch.trim() == "") return
+        else console.log("====== processUserSearch: " + textToSearch)
+        dynatable.settings.dataset.ajax = true
+        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
         dynatable.paginationPage.set(1);
         dynatable.process();
     }
-
-    function processUserSearchJSON(jsonData) {
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}"
-        dynatable.settings.dataset.ajaxData = jsonData
-        dynatable.paginationPage.set(1);
-        dynatable.process();
-    }
-
 
 </asset:script>

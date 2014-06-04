@@ -16,7 +16,6 @@ import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.Streams;
 
 import javax.xml.bind.DatatypeConverter;

@@ -90,9 +90,10 @@ class TransactionVSService {
     public void notifyListeners(TransactionVS transactionVS) {
         Map messageMap = getTransactionMap(transactionVS)
         log.debug("notifyListeners - transactionVS.id: ${transactionVS.id} - messageMap: ${messageMap as JSON}")
-        Map broadcastResul = webSocketService.broadcastList(messageMap, listenerSet);
-        if(ResponseVS.SC_OK != broadcastResul.statusCode) {
-            broadcastResul.errorList.each {listenerSet.remove(it)}
+        ResponseVS broadcastResult = webSocketService.broadcastList(messageMap, listenerSet);
+        if(ResponseVS.SC_OK != broadcastResult.statusCode) {
+            def errorList = broadcastResult.data
+            errorList.each {listenerSet.remove(it)}
         }
     }
 

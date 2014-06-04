@@ -72,6 +72,8 @@ public class UserCertRequestFormFragment extends Fragment {
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
+    private EditText phoneText;
+    private EditText mailText;
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -121,6 +123,8 @@ public class UserCertRequestFormFragment extends Fragment {
         });
         givennameText = (EditText)rootView.findViewById(R.id.given_name_edit);
         surnameText = (EditText)rootView.findViewById(R.id.surname_edit);
+        mailText = (EditText)rootView.findViewById(R.id.mail_edit);
+        phoneText = (EditText)rootView.findViewById(R.id.phone_edit);
         nifText = (EditText)rootView.findViewById(R.id.nif_edit);
         nifText.setOnEditorActionListener(new OnEditorActionListener(){
             @Override
@@ -197,7 +201,7 @@ public class UserCertRequestFormFragment extends Fragment {
 			AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
             Dialog dialog = builder.setTitle(getString(R.string.request_certificate_form_lbl)).
                     setMessage(Html.fromHtml(getString(R.string.cert_data_confirm_msg, givenname,
-                    surname, nif))).setPositiveButton(getString(
+                    surname, nif, phone, email))).setPositiveButton(getString(
                     R.string.continue_lbl), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     PinDialogFragment.showPinScreenWithoutCertValidation(getFragmentManager(),
@@ -247,9 +251,23 @@ public class UserCertRequestFormFragment extends Fragment {
                     Normalizer.Form.NFD);
             surname = surname.replaceAll("[^\\p{ASCII}]", "");
         }
+        if(TextUtils.isEmpty(phoneText.getText().toString())){
+            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.phone_missing_msg));
+            return false;
+        } else {
+            phone = phoneText.getText().toString();
+        }
+        if(TextUtils.isEmpty(mailText.getText().toString())){
+            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.mail_missing_msg));
+            return false;
+        } else {
+            email = Normalizer.normalize(mailText.getText().toString(), Normalizer.Form.NFD);
+        }
     	TelephonyManager telephonyManager = (TelephonyManager)getActivity().getSystemService(
                 Context.TELEPHONY_SERVICE);
-    	phone = telephonyManager.getLine1Number();
+    	// phone = telephonyManager.getLine1Number(); -> operator dependent
     	//IMSI
     	//phone = telephonyManager.getSubscriberId();
     	deviceId = telephonyManager.getDeviceId();

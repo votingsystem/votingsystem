@@ -4,6 +4,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;

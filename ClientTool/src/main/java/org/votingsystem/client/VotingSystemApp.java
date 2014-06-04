@@ -103,10 +103,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     logger.error(ex.getMessage(), ex);
                 }
 
-                WebSocketService webSocketService = new WebSocketService(ContextVS.getInstance().
-                        getVotingSystemSSLCerts().iterator().next(), "wss://vickets:8443/Vickets/websocket/service");
-                webSocketService.restart();
-
                 String accessControlServerURL = null;
                 String vicketsServerURL = null;
                 if(loadedFromJar) {
@@ -120,6 +116,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 catch(Exception ex) {logger.error(ex.getMessage(), ex);}
                 try {SignatureService.checkServer(vicketsServerURL);}
                 catch(Exception ex) {logger.error(ex.getMessage(), ex);}
+
+                WebSocketService webSocketService = new WebSocketService(ContextVS.getInstance().
+                        getVotingSystemSSLCerts().iterator().next(), "wss://vickets:8443/Vickets/websocket/service");
+                webSocketService.restart();
             }
         }).start();
 

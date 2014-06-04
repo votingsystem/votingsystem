@@ -1,7 +1,5 @@
 package org.votingsystem.util;
 
-import org.apache.log4j.Logger;
-
 public class NifUtils {
 	    
     public static String getNif(int number) {

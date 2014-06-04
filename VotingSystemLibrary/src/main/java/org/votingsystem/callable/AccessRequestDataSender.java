@@ -12,7 +12,6 @@ import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
-import javax.mail.Header;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;

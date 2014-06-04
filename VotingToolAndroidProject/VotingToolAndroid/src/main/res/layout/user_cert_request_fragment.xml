@@ -38,6 +38,7 @@
                     android:layout_marginLeft="20dip"
                     android:layout_marginRight="20dip"
                     android:singleLine="true"
+                    android:hint="@string/hint_name"
                     android:imeOptions="actionNext"
                     android:nextFocusDown="@+id/request_button"
                     android:gravity="center_vertical|center_horizontal">
@@ -62,6 +63,7 @@
                     android:layout_marginLeft="20dip"
                     android:layout_marginRight="20dip"
                     android:singleLine="true"
+                    android:hint="@string/hint_surname"
                     android:imeOptions="actionNext"
                     android:nextFocusDown="@+id/request_button"
                     android:gravity="center_vertical|center_horizontal">
@@ -86,6 +88,57 @@
                     android:layout_marginRight="20dip"
                     android:singleLine="true"
                     android:imeOptions="actionNext"
+                    android:hint="@string/hint_nif"
+                    android:nextFocusDown="@+id/request_button"
+                    android:gravity="center_vertical|center_horizontal">
+                </EditText>
+
+                <TextView
+                    android:id="@+id/phone_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dip"
+                    android:layout_marginRight="20dip"
+                    android:layout_marginTop="40dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/phone_lbl"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/phone_edit"
+                    android:layout_height="wrap_content"
+                    android:layout_width="240dp"
+                    android:layout_marginLeft="20dip"
+                    android:layout_marginRight="20dip"
+                    android:singleLine="true"
+                    android:hint="@string/hint_phone"
+                    android:inputType="phone"
+                    android:imeOptions="actionNext"
+                    android:nextFocusDown="@+id/request_button"
+                    android:gravity="center_vertical|center_horizontal">
+                </EditText>
+
+                <TextView
+                    android:id="@+id/mail_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dip"
+                    android:layout_marginRight="20dip"
+                    android:layout_marginTop="40dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/mail_lbl"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/mail_edit"
+                    android:layout_height="wrap_content"
+                    android:layout_width="240dp"
+                    android:layout_marginLeft="20dip"
+                    android:layout_marginRight="20dip"
+                    android:hint="@string/hint_email"
+                    android:inputType="textEmailAddress"
+                    android:imeOptions="actionDone"
+                    android:singleLine="true"
                     android:nextFocusDown="@+id/request_button"
                     android:gravity="center_vertical|center_horizontal">
                 </EditText>

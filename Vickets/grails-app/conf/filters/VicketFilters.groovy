@@ -141,6 +141,10 @@ class VicketFilters {
                                     new ByteArrayInputStream(requestBytes)), contentTypeVS, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
+                        case ContentTypeVS.MESSAGEVS:
+                            responseVS = signatureVSService.processMessageVS(requestBytes, contentTypeVS, request.getLocale())
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageVS = responseVS.data
+                            break;
                         default: return;
                     }
                 } catch(Exception ex) {
@@ -246,8 +250,6 @@ class VicketFilters {
 
     private boolean printOutputStream(HttpServletResponse response, ResponseVS responseVS) {
         response.status = responseVS.getStatusCode()
-        if(!(responseVS?.data instanceof MessageSMIME) && responseVS?.data?.fileName) response.setHeader(
-                "Content-Disposition", "inline; filename='${responseVS.data.fileName}'");
         response.contentLength = responseVS.getMessageBytes().length
         response.setContentType(responseVS.getContentType().getName())
         response.outputStream <<  responseVS.getMessageBytes()

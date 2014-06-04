@@ -1,16 +1,23 @@
 package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
+import net.sf.json.JSONObject
+import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
+import org.bouncycastle.cms.CMSAlgorithm
 import org.bouncycastle.cms.CMSEnvelopedDataParser
+import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator
 import org.bouncycastle.cms.CMSTypedStream
 import org.bouncycastle.cms.RecipientInformation
 import org.bouncycastle.cms.RecipientInformationStore
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
+import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
@@ -25,7 +32,13 @@ import javax.mail.internet.MimeMessage
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.cert.CertPath
+import java.security.cert.CertPathValidator
 import java.security.cert.CertPathValidatorException
+import java.security.cert.CertPathValidatorResult
+import java.security.cert.CertificateFactory
+import java.security.cert.PKIXCertPathValidatorResult
+import java.security.cert.PKIXParameters
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
@@ -292,14 +305,14 @@ class  SignatureVSService {
                 }
 				ResponseVS validationResponse = CertUtil.verifyCertificate(userVS.getCertificate(),
                         getTrustedCerts(), false)
-				X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 				userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
 				log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
-                        " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
+                        " - certificateVS.id : " + userVS.getCertificateCA().getId());
                 extensionChecker = validationResponse.data.extensionChecker
                 ResponseVS responseVS = null
-                if(!extensionChecker.supportedExtensionsVS.isEmpty()) {
-                    log.debug("validateSignersCertificate - anonymous signer")
+                if(extensionChecker.isAnonymousSigner()) {
+                    log.debug("validateSignersCertificate - is anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
                     responseVS.setUserVS(anonymousSigner)
@@ -324,6 +337,30 @@ class  SignatureVSService {
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
                 extensionChecker:extensionChecker])
 	}
+
+    @Transactional
+    private ResponseVS processMessageVS(byte[] messageVSBytes, ContentTypeVS contenType, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(messageVSBytes, "UTF-8");
+        SMIMEMessageWrapper smimeSender = new SMIMEMessageWrapper(new ByteArrayInputStream(
+                Base64.decode(messageVSJSON.smimeSender.getBytes())))
+        ResponseVS responseVS = processSMIMERequest(smimeSender, contenType, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        UserVS fromUser = UserVS.findWhere(nif:messageVSJSON.fromUser)
+        UserVS toUser = UserVS.findWhere(nif:messageVSJSON.toUser)
+
+        String msg
+        if(!fromUser || ! toUser || !messageVSJSON.receiverCertPEM) {
+            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            log.error "${methodName} - ${msg}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
+                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+        }
+
+        MessageVS messageVS = new MessageVS(content: messageVSBytes, receiverCertPEM:messageVSJSON.receiverCertPEM,
+                fromUser, toUser, senderMessageSMIME:responseVS.data, type:TypeVS.OK, state: MessageVS.State.PENDING).save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageVS)
+    }
 
     private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType, Locale locale) {
         if (smimeMessageReq?.isValidSignature()) {
@@ -380,9 +417,24 @@ class  SignatureVSService {
 	}
 
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
+    /*public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
         log.debug("encryptToCMS")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
+    }*/
+
+    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
+        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
+        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receptorCert).
+                setProvider(ContextVS.PROVIDER));
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        OutputStream out = dataStreamGen.open(bOut,
+                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
+                        setProvider(ContextVS.PROVIDER).build());
+        out.write(dataToEncrypt);
+        out.close();
+        byte[] result = bOut.toByteArray();
+        byte[] base64EncryptedDataBytes = Base64.encode(result);
+        return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes, null);
     }
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {

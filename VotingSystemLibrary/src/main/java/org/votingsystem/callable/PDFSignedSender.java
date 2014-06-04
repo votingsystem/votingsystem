@@ -19,7 +19,6 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.dnie.DNIePDFContentSigner;
 import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.signature.util.ContentSignerVS;
 import org.votingsystem.signature.util.Encryptor;

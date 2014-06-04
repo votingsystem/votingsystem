@@ -30,9 +30,18 @@
                     style="color:#f9f9f9;"><g:message code="locateUserVSLbl"/> <i class="fa fa-users"></i>
                 </a>
             </li>
+            <li>
+                <a  href="#" onclick="changeToAdminMenu()" style="color:#f9f9f9;">
+                    <g:message code="changeToAdminMenuLbl"/>
+                </a>
+            </li>
         </ul>
     </nav>
 </div>
 <asset:script>
-
+    function changeToAdminMenu() {
+        var result = window.location.href.replace("menu=superadmin", "menu=admin")
+        window.location.href = result;
+    }
+ console.log(window.location.href)
 </asset:script>

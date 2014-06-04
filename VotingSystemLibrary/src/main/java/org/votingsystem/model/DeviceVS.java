@@ -17,29 +17,27 @@ public class DeviceVS implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id @GeneratedValue(strategy=IDENTITY)
-    @Column(name="id", unique=true, nullable=false)
-    private Long id;
+    @Column(name="id", unique=true, nullable=false) private Long id;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS")
-    private UserVS userVS;
+    @JoinColumn(name="userVS") private UserVS userVS;
     
-    @Column(name="device" )
-    private String deviceId;
+    @Column(name="device" ) private String deviceId;
     
-    @Column(name="email" )
-    private String email;
+    @Column(name="email" ) private String email;
     
-    @Column(name="phone" )
-    private String phone;
-    
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23)
-    private Date dateCreated;
+    @Column(name="phone" ) private String phone;
+
+    @OneToOne private CertificateVS certificateVS;
+
+    @Column(name="reason", columnDefinition="TEXT") private String reason;
+    @Column(name="deviceName") private String deviceName;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23)
-    private Date lastUpdated;
+    @Column(name="dateCreated", length=23) private Date dateCreated;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
 	public UserVS getUserVS() {
 		return userVS;
@@ -96,5 +94,28 @@ public class DeviceVS implements Serializable {
 	public void setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
-	
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public CertificateVS getCertificateVS() {
+        return certificateVS;
+    }
+
+    public void setCertificateVS(CertificateVS certificateVS) {
+        this.certificateVS = certificateVS;
+    }
 }

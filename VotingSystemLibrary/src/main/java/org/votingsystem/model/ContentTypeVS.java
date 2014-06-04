@@ -18,6 +18,7 @@ public enum ContentTypeVS {
     JSON_ENCRYPTED("application/json;application/pkcs7-mime","p7m"),//.p7c
     JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-mime", "p7m"),
 
+    MESSAGEVS("application/messagevs", "vs"),
     MULTIPART_SIGNED("multipart/signed", null),
     MULTIPART_ENCRYPTED("multipart/encrypted", null),
     PDF("application/pdf", "pdf"),

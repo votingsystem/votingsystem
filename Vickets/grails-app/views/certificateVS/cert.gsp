@@ -24,7 +24,6 @@
         </ol>
     </div>
 
-
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
             <button id="cancelCertButton" type="submit" class="btn btn-warning"
@@ -35,7 +34,7 @@
     </div>
 
     <h3>
-        <div class="pageHeader text-center"><g:message code="trustedCertPageTitle"/></div>
+        <div id="pageHeaderDiv" class="pageHeader text-center"></div>
     </h3>
 
     <div style="width: 100%;">
@@ -46,7 +45,9 @@
                 <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em; font-weight: bold; float: right;"></div>
             </div>
             <div class='groupvsSubjectDiv'><span style="font-weight: bold;"><g:message code="subjectLbl"/>: </span>${certMap.subjectDN}</div>
-            <div class=''><span style="font-weight: bold;"><g:message code="issuerLbl"/>: </span>${certMap.issuerDN}</div>
+            <div class=''><span style="font-weight: bold;"><g:message code="issuerLbl"/>: </span>
+                <a id="issuerURL" href="#">${certMap.issuerDN}</a>
+                </div>
             <div class=''><span style="font-weight: bold;"><g:message code="signatureAlgotithmLbl"/>: </span>${certMap.sigAlgName}</div>
             <div>
                 <div class='' style="display: inline;">
@@ -74,6 +75,15 @@
 </html>
 <asset:script>
     $(function() {
+        <g:if test="${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString().equals(certMap.type)}">
+            document.getElementById('pageHeaderDiv').innerHTML = "<g:message code="trustedCertPageTitle"/>"
+        </g:if><g:elseif test="${CertificateVS.Type.USER.toString().equals(certMap.type)}">
+            document.getElementById('pageHeaderDiv').innerHTML = "<g:message code="userCertPageTitle"/>"
+        </g:elseif>
+        <g:if test="${certMap.issuerSerialNumber}">
+            document.getElementById('issuerURL').href =
+                "${createLink( controller:'certificateVS', action:'cert')}/${certMap.issuerSerialNumber}"
+        </g:if>
         document.getElementById('pemCertTextArea').value = document.getElementById("pemCertDiv").innerHTML.trim()
         <g:if test="${CertificateVS.State.OK.toString().equals(certMap.state)}">
             document.getElementById('certStateDiv').innerHTML = "<g:message code="certOKLbl"/>"

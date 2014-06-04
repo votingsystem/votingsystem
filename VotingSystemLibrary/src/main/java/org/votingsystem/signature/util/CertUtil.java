@@ -1,5 +1,6 @@
 package org.votingsystem.signature.util;
 
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -18,7 +19,7 @@ import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-
+import net.sf.json.JSONObject;
 import javax.security.auth.x500.X500Principal;
 import java.io.*;
 import java.math.BigInteger;
@@ -26,7 +27,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
-import java.security.cert.Certificate;
 import java.util.*;
 
 /**
@@ -396,5 +396,22 @@ public class CertUtil {
 			crlStream.close();
 		}
 	}
-	
+
+    public static JSONObject getCertExtensionData(X509Certificate x509Certificate, String extensionOID) throws IOException {
+        JSONObject result = null;
+        byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
+        DERObject derObject =  toDERObject(extensionValue);
+        if (derObject instanceof DEROctetString) {
+            DEROctetString derOctetString = (DEROctetString)derObject;
+            DERTaggedObject derTaggedObject = (DERTaggedObject)toDERObject(derOctetString.getOctets());
+            result = (JSONObject) JSONSerializer.toJSON(((DERUTF8String)derTaggedObject.getObject()).getString());
+        }
+        return result;
+    }
+
+    public static DERObject toDERObject(byte[] data) throws IOException, IOException {
+        ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+        ASN1InputStream DIS = new ASN1InputStream(inStream);
+        return DIS.readObject();
+    }
 }

@@ -11,6 +11,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
+
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;

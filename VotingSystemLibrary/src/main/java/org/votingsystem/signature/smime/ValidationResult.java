@@ -1,6 +1,7 @@
 package org.votingsystem.signature.smime;
 
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
+
 import java.security.cert.CertPath;
 import java.util.List;
 

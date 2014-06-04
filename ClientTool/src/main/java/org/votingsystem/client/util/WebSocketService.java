@@ -71,7 +71,7 @@ public class WebSocketService extends Service<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
             try {
-                logger.debug("WebSocketTask - Connecting ...");
+                logger.debug("WebSocketTask - Connecting ... to " + targetService);
                 client.connectToServer(new Endpoint() {
                     @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
                         try {

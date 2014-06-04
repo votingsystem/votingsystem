@@ -45,11 +45,11 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final String GROUP_POSITION_KEY = "groupPosition";
 
     public static final int VOTING_GROUP_POSITION          = 0;
-    public static final int MANIFESTS_GROUP_POSITION       = 1;
-    public static final int CLAIMS_GROUP_POSITION          = 2;
-    public static final int REPRESENTATIVES_GROUP_POSITION = 3;
-    public static final int RECEIPTS_GROUP_POSITION        = 4;
-    public static final int VICKETS_GROUP_POSITION         = 5;
+    public static final int MANIFESTS_GROUP_POSITION       = -1;
+    public static final int CLAIMS_GROUP_POSITION          = -1;
+    public static final int REPRESENTATIVES_GROUP_POSITION = 1;
+    public static final int RECEIPTS_GROUP_POSITION        = 2;
+    public static final int VICKETS_GROUP_POSITION         = 3;
 
     public static final int OPEN_CHILD_POSITION            = 0;
     public static final int PENDING_CHILD_POSITION         = 1;
@@ -91,8 +91,8 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         public static GroupPosition valueOf(int position)  {
             switch (position) {
                 case VOTING_GROUP_POSITION: return VOTING;
-                case MANIFESTS_GROUP_POSITION: return MANIFESTS;
-                case CLAIMS_GROUP_POSITION: return CLAIMS;
+                //case MANIFESTS_GROUP_POSITION: return MANIFESTS;
+                //case CLAIMS_GROUP_POSITION: return CLAIMS;
                 case REPRESENTATIVES_GROUP_POSITION: return REPRESENTATIVES;
                 case RECEIPTS_GROUP_POSITION: return RECEIPTS;
                 case VICKETS_GROUP_POSITION: return VICKETS;
@@ -251,10 +251,10 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
         listDataHeader.add(GroupPosition.VOTING.getPosition(),
                 context.getString(R.string.voting_drop_down_lbl));
-        listDataHeader.add(GroupPosition.MANIFESTS.getPosition(),
+        /*listDataHeader.add(GroupPosition.MANIFESTS.getPosition(),
                 context.getString(R.string.manifiests_drop_down_lbl));
         listDataHeader.add(GroupPosition.CLAIMS.getPosition(),
-                context.getString(R.string.claims_drop_down_lbl));
+                context.getString(R.string.claims_drop_down_lbl));*/
         listDataHeader.add(GroupPosition.REPRESENTATIVES.getPosition(),
                 context.getString(R.string.representatives_drop_down_lbl));
         listDataHeader.add(GroupPosition.RECEIPTS.getPosition(),
@@ -282,8 +282,8 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         vickets.add(context.getString(R.string.vickets_list_lbl));
 
         listDataChild.put(listDataHeader.get(GroupPosition.VOTING.getPosition()), voting);
-        listDataChild.put(listDataHeader.get(GroupPosition.MANIFESTS.getPosition()), manifests);
-        listDataChild.put(listDataHeader.get(GroupPosition.CLAIMS.getPosition()), claims);
+        //listDataChild.put(listDataHeader.get(GroupPosition.MANIFESTS.getPosition()), manifests);
+        //listDataChild.put(listDataHeader.get(GroupPosition.CLAIMS.getPosition()), claims);
         listDataChild.put(listDataHeader.get(GroupPosition.REPRESENTATIVES.getPosition()),
                 new ArrayList<String>());
         listDataChild.put(listDataHeader.get(GroupPosition.RECEIPTS.getPosition()),

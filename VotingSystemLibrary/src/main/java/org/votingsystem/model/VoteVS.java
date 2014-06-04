@@ -11,7 +11,6 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CMSUtils;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;

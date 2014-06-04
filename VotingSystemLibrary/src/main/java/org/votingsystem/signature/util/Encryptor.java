@@ -25,7 +25,9 @@ import java.io.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * @author jgzornoza
@@ -229,7 +231,7 @@ public class Encryptor {
         out.close();
         byte[] result = bOut.toByteArray();
         byte[] base64EncryptedDataBytes = Base64.encode(result);
-        return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes);
+        return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes, null);
     }
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {

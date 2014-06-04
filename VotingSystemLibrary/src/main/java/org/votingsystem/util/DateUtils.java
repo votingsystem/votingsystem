@@ -8,9 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import static java.util.Calendar.DAY_OF_WEEK;
-import static java.util.Calendar.MONDAY;
-
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

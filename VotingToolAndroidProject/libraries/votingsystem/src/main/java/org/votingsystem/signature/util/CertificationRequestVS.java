@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.util.DeviceUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -102,8 +103,8 @@ public class CertificationRequestVS implements java.io.Serializable {
     }
 
     public static CertificationRequestVS getVicketRequest(int keySize, String keyName,
-                                                          String signatureMechanism, String provider, String vicketProviderURL, String hashCertVS,
-                                                          String amount, String currency) throws NoSuchAlgorithmException,
+              String signatureMechanism, String provider, String vicketProviderURL, String hashCertVS,
+              String amount, String currency) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=vicketProviderURL:" + vicketProviderURL +
@@ -128,14 +129,21 @@ public class CertificationRequestVS implements java.io.Serializable {
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
 
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
-        String principal = "SERIALNUMBER=" + nif + ", UID=deviceId:" + deviceId + ", GIVENNAME=" +
-                givenName + ", SURNAME=" + surName;
-        if (email != null) principal.concat(", emailAddress=" + email);
-        if (phone != null) principal.concat(", mobilePhone=" + phone);
+        String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
+
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        Map extensionDataMap = new HashMap<String, String>();
+        extensionDataMap.put("deviceId", deviceId);
+        extensionDataMap.put("deviceName", DeviceUtils.getDeviceName());
+        if (email != null) extensionDataMap.put("email", email);
+        if (phone != null) extensionDataMap.put("mobilePhone", phone);
+        JSONObject jsonObject = new JSONObject(extensionDataMap);
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
+                new DERUTF8String(jsonObject.toString())));
         X500Principal subject = new X500Principal(principal);
 
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
-                keyPair.getPublic(), null, keyPair.getPrivate(), provider);
+                keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 

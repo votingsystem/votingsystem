@@ -1,10 +1,11 @@
 package org.votingsystem.util;
 
 import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import net.sf.json.JSONSerializer;
+
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
 import java.io.File;

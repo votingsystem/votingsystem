@@ -250,6 +250,7 @@ public class NavigationDrawer extends ActionBarActivity {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
+        Intent intent = null;
         switch (item.getItemId()) {
             case R.id.reload:
                 ((FragmentStatePagerAdapter)mViewPager.getAdapter()).notifyDataSetChanged();
@@ -261,14 +262,18 @@ public class NavigationDrawer extends ActionBarActivity {
                 startActivity(new Intent(this, CertRequestActivity.class));
                 return true;
             case R.id.publish_document:
-                showPublishDialog();
+                intent = new Intent(NavigationDrawer.this, FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, PublishEventVSFragment.class.getName());
+                intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
+                startActivity(intent);
+                //showPublishDialog();
                 return true;
             case R.id.close_app:
                 finish();
                 System.exit(0);
                 return true;
             case R.id.open_vicket_grid:
-                Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+                intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, VicketGridFragment.class.getName());
                 startActivity(intent);
                 return true;

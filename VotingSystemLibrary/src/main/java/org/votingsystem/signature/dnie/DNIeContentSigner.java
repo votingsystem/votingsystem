@@ -1,7 +1,6 @@
 package org.votingsystem.signature.dnie;
 
 import iaik.pkcs.pkcs11.*;
-import iaik.pkcs.pkcs11.Session;
 import iaik.pkcs.pkcs11.objects.*;
 import iaik.pkcs.pkcs11.objects.Object;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
@@ -26,7 +25,9 @@ import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.VotingSystemException;
 import org.votingsystem.util.OSValidator;
 
-import javax.mail.*;
+import javax.mail.Address;
+import javax.mail.Header;
+import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;

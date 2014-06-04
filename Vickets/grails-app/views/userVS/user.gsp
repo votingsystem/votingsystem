@@ -97,7 +97,7 @@
     });
 
     function editGroup() {
-        window.location.href = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/${uservsMap.id}?menu=admin"
+        window.location.href = updateMenuLink("${createLink( controller:'groupVS', action:'edit', absolute:true)}/${uservsMap.id}")
     }
 
     function adminGroupUsers(groupId) {

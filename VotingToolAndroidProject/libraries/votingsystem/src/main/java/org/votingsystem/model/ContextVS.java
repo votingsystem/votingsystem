@@ -16,6 +16,7 @@ public class ContextVS {
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
     public static final int VICKET_TAG                              = 3;
+    public static final int DEVICEVS_TAG                            = 4;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
@@ -23,6 +24,7 @@ public class ContextVS {
             ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
     public static final String VICKET_OID = VOTING_SYSTEM_BASE_OID + VICKET_TAG;
+    public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 

@@ -5,6 +5,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.signature.util.CMSUtils;
+import org.votingsystem.signature.util.CertExtensionCheckerVS;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
@@ -14,7 +15,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -373,8 +373,6 @@ public class UserVS implements Serializable {
             userVS.setFirstName(givenname);
         }
         if (subjectDN.contains("CN=")) userVS.setCn(subjectDN.split("CN=")[1]);
-        if (subjectDN.split("emailAddress=").length > 1) userVS.setEmail(subjectDN.split("emailAddress=")[1].split(",")[0]);
-        if (subjectDN.split("mobilePhone=").length > 1) userVS.setPhone(subjectDN.split("mobilePhone=")[1].split(",")[0]);
         return userVS;
     }
 

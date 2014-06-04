@@ -6,20 +6,6 @@
     <asset:stylesheet src="bootstrap.min.css"/>
     <asset:javascript src="bootstrap.min.js"/>
     <style type="text/css" media="screen">
-        #connect-container {
-            float: left;
-            width: 400px
-        }
-
-        #connect-container div {
-            padding: 5px;
-        }
-
-        #console-container {
-            float: left;
-            margin-left: 15px;
-            width: 400px;
-        }
 
         #console {
             border: 1px solid #CCCCCC;
@@ -31,35 +17,31 @@
             width: 100%;
         }
 
-        #console p {
-            padding: 0;
-            margin: 0;
-        }
     </style>
 </head>
 <body>
 <div class="pageContenDiv">
     <div class="row" style="max-width: 1300px; margin: 20px auto 0px auto;">
-        <div id="connect-container">
-            <div>
-                <span>Connect to:</span>
+        <div id="connect-container" class="row">
+            <div class="col-md-4">
+                <div>
+                    <span>Connect to:</span>
+                </div>
+                <div>
+                    <input id="target" type="text" size="40" style="width: 350px" value="ws://vickets/Vickets/websocket/service"/>
+                </div>
+                <div>
+                    <button id="connect" onclick="connect();">Connect</button>
+                    <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+                </div>
             </div>
-            <div>
-                <input id="target" type="text" size="40" style="width: 350px" value="ws://vickets/Vickets/websocket/service"/>
-            </div>
-            <div>
-                <button id="connect" onclick="connect();">Connect</button>
-                <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
-            </div>
-            <div>
-                <textarea id="message" style="width: 350px">Here is a message!</textarea>
-            </div>
-            <div>
-                <button id="echo" onclick="echo();" disabled="disabled">Echo message</button>
+            <div class="col-md-4 form-inline">
+                    <textarea id="message" style="width: 350px;">{locale:'es', operation:'LISTEN_TRANSACTIONS'}</textarea>
+                    <button id="echo" onclick="sendMessage();" disabled="disabled">Send message</button>
             </div>
         </div>
         <div id="console-container">
-            <div id="console"/>
+            <div id="console" style="width:100%; height:700px;"/>
         </div>
     </div>
 </div>
@@ -114,7 +96,7 @@ function disconnect() {
     setConnected(false);
 }
 
-function echo() {
+function sendMessage() {
     if (ws != null) {
         var message = document.getElementById('message').value;
         log('Sent: ' + message);
