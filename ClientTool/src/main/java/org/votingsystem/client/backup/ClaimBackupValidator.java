@@ -12,6 +12,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
 import java.io.File;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -27,7 +28,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
     private List<String> errorList = new ArrayList<String>();
-    private Set<X509Certificate> systemTrustedCerts;
+    private Set<TrustAnchor> trustAnchors;
     private X509Certificate timeStampServerCert;
     private MetaInf metaInf;
     private String eventURL = null;
@@ -59,7 +60,11 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         File trustedCertsFile = new File(backupPath + File.separator + "systemTrustedCerts.pem");
         Collection<X509Certificate> trustedCerts = CertUtil.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
-        systemTrustedCerts = new HashSet(trustedCerts);
+        trustAnchors = new HashSet<TrustAnchor>();
+        for(X509Certificate certificate: trustedCerts) {
+            TrustAnchor anchor = new TrustAnchor(certificate, null);
+            trustAnchors.add(anchor);
+        }
 
         File timeStampCertFile = new File(backupPath + File.separator +"timeStampCert.pem");
         Collection<X509Certificate> timeStampCerts = CertUtil.fromPEMToX509CertCollection(
@@ -118,7 +123,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
                     String errorMessage = null;
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(claim);
                     SignedFile signedFile = new SignedFile(accessRequestBytes, claim.getName());
-                    ResponseVS validationResponse = DocumentVSValidator.validateClaim(signedFile, systemTrustedCerts,
+                    ResponseVS validationResponse = DocumentVSValidator.validateClaim(signedFile, trustAnchors,
                             eventURL, metaInf.getDateInit(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {

@@ -62,8 +62,7 @@ class GroupVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        def messageJSON = JSON.parse(documentStr)
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
         if (!messageJSON.groupvsName || !messageJSON.groupvsInfo ||!messageJSON.id ||
                 (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
@@ -91,8 +90,7 @@ class GroupVSService {
         log.debug("saveGroup - signer: ${userSigner?.nif}")
         String msg = null
         ResponseVS responseVS = null
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        def messageJSON = JSON.parse(documentStr)
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
         if (!messageJSON.groupvsName || !messageJSON.groupvsInfo ||
                 (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)

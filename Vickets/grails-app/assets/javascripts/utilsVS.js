@@ -13,6 +13,7 @@ function WebAppMessage(statusCode, operation) {
 }
 
 var Operation = {
+    MESSAGEVS:"MESSAGEVS",
     SAVE_RECEIPT: "SAVE_RECEIPT",
     OPEN_RECEIPT: "OPEN_RECEIPT",
     VICKET_GROUP_NEW : "VICKET_GROUP_NEW",
@@ -25,6 +26,7 @@ var Operation = {
     VICKET_SOURCE:"VICKET_SOURCE",
     VICKET_SOURCE_NEW:"VICKET_SOURCE_NEW",
     CERT_CA_NEW:"CERT_CA_NEW",
+    CERT_USER_NEW:"CERT_USER_NEW",
     CERT_EDIT:"CERT_EDIT"
 }
 
@@ -343,4 +345,15 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
     var messageToSignatureClient = JSON.stringify(messageJSON)
     console.log("setJSONMessageToSignatureClient - messageToSignatureClient: " + messageToSignatureClient);
     clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
+}
+
+var clientToolListeners = []
+function addClientToolListener(listener) {
+    clientToolListeners.push(listener)
+}
+
+function notifiyClientToolConnection() {
+    for(var i = 0; i < clientToolListeners.length; i++) {
+        clientToolListeners[i]()
+    }
 }

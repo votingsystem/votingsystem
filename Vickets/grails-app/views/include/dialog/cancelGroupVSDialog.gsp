@@ -38,7 +38,7 @@
     }
 
     function cancelGroupVS() {
-        console.log("sendManifest")
+        console.log("cancelGroupVS")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"

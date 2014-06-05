@@ -251,6 +251,7 @@ public class BrowserVS extends Region {
                         if (newState == Worker.State.SUCCEEDED) {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("clientTool", new JavafxClient());
+                            webView.getEngine().executeScript("notifiyClientToolConnection()");
                         }else if (newState.equals(Worker.State.FAILED)) {
                             showMessage(ContextVS.getMessage("connectionErrorMsg"));
                         }

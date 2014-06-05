@@ -10,17 +10,15 @@
     <g:if env="development"></g:if>
 </head>
 <body>
-    <div class="pageContenDiv" style="max-width: 1000px; padding: 20px;">
-        <div style="margin:0px 30px 0px 30px;">
-            <g:if env="development">
-                <g:renderException exception="${exception}" />
-            </g:if>
-            <g:else>
-                <ul class="errors">
-                    <li>An error has occurred</li>
-                </ul>
-            </g:else>
-        </div>
+    <div class="pageContenDiv" style="max-width: 1000px; padding:0px 30px 0px 30px;">
+        <g:if env="development">
+            <g:renderException exception="${exception}" />
+        </g:if>
+        <g:else>
+            <ul class="errors">
+                <li>An error has occurred</li>
+            </ul>
+        </g:else>
     </div>
 </body>
 </html>

@@ -34,7 +34,7 @@ public class MessageVS implements Serializable {
     @Column(name="type") @Enumerated(EnumType.STRING) private TypeVS type;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @Column(name="content") @Lob private byte[] content;
-    @Lob @Column(name="receiverCertPEM") private byte[] receiverCertPEM;
+    @Lob @Column(name="receiverCertSerialNumber") private Long receiverCertSerialNumber;
     
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="toUserVS") private UserVS toUserVS;
@@ -137,14 +137,6 @@ public class MessageVS implements Serializable {
         this.senderMessageSMIME = senderMessageSMIME;
     }
 
-    public byte[] getReceiverCertPEM() {
-        return receiverCertPEM;
-    }
-
-    public void setReceiverCertPEM(byte[] receiverCertPEM) {
-        this.receiverCertPEM = receiverCertPEM;
-    }
-
     public State getState() {
         return state;
     }
@@ -152,4 +144,13 @@ public class MessageVS implements Serializable {
     public void setState(State state) {
         this.state = state;
     }
+
+    public Long getReceiverCertSerialNumber() {
+        return receiverCertSerialNumber;
+    }
+
+    public void setReceiverCertSerialNumber(Long receiverCertSerialNumber) {
+        this.receiverCertSerialNumber = receiverCertSerialNumber;
+    }
+
 }

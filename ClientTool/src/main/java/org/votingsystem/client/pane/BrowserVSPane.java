@@ -168,20 +168,24 @@ public class BrowserVSPane extends StackPane {
 
     private void checkPasswords() {
         logger.debug("checkPasswords");
-        String password1 = new String(password1Field.getText());
-        String password2 = new String(password2Field.getText());
-        if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
-        else {
-            if (password1.equals(password2)) {
-                password = password1;
-                setPasswordDialogVisible(false);
-                signatureService.processOperationVS(password, operationVS);
-            } else {
-                setMessage(ContextVS.getMessage("passwordError"));
+        PlatformImpl.runLater(new Runnable(){
+            @Override public void run() {
+                String password1 = new String(password1Field.getText());
+                String password2 = new String(password2Field.getText());
+                if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
+                else {
+                    if (password1.equals(password2)) {
+                        password = password1;
+                        setPasswordDialogVisible(false);
+                        signatureService.processOperationVS(password, operationVS);
+                    } else {
+                        setMessage(ContextVS.getMessage("passwordError"));
+                    }
+                    password1Field.setText("");
+                    password2Field.setText("");
+                }
             }
-            password1Field.setText("");
-            password2Field.setText("");
-        }
+        });
     }
 
     private void setMessage (String message) {

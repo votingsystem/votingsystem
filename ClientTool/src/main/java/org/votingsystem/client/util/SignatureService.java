@@ -106,6 +106,9 @@ public class SignatureService extends Service<ResponseVS> {
                         case VOTING_PUBLISHING:
                             responseVS = publishSMIME(operationVS.getTargetServer(), operationVS);
                             break;
+                        case MESSAGEVS:
+                            logger.debug("TODO");
+                            break;
                         default:
                             responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
                     }
@@ -207,6 +210,12 @@ public class SignatureService extends Service<ResponseVS> {
                     reason, location, password.toCharArray(), readerManifesto, null, null,
                     ContextVS.getInstance().getAccessControl().getX509Certificate());
             return pdfSignedSender.call();
+        }
+
+        //we know this is done in a background thread
+        private ResponseVS sendMessageVS(ActorVS targetServer, OperationVS operationVS) throws Exception {
+            //operationVS.getContentType(); -> MessageVS
+            return null;
         }
 
         //we know this is done in a background thread
