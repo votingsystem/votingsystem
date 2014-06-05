@@ -53,7 +53,7 @@ public class HttpHelper {
     private PoolingClientConnectionManager cm;
     private IdleConnectionEvictor connEvictor;
 
-    public static HttpHelper INSTANCE = null;
+    public static HttpHelper INSTANCE = new HttpHelper();
     
     
     private HttpHelper() {
@@ -67,6 +67,10 @@ public class HttpHelper {
         connEvictor.start();
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
+        httpclient = new DefaultHttpClient(cm, httpParams);
+    }
+
+    public void initVotingSystemSSLMode() {
         try {
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
@@ -75,15 +79,16 @@ public class HttpHelper {
             SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
             Scheme sch = new Scheme("https", 8443, socketFactory);
             logger.debug("Added Scheme https with port 8443 to Apache httpclient");
+            final HttpParams httpParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
             httpclient = new DefaultHttpClient(cm, httpParams);
             httpclient.getConnectionManager().getSchemeRegistry().register(sch);
         }catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
     }
-    
+
     public static HttpHelper getInstance() {
-        if(INSTANCE == null) INSTANCE = new HttpHelper();
         return INSTANCE;
     }
 
