@@ -22,7 +22,7 @@ class CertificateVSService {
     def messageSource
 
     /*
-     * Método para poder añadir certificados de confianza en las pruebas de carga.
+     * Método para poder añadir certificados de confianza.
      * El procedimiento para añadir una autoridad certificadora consiste en
      * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
      */
@@ -38,7 +38,7 @@ class CertificateVSService {
         ResponseVS responseVS = null;
         UserVS userSigner = messageSMIMEReq.getUserVS()
         String msg
-        if(userVSService.isUserAdmin()) {
+        if(!userVSService.isUserAdmin()) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                          TypeVS.CERT_CA_NEW.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"
@@ -49,7 +49,7 @@ class CertificateVSService {
         if (!messageJSON.info || !messageJSON.certChainPEM ||
                 (TypeVS.CERT_CA_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "editGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName, "params"),
                     reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
@@ -76,7 +76,7 @@ class CertificateVSService {
                     "newCACertRepeated", "certificateVS_${certificateVS.id}"),
                     reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        log.debug "addCertificateAuthority - new CA - id:'${certificate?.id}'"
+        log.debug "addCertificateAuthority - new CA - id:'${certificateVS?.id}'"
         signatureVSService.loadCertAuthorities() //load changes
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CERT_CA_NEW,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "certificateVS_${certificateVS.id}"),

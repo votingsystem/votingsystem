@@ -315,24 +315,14 @@ public class CertUtil {
     /**
      * Verifies the validity of the given certificate, checking its signature
      * against the issuer's certificate.
-     * 
-     * @param cert the certificate to validate
-     * @param trustedCerts Set of trusted (usually self-signed) certificates.
+     *
+     * @param certs the certificate list to validate
+     * @param anchors Set of trusted (usually self-signed) certificates.
      * @param checkCRL boolean to tell system to check or not check CRL's
-     * 
+     *
      * @return result PKIXCertPathValidatorResult	if the certificate's signature is
      * 		   valid and can be validated using a trustedCertificated, false otherwise.
      */
-    public static ResponseVS verifyCertificate(X509Certificate cert,
-            Set<X509Certificate> trustedCerts, boolean checkCRL) throws Exception {
-        Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
-        for(X509Certificate certificate: trustedCerts) {
-            TrustAnchor anchor = new TrustAnchor(certificate, null);
-            anchors.add(anchor);
-        }
-        return verifyCertificate(anchors, checkCRL,Arrays.asList(cert));
-    }
-
     public static ResponseVS verifyCertificate(Set<TrustAnchor> anchors,
              boolean checkCRL, List<X509Certificate> certs) throws Exception {
         PKIXParameters pkixParameters = new PKIXParameters(anchors);
@@ -400,6 +390,7 @@ public class CertUtil {
     public static JSONObject getCertExtensionData(X509Certificate x509Certificate, String extensionOID) throws IOException {
         JSONObject result = null;
         byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
+        if(extensionValue == null) return null;
         DERObject derObject =  toDERObject(extensionValue);
         if (derObject instanceof DEROctetString) {
             DEROctetString derOctetString = (DEROctetString)derObject;

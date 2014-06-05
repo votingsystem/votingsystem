@@ -161,6 +161,7 @@ log4j = {
 
 }
 
+VotingSystem.urlTimeStampServer='http://www.sistemavotacion.org/TimeStampServer'
 VotingSystem.simulationFilesBaseDir='./simulationFiles'
 VotingSystem.keyStorePath='WEB-INF/cms/TestWebApp.jks'
 VotingSystem.signKeysAlias='TestWebAppServerKeys'

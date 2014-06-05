@@ -77,6 +77,9 @@ public enum TypeVS {
     REPRESENTATIVE_REVOKE,
     TERMINATED,
 
+    MESSAGEVS,
+
+    CERT_USER_NEW,
     CERT_CA_NEW,
     CERT_EDIT,
 

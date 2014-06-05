@@ -25,7 +25,8 @@ import java.security.cert.X509Certificate
 class SignatureVSService {
 	
 	private SignedMailGenerator signedMailGenerator;
-	static Set<X509Certificate> trustedCerts;
+	private static Set<X509Certificate> trustedCerts;
+    private static Set<TrustAnchor> trustAnchors;
 	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, CertificateVS> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
@@ -97,7 +98,19 @@ class SignatureVSService {
 		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = init().trustedCerts
 		return trustedCerts;
 	}
-	
+
+    public Set<TrustAnchor> getTrustAnchors() {
+        if(!trustAnchors) {
+            Set<X509Certificate> trustedCerts = getTrustedCerts()
+            trustAnchors = new HashSet<TrustAnchor>();
+            for(X509Certificate certificate: trustedCerts) {
+                TrustAnchor anchor = new TrustAnchor(certificate, null);
+                trustAnchors.add(anchor);
+            }
+        }
+        return trustAnchors;
+    }
+
 	public ResponseVS getEventTrustedCerts(EventVS event, Locale locale) {
 		log.debug("getEventTrustedCerts")
 		if(!event) return new ResponseVS(ResponseVS.SC_ERROR)
@@ -316,8 +329,7 @@ class SignatureVSService {
                     log.error("ERROR - validateSignersCertificate - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
-				ResponseVS validationResponse = CertUtil.verifyCertificate(userVS.getCertificate(),
-                        getTrustedCerts(), false)
+				ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
 				X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 				userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
 				log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +

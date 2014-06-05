@@ -54,6 +54,7 @@ class SubscriptionVSService {
 		}
 		UserVS userVSDB = UserVS.findByNif(validatedNIF.toUpperCase())
         JSONObject deviceData = CertUtil.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
+        boolean isNewUser = false
 		if (!userVSDB) {
             userVS.nif = validatedNIF.toUpperCase()
             userVS.type = UserVS.Type.USER
@@ -61,7 +62,8 @@ class SubscriptionVSService {
             userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
             userVS.save()
             userVSDB = userVS
-			certificate = saveUserCertificate(userVS);
+			certificate = saveUserCertificate(userVS, deviceData);
+            isNewUser = true
 			log.debug "checkUser ### NEW UserVS '${userVSDB.nif}' CertificateVS id '${certificate.id}'"
 		} else {
             userVSDB.setCertificateCA(userVS.getCertificateCA())
@@ -74,7 +76,7 @@ class SubscriptionVSService {
 				log.debug "checkUser - NEW CertificateVS id '${certificate.id}' for user '${userVSDB.nif}'"
 			}
 		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:certificate)
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:[isNewUser:isNewUser,certificateVS:certificate])
 	}
 
     private CertificateVS saveUserCertificate(UserVS userVS, JSONObject deviceData) {

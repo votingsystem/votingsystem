@@ -1,6 +1,9 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
+import org.votingsystem.model.CertificateVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
@@ -25,6 +28,7 @@ class UserVSService {
 	def grailsApplication
     def grailsLinkGenerator
     def messageSource
+    def subscriptionVSService
     private UserVS systemUser
 
     public synchronized Map init() throws Exception {
@@ -104,6 +108,63 @@ class UserVSService {
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)*/
     }
 
+    /*
+     * Método para poder añadir usuarios a partir de un certificado en formato PEM
+     */
+    @Transactional
+    public ResponseVS saveUser(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
+        /*if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
+            log.debug(" ### ADDING CERTS NOT ALLOWED IN PRODUCTION ENVIRONMENTS ###")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    message: messageSource.getMessage('serviceDevelopmentModeMsg', null, locale))
+        }*/
+        ResponseVS responseVS = null;
+        UserVS userSigner = messageSMIMEReq.getUserVS()
+        String msg
+        if(!isUserAdmin(userSigner.getNif())) {
+            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
+                     TypeVS.CERT_CA_NEW.toString()].toArray(), locale)
+            log.error "${methodName} - ${msg}"
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
+        }
+
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        if (!messageJSON.info || !messageJSON.certChainPEM ||
+                (TypeVS.CERT_USER_NEW != TypeVS.valueOf(messageJSON.operation))) {
+            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            log.error "${methodName}- ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName, "params"),
+                    reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+        Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
+        UserVS newUser = UserVS.getUserVS(certChain.iterator().next())
+
+        responseVS = signatureVSService.verifyUserCertificate(newUser)
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        responseVS = subscriptionVSService.checkUser(newUser, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        String userURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${responseVS.getUserVS().id}"
+
+        if(!responseVS.data.isNewUser) {
+            msg = messageSource.getMessage('certUserNewErrorMsg', [responseVS.getUserVS().getNif()].toArray(), locale)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.CERT_USER_NEW, contentType:
+                    ContentTypeVS.JSON, data:[message:msg, URL:userURL, statusCode:ResponseVS.SC_ERROR], message:msg,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userVS_${responseVS.getUserVS().id}"))
+        }
+
+        responseVS.getUserVS().setState(UserVS.State.ACTIVE)
+        responseVS.getUserVS().setReason(messageJSON.info)
+        responseVS.getUserVS().save()
+        msg = messageSource.getMessage('certUserNewMsg', [responseVS.getUserVS().getNif()].toArray(), locale)
+
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CERT_USER_NEW, contentType: ContentTypeVS.JSON,
+                data:[message:msg, URL:userURL, statusCode:ResponseVS.SC_OK], message:msg,
+                metaInf:MetaInfMsg.getOKMsg(methodName, "userVS_${responseVS.getUserVS().id}"))
+    }
+
 	public Map getUserVS(Date fromDate){
 		def usersVS
 		UserVS.withTransaction {
@@ -114,9 +175,20 @@ class UserVSService {
 		return [totalNumUsu:usersVS?usersVS.getTotalCount():0]
 	}
 
+    @Transactional
     public Map getUserVSDataMap(UserVS userVS){
-        return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, name:userVS.name,
-            IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString()]
+        String name = userVS.name
+        def certificateList = []
+        def certificates = CertificateVS.findAllWhere(userVS:userVS, state:CertificateVS.State.OK)
+        certificates.each {certItem ->
+            X509Certificate x509Cert = certItem.getX509Cert()
+            certificateList.add([serialNumber:"${certItem.serialNumber}",
+                 pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
+        }
+
+        if(!userVS.name) name = "${userVS.firstName} ${userVS.lastName}"
+        return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, name:name,
+                IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString(), certificateList:certificateList]
     }
 
     public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){

@@ -2,15 +2,21 @@ package org.votingsystem.simulation.callable
 
 import grails.converters.JSON
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
+import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.cert.Certificate
 import java.util.concurrent.Callable
 /**
 * @author jgzornoza
@@ -65,9 +71,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     break;
 
             }
-            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
-            responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA,
-                    actorVS.getRootCAServiceURL());
+            responseVS = addCertificateAuthority(actorVS);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 if(actorVS instanceof AccessControlVS) ContextVS.getInstance().setAccessControl(actorVS);
                 if(actorVS instanceof ControlCenterVS) ContextVS.getInstance().setControlCenter(actorVS);
@@ -93,6 +97,24 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                     ContentTypeVS.JSON_SIGNED, null, null);
             responseVS = signedSender.call();
+        }
+        return responseVS;
+    }
+
+    private ResponseVS addCertificateAuthority(ActorVS actorVS) {
+        logger.debug("addCertificateAuthority");
+        byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
+        Map requestMap = [operation: TypeVS.CERT_CA_NEW.toString(), certChainPEM: new String(rootCACertPEMBytes, "UTF-8"),
+                          info: "Autority from Test Web App '${Calendar.getInstance().getTime()}'"]
+        String requestStr = "${requestMap as JSON}".toString();
+        String msgSubject = ApplicationContextHolder.getMessage("newCertificateAuthorityMsgSubject")
+        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+        String serverName = ApplicationContextHolder.getGrailsApplication().config.VotingSystem.serverName
+        ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage(serverName,
+                actorVS.getNameNormalized(), requestStr, msgSubject)
+        if(ResponseVS.SC_OK == responseVS.statusCode) {
+            responseVS = HttpHelper.getInstance().sendData(responseVS.getSmimeMessage().getBytes(),
+                    ContentTypeVS.JSON_SIGNED, actorVS.getRootCAServiceURL())
         }
         return responseVS;
     }

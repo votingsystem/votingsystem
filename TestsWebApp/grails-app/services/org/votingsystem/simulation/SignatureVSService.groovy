@@ -1,5 +1,6 @@
 package org.votingsystem.simulation
 
+import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -75,12 +76,30 @@ class SignatureVSService {
 		mimeMessage.writeTo(new FileOutputStream(resultFile));
 		return resultFile
 	}
+
+    public ResponseVS getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
+                           Header... headers) {
+        log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+
+        if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+        if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+        SMIMEMessageWrapper smimeMessage = getSignedMailGenerator().genMimeMessage(
+                fromUser, toUser, textToSign, subject, headers)
+        MessageTimeStamper timeStamper = new MessageTimeStamper(
+                smimeMessage, "${grailsApplication.config.VotingSystem.urlTimeStampServer}/timeStamp")
+        ResponseVS responseVS = timeStamper.call();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        smimeMessage = timeStamper.getSmimeMessage();
+        responseVS = new ResponseVS(ResponseVS.SC_OK)
+        responseVS.setSmimeMessage(smimeMessage)
+        return responseVS;
+    }
 		
-	public byte[] getSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
+	public byte[] getSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject, Header... headers) {
 		log.debug "getSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
+		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, headers)
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		mimeMessage.writeTo(baos);
 		baos.close();

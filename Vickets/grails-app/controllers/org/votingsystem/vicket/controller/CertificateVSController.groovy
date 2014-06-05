@@ -75,8 +75,9 @@ class CertificateVSController {
 	}
 
 	/**
-	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que añade Autoridades de Confianza.<br/>
-	 * Sirve para poder validar los certificados enviados en las simulaciones.
+     * (Disponible sólo para administradores de sistema)
+     *
+     * Servicio que añade Autoridades de Confianza.<br/>
 	 * 
 	 * @httpMethod [POST]
 	 * @param pemCertificate certificado en formato PEM de la Autoridad de Confianza que se desea añadir.
@@ -98,6 +99,7 @@ class CertificateVSController {
             ResponseVS responseVS = certificateVSService.addCertificateAuthority(messageSMIMEReq, request.getLocale())
             return [responseVS:responseVS]
         }
+        render(view:'newCertificateAuthority')
 	}
 
     /**

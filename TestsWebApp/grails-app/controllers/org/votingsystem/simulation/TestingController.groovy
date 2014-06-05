@@ -1,5 +1,6 @@
 package org.votingsystem.simulation
 
+import grails.converters.JSON
 import org.votingsystem.model.*
 import org.votingsystem.util.HttpHelper
 
@@ -10,8 +11,12 @@ class TestingController {
 	
 	private Timer timer = null
 
+    def index() {
+        ResponseVS responseVS = HttpHelper.getInstance().getData("http://vickets/Vickets/serverInfo",ContentTypeVS.JSON);
+        render responseVS.statusCode
+    }
 
-	def index() {
+	def testBackup() {
         ResponseVS responseVS = HttpHelper.getInstance().getData(
                 "http://sistemavotacion.org/AccessControl/backupVS/download/13", ContentTypeVS.BACKUP);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

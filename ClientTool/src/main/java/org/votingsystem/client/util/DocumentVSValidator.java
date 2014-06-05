@@ -14,7 +14,9 @@ import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 
 import java.security.KeyStore;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
@@ -29,8 +31,8 @@ public class DocumentVSValidator {
 
     //{"operation":"SEND_SMIME_VOTE","optionSelectedId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
     //"optionSelectedContent":"option A","eventURL":"http://sistemavotacion.org/AccessControl/eventVSElection/1"}
-    public static ResponseVS<Long> validateVote(SignedFile signedFile, Set<X509Certificate> systemTrustedCerts,
-               Set<X509Certificate> eventTrustedCerts, Long optionSelectedId, String eventURL, Date dateInit,
+    public static ResponseVS<Long> validateVote(SignedFile signedFile, Set<TrustAnchor> trustAnchors,
+               Set<TrustAnchor> eventTrustedAnchors, Long optionSelectedId, String eventURL, Date dateInit,
                Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         Long signedFileOptionSelectedId = null;
         if(!signedFile.isValidSignature()) {
@@ -42,11 +44,10 @@ public class DocumentVSValidator {
         for(UserVS signerVS:signersVS) {
             try {
                 if(signerVS.getTimeStampToken() != null) {//user signature
-                    ResponseVS validationResponse = CertUtil.verifyCertificate(
-                            signerVS.getCertificate(), eventTrustedCerts, false);
+                    ResponseVS validationResponse = CertUtil.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(
+                            signerVS.getCertificate()));
                 } else {//server signature
-                    ResponseVS validationResponse = CertUtil.verifyCertificate(
-                            signerVS.getCertificate(), systemTrustedCerts, false);
+                    ResponseVS validationResponse = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(signerVS.getCertificate()));
                 }
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -105,7 +106,7 @@ public class DocumentVSValidator {
 
     //{"representativeNif":"00000002W","operation":"REPRESENTATIVE_SELECTION","UUID":"dcfacb17-a323-4853-b446-8e28d8f2d0a4"}
     public static ResponseVS validateRepresentationDocument(SignedFile signedFile,
-            Set<X509Certificate> systemTrustedCerts, Date dateFinish, String representativeNif,
+            Set<TrustAnchor> trustAnchors, Date dateFinish, String representativeNif,
             X509Certificate timeStampServerCert) throws Exception {
         if(!signedFile.isValidSignature()) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
@@ -116,8 +117,7 @@ public class DocumentVSValidator {
                 ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("badRequestMsg") +
                 " - " + ContextVS.getInstance().getMessage("missingRepresentativeNifErrorMsg"));
         try {
-            ResponseVS validationResult = CertUtil.verifyCertificate(
-                    userVS.getCertificate(), systemTrustedCerts, false);
+            ResponseVS validationResult = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(userVS.getCertificate()));
             //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -164,7 +164,7 @@ public class DocumentVSValidator {
     }
 
 
-    public static ResponseVS validateAccessRequest(SignedFile signedFile, Set<X509Certificate> systemTrustedCerts,
+    public static ResponseVS validateAccessRequest(SignedFile signedFile, Set<TrustAnchor> trustAnchors,
             String eventURL, Date dateInit, Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         if(!signedFile.isValidSignature()) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
@@ -172,8 +172,7 @@ public class DocumentVSValidator {
         }
         UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
         try {
-            ResponseVS validationResponse = CertUtil.verifyCertificate(
-                    signer.getCertificate(), systemTrustedCerts, false);
+            ResponseVS validationResponse = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ContextVS.getInstance().getMessage(
@@ -217,7 +216,7 @@ public class DocumentVSValidator {
         return new ResponseVS(ResponseVS.SC_OK);
     }
 
-    public static ResponseVS validateClaim(SignedFile signedFile, Set<X509Certificate> systemTrustedCerts,
+    public static ResponseVS validateClaim(SignedFile signedFile, Set<TrustAnchor> trustAnchors,
             String eventURL, Date dateInit, Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         if(!signedFile.isValidSignature()) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
@@ -225,8 +224,7 @@ public class DocumentVSValidator {
         }
         UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
         try {
-            ResponseVS validationResult = CertUtil.verifyCertificate(
-                    signer.getCertificate(), systemTrustedCerts, false);
+            ResponseVS validationResult = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(

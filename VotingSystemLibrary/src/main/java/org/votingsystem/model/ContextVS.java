@@ -278,7 +278,7 @@ public class ContextVS {
         try {
             DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
             String dateStr = formatter.format(new Date(CERT_VALID_FROM));
-            String strSubjectDN = getMessage("rootCASubjectDN", dateStr);
+            String strSubjectDN = getMessage("rootTestCASubjectDN", dateStr);
             rootCAKeyStore = KeyStoreUtil.createRootKeyStore (CERT_VALID_FROM, ROOT_KEYSTORE_PERIOD,
                     PASSWORD.toCharArray(), ROOT_ALIAS, strSubjectDN);
             rootCACert = (X509Certificate)rootCAKeyStore.getCertificate(ROOT_ALIAS);

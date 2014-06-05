@@ -187,7 +187,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         eventVS.setControlCenterVS(ContextVS.getInstance().getControlCenter());
 		this.eventVS = eventVS;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
-        String urlPublishELection = ContextVS.getInstance().getAccessControl().getPublishElectionURL()
+        String urlPublishElection = ContextVS.getInstance().getAccessControl().getPublishElectionURL()
 		String msgSubject = messageSource.getMessage("publishElectionMsgSubject", null, locale);
 		KeyStore keyStore = ContextVS.getInstance().getUserTest().getKeyStore()
 		PrivateKey privateKey = (PrivateKey)keyStore.getKey(
@@ -198,7 +198,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 				ContextVS.getInstance().getUserTest().getEmail(),
 				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
-		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishELection,
+		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishElection,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);
 		ResponseVS responseVS = signedSender.call();

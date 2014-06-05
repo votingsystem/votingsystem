@@ -8,12 +8,14 @@ import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtil
 
 import java.security.cert.CertPathValidatorException
+import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
 @Transactional
 class TimeStampTestService {
 
-    static Set<X509Certificate> trustedCerts;
+    private static Set<X509Certificate> trustedCerts;
+    private static Set<TrustAnchor> trustAnchors;
     private X509Certificate testCACert;
     def messageSource
     def timeStampService
@@ -23,6 +25,17 @@ class TimeStampTestService {
         return trustedCerts;
     }
 
+    public Set<TrustAnchor> getTrustAnchors() {
+        if(!trustAnchors) {
+            Set<X509Certificate> trustedCerts = getTrustedCerts()
+            trustAnchors = new HashSet<TrustAnchor>();
+            for(X509Certificate certificate: trustedCerts) {
+                TrustAnchor anchor = new TrustAnchor(certificate, null);
+                trustAnchors.add(anchor);
+            }
+        }
+        return trustAnchors;
+    }
 
     public ResponseVS validateMessage(byte[] messageContentBytes, Locale locale) {
         SMIMEMessageWrapper messageWrapper = new SMIMEMessageWrapper(new ByteArrayInputStream(messageContentBytes));
@@ -50,8 +63,7 @@ class TimeStampTestService {
                     log.error("ERROR - validateSignersCertificate - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
-                ResponseVS validationResponse = CertUtil.verifyCertificate(userVS.getCertificate(),
-                        getTrustedCerts(), false)
+                ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
                 X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 
                 log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +

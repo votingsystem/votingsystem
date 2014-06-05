@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.service
 
+import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
@@ -60,7 +61,6 @@ class  SignatureVSService {
 	def messageSource
 	def subscriptionVSService
 	def timeStampService
-	def sessionFactory
 
     @Transactional
 	public synchronized Map init() throws Exception {
@@ -252,13 +252,6 @@ class  SignatureVSService {
 		SMIMEMessageWrapper multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
 		return multiSignedMessage
 	}
-
-    public ResponseVS validateCertificates(List<X509Certificate> certificateList) {
-        log.debug("validateCertificates")
-        ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, certificateList)
-        //X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
-        return validationResponse
-    }
 		
 	public ResponseVS validateSMIME(SMIMEMessageWrapper messageWrapper, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -275,7 +268,24 @@ class  SignatureVSService {
 		}
 		return validateSignersCertificate(messageWrapper, locale)
 	}
-		
+
+    public ResponseVS verifyUserCertificate(UserVS userVS) {
+        ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
+        X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+        userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
+        log.debug("verifyCertificate - user '${userVS.nif}' cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
+                " - CA certificateVS.id : " + userVS.getCertificateCA().getId());
+        return validationResponse
+    }
+
+
+    public ResponseVS validateCertificates(List<X509Certificate> certificateList) {
+        log.debug("validateCertificates")
+        ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, certificateList)
+        //X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+        return validationResponse
+    }
+
 	public ResponseVS validateSignersCertificate(SMIMEMessageWrapper messageWrapper, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		Set<UserVS> signersVS = messageWrapper.getSigners();
@@ -303,12 +313,7 @@ class  SignatureVSService {
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST, reason:msg,
                             metaInf: MetaInfMsg.getErrorMsg(methodName, "timestampMissing"))
                 }
-				ResponseVS validationResponse = CertUtil.verifyCertificate(userVS.getCertificate(),
-                        getTrustedCerts(), false)
-                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
-				userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
-				log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
-                        " - certificateVS.id : " + userVS.getCertificateCA().getId());
+				ResponseVS validationResponse = verifyUserCertificate(userVS)
                 extensionChecker = validationResponse.data.extensionChecker
                 ResponseVS responseVS = null
                 if(extensionChecker.isAnonymousSigner()) {
@@ -343,22 +348,24 @@ class  SignatureVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(messageVSBytes, "UTF-8");
         SMIMEMessageWrapper smimeSender = new SMIMEMessageWrapper(new ByteArrayInputStream(
-                Base64.decode(messageVSJSON.smimeSender.getBytes())))
+                Base64.decode(messageVSJSON.smimeRequest.getBytes())))
         ResponseVS responseVS = processSMIMERequest(smimeSender, contenType, locale)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-        UserVS fromUser = UserVS.findWhere(nif:messageVSJSON.fromUser)
-        UserVS toUser = UserVS.findWhere(nif:messageVSJSON.toUser)
+        MessageSMIME messageSMIMEReq = responseVS.data
+        UserVS fromUser = messageSMIMEReq.getUserVS()
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        UserVS toUser = UserVS.findWhere(nif:messageVSJSON.toUserNIF)
 
         String msg
-        if(!fromUser || ! toUser || !messageVSJSON.receiverCertPEM) {
+        if(!fromUser || ! toUser || !messageVSJSON.encryptedMessage) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }
-
         MessageVS messageVS = new MessageVS(content: messageVSBytes, receiverCertPEM:messageVSJSON.receiverCertPEM,
-                fromUser, toUser, senderMessageSMIME:responseVS.data, type:TypeVS.OK, state: MessageVS.State.PENDING).save()
+                fromUser:fromUser, toUser:toUser, senderMessageSMIME:messageSMIMEReq, type:TypeVS.MESSAGEVS,
+                state: MessageVS.State.PENDING).save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageVS)
     }
 

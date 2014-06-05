@@ -12,6 +12,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
 import java.io.File;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -27,8 +28,8 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
     private List<String> errorList = new ArrayList<String>();
-    private Set<X509Certificate> systemTrustedCerts;
-    private Set<X509Certificate> eventTrustedCertsSet;
+    private Set<TrustAnchor> trustAnchors;
+    private Set<TrustAnchor> eventTrustedAnchors;
     private X509Certificate timeStampServerCert;
     private MetaInf metaInf;
     private final File accessRequestsDir; 
@@ -70,11 +71,19 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
         File trustedCertsFile = new File(backupPath + File.separator + "systemTrustedCerts.pem");
         Collection<X509Certificate> trustedCerts = CertUtil.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
-        systemTrustedCerts = new HashSet(trustedCerts);
+        trustAnchors = new HashSet<TrustAnchor>();
+        for(X509Certificate certificate: trustedCerts) {
+            TrustAnchor anchor = new TrustAnchor(certificate, null);
+            trustAnchors.add(anchor);
+        }
         File eventTrustedCertsFile = new File(backupPath + File.separator + "eventTrustedCerts.pem");
         Collection<X509Certificate> eventTrustedCerts = CertUtil.fromPEMToX509CertCollection(
-                FileUtils.getBytesFromFile(eventTrustedCertsFile));        
-        eventTrustedCertsSet = new HashSet(eventTrustedCerts);
+                FileUtils.getBytesFromFile(eventTrustedCertsFile));
+        eventTrustedAnchors = new HashSet<TrustAnchor>();
+        for(X509Certificate certificate: eventTrustedCerts) {
+            TrustAnchor anchor = new TrustAnchor(certificate, null);
+            eventTrustedAnchors.add(anchor);
+        }
         File timeStampCertFile = new File(backupPath + File.separator + "timeStampCert.pem");
         Collection<X509Certificate> timeStampCerts = CertUtil.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));   
@@ -184,7 +193,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                             }
                         }
                         ResponseVS responseVS = DocumentVSValidator.validateRepresentationDocument(signedFile,
-                                systemTrustedCerts, metaInf.getDateFinish(), representativeNif, timeStampServerCert);
+                                trustAnchors, metaInf.getDateFinish(), representativeNif, timeStampServerCert);
                         logger.debug("responseVS.getStatusCode(): " +  responseVS.getStatusCode());
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                             errorList.add(responseVS.getMessage());
@@ -200,7 +209,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                         byte[] fileBytes = FileUtils.getBytesFromFile(voteFile);
                         SignedFile vote = new SignedFile(fileBytes, voteFile.getName());
                         ResponseVS representativeVoteResponse = DocumentVSValidator.validateVote(vote,
-                                systemTrustedCerts, eventTrustedCertsSet,  representativeDataMetaInf.
+                                trustAnchors, eventTrustedAnchors,  representativeDataMetaInf.
                                 getOptionSelectedId(), eventURL, metaInf.getDateInit(), metaInf.getDateFinish(),
                                 timeStampServerCert);
                         if (ResponseVS.SC_OK != representativeVoteResponse.getStatusCode()) {
@@ -264,7 +273,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(accessRequest);
                     SignedFile signedFile = new SignedFile(accessRequestBytes, accessRequest.getName());
                     ResponseVS validationResponse = DocumentVSValidator.validateAccessRequest(signedFile,
-                            systemTrustedCerts, eventURL, metaInf.getDateInit(), 
+                            trustAnchors, eventURL, metaInf.getDateInit(),
                             metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
@@ -320,7 +329,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                     byte[] voteBytes = FileUtils.getBytesFromFile(vote);
                     SignedFile signedFile = new SignedFile(voteBytes, vote.getName());
                     ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(signedFile,
-                            systemTrustedCerts, eventTrustedCertsSet, null, eventURL,
+                            trustAnchors, eventTrustedAnchors, null, eventURL,
                             metaInf.getDateInit(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
