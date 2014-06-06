@@ -46,22 +46,25 @@ public class WebSocketService extends Service<ResponseVS> {
 
     public WebSocketService(X509Certificate serverCert, String targetService) {
         this.targetService = targetService;
-        try {
-            KeyStore p12Store = KeyStore.getInstance("PKCS12");
-            p12Store.load(null, null);
-            p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
-            byte[] p12KeyStoreBytes = KeyStoreUtil.getBytes(p12Store, keyStorePassw.toCharArray());
+        if(targetService.startsWith("wss")) {
+            logger.debug("settings for SECURE connetion");
+            try {
+                KeyStore p12Store = KeyStore.getInstance("PKCS12");
+                p12Store.load(null, null);
+                p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
+                byte[] p12KeyStoreBytes = KeyStoreUtil.getBytes(p12Store, keyStorePassw.toCharArray());
 
-            // Grizzly ssl configuration
-            SSLContextConfigurator sslContext = new SSLContextConfigurator();
-            sslContext.setTrustStoreType("PKCS12");
-            sslContext.setTrustStoreBytes(p12KeyStoreBytes);
-            sslContext.setTrustStorePass(keyStorePassw);
-            SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContext, true, false, false);
-            client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
+                // Grizzly ssl configuration
+                SSLContextConfigurator sslContext = new SSLContextConfigurator();
+                sslContext.setTrustStoreType("PKCS12");
+                sslContext.setTrustStoreBytes(p12KeyStoreBytes);
+                sslContext.setTrustStorePass(keyStorePassw);
+                SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContext, true, false, false);
+                client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        } else logger.debug("settings for INSECURE connetion");
     }
 
     @Override protected Task<ResponseVS> createTask() {
@@ -71,7 +74,7 @@ public class WebSocketService extends Service<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
             try {
-                logger.debug("WebSocketTask - Connecting ... to " + targetService);
+                logger.debug("WebSocketTask - Connecting to " + targetService + " ...");
                 client.connectToServer(new Endpoint() {
                     @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
                         try {

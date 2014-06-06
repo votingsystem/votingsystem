@@ -98,13 +98,13 @@ environments {
     development {
         grails.logging.jul.usebridge = true
         grails.serverURL = "http://vickets:8086/Vickets"
-        webSocketURL="ws://vickets:8086/Vickets"
+        webSocketURL="ws://vickets:8086/Vickets/websocket/service"
     }
 
     production {
         grails.logging.jul.usebridge = false
         grails.serverURL = "https://www.sistemavotacion.org/Vickets"
-        webSocketURL="wss://vickets:8443/Vickets"
+        webSocketURL="wss://vickets:8443/Vickets/websocket/service"
     }
 
 }

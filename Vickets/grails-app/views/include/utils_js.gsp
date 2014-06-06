@@ -4,7 +4,9 @@
         this.socket = null;
 
         this.connect = function () {
-            var host = "${grailsApplication.config.grails.serverURL}/websocket/service".replace('http', 'ws')
+            var host = "${grailsApplication.config.webSocketURL}".replace('http', 'ws')
+
+            console.log("Connecting to host " + host + " ...")
             if ('WebSocket' in window) {
                 this.socket = new WebSocket(host);
             } else if ('MozWebSocket' in window) {
@@ -14,7 +16,7 @@
                 return
             }
             this.socket.onopen = function () {
-                console.log('Info: WebSocket connection opened');
+                console.log('Info: WebSocket connection opened to host ' + host);
             };
 
             this.socket.onclose = function (event) {
