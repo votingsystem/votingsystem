@@ -270,6 +270,7 @@ public class UserCertRequestFormFragment extends Fragment {
     	// phone = telephonyManager.getLine1Number(); -> operator dependent
     	//IMSI
     	//phone = telephonyManager.getSubscriberId();
+        //the IMEI for GSM and the MEID or ESN for CDMA phones. Null if device ID is not available.
     	deviceId = telephonyManager.getDeviceId();
     	if(deviceId == null || deviceId.trim().isEmpty()) {
     		deviceId = android.os.Build.SERIAL;

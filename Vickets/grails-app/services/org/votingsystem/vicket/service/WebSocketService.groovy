@@ -2,7 +2,9 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.websocket.SessionVSHelper
 
@@ -13,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class WebSocketService {
 
-    public enum SocketOperation {LISTEN_TRANSACTIONS, MESSAGEVS}
+    public enum SocketOperation {LISTEN_TRANSACTIONS, MESSAGEVS, INIT_VALIDATED_SESSION}
 
     private static final ConcurrentHashMap<String, Session> connectionsMap = new ConcurrentHashMap<String, Session>();
     def grailsApplication
@@ -23,7 +25,7 @@ class WebSocketService {
         log.debug("onTextMessage - session id: ${session.getId()} - last: ${last}")
         def messageJSON = JSON.parse(msg)
         messageJSON.userId = session.getId()
-        processRequest(messageJSON)
+        processRequest(messageJSON, session)
     }
 
     public void onBinaryMessage(Session session, ByteBuffer bb, boolean last) {
@@ -53,7 +55,7 @@ class WebSocketService {
     /*
     * references to services from grailsApplication to avoid circular references
     */
-    public void processRequest(JSONObject messageJSON) {
+    public void processRequest(JSONObject messageJSON, Session session) {
         String message = null;
         Locale locale = null
         log.debug("messageJSON: ${messageJSON}")
@@ -69,7 +71,7 @@ class WebSocketService {
             try { socketOperation = SocketOperation.valueOf(messageJSON.operation) }
             catch(Exception ex) {
                 messageJSON.status = ResponseVS.SC_ERROR
-                messageJSON.message = "Operaion '${messageJSON.operation}' is not a valid operation."
+                messageJSON.message = "Invalid operation '${messageJSON.operation}'"
                 processResponse(messageJSON)
                 return;
             }
@@ -81,6 +83,15 @@ class WebSocketService {
                 case SocketOperation.MESSAGEVS:
                     MessageVSService messageVSService = grailsApplication.mainContext.getBean("messageVSService")
                     messageVSService.sendWebSocketMessage(messageJSON)
+                case SocketOperation.INIT_VALIDATED_SESSION:
+                    SignatureVSService signatureVSService = grailsApplication.mainContext.getBean("signatureVSService")
+                    SMIMEMessageWrapper smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(
+                            org.bouncycastle.util.encoders.Base64.decode(messageJSON.smimeMessage.getBytes())))
+                    ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null, new Locale(messageJSON.locale))
+                    if(ResponseVS.SC_OK == responseVS.statusCode) {
+                        SessionVSHelper.getInstance().put(session, ((MessageSMIME)responseVS.data).userVS)
+                    }
+
                 default: throw new ExceptionVS(messageSource.getMessage("unknownSocketOperationErrorMsg",
                         [messageJSON.operation].toArray(), locale))
             }
