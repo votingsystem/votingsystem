@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -174,8 +175,9 @@ public class PasswordDialog {
         }
     }
 
+
     public void show(String mainMessage) {
-        this.mainMessage = mainMessage;
+        PasswordDialog.this.mainMessage = mainMessage;
         setMessage(mainMessage);
         stage.sizeToScene();
         stage.centerOnScreen();

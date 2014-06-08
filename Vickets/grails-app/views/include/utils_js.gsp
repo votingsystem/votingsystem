@@ -4,32 +4,31 @@
         this.socket = null;
 
         this.connect = function () {
-            var host = "${grailsApplication.config.webSocketURL}".replace('http', 'ws')
-
-            console.log("Connecting to host " + host + " ...")
+            var host = "${grailsApplication.config.webSocketURL}"
+            console.log("SocketService - Connecting to host " + host + " ...")
             if ('WebSocket' in window) {
                 this.socket = new WebSocket(host);
             } else if ('MozWebSocket' in window) {
                 this.socket = new MozWebSocket(host);
             } else {
-                console.log('browserWithoutWebsocketSupport');
+                console.log('SocketService - browserWithoutWebsocketSupport');
                 return
             }
             this.socket.onopen = function () {
-                console.log('Info: WebSocket connection opened to host ' + host);
+                console.log('SocketService - socket.onopen - host ' + host);
             };
 
             this.socket.onclose = function (event) {
-                console.log('Info: WebSocket connection closed, Code: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
+                console.log('SocketService - socket.onclose - event: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
 
             };
         }
 
         this.sendMessage = function(message) {
             var messageStr = JSON.stringify(message);
-            console.log("sendMessage to simulation service: " + messageStr)
+            console.log("SocketService - sendMessage: " + messageStr)
             if(this.socket == null || 3 == this.socket.readyState) {
-                console.log("missing message - socket closed")
+                console.log("SocketService - missing message - socket closed")
             } else if(messageStr != ''){
                 this.socket.send(messageStr);
             }
@@ -38,9 +37,9 @@
         this.close = function() {
             //states: CONNECTING	0, OPEN	1, CLOSING	2, CLOSED	3
             if(this.socket == null || 3 == this.socket.readyState) {
-                console.log("socket already closed")
+                console.log("SocketService - socket already closed")
                 return
-            } else console.log(" closing socket connection")
+            } else console.log("SocketService - closing socket connection")
             this.socket.close()
         }
 

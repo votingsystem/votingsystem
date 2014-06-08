@@ -27,9 +27,11 @@
 <asset:script>
 
     var callback
+    var toUserNIF
 
-    function showSendMessageVSDialog(message, callbackParam) {
+    function showSendMessageVSDialog(toNIF, message, callbackParam) {
         callback = callbackParam
+        toUserNIF = toNIF
         console.log("showSendMessageVSDialog - message: " + message);
         if(message == null || "" == message.trim()) document.getElementById("sendMessageVSMsg").style.display = 'none'
         else document.getElementById("sendMessageVSMsg").innerHTML = message
@@ -42,9 +44,10 @@
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink(controller:'messsageVS', absolute:true)}/"
-        webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
-        webAppMessage.signedContent = {operation:Operation.MESSAGEVS, messageContent:document.getElementById('messageVSContent').value}
-        webAppMessage.certificateList =  toJSON(document.getElementById("certificateListDiv").innerHTML)
+        webAppMessage.signedMessageSubject = "<g:message code="sendEncryptedMessageSubject"/>"
+        webAppMessage.signedContent = {operation:Operation.MESSAGEVS, toUserNIF:toUserNIF}
+        webAppMessage.documentToEncrypt = {operation:Operation.MESSAGEVS, messageContent:document.getElementById('messageVSContent').value}
+        webAppMessage.targetCertList =  toJSON(document.getElementById("certificateListDiv").innerHTML)
 
         //signed and encrypted
         webAppMessage.contentType = 'application/messagevs'

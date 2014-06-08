@@ -130,7 +130,7 @@
 
     socketService.socket.onopen = function () {
         console.log('listener - WebSocket connection opened');
-        socketService.sendMessage({operation:SocketOperation.LISTEN_TRANSACTIONS, locale:navigator.language})
+        socketService.sendMessage({operation:Operation.LISTEN_TRANSACTIONS, locale:navigator.language})
     };
 
     function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {

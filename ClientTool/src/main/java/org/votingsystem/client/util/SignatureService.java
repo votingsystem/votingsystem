@@ -10,9 +10,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.callable.*;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.ContentSignerHelper;
+import org.votingsystem.signature.util.*;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
@@ -20,10 +18,8 @@ import org.votingsystem.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.MessageDigest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 /**
  * @author jgzornoza
@@ -34,6 +30,9 @@ public class SignatureService extends Service<ResponseVS> {
     private static Logger logger = Logger.getLogger(SignatureService.class);
 
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
+
+
+    private static final SignatureService instance = new SignatureService();
 
     private OperationVS operationVS = null;
     private String password = null;
@@ -46,6 +45,10 @@ public class SignatureService extends Service<ResponseVS> {
         this.operationVS = operationVS;
         this.password = password;
         restart();
+    }
+
+    public static SignatureService getInstance() {
+        return instance;
     }
 
     public OperationVS getOperationVS() {
@@ -107,7 +110,7 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = publishSMIME(operationVS.getTargetServer(), operationVS);
                             break;
                         case MESSAGEVS:
-                            logger.debug("TODO");
+                            responseVS = sendMessageVS(operationVS.getTargetServer(), operationVS);
                             break;
                         default:
                             responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
@@ -214,8 +217,46 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS sendMessageVS(ActorVS targetServer, OperationVS operationVS) throws Exception {
+            logger.debug("sendMessageVS");
             //operationVS.getContentType(); -> MessageVS
-            return null;
+            List signedDataList = new ArrayList<>();
+            List encryptedDataList = new ArrayList<>();
+            List<Map> targetCertList = operationVS.getTargetCertList();
+            for(Map receiverCertDataMap : targetCertList) {
+                X509Certificate receiverCert = CertUtil.fromPEMToX509Cert(((String) receiverCertDataMap.get("pemCert")).getBytes());
+                JSONObject documentToEncrypt = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToEncrypt());
+                ResponseVS responseVS = Encryptor.encryptToCMS(documentToEncrypt.toString().getBytes(), receiverCert);
+                String encryptedMessageStr = new String(responseVS.getMessageBytes(), "UTF-8");
+                String encryptedMessageHash = CMSUtils.getHashBase64(encryptedMessageStr, ContextVS.VOTING_DATA_DIGEST);
+                Map signedMap = new HashMap<>();
+                signedMap.put("serialNumber", receiverCertDataMap.get("serialNumber"));
+                signedMap.put("encryptedMessageHashBase64", encryptedMessageHash);
+                signedDataList.add(signedMap);
+
+                Map encryptedMap = new HashMap<>();
+                encryptedMap.put("serialNumber", receiverCertDataMap.get("serialNumber"));
+                encryptedMap.put("encryptedData", encryptedMessageStr);
+                encryptedDataList.add(encryptedMap);
+            }
+            operationVS.getDocumentToSignMap().put("encryptedDataInfo", signedDataList);
+            JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
+            SMIMEMessageWrapper smimeMessage = ContentSignerHelper.genMimeMessage(null, targetServer.getNameNormalized(),
+                    documentToSignJSON.toString(), password.toCharArray(), operationVS.getSignedMessageSubject(), null);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
+            ResponseVS responseVS = timeStamper.call();
+            smimeMessage = timeStamper.getSmimeMessage();
+            try {
+                String base64ResultDigest = new String(Base64.encode(smimeMessage.getBytes()));
+                operationVS.getDocumentToSignMap().put("smimeMessage", base64ResultDigest);
+                operationVS.getDocumentToSignMap().put("encryptedDataList", encryptedDataList);
+                JSONObject documentToSendJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
+                responseVS = HttpHelper.getInstance().sendData(documentToSendJSON.toString().getBytes(),
+                        ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());
+            } catch (Exception ex) {
+                logger.debug(ex.getMessage(), ex);
+            } finally {
+                return responseVS;
+            }
         }
 
         //we know this is done in a background thread

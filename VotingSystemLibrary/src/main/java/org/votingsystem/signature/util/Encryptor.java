@@ -219,7 +219,7 @@ public class Encryptor {
         return responseVS;
     }
 
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
+    public static ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
         CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
         dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receptorCert).
                 setProvider(ContextVS.PROVIDER));

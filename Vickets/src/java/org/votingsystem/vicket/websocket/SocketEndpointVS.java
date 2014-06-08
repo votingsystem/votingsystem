@@ -23,7 +23,6 @@ public class SocketEndpointVS {
     private WebSocketService webSocketService = null;
 
     @OnMessage public void onTextMessage(Session session, String msg, boolean last) {
-        logger.debug("onTextMessage:" + msg);
         try {
             if (session.isOpen()) {
                 webSocketService.onTextMessage(session, msg, last);

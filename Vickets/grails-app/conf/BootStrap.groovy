@@ -8,6 +8,7 @@ class BootStrap {
     def signatureVSService
     def filesService
     def userVSService
+    def grailsApplication
 
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) { return it?.format("yyyy/MM/dd' 'HH:mm:ss") }

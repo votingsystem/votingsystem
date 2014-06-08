@@ -97,8 +97,9 @@
 
 
     function showMessageVSDialog() {
-        console.log(sendMessageVS)
-        showSendMessageVSDialog("<g:message code="uservsMessageVSLbl" args="${[uservsMap?.name]}"/>", sendMessageVSCallback)
+        console.log(showMessageVSDialog)
+        showSendMessageVSDialog("${uservsMap?.nif}",
+            "<g:message code="uservsMessageVSLbl" args="${[uservsMap?.name]}"/>", sendMessageVSCallback)
     }
 
     function sendMessageVSCallback() {
@@ -115,7 +116,8 @@
     }
 
     addClientToolListener(function() {
-        document.getElementById("clientToolMsg").style.display = 'none'
+        if(document.getElementById("clientToolMsg") != null)
+            document.getElementById("clientToolMsg").style.display = 'none'
     })
 
 </g:applyCodec>

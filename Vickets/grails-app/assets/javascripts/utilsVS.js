@@ -14,6 +14,7 @@ function WebAppMessage(statusCode, operation) {
 
 var Operation = {
     MESSAGEVS:"MESSAGEVS",
+    LISTEN_TRANSACTIONS : "LISTEN_TRANSACTIONS",
     SAVE_RECEIPT: "SAVE_RECEIPT",
     OPEN_RECEIPT: "OPEN_RECEIPT",
     VICKET_GROUP_NEW : "VICKET_GROUP_NEW",
@@ -145,10 +146,6 @@ var ResponseVS = {
 		SC_CANCELLED : 0,
 		SC_INITIALIZED : 1,
 		SC_PAUSED:10
-}
-
-var SocketOperation = {
-    LISTEN_TRANSACTIONS : "LISTEN_TRANSACTIONS"
 }
 
 function getUrlParam(paramName, staticURL, decode){

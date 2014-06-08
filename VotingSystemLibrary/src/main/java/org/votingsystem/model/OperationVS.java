@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.votingsystem.util.StringUtils;
 
@@ -19,6 +20,7 @@ public class OperationVS {
 
     private TypeVS typeVS;
     private Integer statusCode;
+    private List targetCertList;
     private String callerCallback;
     private String message;
     private String documentURL;
@@ -31,6 +33,7 @@ public class OperationVS {
     private File file;
     private String signedMessageSubject;
     private Map documentToSign;
+    private Map documentToEncrypt;
     private String contentType;
     private EventVS eventVS;
     private String[] args;
@@ -60,7 +63,9 @@ public class OperationVS {
     }
 
     public String getTimeStampServerURL() {
-        return urlTimeStampServer;
+        if(urlTimeStampServer == null && targetServer == null) return null;
+        else if(urlTimeStampServer == null && targetServer != null) return targetServer.getTimeStampServerURL();
+        else return urlTimeStampServer;
     }
 
     public void setUrlTimeStampServer(String urlTimeStampServer) {
@@ -151,7 +156,8 @@ public class OperationVS {
     }
     
     public String getNormalizedReceiverName() {
-        if(receiverName == null) return null;
+        if(receiverName == null && targetServer == null) return null;
+        if(receiverName == null) return targetServer.getNameNormalized();
         return StringUtils.getNormalized(receiverName);
     }
 
@@ -223,11 +229,19 @@ public class OperationVS {
             EventVS eventVS = EventVS.populate((Map) dataMap.get("eventVS"));
             operationVS.setEventVS(eventVS);
         }
+
         if (dataMap.containsKey("signedContent")) {
             Map documentToSignMap = (Map) dataMap.get("signedContent");
             //to avoid process repeated messages on servers
             documentToSignMap.put("UUID", UUID.randomUUID().toString());
             operationVS.setDocumentToSignMap(documentToSignMap);
+        }
+        if (dataMap.containsKey("documentToEncrypt")) {
+            Map documentToEncrypt = (Map) dataMap.get("documentToEncrypt");
+            operationVS.setDocumentToEncrypt(documentToEncrypt);
+        }
+        if (dataMap.containsKey("targetCertList")) {
+            operationVS.setTargetCertList((List) dataMap.get("targetCertList"));
         }
 
         if(dataMap.containsKey("contentType")) operationVS.setContentType((String)dataMap.get("contentType"));
@@ -275,6 +289,22 @@ public class OperationVS {
 
     public void setTargetServer(ActorVS targetServer) {
         this.targetServer = targetServer;
+    }
+
+    public Map getDocumentToEncrypt() {
+        return documentToEncrypt;
+    }
+
+    public void setDocumentToEncrypt(Map documentToEncrypt) {
+        this.documentToEncrypt = documentToEncrypt;
+    }
+
+    public List getTargetCertList() {
+        return targetCertList;
+    }
+
+    public void setTargetCertList(List targetCertList) {
+        this.targetCertList = targetCertList;
     }
 }
 

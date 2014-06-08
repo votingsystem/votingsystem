@@ -16,7 +16,7 @@ public class OSValidator {
 
     private static Logger logger = Logger.getLogger(OSValidator.class);
 
-    public static String LIB_PATH_BASE_DIR =  "lib/";
+    public static String LIB_PATH_BASE_DIR =  "lib";
     public static String LINUX_LIB         =  "libpkcs11wrapper.so";
     public static String MACOSX_LIB        =  "libpkcs11wrapper.jnilib";
     public static String SOLARIS_LIB       =  "libpkcs11wrapper.so";
@@ -60,7 +60,7 @@ public class OSValidator {
 
     
     public static void initClassPath () throws Exception {
-        FileUtils.deleteDir(new File(ContextVS.APPDIR + LIB_PATH_BASE_DIR));
+        FileUtils.deleteDir(new File(ContextVS.APPDIR + File.separator +  LIB_PATH_BASE_DIR));
         String dirAddedToSystemClasspath = null;
         String pkcs11LibraryWrapperPath = null;
         String libName = LINUX_LIB;
@@ -94,8 +94,8 @@ public class OSValidator {
             dirAddedToSystemClasspath = MACOSX_IAIK_SYSTEM_CLASSPATH;
             pkcs11LibraryWrapperPath = MACOSX_IAIK_SYSTEM_LIB_PATH;
         }
-        File directorioDestinolibrerias = new File(ContextVS.APPDIR + LIB_PATH_BASE_DIR + dirAddedToSystemClasspath +
-                UUID.randomUUID().toString() + File.separator);
+        File directorioDestinolibrerias = new File(ContextVS.APPDIR  + File.separator +  LIB_PATH_BASE_DIR +
+                File.separator +  dirAddedToSystemClasspath + UUID.randomUUID().toString() + File.separator);
         directorioDestinolibrerias.mkdirs();
         File outputFile = new File(directorioDestinolibrerias.
                 getAbsolutePath()  + File.separator+ libName);

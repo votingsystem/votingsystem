@@ -42,8 +42,8 @@ public class BrowserVSPane extends StackPane {
     private final SignatureService signatureService;
     private OperationVS operationVS;
 
-    public BrowserVSPane(SignatureService signatureService) {
-        this.signatureService = signatureService;
+    public BrowserVSPane() {
+        this.signatureService = SignatureService.getInstance();
         Region progressRegion = new Region();
         progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
         progressRegion.setPrefSize(240, 160);

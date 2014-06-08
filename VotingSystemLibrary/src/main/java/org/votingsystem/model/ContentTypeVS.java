@@ -18,7 +18,7 @@ public enum ContentTypeVS {
     JSON_ENCRYPTED("application/json;application/pkcs7-mime","p7m"),//.p7c
     JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-mime", "p7m"),
 
-    MESSAGEVS("application/messagevs", "vs"),
+    MESSAGEVS("application/pkcs7-messagevs", "vs"),
     MULTIPART_SIGNED("multipart/signed", null),
     MULTIPART_ENCRYPTED("multipart/encrypted", null),
     PDF("application/pdf", "pdf"),
@@ -105,6 +105,7 @@ public enum ContentTypeVS {
 
         ContentTypeVS result = null;
 
+        if(contentTypeStr.contains(MESSAGEVS.getName())) result = MESSAGEVS;
         if(contentTypeStr.contains(TEXT.getName())) result = TEXT;
 
         if(contentTypeStr.contains(HTML.getName())) result = HTML;

@@ -66,6 +66,7 @@ public class ContextVS {
     public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
 
     public static String APPDIR;
+    public static String WEBVIEWDIR;
     public static String APPTEMPDIR;
     public static String ERROR_DIR;
 
@@ -227,6 +228,7 @@ public class ContextVS {
 
     private void initDirs(String baseDir) {
         APPDIR =  baseDir + File.separator +  ".VotingSystem";
+        WEBVIEWDIR =  APPDIR + File.separator + "webview";
         APPTEMPDIR =  APPDIR + File.separator + "temp";
         ERROR_DIR =  APPDIR + File.separator + "error";
         new File(APPDIR).mkdir();
@@ -257,6 +259,11 @@ public class ContextVS {
             java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
 
     public static ContextVS getInstance() { 
         if(INSTANCE == null)  INSTANCE = new ContextVS();

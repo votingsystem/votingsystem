@@ -34,7 +34,6 @@ public class MessageVS implements Serializable {
     @Column(name="type") @Enumerated(EnumType.STRING) private TypeVS type;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @Column(name="content") @Lob private byte[] content;
-    @Lob @Column(name="receiverCertSerialNumber") private Long receiverCertSerialNumber;
     
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="toUserVS") private UserVS toUserVS;
@@ -43,10 +42,6 @@ public class MessageVS implements Serializable {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
-    
-    //To avoid repeated messages
-    @Column(name="base64ContentDigest", unique=true) private String base64ContentDigest;
-
     @Column(name="reason", columnDefinition="TEXT") private String reason;
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="smimeParent") private MessageSMIME senderMessageSMIME;
 
@@ -97,14 +92,6 @@ public class MessageVS implements Serializable {
 		this.metaInf = metaInf;
 	}
 
-	public String getBase64ContentDigest() {
-		return base64ContentDigest;
-	}
-
-	public void setBase64ContentDigest(String base64ContentDigest) {
-		this.base64ContentDigest = base64ContentDigest;
-	}
-
     public String getReason() {
         return reason;
     }
@@ -143,14 +130,6 @@ public class MessageVS implements Serializable {
 
     public void setState(State state) {
         this.state = state;
-    }
-
-    public Long getReceiverCertSerialNumber() {
-        return receiverCertSerialNumber;
-    }
-
-    public void setReceiverCertSerialNumber(Long receiverCertSerialNumber) {
-        this.receiverCertSerialNumber = receiverCertSerialNumber;
     }
 
 }

@@ -18,6 +18,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
+import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -346,27 +347,37 @@ class  SignatureVSService {
     @Transactional
     private ResponseVS processMessageVS(byte[] messageVSBytes, ContentTypeVS contenType, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(messageVSBytes, "UTF-8");
+        JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(new String(messageVSBytes, "UTF-8"));
+
         SMIMEMessageWrapper smimeSender = new SMIMEMessageWrapper(new ByteArrayInputStream(
-                Base64.decode(messageVSJSON.smimeRequest.getBytes())))
+                Base64.decode(messageVSJSON.smimeMessage.getBytes())))
         ResponseVS responseVS = processSMIMERequest(smimeSender, contenType, locale)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         MessageSMIME messageSMIMEReq = responseVS.data
         UserVS fromUser = messageSMIMEReq.getUserVS()
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
         UserVS toUser = UserVS.findWhere(nif:messageVSJSON.toUserNIF)
-
-        String msg
-        if(!fromUser || ! toUser || !messageVSJSON.encryptedMessage) {
+        String msg = null
+        if(!fromUser || ! toUser || !messageVSJSON.encryptedDataList || !messageVSJSON.encryptedDataInfo) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }
-        MessageVS messageVS = new MessageVS(content: messageVSBytes, receiverCertPEM:messageVSJSON.receiverCertPEM,
-                fromUser:fromUser, toUser:toUser, senderMessageSMIME:messageSMIMEReq, type:TypeVS.MESSAGEVS,
-                state: MessageVS.State.PENDING).save()
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageVS)
+        messageVSJSON.encryptedDataList.each { dataMap ->
+            def dataMapInfo = messageVSJSON.encryptedDataInfo.find { it ->
+                it.serialNumber == dataMap.serialNumber
+            }
+            String encryptedMessageHash = CMSUtils.getHashBase64(dataMap.encryptedData, ContextVS.VOTING_DATA_DIGEST);
+            if(!encryptedMessageHash.equals(dataMapInfo.encryptedMessageHashBase64))
+                    msg = messageSource.getMessage("messageVSHashErrorMsg",
+                    [dataMapInfo.encryptedMessageHashBase64, encryptedMessageHash].toArray(), locale)
+        }
+        if(msg != null) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
+                message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+        MessageVS messageVS = new MessageVS(content: messageVSBytes, fromUser:fromUser, toUser:toUser,
+                senderMessageSMIME:messageSMIMEReq, type:TypeVS.MESSAGEVS, state: MessageVS.State.PENDING).save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[messageVS:messageVS, messageSMIMEReq:messageSMIMEReq])
     }
 
     private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType, Locale locale) {
@@ -424,24 +435,9 @@ class  SignatureVSService {
 	}
 
 
-    /*public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
+    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
         log.debug("encryptToCMS")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
-    }*/
-
-    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receptorCert) throws Exception {
-        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
-        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receptorCert).
-                setProvider(ContextVS.PROVIDER));
-        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-        OutputStream out = dataStreamGen.open(bOut,
-                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
-                        setProvider(ContextVS.PROVIDER).build());
-        out.write(dataToEncrypt);
-        out.close();
-        byte[] result = bOut.toByteArray();
-        byte[] base64EncryptedDataBytes = Base64.encode(result);
-        return new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes, null);
     }
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, PublicKey  receptorPublicKey) throws Exception {

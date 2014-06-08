@@ -48,8 +48,6 @@ public class SessionVSHelper {
         logger.debug("remove - Session id: " + session.getId());
         SessionVS removedSessionVS = sessionMap.remove(session.getId());
         while (userSessionMap.values().remove(session.getId()));
-        if(removedSessionVS != null) try {removedSessionVS.getSession().close();}
-        catch(Exception ex) { logger.error(ex.getMessage(), ex);}
         return removedSessionVS;
     }
 

@@ -143,7 +143,8 @@ class VicketFilters {
                             break;
                         case ContentTypeVS.MESSAGEVS:
                             responseVS = signatureVSService.processMessageVS(requestBytes, contentTypeVS, request.getLocale())
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageVS = responseVS.data
+                            request.messageVS = responseVS.data?.messageVS
+                            request.messageSMIMEReq = responseVS.data?.messageSMIMEReq
                             break;
                         default: return;
                     }

@@ -22,14 +22,7 @@ class MesssageVSController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
         ResponseVS responseVS = messageVSService.send(messageVS, request.getLocale())
-        /*if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            GroupVS newGroupVS = responseVS.data
-            String URL = "${createLink(controller: 'groupVS', absolute:true)}/${newGroupVS.id}"
-            responseVS.data = [statusCode:ResponseVS.SC_OK, message:message(code:'newVicketGroupOKMsg',
-                    args:[newGroupVS.name]), URL:URL]
-            responseVS.setContentType(ContentTypeVS.JSON)
-        }*/
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
+        return [responseVS:responseVS]
     }
 
     /**

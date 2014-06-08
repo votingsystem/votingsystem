@@ -1,13 +1,17 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONObject
+import grails.transaction.Transactional
+import net.sf.json.JSONSerializer
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.ExceptionVS
+import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.vicket.websocket.SessionVSHelper
-
+import net.sf.json.JSONObject;
 import javax.websocket.CloseReason
 import javax.websocket.Session
 import java.nio.ByteBuffer
@@ -15,16 +19,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 class WebSocketService {
 
-    public enum SocketOperation {LISTEN_TRANSACTIONS, MESSAGEVS, INIT_VALIDATED_SESSION}
-
     private static final ConcurrentHashMap<String, Session> connectionsMap = new ConcurrentHashMap<String, Session>();
     def grailsApplication
     def messageSource
 
     public void onTextMessage(Session session, String msg , boolean last) {
-        log.debug("onTextMessage - session id: ${session.getId()} - last: ${last}")
-        def messageJSON = JSON.parse(msg)
-        messageJSON.userId = session.getId()
+        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
+        messageJSON.sessionId = session.getId()
+        log.debug("onTextMessage --- session id: ${session.getId()} - operaionn : ${messageJSON?.operation} - last: ${last}")
         processRequest(messageJSON, session)
     }
 
@@ -34,7 +36,6 @@ class WebSocketService {
     }
 
     public void onOpen(Session session) {
-        log.debug("onOpen - session id: ${session.getId()}")
         SessionVSHelper.getInstance().put(session)
     }
 
@@ -58,7 +59,6 @@ class WebSocketService {
     public void processRequest(JSONObject messageJSON, Session session) {
         String message = null;
         Locale locale = null
-        log.debug("messageJSON: ${messageJSON}")
         try {
             if(!messageJSON.locale) {
                 messageJSON.status = ResponseVS.SC_ERROR
@@ -67,8 +67,8 @@ class WebSocketService {
                 return;
             }
             locale = Locale.forLanguageTag(messageJSON.locale)
-            SocketOperation socketOperation
-            try { socketOperation = SocketOperation.valueOf(messageJSON.operation) }
+            TypeVS socketOperation
+            try { socketOperation = TypeVS.valueOf(messageJSON.operation) }
             catch(Exception ex) {
                 messageJSON.status = ResponseVS.SC_ERROR
                 messageJSON.message = "Invalid operation '${messageJSON.operation}'"
@@ -76,22 +76,29 @@ class WebSocketService {
                 return;
             }
             switch(socketOperation) {
-                case SocketOperation.LISTEN_TRANSACTIONS:
+                case TypeVS.LISTEN_TRANSACTIONS:
                     TransactionVSService transactionVSService = grailsApplication.mainContext.getBean("transactionVSService")
                     transactionVSService.addTransactionListener(messageJSON.userId)
                     break;
-                case SocketOperation.MESSAGEVS:
+                case TypeVS.MESSAGEVS:
                     MessageVSService messageVSService = grailsApplication.mainContext.getBean("messageVSService")
                     messageVSService.sendWebSocketMessage(messageJSON)
-                case SocketOperation.INIT_VALIDATED_SESSION:
+                case TypeVS.INIT_VALIDATED_SESSION:
                     SignatureVSService signatureVSService = grailsApplication.mainContext.getBean("signatureVSService")
                     SMIMEMessageWrapper smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(
-                            org.bouncycastle.util.encoders.Base64.decode(messageJSON.smimeMessage.getBytes())))
+                            messageJSON.smimeMessage.decodeBase64()))
+                    messageJSON.remove("smimeMessage")
                     ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null, new Locale(messageJSON.locale))
                     if(ResponseVS.SC_OK == responseVS.statusCode) {
                         SessionVSHelper.getInstance().put(session, ((MessageSMIME)responseVS.data).userVS)
+                        processResponse(getInitValidatedSessionResponseMsg(((MessageSMIME)responseVS.data).userVS,
+                                messageJSON))
+                    } else {
+                        messageJSON.status = ResponseVS.SC_ERROR
+                        messageJSON.message = responseVS.getMessage()
+                        processResponse(messageJSON)
                     }
-
+                    break;
                 default: throw new ExceptionVS(messageSource.getMessage("unknownSocketOperationErrorMsg",
                         [messageJSON.operation].toArray(), locale))
             }
@@ -103,9 +110,26 @@ class WebSocketService {
         }
     }
 
-    public void processResponse(JSONObject messageJSON) {
-        SessionVSHelper.getInstance().sendMessage(messageJSON.userId, messageJSON.toString());
+    @Transactional
+    public JSONObject getInitValidatedSessionResponseMsg(UserVS userVS, JSONObject requestJSON) {
+        JSONObject responseJSON = new JSONObject(requestJSON)
+        responseJSON.userId = userVS.id
+        def pendingMessageVSList = MessageVS.findAllWhere(toUserVS: userVS, state:MessageVS.State.PENDING)
+        List messageVSList = []
+        pendingMessageVSList.each { messageVS ->
+            JSONObject messageVSJSON = JSONSerializer.toJSON(messageVS.content, "UTF-8");
+            Map fromUser = [id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.getDefaultName()]
+            messageVSList.add([fromUser: fromUser, dateCreated:messageVS.dateCreated,
+                   encryptedMessage:messageVSJSON.encryptedMessage, receiverCertSerialNumber:messageVS.receiverCertSerialNumber])
+        }
+        responseJSON.messageVSList = messageVSList
+        responseJSON.status = ResponseVS.SC_OK
+        return responseJSON
+    }
 
+
+    public void processResponse(JSONObject messageJSON) {
+        SessionVSHelper.getInstance().sendMessage(messageJSON.sessionId, messageJSON.toString());
     }
 
 }

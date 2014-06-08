@@ -68,8 +68,6 @@ public class VotingAppService extends Service implements Runnable {
 
     public static final String TAG = VotingAppService.class.getSimpleName();
 
-    public enum SocketOperation {LISTEN_TRANSACTIONS}
-
     public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 
     private AppContextVS appContextVS;

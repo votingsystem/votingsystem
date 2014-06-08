@@ -25,9 +25,9 @@ public class CertGenerator {
     public static String END_ENTITY_ALIAS = "endEntityAlias";//
 
 
-    public static long COMIEZO_VALIDEZ_CERT = System.currentTimeMillis();//
-    public static final long PERIODO_VALIDEZ_ALMACEN_RAIZ = 20000000000L;//En producción durará lo que dure una votación
-    public static final long PERIODO_VALIDEZ_CERT = 20000000000L;
+    public static long DATE_BEGIN_CERT = System.currentTimeMillis();//
+    public static final long DURATION_ROOT_KEYSTORE = 20000000000L;//En producción durará lo que dure una votación
+    public static final long DURATION_CERT = 20000000000L;
 
     private String password;
     private X500PrivateCredential rootPrivateCredential;
@@ -58,7 +58,7 @@ public class CertGenerator {
         logger.debug(" - rootSubjectDN: " + rootSubjectDN + " - password: " + password + 
                 " - rootCertFile.getAbsolutePath(): " + rootCertFile.getAbsolutePath()); 
         this.password = password;
-        KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(COMIEZO_VALIDEZ_CERT, PERIODO_VALIDEZ_ALMACEN_RAIZ,
+        KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(DATE_BEGIN_CERT, DURATION_ROOT_KEYSTORE,
                 password.toCharArray(), ROOT_ALIAS, rootSubjectDN);
         rootKeyStore.store(new FileOutputStream(rootCertFile),  password.toCharArray());
         X509Certificate rootCertificate = (X509Certificate)rootKeyStore.getCertificate(ROOT_ALIAS);
@@ -69,9 +69,8 @@ public class CertGenerator {
     public void genUserKeyStore(String subjectDN, File file, String alias) throws Exception {
         logger.debug("--- genUserKeyStore - subjectDN: " + subjectDN + 
                         " - file: " + file.getAbsolutePath() + " - alias: " + alias);
-        KeyStore keyStore = KeyStoreUtil.createUserKeyStore(COMIEZO_VALIDEZ_CERT,
-                        PERIODO_VALIDEZ_CERT, password.toCharArray(),
-                        alias, rootPrivateCredential, subjectDN);
+        KeyStore keyStore = KeyStoreUtil.createUserKeyStore(DATE_BEGIN_CERT,
+                        DURATION_CERT, password.toCharArray(), alias, rootPrivateCredential, subjectDN);
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
     }
@@ -81,8 +80,7 @@ public class CertGenerator {
         logger.debug("--- genTimeStampingKeyStore - subjectDN: " + subjectDN + 
                 " - file: " + file.getAbsolutePath() + " - alias: " + alias);
         KeyStore keyStore = KeyStoreUtil.createTimeStampingKeyStore(
-                COMIEZO_VALIDEZ_CERT, PERIODO_VALIDEZ_CERT, 
-                password.toCharArray(), alias, rootPrivateCredential, subjectDN);
+                DATE_BEGIN_CERT, DURATION_CERT, password.toCharArray(), alias, rootPrivateCredential, subjectDN);
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(
                 keyStore, password.toCharArray());
         FileUtils.copyStreamToFile(

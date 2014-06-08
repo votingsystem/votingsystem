@@ -79,6 +79,9 @@ public enum TypeVS {
 
     MESSAGEVS,
 
+    LISTEN_TRANSACTIONS,
+    INIT_VALIDATED_SESSION,
+
     CERT_USER_NEW,
     CERT_CA_NEW,
     CERT_EDIT,

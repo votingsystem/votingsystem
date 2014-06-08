@@ -67,8 +67,6 @@ public class BrowserVS extends Region {
 
     private static Logger logger = Logger.getLogger(BrowserVS.class);
 
-    private final SignatureService signatureService = new SignatureService();
-
     private Stage browserStage;
     private HBox toolBar;
     private MessageDialog messageDialog;
@@ -87,30 +85,31 @@ public class BrowserVS extends Region {
 
     private BrowserVS(WebView webView) {
         this.webView = webView;
+        this.webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         Platform.setImplicitExit(false);
-        signatureService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+        SignatureService.getInstance().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 logger.debug("signatureService - OnSucceeded");
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
-                        ResponseVS responseVS = signatureService.getValue();
+                        ResponseVS responseVS = SignatureService.getInstance().getValue();
                         if(ContentTypeVS.JSON == responseVS.getContentType()) {
                             sendMessageToBrowserApp(responseVS.getJSONMessage(),
-                                    signatureService.getOperationVS().getCallerCallback());
+                                    SignatureService.getInstance().getOperationVS().getCallerCallback());
                         } else sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
-                                signatureService.getOperationVS().getCallerCallback());
+                                SignatureService.getInstance().getOperationVS().getCallerCallback());
                     }
                 });
             }
         });
 
-        signatureService.setOnRunning(new EventHandler<WorkerStateEvent>() {
+        SignatureService.getInstance().setOnRunning(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 logger.debug("signatureService - OnRunning");
             }
         });
 
-        signatureService.setOnFailed(new EventHandler<WorkerStateEvent>() {
+        SignatureService.getInstance().setOnFailed(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 logger.debug("signatureService - OnFailed");
             }
@@ -261,7 +260,7 @@ public class BrowserVS extends Region {
                 }
         );
         mainVBox.getChildren().addAll(toolBar, webView);
-        browserHelper = new BrowserVSPane(signatureService);
+        browserHelper = new BrowserVSPane();
         browserHelper.getChildren().add(0, mainVBox);
 
         Scene scene = new Scene(browserHelper, Color.web("#666970"));

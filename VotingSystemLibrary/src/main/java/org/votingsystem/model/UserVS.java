@@ -141,6 +141,12 @@ public class UserVS implements Serializable {
         return name;
     }
 
+    public String getDefaultName() {
+        if(name != null) return name;
+        else if(firstName == null) return lastName;
+        else return firstName + " " + lastName;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
