@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -17,7 +18,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 
 /**
  * @author jgzornoza
@@ -28,6 +31,7 @@ public class MessageDialog {
     private static Logger logger = Logger.getLogger(MessageDialog.class);
 
     private final Stage stage;
+    private HBox messageBox;
     private Label messageLabel;
 
     public MessageDialog() {
@@ -39,9 +43,14 @@ public class MessageDialog {
             @Override public void handle(WindowEvent window) {      }
         });
 
-        VBox verticalBox = new VBox(10);
+        VBox mainBox = new VBox(10);
+
+        messageBox = new HBox(10);
         messageLabel = new Label();
         messageLabel.setWrapText(true);
+
+        messageBox.getChildren().add(messageLabel);
+
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
@@ -53,9 +62,9 @@ public class MessageDialog {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         footerButtonsBox.getChildren().addAll(spacer, acceptButton);
 
-        verticalBox.getChildren().addAll(messageLabel, footerButtonsBox);
-        verticalBox.getStyleClass().add("modal-dialog");
-        stage.setScene(new Scene(verticalBox, Color.TRANSPARENT));
+        mainBox.getChildren().addAll(messageLabel, footerButtonsBox);
+        mainBox.getStyleClass().add("modal-dialog");
+        stage.setScene(new Scene(mainBox, Color.TRANSPARENT));
         stage.getScene().getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
         // allow the dialog to be dragged around.
         final Node root = stage.getScene().getRoot();
@@ -77,6 +86,16 @@ public class MessageDialog {
 
     public void showMessage(String message) {
         messageLabel.setText(message);
+        messageLabel.setGraphic(null);
+        stage.centerOnScreen();
+        stage.show();
+    }
+
+    public void showMessage(int statusCode, String message) {
+        messageLabel.setText(message);
+        if(ResponseVS.SC_OK == statusCode) {
+            messageLabel.setGraphic( new ImageView(Utils.getImage(MessageDialog.this, "accept_32")));
+        } else messageLabel.setGraphic( new ImageView(Utils.getImage(MessageDialog.this, "cancel_32")));
         stage.centerOnScreen();
         stage.show();
     }

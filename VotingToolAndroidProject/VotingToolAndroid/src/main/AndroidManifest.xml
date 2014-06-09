@@ -152,6 +152,7 @@
         <service android:name=".service.UserCertRequestService"  android:exported="false"/>
         <service android:name=".service.EventVSService"  android:exported="false"/>
         <service android:name=".service.VotingAppService"  android:exported="false"/>
+        <service android:name=".service.WebSocketService"  android:exported="false"/>
         <service android:name=".service.VoteService"  android:exported="false"/>
         <service android:name=".service.VicketService"  android:exported="false"/>
 

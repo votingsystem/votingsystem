@@ -39,7 +39,6 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
-import org.votingsystem.client.pane.PEMCertFormPane;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -47,13 +46,8 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.FileUtils;
 import org.w3c.dom.Document;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.FileInputStream;
-import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +72,6 @@ public class BrowserVS extends Region {
     private AtomicInteger offset = new AtomicInteger(0);
 
 
-
     public BrowserVS() {
         this(new WebView());
     }
@@ -94,7 +87,7 @@ public class BrowserVS extends Region {
                     @Override public void run() {
                         ResponseVS responseVS = SignatureService.getInstance().getValue();
                         if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                            sendMessageToBrowserApp(responseVS.getJSONMessage(),
+                            sendMessageToBrowserApp(responseVS.getMessageJSON(),
                                     SignatureService.getInstance().getOperationVS().getCallerCallback());
                         } else sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
                                 SignatureService.getInstance().getOperationVS().getCallerCallback());
@@ -349,6 +342,41 @@ public class BrowserVS extends Region {
         });
     }
 
+    public void loadURL(final String urlToLoad, String callback, String callbackMsg, final String caption,
+            final boolean isToolbarVisible) {
+        logger.debug("loadURL: " + urlToLoad);
+        final StringBuilder jsCommand = new StringBuilder();
+        if(callback != null && callbackMsg != null) jsCommand.append(callback + "(" + callbackMsg + ")");
+        else if(callback != null) jsCommand.append(callback + "()");;
+        logger.debug("jsCommand: " + jsCommand.toString());
+        if(!"".equals(jsCommand.toString())) {
+            webView.getEngine().getLoadWorker().stateProperty().addListener(
+                    new ChangeListener<Worker.State>() {
+                        @Override
+                        public void changed(ObservableValue<? extends Worker.State> ov,
+                                            Worker.State oldState, Worker.State newState) {
+                            //logger.debug("newState: " + newState);
+                            if (newState == Worker.State.SUCCEEDED) {
+                                webView.getEngine().executeScript(jsCommand.toString());
+                            }
+                        }
+                    }
+            );
+        }
+        PlatformImpl.runLater(new Runnable() {
+            @Override public void run() {
+                if(!isToolbarVisible) mainVBox.getChildren().removeAll(toolBar);
+                webView.getEngine().load(urlToLoad);
+                if(caption != null) browserStage.setTitle(caption);
+                browserStage.show();
+            }
+        });
+    }
+
+    public void executeScript (String jsCommand) {
+        webView.getEngine().executeScript(jsCommand);
+    }
+
     public void loadBackgroundURL(final String urlToLoad) {
         logger.debug("loadBackgroundURL: " + urlToLoad);
         PlatformImpl.runLater(new Runnable() {
@@ -388,6 +416,10 @@ public class BrowserVS extends Region {
                         saveReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
                         break;
                     case SAVE_RECEIPT_ANONYMOUS_DELEGATION:
+                        break;
+                    case MESSAGEVS_GET:
+                        JSONObject documentJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocument());
+                        WebSocketService.getInstance().sendMessage(documentJSON.toString());
                         break;
                     /*case VICKET_SOURCE_NEW:
                         PEMCertFormPane.showDialog();

@@ -17,7 +17,9 @@ import org.votingsystem.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -75,6 +77,9 @@ public class SignatureService extends Service<ResponseVS> {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
                         }
                         break;
+                    case MESSAGEVS_DECRYPT:
+                        responseVS = new ResponseVS(ResponseVS.SC_OK);
+                        break;
                     default:
                         responseVS = checkServer(operationVS.getServerURL().trim());
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -111,6 +116,9 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case MESSAGEVS:
                             responseVS = sendMessageVS(operationVS.getTargetServer(), operationVS);
+                            break;
+                        case MESSAGEVS_DECRYPT:
+                            responseVS = decryptMessageVS(operationVS);
                             break;
                         default:
                             responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
@@ -254,9 +262,56 @@ public class SignatureService extends Service<ResponseVS> {
                         ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());
             } catch (Exception ex) {
                 logger.debug(ex.getMessage(), ex);
+                responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             } finally {
                 return responseVS;
             }
+        }
+
+        private ResponseVS decryptMessageVS(OperationVS operationVS) throws Exception {
+            logger.debug("decryptMessageVS");
+            Map documentToDecrypt = operationVS.getDocumentToDecrypt();
+            List<Map> encryptedDataList = (List) documentToDecrypt.get("encryptedDataList");
+            X509Certificate cryptoTokenCert = null;
+            PrivateKey privateKey = null;
+            try{
+                KeyStore keyStore = ContextVS.getUserKeyStore(password.toCharArray());
+                privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray());
+                java.security.cert.Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
+                cryptoTokenCert = (X509Certificate) chain[0];
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+                return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
+            }
+            String encryptedData = null;
+            for(Map encryptedDataMap : encryptedDataList) {
+                Long serialNumber = Long.valueOf((String) encryptedDataMap.get("serialNumber"));
+                if(serialNumber == cryptoTokenCert.getSerialNumber().longValue()) {
+                    logger.debug("Cert matched - serialNumber: " + serialNumber);
+                    encryptedData = (String) encryptedDataMap.get("encryptedData");
+                }
+            }
+            ResponseVS responseVS = null;
+            if(encryptedData != null) {
+                responseVS = Encryptor.decryptCMS(encryptedData.getBytes(), privateKey);
+                responseVS.setContentType(ContentTypeVS.JSON);
+                Map editDataMap = new HashMap();
+                editDataMap.put("operation", TypeVS.MESSAGEVS_EDIT.toString());
+                editDataMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+                editDataMap.put("state", "CONSUMED");
+                editDataMap.put("messageId", documentToDecrypt.get("id"));
+                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(editDataMap);
+                WebSocketService.getInstance().sendMessage(jsonObject.toString());
+            }
+            else {
+                logger.error("Unable to decrypt from this device");
+                responseVS = new ResponseVS(ResponseVS.SC_ERROR);
+            }
+            //[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.getDefaultName()]
+            //messageVSList.add([fromUser: fromUser, dateCreated:messageVS.dateCreated,
+            //encryptedDataList:messageVSJSON.encryptedDataList]
+
+            return responseVS;
         }
 
         //we know this is done in a background thread
@@ -424,7 +479,7 @@ public class SignatureService extends Service<ResponseVS> {
             String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
             ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ActorVS.populate(responseVS.getJSONMessage());
+                actorVS = ActorVS.populate(responseVS.getMessageJSON());
                 responseVS.setData(actorVS);
                 logger.error("checkServer - adding " + serverURL.trim() + " to sever map");
                 serverMap.put(serverURL.trim(), actorVS);

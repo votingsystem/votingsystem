@@ -17,8 +17,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;

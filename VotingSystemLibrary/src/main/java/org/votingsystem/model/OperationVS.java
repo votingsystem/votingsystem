@@ -34,6 +34,9 @@ public class OperationVS {
     private String signedMessageSubject;
     private Map documentToSign;
     private Map documentToEncrypt;
+    private Map documentToDecrypt;
+    private Map document;
+
     private String contentType;
     private EventVS eventVS;
     private String[] args;
@@ -240,6 +243,15 @@ public class OperationVS {
             Map documentToEncrypt = (Map) dataMap.get("documentToEncrypt");
             operationVS.setDocumentToEncrypt(documentToEncrypt);
         }
+        if (dataMap.containsKey("documentToDecrypt")) {
+            Map documentToDecrypt = (Map) dataMap.get("documentToDecrypt");
+            operationVS.setDocumentToDecrypt(documentToDecrypt);
+        }
+        if (dataMap.containsKey("document")) {
+            Map documentMap = (Map) dataMap.get("document");
+            documentMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
+            operationVS.setDocument(documentMap);
+        }
         if (dataMap.containsKey("targetCertList")) {
             operationVS.setTargetCertList((List) dataMap.get("targetCertList"));
         }
@@ -299,12 +311,29 @@ public class OperationVS {
         this.documentToEncrypt = documentToEncrypt;
     }
 
+
+    public Map getDocumentToDecrypt() {
+        return documentToDecrypt;
+    }
+
+    public void setDocumentToDecrypt(Map documentToDecrypt) {
+        this.documentToDecrypt = documentToDecrypt;
+    }
+
     public List getTargetCertList() {
         return targetCertList;
     }
 
     public void setTargetCertList(List targetCertList) {
         this.targetCertList = targetCertList;
+    }
+
+    public Map getDocument() {
+        return document;
+    }
+
+    public void setDocument(Map document) {
+        this.document = document;
     }
 }
 

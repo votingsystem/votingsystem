@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
@@ -56,6 +57,7 @@ public class ResponseVS<T> implements Parcelable {
     private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private byte[] messageBytes;
     private Uri uri;
+    private JSONObject messageJSON;
 
 
     public ResponseVS() {  }
@@ -161,14 +163,14 @@ public class ResponseVS<T> implements Parcelable {
         }
     }
 
-    public JSONObject getJSONMessage() {
+    public JSONObject getMessageJSON() {
         JSONObject result = null;
         try {
             String message = getMessage();
             if(message != null) result = new JSONObject(message);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Log.e(TAG + ".getJSONMessage() ", ex.getMessage(), ex);
+            Log.e(TAG + ".getMessageJSON() ", ex.getMessage(), ex);
         }
         return result;
     }
@@ -364,9 +366,9 @@ public class ResponseVS<T> implements Parcelable {
         if(notificationMessage == null) {
             if (ContentTypeVS.JSON == contentType) {
                 try {
-                    notificationMessage = getJSONMessage().getString("message");
+                    notificationMessage = getMessageJSON().getString("message");
                 } catch(Exception ex) {
-                    Log.e(TAG + ".getJSONMessage() ", ex.getMessage(), ex);
+                    Log.e(TAG + ".getMessageJSON() ", ex.getMessage(), ex);
                 }
             } else notificationMessage = getMessage();
         }
@@ -383,5 +385,25 @@ public class ResponseVS<T> implements Parcelable {
 
     public void setOperation(OperationVS operation) {
         this.operation = operation;
+    }
+
+    public static ResponseVS parseWebSocketResponse(String message) {
+        try {
+            JSONObject messageJSON = new JSONObject(message);
+            ResponseVS result = new ResponseVS();
+            result.setMessageJSON(messageJSON);
+            if(messageJSON.has("operation")) result.setTypeVS(TypeVS.valueOf(messageJSON.getString("operation")));
+            if(messageJSON.has("status")) result.setStatusCode(Integer.valueOf(messageJSON.getString("status")));
+            if(messageJSON.has("message")) result.setMessage(messageJSON.getString("message"));
+            return result;
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+        }
+
+    }
+
+    public void setMessageJSON(JSONObject messageJSON) {
+        this.messageJSON = messageJSON;
     }
 }

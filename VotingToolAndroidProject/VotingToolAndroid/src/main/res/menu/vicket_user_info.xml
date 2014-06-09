@@ -11,10 +11,10 @@
         android:title="@string/admin_vickets_menu_item"/>
 
 
-    <item android:id="@+id/send_message"
+    <item android:id="@+id/connect_to_service"
         android:orderInCategory="3"
         android:showAsAction="never"
-        android:title="@string/send_message_lbl"/>
+        android:title="@string/connect_to_service_lbl"/>
 
     <item android:id="@+id/test_menu_item"
         android:orderInCategory="4"

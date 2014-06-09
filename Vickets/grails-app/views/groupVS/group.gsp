@@ -16,61 +16,59 @@
             </li>
         </ol>
     </div>
-<div class="pageContenDiv" style="max-width: 1000px; padding: 20px;">
-    <div style="margin:0px 30px 0px 30px;">
-        <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
-        </div>
-
-        <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
-            <div id="adminButtonsDiv" class="">
-                <button id="editGroupVSButton" type="submit" class="btn btn-warning" onclick="editGroup();"
-                        style="margin:10px 20px 0px 0px;">
-                    <g:message code="editGroupVSLbl"/> <i class="fa fa fa-check"></i>
-                </button>
-                <button id="cancelGroupVSButton" type="submit" class="btn btn-warning"
-                        style="margin:10px 20px 0px 0px;" onclick="showCancelGroupVSDialog('${groupvsMap.name}', '${groupvsMap.id}')">
-                    <g:message code="cancelGroupVSLbl"/> <i class="fa fa fa-check"></i>
-                </button>
-                <button id="adminGroupVSUsersButton" type="submit" class="btn btn-warning" onclick="adminGroupUsers('${groupvsMap.id}');"
-                        style="margin:10px 20px 0px 0px;">
-                    <g:message code="adminGroupVSUsersLbl"/> <i class="fa fa fa-check"></i>
-                </button>
-                <button id="makeDepositButton" type="submit" class="btn btn-warning" onclick="makeDeposit();"
-                        style="margin:10px 20px 0px 0px;">
-                    <g:message code="makeDepositLbl"/> <i class="fa fa fa-check"></i>
-                </button>
-            </div>
-        </g:if>
-
-        <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
-
-        <div style="margin: 15px 0 15px 0;">
-            <div class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
-                ${raw(groupvsMap?.description)}
-            </div>
-            <div class="row">
-                <div id="eventAuthorDiv" style="margin:0px 30px 0px 0px;" class="text-right">
-                    <b><g:message code="groupRepresentativeLbl"/>: </b>${groupvsMap?.representative.firstName} ${groupvsMap?.representative.lastName}
-                </div>
-            </div>
-        </div>
-
-        <g:if test="${"user".equals(params.menu)}">
-            <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
-                <div class="row text-right">
-                    <button id="subscribeButton" type="submit" class="btn btn-default btn-lg" onclick="subscribeToGroup();"
-                            style="margin:15px 20px 15px 0px;">
-                        <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
-                    </button>
-                </div>
-            </g:if>
-        </g:if>
-        <g:if test="${!"admin".equals(params.menu) && !"user".equals(params.menu)}">
-            <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
-                <g:message code="clientToolNeededMsg"/>.
-                <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
-        </g:if>
+<div class="pageContenDiv" style="max-width: 1000px; padding: 20px 30px 0px 30px;">
+    <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
     </div>
+
+    <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
+        <div id="adminButtonsDiv" class="">
+            <button id="editGroupVSButton" type="submit" class="btn btn-warning" onclick="editGroup();"
+                    style="margin:10px 20px 0px 0px;">
+                <g:message code="editGroupVSLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+            <button id="cancelGroupVSButton" type="submit" class="btn btn-warning"
+                    style="margin:10px 20px 0px 0px;" onclick="showCancelGroupVSDialog('${groupvsMap.name}', '${groupvsMap.id}')">
+                <g:message code="cancelGroupVSLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+            <button id="adminGroupVSUsersButton" type="submit" class="btn btn-warning" onclick="adminGroupUsers('${groupvsMap.id}');"
+                    style="margin:10px 20px 0px 0px;">
+                <g:message code="adminGroupVSUsersLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+            <button id="makeDepositButton" type="submit" class="btn btn-warning" onclick="makeDeposit();"
+                    style="margin:10px 20px 0px 0px;">
+                <g:message code="makeDepositLbl"/> <i class="fa fa fa-check"></i>
+            </button>
+        </div>
+    </g:if>
+
+    <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
+
+    <div style="margin: 15px 0 15px 0;">
+        <div class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
+            ${raw(groupvsMap?.description)}
+        </div>
+        <div class="row">
+            <div id="eventAuthorDiv" style="margin:0px 30px 0px 0px;" class="text-right">
+                <b><g:message code="groupRepresentativeLbl"/>: </b>${groupvsMap?.representative.firstName} ${groupvsMap?.representative.lastName}
+            </div>
+        </div>
+    </div>
+
+    <g:if test="${"user".equals(params.menu)}">
+        <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
+            <div class="row text-right">
+                <button id="subscribeButton" type="submit" class="btn btn-default btn-lg" onclick="subscribeToGroup();"
+                        style="margin:15px 20px 15px 0px;">
+                    <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
+                </button>
+            </div>
+        </g:if>
+    </g:if>
+    <g:if test="${!"admin".equals(params.menu) && !"user".equals(params.menu)}">
+        <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
+            <g:message code="clientToolNeededMsg"/>.
+            <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
+    </g:if>
 </div>
 <g:include view="/include/dialog/resultDialog.gsp"/>
 <g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>

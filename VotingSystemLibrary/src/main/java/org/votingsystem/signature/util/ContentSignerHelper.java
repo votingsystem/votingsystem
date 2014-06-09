@@ -3,6 +3,7 @@ package org.votingsystem.signature.util;
 import iaik.pkcs.pkcs11.Mechanism;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.dnie.DNIePDFContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;

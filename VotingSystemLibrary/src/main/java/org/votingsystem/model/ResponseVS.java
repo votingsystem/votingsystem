@@ -40,6 +40,7 @@ public class ResponseVS<T> implements Serializable {
     private Integer statusCode;
     private StatusVS<?> status;
     private String message;
+    private JSONObject messageJSON;
     private String reason;
     private String metaInf;
     private SMIMEMessageWrapper smimeMessage;
@@ -103,11 +104,16 @@ public class ResponseVS<T> implements Serializable {
         return message;
     }
 
-    public JSONObject getJSONMessage() {
+    public JSONObject getMessageJSON() {
+        if(messageJSON != null) return messageJSON;
         JSONObject result = null;
         String message = getMessage();
         if(message != null) result = (JSONObject)JSONSerializer.toJSON(message);
         return result;
+    }
+
+    public void setMessageJSON(JSONObject jsonObject) {
+        this.messageJSON = jsonObject;
     }
 
     public JSONObject getSignedJSON() {
@@ -244,5 +250,15 @@ public class ResponseVS<T> implements Serializable {
 
     public void setMetaInf(String metaInf) {
         this.metaInf = metaInf;
+    }
+
+    public static ResponseVS parseWebSocketResponse(String message) {
+        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(message);
+        ResponseVS result = new ResponseVS();
+        result.setMessageJSON(messageJSON);
+        if(messageJSON.containsKey("operation")) result.setType(TypeVS.valueOf(messageJSON.getString("operation")));
+        if(messageJSON.containsKey("status")) result.setStatusCode(Integer.valueOf(messageJSON.getString("status")));
+        if(messageJSON.containsKey("message")) result.setMessage(messageJSON.getString("message"));
+        return result;
     }
 }

@@ -32,6 +32,14 @@ public class UserVS implements Serializable {
 
     private static Logger log = Logger.getLogger(UserVS.class);
 
+    public CertificateVS getCertificateVS() {
+        return certificateVS;
+    }
+
+    public void setCertificateVS(CertificateVS certificateVS) {
+        this.certificateVS = certificateVS;
+    }
+
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, VICKET_SOURCE}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
@@ -84,7 +92,9 @@ public class UserVS implements Serializable {
     @Column(name="representativeRegisterDate", length=23) private Date representativeRegisterDate;
     
     @Transient private transient X509Certificate certificate;
+    @Transient private transient CertificateVS certificateVS;
     @Transient private transient CertificateVS certificateCA;
+
     @Transient private transient TimeStampToken timeStampToken;
     @Transient private transient SignerInformation signerInformation;
     @Transient private KeyStore keyStore;

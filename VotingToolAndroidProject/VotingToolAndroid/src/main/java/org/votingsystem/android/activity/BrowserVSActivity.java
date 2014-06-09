@@ -64,7 +64,7 @@ public class BrowserVSActivity extends ActionBarActivity {
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
         else {
             if(operationVS != null && ContentTypeVS.JSON == responseVS.getContentType()) {
-                sendMessageToBrowserApp(responseVS.getJSONMessage(),
+                sendMessageToBrowserApp(responseVS.getMessageJSON(),
                         operationVS.getCallerCallback());
             } else if(operationVS != null) {
                 sendMessageToBrowserApp(responseVS.getStatusCode(),

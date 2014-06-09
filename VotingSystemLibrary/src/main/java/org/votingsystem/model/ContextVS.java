@@ -422,9 +422,19 @@ public class ContextVS {
     }
 
     public static KeyStore getUserKeyStore(char[] password) throws Exception{
-        File keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new FileInputStream(keyStoreFile), password);
+        File keyStoreFile = null;
+        KeyStore keyStore = null;
+        try {
+            keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+        } catch(Exception ex) {
+            throw new Exception(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
+        }
+        try {
+            keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(new FileInputStream(keyStoreFile), password);
+        } catch(Exception ex) {
+            throw new Exception(getMessage("cryptoTokenPasswordErrorMsg"), ex);
+        }
         return keyStore;
     }
 

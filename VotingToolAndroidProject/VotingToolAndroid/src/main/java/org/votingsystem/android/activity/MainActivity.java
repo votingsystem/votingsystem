@@ -21,6 +21,7 @@ import org.votingsystem.model.ResponseVS;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -62,9 +63,9 @@ public class MainActivity extends FragmentActivity {
         }
         if (savedInstanceState != null) return;
         ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(contextVS.getAccessControl() == null) runAppService(uriData);
         if(responseVS != null) showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                 responseVS.getNotificationMessage());
-        else if(uriData != null || contextVS.getAccessControl() == null) runAppService(uriData);
         else if(contextVS.getAccessControl() != null) {
             Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
             startActivity(intent);

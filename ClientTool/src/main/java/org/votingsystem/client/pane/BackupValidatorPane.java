@@ -21,6 +21,7 @@ import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+
 import java.io.File;
 
 /**

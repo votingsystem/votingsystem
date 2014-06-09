@@ -349,7 +349,7 @@ public class EventVSGridFragment extends Fragment
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        Log.d(TAG + ".onLoaderReset(...)", "");
+        Log.d(TAG + ".onLoaderReset(...)", "onLoaderReset");
         ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
@@ -367,6 +367,8 @@ public class EventVSGridFragment extends Fragment
     }
 
     @Override public void onStop() {
+        gridView.setOnScrollListener(null);
+        getLoaderManager().destroyLoader(loaderId);
         super.onStop();
         Log.d(TAG +  ".onStop()", " - onStop - ");
     }

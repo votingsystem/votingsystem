@@ -33,6 +33,7 @@
         callback = callbackParam
         toUserNIF = toNIF
         console.log("showSendMessageVSDialog - message: " + message);
+        document.getElementById('messageVSContent').value = ""
         if(message == null || "" == message.trim()) document.getElementById("sendMessageVSMsg").style.display = 'none'
         else document.getElementById("sendMessageVSMsg").innerHTML = message
         $('#sendMessageVSDialog').modal('show')
@@ -43,7 +44,7 @@
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-        webAppMessage.serviceURL = "${createLink(controller:'messsageVS', absolute:true)}/"
+        webAppMessage.serviceURL = "${createLink(controller:'messageVS', absolute:true)}/"
         webAppMessage.signedMessageSubject = "<g:message code="sendEncryptedMessageSubject"/>"
         webAppMessage.signedContent = {operation:Operation.MESSAGEVS, toUserNIF:toUserNIF}
         webAppMessage.documentToEncrypt = {operation:Operation.MESSAGEVS, messageContent:document.getElementById('messageVSContent').value}
@@ -54,6 +55,7 @@
         webAppMessage.callerCallback = getFnName(callback)
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        $('#sendMessageVSDialog').modal('hide')
     }
 
 </asset:script>

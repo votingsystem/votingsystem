@@ -3,7 +3,6 @@ package org.votingsystem.client;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -16,7 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import net.sf.json.JSONObject;
@@ -27,18 +27,16 @@ import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.util.*;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.util.HttpHelper;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.File;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -54,8 +52,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     private VBox vicketOptionsBox;
     private SettingsDialog settingsDialog;
     private Button connectButton;
+    private Text messageText;
     private Button vicketAdminProceduresButton;
     private Stage primaryStage;
+    private AtomicBoolean wsConnected = new AtomicBoolean(false);
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
 
@@ -141,15 +141,24 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         connectButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
                 connectButton.setDisable(true);
+                if(!wsConnected.get()) {
+                    connectButton.setText(ContextVS.getMessage("connectionMsg") + "...");
+                }
                 toggleConnection();
             }});
+
+        messageText = new Text();
+        messageText.setWrappingWidth(320);
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;");
+        VBox.setMargin(messageText, new Insets(0, 0, 0, 0));
+        messageText.setTextAlignment(TextAlignment.CENTER);
 
         HBox headerButtonsBox = new HBox(10);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        headerButtonsBox.getChildren().addAll(connectButton, spacer);
+        headerButtonsBox.getChildren().addAll(connectButton, spacer, messageText);
         VBox.setMargin(headerButtonsBox, new Insets(0, 0, 10, 0));
 
         votingSystemOptionsBox = new VBox(10);
@@ -274,8 +283,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                     getVotingSystemSSLCerts(), ContextVS.getInstance().getVicketServer());
             webSocketService.addListener(VotingSystemApp.this);
         }
-        WebSocketService.getInstance().setConnectionEnabled(
-                ContextVS.getMessage("connectLbl").equals(connectButton.getText()));
+        WebSocketService.getInstance().setConnectionEnabled(!wsConnected.get());
     }
 
     private void setVicketServerAvailable(boolean available) {
@@ -410,8 +418,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
         switch(operation) {
             case INIT_VALIDATED_SESSION:
+                wsConnected.set(true);
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
+                        messageText.setText(WebSocketService.getInstance().getSessionUser().getDefaultName());
                         connectButton.setGraphic(new ImageView(Utils.getImage(VotingSystemApp.this, "connected")));
                         connectButton.setText(ContextVS.getMessage("disConnectLbl"));
                         connectButton.setDisable(false);
@@ -425,8 +435,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         logger.debug("setConnectionStatus - status: " + status.toString());
         switch (status) {
             case CLOSED:
+                wsConnected.set(false);
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
+                        messageText.setText("");
                         connectButton.setGraphic(new ImageView(Utils.getImage(this, "disconnected")));
                         connectButton.setText(ContextVS.getMessage("connectLbl"));
                         connectButton.setDisable(false);

@@ -12,6 +12,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.*;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.util.Utils;
@@ -75,6 +76,8 @@ public class SettingsDialog {
                 changeSignatureMode(actionEvent);
             }});
         mobileVBox = new VBox(10);
+        Text adviceText = new Text(ContextVS.getMessage("mobileSettingsAdvice"));
+        adviceText.setWrappingWidth(450);
         Label label = new Label(ContextVS.getMessage("mobileNIFLbl") + ":");
         mobileNIFTextField = new TextField();
         mobileNIFTextField.addEventHandler(KeyEvent.KEY_PRESSED,
@@ -87,7 +90,7 @@ public class SettingsDialog {
                 }
         );
         mobileNIFTextField.setPromptText(ContextVS.getMessage("nifLbl"));
-        mobileVBox.getChildren().addAll(label, mobileNIFTextField);
+        mobileVBox.getChildren().addAll(adviceText, label, mobileNIFTextField);
         mobileVBox.getStyleClass().add("settings-vbox");
 
         signWithKeystoreRb = new RadioButton(ContextVS.getMessage("setJksKeyStoreSignatureMechanismMsg"));

@@ -356,14 +356,15 @@ class  SignatureVSService {
         MessageSMIME messageSMIMEReq = responseVS.data
         UserVS fromUser = messageSMIMEReq.getUserVS()
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
-        UserVS toUser = UserVS.findWhere(nif:messageVSJSON.toUserNIF)
         String msg = null
-        if(!fromUser || ! toUser || !messageVSJSON.encryptedDataList || !messageVSJSON.encryptedDataInfo) {
+        String toUserNIFValidated = org.votingsystem.util.NifUtils.validate(messageVSJSON.toUserNIF)
+        if(!fromUser || ! toUserNIFValidated || !messageVSJSON.encryptedDataList || !messageVSJSON.encryptedDataInfo) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }
+        UserVS toUser = UserVS.findWhere(nif:toUserNIFValidated)
         messageVSJSON.encryptedDataList.each { dataMap ->
             def dataMapInfo = messageVSJSON.encryptedDataInfo.find { it ->
                 it.serialNumber == dataMap.serialNumber
@@ -375,8 +376,9 @@ class  SignatureVSService {
         }
         if(msg != null) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                 message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
-        MessageVS messageVS = new MessageVS(content: messageVSBytes, fromUser:fromUser, toUser:toUser,
+        MessageVS messageVS = new MessageVS(content: messageVSBytes, fromUserVS: fromUser, toUserVS: toUser,
                 senderMessageSMIME:messageSMIMEReq, type:TypeVS.MESSAGEVS, state: MessageVS.State.PENDING).save()
+        log.debug("OK - MessageVS from user '${fromUser?.id}' to user '${toUser?.id}'")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[messageVS:messageVS, messageSMIMEReq:messageSMIMEReq])
     }
 
@@ -485,7 +487,7 @@ class  SignatureVSService {
     /**
      * Method to decrypt files attached to SMIME (not signed) messages
      */
-    /*public ResponseVS decryptCMS (byte[] encryptedFile, Locale locale) {
+    public ResponseVS decryptCMS (byte[] encryptedFile, Locale locale) {
         log.debug " - decryptCMS"
         try {
             return getEncryptor().decryptCMS(serverPrivateKey, encryptedFile)
@@ -494,39 +496,6 @@ class  SignatureVSService {
             return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-    }*/
-
-
-
-    public ResponseVS decryptCMS (byte[] base64EncryptedData, Locale locale) {
-        log.debug "decryptCMS"
-        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
-        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
-        RecipientInformationStore  recipients = ep.getRecipientInfos();
-        Collection                 c = recipients.getRecipients();
-        Iterator                   it = c.iterator();
-        byte[] result = null;
-        if (it.hasNext()) {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
-            //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-            CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(getServerPrivateKey()).setProvider(ContextVS.PROVIDER));
-            InputStream           dataStream = recData.getContentStream();
-            ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
-            byte[]                buf = new byte[4096];
-            int len = 0;
-            while ((len = dataStream.read(buf)) >= 0) {
-                dataOut.write(buf, 0, len);
-            }
-            dataOut.close();
-            result = dataOut.toByteArray();
-            return new ResponseVS(ResponseVS.SC_OK, result);
-            //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
-        } else {
-            String msg = messageSource.getMessage('encryptedMessageWithoutRecipientsErrorMsg', null, locale)
-            log.error "decryptCMS - ${msg}"
-            return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, msg);
-        }
-
     }
 
     /**

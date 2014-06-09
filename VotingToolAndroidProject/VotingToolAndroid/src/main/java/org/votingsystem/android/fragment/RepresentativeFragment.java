@@ -191,9 +191,7 @@ public class RepresentativeFragment extends Fragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
-            case R.id.send_message:
 
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

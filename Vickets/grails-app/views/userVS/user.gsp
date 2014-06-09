@@ -102,8 +102,18 @@
             "<g:message code="uservsMessageVSLbl" args="${[uservsMap?.name]}"/>", sendMessageVSCallback)
     }
 
-    function sendMessageVSCallback() {
-
+    function sendMessageVSCallback(appMessage) {
+        var appMessageJSON = toJSON(appMessage)
+        var callBackResult = null
+        if(appMessageJSON != null) {
+            var caption = '<g:message code="sendMessageERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="sendMessageOKCaption"/>'
+            }
+            showResultDialog(caption, msg, callBackResult)
+        }
+        window.scrollTo(0,0);
     }
 
 

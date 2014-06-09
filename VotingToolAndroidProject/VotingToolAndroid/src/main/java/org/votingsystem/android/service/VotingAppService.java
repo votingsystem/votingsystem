@@ -27,12 +27,14 @@ import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.fragment.VicketUserInfoFragment;
 import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
@@ -83,7 +85,17 @@ public class VotingAppService extends Service implements Runnable {
 
     private void processOperation (String accessControlURL, OperationVS operationVS) {
         Log.d(TAG + ".processOperation(...)", "accessControlURL: " + accessControlURL);
-        ResponseVS responseVS = HttpHelper.getData(AccessControlVS.
+        ResponseVS responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(appContextVS.getVicketServerURL()),
+                ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            try {
+                VicketServer vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                appContextVS.setVicketServer(vicketServer);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        responseVS = HttpHelper.getData(AccessControlVS.
                 getServerInfoURL(accessControlURL), ContentTypeVS.JSON);
         SharedPreferences pref = getSharedPreferences(
                 ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -170,44 +182,41 @@ public class VotingAppService extends Service implements Runnable {
     @Override public void onDestroy(){ }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG + ".onStartCommand(...) ", "");
+        Log.i(TAG + ".onStartCommand(...) ", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        Bundle arguments = intent.getExtras();
-        final String accessControlURL = arguments.getString(URL_KEY);
-        Uri uriData = (Uri) arguments.getParcelable(URI_KEY);
-        OperationVS operationVS = null;
-        if(uriData != null) {
-            String operationStr = uriData.getQueryParameter("operation");
-            if(operationStr != null) {
-                operationVS = new OperationVS(TypeVS.valueOf(operationStr), uriData);
-            } else {
-                String encodedMsg = uriData.getQueryParameter("msg");
-                if(encodedMsg != null) {
-                    try {
-                        operationVS = OperationVS.parse(StringUtils.decodeString(encodedMsg));
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
+        if(intent != null) {
+            Bundle arguments = intent.getExtras();
+            final String accessControlURL = arguments.getString(URL_KEY);
+            Uri uriData = (Uri) arguments.getParcelable(URI_KEY);
+            OperationVS operationVS = null;
+            if(uriData != null) {
+                String operationStr = uriData.getQueryParameter("operation");
+                if(operationStr != null) {
+                    operationVS = new OperationVS(TypeVS.valueOf(operationStr), uriData);
+                } else {
+                    String encodedMsg = uriData.getQueryParameter("msg");
+                    if(encodedMsg != null) {
+                        try {
+                            operationVS = OperationVS.parse(StringUtils.decodeString(encodedMsg));
+                        } catch(Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             }
-        }
-        final OperationVS operationFinal = operationVS;
-        Runnable runnable = new Runnable() {
-            @Override public void run() {
-                processOperation(accessControlURL, operationFinal);
-            }
-        };
+            final OperationVS operationFinal = operationVS;
+            Runnable runnable = new Runnable() {
+                @Override public void run() {
+                    processOperation(accessControlURL, operationFinal);
+                }
+            };
             /*Services run in the main thread of their hosting process. This means that, if
             * it's going to do any CPU intensive (such as networking) operations, it should
             * spawn its own thread in which to do that work.*/
-        Thread thr = new Thread(null, runnable, "voting_app_service_thread");
-        thr.start();
-        //WebsocketListener socketListener = new WebsocketListener("ws://vickets/Vickets/websocket/service");
-        WebSocketListener socketListener = new WebSocketListener("wss://vickets:8443/Vickets/websocket/service");
-
-        Thread websocketThread = new Thread(null, socketListener, "websocket_service_thread");
-        websocketThread.start();
-        //We want this service to continue running until it is explicitly stopped, so return sticky.
+            Thread thr = new Thread(null, runnable, "voting_app_service_thread");
+            thr.start();
+            //We want this service to continue running until it is explicitly stopped, so return sticky.
+        }
         return START_STICKY;
     }
 
@@ -241,58 +250,6 @@ public class VotingAppService extends Service implements Runnable {
 
     @Override public void run() {
         checkForPendingOperations();
-    }
-    private class WebSocketListener implements Runnable {
-
-        private String serviceURL = null;
-
-        final ClientManager client = ClientManager.createClient();
-
-        public WebSocketListener(String serviceURL) {
-            this.serviceURL = serviceURL;
-            try {
-                KeyStore p12Store = KeyStore.getInstance("PKCS12");
-                p12Store.load(null, null);
-                byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open("VotingSystemSSLCert.pem"));
-                Collection<X509Certificate> votingSystemSSLCerts =  CertUtil.fromPEMToX509CertCollection(certBytes);
-                X509Certificate serverCert = votingSystemSSLCerts.iterator().next();
-                p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
-                byte[] p12KeyStoreBytes = KeyStoreUtil.getBytes(p12Store, "".toCharArray());
-
-                // Grizzly ssl configuration
-                SSLContextConfigurator sslContext = new SSLContextConfigurator();
-                sslContext.setTrustStoreType("PKCS12");
-                sslContext.setTrustStoreBytes(p12KeyStoreBytes);
-                sslContext.setTrustStorePass("");
-                SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContext, true, false, false);
-                client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        @Override public void run() {
-            try {
-                Log.d(TAG + ".WebsocketListener", "run");
-                client.connectToServer(new Endpoint() {
-                    @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
-                        try {
-                            session.addMessageHandler(new MessageHandler.Whole<String>() {
-                                @Override public void onMessage(String message) {
-                                    Log.d(TAG + ".WebsocketListener", "onMessage: " + message);
-                                }
-                            });
-                            session.getBasicRemote().sendText("Test message from Android Websocket client");
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }, ClientEndpointConfig.Builder.create().build(), URI.create(serviceURL));
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
     }
 
 }

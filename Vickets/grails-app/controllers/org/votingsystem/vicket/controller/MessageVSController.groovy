@@ -1,7 +1,12 @@
 package org.votingsystem.vicket.controller
 
+import grails.converters.JSON
+import net.sf.json.JSONObject
+import net.sf.json.JSONSerializer
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
+import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.MessageVS
 
 /**
@@ -11,7 +16,7 @@ import org.votingsystem.vicket.model.MessageVS
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
-class MesssageVSController {
+class MessageVSController {
 
 	def grailsApplication;
     def messageVSService
@@ -23,6 +28,10 @@ class MesssageVSController {
         }
         ResponseVS responseVS = messageVSService.send(messageVS, request.getLocale())
         return [responseVS:responseVS]
+    }
+
+    def inbox() {
+        //render(view:'inbox', model: [messageVSList:"${messageVSList as JSON}"])
     }
 
     /**

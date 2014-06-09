@@ -29,6 +29,14 @@ public class ActorVS implements java.io.Serializable {
         this.environment = environment;
     }
 
+    public String getWebSocketURL() {
+        return webSocketURL;
+    }
+
+    public void setWebSocketURL(String webSocketURL) {
+        this.webSocketURL = webSocketURL;
+    }
+
     public enum Type {CONTROL_CENTER, ACCESS_CONTROL, VICKETS, TIMESTAMP_SERVER;}
 
     public enum State { SUSPENDED, RUNNING, PAUSED;}
@@ -43,6 +51,7 @@ public class ActorVS implements java.io.Serializable {
     private Date lastUpdated;
     private State state;
     private Type type;
+    private String webSocketURL;
     private String certificateURL;
     private String certificatePEM;
     private X509Certificate certificate;
@@ -211,6 +220,9 @@ public class ActorVS implements java.io.Serializable {
         }
         if (actorVSJSON.has("timeStampCertPEM")) {
             actorVS.setTimeStampCertPEM(actorVSJSON.getString("timeStampCertPEM"));
+        }
+        if (actorVSJSON.has("webSocketURL")) {
+            actorVS.setWebSocketURL(actorVSJSON.getString("webSocketURL"));
         }
         return actorVS;
     }

@@ -76,6 +76,7 @@ class SubscriptionVSService {
 				log.debug "checkUser - NEW CertificateVS id '${certificate.id}' for user '${userVSDB.nif}'"
 			}
 		}
+        userVS.setCertificateVS(certificate)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:[isNewUser:isNewUser,certificateVS:certificate])
 	}
 

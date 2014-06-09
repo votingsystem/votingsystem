@@ -28,6 +28,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * @author jgzornoza
@@ -272,6 +273,38 @@ public class Encryptor {
             //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
         }
         return result;
+    }
+
+    public static ResponseVS decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) {
+        logger.debug("decryptCMS");
+        try {
+            byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+            CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+            RecipientInformationStore  recipients = ep.getRecipientInfos();
+            Collection                 c = recipients.getRecipients();
+            Iterator                   it = c.iterator();
+            byte[] result = null;
+            if (it.hasNext()) {
+                RecipientInformation   recipient = (RecipientInformation)it.next();
+                //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+                CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.PROVIDER));
+                InputStream           dataStream = recData.getContentStream();
+                ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+                byte[]                buf = new byte[4096];
+                int len = 0;
+                while ((len = dataStream.read(buf)) >= 0) {
+                    dataOut.write(buf, 0, len);
+                }
+                dataOut.close();
+                result = dataOut.toByteArray();
+                return new ResponseVS(ResponseVS.SC_OK, result, null);
+            } else {
+                String msg = ContextVS.getMessage("encryptedMessageWithoutRecipientsErrorMsg");
+                return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, msg);
+            }
+        } catch(Exception ex) {
+            return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
+        }
     }
 
     public static byte[] encryptSMIME(SMIMEMessageWrapper msgToEncrypt, 

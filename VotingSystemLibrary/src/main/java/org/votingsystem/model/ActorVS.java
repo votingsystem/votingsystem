@@ -255,6 +255,10 @@ public class ActorVS implements Serializable {
         return getServerURL() + "/userVS";
     }
 
+    @Transient public String getMessageVSInboxURL() {
+        return getServerURL() + "/messageVS/inbox";
+    }
+
     @Transient public String getUserBaseInitServiceURL() {
         return getServerURL() + "/userVS/prepareUserBaseData";
     }

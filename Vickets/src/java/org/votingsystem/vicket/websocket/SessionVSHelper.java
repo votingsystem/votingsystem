@@ -41,7 +41,7 @@ public class SessionVSHelper {
             if(sessionVS.getUserVS() == null) sessionVS.setUserVS(userVS);
             else if(sessionVS.getUserVS().getId() != userVS.getId()){ throw new ExceptionVS("SessionVS with existing user");}
             userSessionMap.putIfAbsent(userVS.getId(), session.getId());
-        }else logger.debug("put - Session already in sessionMap");
+        } else logger.debug("put - Session already in sessionMap");
     }
 
     public SessionVS remove(Session session) {

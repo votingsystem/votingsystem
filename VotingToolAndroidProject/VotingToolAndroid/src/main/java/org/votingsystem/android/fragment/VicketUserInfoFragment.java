@@ -29,6 +29,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.contentprovider.Utils;
 import org.votingsystem.android.service.VicketService;
+import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
@@ -256,8 +257,10 @@ public class VicketUserInfoFragment extends Fragment {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);
                 return true;
-            case R.id.send_message:
-
+            case R.id.connect_to_service:
+                Intent startIntent = new Intent(contextVS, WebSocketService.class);
+                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
+                getActivity().startService(startIntent);
                 return true;
             case R.id.admin_vickets_menu_item:
                 Intent intent = new Intent(getActivity(), BrowserVSActivity.class);
