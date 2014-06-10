@@ -28,6 +28,8 @@ class TestingController {
 
     //logTransactionVS(int status, String type, String fromUser, String toUser, String currency, BigDecimal amount, String msg, Date dateCreated, String subject)
 
+
+
     def IBAN() {
         render IbanVSUtil.getInstance().getIBAN(12)
         return false

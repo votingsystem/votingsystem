@@ -16,13 +16,18 @@
 package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -37,14 +42,17 @@ import android.widget.ExpandableListView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
 import org.votingsystem.android.fragment.VicketGridFragment;
+import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.EventNavigationPagerAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.PagerAdapterVS;
 import org.votingsystem.android.ui.SingleOptionPagerAdapter;
 import org.votingsystem.android.ui.VicketPagerAdapter;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ScreenUtils;
 
@@ -60,17 +68,54 @@ public class NavigationDrawer extends ActionBarActivity {
     public static final String CHILD_POSITION_KEY = "childPosition";
 
     private NavigatorDrawerOptionsAdapter listAdapter;
+    private ProgressDialog progressDialog = null;
     private ExpandableListView expListView;
     private DrawerLayout mDrawerLayout;
     private ViewPager mViewPager;
     private ActionBarDrawerToggle mDrawerToggle;
     private AppContextVS contextVS = null;
-
+    private String broadCastId = NavigationDrawer.class.getSimpleName();
     //private RepresentativeNavigationPagerAdapter representativePagerAdapter;
     private SingleOptionPagerAdapter singleOptionPagerAdapter;
     private EventNavigationPagerAdapter pagerAdapter;
     private VicketPagerAdapter vicketAdapter;
+    private Menu mainMenu;
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            Log.d(TAG + ".broadcastReceiver.onReceive(...)", "extras: " + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                switch(responseVS.getTypeVS()) {
+                    case WEB_SOCKET_INIT:
+                        showProgressDialog(getString(R.string.connecting_caption),
+                                getString(R.string.connecting_to_service_msg));
+                        toggleWebSocketServiceConnection();
+                        break;
+                }
+            } else {
+                Log.d(TAG + ".broadcastReceiver.onReceive(...)", "response typeVS: " + responseVS.getTypeVS());
+                if(progressDialog != null) progressDialog.dismiss();
+                switch(responseVS.getTypeVS()) {
+                    case INIT_VALIDATED_SESSION:
+                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                            if(mainMenu != null) {
+                                MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
+                                connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
+                            }
+                        }
+                        break;
+                    case WEB_SOCKET_CLOSE:
+                        if(mainMenu != null) {
+                            MenuItem connectToServiceMenuItem = mainMenu.findItem(R.id.connect_to_service);
+                            connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
+                        }
+                        break;
+                }
+
+            }
+        }
+    };
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
@@ -162,6 +207,8 @@ public class NavigationDrawer extends ActionBarActivity {
         if(savedInstanceState != null) {
             selectedGroupPosition = savedInstanceState.getInt(GROUP_POSITION_KEY);
             selectedChildPosition = savedInstanceState.getInt(CHILD_POSITION_KEY);
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgressDialog(
+                    getString(R.string.connecting_caption), getString(R.string.loading_data_msg));
         }
         selectItem(selectedGroupPosition,selectedChildPosition);
     }
@@ -177,6 +224,9 @@ public class NavigationDrawer extends ActionBarActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        if (progressDialog != null && progressDialog.isShowing()) {
+            outState.putBoolean(ContextVS.LOADING_KEY, true);
+        }
         outState.putInt(GROUP_POSITION_KEY,
                 ((PagerAdapterVS) mViewPager.getAdapter()).getSelectedGroupPosition());
         outState.putInt(CHILD_POSITION_KEY,
@@ -232,6 +282,7 @@ public class NavigationDrawer extends ActionBarActivity {
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
+        mainMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.navigation_drawer, menu);
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ||
@@ -268,6 +319,22 @@ public class NavigationDrawer extends ActionBarActivity {
                 startActivity(intent);
                 //showPublishDialog();
                 return true;
+            case R.id.vickets_menu_user_item:
+                intent = new Intent(this, BrowserVSActivity.class);
+                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuUserURL());
+                startActivity(intent);
+                return true;
+            case R.id.connect_to_service:
+                if(contextVS.getWebSocketSessionId() == null) {
+                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
+                            R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
+                } else {toggleWebSocketServiceConnection();}
+                return true;
+            case R.id.admin_vickets_menu_item:
+                intent = new Intent(this, BrowserVSActivity.class);
+                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuAdminURL());
+                startActivity(intent);
+                return true;
             case R.id.close_app:
                 finish();
                 System.exit(0);
@@ -282,6 +349,30 @@ public class NavigationDrawer extends ActionBarActivity {
         }
 
     };
+
+
+    private void toggleWebSocketServiceConnection() {
+        Log.d(TAG + ".toggleWebSocketServiceConnection(...)", "toggleWebSocketServiceConnection");
+        Intent startIntent = new Intent(contextVS, WebSocketService.class);
+        TypeVS typeVS;
+        if(contextVS.getWebSocketSessionId() != null) typeVS = TypeVS.WEB_SOCKET_CLOSE;
+        else typeVS = TypeVS.WEB_SOCKET_INIT;
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
+        startService(startIntent);
+    }
+
+    private void showProgressDialog(String title, String dialogMessage) {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setCancelable(true);
+            progressDialog.setTitle(title);
+            progressDialog.setMessage(dialogMessage);
+            progressDialog.setIndeterminate(true);
+            /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
+                @Override public void onCancel(DialogInterface dialog){}});*/
+        }
+        progressDialog.show();
+    }
 
     private void showPublishDialog(){
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.publish_document_lbl).
@@ -317,6 +408,20 @@ public class NavigationDrawer extends ActionBarActivity {
         Log.d(TAG + ".onActivityResult(...)", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         super.onActivityResult(requestCode, resultCode, data);
+    }
+    @Override public void onResume() {
+        Log.d(TAG + ".onResume() ", "");
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
+    }
+
+    @Override public void onPause() {
+        Log.d(TAG + ".onPause(...)", "");
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 
 }

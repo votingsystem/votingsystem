@@ -14,9 +14,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.glassfish.grizzly.ssl.SSLContextConfigurator;
-import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
-import org.glassfish.tyrus.client.ClientManager;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -35,25 +32,11 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
-import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
-import java.io.IOException;
-import java.net.URI;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.UUID;
-
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler;
-import javax.websocket.Session;
 
 import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.model.ContextVS.RESPONSEVS_KEY;

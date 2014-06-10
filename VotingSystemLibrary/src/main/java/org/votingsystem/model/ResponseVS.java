@@ -43,6 +43,7 @@ public class ResponseVS<T> implements Serializable {
     private JSONObject messageJSON;
     private String reason;
     private String metaInf;
+    private String url;
     private SMIMEMessageWrapper smimeMessage;
     private EventVS eventVS;
     private T data;
@@ -252,6 +253,14 @@ public class ResponseVS<T> implements Serializable {
         this.metaInf = metaInf;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public static ResponseVS parseWebSocketResponse(String message) {
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(message);
         ResponseVS result = new ResponseVS();
@@ -259,6 +268,8 @@ public class ResponseVS<T> implements Serializable {
         if(messageJSON.containsKey("operation")) result.setType(TypeVS.valueOf(messageJSON.getString("operation")));
         if(messageJSON.containsKey("status")) result.setStatusCode(Integer.valueOf(messageJSON.getString("status")));
         if(messageJSON.containsKey("message")) result.setMessage(messageJSON.getString("message"));
+        if(messageJSON.containsKey("URL")) result.setMessage(messageJSON.getString("URL"));
         return result;
     }
+
 }

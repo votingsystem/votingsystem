@@ -1,23 +1,30 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <item android:id="@+id/update_signers_info"
         android:orderInCategory="1"
         android:showAsAction="never"
         android:title="@string/update_signers_info_lbl"/>
 
-    <item android:id="@+id/admin_vickets_menu_item"
+
+    <item android:id="@+id/vickets_menu_user_item"
         android:orderInCategory="2"
+        android:showAsAction="never"
+        android:title="@string/vickets_menu_user_lbl"/>
+
+    <item android:id="@+id/admin_vickets_menu_item"
+        android:orderInCategory="3"
         android:showAsAction="never"
         android:title="@string/admin_vickets_menu_item"/>
 
 
     <item android:id="@+id/connect_to_service"
-        android:orderInCategory="3"
+        android:orderInCategory="4"
         android:showAsAction="never"
         android:title="@string/connect_to_service_lbl"/>
 
     <item android:id="@+id/test_menu_item"
-        android:orderInCategory="4"
+        android:orderInCategory="5"
         android:showAsAction="never"
         android:title="@string/test_lbl"/>
 

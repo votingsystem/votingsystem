@@ -14,19 +14,24 @@ import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
-import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
+import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.DateUtils;
@@ -38,6 +43,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -45,6 +51,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -71,6 +78,8 @@ public class AppContextVS extends Application {
 
     private State state = State.WITHOUT_CSR;
     private String vicketServerURL;
+    private String webSocketSessionId = null;
+    private String webSocketUserId = null;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
@@ -263,6 +272,39 @@ public class AppContextVS extends Application {
         return keyEntry;
     }
 
+    public ResponseVS decryptMessageVS(JSONObject documentToDecrypt) throws Exception {
+        ResponseVS responseVS = null;
+        JSONArray encryptedDataArray = documentToDecrypt.getJSONArray("encryptedDataList");
+        KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
+        X509Certificate cryptoTokenCert = (X509Certificate) keyEntry.getCertificateChain()[0];
+        PrivateKey privateKey = keyEntry.getPrivateKey();
+        String encryptedData = null;
+        for(int i = 0 ; i < encryptedDataArray.length(); i++){
+            JSONObject arrayItem = encryptedDataArray.getJSONObject(i);
+            Long serialNumber = Long.valueOf((String) arrayItem.get("serialNumber"));
+            if(serialNumber == cryptoTokenCert.getSerialNumber().longValue()) {
+                Log.d(TAG + ".decryptMessageVS(...) ", "Cert matched - serialNumber: " + serialNumber);
+                encryptedData = (String) arrayItem.get("encryptedData");
+            }
+        }
+        if(encryptedData != null) {
+            responseVS = Encryptor.decryptCMS(encryptedData.getBytes(), privateKey);
+            responseVS.setContentType(ContentTypeVS.JSON);
+            Map editDataMap = new HashMap();
+            editDataMap.put("operation", TypeVS.MESSAGEVS_EDIT.toString());
+            editDataMap.put("locale", Locale.getDefault().getLanguage().toLowerCase());
+            editDataMap.put("state", "CONSUMED");
+            editDataMap.put("messageId", documentToDecrypt.get("id"));
+            JSONObject messageToWebSocket = new JSONObject(editDataMap);
+            responseVS.setData(messageToWebSocket);
+        }
+        else {
+            Log.e(TAG + ".decryptMessageVS(...)", "Unable to decrypt from this device");
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, getString(R.string.decrypt_cert_notfound_msg));
+        }
+        return responseVS;
+    }
+
     public ResponseVS signMessage(String toUser, String textToSign, String subject) {
         ResponseVS responseVS = null;
         try {
@@ -270,15 +312,12 @@ public class AppContextVS extends Application {
             Log.d(TAG + ".signMessage(...) ", "subject: " + subject);
             KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
-                    keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
+                    (X509Certificate) keyEntry.getCertificateChain()[0],
+                    SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
             SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS, toUser,
                     textToSign, subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
-                    (AppContextVS)getApplicationContext());
-            responseVS = timeStamper.call();
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                responseVS.setCaption(getString(R.string.timestamp_service_error_caption));
-            } else responseVS.setSmimeMessage(timeStamper.getSmimeMessage());
+            //we can't timestamp here because of android.os.NetworkOnMainThreadException
+            responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
         } catch (Exception ex) {
             ex.printStackTrace();
             String message = ex.getMessage();
@@ -302,6 +341,7 @@ public class AppContextVS extends Application {
     }
 
     public void setVicketServer(VicketServer vicketServer) {
+        serverMap.put(vicketServer.getServerURL(), vicketServer);
         this.vicketServer = vicketServer;
     }
 
@@ -325,12 +365,58 @@ public class AppContextVS extends Application {
     }
 
     public void sendBroadcast(ResponseVS responseVS) {
-        Log.d(TAG + ".sendMessage(...) ", "statusCode: " + responseVS.getStatusCode() +
+        Log.d(TAG + ".sendBroadcast(...) ", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        if(responseVS.getTypeVS() != null) {
+            Intent intent = new Intent(responseVS.getServiceCaller());
+            intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            switch(responseVS.getTypeVS()) {
+                case INIT_VALIDATED_SESSION:
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        try {
+                            setWebSocketSessionId(responseVS.getMessageJSON().getString("sessionId"));
+                            setWebSocketUserId(responseVS.getMessageJSON().getString("userId"));
+                            if(responseVS.getMessageJSON().has("messageVSList")) {
+                                JSONArray messageVSList = responseVS.getMessageJSON().getJSONArray("messageVSList");
+                                if(messageVSList.length() > 0) {
+                                    String jsCommand = "javascript:updateMessageVSList('" + responseVS.getMessageJSON().toString() + "')";
+                                    intent = new Intent(this, BrowserVSActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.putExtra(ContextVS.JS_COMMAND_KEY, jsCommand);
+                                    intent.putExtra(ContextVS.URL_KEY, getVicketServer().getMessageVSInboxURL());
+                                    startActivity(intent);
+                                }
+                            }
+                        } catch(Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    break;
+                case WEB_SOCKET_CLOSE:
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        setWebSocketSessionId(null);
+                        setWebSocketUserId(null);
+                    }
+                    break;
+            }
+        }
     }
 
+    public String getWebSocketSessionId() {
+        return webSocketSessionId;
+    }
+
+    public void setWebSocketSessionId(String webSocketSessionId) {
+        this.webSocketSessionId = webSocketSessionId;
+    }
+
+    public String getWebSocketUserId() {
+        return webSocketUserId;
+    }
+
+    public void setWebSocketUserId(String webSocketUserId) {
+        this.webSocketUserId = webSocketUserId;
+    }
 }

@@ -21,7 +21,6 @@ import org.votingsystem.model.ResponseVS;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**

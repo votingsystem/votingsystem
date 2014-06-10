@@ -27,6 +27,7 @@ class WebSocketService {
     def messageVSService
 
     public void onTextMessage(Session session, String msg , boolean last) {
+        //log.debug("onTextMessage --- session id: ${session.getId()} - operation : ${msg} - last: ${last}")
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(msg);
         messageJSON.sessionId = session.getId()
         log.debug("onTextMessage --- session id: ${session.getId()} - operation : ${messageJSON?.operation} - last: ${last}")
@@ -94,6 +95,12 @@ class WebSocketService {
                                 messageJSON, sessionVS.userVS, locale)
                     } else processUserNotAuthenticatedResponse(messageJSON)
                     break;
+                case TypeVS.WEB_SOCKET_ADD_SESSION:
+                    if(sessionVS.userVS) {
+                        grailsApplication.mainContext.getBean("messageVSService").editMessage(
+                                messageJSON, sessionVS.userVS, locale)
+                    } else processUserNotAuthenticatedResponse(messageJSON)
+                    break;
                 case TypeVS.MESSAGEVS_GET:
                     if(sessionVS.userVS) {
                         messageJSON.userId = sessionVS.userVS.id
@@ -141,6 +148,7 @@ class WebSocketService {
     }
 
     public void processResponse(JSONObject messageJSON) {
+        log.debug("processResponse - messageJSON: ${messageJSON}")
         SessionVSHelper.getInstance().sendMessage(messageJSON.sessionId, messageJSON.toString());
     }
 

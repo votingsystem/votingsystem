@@ -376,8 +376,12 @@ class  SignatureVSService {
         }
         if(msg != null) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                 message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+
         MessageVS messageVS = new MessageVS(content: messageVSBytes, fromUserVS: fromUser, toUserVS: toUser,
-                senderMessageSMIME:messageSMIMEReq, type:TypeVS.MESSAGEVS, state: MessageVS.State.PENDING).save()
+                senderMessageSMIME:messageSMIMEReq, type:TypeVS.MESSAGEVS, state: MessageVS.State.PENDING)
+
+        if (!messageVS.save()) {messageVS.errors.each { log.error("messageVS - error - ${it}")}}
+
         log.debug("OK - MessageVS from user '${fromUser?.id}' to user '${toUser?.id}'")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[messageVS:messageVS, messageSMIMEReq:messageSMIMEReq])
     }

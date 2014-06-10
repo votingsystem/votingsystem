@@ -1,4 +1,4 @@
-<div id="navBarMainMenu" style="">
+<div id="navBarMainMenu" style="visibility:hidden;">
     <nav>
         <h2><i class="fa fa-reorder"></i>
             <span style="text-decoration: underline; font-size: 1.2em;">

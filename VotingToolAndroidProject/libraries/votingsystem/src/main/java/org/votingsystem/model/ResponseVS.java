@@ -50,6 +50,7 @@ public class ResponseVS<T> implements Parcelable {
     private String notificationMessage;
     private String message;
     private String serviceCaller;
+    private String url;
     private T data;
     private TypeVS typeVS;
     private SMIMEMessageWrapper smimeMessage;
@@ -106,10 +107,21 @@ public class ResponseVS<T> implements Parcelable {
         this.iconId = iconId;
     }
 
+    public ResponseVS(int statusCode, TypeVS typeVS) {
+        this.statusCode = statusCode;
+        this.typeVS = typeVS;
+    }
+
+
     public ResponseVS(int statusCode, String message, byte[] messageBytes) {
         this.statusCode = statusCode;
         this.message = message;
         this.messageBytes = messageBytes;
+    }
+
+    public ResponseVS(int statusCode, SMIMEMessageWrapper smimeMessage) {
+        this.statusCode = statusCode;
+        this.smimeMessage = smimeMessage;
     }
 
     public ResponseVS(int statusCode, String message) {
@@ -151,26 +163,24 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public String getMessage() {
-        String result = null;
-        try {
-            if(message == null && messageBytes != null) result = new String(messageBytes,
-                    ContextVS.UTF_8);
-            else result = message;
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            return result;
+        if(message == null && messageBytes != null) {
+            try {
+                message = new String(messageBytes, "UTF-8");
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
         }
+        return message;
     }
 
     public JSONObject getMessageJSON() {
+        if(messageJSON != null) return messageJSON;
         JSONObject result = null;
         try {
             String message = getMessage();
             if(message != null) result = new JSONObject(message);
         } catch (Exception ex) {
             ex.printStackTrace();
-            Log.e(TAG + ".getMessageJSON() ", ex.getMessage(), ex);
         }
         return result;
     }
@@ -387,6 +397,18 @@ public class ResponseVS<T> implements Parcelable {
         this.operation = operation;
     }
 
+    public void setMessageJSON(JSONObject messageJSON) {
+        this.messageJSON = messageJSON;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public static ResponseVS parseWebSocketResponse(String message) {
         try {
             JSONObject messageJSON = new JSONObject(message);
@@ -395,6 +417,7 @@ public class ResponseVS<T> implements Parcelable {
             if(messageJSON.has("operation")) result.setTypeVS(TypeVS.valueOf(messageJSON.getString("operation")));
             if(messageJSON.has("status")) result.setStatusCode(Integer.valueOf(messageJSON.getString("status")));
             if(messageJSON.has("message")) result.setMessage(messageJSON.getString("message"));
+            if(messageJSON.has("URL")) result.setMessage(messageJSON.getString("URL"));
             return result;
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -403,7 +426,4 @@ public class ResponseVS<T> implements Parcelable {
 
     }
 
-    public void setMessageJSON(JSONObject messageJSON) {
-        this.messageJSON = messageJSON;
-    }
 }

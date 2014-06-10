@@ -25,6 +25,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
+import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -58,17 +59,27 @@ public class BrowserVSActivity extends ActionBarActivity {
         Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                 "intent.getExtras(): " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        OperationVS operationVS = responseVS.getOperation();
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(TypeVS.MESSAGEVS_DECRYPT == typeVS) {
+                decryptMessageVS(operationVS);
+            } else launchSignAndSendService();
+        }
         else {
-            if(operationVS != null && ContentTypeVS.JSON == responseVS.getContentType()) {
-                sendMessageToBrowserApp(responseVS.getMessageJSON(),
-                        operationVS.getCallerCallback());
-            } else if(operationVS != null) {
-                sendMessageToBrowserApp(responseVS.getStatusCode(),
-                        responseVS.getNotificationMessage(), operationVS.getCallerCallback());
+            if(responseVS != null && TypeVS.MESSAGEVS_GET == responseVS.getTypeVS()) {
+                String jsCommand = "javascript:updateMessageVSList('" +
+                        responseVS.getMessageJSON().toString() + "')";
+                runOnUiThread(new Runnable() { @Override public void run() { showProgress(false, true); } });
+                webView.loadUrl(jsCommand);
+            } else if(responseVS.getOperation() != null) {
+                if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                    sendMessageToBrowserApp(responseVS.getMessageJSON(),
+                            responseVS.getOperation().getCallerCallback());
+                } else {
+                    sendMessageToBrowserApp(responseVS.getStatusCode(),
+                            responseVS.getNotificationMessage(), responseVS.getOperation().getCallerCallback());
+                }
             } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                     responseVS.getNotificationMessage());
         }
@@ -107,10 +118,10 @@ public class BrowserVSActivity extends ActionBarActivity {
         if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        loadUrl(viewerURL);
+        loadUrl(viewerURL, getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY));
     }
 
-    private void loadUrl(String viewerURL) {
+    private void loadUrl(String viewerURL, final String jsCommand) {
         Log.d(TAG + ".viewerURL(...)", " - viewerURL: " + viewerURL);
         webView = (WebView) findViewById(R.id.browservs_content);
         WebSettings webSettings = webView.getSettings();
@@ -123,6 +134,7 @@ public class BrowserVSActivity extends ActionBarActivity {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
+                if(jsCommand != null) webView.loadUrl(jsCommand);
                 showProgress(false, true);
             }
         });
@@ -134,12 +146,43 @@ public class BrowserVSActivity extends ActionBarActivity {
         try {
             operationVS = OperationVS.parse(appMessage);
             switch(operationVS.getTypeVS()) {
+                case MESSAGEVS_GET:
+                    sendMessageToWebSocketService(operationVS.getTypeVS(), operationVS.getDocument().toString());
+                    break;
+                case MESSAGEVS_DECRYPT:
+                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
+                            getString(R.string.enter_pin_to_decrypt_msg), false, TypeVS.MESSAGEVS_DECRYPT);
+                    break;
                 default:
                     processSignatureOperation(operationVS);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void decryptMessageVS(OperationVS operationVS)  {
+        Log.d(TAG + ".decryptMessageVS(...) ", "decryptMessageVS");
+        ResponseVS responseVS = null;
+        try {
+            responseVS = contextVS.decryptMessageVS(operationVS.getDocumentToDecrypt());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                sendMessageToWebSocketService(TypeVS.WEB_SOCKET_MESSAGE,
+                        ((JSONObject)responseVS.getData()).toString());
+                sendMessageToBrowserApp(responseVS.getMessageJSON(), operationVS.getCallerCallback());
+            } else Log.e(TAG + ".decryptMessageVS(...) ", "ERROR decrypting message");
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
+        Log.d(TAG + ".sendMessageToWebSocketService(...)", "messageTypeVS: " + messageTypeVS.toString());
+        Intent startIntent = new Intent(contextVS, WebSocketService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
+        startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
+        runOnUiThread(new Runnable() { @Override public void run() { showProgress(true, true); } });
+        startService(startIntent);
     }
 
     @Override public void onBackPressed() {
@@ -253,6 +296,8 @@ public class BrowserVSActivity extends ActionBarActivity {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
 
     @Override public void onPause() {

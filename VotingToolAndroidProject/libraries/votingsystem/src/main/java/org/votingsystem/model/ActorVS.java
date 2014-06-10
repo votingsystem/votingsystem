@@ -37,6 +37,19 @@ public class ActorVS implements java.io.Serializable {
         this.webSocketURL = webSocketURL;
     }
 
+    public String getMessageVSInboxURL() {
+        return getServerURL() + "/messageVS/inbox";
+    }
+
+    public String getMenuUserURL() {
+        return getServerURL() + "/app/user?menu=user";
+    }
+
+    public String getMenuAdminURL() {
+        return getServerURL() + "/app/admin?menu=admin";
+    }
+
+
     public enum Type {CONTROL_CENTER, ACCESS_CONTROL, VICKETS, TIMESTAMP_SERVER;}
 
     public enum State { SUSPENDED, RUNNING, PAUSED;}

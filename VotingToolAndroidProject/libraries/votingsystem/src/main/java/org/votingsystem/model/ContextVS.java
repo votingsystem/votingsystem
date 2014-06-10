@@ -39,7 +39,7 @@ public class ContextVS {
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
     public static final String ANDROID_PROVIDER                = "AndroidOpenSSL";
-
+    public static final String WEB_SOCKET_BROADCAST_ID         = "WEB_SOCKET_BROADCAST_ID";
 
 
     //Intent keys
@@ -47,6 +47,7 @@ public class ContextVS {
     public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";
     public static final String PIN_KEY = "PIN";
     public static final String URL_KEY = "URL";
+    public static final String JS_COMMAND_KEY = "JS_COMMAND_KEY";
     public static final String FORM_DATA_KEY = "FORM_DATA";
     public static final String NIF_KEY = "NIF";
     public static final String USER_KEY = "USER_KEY";

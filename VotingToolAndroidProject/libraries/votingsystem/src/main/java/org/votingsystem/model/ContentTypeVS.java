@@ -20,7 +20,7 @@ public enum ContentTypeVS {
 
     MULTIPART_SIGNED("multipart/signed", null),
     MULTIPART_ENCRYPTED("multipart/encrypted", null),
-    MESSAGEVS("application/messagevs", "vs"),
+    MESSAGEVS("application/pkcs7-messagevs", "vs"),
     PDF("application/pdf", "pdf"),
     PDF_SIGNED_AND_ENCRYPTED("application/pdf;application/pkcs7-signature;application/pkcs7-mime", "pdf"),
     PDF_SIGNED("application/pdf;application/pkcs7-signature", "pdf"),

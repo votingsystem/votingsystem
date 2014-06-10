@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.bouncycastle2.util.encoders.Base64;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.model.ActorVS;
@@ -16,9 +19,17 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.signature.smime.CMSUtils;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -39,7 +50,14 @@ public class SignAndSendService extends IntentService {
         TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         OperationVS operationVS = (OperationVS)arguments.getSerializable(ContextVS.OPERATIONVS_KEY);
         if(operationVS != null) {
-            processOperation(operationVS, serviceCaller);
+            switch(operationVS.getTypeVS()) {
+                case MESSAGEVS:
+                    sendMessageVS(operationVS, serviceCaller);
+                    break;
+                default:
+                    processOperation(operationVS, serviceCaller);
+            }
+
             return;
         }
         ResponseVS responseVS = null;
@@ -152,8 +170,8 @@ public class SignAndSendService extends IntentService {
     }
 
     private void processOperation(OperationVS operation, String serviceCaller) {
-        Log.d(TAG + ".processOperation(...) ", "operation" + operation.getTypeVS() + " - serviceCaller: " +
-                serviceCaller);
+        Log.d(TAG + ".processOperation(...) ", "operation: " + operation.getTypeVS() +
+                " - serviceCaller: " + serviceCaller);
         ActorVS targetServer = getActorVS(operation.getServerURL());
         ResponseVS responseVS = null;
         if(targetServer == null) {
@@ -170,6 +188,61 @@ public class SignAndSendService extends IntentService {
         contextVS.sendBroadcast(responseVS);
     }
 
+    private void sendMessageVS(OperationVS operationVS, String serviceCaller){
+        Log.d(TAG + ".sendMessageVS(...) ", "operationVS: " + operationVS.getTypeVS());
+        //operationVS.getContentType(); -> MessageVS
+        ResponseVS responseVS = null;
+        ActorVS targetServer = getActorVS(operationVS.getServerURL());
+        List signedDataList = new ArrayList();
+        List encryptedDataList = new ArrayList();
+        try {
+            JSONArray targetCertArray = operationVS.getTargetCertArray();
+            for(int i = 0; i < targetCertArray.length(); i++) {
+                JSONObject targetCertItem = targetCertArray.getJSONObject(i);
+                X509Certificate receiverCert = CertUtil.fromPEMToX509Cert((targetCertItem.getString("pemCert")).getBytes());
+                JSONObject documentToEncrypt = operationVS.getDocumentToEncrypt();
+                responseVS = Encryptor.encryptToCMS(documentToEncrypt.toString().getBytes(), receiverCert);
+                String encryptedMessageStr = new String(responseVS.getMessageBytes(), "UTF-8");
+                String encryptedMessageHash = CMSUtils.getHashBase64(encryptedMessageStr, ContextVS.VOTING_DATA_DIGEST);
+                Map signedMap = new HashMap();
+                signedMap.put("serialNumber", targetCertItem.getString("serialNumber"));
+                signedMap.put("encryptedMessageHashBase64", encryptedMessageHash);
+                signedDataList.add(signedMap);
+
+                Map encryptedMap = new HashMap();
+                encryptedMap.put("serialNumber", targetCertItem.getString("serialNumber"));
+                encryptedMap.put("encryptedData", encryptedMessageStr);
+                encryptedDataList.add(encryptedMap);
+            }
+            operationVS.getDocumentToSignJSON().put("encryptedDataInfo", new JSONArray(signedDataList));
+            responseVS = contextVS.signMessage(targetServer.getNameNormalized(),
+                    operationVS.getDocumentToSignJSON().toString(), operationVS.getSignedMessageSubject());
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                responseVS.setOperation(operationVS);
+            } else {
+                SMIMEMessageWrapper smimeMessage = responseVS.getSmimeMessage();
+                MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
+                        targetServer.getTimeStampServiceURL(), contextVS);
+                responseVS = timeStamper.call();
+                smimeMessage = timeStamper.getSmimeMessage();
+                String base64ResultDigest = new String(Base64.encode(smimeMessage.getBytes()));
+                operationVS.getDocumentToSignJSON().put("smimeMessage", base64ResultDigest);
+                operationVS.getDocumentToSignJSON().put("encryptedDataList", new JSONArray(encryptedDataList));
+                responseVS = HttpHelper.sendData(operationVS.getDocumentToSignJSON().toString().getBytes(),
+                        ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS =
+                        new ResponseVS(ResponseVS.SC_OK, getString(R.string.messagevs_send_ok_msg));
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+        } finally {
+            responseVS.setOperation(operationVS);
+            responseVS.setServiceCaller(serviceCaller);
+            responseVS.setTypeVS(operationVS.getTypeVS());
+            contextVS.sendBroadcast(responseVS);
+        }
+    }
 
     private ResponseVS sendSMIME(ActorVS targetServer, OperationVS operationVS, String... header) {
         Log.d(TAG + ".sendSMIME(...) ", "sendSMIME");
@@ -177,7 +250,7 @@ public class SignAndSendService extends IntentService {
         String serviceURL = operationVS.getServiceURL();
         ContentTypeVS contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED;
         String messageSubject = operationVS.getSignedMessageSubject();
-        String signatureContent = operationVS.getSignedContent().toString();
+        String signatureContent = operationVS.getDocumentToSignJSON().toString();
         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                 contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
                 contentType, messageSubject, targetServer.getCertificate(),

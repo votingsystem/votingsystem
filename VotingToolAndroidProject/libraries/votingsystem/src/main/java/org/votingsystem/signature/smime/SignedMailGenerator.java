@@ -50,7 +50,7 @@ public class SignedMailGenerator {
     private static Properties props = System.getProperties();
     private static Session session = Session.getDefaultInstance(props, null);
 
-    public SignedMailGenerator(PrivateKey key, Certificate[] chain, 
+    public SignedMailGenerator(PrivateKey key, Certificate[] chain,
     		String signatureMechanism, String provider) throws Exception {
         Log.d(TAG + ".SignedMailGenerator(...)", " - signatureMechanism: " + signatureMechanism);
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
@@ -71,6 +71,30 @@ public class SignedMailGenerator {
                 signatureMechanism, key, (X509Certificate)chain[0]);
         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
         // add our pool of certs and cerls (if any) to go with the signature
+        smimeSignedGenerator.addCertificates(certs);
+    }
+
+    public SignedMailGenerator(PrivateKey key, X509Certificate x509Cert,
+                   String signatureMechanism, String provider) throws Exception {
+        Log.d(TAG + ".SignedMailGenerator(...)", " - signatureMechanism: " + signatureMechanism);
+        ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
+        SMIMECapabilityVector caps = new SMIMECapabilityVector();
+        //create some smime capabilities in case someone wants to respond
+        caps.addCapability(SMIMECapability.dES_EDE3_CBC);
+        caps.addCapability(SMIMECapability.rC2_CBC, 128);
+        caps.addCapability(SMIMECapability.dES_CBC);
+        signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
+        smimeSignedGenerator = new SMIMESignedGenerator();
+        SimpleSignerInfoGeneratorBuilder signerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
+
+        signerInfoGeneratorBuilder.setProvider(provider);
+        signerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
+        SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
+                signatureMechanism, key, x509Cert);
+        smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
+        // add our pool of certs and cerls (if any) to go with the signature
+        List certList = Arrays.asList(x509Cert);
+        Store certs = new JcaCertStore(certList);
         smimeSignedGenerator.addCertificates(certs);
     }
     

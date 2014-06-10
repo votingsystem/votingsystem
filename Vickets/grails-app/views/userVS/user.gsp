@@ -19,22 +19,20 @@
             <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
             </div>
 
-            <g:if test="${"admin".equals(params.menu)}">
-                <div id="adminButtonsDiv" class="">
-                    <button id="sendMessageVSButton" type="submit" class="btn btn-warning" onclick="showMessageVSDialog();"
-                            style="margin:10px 20px 0px 0px;">
-                        <g:message code="sendMessageVSLbl"/> <i class="fa fa fa-envelope-square"></i>
-                    </button>
-                    <button id="blockUserVSButton" type="submit" class="btn btn-warning"
-                            style="margin:10px 20px 0px 0px;" onclick="showBlockUserVSDialog('${uservsMap.name}', '${uservsMap.id}')">
-                        <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
-                    </button>
-                    <button id="makeDepositButton" type="submit" class="btn btn-warning" onclick="makeDepositDialog('${uservsMap.id}');"
-                            style="margin:10px 20px 0px 0px;">
-                        <g:message code="makeDepositLbl"/> <i class="fa fa fa-money"></i>
-                    </button>
-                </div>
-            </g:if>
+            <div id="adminButtonsDiv" class="" style="">
+                <button id="sendMessageVSButton" type="submit" class="btn btn-warning" onclick="showMessageVSDialog();"
+                        style="margin:10px 20px 0px 0px;display:none;">
+                    <g:message code="sendMessageVSLbl"/> <i class="fa fa fa-envelope-square"></i>
+                </button>
+                <button id="blockUserVSButton" type="submit" class="btn btn-warning"
+                        style="margin:10px 20px 0px 0px;display:none;" onclick="showBlockUserVSDialog('${uservsMap.name}', '${uservsMap.id}')">
+                    <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
+                </button>
+                <button id="makeDepositButton" type="submit" class="btn btn-warning" onclick="makeDepositDialog('${uservsMap.id}');"
+                        style="margin:10px 20px 0px 0px;display:none;">
+                    <g:message code="makeDepositLbl"/> <i class="fa fa fa-money"></i>
+                </button>
+            </div>
 
             <h3><div class="pageHeader text-center"> ${uservsMap?.name}</div></h3>
 
@@ -47,10 +45,6 @@
             <g:if test="${"user".equals(params.menu)}">
                 <g:if test="${UserVS.State.ACTIVE.toString().equals(uservsMap?.state)}">
                     <div class="row text-right">
-                        <button id="subscribeButton" type="submit" class="btn btn-default btn-lg" onclick=""
-                                style="margin:15px 20px 15px 0px;">
-                            <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
-                        </button>
                     </div>
                 </g:if>
             </g:if>
@@ -79,6 +73,17 @@
         <g:if test="${UserVS.State.ACTIVE.toString().equals(uservsMap?.state)}">
 
         </g:if>
+
+
+        <g:if test="${"admin".equals(params.menu)}">
+            enableAdminMenu()
+        </g:if>
+        <g:elseif test="${"user".equals(params.menu)}">
+            enableUserMenu()
+        </g:elseif>
+        <g:elseif test="${"superadmin".equals(params.menu)}">
+
+        </g:elseif>
         <g:if test="${UserVS.State.PENDING.toString().equals(uservsMap?.state)}">
             $(".pageHeader").css("color", "#fba131")
             $("#messagePanel").addClass("groupvsPendingBox");
@@ -94,6 +99,14 @@
             $("#adminButtonsDiv").css("display", "none")
         </g:if>
     });
+
+    function enableAdminMenu() {
+    }
+
+    function enableUserMenu() {
+        document.getElementById("sendMessageVSButton").style.display = 'inline'
+        document.getElementById("makeDepositButton").style.display = 'inline'
+    }
 
 
     function showMessageVSDialog() {

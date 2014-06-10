@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.Locale;
 
 /**
  * @author jgzornoza
@@ -33,13 +34,17 @@ public class OperationVS implements Serializable{
     private String serverURL;
     private String receiverName;
     private String signedMessageSubject;
-    private transient JSONObject signedContent;
     private EventVS eventVS;
     private String sessionId;
     private Uri uriData;
     private String[] args;
+    private transient JSONArray targetCertArray;
+    private transient JSONObject signedContent;
+    private transient JSONObject documentToEncrypt;
+    private transient JSONObject documentToDecrypt;
+    private transient JSONObject document;
 
-    
+
     public OperationVS() {}
     
     public OperationVS(int statusCode) {
@@ -171,7 +176,19 @@ public class OperationVS implements Serializable{
             operation.setEventVS(eventVS);
         }  
         if (operationJSON.has("signedContent"))
-             operation.setSignedContent(operationJSON.getJSONObject("signedContent"));
+             operation.setDocumentToSignJSON(operationJSON.getJSONObject("signedContent"));
+        if (operationJSON.has("documentToEncrypt"))
+            operation.setDocumentToEncrypt(operationJSON.getJSONObject("documentToEncrypt"));
+        if (operationJSON.has("documentToDecrypt"))
+            operation.setDocumentToDecrypt(operationJSON.getJSONObject("documentToDecrypt"));
+        if (operationJSON.has("document")) {
+            operation.setDocument(operationJSON.getJSONObject("document"));
+            operation.getDocument().put("locale", Locale.getDefault().getLanguage().toLowerCase());
+        }
+        if (operationJSON.has("targetCertList")) {
+            operation.setTargetCertArray(operationJSON.getJSONArray("targetCertList"));
+        }
+
         if (operationJSON.has("receiverName")) {
             operation.setReceiverName(operationJSON.getString("receiverName"));
         }
@@ -224,11 +241,11 @@ public class OperationVS implements Serializable{
         this.caption = caption;
     }
 
-    public JSONObject getSignedContent() {
+    public JSONObject getDocumentToSignJSON() {
         return signedContent;
     }
 
-    public void setSignedContent(JSONObject signedContent) {
+    public void setDocumentToSignJSON(JSONObject signedContent) {
         this.signedContent = signedContent;
     }
 
@@ -261,6 +278,14 @@ public class OperationVS implements Serializable{
         try {
             if(signedContent != null) s.writeObject(signedContent.toString());
             else s.writeObject(null);
+            if(documentToEncrypt != null) s.writeObject(documentToEncrypt.toString());
+            else s.writeObject(null);
+            if(documentToDecrypt != null) s.writeObject(documentToDecrypt.toString());
+            else s.writeObject(null);
+            if(document != null) s.writeObject(document.toString());
+            else s.writeObject(null);
+            if(targetCertArray != null) s.writeObject(targetCertArray.toString());
+            else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -269,8 +294,16 @@ public class OperationVS implements Serializable{
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException,
             JSONException {
         s.defaultReadObject();
-        String signedContentStr = (String) s.readObject();
-        if(signedContentStr != null) signedContent = new JSONObject(signedContentStr);
+        String contentStr = (String) s.readObject();
+        if(contentStr != null) signedContent = new JSONObject(contentStr);
+        contentStr = (String) s.readObject();
+        if(contentStr != null) documentToEncrypt = new JSONObject(contentStr);
+        contentStr = (String) s.readObject();
+        if(contentStr != null) documentToDecrypt = new JSONObject(contentStr);
+        contentStr = (String) s.readObject();
+        if(contentStr != null) document = new JSONObject(contentStr);
+        contentStr = (String) s.readObject();
+        if(contentStr != null) targetCertArray = new JSONArray(contentStr);
     }
 
 
@@ -280,6 +313,38 @@ public class OperationVS implements Serializable{
 
     public void setCallerCallback(String callerCallback) {
         this.callerCallback = callerCallback;
+    }
+
+    public JSONObject getDocument() {
+        return document;
+    }
+
+    public void setDocument(JSONObject document) {
+        this.document = document;
+    }
+
+    public JSONObject getDocumentToEncrypt() {
+        return documentToEncrypt;
+    }
+
+    public void setDocumentToEncrypt(JSONObject documentToEncrypt) {
+        this.documentToEncrypt = documentToEncrypt;
+    }
+
+    public JSONObject getDocumentToDecrypt() {
+        return documentToDecrypt;
+    }
+
+    public void setDocumentToDecrypt(JSONObject documentToDecrypt) {
+        this.documentToDecrypt = documentToDecrypt;
+    }
+
+    public JSONArray getTargetCertArray() {
+        return targetCertArray;
+    }
+
+    public void setTargetCertArray(JSONArray targetCertArray) {
+        this.targetCertArray = targetCertArray;
     }
 }
 

@@ -161,22 +161,29 @@ public class Encryptor {
         return encryptedPart;
     }
 
-    public static byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate reciCert)
-            throws Exception {
-        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
-        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(reciCert).
-                setProvider(ContextVS.PROVIDER));
-        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-        OutputStream out = dataStreamGen.open(bOut,
-                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
-                        setProvider(ContextVS.PROVIDER).build());
-        out.write(dataToEncrypt);
-        out.close();
-        byte[] result = bOut.toByteArray();
-        byte[] base64EncryptedDataBytes = Base64.encode(result);
-        return base64EncryptedDataBytes;
+    public static ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) {
+        ResponseVS responseVS = null;
+        try {
+            CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
+            dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert).
+                    setProvider(ContextVS.PROVIDER));
+            ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+            OutputStream out = dataStreamGen.open(bOut,
+                    new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
+                            setProvider(ContextVS.PROVIDER).build());
+            out.write(dataToEncrypt);
+            out.close();
+            byte[] result = bOut.toByteArray();
+            byte[] base64EncryptedDataBytes = Base64.encode(result);
+            responseVS = new ResponseVS(ResponseVS.SC_OK, base64EncryptedDataBytes, null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+        } finally {
+            return responseVS;
+        }
     }
-	
+
     /**
     * Method to decrypt SMIME signed messages
     */
@@ -302,7 +309,39 @@ public class Encryptor {
         }
         return result;
     }
-	
+
+    public static ResponseVS decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) {
+        Log.d(TAG + ".decryptCMS()", "decryptCMS");
+        try {
+            byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+            CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+            RecipientInformationStore  recipients = ep.getRecipientInfos();
+            Collection                 c = recipients.getRecipients();
+            Iterator                   it = c.iterator();
+            byte[] result = null;
+            if (it.hasNext()) {
+                RecipientInformation   recipient = (RecipientInformation)it.next();
+                //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+                CMSTypedStream recData = recipient.getContentStream(
+                        new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.ANDROID_PROVIDER));
+                InputStream           dataStream = recData.getContentStream();
+                ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+                byte[]                buf = new byte[4096];
+                int len = 0;
+                while ((len = dataStream.read(buf)) >= 0) {
+                    dataOut.write(buf, 0, len);
+                }
+                dataOut.close();
+                result = dataOut.toByteArray();
+                return new ResponseVS(ResponseVS.SC_OK, result, null);
+            } else {
+                return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, "encryptedMessageWithoutRecipientsErrorMsg");
+            }
+        } catch(Exception ex) {
+            return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
+        }
+    }
+
 	public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
             PublicKey publicKey, PrivateKey receiverPrivateKey) throws Exception {
 		byte[] messageBytes = null;

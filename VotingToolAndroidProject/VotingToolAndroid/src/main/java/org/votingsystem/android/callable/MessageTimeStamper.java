@@ -27,16 +27,24 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
 	public static final String TAG = MessageTimeStamper.class.getSimpleName();
     
     private SMIMEMessageWrapper smimeMessage;
-    private static final int numMaxAttempts = 3;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
     private AppContextVS contextVS;
+    private String timeStampServiceURL;
       
     public MessageTimeStamper (SMIMEMessageWrapper smimeMessage,
             AppContextVS context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
         this.contextVS = context;
+    }
+
+    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage, String timeStampServiceURL,
+               AppContextVS context) throws Exception {
+        this.smimeMessage = smimeMessage;
+        this.timeStampRequest = smimeMessage.getTimeStampRequest();
+        this.contextVS = context;
+        this.timeStampServiceURL = timeStampServiceURL;
     }
     
     public MessageTimeStamper (TimeStampRequest timeStampRequest,
@@ -55,32 +63,20 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     
         
     @Override public ResponseVS call() throws Exception {
-        //byte[] base64timeStampRequest = Base64.encode(timeStampRequest.getEncoded());        
-        AtomicInteger numAttemp = new AtomicInteger(0);
-        AtomicBoolean done = new AtomicBoolean(false);
-        ResponseVS responseVS = null;
-        while(!done.get()) {
-        	String timeStampServiceURL = contextVS.getAccessControl().
-                    getTimeStampServiceURL();
-            responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(),
-                    ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                timeStampToken= new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
-                X509Certificate timeStampCert = contextVS.getTimeStampCert();
+        //byte[] base64timeStampRequest = Base64.encode(timeStampRequest.getEncoded());
+        if(timeStampServiceURL == null) timeStampServiceURL =
+                contextVS.getAccessControl().getTimeStampServiceURL();
+        ResponseVS responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(),
+                ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            timeStampToken= new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
+            X509Certificate timeStampCert = contextVS.getTimeStampCert();
                 /* -> Android project config problem
                  * SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
                 timeStampToken.validate(timeStampSignerInfoVerifier);*/
-                timeStampToken.validate(timeStampCert, ContextVS.PROVIDER);/**/
-                if(smimeMessage != null) smimeMessage.setTimeStampToken(timeStampToken);
-                done.set(true);
-            } else if(ResponseVS.SC_ERROR_TIMESTAMP == responseVS.getStatusCode()) {
-                if(numAttemp.getAndIncrement() < numMaxAttempts) {
-                	Log.e(TAG + ".call(...)", "Error getting timestamp - attemp: " + numAttemp.get());
-                } else done.set(true);
-            } else {
-            	done.set(true);
-            }
+            timeStampToken.validate(timeStampCert, ContextVS.PROVIDER);/**/
+            if(smimeMessage != null) smimeMessage.setTimeStampToken(timeStampToken);
         }
         return responseVS;
     }

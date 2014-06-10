@@ -26,10 +26,8 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.contentprovider.Utils;
 import org.votingsystem.android.service.VicketService;
-import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.CurrencyData;
 import org.votingsystem.model.CurrencyVS;
@@ -59,7 +57,7 @@ public class VicketUserInfoFragment extends Fragment {
     private String subject;
     private String receptor;
     private View rootView;
-    private String broadCastId = null;
+    private String broadCastId = VicketUserInfoFragment.class.getSimpleName();
     private AppContextVS contextVS;
     private Button request_button;
     private View progressContainer;
@@ -70,6 +68,7 @@ public class VicketUserInfoFragment extends Fragment {
     private TextView time_remaining_info;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
+    private Menu fragmentMenu;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -114,6 +113,23 @@ public class VicketUserInfoFragment extends Fragment {
                     } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
                     break;
+                case INIT_VALIDATED_SESSION:
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        if(fragmentMenu != null) {
+                            MenuItem connectToServiceMenuItem = fragmentMenu.findItem(R.id.connect_to_service);
+                            connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
+                        }
+
+                    }
+                    break;
+                case WEB_SOCKET_CLOSE:
+                    if(fragmentMenu != null) {
+                        MenuItem connectToServiceMenuItem = fragmentMenu.findItem(R.id.connect_to_service);
+                        connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
+                    }
+                    break;
+                default: showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        responseVS.getNotificationMessage());
             }
             showProgress(false, false);
         }
@@ -131,7 +147,6 @@ public class VicketUserInfoFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        broadCastId = VicketUserInfoFragment.class.getSimpleName();
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
@@ -247,25 +262,15 @@ public class VicketUserInfoFragment extends Fragment {
         menuInflater.inflate(R.menu.vicket_user_info, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
+        fragmentMenu = menu;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.update_signers_info:
-
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);
-                return true;
-            case R.id.connect_to_service:
-                Intent startIntent = new Intent(contextVS, WebSocketService.class);
-                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
-                getActivity().startService(startIntent);
-                return true;
-            case R.id.admin_vickets_menu_item:
-                Intent intent = new Intent(getActivity(), BrowserVSActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, "http://vickets/Vickets/app/admin?menu=admin");
-                startActivityForResult(intent, ADMIN_ACCESS_CONTROL);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -364,6 +369,9 @@ public class VicketUserInfoFragment extends Fragment {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
+
     }
 
     @Override public void onPause() {

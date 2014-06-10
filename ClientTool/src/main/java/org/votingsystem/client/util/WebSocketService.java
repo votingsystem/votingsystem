@@ -246,7 +246,7 @@ public class WebSocketService extends Service<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
             Map documentToSignMap = new HashMap<>();
-            documentToSignMap.put("operation", TypeVS.INIT_VALIDATED_SESSION);
+            documentToSignMap.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
             documentToSignMap.put("UUID", UUID.randomUUID().toString());
             ResponseVS responseVS = null;
             try {

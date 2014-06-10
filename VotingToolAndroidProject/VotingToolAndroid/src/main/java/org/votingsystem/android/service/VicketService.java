@@ -198,10 +198,8 @@ public class VicketService extends IntentService {
             }
             Map requestMap = new HashMap();
             requestMap.put("vicketCancellationList", cancellationList);
-            byte[] messageToSend = Encryptor.encryptToCMS(new JSONObject(requestMap).toString().getBytes(),
-                    vicketServer.getCertificate());
-            responseVS = HttpHelper.sendData(messageToSend, ContentTypeVS.JSON_ENCRYPTED,
-                    vicketServer.getVicketBatchCancellationServiceURL());
+            responseVS = HttpHelper.sendData(new JSONObject(requestMap).toString().getBytes(),
+                    ContentTypeVS.JSON, vicketServer.getVicketBatchCancellationServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
             String message = ex.getMessage();
@@ -275,9 +273,7 @@ public class VicketService extends IntentService {
                 mapToSend.put("vickets", smimeVicketList);
                 mapToSend.put("publicKey", publicKeyStr);
                 String textToSign = new JSONObject(mapToSend).toString();
-                byte[] messageToSend = Encryptor.encryptToCMS(textToSign.getBytes(),
-                        vicketServer.getCertificate());
-                responseVS = HttpHelper.sendData(messageToSend, ContentTypeVS.JSON_ENCRYPTED,
+                responseVS = HttpHelper.sendData(textToSign.getBytes(), ContentTypeVS.JSON,
                         vicketServer.getVicketBatchServiceURL());
                 if(responseVS.getContentType()!= null && responseVS.getContentType().isEncrypted()) {
                     decryptedMessageBytes = Encryptor.decryptCMS(keyPair.getPrivate(),
