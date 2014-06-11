@@ -16,6 +16,8 @@ import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.util.encoders.Base64
+import org.postgresql.util.PSQLException
+import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CMSUtils
@@ -323,6 +325,7 @@ class  SignatureVSService {
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
                     responseVS.setUserVS(anonymousSigner)
                 } else {
+
                     responseVS = subscriptionVSService.checkUser(userVS, locale)
                     if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
                     if(responseVS.userVS.nif.equals(signerNIF)) checkedSigner = responseVS.userVS;
@@ -333,7 +336,11 @@ class  SignatureVSService {
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                         metaInf: MetaInfMsg.getExceptionMsg(methodName, ex),
                         message: messageSource.getMessage('unknownCAErrorMsg', null, locale))
-			} catch (Exception ex) {
+			} catch (DataAccessException ex) {
+                log.error(ex.getMessage(), ex)
+                return new ResponseVS(message:messageSource.getMessage('paramsErrorMsg', null, locale),
+                        statusCode:ResponseVS.SC_ERROR, metaInf: MetaInfMsg.getExceptionMsg(methodName, ex))
+            } catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
 				return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR,
                         metaInf: MetaInfMsg.getExceptionMsg(methodName, ex))

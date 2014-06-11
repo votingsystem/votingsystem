@@ -50,12 +50,10 @@ class TransactionController {
         int totalTransactions = 0;
         TransactionVS.withTransaction {
             if(params.searchText || params.searchFrom || params.searchTo || params.transactionvsType) {
-                CurrencyVS currency = null
                 TransactionVS.Type transactionType = null
                 BigDecimal amount = null
                 Date dateFrom = null
                 Date dateTo = null
-                try {currency = CurrencyVS.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
                 try {
                     if(params.transactionvsType) transactionType = TransactionVS.Type.valueOf(params.transactionvsType)
                     else transactionType = TransactionVS.Type.valueOf(params.searchText.toUpperCase())} catch(Exception ex) {}
@@ -67,10 +65,11 @@ class TransactionController {
                 transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
                         sort:sortParam?.key, order:sortParam?.value) {
                     or {
-                        if(currency) eq("currency", currency)
+
                         if(transactionType) eq("type", transactionType)
                         if(amount) eq("amount", amount)
                         ilike('subject', "%${params.searchText}%")
+                        ilike('currencyCode', "%${params.searchText}%")
                     }
                     and {
                         if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}

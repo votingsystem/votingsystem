@@ -4,7 +4,6 @@ import com.sun.org.apache.xerces.internal.impl.dv.util.Base64
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.model.ContextVS
-import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.UserVS
 import org.votingsystem.vicket.model.TransactionVS
@@ -117,7 +116,7 @@ class AuditingService {
             Map userTransactionMap = transactionVSService.getUserInfoMap(userVS, weekFromCalendar)
             File userTransactionsFile = new File("${basePath}${userSubPath}/transactions.json")
             userTransactionsFile.setBytes("${userTransactionMap as JSON}".getBytes("UTF-8"))
-            Map euroDataMap = userTransactionMap?.get(lapsePath)?.get(CurrencyVS.EURO.toString())
+            Map euroDataMap = userTransactionMap?.get(lapsePath)?.get(Currency.getInstance("EUR").getCurrencyCode())
 
             List transactionList = euroDataMap.transactionList
             transactionList.each {

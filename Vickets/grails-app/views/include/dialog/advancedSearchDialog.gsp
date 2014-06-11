@@ -17,7 +17,7 @@
                         <div  class="" style="display:block; margin: 0 0 10px 0;">
                             <div class="" style="display: table;">
                                 <div style="display:table-cell;vertical-align: middle;">
-                                    <label style="width:45px;"><g:message code="fromLbl"/></label>
+                                    <label style="width:50px;"><g:message code="fromLbl"/></label>
                                 </div>
                                 <div style="display:table-cell; vertical-align: middle;">
                                     <votingSystem:datePicker id="advancedSearchFrom"></votingSystem:datePicker>
@@ -28,7 +28,7 @@
                             </div>
                             <div class="" style="display: table; margin: 10px 0 0 0;">
                                 <div style="display:table-cell;vertical-align: middle;">
-                                    <label style="width:45px;"><g:message code="toLbl"/></label>
+                                    <label style="width:50px;"><g:message code="toLbl"/></label>
                                 </div>
                                 <div style="display:table-cell; vertical-align: middle;">
                                     <votingSystem:datePicker id="advancedSearchTo"></votingSystem:datePicker>

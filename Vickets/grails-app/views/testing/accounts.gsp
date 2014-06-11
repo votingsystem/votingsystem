@@ -20,8 +20,11 @@
 	<div style="display:none;">
 
 	</div>
+    <g:include view="/include/dialog/resultDialog.gsp"/>
 	</body>
 	<asset:script>
+
+        $(function() { })
 
         function initTransaction(transactionSubject) {
             var encodedIBAN = encodeURIComponent("")

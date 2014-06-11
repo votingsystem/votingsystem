@@ -47,15 +47,15 @@ class VicketService {
                     "operationMismatchErrorMsg", [TypeVS.VICKET_REQUEST.toString(), operation.toString()].toArray(),
                     locale));
 
-            CurrencyVS requestCurrency = CurrencyVS.valueOf(dataRequestJSON.currency)
+            Currency requestCurrency = Currency.getInstance(dataRequestJSON.currency)
 
             Calendar mondayLapse = DateUtils.getMonday(Calendar.getInstance())
             String dirPath = DateUtils.getDirPath(mondayLapse.getTime())
             Map userInfoMap = transactionVSService.getUserInfoMap(signer, mondayLapse)
 
-            Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.toString())
+            Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.getCurrencyCode())
             if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
-                    [requestCurrency.toString()].toArray(), locale));
+                    [requestCurrency.getCurrencyCode()].toArray(), locale));
 
             BigDecimal currencyAvailable = ((BigDecimal)currencyMap.totalInputs).add(
                     ((BigDecimal)currencyMap.totalOutputs).negate())
@@ -63,7 +63,7 @@ class VicketService {
             BigDecimal totalAmount = new BigDecimal(dataRequestJSON.totalAmount)
             if(currencyAvailable.compareTo(totalAmount) < 0) throw new ExceptionVS(
                     messageSource.getMessage("vicketRequestAvailableErrorMsg",
-                    [totalAmount, currencyAvailable,requestCurrency.toString()].toArray(), locale));
+                    [totalAmount, currencyAvailable,requestCurrency.getCurrencyCode()].toArray(), locale));
 
             Integer numTotalVickets = 0
             def vicketsArray = dataRequestJSON.vickets

@@ -57,7 +57,7 @@
     <g:if test="${"user".equals(params.menu)}">
         <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
             <div class="row text-right">
-                <button id="subscribeButton" type="submit" class="btn btn-default btn-lg" onclick="subscribeToGroup();"
+                <button id="subscribeButton" type="submit" class="btn btn-default" onclick="subscribeToGroup();"
                         style="margin:15px 20px 15px 0px;">
                     <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
                 </button>
@@ -83,6 +83,10 @@
 
     $(function() {
 
+
+
+            var messageJSON = toJSON('{"message":"Hibernate operation: could not execute statement; SQL [n/a]; ERROR: llave duplicada viola restricción de unicidad «uk_5k2ski6no8l5mhuoivbewomox»\n  Detail: Ya existe la llave (serial_number)=(2802359874848086554).; nested exception is org.postgresql.util.PSQLException: ERROR: llave duplicada viola restricción de unicidad «uk_5k2ski6no8l5mhuoivbewomox»\n  Detail: Ya existe la llave (serial_number)=(2802359874848086554).")
+        subscribeToGroupCallback(messageJSON)
         <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
 
         </g:if>

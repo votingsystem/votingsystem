@@ -23,7 +23,7 @@ public class ContentSignerHelper {
 
     private static Logger logger = Logger.getLogger(ContentSignerHelper.class);
 
-    public enum CryptoToken {MOBILE, DNIe, JKS_KEYSTORE}
+    public enum CryptoToken {DNIe, JKS_KEYSTORE}
 
     public static SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
              char[] password, String subject, Header header) throws Exception {
@@ -40,8 +40,6 @@ public class ContentSignerHelper {
             case DNIe:
                 return DNIeContentSigner.genMimeMessage(fromUser,
                         toUser, textToSign, password, subject, header);
-            case MOBILE:
-                return null;
             default: return null;
         }
     }
@@ -60,8 +58,6 @@ public class ContentSignerHelper {
                         PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
             case DNIe:
                 return DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
-            case MOBILE:
-                return null;
             default: return null;
         }
     }
@@ -70,8 +66,6 @@ public class ContentSignerHelper {
         String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
         CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
         switch(cryptoToken) {
-            case MOBILE:
-                return ContextVS.getMessage("passwordDialogMobileMsg");
             case JKS_KEYSTORE:
                 return ContextVS.getMessage("passwordDialogKeyStoreMsg");
             case DNIe:

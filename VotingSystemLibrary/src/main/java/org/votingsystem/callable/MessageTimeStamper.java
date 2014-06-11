@@ -59,6 +59,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
                     JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
             if(smimeMessage != null) smimeMessage.setTimeStampToken(timeStampToken);
+            responseVS.setSmimeMessage(smimeMessage);
         }
         return responseVS;
     }

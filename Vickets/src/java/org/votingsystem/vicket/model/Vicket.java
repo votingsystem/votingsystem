@@ -3,7 +3,6 @@ package org.votingsystem.vicket.model;
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.MessageSMIME;
 
 import javax.persistence.*;
@@ -24,12 +23,20 @@ public class Vicket implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
     public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
-    @Column(name="currency", nullable=false) @Enumerated(EnumType.STRING) private CurrencyVS currency;
+    @Column(name="currency", nullable=false) private String currencyCode;
 
     @Column(name="hashCertVS") private String hashCertVS;
     @Column(name="originHashCertVS") private String originHashCertVS;
@@ -179,14 +186,6 @@ public class Vicket implements Serializable  {
 
     public void setReason(String reason) {
         this.reason = reason;
-    }
-
-    public CurrencyVS getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(CurrencyVS currency) {
-        this.currency = currency;
     }
 
     public static Map checkSubject(String subjectDN) {

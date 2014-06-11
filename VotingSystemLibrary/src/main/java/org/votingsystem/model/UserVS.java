@@ -75,7 +75,7 @@ public class UserVS implements Serializable {
 
     @Column(name="reason") private String reason;
 
-    @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.PENDING;
+    @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.ACTIVE;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
@@ -378,6 +378,22 @@ public class UserVS implements Serializable {
 
     public static UserVS getUserVS (X509Certificate certificate) {
         UserVS userVS = new UserVS();
+        userVS.setCertificate(certificate);
+        String subjectDN = certificate.getSubjectDN().getName();
+        if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
+        if (subjectDN.contains("SERIALNUMBER=")) userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
+        if (subjectDN.contains("SURNAME=")) userVS.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
+        if (subjectDN.contains("GIVENNAME=")) {
+            String givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0];
+            userVS.setName(givenname);
+            userVS.setFirstName(givenname);
+        }
+        if (subjectDN.contains("CN=")) userVS.setCn(subjectDN.split("CN=")[1]);
+        return userVS;
+    }
+
+    public static VicketSource getVicketSource (X509Certificate certificate) {
+        VicketSource userVS = new VicketSource();
         userVS.setCertificate(certificate);
         String subjectDN = certificate.getSubjectDN().getName();
         if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);

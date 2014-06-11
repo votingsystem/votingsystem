@@ -16,4 +16,5 @@ public class VicketSource extends UserVS implements java.io.Serializable {
     public void beforeInsert() {
         if(getType() == null) setType(Type.VICKET_SOURCE);
     }
+
 }

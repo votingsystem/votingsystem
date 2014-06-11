@@ -6,7 +6,7 @@
                 <h4 id="resultCaption" class="modal-title" style="color: #6c0404; font-weight: bold;"></h4>
             </div>
             <div class="modal-body">
-                <p id='resultMessage' style="text-align: center;  font-size: 1.2em;"></p>
+                <p id='resultMessage' style="text-align: center;  font-size: 1.2em;word-wrap: break-word;"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-accept-vs" data-dismiss="modal" onclick="closeResultDialog();">

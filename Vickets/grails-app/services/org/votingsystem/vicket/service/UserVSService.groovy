@@ -9,6 +9,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.VicketSource
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -50,62 +51,78 @@ class UserVSService {
 
     public ResponseVS saveVicketSource(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("saveVicketSource - methodName: ${methodName}")
-        UserVS vicketSource = null
         UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("saveVicketSource - signer: ${userSigner?.nif}")
+        log.debug("${methodName} - signer: ${userSigner?.nif}")
         String msg = null
         ResponseVS responseVS = null
         String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
         def messageJSON = JSON.parse(documentStr)
-        if (!messageJSON.info || !messageJSON.certChainPEM ||
+        if (!messageJSON.info || !messageJSON.certChainPEM || !messageJSON.IBAN ||
                 (TypeVS.VICKET_SOURCE_NEW != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - PARAMS ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, reason:msg,
                     metaInf:MetaInfMsg.getErrorMsg(methodName), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
-        responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
-
-        X509Certificate x509Certificate = certChain.iterator().next();
-        for(Iterator iterator = certChain.iterator();iterator.hasNext(); ) {
-            log.debug ("====== ${((X509Certificate)iterator.next()).getSubjectDN()}")
+        try {
+            IbanVSUtil.validate(messageJSON.IBAN);
+        } catch(Exception ex) {
+            msg = messageSource.getMessage('IBANCodeErrorMsg', [messageJSON.IBAN].toArray(), locale)
+            log.error("${msg} - ${ex.getMessage()}", ex)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
+                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"), type:TypeVS.ERROR)
         }
+        if(!isUserAdmin(userSigner.getNif())) {
+            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
+                    TypeVS.VICKET_SOURCE_NEW.toString()].toArray(), locale)
+            log.error "${methodName} - ${msg}"
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
+        }
+
+        Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
+
+        log.debug("======== ${certChain}")
+
+        responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        X509Certificate x509Certificate = certChain.iterator().next();
+
         //{info:getEditor_editorDivData(),certChainPEM:$("#pemCert").val(), operation:Operation.VICKET_SOURCE_NEW}
 
-
-        /*
-
-        if (!messageJSON.groupvsName || !messageJSON.groupvsInfo ||
-                (TypeVS.VICKET_GROUP_NEW != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "params"), statusCode:ResponseVS.SC_ERROR_REQUEST)
+        VicketSource vicketSource = UserVS.getVicketSource(x509Certificate)
+        String validatedNIF = org.votingsystem.util.NifUtils.validate(vicketSource.getNif())
+        if(!validatedNIF) {
+            msg = messageSource.getMessage('NIFWithErrorsMsg', [vicketSource.getNif()].toArray(), locale)
+            log.error("checkUser - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
+                    metaInf: MetaInfMsg.getErrorMsg(methodName, "nif"))
         }
 
-        groupVS = GroupVS.findWhere(name:messageJSON.groupvsName.trim())
-        if(groupVS) {
-            msg = messageSource.getMessage('nameGroupRepeatedMsg', [messageJSON.groupvsName].toArray(), locale)
-            log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "nameGroupRepeatedMsg"))
+        def vicketSourceDB = UserVS.findWhere(nif:validatedNIF.toUpperCase())
+
+        if(!vicketSourceDB || !(vicketSourceDB instanceof VicketSource)) {
+            vicketSource.description = messageJSON.info
+            vicketSourceDB.setIBAN(messageJSON.IBAN)
+            vicketSource.save()
+            vicketSourceDB = vicketSource
+            log.debug("${methodName} - NEW vicketSource.id: '${vicketSourceDB.id}'")
+        } else {
+            log.debug("${methodName} - updating vicketSource.id: '${vicketSourceDB.id}'")
+            vicketSourceDB.description = messageJSON.info
+            vicketSourceDB.setCertificateCA(vicketSource.getCertificateCA())
+            vicketSourceDB.setCertificate(vicketSource.getCertificate())
+            vicketSourceDB.setTimeStampToken(vicketSource.getTimeStampToken())
         }
+        CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(vicketSourceDB, null)
 
-        groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, groupRepresentative:userSigner,
-                description:messageJSON.groupvsInfo).save()
-        groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
-        String metaInf =  MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}")
-
-        String fromUser = grailsApplication.config.VotingSystem.serverName
-        String toUser = userSigner.getNif()
-        String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(fromUser, toUser, documentStr, subject, null)
-
-        MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf,
-                smimeParent:messageSMIMEReq, content:smimeMessageRespBytes).save() }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)*/
+        vicketSourceDB.save()
+        msg = messageSource.getMessage('newVicketSourceOKMsg', [x509Certificate.subjectDN].toArray(), locale)
+        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "vicketSource_${vicketSourceDB.id}_certificateVS_${certificateVS.id}")
+        String vicketSourceURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${vicketSourceDB.id}"
+        log.debug("${metaInfMsg}")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_SOURCE_NEW, message:msg, metaInf:metaInfMsg,
+            data:[message:msg, URL:vicketSourceURL, statusCode:ResponseVS.SC_OK], contentType:ContentTypeVS.JSON)
     }
 
     /*
@@ -188,8 +205,10 @@ class UserVSService {
 
         if(!userVS.name) name = "${userVS.firstName} ${userVS.lastName}"
         return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, name:name,
-                IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString(), certificateList:certificateList]
+                IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString(), reason:userVS.reason,
+                description:userVS.description, certificateList:certificateList]
     }
+
 
     public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){
         Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,

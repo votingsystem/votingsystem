@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.DERObject
 import org.bouncycastle.asn1.DEROctetString
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
+import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
@@ -130,6 +131,26 @@ class UserVSController {
         }
     }
 
+    def vicketSourceList() {
+        if(request.contentType?.contains('json')) {
+            List<VicketSource> vicketSourceList = null
+            int numTotalVicketSources = 0;
+            VicketSource.withTransaction {
+                vicketSourceList = VicketSource.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:'dateCreated', order:'desc'){
+                };
+                numTotalVicketSources = vicketSourceList.totalCount
+            }
+            def resultList = []
+            vicketSourceList.each {userItem ->
+                resultList.add(userVSService.getUserVSDataMap(userItem))
+            }
+            def resultMap = [vicketSourceList:resultList, queryRecordCount: numTotalVicketSources, numTotalVicketSources:numTotalVicketSources ]
+            render resultMap as JSON
+        }
+    }
+
+
     /**
      * Servicio que envía información del estado de las cuentas
      *
@@ -167,10 +188,6 @@ class UserVSController {
         ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap)
         responseVS.setContentType(ContentTypeVS.JSON)
         X509Certificate cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
-
-
-
-
 
         responseVS.setType(TypeVS.VICKET_USER_INFO)
         return [responseVS:responseVS]
@@ -229,10 +246,16 @@ class UserVSController {
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        log.error " Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${exception.getClass().getSimpleName()}"
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
                 metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
-	
+
+    def daoExceptionHandler(final DataAccessException exception) {
+        log.error " Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${exception.getClass().getSimpleName()}"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: message(code:'paramsErrorMsg'),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+    }
 }

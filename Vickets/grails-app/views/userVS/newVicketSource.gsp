@@ -29,6 +29,11 @@
         </div>
 
         <form id="mainForm">
+            <div style="margin:10px 0px 10px 0px">
+                <input type="text" name="subject" id="IBANCode" class="form-control" style="width:350px"  required
+                       title="<g:message code="vicketSourceIbanLbl"/>"
+                       placeholder="<g:message code="vicketSourceIbanLbl"/>"/>
+            </div>
             <div style="position:relative; width:100%;">
                 <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
             </div>
@@ -57,6 +62,7 @@
     $(function() {
         $('#mainForm').submit(function(event){
             event.preventDefault();
+
             if(!document.getElementById('pemCert').validity.valid) {
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
                 return
@@ -76,7 +82,7 @@
             webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newVicketSource", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newVicketSourceMsgSubject'/>"
             webAppMessage.signedContent = {info:getEditor_editorDivData(),certChainPEM:$("#pemCert").val(),
-                        operation:Operation.VICKET_SOURCE_NEW}
+            IBAN:document.getElementById('IBANCode').value, operation:Operation.VICKET_SOURCE_NEW}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             webAppMessage.callerCallback = 'newVicketSourceCallback'
             //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

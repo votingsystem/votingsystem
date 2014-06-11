@@ -8,8 +8,6 @@ import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.vicket.model.Vicket
@@ -40,7 +38,7 @@ class CsrService {
     }
 
     public synchronized ResponseVS signVicket (byte[] csrPEMBytes, String vicketAmount,
-           CurrencyVS vicketCurrency, Locale locale) {
+           Currency vicketCurrency, Locale locale) {
         PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         String serverURL = grailsApplication.config.grails.serverURL
         try {
@@ -71,9 +69,9 @@ class CsrService {
                             ["${vicketProviderURL} ${amount} ${currency}",
                             "${subjectDataMap.get("vicketProviderURL")} ${subjectDataMap.get("amount")} ${subjectDataMap.get("currency")}"].toArray(), locale))
 
-            if(!vicketAmount.equals(amount) || !vicketCurrency.toString().equals(currency)) throw new ExceptionVS(
+            if(!vicketAmount.equals(amount) || !vicketCurrency.getCurrencyCode().equals(currency)) throw new ExceptionVS(
                     messageSource.getMessage('csrVicketValueErrorMsg',
-                    ["${vicketAmount} ${vicketCurrency.toString()}", "${amount} ${currency}"].toArray(), locale))
+                    ["${vicketAmount} ${vicketCurrency.getCurrencyCode()}", "${amount} ${currency}"].toArray(), locale))
             if (!serverURL.equals(vicketProviderURL))  throw new ExceptionVS(messageSource.getMessage(
                     "serverMismatchErrorMsg", [serverURL, vicketProviderURL].toArray(), locale));
             if (!hashCertVSBase64) throw new ExceptionVS(messageSource.getMessage("csrMissingHashCertVSErrorMsg",
@@ -92,7 +90,8 @@ class CsrService {
             else {
                 Vicket vicket = new Vicket(serialNumber:issuedCert.getSerialNumber().longValue(),
                         content:issuedCert.getEncoded(), state:Vicket.State.OK, hashCertVS:hashCertVSBase64,
-                        vicketProviderURL: vicketProviderURL, amount:new BigDecimal(amount), currency:vicketCurrency,
+                        vicketProviderURL: vicketProviderURL, amount:new BigDecimal(amount),
+                        currencyCode:vicketCurrency.getCurrencyCode(),
                         authorityCertificateVS:signatureVSService.getServerCertificateVS(),
                         validFrom:certValidFrom, validTo: certValidTo).save()
                 log.debug("signVicket - expended Vicket '${vicket.id}'")
@@ -112,7 +111,7 @@ class CsrService {
     }
 
     public synchronized ResponseVS signVicketBatchRequest (byte[] vicketBatchRequest, BigDecimal expectedAmount,
-            CurrencyVS expectedCurrency, Locale locale){
+            Currency expectedCurrency, Locale locale){
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ResponseVS responseVS = null;
         String msg = null;
@@ -124,10 +123,10 @@ class CsrService {
             BigDecimal batchAmount = new BigDecimal(0)
             vicketsArray.each {
                 String csr = it.csr
-                CurrencyVS vicketCurrency = CurrencyVS.valueOf(it.currency)
+                Currency vicketCurrency = Currency.getInstance(it.currency).getCurrencyCode()
                 if(vicketCurrency != expectedCurrency) throw new ExceptionVS(messageSource.getMessage(
                         'vicketBatchRequestCurrencyErrorMsg', [expectedCurrency.toString(),
-                        vicketCurrency.toString()].toArray(), locale));
+                        vicketCurrency.getCurrencyCode()].toArray(), locale));
                 String vicketAmount = it.vicketValue
                 batchAmount = batchAmount.add(new BigDecimal(vicketAmount))
                 responseVS = signVicket(csr.getBytes(), vicketAmount, vicketCurrency, locale)

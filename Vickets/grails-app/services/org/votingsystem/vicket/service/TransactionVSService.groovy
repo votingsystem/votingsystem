@@ -75,6 +75,9 @@ class TransactionVSService {
                 case TypeVS.VICKET_USER_ALLOCATION:
                     processUserAllocation(messageSMIMEReq, messageJSON, locale)
                     break;
+                case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
+                    processDepositFromVicketSource(messageSMIMEReq, messageJSON, locale)
+                    break;
                 default:
                     log.debug("Unprocessed transactionType: " + transactionType);
             }
@@ -94,6 +97,76 @@ class TransactionVSService {
         if(ResponseVS.SC_OK != broadcastResult.statusCode) {
             def errorList = broadcastResult.data
             errorList.each {listenerSet.remove(it)}
+        }
+    }
+
+    private ResponseVS processDepositFromVicketSource(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
+        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        UserVS signer = messageSMIMEReq.userVS
+        String msg;
+        try {
+            if(!userVSService.isUserAdmin(signer.getNif())) {
+                msg = messageSource.getMessage('userAllocationAdminErrorMsg', [signer.getNif()].toArray(), locale)
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
+            }
+            Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
+            Calendar weekToCalendar = weekFromCalendar.clone();
+            weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
+
+            int numUsers = UserVS.createCriteria().count {
+                eq("type", UserVS.Type.USER)
+                le("dateCreated", weekFromCalendar.getTime())
+            }
+            def dataMapToSignBySystem = [numUsers:numUsers, amount: messageJSON.amount,
+                                         currency:messageJSON.currency, allocationMessage:new String(Base64.encode(messageSMIMEReq.content))]
+            String dataToSignBySystem = new JSONObject(dataMapToSignBySystem).toString()
+            ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage(userVSService.getSystemUser().getNif(),
+                    null, dataToSignBySystem, messageSource.getMessage("userAllocationReceiptMsg", null, locale))
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS
+            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.VICKET_USER_ALLOCATION_RECEIPT,
+                    smimeParent: messageSMIMEReq,
+                    content:responseVS.getSmimeMessage().getBytes())
+            MessageSMIME.withTransaction { messageSMIMEResp.save(); }
+            log.debug("processUserAllocation - ${messageJSON}")
+            BigDecimal numUsersBigDecimal = new BigDecimal(numUsers)
+            Currency currency = Currency.getInstance(messageJSON.currency)
+            String subject = messageJSON.subject
+            BigDecimal amount = new BigDecimal(messageJSON.amount)
+            if(numUsersBigDecimal == BigDecimal.ZERO) {
+                log.error("Users not found")
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:"Transaction without target users")
+            }
+            BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
+            BigDecimal totalUsers = userPart.multiply(numUsersBigDecimal)
+            if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
+
+            TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEResp,
+                    state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
+                    subject:subject, fromUserVS:signer, toUserVS: userVSService.getSystemUser(),
+                    currencyCode: currency.getCurrencyCode(), type:TransactionVS.Type.USER_ALLOCATION).save()
+
+            def usersToDeposit = UserVS.createCriteria().scroll {
+                eq("type", UserVS.Type.USER)
+                le("dateCreated", weekFromCalendar.getTime())
+            }
+            UserVS systemUser = UserVS.findWhere(type: UserVS.Type.SYSTEM)
+            while (usersToDeposit.next()) {
+                UserVS userVS = (UserVS) usersToDeposit.get(0);
+                TransactionVS userTransaction = new TransactionVS(transactionParent:transactionParent, amount:userPart,
+                        state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
+                        subject:subject, fromUserVS: systemUser, toUserVS:userVS, currency:currency,
+                        type:TransactionVS.Type.USER_ALLOCATION_INPUT).save()
+                if((usersToDeposit.getRowNumber() % 100) == 0) {
+                    sessionFactory.currentSession.flush()
+                    sessionFactory.currentSession.clear()
+                    log.debug("processed ${usersToDeposit.getRowNumber()}/${numUsers} user allocation for transaction ${transactionParent.id}");
+                }
+            }
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", type:TypeVS.VICKET_USER_ALLOCATION)
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            msg = messageSource.getMessage('depositDataError', null, locale)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
         }
     }
 
@@ -127,7 +200,7 @@ class TransactionVSService {
             MessageSMIME.withTransaction { messageSMIMEResp.save(); }
             log.debug("processUserAllocation - ${messageJSON}")
             BigDecimal numUsersBigDecimal = new BigDecimal(numUsers)
-            CurrencyVS currency = CurrencyVS.valueOf(messageJSON.currency)
+            Currency currency = Currency.getInstance(messageJSON.currency)
             String subject = messageJSON.subject
             BigDecimal amount = new BigDecimal(messageJSON.amount)
             if(numUsersBigDecimal == BigDecimal.ZERO) {
@@ -244,16 +317,15 @@ class TransactionVSService {
 
         Map resultMap = [:]
         Map dateResultMap = [:]
-        dateResultMap[CurrencyVS.EURO.toString()] = [totalOutputs: new BigDecimal(0),
+        dateResultMap[Currency.getInstance("EUR").getCurrencyCode()] = [totalOutputs: new BigDecimal(0),
                 totalInputs:new BigDecimal(0), transactionList:[]]
 
         while (userInputTransactions.next()) {
             TransactionVS transactionVS = (TransactionVS) userInputTransactions.get(0);
-            CurrencyVS currencyVS = transactionVS.getCurrency()
-            Map currencyMap = dateResultMap.get(currencyVS.toString())
+            Map currencyMap = dateResultMap.get(transactionVS.getCurrencyCode())
             if(!currencyMap) {
                 currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
-                dateResultMap.put(currencyVS.toString(), currencyMap)
+                dateResultMap.put(transactionVS.getCurrencyCode(), currencyMap)
             }
             currencyMap.totalInputs = currencyMap.totalInputs.add(transactionVS.amount)
             currencyMap.transactionList.add(getTransactionMap(transactionVS))
@@ -261,11 +333,10 @@ class TransactionVSService {
 
         while (userOutputTransactions.next()) {
             TransactionVS transactionVS = (TransactionVS) userOutputTransactions.get(0);
-            CurrencyVS currencyVS = transactionVS.getCurrency()
-            Map currencyMap = dateResultMap.get(currencyVS.toString())
+            Map currencyMap = dateResultMap.get(transactionVS.getCurrencyCode())
             if(!currencyMap) {
                 currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
-                dateResultMap.put(currencyVS.toString(), currencyMap)
+                dateResultMap.put(transactionVS.getCurrencyCode(), currencyMap)
             }
             currencyMap.totalOutputs = currencyMap.totalOutputs.add(transactionVS.amount)
             currencyMap.transactionList.add(getTransactionMap(transactionVS))

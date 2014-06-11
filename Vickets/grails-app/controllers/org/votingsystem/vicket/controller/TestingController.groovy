@@ -1,7 +1,6 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
-import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.vicket.util.LoggerVS
@@ -29,13 +28,17 @@ class TestingController {
     //logTransactionVS(int status, String type, String fromUser, String toUser, String currency, BigDecimal amount, String msg, Date dateCreated, String subject)
 
 
+    def index() {
+        render Currency.getInstance("EUR").getCurrencyCode()
+        return false
+    }
 
     def IBAN() {
         render IbanVSUtil.getInstance().getIBAN(12)
         return false
     }
 
-    def index() {
+    def index1() {
         Long init = System.currentTimeMillis()
         Random randomGenerator = new Random();
 
@@ -48,7 +51,7 @@ class TestingController {
             int transactionvsItemId = new Random().nextInt(transactionTypes.length);
             TransactionVS.Type transactionType = transactionTypes[transactionvsItemId]
             LoggerVS.logTransactionVS(Long.valueOf(idx), ResponseVS.SC_OK, transactionType.toString(), "fromUser${randomInt}",
-                    "toUser${randomInt}", CurrencyVS.EURO.toString(), new BigDecimal(randomInt), "message ${randomInt}",
+                    "toUser${randomInt}", Currency.getInstance("EUR").getCurrencyCode(), new BigDecimal(randomInt), "message ${randomInt}",
                     Calendar.getInstance().getTime(), "Subject - ${randomInt}")
         }
         Long finish = System.currentTimeMillis()

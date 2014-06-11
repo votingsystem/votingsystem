@@ -2,7 +2,6 @@ package org.vickets.simulation.model
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.CurrencyVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.StringUtils
@@ -42,7 +41,7 @@ class SimulationData {
     private String backupRequestEmail = null;
     private Long receptorId = null;
     private BigDecimal depositAmount;
-    private CurrencyVS currency;
+    private String currencyCode;
 
     private UserBaseSimulationData userBaseSimulationData;
 
@@ -63,12 +62,12 @@ class SimulationData {
         return receptorId;
     }
 
-    public CurrencyVS getCurrency() {
-        return currency;
+    public String getCurrency() {
+        return currencyCode;
     }
 
-    public void setCurrency(CurrencyVS currency) {
-        this.currency = currency;
+    public void setCurrency(String currency) {
+        this.currencyCode = currency;
     }
 
     public String getSubject() {
@@ -130,7 +129,7 @@ class SimulationData {
             simulationData.setDepositAmount(new BigDecimal(dataJSON.getLong("depositAmount")));
         }
         if (dataJSON.containsKey("currency")) {
-            simulationData.setCurrency(CurrencyVS.valueOf(dataJSON.getString("currency").toUpperCase()));
+            simulationData.setCurrency(dataJSON.getString("currency").toUpperCase()s);
         }
         if (dataJSON.containsKey("subject")) {
             simulationData.setSubject(dataJSON.getString("subject"));

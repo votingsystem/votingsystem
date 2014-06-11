@@ -69,34 +69,35 @@ class SubscriptionVSService {
             userVSDB.setCertificateCA(userVS.getCertificateCA())
             userVSDB.setCertificate(userVS.getCertificate())
             userVSDB.setTimeStampToken(userVS.getTimeStampToken())
-			certificate = CertificateVS.findWhere(userVS:userVSDB, state:CertificateVS.State.OK,
-                    serialNumber:x509Cert.getSerialNumber()?.longValue(), authorityCertificateVS: userVS.getCertificateCA())
-            if (!certificate) {
-				certificate = saveUserCertificate(userVSDB, deviceData);
-				log.debug "checkUser - NEW CertificateVS id '${certificate.id}' for user '${userVSDB.nif}'"
-			}
+			certificate = saveUserCertificate(userVSDB, deviceData);
 		}
         userVS.setCertificateVS(certificate)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVSDB, data:[isNewUser:isNewUser,certificateVS:certificate])
 	}
 
-    private CertificateVS saveUserCertificate(UserVS userVS, JSONObject deviceData) {
+    @Transactional
+    public CertificateVS saveUserCertificate(UserVS userVS, JSONObject deviceData) {
         log.debug "saveUserCertificate - deviceData: ${deviceData}"
         X509Certificate x509Cert = userVS.getCertificate()
-        CertificateVS certificate = new CertificateVS(userVS:userVS, content:x509Cert?.getEncoded(),
-                state:CertificateVS.State.OK, type:CertificateVS.Type.USER,
-                serialNumber:x509Cert?.getSerialNumber()?.longValue(),
-                authorityCertificateVS:userVS.getCertificateCA(), validFrom:x509Cert?.getNotBefore(),
-                validTo:x509Cert?.getNotAfter()).save();
-        if(deviceData) {
-            DeviceVS deviceVS = DeviceVS.findWhere(userVS:userVS, deviceId:deviceData.deviceId)
-            if(!deviceVS) {
-                deviceVS = new DeviceVS(userVS:userVS, deviceId:deviceData.deviceId,email:deviceData.email,
-                        phone:deviceData.mobilePhone, deviceName:deviceData.deviceName, certificateVS: certificate).save()
-                log.debug "saveUserCertificate - new device with id '${deviceVS.id}'"
-            }
+        CertificateVS certificate = CertificateVS.findWhere(userVS:userVS, state:CertificateVS.State.OK,
+                serialNumber:x509Cert.getSerialNumber()?.longValue(), authorityCertificateVS: userVS.getCertificateCA())
+        if(certificate) return certificate
+        else{
+            certificate = new CertificateVS(userVS:userVS, content:x509Cert?.getEncoded(),
+                    state:CertificateVS.State.OK, type:CertificateVS.Type.USER,
+                    serialNumber:x509Cert?.getSerialNumber()?.longValue(),
+                    authorityCertificateVS:userVS.getCertificateCA(), validFrom:x509Cert?.getNotBefore(),
+                    validTo:x509Cert?.getNotAfter()).save();
+            if(deviceData) {
+                DeviceVS deviceVS = DeviceVS.findWhere(userVS:userVS, deviceId:deviceData.deviceId)
+                if(!deviceVS) {
+                    deviceVS = new DeviceVS(userVS:userVS, deviceId:deviceData.deviceId,email:deviceData.email,
+                            phone:deviceData.mobilePhone, deviceName:deviceData.deviceName, certificateVS: certificate).save()
+                    log.debug "saveUserCertificate - certificate id: '${certificate.id}' - new device with id '${deviceVS.id}'"
+                }
+            } else log.debug "saveUserCertificate - certificate id: '${certificate.id}'"
+            return certificate
         }
-        return certificate
     }
 
     public ResponseVS checkDevice(String givenname, String surname, String nif, String phone, String email,

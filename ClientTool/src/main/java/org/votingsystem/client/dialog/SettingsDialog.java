@@ -38,12 +38,8 @@ public class SettingsDialog {
     private KeyStore userKeyStore;
     private Label keyStoreLabel;
     private VBox keyStoreVBox;
-    private VBox mobileVBox;
     private GridPane gridPane;
-    //private VBox dialogVBox;
     private RadioButton signWithDNIeRb;
-    private RadioButton signWithMobileRb;
-    private TextField mobileNIFTextField;
     private RadioButton signWithKeystoreRb;
 
     public SettingsDialog() {
@@ -58,7 +54,6 @@ public class SettingsDialog {
         gridPane = new GridPane();
         gridPane.setVgap(10);
 
-
         ToggleGroup tg = new ToggleGroup();
 
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
@@ -67,31 +62,6 @@ public class SettingsDialog {
             @Override public void handle(ActionEvent actionEvent) {
                 changeSignatureMode(actionEvent);
             }});
-
-
-        signWithMobileRb = new RadioButton(ContextVS.getMessage("setAndroidSignatureMechanismMsg"));
-        signWithMobileRb.setToggleGroup(tg);
-        signWithMobileRb.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent actionEvent) {
-                changeSignatureMode(actionEvent);
-            }});
-        mobileVBox = new VBox(10);
-        Text adviceText = new Text(ContextVS.getMessage("mobileSettingsAdvice"));
-        adviceText.setWrappingWidth(450);
-        Label label = new Label(ContextVS.getMessage("mobileNIFLbl") + ":");
-        mobileNIFTextField = new TextField();
-        mobileNIFTextField.addEventHandler(KeyEvent.KEY_PRESSED,
-                new EventHandler<KeyEvent>() {
-                    public void handle(KeyEvent event) {
-                        if ((event.getCode() == KeyCode.ENTER)) {
-                            acceptButton.fire();
-                        }
-                    }
-                }
-        );
-        mobileNIFTextField.setPromptText(ContextVS.getMessage("nifLbl"));
-        mobileVBox.getChildren().addAll(adviceText, label, mobileNIFTextField);
-        mobileVBox.getStyleClass().add("settings-vbox");
 
         signWithKeystoreRb = new RadioButton(ContextVS.getMessage("setJksKeyStoreSignatureMechanismMsg"));
         signWithKeystoreRb.setToggleGroup(tg);
@@ -133,7 +103,6 @@ public class SettingsDialog {
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
 
         gridPane.add(signWithDNIeRb,0,0);
-        gridPane.add(signWithMobileRb,0,2);
         gridPane.add(signWithKeystoreRb,0,4);
         gridPane.add(footerButtonsBox,0,6);
         gridPane.getStyleClass().add("modal-dialog");
@@ -161,13 +130,8 @@ public class SettingsDialog {
     private void changeSignatureMode(ActionEvent evt) {
         logger.debug("changeSignatureMode");
         gridPane.getChildren().remove(keyStoreVBox);
-        gridPane.getChildren().remove(mobileVBox);
         if(evt.getSource() == signWithKeystoreRb) {
             gridPane.add(keyStoreVBox, 0, 5);
-        } else if(evt.getSource() == signWithMobileRb){
-            String userNif = ContextVS.getInstance().getProperty(ContextVS.USER_NIF, null);
-            if(userNif != null && !"".equals(userNif.trim())) mobileNIFTextField.setText(userNif);
-            gridPane.add(mobileVBox, 0, 3);
         }
         stage.sizeToScene();
     }
@@ -178,14 +142,7 @@ public class SettingsDialog {
                 ContentSignerHelper.CryptoToken.DNIe.toString());
         ContentSignerHelper.CryptoToken cryptoToken = ContentSignerHelper.CryptoToken.valueOf(cryptoTokenStr);
         gridPane.getChildren().remove(keyStoreVBox);
-        gridPane.getChildren().remove(mobileVBox);
         switch(cryptoToken) {
-            case MOBILE:
-                signWithMobileRb.setSelected(true);
-                String userNif = ContextVS.getInstance().getProperty(ContextVS.USER_NIF, null);
-                if(userNif != null && !"".equals(userNif.trim())) mobileNIFTextField.setText(userNif);
-                gridPane.add(mobileVBox, 0, 3);
-                break;
             case DNIe:
                 signWithDNIeRb.setSelected(true);
                 break;
@@ -258,19 +215,6 @@ public class SettingsDialog {
         if(signWithDNIeRb.isSelected()) {
             ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                     ContentSignerHelper.CryptoToken.DNIe.toString());
-        }
-        if(signWithMobileRb.isSelected()) {
-            String userNif = NifUtils.validate(mobileNIFTextField.getText());
-            if(userNif != null) {
-                ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                        ContentSignerHelper.CryptoToken.MOBILE.toString());
-                ContextVS.getInstance().setProperty(ContextVS.USER_NIF,userNif);
-            } else {
-                MessageDialog messageDialog = new MessageDialog();
-                messageDialog.showMessage(ContextVS.getMessage("errorLbl") + " " +
-                        ContextVS.getMessage("nifWithErrorsLbl"));
-                return;
-            }
         }
         stage.close();
     }

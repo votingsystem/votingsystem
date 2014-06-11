@@ -278,7 +278,7 @@ public class BrowserVS extends Region {
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
-        final String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
+        final String jsCommand = callbackFunction + "('" + Utils.escapeStringJS(messageJSON.toString()) + "')";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {

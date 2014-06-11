@@ -31,7 +31,7 @@ public class CertificateVS implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @OneToOne private UserRequestCsrVS userRequestCsrVS;
     @OneToOne(mappedBy="certificateVS") private VoteVS voteVS;
-    @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
+    @Column(name="serialNumber", nullable=false) private Long serialNumber;
     @Column(name="content", nullable=false) @Lob private byte[] content;
 
     @ManyToOne(fetch=FetchType.LAZY)

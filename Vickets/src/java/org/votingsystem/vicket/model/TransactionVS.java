@@ -2,7 +2,6 @@ package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
-import org.votingsystem.model.CurrencyVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.vicket.service.TransactionVSService;
@@ -27,6 +26,14 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
     public enum Type { VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_SEND, VICKET_CANCELLATION;}
 
     public enum State { OK, REPEATED, CANCELLED;}
@@ -36,7 +43,7 @@ public class TransactionVS  implements Serializable {
 
     @Column(name="subject") private String subject;
 
-    @Column(name="currency", nullable=false) @Enumerated(EnumType.STRING) private CurrencyVS currency;
+    @Column(name="currency", nullable=false) private String currencyCode;
 
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;
@@ -155,14 +162,6 @@ public class TransactionVS  implements Serializable {
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public CurrencyVS getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(CurrencyVS currency) {
-        this.currency = currency;
     }
 
     public State getState() {

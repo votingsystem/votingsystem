@@ -10,12 +10,6 @@ class UrlMappings {
         "/"(controller:"/app")
         "500"(view:'/error')
 
-
-        "/certificateVS/model/hashHex/$hashHex" {
-            controller = "certificateVS"
-            action = "voteVS"
-        }
-
         "/certificateVS/cert/$serialNumber"{
             controller = "certificateVS"
             action = "cert"
@@ -23,6 +17,18 @@ class UrlMappings {
                 serialNumber(matches:/\d*/)
             }
         }
+
+        "/certificateVS/model/hashHex/$hashHex" {
+            controller = "certificateVS"
+            action = "voteVS"
+        }
+
+        "/certificateVS/userVS/$userId" {
+            controller = "certificateVS"
+            action = "userVS"
+        }
+
+
 
         "/groupVS/$id"{
             controller = "groupVS"

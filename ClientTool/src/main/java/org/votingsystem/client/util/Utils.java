@@ -23,6 +23,10 @@ public class Utils {
 
     private static Logger logger = Logger.getLogger(Utils.class);
 
+    public static String escapeStringJS(String param) {
+        return param.replaceAll("'", "&apos;");
+    }
+
     public static Image getImage(Object baseObject, String key) {
         String iconPath = null;
         String iconName = null;

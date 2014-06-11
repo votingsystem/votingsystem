@@ -149,7 +149,6 @@ class VicketFilters {
                         default: return;
                     }
                 } catch(Exception ex) {
-                    log.error(ex.getMessage(), ex)
                     return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
                 }
