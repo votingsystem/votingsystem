@@ -55,9 +55,11 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
             byte[] bytesToken = responseVS.getMessageBytes();
             timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
             X509Certificate timeStampCert = ContextVS.getInstance().getTimeStampServerCert();
-            SignerInformationVerifier timeStampSignerInfoVerifier = new
-                    JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert);
-            timeStampToken.validate(timeStampSignerInfoVerifier);
+            if(timeStampCert != null) {
+                SignerInformationVerifier timeStampSignerInfoVerifier = new
+                        JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert);
+                timeStampToken.validate(timeStampSignerInfoVerifier);
+            } else logger.debug("TIMESTAMP RESPONSE NOT VALIDATED");
             if(smimeMessage != null) smimeMessage.setTimeStampToken(timeStampToken);
             responseVS.setSmimeMessage(smimeMessage);
         }

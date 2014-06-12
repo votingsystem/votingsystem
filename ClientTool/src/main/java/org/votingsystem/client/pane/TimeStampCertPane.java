@@ -4,7 +4,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebView;
@@ -44,11 +43,8 @@ public class TimeStampCertPane extends GridPane {
         add(showPEMcertButton, 0, 1);
 
         WebView certInfoWebView = new WebView();
-        certInfoWebView.getEngine().loadContent(getCertInfo(certificate));
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(certInfoWebView);
-        scrollPane.setPrefHeight(400);
-        add(scrollPane, 0, 2);
+        certInfoWebView.setPrefHeight(400);
+        add(certInfoWebView, 0, 2);
     }
 
     private void showPEMCert() {

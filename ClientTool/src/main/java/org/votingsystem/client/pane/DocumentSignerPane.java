@@ -1,14 +1,15 @@
 package org.votingsystem.client.pane;
 
-import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -16,34 +17,20 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.dialog.MessageDialog;
-import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.signature.util.ContentSignerHelper;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.UUID;
 
 /**
  * @author jgzornoza
@@ -53,6 +40,7 @@ public class DocumentSignerPane extends GridPane implements DocumentSignerStackP
 
     private static Logger logger = Logger.getLogger(DocumentSignerPane.class);
 
+    private Stage stage;
     private TextArea textArea;
     private Button signButton;
     private SMIMEMessageWrapper smimeMessage;
@@ -153,17 +141,38 @@ public class DocumentSignerPane extends GridPane implements DocumentSignerStackP
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));
         add(buttonsBox, 0, 4);
         textArea.requestFocus();
+
+        stage = new Stage();
+        stage.initModality(Modality.WINDOW_MODAL);
+        //stage.initOwner(window);
+
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
+            @Override public void handle(WindowEvent window) {
+            }
+        });
+        documentSignerHelper = new DocumentSignerStackPane(this);
+        documentSignerHelper.getChildren().add(0, this);
+        stage.setScene(new Scene(documentSignerHelper, javafx.scene.paint.Color.TRANSPARENT));
+        stage.setTitle(ContextVS.getMessage("documentSignerDialogCaption"));
     }
 
 
     private void showMessage(int statusCode, String message) {
-        MessageDialog messageDialog = new MessageDialog();
-        messageDialog.showMessage(statusCode, message);
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                MessageDialog messageDialog = new MessageDialog();
+                messageDialog.showMessage(statusCode, message);
+            }
+        });
+
     }
 
 
     private void sendDocumentToService() {
-        if("".equals(serviceURLTextField.getText())) return;
+        if("".equals(serviceURLTextField.getText())) {
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterServiceURLErrorMsg"));
+            return;
+        }
         if(smimeMessage == null) {
             showMessage(ResponseVS.SC_ERROR, "Missing signed document");
         } else {
@@ -190,31 +199,17 @@ public class DocumentSignerPane extends GridPane implements DocumentSignerStackP
         }
     }
 
+    private void show() {
+        stage.centerOnScreen();
+        stage.show();
+    }
+
     public static void showDialog() {
         logger.debug("showDialog");
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                Stage stage = new Stage();
-                stage.initModality(Modality.WINDOW_MODAL);
-                //stage.initOwner(window);
-
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-                    @Override public void handle(WindowEvent window) {
-                    }
-                });
-
                 DocumentSignerPane documentSignerPane = new DocumentSignerPane();
-                DocumentSignerStackPane documentSignerStackPane = new DocumentSignerStackPane(documentSignerPane);
-                documentSignerPane.documentSignerHelper = documentSignerStackPane;
-                documentSignerStackPane.getChildren().add(0, documentSignerPane);
-
-
-
-
-                stage.setScene(new Scene(documentSignerStackPane, javafx.scene.paint.Color.TRANSPARENT));
-                stage.setTitle(ContextVS.getMessage("documentSignerDialogCaption"));
-                stage.centerOnScreen();
-                stage.show();
+                documentSignerPane.show();
             }
         });
     }
@@ -233,14 +228,10 @@ public class DocumentSignerPane extends GridPane implements DocumentSignerStackP
                         });
                     }
                     smimeMessage = responseVS.getSmimeMessage();
-                }
+                } else showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                 break;
             case SEND_SMIME:
-                Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                        showMessage(responseVS.getStatusCode(), responseVS.getMessage());
-                    }
-                });
+                showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                 break;
         }
     }

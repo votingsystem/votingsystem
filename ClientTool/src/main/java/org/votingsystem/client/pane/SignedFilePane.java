@@ -6,7 +6,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
@@ -96,9 +95,8 @@ public class SignedFilePane extends GridPane {
                 contentStr = signedFile.getSMIMEMessageWraper().getSignedContent();
             }
             signatureContentWebView.getEngine().loadContent(contentStr);
-            ScrollPane scrollPane = new ScrollPane();
-            scrollPane.setContent(signatureContentWebView);
-            scrollPane.setPrefHeight(600);
+            signatureContentWebView.setPrefHeight(600);
+
 
             VBox.setVgrow(signatureContentWebView, Priority.ALWAYS);
             add(openSignatureInfoButton, 1, 0);

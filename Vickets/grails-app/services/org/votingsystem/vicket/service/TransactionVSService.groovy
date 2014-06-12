@@ -56,36 +56,28 @@ class TransactionVSService {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
         String msg;
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
+        String toUser = smimeMessageReq.getFrom().toString().replace(" ", "")
         try {
-            def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
-            String toUser = smimeMessageReq.getFrom().toString().replace(" ", "")
-            try {
-                IbanVSUtil.validate(toUser);
-            } catch(Exception ex) {
-                msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
-                        locale)
-                log.error("${msg} - ${ex.getMessage()}", ex)
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                        metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"),
-                        contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.ERROR)
-            }
-
-            TypeVS transactionType = TypeVS.valueOf(messageJSON.typeVS)
-            switch(transactionType) {
-                case TypeVS.VICKET_USER_ALLOCATION:
-                    processUserAllocation(messageSMIMEReq, messageJSON, locale)
-                    break;
-                case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
-                    processDepositFromVicketSource(messageSMIMEReq, messageJSON, locale)
-                    break;
-                default:
-                    log.debug("Unprocessed transactionType: " + transactionType);
-            }
-
+            IbanVSUtil.validate(messageJSON.toUserIBAN);
         } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            msg = messageSource.getMessage('depositDataError', null, locale)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
+            msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
+                    locale)
+            log.error("${msg} - ${ex.getMessage()}", ex)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
+                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"),
+                    contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.ERROR)
+        }
+        TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
+        switch(transactionType) {
+            case TypeVS.VICKET_USER_ALLOCATION:
+                processUserAllocation(messageSMIMEReq, messageJSON, locale)
+                break;
+            case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
+                processDepositFromVicketSource(messageSMIMEReq, messageJSON, locale)
+                break;
+            default:
+                log.debug("Unprocessed transactionType: " + transactionType);
         }
     }
 
@@ -101,73 +93,45 @@ class TransactionVSService {
     }
 
     private ResponseVS processDepositFromVicketSource(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
         String msg;
-        try {
-            if(!userVSService.isUserAdmin(signer.getNif())) {
-                msg = messageSource.getMessage('userAllocationAdminErrorMsg', [signer.getNif()].toArray(), locale)
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
-            }
-            Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
-            Calendar weekToCalendar = weekFromCalendar.clone();
-            weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
+        UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN)
+        if (!messageJSON.amount || !messageJSON.currency || !messageJSON.toUserIBAN || !toUser ||
+                (TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE != TypeVS.valueOf(messageJSON.operation))) {
+            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
+                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+        }
 
-            int numUsers = UserVS.createCriteria().count {
-                eq("type", UserVS.Type.USER)
-                le("dateCreated", weekFromCalendar.getTime())
-            }
-            def dataMapToSignBySystem = [numUsers:numUsers, amount: messageJSON.amount,
-                                         currency:messageJSON.currency, allocationMessage:new String(Base64.encode(messageSMIMEReq.content))]
-            String dataToSignBySystem = new JSONObject(dataMapToSignBySystem).toString()
-            ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage(userVSService.getSystemUser().getNif(),
-                    null, dataToSignBySystem, messageSource.getMessage("userAllocationReceiptMsg", null, locale))
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS
-            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.VICKET_USER_ALLOCATION_RECEIPT,
-                    smimeParent: messageSMIMEReq,
-                    content:responseVS.getSmimeMessage().getBytes())
-            MessageSMIME.withTransaction { messageSMIMEResp.save(); }
-            log.debug("processUserAllocation - ${messageJSON}")
-            BigDecimal numUsersBigDecimal = new BigDecimal(numUsers)
-            Currency currency = Currency.getInstance(messageJSON.currency)
-            String subject = messageJSON.subject
-            BigDecimal amount = new BigDecimal(messageJSON.amount)
-            if(numUsersBigDecimal == BigDecimal.ZERO) {
-                log.error("Users not found")
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:"Transaction without target users")
-            }
-            BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
-            BigDecimal totalUsers = userPart.multiply(numUsersBigDecimal)
-            if(!currency || !amount) throw new ExceptionVS(messageSource.getMessage('depositDataError', null, locale))
-
-            TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEResp,
-                    state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
-                    subject:subject, fromUserVS:signer, toUserVS: userVSService.getSystemUser(),
-                    currencyCode: currency.getCurrencyCode(), type:TransactionVS.Type.USER_ALLOCATION).save()
-
-            def usersToDeposit = UserVS.createCriteria().scroll {
-                eq("type", UserVS.Type.USER)
-                le("dateCreated", weekFromCalendar.getTime())
-            }
-            UserVS systemUser = UserVS.findWhere(type: UserVS.Type.SYSTEM)
-            while (usersToDeposit.next()) {
-                UserVS userVS = (UserVS) usersToDeposit.get(0);
-                TransactionVS userTransaction = new TransactionVS(transactionParent:transactionParent, amount:userPart,
-                        state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
-                        subject:subject, fromUserVS: systemUser, toUserVS:userVS, currency:currency,
-                        type:TransactionVS.Type.USER_ALLOCATION_INPUT).save()
-                if((usersToDeposit.getRowNumber() % 100) == 0) {
-                    sessionFactory.currentSession.flush()
-                    sessionFactory.currentSession.clear()
-                    log.debug("processed ${usersToDeposit.getRowNumber()}/${numUsers} user allocation for transaction ${transactionParent.id}");
-                }
-            }
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", type:TypeVS.VICKET_USER_ALLOCATION)
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            msg = messageSource.getMessage('depositDataError', null, locale)
+        if(!(signer instanceof VicketSource)) {
+            msg = messageSource.getMessage('vicketSourcePrivilegesErrorMsg', [messageJSON.operation].toArray(), locale)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
         }
+        Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
+        Calendar weekToCalendar = weekFromCalendar.clone();
+        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
+        log.debug("processDepositFromVicketSource - ${messageJSON}")
+
+        Currency currency = Currency.getInstance(messageJSON.currency)
+        String subject = messageJSON.subject
+        BigDecimal amount = new BigDecimal(messageJSON.amount)
+
+        Date validTo =  DateUtils.getDateFromString(messageJSON.validTo)
+        if(!validTo.after(Calendar.getInstance().getTime())) {
+            throw new Exception(messageSource.getMessage('depositDateRangeERRORMsg', [messageJSON.validTo].toArray(), locale))
+        }
+
+        TransactionVS transaction = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
+                state:TransactionVS.State.OK, validTo:validTo,
+                subject:subject, fromUserVS:signer, toUserVS: toUser,
+                currencyCode: currency.getCurrencyCode(), type:TransactionVS.Type.VICKET_SOURCE_INPUT).save()
+        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}")
+        log.debug("${metaInfMsg} - from VicketSource '${signer.id}' to userVS '${toUser.id}' ")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", metaInf:metaInfMsg,
+                type:TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE)
     }
 
     private ResponseVS processUserAllocation(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
@@ -280,7 +244,7 @@ class TransactionVSService {
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount
-        transactionMap.currency = transaction.currency.toString()
+        transactionMap.currency = transaction.currencyCode
 
         String messageSMIMEURL = null
         TransactionVS.withTransaction {

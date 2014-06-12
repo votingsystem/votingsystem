@@ -3,6 +3,7 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONArray
+import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
@@ -10,12 +11,13 @@ import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketBatchRequest
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
-
+import org.codehaus.groovy.runtime.StackTraceUtils
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 
 class TransactionController {
+
 
     def userVSService
     def transactionVSService
@@ -245,17 +247,26 @@ class TransactionController {
         if(ContentTypeVS.VICKET == contentTypeVS) {
             responseVS = vicketService.processVicketDeposit(messageSMIMEReq, null, request.locale)
         } else responseVS = transactionVSService.processDeposit(messageSMIMEReq, request.locale)
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+        return [responseVS:responseVS]
     }
 
     /**
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
+        log.error " Exception occurred. ${rootCause.getMessage()}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
+    }
+
+    def daoExceptionHandler(final DataAccessException exception) {
+        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
+        log.error " Exception occurred. ${rootCause.getMessage()}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${exception.getClass().getSimpleName()}"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: message(code:'paramsErrorMsg'),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
     }
 
 }

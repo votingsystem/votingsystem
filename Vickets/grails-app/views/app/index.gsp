@@ -32,6 +32,15 @@
             confiar o no en los Vickets emitidos por una determinada organización. Puede ser utilizado por un centro
             comercial para cupones y descuentos, para la gestión (y control) de entradas en eventos, como moneda alternativa...</p>
         </div>
+
+        <div class="text-justify" style="margin: 20px auto 0 auto;font-size: 1.2em;">
+            <h3 class="page-header">Alquimia digital</h3>
+            <p><b>Estímulo de actividad mediante monedas electrónicas</b></p>
+            <p>Lo que necesitan las empresas es demanda efectiva, es decir, que sus potenciales compradores tengan más
+            ingresos para gastar. Es solo el incremento de gasto por parte de los consumidores lo que puede hacer que
+            aumente la actividad.</p>
+        </div>
+
     </div>
 </body>
 </html>

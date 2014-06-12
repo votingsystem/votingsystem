@@ -10,6 +10,7 @@ import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -30,6 +31,7 @@ class UserVSService {
     def grailsLinkGenerator
     def messageSource
     def subscriptionVSService
+    def transactionVSService
     private UserVS systemUser
 
     public synchronized Map init() throws Exception {
@@ -82,7 +84,6 @@ class UserVSService {
 
         Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
 
-        log.debug("======== ${certChain}")
 
         responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
@@ -191,6 +192,21 @@ class UserVSService {
 		}
 		return [totalNumUsu:usersVS?usersVS.getTotalCount():0]
 	}
+
+    @Transactional
+    public Map getVicketSourceDataMap(VicketSource vicketSource) {
+        def transactionList = TransactionVS.createCriteria().list(max: 100, offset: 0,
+                sort:'dateCreated', order:'desc') {
+            eq('fromUserVS', vicketSource)
+        }
+        def transactionListJSON = []
+        transactionList.each { transaction ->
+            transactionListJSON.add(transactionVSService.getTransactionMap(transaction))
+        }
+        Map resultMap = getUserVSDataMap(vicketSource)
+        resultMap.transactionList = transactionListJSON
+        return resultMap
+    }
 
     @Transactional
     public Map getUserVSDataMap(UserVS userVS){

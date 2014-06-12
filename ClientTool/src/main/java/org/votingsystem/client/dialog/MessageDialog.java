@@ -89,6 +89,7 @@ public class MessageDialog {
         messageLabel.setGraphic(null);
         stage.centerOnScreen();
         stage.show();
+        stage.toFront();
     }
 
     public void showMessage(int statusCode, String message) {
@@ -98,6 +99,7 @@ public class MessageDialog {
         } else messageLabel.setGraphic( new ImageView(Utils.getImage(MessageDialog.this, "cancel_32")));
         stage.centerOnScreen();
         stage.show();
+        stage.toFront();
     }
 
     class Delta { double x, y; }

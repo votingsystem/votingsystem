@@ -21,9 +21,11 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.dialog.MessageDialog;
-import org.votingsystem.client.util.SignatureService;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.util.HttpHelper;
@@ -65,7 +67,7 @@ public class DocumentSignerStackPane extends StackPane {
     private Region progressRegion;
     private VBox progressBox;
     private OperationListener operationListener;
-    private Task<ResponseVS> operationHandlerTask;
+    private Text progressMessageText;
 
     public DocumentSignerStackPane(OperationListener operationListener) {
         this.operationListener = operationListener;
@@ -82,7 +84,7 @@ public class DocumentSignerStackPane extends StackPane {
         progressBox.setPrefWidth(400);
         progressBox.setPrefHeight(300);
 
-        Text progressMessageText = new Text();
+        progressMessageText = new Text();
         progressMessageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #f9f9f9;");
         progressBar = new ProgressBar();
         progressBar.setPrefWidth(200);
@@ -154,7 +156,8 @@ public class DocumentSignerStackPane extends StackPane {
 
         passwordVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
-        passwordVBox.getStylesheets().add(getClass().getResource("/resources/css/modal-dialog.css").toExternalForm());
+        passwordVBox.getStylesheets().add(getClass().getResource(
+                "/resources/css/documentSignerPasswordDialog.css").toExternalForm());
 
         passwordVBox.getStyleClass().add("message-lbl-bold");
         passwordVBox.getStyleClass().add("modal-dialog");
@@ -163,38 +166,45 @@ public class DocumentSignerStackPane extends StackPane {
         setPasswordDialogVisible(false);
         getChildren().addAll(progressRegion, progressBox, passwordRegion, passwordVBox);
 
-        operationHandlerTask = new OperationHandlerTask();
+        Task<ResponseVS> operationHandlerTask = new OperationHandlerTask();
+        progressMessageText.textProperty().bind(operationHandlerTask.messageProperty());
         progressBar.progressProperty().bind(operationHandlerTask.progressProperty());
         progressRegion.visibleProperty().bind(operationHandlerTask.runningProperty());
         progressBox.visibleProperty().bind(operationHandlerTask.runningProperty());
     }
 
     public void processOperation(Operation operation, String toUser, String textToSign, String subject,
-                                 SMIMEMessageWrapper smimeMessage, String serviceURL) {
+             SMIMEMessageWrapper smimeMessage, String serviceURL) {
         this.operation = operation;
         this.smimeMessage = smimeMessage;
         this.toUser = toUser;
         this.messageSubject = subject;
         this.serviceURL = serviceURL;
         this.textToSign = textToSign;
-        if(operation == Operation.SEND_SMIME) {
-            operationHandlerTask = new OperationHandlerTask();
-            progressBar.progressProperty().bind(operationHandlerTask.progressProperty());
-            progressRegion.visibleProperty().bind(operationHandlerTask.runningProperty());
-            progressBox.visibleProperty().bind(operationHandlerTask.runningProperty());
-            new Thread(operationHandlerTask).start();
-        } else {
-            PlatformImpl.runAndWait(new Runnable() {
+        if(operation == Operation.SEND_SMIME) initBackgroundTask();
+        else PlatformImpl.runAndWait(new Runnable() {
                 @Override public void run() {
                     setPasswordDialogVisible(true);
                 }
             });
-        }
+    }
+
+    private void initBackgroundTask() {
+        logger.debug("processOperation");
+        Task<ResponseVS> operationHandlerTask = new OperationHandlerTask();
+        progressMessageText.textProperty().bind(operationHandlerTask.messageProperty());
+        progressBar.progressProperty().bind(operationHandlerTask.progressProperty());
+        progressRegion.visibleProperty().bind(operationHandlerTask.runningProperty());
+        progressBox.visibleProperty().bind(operationHandlerTask.runningProperty());
+        new Thread(operationHandlerTask).start();
     }
 
     private void showMessage(int statusCode, String message) {
-        MessageDialog messageDialog = new MessageDialog();
-        messageDialog.showMessage(statusCode, message);
+        PlatformImpl.runLater(new Runnable(){
+            @Override public void run() {
+                MessageDialog messageDialog = new MessageDialog();
+                messageDialog.showMessage(statusCode, message);
+            }});
     }
 
     public void setPasswordDialogVisible(boolean isVisible) {
@@ -222,7 +232,7 @@ public class DocumentSignerStackPane extends StackPane {
                     if (password1.equals(password2)) {
                         password = password1;
                         setPasswordDialogVisible(false);
-                        new Thread(operationHandlerTask).start();
+                        initBackgroundTask();
                     } else {
                         setMessage(ContextVS.getMessage("passwordError"));
                     }
@@ -254,11 +264,14 @@ public class DocumentSignerStackPane extends StackPane {
             switch(operation) {
                 case SEND_SMIME:
                     try {
+                        updateMessage(ContextVS.getMessage("sendingDocumentMsg"));
+                        updateProgress(20, 100);
                         responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                                 serviceURL);
-                        showMessage(responseVS.getStatusCode(), responseVS.getMessage());
+                        updateProgress(80, 100);
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
+                        responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;
                 case SIGN_SMIME:
@@ -270,11 +283,13 @@ public class DocumentSignerStackPane extends StackPane {
                         logger.debug("toUser: " + toUser + " - timeStampService: " + timeStampService);
                         smimeMessage = ContentSignerHelper.genMimeMessage(null, toUser,
                                 textToSignJSON.toString(), password.toCharArray(), messageSubject, null);
+                        updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
+                        updateProgress(40, 100);
                         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);
                         responseVS = timeStamper.call();
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;
             }

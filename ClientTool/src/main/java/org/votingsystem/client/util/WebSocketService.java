@@ -20,7 +20,6 @@ import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.signature.util.KeyStoreUtil;
 
 import javax.websocket.*;
-import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -44,6 +43,7 @@ public class WebSocketService extends Service<ResponseVS> {
     private UserVS userVS;
     private BrowserVS browserVS;
     private Set<WebSocketListener> listeners = new HashSet<WebSocketListener>();
+    private String connectionMessage = null;
 
     public WebSocketService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
@@ -80,7 +80,7 @@ public class WebSocketService extends Service<ResponseVS> {
                 String password = passwordDialog.getPassword();
                 if(password != null) {
                     new Thread(new InitValidatedSessionTask(password,targetServer)).start();
-                }
+                } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
             }
         });
     }
@@ -113,7 +113,6 @@ public class WebSocketService extends Service<ResponseVS> {
         @Override protected ResponseVS call() throws Exception {
             try {
                 logger.debug("WebSocketTask - Connecting to " + targetServer.getWebSocketURL() + " ...");
-                initAuthenticatedSession();
                 client.connectToServer(new Endpoint() {
                     @Override public void onOpen(Session session, EndpointConfig EndpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
@@ -121,8 +120,12 @@ public class WebSocketService extends Service<ResponseVS> {
                                 consumeMessage(message);
                             }
                         });
+                        try {
+                            session.getBasicRemote().sendText(connectionMessage);
+                        } catch(Exception ex) {
+                            logger.error(ex.getMessage(), ex);
+                        }
                         WebSocketService.this.session = session;
-                        broadcastConnectionStatus(WebSocketListener.ConnectionStatus.OPEN);
                     }
 
                     @Override public void onClose(Session session, CloseReason closeReason) {
@@ -141,7 +144,7 @@ public class WebSocketService extends Service<ResponseVS> {
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
-        if(isConnectionEnabled) restart();
+        if(isConnectionEnabled) initAuthenticatedSession();
         if(!isConnectionEnabled && session != null && session.isOpen()) {
             try {session.close();}
             catch(Exception ex) {logger.error(ex.getMessage(), ex);}
@@ -182,6 +185,9 @@ public class WebSocketService extends Service<ResponseVS> {
                         }
                     });
                 }
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    broadcastConnectionStatus(WebSocketListener.ConnectionStatus.OPEN);
+                } else broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);
                 break;
             case MESSAGEVS_EDIT:
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) showMessage(
@@ -205,7 +211,8 @@ public class WebSocketService extends Service<ResponseVS> {
     }
 
     private void broadcastConnectionStatus(WebSocketListener.ConnectionStatus status) {
-        logger.debug("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
+        if(session == null) logger.debug("broadcastConnectionStatus - status: " + status.toString());
+        else logger.debug("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         for(WebSocketListener listener : listeners) {
             if(listener != null) listener.setConnectionStatus(status);
             else listeners.remove(listener);
@@ -257,7 +264,8 @@ public class WebSocketService extends Service<ResponseVS> {
                 userVS = smimeMessage.getSigner();
                 responseVS = timeStamper.call();
                 smimeMessage = timeStamper.getSmimeMessage();
-                sendMessage(getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null, smimeMessage).toString());
+                connectionMessage = getMessageJSON(TypeVS.INIT_VALIDATED_SESSION, null, null, smimeMessage).toString();
+                WebSocketService.this.restart();
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 broadcastConnectionStatus(WebSocketListener.ConnectionStatus.CLOSED);

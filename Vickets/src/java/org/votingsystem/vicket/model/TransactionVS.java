@@ -34,7 +34,8 @@ public class TransactionVS  implements Serializable {
         this.currencyCode = currencyCode;
     }
 
-    public enum Type { VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_SEND, VICKET_CANCELLATION;}
+    public enum Type { VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_SEND, VICKET_CANCELLATION,
+        VICKET_SOURCE_INPUT;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 

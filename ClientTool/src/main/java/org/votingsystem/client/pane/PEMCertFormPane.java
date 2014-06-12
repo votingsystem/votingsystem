@@ -45,6 +45,7 @@ public class PEMCertFormPane extends GridPane {
         add(messageLbl, 0, 0);
         textArea = new TextArea();
         textArea.setPrefHeight(400);
+        textArea.setWrapText(true);
         add(textArea, 0, 1);
 
         acceptButton = new Button(ContextVS.getMessage("acceptLbl"));

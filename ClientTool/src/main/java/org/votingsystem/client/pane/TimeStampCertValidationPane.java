@@ -46,6 +46,7 @@ public class TimeStampCertValidationPane extends GridPane {
         messageLbl.setStyle("");
         add(messageLbl, 0, 0);
         textArea = new TextArea();
+        textArea.setWrapText(true);
         textArea.setPrefHeight(400);
         add(textArea, 0, 1);
 

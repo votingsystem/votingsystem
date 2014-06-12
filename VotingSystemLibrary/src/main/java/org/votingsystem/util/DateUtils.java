@@ -4,9 +4,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.text.*;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 /**
 * @author jgzornoza
@@ -166,4 +164,13 @@ public class DateUtils {
         return calendar;
     }
 
+    public static Map<String, Date> getCurrentWeekPeriod() {
+        Calendar weekFromCalendar = getMonday(Calendar.getInstance());
+        Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
+        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7);
+        Map<String, Date> resultMap = new HashMap<String, Date>();
+        resultMap.put("weekFrom", weekFromCalendar.getTime());
+        resultMap.put("weekTo", weekToCalendar.getTime());
+        return resultMap;
+    }
 }
