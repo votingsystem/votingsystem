@@ -56,24 +56,15 @@ class UserVSService {
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("${methodName} - signer: ${userSigner?.nif}")
         String msg = null
-        ResponseVS responseVS = null
-        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-        def messageJSON = JSON.parse(documentStr)
-        if (!messageJSON.info || !messageJSON.certChainPEM || !messageJSON.IBAN ||
-                (TypeVS.VICKET_SOURCE_NEW != TypeVS.valueOf(messageJSON.operation))) {
+        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+        if (!messageJSON.info || (TypeVS.VICKET_SOURCE_NEW != TypeVS.valueOf(messageJSON.operation)) ||
+                !messageJSON.certChainPEM) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - PARAMS ERROR - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.ERROR, message:msg, reason:msg,
                     metaInf:MetaInfMsg.getErrorMsg(methodName), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        try {
-            IbanVSUtil.validate(messageJSON.IBAN);
-        } catch(Exception ex) {
-            msg = messageSource.getMessage('IBANCodeErrorMsg', [messageJSON.IBAN].toArray(), locale)
-            log.error("${msg} - ${ex.getMessage()}", ex)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"), type:TypeVS.ERROR)
-        }
+
         if(!isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                     TypeVS.VICKET_SOURCE_NEW.toString()].toArray(), locale)
@@ -85,13 +76,13 @@ class UserVSService {
         Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
 
 
-        responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
+        ResponseVS responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         X509Certificate x509Certificate = certChain.iterator().next();
 
         //{info:getEditor_editorDivData(),certChainPEM:$("#pemCert").val(), operation:Operation.VICKET_SOURCE_NEW}
 
-        VicketSource vicketSource = UserVS.getVicketSource(x509Certificate)
+        VicketSource vicketSource = UserVS.getUserVS(x509Certificate, new VicketSource())
         String validatedNIF = org.votingsystem.util.NifUtils.validate(vicketSource.getNif())
         if(!validatedNIF) {
             msg = messageSource.getMessage('NIFWithErrorsMsg', [vicketSource.getNif()].toArray(), locale)
@@ -100,13 +91,13 @@ class UserVSService {
                     metaInf: MetaInfMsg.getErrorMsg(methodName, "nif"))
         }
 
-        def vicketSourceDB = UserVS.findWhere(nif:validatedNIF.toUpperCase())
+        def vicketSourceDB = VicketSource.findWhere(nif:validatedNIF.toUpperCase())
 
-        if(!vicketSourceDB || !(vicketSourceDB instanceof VicketSource)) {
-            vicketSource.description = messageJSON.info
-            vicketSourceDB.setIBAN(messageJSON.IBAN)
-            vicketSource.save()
+        if(!vicketSourceDB) {
             vicketSourceDB = vicketSource
+            vicketSourceDB.description = messageJSON.info
+            vicketSourceDB.save()
+            vicketSourceDB.setIBAN(IbanVSUtil.getInstance().getIBAN(vicketSourceDB.id))
             log.debug("${methodName} - NEW vicketSource.id: '${vicketSourceDB.id}'")
         } else {
             log.debug("${methodName} - updating vicketSource.id: '${vicketSourceDB.id}'")
@@ -195,9 +186,10 @@ class UserVSService {
 
     @Transactional
     public Map getVicketSourceDataMap(VicketSource vicketSource) {
-        def transactionList = TransactionVS.createCriteria().list(max: 100, offset: 0,
-                sort:'dateCreated', order:'desc') {
+        def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('fromUserVS', vicketSource)
+            gt('dateCreated', currentWeekPeriod.getDateFrom())
         }
         def transactionListJSON = []
         transactionList.each { transaction ->

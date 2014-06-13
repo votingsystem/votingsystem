@@ -392,8 +392,7 @@ public class UserVS implements Serializable {
         return userVS;
     }
 
-    public static VicketSource getVicketSource (X509Certificate certificate) {
-        VicketSource userVS = new VicketSource();
+    public static UserVS getUserVS (X509Certificate certificate, UserVS userVS) {
         userVS.setCertificate(certificate);
         String subjectDN = certificate.getSubjectDN().getName();
         if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);

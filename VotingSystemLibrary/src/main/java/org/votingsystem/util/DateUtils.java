@@ -164,13 +164,28 @@ public class DateUtils {
         return calendar;
     }
 
-    public static Map<String, Date> getCurrentWeekPeriod() {
+    public static TimePeriod getCurrentWeekPeriod() {
         Calendar weekFromCalendar = getMonday(Calendar.getInstance());
         Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
         weekToCalendar.add(Calendar.DAY_OF_YEAR, 7);
-        Map<String, Date> resultMap = new HashMap<String, Date>();
-        resultMap.put("weekFrom", weekFromCalendar.getTime());
-        resultMap.put("weekTo", weekToCalendar.getTime());
-        return resultMap;
+        return new TimePeriod(weekFromCalendar.getTime(), weekToCalendar.getTime());
+    }
+
+    public static class TimePeriod {
+        private Date dateFrom;
+        private Date dateTo;
+
+        public TimePeriod(Date dateFrom, Date dateTo) {
+            this.dateFrom = dateFrom;
+            this.dateTo = dateTo;
+        }
+
+        public Date getDateFrom() {
+            return dateFrom;
+        }
+
+        public Date getDateTo() {
+            return dateTo;
+        }
     }
 }

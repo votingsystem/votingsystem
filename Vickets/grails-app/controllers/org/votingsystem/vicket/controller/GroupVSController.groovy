@@ -1,6 +1,8 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
+import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 
@@ -25,7 +27,7 @@ class GroupVSController {
             GroupVS.withTransaction {
                 result = GroupVS.get(params.long('id'))
             }
-            if(result) resultMap = groupVSService.getGroupVSDataMap(result)
+            if(result) resultMap = groupVSService.getGroupVSDetailedDataMap(result)
             else {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
@@ -259,10 +261,18 @@ class GroupVSController {
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.
      */
     def exceptionHandler(final Exception exception) {
-        log.error "Exception occurred. ${exception?.message}", exception
-        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
-                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
+        log.error " Exception occurred. ${rootCause.getMessage()}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
     }
 
+    def daoExceptionHandler(final DataAccessException exception) {
+        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
+        log.error " Exception occurred. ${rootCause.getMessage()}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${exception.getClass().getSimpleName()}"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: message(code:'paramsErrorMsg'),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
+    }
 }

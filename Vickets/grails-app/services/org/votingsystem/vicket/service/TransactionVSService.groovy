@@ -95,25 +95,25 @@ class TransactionVSService {
     private ResponseVS processDepositFromVicketSource(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        UserVS signer = messageSMIMEReq.userVS
+        UserVS messageSigner = messageSMIMEReq.userVS
         String msg;
         UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN)
-        if (!messageJSON.amount || !messageJSON.currency || !messageJSON.toUserIBAN || !toUser ||
-                (TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE != TypeVS.valueOf(messageJSON.operation))) {
+        if (!messageJSON.amount || !messageJSON.currency || !messageJSON.toUserIBAN || !toUser || ! messageJSON.fromUserIBAN ||
+                !messageJSON.fromUser|| (TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }
-
-        if(!(signer instanceof VicketSource)) {
+        log.debug("${methodName} - signer: '${messageSigner.nif}'")
+        VicketSource signer = VicketSource.findWhere(nif:messageSigner.nif)
+        if(!(signer)) {
             msg = messageSource.getMessage('vicketSourcePrivilegesErrorMsg', [messageJSON.operation].toArray(), locale)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
         }
         Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
         Calendar weekToCalendar = weekFromCalendar.clone();
         weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
-        log.debug("processDepositFromVicketSource - ${messageJSON}")
 
         Currency currency = Currency.getInstance(messageJSON.currency)
         String subject = messageJSON.subject
@@ -125,8 +125,8 @@ class TransactionVSService {
         }
 
         TransactionVS transaction = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
-                state:TransactionVS.State.OK, validTo:validTo,
-                subject:subject, fromUserVS:signer, toUserVS: toUser,
+                fromUserIBAN: messageJSON.fromUserIBAN, fromUser: messageJSON.fromUser,
+                state:TransactionVS.State.OK, validTo:validTo, subject:subject, fromUserVS:signer, toUserVS: toUser,
                 currencyCode: currency.getCurrencyCode(), type:TransactionVS.Type.VICKET_SOURCE_INPUT).save()
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}")
         log.debug("${metaInfMsg} - from VicketSource '${signer.id}' to userVS '${toUser.id}' ")
@@ -231,15 +231,20 @@ class TransactionVSService {
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
         if(transaction.fromUserVS) {
-            String fromUserVSName = "${transaction.fromUserVS.firstName} ${transaction.fromUserVS.lastName}"
-            transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:fromUserVSName]
+            transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.getDefaultName(),
+                type:transaction.fromUserVS.type.toString(), id:transaction.fromUserVS.id]
+            if(transaction.fromUserIBAN) {
+                transactionMap.fromUserVS.payer = [fromUserIBAN: transaction.fromUserIBAN,
+                                                   fromUser:transaction.fromUser]
+            }
         }
         if(transaction.toUserVS) {
-            String toUserVSName = "${transaction.toUserVS.firstName} ${transaction.toUserVS.lastName}"
-            transactionMap.toUserVS = [nif:transaction.toUserVS.nif, name:toUserVSName]
+            String toUserVSName = "${transaction.toUserVS.getDefaultName()}"
+            transactionMap.toUserVS = [nif:transaction.toUserVS.nif, name:toUserVSName, id:transaction.toUserVS.id,
+                                       type:transaction.toUserVS.type.toString()]
         }
-        transactionMap.dateCreated = DateUtils.getStringFromDate(transaction.dateCreated)
-        if(transaction.validTo) transactionMap.validTo = DateUtils.getStringFromDate(transaction.validTo)
+        transactionMap.dateCreated = transaction.dateCreated
+        if(transaction.validTo) transactionMap.validTo = transaction.validTo
         transactionMap.id = transaction.id
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()

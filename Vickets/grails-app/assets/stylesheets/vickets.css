@@ -146,7 +146,6 @@ input:focus:valid {
 .pageHeader {
     color: #6c0404;
     font-weight: bold;
-    text-decoration: underline;
     text-overflow: ellipsis;
 }
 

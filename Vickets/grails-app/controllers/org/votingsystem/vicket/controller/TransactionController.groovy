@@ -37,7 +37,7 @@ class TransactionController {
                 resultMap = transactionVSService.getTransactionMap(result)
             }
         }
-        if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+        if(request.contentType?.contains("json")) {
             render resultMap as JSON
         } else {
             render(view:'transactionViewer', model: [transactionvsMap:resultMap, receipt:receipt])

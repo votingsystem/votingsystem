@@ -18,6 +18,8 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
 
+import java.io.File;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -74,6 +76,7 @@ public class SignatureInfoPane extends GridPane {
         signerLabel.setStyle("-fx-font-weight: bold;");
 
         WebView webView = new WebView();
+        webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().loadContent(Formatter.getInfoCert(signer.getCertificate()));
         webView.setPrefHeight(150);
         add(webView, 0 ,2, 3, 1);

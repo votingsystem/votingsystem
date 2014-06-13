@@ -18,6 +18,7 @@ import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 
+import java.io.File;
 
 
 /**
@@ -73,6 +74,7 @@ public class SignedFilePane extends GridPane {
             add(openSignatureInfoButton, 1, 0);
         } else {
             signatureContentWebView = new WebView();
+            signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
             contentFormattedCheckBox = new CheckBox(ContextVS.getMessage("formattedCheckBoxLbl"));
             contentFormattedCheckBox.setSelected(true);
             contentFormattedCheckBox.setOnAction(new EventHandler<ActionEvent>() {

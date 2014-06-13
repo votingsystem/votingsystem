@@ -14,6 +14,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 
+import java.io.File;
 import java.security.cert.X509Certificate;
 
 /**
@@ -43,6 +44,7 @@ public class TimeStampCertPane extends GridPane {
         add(showPEMcertButton, 0, 1);
 
         WebView certInfoWebView = new WebView();
+        certInfoWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         certInfoWebView.setPrefHeight(400);
         add(certInfoWebView, 0, 2);
     }

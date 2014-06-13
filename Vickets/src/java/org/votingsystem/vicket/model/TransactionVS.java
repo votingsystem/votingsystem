@@ -26,14 +26,6 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public String getCurrencyCode() {
-        return currencyCode;
-    }
-
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
-    }
-
     public enum Type { VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_SEND, VICKET_CANCELLATION,
         VICKET_SOURCE_INPUT;}
 
@@ -56,6 +48,10 @@ public class TransactionVS  implements Serializable {
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
+
+    //This is for Transactions From Vicket Sources
+    @Column(name="fromUserIBAN") private String fromUserIBAN;
+    @Column(name="fromUser") private String fromUser;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
@@ -171,6 +167,30 @@ public class TransactionVS  implements Serializable {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public String getFromUserIBAN() {
+        return fromUserIBAN;
+    }
+
+    public void setFromUserIBAN(String fromUserIBAN) {
+        this.fromUserIBAN = fromUserIBAN;
+    }
+
+    public String getFromUser() {
+        return fromUser;
+    }
+
+    public void setFromUser(String fromUser) {
+        this.fromUser = fromUser;
     }
 
     public void afterInsert() {

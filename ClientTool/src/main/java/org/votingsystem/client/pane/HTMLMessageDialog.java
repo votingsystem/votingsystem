@@ -15,6 +15,8 @@ import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 
+import java.io.File;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -37,6 +39,7 @@ public class HTMLMessageDialog {
 
         VBox verticalBox = new VBox(10);
         webView = new WebView();
+        webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.setPrefHeight(400);
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(new EventHandler<ActionEvent>() {

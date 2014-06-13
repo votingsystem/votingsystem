@@ -36,10 +36,10 @@
                     </div>
                 </g:if>
             </g:if>
-            <g:set var="currentWeekPeriod" value="${org.votingsystem.util.DateUtils.getCurrentWeekPeriod()}" scope="page" />
-            <g:set var="weekFrom" value="${formatDate(date:currentWeekPeriod.weekFrom, formatName:'webViewDateFormat')}" scope="page" />
-            <g:set var="weekTo" value="${formatDate(date:currentWeekPeriod.weekTo, formatName:'webViewDateFormat')}" scope="page" />
-
+            <%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
+                def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
+                def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
+            %>
 
             <div class="text-center" style="font-size: 1.2em;font-weight: bold;">
                 <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>
@@ -60,11 +60,11 @@
                     <tbody>
                     <g:each in="${uservsMap?.transactionList}">
                         <g:set var="transactionURL" value="${createLink(uri:'/transaction', absolute:true)}/${it.id}" scope="page" />
-                        <g:set var="transactionDate" value="${new Date().parse("yyyy/MM/dd HH:mm:ss", it.dateCreated)}" scope="page" />
+                        <% def transactionDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
                         <tr>
                             <td class="text-center">${it.amount}</td>
                             <td class="text-center">${it.currency}</td>
-                            <td class="text-center"><g:formatDate date="${transactionDate}" formatName="webViewDateFormat"/></td>
+                            <td class="text-center">${transactionDate}</td>
                             <td class="text-center">
                                 <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
                             </td>

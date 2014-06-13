@@ -14,6 +14,8 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
+import java.io.File;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -46,6 +48,7 @@ public class EventVSInfoPane extends GridPane {
         add(dateFinishValueLabel, 1, 2);
 
         WebView webView = new WebView();
+        webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().loadContent(metaInf.getFormattedInfo());
         webView.setPrefHeight(300);
         add(webView, 0, 3, 2, 1);

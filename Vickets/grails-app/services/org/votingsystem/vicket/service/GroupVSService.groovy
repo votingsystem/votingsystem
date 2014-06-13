@@ -1,7 +1,9 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.votingsystem.model.*
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
 
@@ -18,6 +20,7 @@ class GroupVSService {
     def grailsApplication
     def signatureVSService
     def subscriptionVSService
+    def transactionVSService
 
 	public void init() { }
 
@@ -115,8 +118,9 @@ class GroupVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(fromUser, toUser, documentStr, subject, null)
-
+        byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(fromUser, toUser,
+                messageSMIMEReq.getSmimeMessage()?.getSignedContent(), subject, null)
+        log.debug("${metaInf}")
         MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf,
                 smimeParent:messageSMIMEReq, content:smimeMessageRespBytes).save() }
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
@@ -180,6 +184,32 @@ class GroupVSService {
         }
         return resultMap
 	}
+
+    @Transactional
+    public Map getGroupVSDetailedDataMap(GroupVS groupVS){
+        Map resultMap = getGroupVSDataMap(groupVS)
+        def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
+        def transactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('fromUserVS', groupVS)
+            gt('dateCreated', currentWeekPeriod.getDateFrom())
+        }
+        def transactionFromListJSON = []
+        transactionListDB.each { transaction ->
+            transactionFromListJSON.add(transactionVSService.getTransactionMap(transaction))
+        }
+
+        transactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('toUserVS', groupVS)
+            gt('dateCreated', currentWeekPeriod.getDateFrom())
+        }
+        def transactionToListJSON = []
+        transactionListDB.each { transaction ->
+            transactionToListJSON.add(transactionVSService.getTransactionMap(transaction))
+        }
+        resultMap.transactionFromList = transactionFromListJSON
+        resultMap.transactionToList = transactionToListJSON
+        return resultMap
+    }
 
 }
 

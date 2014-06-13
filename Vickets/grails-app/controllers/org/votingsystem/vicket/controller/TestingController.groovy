@@ -3,11 +3,13 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.VicketSource
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.IbanVSUtil
 
+import java.lang.reflect.Constructor
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -29,12 +31,13 @@ class TestingController {
 
 
     def index() {
-        render Currency.getInstance("EUR").getCurrencyCode()
+        Object object = VicketSource.class.newInstance();
+        render object.getClass()
         return false
     }
 
     def IBAN() {
-        render IbanVSUtil.getInstance().getIBAN(12)
+        render IbanVSUtil.getInstance().getIBAN(1111111111)
         return false
     }
 

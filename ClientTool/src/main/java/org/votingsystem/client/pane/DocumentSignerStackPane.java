@@ -288,7 +288,7 @@ public class DocumentSignerStackPane extends StackPane {
                         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);
                         responseVS = timeStamper.call();
                     } catch(Exception ex) {
-                        logger.error(ex.getMessage(), ex);
+                        logger.error(ex.getMessage() + " - " + textToSign.replaceAll("(\\r|\\n)", "\\\\n"), ex);
                         responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;

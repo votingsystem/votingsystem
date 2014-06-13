@@ -87,6 +87,11 @@ class UrlMappings {
             }
         }
 
+        "/IBAN/from/$IBANCode" {
+            controller = "IBAN"
+            action = "index"
+        }
+
         "/messageSMIME/$id" {
             controller = "messageSMIME"
             action = [GET:"index"]

@@ -89,11 +89,6 @@
 
       });
 
-    var groupURL = null
-
-    function resultOKCallback() {
-        window.location.href = groupURL + "?menu=admin"
-    }
 
     function newGroupVSCallback(appMessage) {
         console.log("newGroupVSCallback - message from native client: " + appMessage);
@@ -104,12 +99,9 @@
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = '<g:message code="newGroupOKCaption"/>'
-                var msgTemplate = '<g:message code='accessLinkMsg'/>';
-                msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
-                callBackResult = resultOKCallback
-                groupURL = appMessageJSON.URL
+                window.location.href = appMessageJSON.URL + "?menu=" + menuType
             }
-            showResultDialog(caption, msg, callBackResult)
+            showResultDialog(caption, msg)
         }
         window.scrollTo(0,0);
     }
