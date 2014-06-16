@@ -10,7 +10,7 @@
     <asset:stylesheet src="vickets.css"/>
 </head>
 <body>
-<div class="" style="margin: 20px;">
+<div class="" style="max-width:1000px; margin: 0px auto 0px auto; padding:0px 30px 0px 30px;">
     <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
     <div style=""><b><g:message code="subjectLbl"/>: </b>${transactionvsMap.subject}</div>
     <div style=""><b><g:message code="amountLbl"/>: </b>${transactionvsMap.amount} ${transactionvsMap.currency}</div>
@@ -37,10 +37,12 @@
         <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.toUserVS.name}</div>
         <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.toUserVS.nif}</div>
     </div>
-</div>
-    <button id="saveReceiptButton" type="button" class="btn btn-accept-vs" onclick="saveReceipt();"
-            style="margin:10px 0px 0px 0px; float:right;"><g:message code="saveReceiptLbl"/>
-    </button>
+</div >
+    <div style="max-width: 600px;">
+        <button type="button" class="btn btn-accept-vs" onclick="openReceipt();"
+                style="margin:10px 0px 0px 0px; float:right;"><g:message code="openReceiptLbl"/>
+        </button>
+    </div>
 </div>
 
 <div id="receipt" style="display:none;">
@@ -59,6 +61,7 @@
 <asset:script>
 
     $(function() { })
+
     var fromUserTemplate
     var toUserTemplate
 
@@ -98,20 +101,33 @@
             "${transactionvsMap.toUserVS.id}")
     </g:if>
 
+    function openReceipt() {
+        console.log("openReceipt")
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
+        webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
+        webAppMessage.callerCallback = 'saveReceiptCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+    }
 
-       function saveReceipt() {
-           console.log("saveReceipt")
-           var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT)
-           webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
-           webAppMessage.callerCallback = 'saveReceiptCallback'
-           VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-       }
+    function openReceiptCallback(appMessage) {
+        console.log("openReceiptCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        console.log("openReceiptCallback - message from native client: " + appMessage);
+    }
 
-       function saveReceiptCallback(appMessage) {
-           console.log("saveReceiptCallback - message from native client: " + appMessage);
-           var appMessageJSON = toJSON(appMessage)
-           console.log("saveReceiptCallback - message from native client: " + appMessage);
-       }
+    function saveReceipt() {
+        console.log("saveReceipt")
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT)
+        webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
+        webAppMessage.callerCallback = 'saveReceiptCallback'
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+    }
+
+    function saveReceiptCallback(appMessage) {
+        console.log("saveReceiptCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        console.log("saveReceiptCallback - message from native client: " + appMessage);
+    }
 
 </asset:script>
 <asset:deferredScripts/>

@@ -267,6 +267,9 @@ public class ActorVS implements Serializable {
         return getServerURL() + "/userVS/prepareUserBaseData";
     }
 
+    @Transient public String getReceiptViewerURL() {
+        return getServerURL() + "/receipt/contentViewer";}
+
     @Transient public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();

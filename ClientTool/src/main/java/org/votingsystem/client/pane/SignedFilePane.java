@@ -1,5 +1,8 @@
 package org.votingsystem.client.pane;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -76,7 +79,7 @@ public class SignedFilePane extends GridPane {
             signatureContentWebView = new WebView();
             signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
             contentFormattedCheckBox = new CheckBox(ContextVS.getMessage("formattedCheckBoxLbl"));
-            contentFormattedCheckBox.setSelected(true);
+            contentFormattedCheckBox.setSelected(false);
             contentFormattedCheckBox.setOnAction(new EventHandler<ActionEvent>() {
                 @Override public void handle(ActionEvent actionEvent) {
                     changeContentFormat();
@@ -106,6 +109,7 @@ public class SignedFilePane extends GridPane {
             setColumnSpan(signatureContentWebView, 2);
             add(contentFormattedCheckBox, 0, 2);
         }
+        changeContentFormat();
     }
 
     private void initComponents() {
@@ -115,6 +119,9 @@ public class SignedFilePane extends GridPane {
         }
     }
 
+    public SignedFile getSignedFile () {
+        return signedFile;
+    }
 
     private void openPDFDocument() {
         try {
@@ -124,7 +131,26 @@ public class SignedFilePane extends GridPane {
         }
     }
 
+    private ChangeListener changeListener = null;
+    private JSONObject signedContentJSON = null;
+
     public void changeContentFormat() {
+        if(signedContentJSON == null && signedFile.isSMIME()) {
+            signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
+        }
+        if(changeListener == null) {
+            final String jsCommand = ("showContent('" + signedFile.getSMIMEMessageWraper().getSignedContent() + "')");
+            changeListener = new ChangeListener<Worker.State>() {
+                @Override
+                public void changed(ObservableValue<? extends Worker.State> ov, Worker.State oldState,
+                                    Worker.State newState) {
+                    //logger.debug("newState: " + newState);
+                    if (newState == Worker.State.SUCCEEDED) {
+                        signatureContentWebView.getEngine().executeScript(jsCommand);
+                    }
+                }
+            };
+        }
         logger.debug("changeContentFormat: " + contentFormattedCheckBox.isSelected());
         if (contentFormattedCheckBox.isSelected()) {
             try {
@@ -133,6 +159,11 @@ public class SignedFilePane extends GridPane {
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
-        } else signatureContentWebView.getEngine().loadContent(signedFile.getSMIMEMessageWraper().getSignedContent());
+            signatureContentWebView.getEngine().getLoadWorker().stateProperty().removeListener(changeListener);
+        } else {
+            signatureContentWebView.getEngine().getLoadWorker().stateProperty().addListener(changeListener);
+            signatureContentWebView.getEngine().load(ContextVS.getInstance().getDefaultServer().getReceiptViewerURL() +
+                    "?operation=" + signedContentJSON.getString("operation"));
+        }
     }
 }

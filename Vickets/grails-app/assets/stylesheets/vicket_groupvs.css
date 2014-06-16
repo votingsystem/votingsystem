@@ -35,7 +35,7 @@
     max-width: 400px;
     background-color: #f2f2f2;
     margin: 10px 5px 5px 10px;
-    -moz-border-radius: 5px; border-radius: 5px;
+    -moz-border-radius: 3px; border-radius: 3px;
     cursor: pointer;
     max-height:165px;
     overflow:hidden;
@@ -48,7 +48,7 @@
     height:80px;
     padding: 10px;
     vertical-align:middle;
-    padding: 0px 5px 0px 5px;
+    padding: 0px 5px 20px 5px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -80,11 +80,11 @@
 }
 
 .groupvsActive {
-    border: 1px solid #388746;
+    border: 1px solid #e3411a;
 }
 
 .groupvsActive .groupvsSubjectDiv{
-    background-color:#388746;
+    background-color:#e3411a;
 }
 
 
@@ -99,8 +99,9 @@
 .numTotalUsersDiv {
     right: 0px;
     display: block;
-    color:#388746;
+    color:#e3411a;
     margin: 0px 20px 0px 0px;
+    text-transform:uppercase;
 }
 
 .groupvsFinished {
@@ -114,6 +115,7 @@
 .groupvsRepresentativeDiv {
     position: relative;
     white-space:nowrap;
+    color:#91140a;
     overflow:hidden;
     text-overflow: ellipsis;
     font-weight: bold;

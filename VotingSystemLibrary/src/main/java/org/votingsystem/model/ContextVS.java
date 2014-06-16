@@ -168,6 +168,7 @@ public class ContextVS {
     private VicketServer vicketServer;
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
+    private ActorVS defaultServer;
     private static ContextVS INSTANCE;
 
     private ContextVS(){
@@ -542,4 +543,13 @@ public class ContextVS {
         else if(server instanceof ControlCenterVS) setControlCenter((ControlCenterVS) server);
         else logger.error("setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
     }
+
+    public void setDefaultServer(ActorVS server) {
+        this.defaultServer = server;
+    }
+
+    public ActorVS getDefaultServer() {
+        return this.defaultServer;
+    }
+
 }

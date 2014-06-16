@@ -127,6 +127,7 @@ public class SignedFile {
     }
     
     public boolean isSMIME() {
+        if(smimeMessageWraper != null) return true;
         if(signedFileBytes == null) return false;
         if(name.toLowerCase().endsWith(".p7m") && signatureVerified) return true;
         else return false;

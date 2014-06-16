@@ -36,7 +36,7 @@ public class DocumentSignersPane extends GridPane {
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
         tabPane.setSide(Side.TOP);
-        setStyle("-fx-max-width: 800px;");
+        setStyle("-fx-max-width: 900px;");
 
         Button closeButton = new Button(ContextVS.getMessage("closeLbl"));
         closeButton.setGraphic((new ImageView(Utils.getImage(this, "save_data"))));

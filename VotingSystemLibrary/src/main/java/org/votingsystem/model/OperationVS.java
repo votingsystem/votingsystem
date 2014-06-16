@@ -209,7 +209,7 @@ public class OperationVS {
     }
 
     public static OperationVS populate (Map dataMap) {
-        logger.debug("- populate ");
+        logger.debug("populate");
         if(dataMap == null) return null;
         OperationVS operationVS = new OperationVS();
         if (dataMap.containsKey("operation")) operationVS.setType(TypeVS.valueOf((String) dataMap.get("operation")));

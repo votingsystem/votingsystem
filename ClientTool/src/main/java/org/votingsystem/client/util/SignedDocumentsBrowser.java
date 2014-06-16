@@ -52,7 +52,6 @@ public class SignedDocumentsBrowser extends StackPane{
     private MessageDialog messageDialog = null;
     private MetaInf metaInf;
     private Button validateBackupButton;
-    private String mensajeMime;
     private int selectedFileIndex;
     private Text progressMessageText;
     private VBox progressBox;
@@ -117,7 +116,7 @@ public class SignedDocumentsBrowser extends StackPane{
                 saveMessage();
             }
         });
-        HBox.setMargin(saveButton, new Insets(0, 10, 0, 0));
+        HBox.setMargin(saveButton, new Insets(5, 10, 5, 0));
         HBox.setMargin(validateBackupButton, new Insets(0, 10, 0, 0));
 
         navigateButtonsHBox.setVisible(false);
@@ -190,7 +189,7 @@ public class SignedDocumentsBrowser extends StackPane{
         });
     }
 
-    public static void showDialog() {
+    public static void showDialog(String signedDocumentStr) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 SignedDocumentsBrowser signedDocumentsBrowser = new SignedDocumentsBrowser();
@@ -199,18 +198,26 @@ public class SignedDocumentsBrowser extends StackPane{
                 primaryStage.initModality(Modality.WINDOW_MODAL);
                 primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
                 primaryStage.setResizable(true);
-                FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                        ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
-                fileChooser.getExtensionFilters().add(extFilter);
-                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                File file = fileChooser.showOpenDialog(primaryStage);
+                File file = null;
+                if(signedDocumentStr == null) {
+                    FileChooser fileChooser = new FileChooser();
+                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                            ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
+                    fileChooser.getExtensionFilters().add(extFilter);
+                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                    //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+                    file = fileChooser.showOpenDialog(primaryStage);
+                } else {
+                    file = FileUtils.getFileFromString(signedDocumentStr);
+                    File newFile = new File(file.getParent() + File.separator + ContextVS.getMessage("receiptLbl"));
+                    file.renameTo(newFile);
+                    file = newFile;
+                }
                 if(file != null){
                     signedDocumentsBrowser.openFile(file);
                     primaryStage.centerOnScreen();
                     primaryStage.show();
-                }
+                } else logger.debug("File null dialog will not be opened");
             }
         });
     }
@@ -221,7 +228,8 @@ public class SignedDocumentsBrowser extends StackPane{
             File file = fileChooser.showSaveDialog(getScene().getWindow());
             String fileName = file.getAbsolutePath() + ContentTypeVS.SIGNED.getExtension();
             FileOutputStream fos = new FileOutputStream(new File(fileName));
-            fos.write(mensajeMime.getBytes());
+            SignedFilePane selectedSignedFilePane = ((SignedFilePane)tabPane.getSelectionModel().getSelectedItem().getContent());
+            fos.write(selectedSignedFilePane.getSignedFile().getSMIMEMessageWraper().getBytes());
             fos.close();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

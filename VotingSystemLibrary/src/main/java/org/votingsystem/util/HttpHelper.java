@@ -71,6 +71,7 @@ public class HttpHelper {
     }
 
     public void initVotingSystemSSLMode() {
+        logger.debug("initVotingSystemSSLMode");
         try {
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);

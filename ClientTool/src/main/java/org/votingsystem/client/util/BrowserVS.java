@@ -412,6 +412,9 @@ public class BrowserVS extends Region {
                     case SELECT_IMAGE:
                         selectImage(operationVS);
                         break;
+                    case OPEN_RECEIPT:
+                        openReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
+                        break;
                     case SAVE_RECEIPT:
                         saveReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
                         break;
@@ -476,6 +479,10 @@ public class BrowserVS extends Region {
         } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
     }
 
+    private void openReceipt(String messageToSignatureClient, String callbackFunction) throws Exception{
+        logger.debug("openReceipt");
+        SignedDocumentsBrowser.showDialog(messageToSignatureClient);
+    }
 
     private void selectImage(final OperationVS operationVS) throws Exception {
         PlatformImpl.runLater(new Runnable() {

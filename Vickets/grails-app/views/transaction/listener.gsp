@@ -51,19 +51,35 @@
 </html>
 <asset:script>
     var socketService = new SocketService()
-    socketService.connect()
 
-    var dynatable
+    function connectToWs() {
 
-    $(function() {
-        $("#navBarSearchInput").css( "visibility", "visible" );
-        $('#transaction_table').dynatable({
-                features: dynatableFeatures,
-                inputs: dynatableInputs,
-                params: dynatableParams,
-                dataset: {
-                    ajax: true,
-                    ajaxUrl: "${createLink(controller: 'transaction', action: 'index')}",
+        socketService.connect()
+
+        socketService.socket.onmessage = function (message) {
+            console.log('socket.onmessage - message.data: ' + message.data);
+            var messageJSON = toJSON(message.data)
+            addRecordToTable(messageJSON)
+        }
+
+        socketService.socket.onopen = function () {
+            console.log('listener - WebSocket connection opened');
+            socketService.sendMessage({operation:Operation.LISTEN_TRANSACTIONS, locale:navigator.language})
+        };
+    }
+
+var dynatable
+
+$(function() {
+    connectToWs();
+    $("#navBarSearchInput").css( "visibility", "visible" );
+    $('#transaction_table').dynatable({
+            features: dynatableFeatures,
+            inputs: dynatableInputs,
+            params: dynatableParams,
+            dataset: {
+                ajax: true,
+                ajaxUrl: "${createLink(controller: 'transaction', action: 'index')}",
                     ajaxOnLoad: false,
                     perPageDefault: 50,
                     records: []
@@ -121,17 +137,6 @@
         dynatable.settings.dataset.records.push(record);
         dynatable.process();
     }
-
-    socketService.socket.onmessage = function (message) {
-        console.log('socket.onmessage - message.data: ' + message.data);
-        var messageJSON = toJSON(message.data)
-        addRecordToTable(messageJSON)
-    }
-
-    socketService.socket.onopen = function () {
-        console.log('listener - WebSocket connection opened');
-        socketService.sendMessage({operation:Operation.LISTEN_TRANSACTIONS, locale:navigator.language})
-    };
 
     function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
         var transactionType

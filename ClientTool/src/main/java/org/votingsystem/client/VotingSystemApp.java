@@ -24,10 +24,11 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
-import org.votingsystem.client.pane.DocumentSignerPane;
+import org.votingsystem.client.pane.SignDocumentPane;
 import org.votingsystem.client.util.*;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.util.HttpHelper;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -117,6 +118,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 String accessControlServerURL = null;
                 String vicketsServerURL = null;
                 if(loadedFromJar) {
+                    HttpHelper.getInstance().initVotingSystemSSLMode();
                     accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
                     vicketsServerURL = ContextVS.getMessage("prodVicketsServerURL");
                 } else {
@@ -131,7 +133,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 catch(Exception ex) {logger.error(ex.getMessage(), ex);}
                 try {
                     responseVS = SignatureService.checkServer(vicketsServerURL);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) setVicketServerAvailable(true);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        setVicketServerAvailable(true);
+                        ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
+                    }
                 }
                 catch(Exception ex) {logger.error(ex.getMessage(), ex);}
             }
@@ -196,7 +201,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         openSignedFileButton.setGraphic(new ImageView(Utils.getImage(this, "application-certificate")));
         openSignedFileButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                SignedDocumentsBrowser.showDialog();
+                SignedDocumentsBrowser.showDialog(null);
 
             }});
         openSignedFileButton.setPrefWidth(500);
@@ -205,7 +210,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         signDocumentButton.setGraphic(new ImageView(Utils.getImage(this, "pencil")));
         signDocumentButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                DocumentSignerPane.showDialog();
+                SignDocumentPane.showDialog();
 
             }});
         signDocumentButton.setPrefWidth(500);

@@ -38,9 +38,9 @@ import java.util.UUID;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class DocumentSignerStackPane extends StackPane {
+public class SignDocumentStackPane extends StackPane {
 
-    private static Logger logger = Logger.getLogger(DocumentSignerStackPane.class);
+    private static Logger logger = Logger.getLogger(SignDocumentStackPane.class);
 
     public enum Operation {SEND_SMIME, SIGN_SMIME}
 
@@ -69,7 +69,7 @@ public class DocumentSignerStackPane extends StackPane {
     private OperationListener operationListener;
     private Text progressMessageText;
 
-    public DocumentSignerStackPane(OperationListener operationListener) {
+    public SignDocumentStackPane(OperationListener operationListener) {
         this.operationListener = operationListener;
         progressRegion = new Region();
         progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");

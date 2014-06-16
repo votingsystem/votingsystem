@@ -57,29 +57,39 @@ public class TimeStampPane extends GridPane {
         Label timeStampDateLabel = new Label(ContextVS.getMessage("dateGeneratedLbl") + ":");
         timeStampDateLabel.setStyle("-fx-font-weight: bold;");
         add(timeStampDateLabel, 0, 0);
+        setMargin(timeStampDateLabel, new Insets(10, 0 , 10, 0));
+
 
         TextField timeStampText =new TextField(DateUtils.getLongDate_Es(tsInfo.getGenTime()));
+        timeStampText.setEditable(false);
         add(timeStampText, 1, 0);
 
         Label serialNumberLabel = new Label(ContextVS.getMessage("timeStampSerialNumberLbl") + ":");
         serialNumberLabel.setStyle("-fx-font-weight: bold;");
         add(serialNumberLabel, 0, 1);
+        setMargin(serialNumberLabel, new Insets(10, 0 , 10, 0));
+
         TextField serialNumberTextField = new TextField(tsInfo.getSerialNumber().toString());
+        serialNumberTextField.setEditable(false);
         add(serialNumberTextField, 1, 1);
 
 
         Label certSignerSerialNumberLabel = new Label(ContextVS.getMessage("certSignerSerialNumberLbl") + ":");
         certSignerSerialNumberLabel.setStyle("-fx-font-weight: bold;");
         add(certSignerSerialNumberLabel, 0, 2);
+        setMargin(certSignerSerialNumberLabel, new Insets(10, 0 , 10, 0));
 
         TextField certSignerSerialNumberTextField =new TextField(signerId.getSerialNumber().toString());
+        certSignerSerialNumberTextField.setEditable(false);
         add(certSignerSerialNumberTextField, 1, 2);
 
 
         Label certIssuerLabel = new Label(ContextVS.getMessage("signingCertIssuerLbl") + ":");
         certIssuerLabel.setStyle("-fx-font-weight: bold;");
         add(certIssuerLabel, 0, 3);
+        setMargin(certIssuerLabel, new Insets(10, 0 , 0, 0));
         TextField certIssuerTextField = new TextField(signerId.getIssuerAsString());
+        certIssuerTextField.setEditable(false);
         add(certIssuerTextField, 0, 4, 2, 1);
 
         CollectionStore store = (CollectionStore) timeStampToken.getCertificates();

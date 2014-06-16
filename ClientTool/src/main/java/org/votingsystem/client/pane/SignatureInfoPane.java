@@ -2,12 +2,16 @@ package org.votingsystem.client.pane;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.model.SignedFile;
@@ -52,6 +56,7 @@ public class SignatureInfoPane extends GridPane {
     private void initComponents() {
         Label signatureAlgorithmLabel = new Label(ContextVS.getMessage("signatureAlgorithmLbl") + ": ");
         signatureAlgorithmLabel.setStyle("-fx-font-weight: bold;");
+        setPadding(new Insets(10, 10 , 10, 10));
         add(signatureAlgorithmLabel, 0, 0);
         Label signatureAlgorithmValueLabel = new Label(signatureAlgorithmValue);
         add(signatureAlgorithmValueLabel, 1, 0);
@@ -70,6 +75,7 @@ public class SignatureInfoPane extends GridPane {
                 }
             });
             add(timeStampButton, 2, 1);
+            setMargin(timeStampButton, new Insets(10, 0, 10, 0));
         }
 
         Label signerLabel = new Label(ContextVS.getMessage("signerLbl") + ": ");
@@ -78,37 +84,62 @@ public class SignatureInfoPane extends GridPane {
         WebView webView = new WebView();
         webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().loadContent(Formatter.getInfoCert(signer.getCertificate()));
-        webView.setPrefHeight(150);
-        add(webView, 0 ,2, 3, 1);
+        webView.setPrefHeight(170);
+        setHgrow(webView, Priority.ALWAYS);
+        setVgrow(webView, Priority.ALWAYS);
+        webView.setStyle("-fx-word-wrap:break-word;");
+        add(webView, 0, 2, 3, 1);
 
-        getColumnConstraints().addAll(new ColumnConstraints(), new ColumnConstraints(400), new ColumnConstraints());
+        getColumnConstraints().addAll(new ColumnConstraints(), new ColumnConstraints(500), new ColumnConstraints());
+
+        GridPane signatureInfoGridPane = new GridPane();
+        CheckBox signatureInfoCheckBox = new CheckBox(ContextVS.getMessage("signatureInfoCheckBoxLbl"));
+        signatureInfoCheckBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent actionEvent) {
+                if(SignatureInfoPane.this.getChildren().contains(signatureInfoGridPane)) {
+                    SignatureInfoPane.this.getChildren().remove(signatureInfoGridPane);
+                } else SignatureInfoPane.this.add(signatureInfoGridPane, 0 , 4);
+                SignatureInfoPane.this.getScene().getWindow().sizeToScene();
+            }});
+
+        add(signatureInfoCheckBox, 0, 3);
+        setMargin(signatureInfoCheckBox, new Insets(10, 0 , 10, 0));
 
         if(signedMessage != null) {
+
+            signatureInfoGridPane.setMinWidth(1000);
+
             Label hashBase64Label = new Label(ContextVS.getMessage("hashBase64Lbl") + ": ");
             hashBase64Label.setStyle("-fx-font-weight: bold;");
+            signatureInfoGridPane.setMargin(hashBase64Label, new Insets(10, 0 , 10, 0));
 
-            add(hashBase64Label, 0, 3);
+            signatureInfoGridPane.add(hashBase64Label, 0, 0);
             TextField hashBase64Value = new TextField(signer.getContentDigestBase64());
+            hashBase64Value.setMinWidth(600);
             hashBase64Value.setEditable(false);
-            add(hashBase64Value, 1, 3);
+
+            signatureInfoGridPane.add(hashBase64Value, 1, 0);
 
             Label hashHexadecimalLabel = new Label(ContextVS.getMessage("hashHexadecimalLbl") + ": ");
-            add(hashHexadecimalLabel, 0, 4);
+            signatureInfoGridPane.add(hashHexadecimalLabel, 0, 2);
+            setMargin(hashHexadecimalLabel, new Insets(10, 0 , 10, 0));
             TextField hashHexadecimalValue = new TextField(signer.getContentDigestHex());
             hashHexadecimalValue.setEditable(false);
-            add(hashHexadecimalValue, 1, 4);
+            signatureInfoGridPane.add(hashHexadecimalValue, 1, 2);
 
             Label signatureBase64Label = new Label(ContextVS.getMessage("signatureBase64lLbl") + ": ");
-            add(signatureBase64Label, 0, 5);
+            signatureInfoGridPane.add(signatureBase64Label, 0, 3);
+            setMargin(signatureBase64Label, new Insets(10, 0 , 10, 0));
             TextField signatureBase64Value = new TextField(signer.getSignatureBase64());
             signatureBase64Value.setEditable(false);
-            add(signatureBase64Value, 1, 5);
+            signatureInfoGridPane.add(signatureBase64Value, 1, 3);
 
             Label signatureHexadecimalLabel = new Label(ContextVS.getMessage("signatureHexadecimalLbl") + ": ");
-            add(signatureHexadecimalLabel, 0, 6);
+            signatureInfoGridPane.add(signatureHexadecimalLabel, 0, 4);
+            setMargin(signatureHexadecimalLabel, new Insets(10, 0 , 10, 0));
             TextField signatureHexadecimalValue = new TextField(signer.getSignatureHex());
             signatureHexadecimalValue.setEditable(false);
-            add(signatureHexadecimalValue, 1, 6);
+            signatureInfoGridPane.add(signatureHexadecimalValue, 1, 4);
         }
     }
 

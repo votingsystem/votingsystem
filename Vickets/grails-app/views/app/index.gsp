@@ -4,7 +4,7 @@
     <meta name="layout" content="main" />
 </head>
 <body>
-    <div class="pageContenDiv" style="max-width: 1300px;">
+    <div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto; padding: 0px 30px 0px 30px;">
         <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
             <h3 class="page-header">Vickets, moneda electrónica basada en arquitecturas de clave pública.</h3>
             <ul>
@@ -21,7 +21,8 @@
         <div class="text-justify" style="margin: 20px auto 0 auto;font-size: 1.2em;">
             <h3 class="page-header">Preguntas frecuentes</h3>
             <p><b>¿Qué es un Vicket?</b> Es un certificado electrónico que tiene asociado un valor y que puede ser
-            anónimo (para transacciones anónimas) o no</p>
+            anónimo (para transacciones anónimas) o no, aunque su principal razón de ser consiste en permitir
+            <b>intercambios monetarios anónimos y seguros desde el móvil</b>.</p>
             <p><b>¿Cómo se produce un intercambio de Vickets?</b> El usuario que desea hacer una transacción utiliza los
             Vickets para firmar electrónicamente un documento con los datos del beneficiario.
             El valor del intercambio corresponde al valor asociado al Vicket con el que se firma el documento.</p>
