@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  	<title>TestingTemplate</title>
+    <title>TestingTemplate</title>
     <style>
-	  	textarea { }
-	  	input[id="subject"] { }
-  	</style>
+    textarea { }
+    input[id="subject"] { }
+    </style>
 </head>
 <body>
 
