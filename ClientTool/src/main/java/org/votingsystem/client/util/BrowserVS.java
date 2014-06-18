@@ -44,12 +44,14 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
 import org.w3c.dom.Document;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -127,7 +129,6 @@ public class BrowserVS extends Region {
             @Override
             public void handle(WindowEvent event) {
                 event.consume();
-                webView.getEngine().loadContent("");
                 browserStage.hide();
                 logger.debug("browserStage.setOnCloseRequest");
             }
@@ -332,7 +333,7 @@ public class BrowserVS extends Region {
 
 
     public void loadURL(final String urlToLoad, final String caption) {
-        logger.debug("loadURL: " + urlToLoad);
+
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 webView.getEngine().load(urlToLoad);

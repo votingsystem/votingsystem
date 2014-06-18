@@ -19,7 +19,7 @@
             </li>
         </ol>
     </div>
-<div class="pageContenDiv" style="max-width: 1000px; padding: 20px 30px 0px 30px;">
+<div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 0px 30px;">
     <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
     </div>
 
@@ -44,78 +44,115 @@
         </div>
     </g:if>
 
-    <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
-
-    <div style="margin: 15px 0 15px 0;">
-        <div class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
-            ${raw(groupvsMap?.description)}
-        </div>
-        <div class="row" style="width:1200px;">
-            <div id="" style="margin:0px 30px 0px 0px;" class="col-sm-3 text-left">
-                <b><g:message code="IBANLbl"/>: </b>${groupvsMap?.IBAN}
-            </div>
-            <div id="" style="margin:0px 30px 0px 0px;" class="col-sm-5 text-right">
-                <b><g:message code="groupRepresentativeLbl"/>: </b>${groupvsMap?.representative.firstName} ${groupvsMap?.representative.lastName}
-            </div>
-        </div>
-    </div>
-
     <g:if test="${"user".equals(params.menu)}">
         <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
-            <div class="row text-right">
+            <div class="row">
                 <button id="subscribeButton" type="submit" class="btn btn-default" onclick="subscribeToGroup();"
-                        style="margin:15px 20px 15px 0px;">
+                        style="margin:15px 0px 0px 30px;">
                     <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
                 </button>
             </div>
         </g:if>
     </g:if>
 
-    <%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
-    def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
-    def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
-    %>
+    <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
 
-    <div class="text-center" style="font-size: 1.2em;font-weight: bold;">
-        <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>
+    <div style="margin: 15px 0 15px 0;">
+        <div class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
+            ${raw(groupvsMap?.description)}
+        </div>
+        <div class="row" style="width:1000px;">
+            <div id="" style="margin:0px 30px 0px 10px; font-size: 0.85em; color:#888;" class="col-sm-4 text-left">
+                <b><g:message code="IBANLbl"/>: </b>${groupvsMap?.IBAN}
+            </div>
+            <div id="" style="margin:0px 40px 0px 0px; font-size: 0.85em; float:right; color:#888;" class="col-sm-6 text-right">
+                <b><g:message code="groupRepresentativeLbl"/>: </b>${groupvsMap?.representative.firstName} ${groupvsMap?.representative.lastName}
+            </div>
+        </div>
     </div>
 
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#home" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="incomeLbl"/></a></li>
-        <li style="padding: 0px;"><a href="#profile" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="expensesLbl"/></a></li>
-    </ul>
+    <%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
+        def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
+        def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
+    %>
 
-    <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-        <table class="table dynatable-vickets" id="transaction_table" style="">
-            <thead>
-            <tr style="color: #ff0000;">
-                <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
-                <th data-dynatable-column="currency" style="max-width:60px;"><g:message code="currencyLbl"/></th>
-                <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="dateLbl"/></th>
-                <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
-                <th data-dynatable-column="receiver" style="min-width:200px;"><g:message code="recipientLbl"/></th>
-                <!--<th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>-->
-            </tr>
-            </thead>
-            <tbody>
-            <g:each in="${uservsMap?.transactionList}">
-                <g:set var="transactionURL" value="${createLink(uri:'/transaction', absolute:true)}/${it.id}" scope="page" />
-                <% def transactionDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
-                <tr>
-                    <td class="text-center">${it.amount}</td>
-                    <td class="text-center">${it.currency}</td>
-                    <td class="text-center">${transactionDate}</td>
-                    <td class="text-center">
-                        <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
-                    </td>
-                    <td class="text-center">${it.toUserVS?.name}</td>
-                </tr>
-            </g:each>
+    <div style="border: 1px solid #ccc; padding: 10px; margin: 20px 0 0 0;">
+        <div class="text-center" style="font-size: 1.2em;font-weight: bold; color:#6c0404; padding: 0px 0 0 0; ">
+            <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>
+        </div>
 
-            </tbody>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs">
+            <li class="active" style="">
+                <a href="#transactionsTo" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="incomeLbl"/></a>
+            </li>
+            <li style="">
+                <a href="#transactionsFrom" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="expensesLbl"/></a>
+            </li>
+        </ul>
 
-        </table>
+        <g:set var="transactionVSService" bean="transactionVSService"/>
+
+        <!-- Tab panes -->
+        <div class="tab-content" style="min-height: 600px;">
+            <div class="tab-pane fade in active" id="transactionsTo">
+                <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
+                    <table class="table transactions_table" id="transaction_table" style="">
+                        <thead>
+                        <tr style="color: #ff0000;">
+                            <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
+                            <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
+                            <th data-dynatable-column="dateCreated" style="width:180px;"><g:message code="dateLbl"/></th>
+                            <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <g:each in="${groupvsMap?.transactionToList}">
+                            <g:set var="transactionURL" value="${createLink(uri:'/transaction', absolute:true)}/${it.id}" scope="page" />
+                            <% def transactionToDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
+                            <tr>
+                                <td class="text-center">${transactionVSService.getTransactionTypeDescription(it.type, request.locale)}</td>
+                                <td class="text-center">${it.amount} ${it.currency}</td>
+                                <td class="text-center">${transactionToDate}</td>
+                                <td class="text-center">
+                                    <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
+                                </td>
+                            </tr>
+                        </g:each>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="transactionsFrom" style="top:0px;">
+                <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
+                    <table class="table transactions_table" id="transaction_table" style="">
+                        <thead>
+                        <tr style="color: #ff0000;">
+                            <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
+                            <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
+                            <th data-dynatable-column="dateCreated" style="width:180px;"><g:message code="dateLbl"/></th>
+                            <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <g:each in="${groupvsMap?.transactionFromList}">
+                            <g:set var="transactionURL" value="${createLink(uri:'/transaction', absolute:true)}/${it.id}" scope="page" />
+                            <% def transactionDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
+                            <tr>
+                                <td class="text-center">${it.type}</td>
+                                <td class="text-center">${it.amount} ${it.currency}</td>
+                                <td class="text-center">${transactionDate}</td>
+                                <td class="text-center">
+                                    <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
+                                </td>
+                            </tr>
+                        </g:each>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <g:if test="${!"admin".equals(params.menu) && !"user".equals(params.menu)}">
@@ -190,6 +227,42 @@
             var msg = appMessageJSON.message
             showResultDialog(caption, msg)
         }
+    }
+
+        function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
+        var transactionType
+        switch(jsonTransactionData.type) {
+            case 'VICKET_SEND':
+                transactionType = '<g:message code="selectVicketSendLbl"/>'
+                break;
+            case 'USER_ALLOCATION':
+                transactionType = '<g:message code="selectUserAllocationLbl"/>'
+                break;
+            case 'USER_ALLOCATION_INPUT':
+                transactionType = '<g:message code="selectUserAllocationInputLbl"/>'
+                break;
+            case 'VICKET_REQUEST':
+                transactionType = '<g:message code="selectVicketRequestLbl"/>'
+                break;
+            case 'VICKET_CANCELLATION':
+                transactionType = '<g:message code="selectVicketCancellationLbl"/>'
+                break;
+            case 'VICKET_SOURCE_INPUT':
+                transactionType = '<g:message code="vicketSourceInputLbl"/>'
+                break;
+            default:
+                transactionType = jsonTransactionData.type
+        }
+        var transactionURL = jsonTransactionData.id
+
+        var cssClass = "span4", tr;
+        var amount = jsonTransactionData.amount + " " + jsonTransactionData.currency
+        if (rowIndex % 3 === 0) { cssClass += ' first'; }
+        tr = '<tr><td title="' + transactionType + '" class="text-center">' +
+'<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-center">' +
+amount + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
+'</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
+        return tr
     }
 
 </g:applyCodec>

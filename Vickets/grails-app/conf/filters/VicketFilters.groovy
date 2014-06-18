@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
 import javax.servlet.http.HttpServletRequest
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.*
+import org.springframework.web.servlet.support.RequestContextUtils
 
 /**
  * @author jgzornoza

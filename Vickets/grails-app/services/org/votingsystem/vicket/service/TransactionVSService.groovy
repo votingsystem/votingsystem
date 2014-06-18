@@ -84,12 +84,14 @@ class TransactionVSService {
 
     public void notifyListeners(TransactionVS transactionVS) {
         Map messageMap = getTransactionMap(transactionVS)
-        log.debug("notifyListeners - transactionVS.id: ${transactionVS.id} - messageMap: ${messageMap as JSON}")
-        ResponseVS broadcastResult = webSocketService.broadcastList(messageMap, listenerSet);
-        if(ResponseVS.SC_OK != broadcastResult.statusCode) {
-            def errorList = broadcastResult.data
-            errorList.each {listenerSet.remove(it)}
-        }
+        if(!listenerSet.isEmpty()) {
+            log.debug("notifyListeners - transactionVS.id: ${transactionVS.id} - messageMap: ${messageMap as JSON}")
+            ResponseVS broadcastResult = webSocketService.broadcastList(messageMap, listenerSet);
+            if(ResponseVS.SC_OK != broadcastResult.statusCode) {
+                def errorList = broadcastResult.data
+                errorList.each {listenerSet.remove(it)}
+            }
+        } else log.debug("notifyListeners - NO listeners")
     }
 
     private ResponseVS processDepositFromVicketSource(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
@@ -259,6 +261,33 @@ class TransactionVSService {
             transactionMap.messageSMIMEURL = messageSMIMEURL
         }
         return transactionMap
+    }
+
+    public String getTransactionTypeDescription(String transactionType, Locale locale) {
+        String typeDescription
+        switch(transactionType) {
+            case 'VICKET_REQUEST':
+                typeDescription = messageSource.getMessage('vicketRequestLbl', null, locale);
+                break;
+            case 'USER_ALLOCATION':
+                typeDescription = messageSource.getMessage('userAllocationLbl', null, locale);
+                break;
+            case 'USER_ALLOCATION_INPUT':
+                typeDescription = messageSource.getMessage('userAllocationInputLbl', null, locale);
+                break;
+            case 'VICKET_SEND':
+                typeDescription = messageSource.getMessage('vicketSendLbl', null, locale);
+                break;
+            case 'VICKET_CANCELLATION':
+                typeDescription = messageSource.getMessage('vicketCancellationLbl', null, locale);
+                break;
+            case 'VICKET_SOURCE_INPUT':
+                typeDescription = messageSource.getMessage('vicketSourceInputLbl', null, locale);
+                break;
+            default: typeDescription = transactionType
+
+        }
+        return typeDescription
     }
 
     public Map getUserInfoMap(UserVS userVS, Calendar mondayLapse) {

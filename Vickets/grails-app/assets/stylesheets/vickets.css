@@ -144,7 +144,7 @@ input:focus:valid {
 }
 
 .pageHeader {
-    color: #ba0011;
+    color: #6c0404;
     font-weight: bold;
     text-overflow: ellipsis;
 }
@@ -197,4 +197,28 @@ input:focus:valid {
     font-weight:bold;
     color: #ba0011;
     margin:10px auto 15px auto;
+}
+.transactions_table {}
+
+.transactions_table th {
+    text-align: center;
+    padding:5px 0;
+    min-width: 120px;
+    color:#6c0404;
+}
+
+.transactions_table th a {
+    color: #6c0404;
+}
+
+.transactions_table th a:hover {
+    color: #6c0404;
+    text-decoration: underline;
+}
+
+.transactions_table td {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

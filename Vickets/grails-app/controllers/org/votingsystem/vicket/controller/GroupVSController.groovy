@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 
+
 /**
  * @infoController Aplicación
  * @descController Servicios de acceso a la aplicación web principal
@@ -27,7 +28,7 @@ class GroupVSController {
             GroupVS.withTransaction {
                 result = GroupVS.get(params.long('id'))
             }
-            if(result) resultMap = groupVSService.getGroupVSDetailedDataMap(result)
+            if(result) resultMap = groupVSService.getGroupVSDetailedDataMap(result, DateUtils.getCurrentWeekPeriod())
             else {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
@@ -35,7 +36,9 @@ class GroupVSController {
             if(request.contentType?.contains("json")) {
                 render resultMap as JSON
             } else {
-                render(view:'group', model: [groupvsMap:resultMap])
+                if("admin".equals(params.menu) || "superadmin".equals(params.menu)) {
+                    render(view:'admin', model: [groupvsMap:resultMap])
+                } else render(view:'group', model: [groupvsMap:resultMap])
             }
         } else if(request.contentType?.contains("json")) {
             Map resultMap = [:]

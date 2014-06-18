@@ -29,15 +29,24 @@ import org.votingsystem.client.util.*;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.HttpHelper;
+import sun.net.www.protocol.jar.JarURLConnection;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -61,6 +70,28 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     private AtomicBoolean wsConnected = new AtomicBoolean(false);
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
+
+    static {
+        //Without this WebView always send requests with 'en-us,en;q=0.5'
+        URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+            public URLStreamHandler createURLStreamHandler(String protocol) {
+                if (protocol.contains("http")) {
+                    return new URLStreamHandler() {
+                        protected URLConnection openConnection(URL url) throws IOException {
+                            URLConnection reConnection = new sun.net.www.protocol.http.HttpURLConnection(url, null);
+                            reConnection.setRequestProperty("Accept-Language", Locale.getDefault().getLanguage());
+                            reConnection.addRequestProperty("Accept-Language", Locale.getDefault().getLanguage());
+                            return reConnection;
+                        }
+                    };
+                }
+                // Don't handle a non-http protocol, so just return null and let
+                // the system return the default one.
+                return null;
+            }
+        });
+
+    }
 
     // Create a trust manager that does not validate certificate chains
     TrustManager[] trustAllCerts = new TrustManager[] {
@@ -97,7 +128,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         INSTANCE = this;
         this.primaryStage = primaryStage;
         ContextVS.initSignatureClient(this, "log4jClientTool.properties", "clientToolMessages.properties", locale);
-
         browserVS = new BrowserVS();
         new Thread(new Runnable() {
             @Override public void run() {
@@ -398,10 +428,12 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
     private void openVicketAdminProcedures() {
         logger.debug("openVicketAdminProcedures");
+
         if(ContextVS.getInstance().getVicketServer() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
         }
+
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 browserVS.loadURL(ContextVS.getInstance().getVicketServer().getAdminProceduresPageURL(),

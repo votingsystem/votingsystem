@@ -33,15 +33,15 @@ body {
   position:relative;
 }
 
-.my-dock-manager {
-  background-color: #F8F8F8;
+.vickets-dock-manager {
+  background-color: #fff;
   clear: both;
 }
 
 .solution-window {
 	width: 300px;
 	height: 200px;
-	background-color: #eee;
+	background-color: #fff;
 }
 
 .output-window {

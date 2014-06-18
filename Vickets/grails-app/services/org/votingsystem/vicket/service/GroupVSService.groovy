@@ -3,6 +3,7 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.model.*
+import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -186,12 +187,12 @@ class GroupVSService {
 	}
 
     @Transactional
-    public Map getGroupVSDetailedDataMap(GroupVS groupVS){
+    public Map getGroupVSDetailedDataMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
         Map resultMap = getGroupVSDataMap(groupVS)
-        def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
+
         def transactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('fromUserVS', groupVS)
-            gt('dateCreated', currentWeekPeriod.getDateFrom())
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
         def transactionFromListJSON = []
         transactionListDB.each { transaction ->
@@ -200,7 +201,7 @@ class GroupVSService {
 
         transactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('toUserVS', groupVS)
-            gt('dateCreated', currentWeekPeriod.getDateFrom())
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
         def transactionToListJSON = []
         transactionListDB.each { transaction ->

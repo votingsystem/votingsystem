@@ -120,8 +120,7 @@ public class HttpHelper {
         }
     }
     
-    public ResponseVS getData (String serverURL, ContentTypeVS contentType)
-            throws IOException, ParseException {
+    public ResponseVS getData (String serverURL, ContentTypeVS contentType) {
         logger.debug("getData - contentType: "  + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpResponse response = null;
@@ -147,13 +146,13 @@ public class HttpHelper {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()), responseContentType);
             }
+            if(response != null) EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "hostConnectionErrorMsg", serverURL));
             if(httpget != null) httpget.abort();
         } finally {
-            if(response != null) EntityUtils.consume(response.getEntity());
             return responseVS;
         }
     }

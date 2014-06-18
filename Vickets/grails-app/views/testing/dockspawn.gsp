@@ -4,7 +4,6 @@
 <head>
   	<title>Test DockSpawn</title>
     <meta name="layout" content="main" />
-    <meta name="layout" content="main" />
     <link rel="stylesheet" href="${resource(dir: 'dockspawn/font-awesome/css', file: 'font-awesome.css')}" type="text/css"/>
     <asset:stylesheet src="vickets.css"/>
     <link rel="stylesheet" href="${resource(dir: 'dockspawn', file: 'testDockSpawn.css')}" type="text/css"/>
@@ -15,7 +14,7 @@
 <body>
 
 <div id="dockContainer" style="visibility:hidden;">
-    <div id="my_dock_manager" class="my-dock-manager"></div>
+    <div id="my_dock_manager" class="vickets-dock-manager"></div>
     <div id="solution_window" caption="Solution Explorer" icon="icon-circle-arrow-right" class="solution-window">
         <ul>
             <li id="solution_window_1">
