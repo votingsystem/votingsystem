@@ -1,4 +1,9 @@
 <%@ page import="org.votingsystem.model.UserVS; org.votingsystem.model.GroupVS" %>
+<%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
+    def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
+    def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
+    def groupName = groupvsMap.name.replaceAll("'", "&apos;")
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,27 +25,39 @@
         </ol>
     </div>
 <div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 0px 30px;">
-    <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
+    <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
     </div>
 
-    <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
+    <g:if test="${("admin".equals(params.menu) || "superadmin".equals(params.menu)) && UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
         <div id="adminButtonsDiv" class="">
             <button id="editGroupVSButton" type="submit" class="btn btn-warning" onclick="editGroup();"
                     style="margin:10px 20px 0px 0px;">
-                <g:message code="editGroupVSLbl"/> <i class="fa fa fa-check"></i>
+                <g:message code="editDataLbl"/> <i class="fa fa-edit"></i>
             </button>
             <button id="cancelGroupVSButton" type="submit" class="btn btn-warning"
-                    style="margin:10px 20px 0px 0px;" onclick="showCancelGroupVSDialog('${groupvsMap.name}', '${groupvsMap.id}')">
-                <g:message code="cancelGroupVSLbl"/> <i class="fa fa fa-check"></i>
+                    style="margin:10px 20px 0px 0px;" onclick="$('#cancelGroupVSDialog').modal('show')">
+                <g:message code="cancelGroupVSLbl"/> <i class="fa fa-times"></i>
             </button>
             <button id="adminGroupVSUsersButton" type="submit" class="btn btn-warning" onclick="adminGroupUsers('${groupvsMap.id}');"
                     style="margin:10px 20px 0px 0px;">
-                <g:message code="adminGroupVSUsersLbl"/> <i class="fa fa fa-check"></i>
+                <g:message code="adminGroupVSUsersLbl"/> <i class="fa fa-users"></i>
             </button>
-            <button id="makeDepositButton" type="submit" class="btn btn-warning" onclick="makeDeposit();"
-                    style="margin:10px 20px 0px 0px;">
-                <g:message code="makeDepositLbl"/> <i class="fa fa fa-check"></i>
-            </button>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" style="margin:10px 20px 0px 0px;">
+                    <g:message code="makeDepositFromGroupVSLbl"/>  <i class="fa fa-money"></i>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,'${groupName}')"><a href="#">
+                        <g:message code="makeDepositFromGroupVSToMemberLbl"/></a></li>
+                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, '${groupName}')"><a href="#">
+                        <g:message code="makeDepositFromGroupVSToMemberGroupLbl"/></a></li>
+                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, '${groupName}')"><a href="#">
+                        <g:message code="makeDepositFromGroupVSToAllMembersLbl"/></a></li>
+                </ul>
+            </div>
+
         </div>
     </g:if>
 
@@ -48,8 +65,13 @@
         <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
             <div class="row">
                 <button id="subscribeButton" type="submit" class="btn btn-default" onclick="subscribeToGroup();"
-                        style="margin:15px 0px 0px 30px;">
-                    <g:message code="subscribeGroupVSLbl"/> <i class="fa fa fa-check"></i>
+                        style="margin:15px 0px 0px 30px;color:#6c0404;">
+                    <g:message code="subscribeGroupVSLbl"/> <i class="fa fa-sign-in"></i>
+                </button>
+
+                <button id="subscribeButton" type="submit" class="btn btn-default" onclick="subscribeToGroup();"
+                        style="margin:15px 0px 0px 30px;color:#6c0404;">
+                    <g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
                 </button>
             </div>
         </g:if>
@@ -70,11 +92,6 @@
             </div>
         </div>
     </div>
-
-    <%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
-        def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
-        def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
-    %>
 
     <div style="border: 1px solid #ccc; padding: 10px; margin: 20px 0 0 0;">
         <div class="text-center" style="font-size: 1.2em;font-weight: bold; color:#6c0404; padding: 0px 0 0 0; ">
@@ -97,7 +114,7 @@
         <div class="tab-content" style="min-height: 600px;">
             <div class="tab-pane fade in active" id="transactionsTo">
                 <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                    <table class="table transactions_table" id="transaction_table" style="">
+                    <table class="table white_headers_table" id="transaction_table" style="">
                         <thead>
                         <tr style="color: #ff0000;">
                             <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
@@ -125,11 +142,11 @@
             </div>
             <div class="tab-pane fade" id="transactionsFrom" style="top:0px;">
                 <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                    <table class="table transactions_table" id="transaction_table" style="">
+                    <table class="table white_headers_table" id="transaction_table" style="">
                         <thead>
                         <tr style="color: #ff0000;">
                             <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
-                            <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
+                            <th data-dynatable-column="amount" style="width:150px;"><g:message code="amountLbl"/></th>
                             <th data-dynatable-column="dateCreated" style="width:180px;"><g:message code="dateLbl"/></th>
                             <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
                         </tr>
@@ -140,7 +157,7 @@
                             <% def transactionDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
                             <tr>
                                 <td class="text-center">${it.type}</td>
-                                <td class="text-center">${it.amount} ${it.currency}</td>
+                                <td class="text-right">${it.amount} ${it.currency}</td>
                                 <td class="text-center">${transactionDate}</td>
                                 <td class="text-center">
                                     <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
@@ -161,15 +178,16 @@
             <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
     </g:if>
 </div>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 <g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>
+<g:include view="/include/dialog/depositDialog.gsp"/>
+<g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
 
     var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
-    var groupVSData = {id:${groupvsMap.id}, name:"${groupvsMap.name}" , representative:groupvsRepresentative}
+    var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
 
 
     $(function() {
@@ -181,16 +199,17 @@
             $(".pageHeader").css("color", "#fba131")
             $("#messagePanel").addClass("groupvsPendingBox");
             $("#messagePanel").text("<g:message code="groupvsPendingLbl"/>")
-            $("#messagePanel").css("display", "visible")
+            $("#messagePanel").css("display", "block")
 
         </g:if>
         <g:if test="${UserVS.State.CANCELLED.toString().equals(groupvsMap?.state)}">
             $(".pageHeader").css("color", "#6c0404")
             $("#messagePanel").addClass("groupvsClosedBox");
             $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
-            $("#messagePanel").css("display", "visible")
+            $("#messagePanel").css("display", "block")
             $("#adminButtonsDiv").css("display", "none")
         </g:if>
+
     });
 
     function editGroup() {
@@ -229,7 +248,7 @@
         }
     }
 
-        function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
+    function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
         var transactionType
         switch(jsonTransactionData.type) {
             case 'VICKET_SEND':
@@ -258,11 +277,23 @@
         var cssClass = "span4", tr;
         var amount = jsonTransactionData.amount + " " + jsonTransactionData.currency
         if (rowIndex % 3 === 0) { cssClass += ' first'; }
-        tr = '<tr><td title="' + transactionType + '" class="text-center">' +
-'<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-center">' +
-amount + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
-'</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
+        tr = '<tr><td title="' + transactionType + '" class="text-center"><a href="#" onclick="openWindow(\'' + transactionURL + '\')">' +
+            transactionType + '</a></td><td class="text-center">' + amount + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
+            '</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
         return tr
+    }
+
+// VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS,
+    function makeDepositFromGroupVSToMember() {
+        alert("makeDepositFromGroupVSToMember")
+    }
+
+    function makeDepositFromGroupVSToMemberGroup() {
+        alert("makeDepositFromGroupVSToMemberGroup")
+    }
+
+    function makeDepositFromGroupVSToAllMembers() {
+        alert("makeDepositFromGroupVSToAllMembers")
     }
 
 </g:applyCodec>

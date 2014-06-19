@@ -22,7 +22,7 @@
                 <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
                     <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
                     <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
-                    <option value="CLOSED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
+                    <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
                 </select>
             </div>
         </div>
@@ -84,6 +84,11 @@
         });
 
         $('#groupvsList').bind('dynatable:afterUpdate',  function() {
+            $('p').each(function(index, item) {
+                if($.trim($(item).text()) === "") {
+                    $(item).slideUp(); // $(item).remove();
+                }
+            });
             updateMenuLinks()
             $('.groupvsDiv').click(function() {
                 window.location.href = $(this).attr('data-href')
@@ -117,18 +122,17 @@
     UserVS.State = {
         ACTIVE:"ACTIVE",
         PENDING:"PENDING",
-        CLOSED:"CLOSED"
+        CANCELLED:"CANCELLED"
     }
 
     GroupVS.prototype.getElement = function() {
         var $newGroup = $(this.groupHTML)
         var $li = $newGroup.find("li");
-
         if(UserVS.State.ACTIVE == this.state) $li.addClass("groupvsActive");
         if(UserVS.State.PENDING == this.state) $li.addClass("groupvsPending");
-        if(UserVS.State.CLOSED == this.state) {
+        if(UserVS.State.CANCELLED == this.state) {
             $li.addClass("groupvsFinished");
-            $li.find(".cancelMessage").fadeIn(100)
+            $li.find(".groupvsMessageCancelled").text("<g:message code="groupvsCancelledLbl"/>")
         }
 
         $li.attr('id', this.id)

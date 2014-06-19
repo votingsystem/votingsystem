@@ -259,7 +259,7 @@ public class BrowserVS extends Region {
 
         Scene scene = new Scene(browserHelper, Color.web("#666970"));
         browserStage.setScene(scene);
-        browserStage.setWidth(1000);
+        browserStage.setWidth(1050);
         browserStage.setHeight(1000);
 
         getChildren().addListener(new ListChangeListener<Node>() {

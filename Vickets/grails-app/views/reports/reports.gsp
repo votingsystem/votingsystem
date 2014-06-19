@@ -20,7 +20,7 @@
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
     <div id="record_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-        <table class="table dynatable-vickets" id="record_table" style="">
+        <table class="table white_headers_table" id="record_table" style="">
             <thead>
             <tr style="color: #ff0000;">
                 <th data-dynatable-column="date" style="width: 220px;"><g:message code="dateLbl"/></th>

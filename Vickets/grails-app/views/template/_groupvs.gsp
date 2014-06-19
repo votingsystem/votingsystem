@@ -5,6 +5,7 @@
         <div class='groupvsInfoDiv'>
             <p> {1}</p>
         </div>
+        <div style="position: relative;"><div class='groupvsMessageCancelled' style=""></div></div>
         <div class='groupvsRepresentativeDiv'>{3}</div>
     </li>
 </div>

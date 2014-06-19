@@ -198,27 +198,39 @@ input:focus:valid {
     color: #ba0011;
     margin:10px auto 15px auto;
 }
-.transactions_table {}
+.white_headers_table {}
 
-.transactions_table th {
+.white_headers_table th {
     text-align: center;
     padding:5px 0;
     min-width: 120px;
     color:#6c0404;
+    background: #fff;
 }
 
-.transactions_table th a {
+.white_headers_table th a {
     color: #6c0404;
 }
 
-.transactions_table th a:hover {
+.white_headers_table th a:hover {
     color: #6c0404;
     text-decoration: underline;
 }
 
-.transactions_table td {
+.white_headers_table td {
     max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.fieldsBox {
+    margin: 10px auto 30px auto;
+    width: 80%;
+}
+
+#fieldsBox legend {
+    font-size: 1.2em;
+    font-weight: bold;
+    color:#6c0404;
 }

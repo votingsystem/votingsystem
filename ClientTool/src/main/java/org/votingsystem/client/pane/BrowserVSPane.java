@@ -153,13 +153,14 @@ public class BrowserVSPane extends StackPane {
     }
 
     public void setPasswordDialogVisible(boolean isVisible) {
+        setMessage(ContextVS.getMessage("passwordMissing"));
         passwordVBox.setVisible(isVisible);
         passwordRegion.setVisible(isVisible);
     }
 
     private void setCapsLockState (boolean pressed) {
         this.isCapsLockPressed = pressed;
-        setMessage(null);
+        setMessage(ContextVS.getMessage("passwordMissing"));
     }
 
     public String getPassword() {

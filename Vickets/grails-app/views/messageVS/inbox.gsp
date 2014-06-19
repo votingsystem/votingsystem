@@ -27,7 +27,7 @@
 
 
     <div id="messagevs_tableDiv" style="margin: 20px auto 0px auto; max-width: 1200px; overflow:auto;">
-        <table class="table dynatable-vickets" id="messagevs_table" style="">
+        <table class="table white_headers_table" id="messagevs_table" style="">
             <thead>
             <tr style="color: #ff0000;">
                 <th data-dynatable-column="dateCreated" style="width:270px;"><g:message code="dateLbl"/></th>

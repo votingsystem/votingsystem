@@ -35,11 +35,7 @@ class GroupVSController {
             }
             if(request.contentType?.contains("json")) {
                 render resultMap as JSON
-            } else {
-                if("admin".equals(params.menu) || "superadmin".equals(params.menu)) {
-                    render(view:'admin', model: [groupvsMap:resultMap])
-                } else render(view:'group', model: [groupvsMap:resultMap])
-            }
+            } else render(view:'group', model: [groupvsMap:resultMap])
         } else if(request.contentType?.contains("json")) {
             Map resultMap = [:]
             def result

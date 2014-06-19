@@ -32,7 +32,7 @@
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
     <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-        <table class="table dynatable-vickets" id="transaction_table" style="">
+        <table class="table white_headers_table" id="transaction_table" style="">
             <thead>
             <tr style="color: #ff0000;">
                 <th data-dynatable-column="type" style="width: 240px;"><g:message code="typeLbl"/></th>

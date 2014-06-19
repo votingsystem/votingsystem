@@ -47,7 +47,7 @@ class GroupVSService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }
-        groupVS.state = UserVS.State.CLOSED
+        groupVS.state = UserVS.State.CANCELLED
         groupVS.save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_CANCEL, message:msg,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}"))

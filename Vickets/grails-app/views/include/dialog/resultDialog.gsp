@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 id="resultCaption" class="modal-title" style="color: #6c0404; font-weight: bold;"></h4>
+                <h4 id="resultDialogCaption" class="modal-title" style="color: #6c0404; font-weight: bold;"></h4>
             </div>
             <div class="modal-body">
                 <p id='resultMessage' style="text-align: center;  font-size: 1.2em;word-wrap: break-word;"></p>
@@ -28,7 +28,7 @@
     function showResultDialog(caption, message, callback) {
         console.log("showResultDialog - caption: " + caption + " - message: "+ message);
         $('#resultMessage').html(message);
-        $("#resultCaption").html(caption);
+        $("#resultDialogCaption").html(caption);
         $('#resultDialog').modal('show')
         clientCallback = callback
     }

@@ -125,6 +125,7 @@ class SubscriptionVSService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, data:device)
 	}
 
+    @Transactional
     public ResponseVS deActivateUser(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
@@ -178,6 +179,7 @@ class SubscriptionVSService {
         return responseVS
     }
 
+    @Transactional
     public ResponseVS activateUser(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()

@@ -58,15 +58,15 @@ class TransactionVSService {
         String msg;
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
         String toUser = smimeMessageReq.getFrom().toString().replace(" ", "")
+        log.debug("========= ${messageJSON}")
         try {
             IbanVSUtil.validate(messageJSON.toUserIBAN);
         } catch(Exception ex) {
             msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
                     locale)
-            log.error("${msg} - ${ex.getMessage()}", ex)
+            log.error("${methodName} - ${msg} - ${ex.getMessage()}", ex)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"),
-                    contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.ERROR)
+                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"), type:TypeVS.ERROR)
         }
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
         switch(transactionType) {
@@ -77,7 +77,10 @@ class TransactionVSService {
                 processDepositFromVicketSource(messageSMIMEReq, messageJSON, locale)
                 break;
             default:
-                log.debug("Unprocessed transactionType: " + transactionType);
+                msg = messageSource.getMessage('unknownTransactionErrorMsg', [transactionType.toString()].toArray(), locale)
+                log.debug("${methodName} - ${msg}");
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
+                        metaInf:MetaInfMsg.getErrorMsg(methodName, "UNKNOWN_TRANSACTION"), type:TypeVS.ERROR)
         }
     }
 

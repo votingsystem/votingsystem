@@ -25,7 +25,7 @@
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
     <div id="uservs_tableDiv" style="margin: 20px auto 0px auto; max-width: 800px; overflow:auto; visibility: hidden;">
-        <table class="table dynatable-vickets" id="uservs_table" style="">
+        <table class="table white_headers_table" id="uservs_table" style="">
             <thead>
             <tr style="color: #ff0000;">
                 <th data-dynatable-column="uservsNIF" style="width: 60px;"><g:message code="nifLbl"/></th>
@@ -97,7 +97,6 @@
     function processUserSearch() {
         var textToSearch = document.getElementById("userSearchInput").value
         if(textToSearch.trim() == "") return
-        else console.log("====== processUserSearch: " + textToSearch)
         dynatable.settings.dataset.ajax = true
         dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
         dynatable.paginationPage.set(1);

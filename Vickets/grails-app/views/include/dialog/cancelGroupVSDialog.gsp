@@ -9,6 +9,7 @@
             </div>
             <div class="modal-body">
                 <p id='cancelGroupVSMsg' style="text-align: center;  font-size: 1.2em;">
+                    <g:message code="cancelGroupVSDialogMsg" args="${[groupvsMap.name]}"/>
                 </p>
                 <p style="text-align: center;  font-size: 1.2em;"><g:message code="confirmOperationMsg"/></p>
             </div>
@@ -25,26 +26,14 @@
 </div>
 <asset:script>
 
-    var cancelGroupVSDialogMsgTemplate = "<g:message code="cancelGroupVSDialogMsg"/>"
-    var groupVSName = null
-    var groupVSId = null
-
-    function showCancelGroupVSDialog(groupName, groupId) {
-        console.log("showCancelGroupVSDialog - groupName: " + groupName);
-        groupVSName = groupName
-        groupVSId = groupId
-        $('#cancelGroupVSMsg').html(cancelGroupVSDialogMsgTemplate.format(groupName));
-        $('#cancelGroupVSDialog').modal('show')
-    }
-
     function cancelGroupVS() {
         console.log("cancelGroupVS")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-        webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + groupVSId
+        webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + ${groupvsMap.id}
         webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
-        webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:groupVSName, id:groupVSId}
+        webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:"${groupvsMap.name}", id:${groupvsMap.id}}
         //signed and encrypted
         webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
         webAppMessage.callerCallback = 'showCancelGroupVSDialogCallback'

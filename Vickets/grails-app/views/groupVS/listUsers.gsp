@@ -27,7 +27,7 @@
     </h3>
 
     <div id="uservs_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-        <table class="table dynatable-vickets" id="uservs_table" style="">
+        <table class="table white_headers_table" id="uservs_table" style="">
             <thead>
             <tr style="color: #ff0000;">
                 <th data-dynatable-column="nif" style="width: 120px;"><g:message code="nifLbl"/></th>
