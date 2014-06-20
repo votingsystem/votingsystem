@@ -53,6 +53,45 @@ class UserVSController {
         }
     }
 
+    def searchGroup() {
+        if(request.contentType?.contains('json')) {
+            if(params.searchText && params.long('groupId')) {
+                GroupVS groupVS = null
+                GroupVS.withTransaction {
+                    groupVS = GroupVS.get(params.long('groupId'))
+                }
+                if(!groupVS) {
+                    return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                            message: message(code: 'groupNotFoundMsg', args:[params.long('groupId')]))]
+                }
+                def subscriptionList
+                SubscriptionVS.withTransaction {
+                    subscriptionList = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
+                        eq("groupVS", groupVS)
+                        userVS {
+                            or {
+                                ilike('name', "%${params.searchText}%")
+                                ilike('firstName', "%${params.searchText}%")
+                                ilike('lastName', "%${params.searchText}%")
+                                ilike('nif', "%${params.searchText}%")
+                            }
+                            and {
+                                eq("state", UserVS.State.ACTIVE)
+                            }
+                        }
+                    }
+                }
+                def resultList = []
+                subscriptionList.each {userSubscriptionItem ->
+                    resultList.add(userVSService.getUserVSDataMap(userSubscriptionItem.userVS))
+                }
+                int totalUsers = subscriptionList.totalCount
+                Map resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
+                render resultMap as JSON
+            }
+        }
+    }
+
     def index() {
         if (params.long('id')) {
             def result

@@ -35,7 +35,7 @@
         webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
         webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:"${groupvsMap.name}", id:${groupvsMap.id}}
         //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.contentType = 'application/x-pkcs7-signature'
         webAppMessage.callerCallback = 'showCancelGroupVSDialogCallback'
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

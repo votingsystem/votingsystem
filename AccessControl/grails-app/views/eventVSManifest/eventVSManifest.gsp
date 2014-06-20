@@ -116,7 +116,7 @@ webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serviceURL = "${createLink( controller:'eventVSManifestCollector', absolute:true)}/${eventMap.id}"
         webAppMessage.signedMessageSubject = "${eventMap.subject}"
         //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.contentType = 'application/x-pkcs7-signature'
         webAppMessage.eventVS = pageEvent
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         webAppMessage.documentURL = pageEvent.URL

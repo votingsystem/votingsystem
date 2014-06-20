@@ -24,6 +24,10 @@
            class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
             <g:message code="makeDepositButton"/>
         </a>
+        <a href="${createLink(controller: 'vicket', action:'addUsersToGroup', absolute:true)}"
+           class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
+            <g:message code="addUsersToGroupButton"/>
+        </a>
         <a id="simulationRunningButton" href="#" onclick="showSimulationRunningDialog('Mensaje de la página principal');"
            class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
             TEST

@@ -32,7 +32,7 @@ public class BrowserVSPane extends StackPane {
 
     private Text messageText;
     private boolean isCapsLockPressed = false;
-    private Label capsLockPressedMessageLabel;
+    private Text capsLockPressedMessageText;
     private String password;
     private PasswordField password1Field;
     private PasswordField password2Field;
@@ -75,9 +75,11 @@ public class BrowserVSPane extends StackPane {
         VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
         messageText.setTextAlignment(TextAlignment.CENTER);
 
-        capsLockPressedMessageLabel = new Label(ContextVS.getMessage("capsLockKeyPressed"));
-        capsLockPressedMessageLabel.setWrapText(true);
-        capsLockPressedMessageLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #6c0404;");
+        capsLockPressedMessageText = new Text(ContextVS.getMessage("capsLockKeyPressed"));
+        capsLockPressedMessageText.setWrappingWidth(320);
+        capsLockPressedMessageText.setStyle("-fx-font-weight: bold; -fx-fill: #6c0404;");
+        VBox.setMargin(messageText, new Insets(0, 0, 15, 0));
+        capsLockPressedMessageText.setTextAlignment(TextAlignment.CENTER);
 
         password1Field = new PasswordField();
         password2Field = new PasswordField();
@@ -193,10 +195,10 @@ public class BrowserVSPane extends StackPane {
         if (message == null) messageText.setText(mainMessage);
         else messageText.setText(message);
         if(isCapsLockPressed) {
-            if(!passwordVBox.getChildren().contains(capsLockPressedMessageLabel))
-                passwordVBox.getChildren().add(0, capsLockPressedMessageLabel);
+            if(!passwordVBox.getChildren().contains(capsLockPressedMessageText))
+                passwordVBox.getChildren().add(0, capsLockPressedMessageText);
         }
-        else passwordVBox.getChildren().removeAll(capsLockPressedMessageLabel);
+        else passwordVBox.getChildren().removeAll(capsLockPressedMessageText);
         passwordVBox.autosize();
     }
 

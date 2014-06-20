@@ -215,7 +215,7 @@ var dynatableParams = {
     page: 'page',
     perPage: 'max',
     offset: 'offset',
-    record: null,
+    record: null
   }
 
 var dynatableFeatures =  {

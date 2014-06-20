@@ -76,7 +76,7 @@
             groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
             uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF}}
         //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.contentType = 'application/x-pkcs7-signature'
         webAppMessage.callerCallback = 'activateUserCallback'
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
@@ -94,7 +94,7 @@
             uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF},
             reason:$("#cancelUserSubscriptionReason").val()}
         //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.contentType = 'application/x-pkcs7-signature'
         webAppMessage.callerCallback = 'deActivateUserCallback'
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
@@ -110,7 +110,7 @@
         webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEPOSIT,
                 groupvsName:subscriptionDataJSON.groupvs.name , id:subscriptionDataJSON.groupvs.id}
         //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.contentType = 'application/x-pkcs7-signature'
         webAppMessage.callerCallback = 'makeDepositCallback'
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

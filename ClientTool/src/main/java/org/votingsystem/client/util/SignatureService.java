@@ -451,7 +451,7 @@ public class SignatureService extends Service<ResponseVS> {
                     operationVS.getNormalizedReceiverName(), documentToSignJSON.toString(),
                     password.toCharArray(), operationVS.getSignedMessageSubject(), null);
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
-                    targetServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null,
+                    targetServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null,
                     targetServer.getX509Certificate(), header);
             return senderWorker.call();
         }

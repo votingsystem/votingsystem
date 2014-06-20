@@ -11,6 +11,8 @@
     <asset:javascript src="jquery.stickytableheaders.js"/>
     <asset:javascript src="jquery.dynatable.js"/>
     <asset:stylesheet src="jquery.dynatable.css"/>
+    <asset:stylesheet src="bootstrapValidator.min.css"/>
+    <asset:javascript src="bootstrapValidator.min.js"/>
     <meta name="layout" content="main" />
 </head>
 <body>
@@ -49,11 +51,14 @@
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
-                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,'${groupName}')"><a href="#">
+                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,'${groupName}', '${groupvsMap?.IBAN}',
+                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')"><a href="#">
                         <g:message code="makeDepositFromGroupVSToMemberLbl"/></a></li>
-                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, '${groupName}')"><a href="#">
+                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, '${groupName}', '${groupvsMap?.IBAN}',
+                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')"><a href="#">
                         <g:message code="makeDepositFromGroupVSToMemberGroupLbl"/></a></li>
-                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, '${groupName}')"><a href="#">
+                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, '${groupName}', '${groupvsMap?.IBAN}',
+                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')"><a href="#">
                         <g:message code="makeDepositFromGroupVSToAllMembersLbl"/></a></li>
                 </ul>
             </div>
@@ -229,7 +234,7 @@
         webAppMessage.signedMessageSubject = "<g:message code="subscribeToVicketGroupMsg"/>"
         webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_SUBSCRIBE, groupvs:groupVSData}
         //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.contentType = 'application/x-pkcs7-signature'
         webAppMessage.callerCallback = 'subscribeToGroupCallback'
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

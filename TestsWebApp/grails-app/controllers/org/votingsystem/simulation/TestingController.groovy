@@ -11,6 +11,8 @@ class TestingController {
 	
 	private Timer timer = null
 
+    def validator() {}
+
     def index() {
         ResponseVS responseVS = HttpHelper.getInstance().getData("http://vickets/Vickets/serverInfo",ContentTypeVS.JSON);
         render responseVS.statusCode

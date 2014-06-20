@@ -8,4 +8,6 @@ class VicketController {
 
     def initUserBaseData() {}
 
+    def addUsersToGroup() {}
+
 }

@@ -34,6 +34,8 @@ class TestingController {
 
     def dockspawn() {}
 
+    def validator() { }
+
     def IBAN() {
         render IbanVSUtil.getInstance().getIBAN(1111111111)
         return false

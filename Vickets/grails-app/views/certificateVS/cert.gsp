@@ -106,7 +106,7 @@
         webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:$("#cancelCertReason").val(),
             changeCertToState:"${CertificateVS.State.CANCELLED.toString()}", serialNumber:"${certMap.serialNumber}"}
         //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+        webAppMessage.contentType = 'application/x-pkcs7-signature'
         webAppMessage.callerCallback = 'cancelCertCallback'
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
