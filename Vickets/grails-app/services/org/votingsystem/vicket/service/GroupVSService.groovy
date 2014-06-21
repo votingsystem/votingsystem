@@ -5,6 +5,7 @@ import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
 
@@ -31,7 +32,7 @@ class GroupVSService {
         log.debug("cancelGroup '${groupVS.id}' - signer: ${userSigner?.nif}")
         String msg = null
         ResponseVS responseVS = null
-        if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin()) {
+        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin()) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                              TypeVS.VICKET_GROUP_CANCEL.toString(), groupVS.name].toArray(), locale)
             log.error "cancelGroup - ${msg}"
@@ -59,7 +60,7 @@ class GroupVSService {
         log.debug(methodName);
         String msg = null
         ResponseVS responseVS = null
-        if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin()) {
+        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin()) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                  TypeVS.VICKET_GROUP_EDIT.toString(), groupVS.name].toArray(), locale)
             log.error "editGroup - ${msg}"
@@ -111,9 +112,12 @@ class GroupVSService {
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "nameGroupRepeatedMsg"))
         }
 
-        groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, groupRepresentative:userSigner,
+        groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, representative:userSigner,
                 description:messageJSON.groupvsInfo).save()
         groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
+        new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:groupVS,
+                balance:BigDecimal.ZERO, IBAN:groupVS.getIBAN()).save()
+
         String metaInf =  MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}")
 
         String fromUser = grailsApplication.config.VotingSystem.serverName
@@ -127,6 +131,7 @@ class GroupVSService {
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
     }
 
+    @Transactional
     public ResponseVS subscribe(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SubscriptionVS subscriptionVS = null
@@ -144,9 +149,9 @@ class GroupVSService {
         }
         GroupVS groupVS = GroupVS.get(messageJSON.groupvs.id)
 
-        if(groupVS.getGroupRepresentative().nif.equals(userSigner.nif)) {
+        if(groupVS.getRepresentative().nif.equals(userSigner.nif)) {
             msg = messageSource.getMessage('representativeSubscribedErrorMsg',
-                    [groupVS.groupRepresentative.nif, groupVS.name].toArray(), locale)
+                    [groupVS.representative.nif, groupVS.name].toArray(), locale)
             log.error "subscribe - ERROR - ${msg}"
             return new ResponseVS(type:TypeVS.ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "representativeSubscribed"))
@@ -170,7 +175,7 @@ class GroupVSService {
  	public Map getGroupVSDataMap(GroupVS groupVS){
         Map resultMap = [id:groupVS.id, IBAN:groupVS.IBAN, name:groupVS.name, description:groupVS.description,
             state:groupVS.state.toString(), dateCreated:groupVS.dateCreated,
-            representative:userVSService.getUserVSDataMap(groupVS.groupRepresentative), type:groupVS.type.toString()]
+            representative:userVSService.getUserVSDataMap(groupVS.representative), type:groupVS.type.toString()]
         SubscriptionVS.withTransaction {
             def result = SubscriptionVS.createCriteria().list(offset: 0) {
                 eq("groupVS", groupVS)

@@ -7,11 +7,14 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
+import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.FileUtils
+import org.votingsystem.util.StringUtils
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
+import javax.security.auth.x500.X500PrivateCredential
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -22,6 +25,7 @@ class SignatureVSService {
 	
 	private SignedMailGenerator signedMailGenerator;
 	private X509Certificate localServerCertSigner;
+    private X500PrivateCredential rootCAPrivateCredential;
     private PrivateKey serverPrivateKey;
     private Encryptor encryptor;
 
@@ -48,6 +52,8 @@ class SignatureVSService {
 		}
 		localServerCertSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
         serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
+        rootCAPrivateCredential = new X500PrivateCredential(localServerCertSigner, serverPrivateKey,  ContextVS.ROOT_ALIAS);
+
 		File certChainFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();
 		certChainFile.createNewFile()
@@ -191,4 +197,13 @@ class SignatureVSService {
 		return signedMailGenerator
 	}
 
+    public KeyStore generateKeyStore(String userNIF) throws Exception {
+        KeyStore keyStore = KeyStoreUtil.createUserKeyStore(ContextVS.CERT_VALID_FROM, ContextVS.USER_KEYSTORE_PERIOD,
+                ContextVS.PASSWORD.toCharArray(), ContextVS.END_ENTITY_ALIAS, rootCAPrivateCredential,
+                "GIVENNAME=FirstName_" + userNIF + " ,SURNAME=lastName_" + userNIF + ", SERIALNUMBER=" + userNIF);
+        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, ContextVS.PASSWORD.toCharArray());
+        String userSubPath = StringUtils.getUserDirPath(userNIF);
+        ContextVS.getInstance().copyFile(keyStoreBytes, userSubPath,  "userVS_" + userNIF + ".jks");
+        return keyStore;
+    }
 }

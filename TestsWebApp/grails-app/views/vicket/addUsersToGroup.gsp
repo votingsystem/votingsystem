@@ -7,8 +7,7 @@
     <meta name="layout" content="main" />
 </head>
 <body style="">
-<div class="pageContenDiv">
-    <div style="padding: 0px 30px 0px 30px;">
+    <div class="pageContenDiv" style="padding: 0px 30px 0px 30px;">
         <div class="row" style="">
             <ol class="breadcrumbVS pull-left">
                 <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
@@ -17,73 +16,68 @@
                 <li class="active"><g:message code="addUsersToGroupButton"/></li>
             </ol>
         </div>
-        <div id="vicketUserBaseDataSimulationDataDialog"  class="row"
-             style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
+        <div id="vicketUserBaseDataSimulationDataDialog" style="width: 800px; padding:0px 0px 0px 0px; margin:0px auto 0px auto; ">
             <div class="errorMsgWrapper" style="display:none;"></div>
-            <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
-                <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
-                    <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
-                        <g:message code="goToResultViewMsg"/>
-                    </button>
-                </div>
+            <div style="margin: 0px 0px 30px 0px; width: 100%;">
+                <button id="changeViewButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px; display:none; float:right;"
+                    onclick="showListenerDiv(!$('#simulationListenerDiv').is(':visible'))">
+                    <g:message code="goToResultViewMsg"/>
+                </button>
             </div>
-            <div id="formDataDiv" style="width: 800px; margin: 0px auto 0px auto;">
-                <fieldset id="userBaseData">
-                    <legend style="font-size: 1.2em; font-weight: bold;"><g:message code="addUsersToGroupButton"/></legend>
-                    <form id="addUsersToGroupForm" method="post" class="form-horizontal">
-                        <div class="form-group" style="">
-                            <label class="col-sm-3"><g:message code="groupIdMsg"/></label>
-                            <div class="col-sm-3" style="margin:0px 0px 0px 0px;">
-                                <input type="number" id="groupId" name="groupId" class="form-control"
-                                       style="margin:0px 0px 0px 0px;"/>
-                            </div>
+            <div id="formDataDiv" style="width: 800px;" class="container">
+                <form id="addUsersToGroupForm" method="post" class="form-horizontal">
+                    <h4 id="pageTitle" class="pageHeader text-center">
+                        <g:message code="addUsersToGroupButton"/>
+                    </h4>
+                    <div class="row">
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="" style="width:190px;"><g:message code="groupIdMsg"/></label>
+                            <input type="number" id="groupId" name="groupId" class="form-control"
+                                   style="width:220px;margin:0px 0px 0px 0px; padding: 0px 0px 0px 10px; display: inline;"/>
                         </div>
+                    </div>
 
-                        <div class="form-group" style="">
-                            <label class="col-sm-3"><g:message code="numUsersLbl"/></label>
-                            <div class="col-sm-3" style="margin:0px 0px 0px 0px;">
-                                <input type="number" id="numUsers" name="numUsers" min="0" value="1"
-                                       class="form-control" placeholder="<g:message code="numRepresentativesMsg"/>"/>
-                            </div>
-
+                    <div class="row">
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="" style="width:190px;"><g:message code="numUsersLbl"/></label>
+                            <input type="number" id="numUsers" name="numUsers" min="0" value="1" class="form-control"
+                                   style="width:220px;margin:0px 0px 0px 0px; padding: 0px 0px 0px 10px; display: inline;"/>
                         </div>
-                        <div class="form-group" style="">
-                            <label class="col-sm-3"><g:message code="vicketServerLbl"/></label>
-                            <div class="col-sm-3" style="margin:0px 0px 0px 0px;">
-                                <input type="url" id="vicketServerURL"  class="form-control" style="margin:0px 0px 0px 0px;"
-                                       value="http://vickets/Vickets/" placeholder="<g:message code="vicketServerURLMsg"/>"/>
-                            </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="" style="width:190px;"><g:message code="userIndexLbl"/></label>
+                            <input type="number" id="userIndex" name="userIndex" min="0" value="1" class="form-control"
+                                   style="width:220px;margin:0px 0px 0px 0px; padding: 0px 0px 0px 10px; display: inline;"/>
                         </div>
-                        <div class="form-group" style="width:700px;">
-                            <button type="submit" class="btn btn-warning" style="margin:15px 20px 20px 0px; float:right; ">
-                                <g:message code="addUsersToGroupButton"/>
-                            </button>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="" style="width:190px;"><g:message code="vicketServerLbl"/></label>
+                            <input type="url" id="vicketServerURL"  class="form-control" style="width:220px;margin:0px 0px 0px 0px;display: inline;"
+                                   value="http://vickets/Vickets/" placeholder="<g:message code="vicketServerURLMsg"/>"/>
                         </div>
-                    </form>
-
-                </fieldset>
+                    </div>
+                    <div class="form-group" style="width:700px;">
+                        <button id="addUsersToGroupButton" type="submit" class="btn btn-warning" style="margin:15px 20px 20px 0px; float:right; ">
+                            <g:message code="addUsersToGroupButton"/>
+                        </button>
+                    </div>
+                </form>
 
             </div>
         </div>
-
         <div id="simulationListenerDiv" style="display: none;">
             <g:include view="/include/listenSimulation.gsp"/>
         </div>
     </div>
-</div>
-
-
 </body>
 </html>
 <asset:script>
 
-
     $(document).ready(function(){
 
-
         $('#addUsersToGroupForm').bootstrapValidator({
-            // Only disabled elements are excluded
-            // The invisible elements belonging to inactive tabs must be validated
             excluded: [':disabled'],
             feedbackIcons: {
                 valid: 'glyphicon glyphicon-ok',
@@ -92,15 +86,20 @@
             },
             message: '<g:message code="fieldTypeErrorMsg"/>',
             submitHandler: function(validator, form, submitButton) {
-                console.log(" ===== submitHandler")
-                event.preventDefault();
+                var vicketServerURL = $('#vicketServerURL').val()
+                var suffix = "/"
+                if((vicketServerURL.indexOf(suffix, vicketServerURL.length - suffix.length) == -1)) {
+                    vicketServerURL = vicketServerURL + "/"
+                }
+                vicketServerURL = vicketServerURL + "serverInfo"
+                if(vicketServerURL.indexOf("http://") != 0) {
+                    vicketServerURL = "http://" + vicketServerURL
+                }
+
                 $(".errorMsgWrapper").fadeOut()
-
-                 var userBaseData = {userIndex:$('#groupId').val(),
-                    numUsers: $('#numUsers').val() }
-
-                 var simulationData = {service:'vicketUserBaseDataSimulationService', status:"INIT_SIMULATION",
-                         serverURL:$('#vicketServerURL').val(), userBaseData:userBaseData}
+                 var userBaseData = {numUsers: $('#numUsers').val(), userIndex:$('#userIndex').val() }
+                 var simulationData = {service:'vicketAddUsersToGroupSimulationService', status:"INIT_SIMULATION",
+                         groupId:$('#groupId').val(), serverURL:$('#vicketServerURL').val(), userBaseData:userBaseData}
 
                  showListenerDiv(true)
                  showSimulationProgress(simulationData)
@@ -115,6 +114,11 @@
                     validators: {
                         notEmpty: {message: '<g:message code="emptyFieldErrorMsg"/>'}
                     }
+                },
+                userIndex: {
+                    validators: {
+                        notEmpty: {message: '<g:message code="emptyFieldErrorMsg"/>'}
+                    }
                 }
             }
         });
@@ -122,52 +126,22 @@
     })
 
 
-function isValidForm() {
-	//numRepresentativesMsg"/></label>numRepresentativesWithVote numUsersWithRepresentativeMsg numUsersWithRepresentativeWithVote
-
-
-	if(!document.getElementById('vicketServerURL').validity.valid) {
-		$("#vicketServerURL").addClass( "formFieldError" );
-		showResultDialog('<g:message code="dataFormERRORLbl"/>',
-			'<g:message code="emptyFieldLbl"/>', function() {
-			$("#addControlCenterDialog").dialog("open")
-		})
-		return false
-	}
-	var vicketServerURL = $('#vicketServerURL').val()
-	var suffix = "/"
-	if((vicketServerURL.indexOf(suffix, vicketServerURL.length - suffix.length) == -1)) {
-		vicketServerURL = vicketServerURL + "/"
-	}
-	vicketServerURL = vicketServerURL + "serverInfo"
-	if(vicketServerURL.indexOf("http://") != 0) {
-		vicketServerURL = "http://" + vicketServerURL
-	}
-	return true
-}
-
-$("#testButtonDiv").hide()
-
 function showListenerDiv(isListening) {
-    $("#testButtonDiv").show()
+    document.getElementById("changeViewButton").style.display= 'block'
     if(isListening) {
-        $("#testButton").text("<g:message code="goToFormViewMsg"/>")
+        $("#changeViewButton").text("<g:message code="goToFormViewMsg"/>")
         $('#formDataDiv').fadeOut()
         $('#simulationListenerDiv').fadeIn()
-        $('#pageTitle').text('<g:message code="listeningtVicketUserBaseDataSimulationMsg"/>')
+        document.getElementById('pageTitle').innerHTML = '<g:message code="listeningAddUsersToGroup"/>'
     } else {
-        $("#testButton").text("<g:message code="goToResultViewMsg"/>")
+        $("#changeViewButton").text("<g:message code="goToResultViewMsg"/>")
         $('#simulationListenerDiv').fadeOut()
         $('#formDataDiv').fadeIn()
         SimulationService.close()
-        $('#pageTitle').text('<g:message code="initVicketUserBaseDataSimulationMsg"/>')
+        document.getElementById("addUsersToGroupButton").disabled = false;
+        document.getElementById('pageTitle').innerHTML = '<g:message code="addUsersToGroupButton"/>'
     }
 }
-
-
-$("#testButton").click(function () {
-    showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
-});
 
 function showErrorMsg(errorMsg) {
 	$("#vicketUserBaseDataSimulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')

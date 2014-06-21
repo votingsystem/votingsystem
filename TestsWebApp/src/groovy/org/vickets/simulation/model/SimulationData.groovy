@@ -40,6 +40,7 @@ class SimulationData {
     private String subject = null;
     private String backupRequestEmail = null;
     private Long receptorId = null;
+    private Long groupId = null;
     private BigDecimal depositAmount;
     private String currencyCode;
 
@@ -61,6 +62,15 @@ class SimulationData {
     public Long getReceptorId() {
         return receptorId;
     }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
 
     public String getCurrency() {
         return currencyCode;
@@ -137,6 +147,10 @@ class SimulationData {
         if (dataJSON.containsKey("receptorId")) {
             simulationData.setReceptorId(dataJSON.getLong("receptorId"));
         }
+        if (dataJSON.containsKey("groupId")) {
+            simulationData.setGroupId(dataJSON.getLong("groupId"));
+        }
+
         if (!dataJSON.isNull("backupRequestEmail")) {
             String email = dataJSON.getString("backupRequestEmail");
             if(email != null && !email.trim().isEmpty()) simulationData.setBackupRequestEmail(email);

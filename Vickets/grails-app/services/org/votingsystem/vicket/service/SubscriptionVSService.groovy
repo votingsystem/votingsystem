@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
 
@@ -61,6 +62,8 @@ class SubscriptionVSService {
 			userVS.save();
             userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
             userVS.save()
+            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
+                    balance:BigDecimal.ZERO, IBAN:userVS.getIBAN()).save()
             userVSDB = userVS
 			certificate = saveUserCertificate(userVS, deviceData);
             isNewUser = true
@@ -151,7 +154,7 @@ class SubscriptionVSService {
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "groupNotFound"), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
 
-        if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
+        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
                 messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                  TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), locale)
@@ -203,7 +206,7 @@ class SubscriptionVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, groupNotFound), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        if(!groupVS.getGroupRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
+        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
                 messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                      TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), locale)

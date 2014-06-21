@@ -49,7 +49,7 @@ public class CertificateVS implements Serializable {
 
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
 
-    @Column(name="description", columnDefinition="TEXT")  private String description;
+    @Column(name="description", columnDefinition="TEXT")  private String description = "";
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;

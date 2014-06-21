@@ -359,3 +359,7 @@ function notifiyClientToolConnection() {
         clientToolListeners[i]()
     }
 }
+
+function reloadPage() {
+    location.reload();
+}

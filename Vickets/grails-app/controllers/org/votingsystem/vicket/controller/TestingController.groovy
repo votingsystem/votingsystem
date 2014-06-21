@@ -1,13 +1,17 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.SubscriptionVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.IbanVSUtil
+import org.votingsystem.vicket.util.MetaInfMsg
 
 import java.lang.reflect.Constructor
 import java.util.concurrent.ConcurrentHashMap
@@ -30,9 +34,9 @@ class TestingController {
     //logTransactionVS(int status, String type, String fromUser, String toUser, String currency, BigDecimal amount, String msg, Date dateCreated, String subject)
 
 
-    def index() { }
+    def index() {  }
 
-    def dockspawn() {}
+    def dockspawn() { }
 
     def validator() { }
 

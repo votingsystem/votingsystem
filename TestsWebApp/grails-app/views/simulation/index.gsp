@@ -42,6 +42,10 @@
         <div class="text-center" style="margin: 30px 0 10px 0; font-weight: bold; font-size: 2em; color: #6c0404;">
             <g:message code="vicketsOperationsLbl"/>
         </div>
+        <a href="${createLink(controller: 'vicket', action:'addUsersToGroup', absolute:true)}"
+           class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
+            <g:message code="addUsersToGroupButton"/>
+        </a>
         <a id="initUserBaseDataButton" href="${createLink(controller: 'vicket', action:'initUserBaseData', absolute:true)}"
            class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
             <g:message code="initUserBaseDataButton"/>

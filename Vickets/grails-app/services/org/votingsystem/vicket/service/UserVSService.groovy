@@ -11,6 +11,7 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
 import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -42,6 +43,8 @@ class UserVSService {
                     name:grailsApplication.config.VotingSystem.serverName).save()
             systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id))
             systemUser.save()
+            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser, balance:BigDecimal.ZERO,
+                    IBAN:systemUser.getIBAN()).save()
         }
         return [systemUser:systemUser]
     }
@@ -221,7 +224,7 @@ class UserVSService {
     public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){
         Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,
              dateCancelled:subscriptionVS.dateCancelled, lastUpdated:subscriptionVS.lastUpdated,
-             uservs:[id:subscriptionVS.userVS.id, NIF:subscriptionVS.userVS.nif,
+             uservs:[id:subscriptionVS.userVS.id, IBAN:subscriptionVS.userVS.IBAN, NIF:subscriptionVS.userVS.nif,
                    name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}"],
              groupvs:[name:subscriptionVS.groupVS.name, id:subscriptionVS.groupVS.id],
                 state:subscriptionVS.state.toString(), dateCreated:subscriptionVS.dateCreated]

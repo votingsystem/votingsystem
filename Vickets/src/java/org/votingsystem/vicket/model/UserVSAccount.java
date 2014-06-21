@@ -28,6 +28,9 @@ public class UserVSAccount implements Serializable {
     @NumberFormat(style= NumberFormat.Style.CURRENCY)
     private BigDecimal balance = null;
 
+    @Column(name="currency", nullable=false) private String currencyCode;
+    @Column(name="IBAN") private String IBAN;
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
 
@@ -72,5 +75,21 @@ public class UserVSAccount implements Serializable {
 
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public String getIBAN() {
+        return IBAN;
+    }
+
+    public void setIBAN(String IBAN) {
+        this.IBAN = IBAN;
     }
 }

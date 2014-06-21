@@ -30,7 +30,7 @@ class GroupVSController {
             }
             if(result) resultMap = groupVSService.getGroupVSDetailedDataMap(result, DateUtils.getCurrentWeekPeriod())
             else {
-                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_NOT_FOUND,
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
             }
             if(request.contentType?.contains("json")) {

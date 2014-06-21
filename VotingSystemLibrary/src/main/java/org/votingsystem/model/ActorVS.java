@@ -270,6 +270,10 @@ public class ActorVS implements Serializable {
     @Transient public String getReceiptViewerURL() {
         return getServerURL() + "/receipt/contentViewer";}
 
+    @Transient public String getGroupURL(Long groupId) {
+        return getServerURL() + "/groupVS/" + String.valueOf(groupId);
+    }
+
     @Transient public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();

@@ -31,6 +31,7 @@
             <thead>
             <tr style="color: #ff0000;">
                 <th data-dynatable-column="nif" style="width: 120px;"><g:message code="nifLbl"/></th>
+                <th data-dynatable-column="name" style="max-width:80px;">IBAN</th>
                 <th data-dynatable-column="name" style="max-width:80px;"><g:message code="nameLbl"/></th>
                 <th data-dynatable-column="state" style="max-width:60px;"><g:message code="stateLbl"/></th>
                 <th data-dynatable-column="lastUpdate" style="width:200px;"><g:message code="lastUpdateLbl"/></th>
@@ -126,6 +127,7 @@
         var cssClass = "span4", tr;
         if (rowIndex % 3 === 0) { cssClass += ' first'; }
         tr = '<tr><td class="text-center"><a href="#" onclick="openWindow(\'' + userURL + '\')">' + jsonSubscriptionData.uservs.NIF + '</a></td>' +
+            '<td class="text-center">' + jsonSubscriptionData.uservs.IBAN + '</td>' +
             '<td class="text-center">' + jsonSubscriptionData.uservs.name + '</td>' +
             '<td class="text-center">' + userState + '</td>' +
             '<td class="text-center">' + jsonSubscriptionData.lastUpdated + '</td></tr>'

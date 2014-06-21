@@ -183,9 +183,9 @@
             <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
     </g:if>
 </div>
+<g:include view="/include/dialog/resultDialog.gsp"/>
 <g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>
 <g:include view="/include/dialog/depositDialog.gsp"/>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
 <asset:script>

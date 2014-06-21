@@ -4,9 +4,13 @@ import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.vickets.simulation.model.SimulationData
 import org.vickets.simulation.model.UserBaseSimulationData
+import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.callable.ServerInitializer
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -21,13 +25,14 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
 @Transactional
-class VicketUserBaseDataSimulationService {
+class VicketAddUsersToGroupSimulationService {
 
-    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INITIALIZE_SERVER,
-        CREATE_USER_BASE_DATA, FINISH_SIMULATION, LISTEN}
+    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INITIALIZE_SERVER, GET_GROUP_DATA,
+        SUBSCRIBE_USERS, FINISH_SIMULATION, LISTEN}
 
     def grailsApplication
     def webSocketService
+    def signatureVSService
     private Locale locale = new Locale("es")
     def messageSource
 
@@ -39,7 +44,8 @@ class VicketUserBaseDataSimulationService {
     private Set<String> synchronizedListenerSet;
 
     private List<String> userList;
-    private ActorVS vicketServer;
+    private VicketServer vicketServer;
+    private JSONObject requestSubscribeData;
 
     private SimulationData simulationData;
     private List<String> errorList;
@@ -91,39 +97,78 @@ class VicketUserBaseDataSimulationService {
         simulationData = SimulationData.parse(simulationDataJSON)
         errorList = Collections.synchronizedList(new ArrayList<String>());
         simulationStarter = simulationDataJSON.userId
+        if(simulationDataJSON.locale) locale = new Locale(simulationDataJSON.locale)
         synchronizedListenerSet.add(simulationStarter)
+        userList = new ArrayList<String>();
         simulationData.init(System.currentTimeMillis());
         log.debug("call - process:" + ManagementFactory.getRuntimeMXBean().getName());
         changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
     }
 
+    //For this service to work server cert must be installed as CA Authority
     private void initializeServer() {
         log.debug("initializeServer ### Enter INITIALIZE_SERVER status")
-        //Prepare UserBase Data
-        //String serviceURL = simulationData.getUserBaseSimulationData().getUserBaseInitServiceURL()
-        ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(), ActorVS.Type.VICKETS);
-        userList = new ArrayList<String>();
-        ResponseVS responseVS = serverInitializer.call();
-        vicketServer = responseVS.getData();
+        ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(simulationData.getServerURL()), ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            vicketServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+            if(vicketServer.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != vicketServer.getEnvironmentVS()) {
+                responseVS = new ResponseVS(ResponseVS.SC_ERROR, "SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
+                        vicketServer.getEnvironmentVS());
+            } else {
+                responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+                        vicketServer.getTimeStampServerURL()),ContentTypeVS.JSON);
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+                    ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());
+                }
+            }
+        }
         responseVS.setStatus(Status.INITIALIZE_SERVER)
         changeSimulationStatus(responseVS)
     }
 
-    private void createUsers() {
-        log.debug("createUsers ### Enter status CREATE_USER_BASE_DATA - " +
+    private void getGroupData() {
+        ResponseVS responseVS = HttpHelper.getInstance().getData(vicketServer.getGroupURL(simulationData.getGroupId()), ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            JSONObject groupDataJSON = new JSONObject(responseVS.getMessage())
+            JSONObject representativeDataJSON = groupDataJSON.getJSONObject("representative")
+            //{"operation":,"groupvs":{"id":4,"name":"NombreGrupo","representative":{"id":2,"nif":"07553172H"}}}
+            requestSubscribeData = new JSONObject([operation:"VICKET_GROUP_SUBSCRIBE"])
+            JSONObject groupDataJSON1 = new JSONObject([id:groupDataJSON.getLong("id"), name:groupDataJSON.getString("name")])
+            JSONObject representativeDataJSON1 = new JSONObject([id:representativeDataJSON.getLong("id"),
+                         nif:representativeDataJSON.getString("nif")])
+            groupDataJSON1.put("representative", representativeDataJSON1)
+            requestSubscribeData.put("groupvs", groupDataJSON1)
+        }
+        responseVS.setStatus(Status.GET_GROUP_DATA)
+        changeSimulationStatus(responseVS)
+    }
+
+
+    private void subscribeUsers() {
+        log.debug("subscribeUsers ### Enter status SUBSCRIBE_USERS - " +
                 "Num. Users:" + simulationData.getUserBaseSimulationData().getNumUsers());
         ResponseVS responseVS = null;
-        for(int i = 1; i <= simulationData.getUserBaseSimulationData().getNumUsers(); i++ ) {
+        int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue()
+        int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
+                simulationData.getUserBaseSimulationData().getNumUsers()
+        for(int i = fromFirstUser; i < toLastUser; i++ ) {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             try {
                 String userNif = NifUtils.getNif(userIndex);
-                KeyStore keyStore = ContextVS.getInstance().generateKeyStore(userNif);
+                KeyStore mockDnie = signatureVSService.generateKeyStore(userNif);
                 userList.add(userNif);
-                Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
-                X509Certificate usertCert = (X509Certificate) chain[0];
-                byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
-                String certServiceURL = vicketServer.getUserCertServiceURL();
-                responseVS =HttpHelper.getInstance().sendData(usertCertPEMBytes,ContentTypeVS.X509_USER,certServiceURL);
+                String toUser = vicketServer.getNameNormalized();
+                String subject = messageSource.getMessage("subscribeToGroupMsg", null, locale)
+                requestSubscribeData.put("UUID", UUID.randomUUID().toString())
+                SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
+                        ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
+                SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
+                        requestSubscribeData.toString(), subject);
+                SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
+                        vicketServer.getSubscribeUserToGroupURL(simulationData.getGroupId()),
+                        vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
+                responseVS = worker.call();
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
                     errorList.add(responseVS.getMessage());
@@ -139,7 +184,7 @@ class VicketUserBaseDataSimulationService {
         }
         if(!errorList.isEmpty()) responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         else responseVS = new ResponseVS(ResponseVS.SC_OK)
-        responseVS.setStatus(Status.CREATE_USER_BASE_DATA)
+        responseVS.setStatus(Status.SUBSCRIBE_USERS)
         changeSimulationStatus(responseVS);
     }
 
@@ -169,22 +214,37 @@ class VicketUserBaseDataSimulationService {
             case Status.INIT_SIMULATION:
                 if(ResponseVS.SC_OK != statusFromResponse.getStatusCode()) {
                     finishSimulation(statusFromResponse);
-                } else initializeServer();
+                } else {
+                    initializeServer();
+                }
                 break;
             case Status.INITIALIZE_SERVER:
                 if(ResponseVS.SC_OK != statusFromResponse.getStatusCode()) {
                     finishSimulation(statusFromResponse);
                 } else {
                     try {
-                        requestExecutor.execute(new Runnable() {@Override public void run() {createUsers();}});
+                        requestExecutor.execute(new Runnable() {@Override public void run() {getGroupData();}});
                     } catch(Exception ex) {
                         log.error(ex.getMessage(), ex);
                         errorList.add(ex.getMessage())
-                        changeSimulationStatus(new ResponseVS(ResponseVS.SC_ERROR, Status.INIT_SIMULATION, ex.getMessage()));
+                        changeSimulationStatus(new ResponseVS(ResponseVS.SC_ERROR, Status.INITIALIZE_SERVER, ex.getMessage()));
                     }
                 }
                 break;
-            case Status.CREATE_USER_BASE_DATA:
+            case Status.GET_GROUP_DATA:
+                if(ResponseVS.SC_OK != statusFromResponse.getStatusCode()) {
+                    finishSimulation(statusFromResponse);
+                } else {
+                    try {
+                        requestExecutor.execute(new Runnable() {@Override public void run() {subscribeUsers();}});
+                    } catch(Exception ex) {
+                        log.error(ex.getMessage(), ex);
+                        errorList.add(ex.getMessage())
+                        changeSimulationStatus(new ResponseVS(ResponseVS.SC_ERROR, Status.GET_GROUP_DATA, ex.getMessage()));
+                    }
+                }
+                break;
+            case Status.SUBSCRIBE_USERS:
                 finishSimulation(statusFromResponse);
                 break;
             case Status.FINISH_SIMULATION:

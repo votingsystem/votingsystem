@@ -1,9 +1,12 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.bouncycastle.util.encoders.Base64
+import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -58,9 +61,13 @@ class TransactionVSService {
         String msg;
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
         String toUser = smimeMessageReq.getFrom().toString().replace(" ", "")
-        log.debug("========= ${messageJSON}")
         try {
-            IbanVSUtil.validate(messageJSON.toUserIBAN);
+            if(messageJSON.toUserIBAN instanceof JSONArray) {
+                messageJSON.toUserIBAN.each { it ->
+                    IbanVSUtil.validate(it);}
+            } else {
+                IbanVSUtil.validate(messageJSON.toUserIBAN);
+            }
         } catch(Exception ex) {
             msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
                     locale)
@@ -75,6 +82,11 @@ class TransactionVSService {
                 break;
             case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
                 processDepositFromVicketSource(messageSMIMEReq, messageJSON, locale)
+                break;
+            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
+            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
+            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                processDepositFromGroup(messageSMIMEReq, messageJSON, locale)
                 break;
             default:
                 msg = messageSource.getMessage('unknownTransactionErrorMsg', [transactionType.toString()].toArray(), locale)
@@ -139,6 +151,123 @@ class TransactionVSService {
                 type:TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE)
     }
 
+    @Transactional
+    private UserVS getUserFromGroup (GroupVS groupVS, String IBAN) {
+        def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
+            eq("groupVS", groupVS)
+            eq("state", SubscriptionVS.State.ACTIVE)
+            userVS { eq("IBAN", IBAN)}
+        }
+        return subscriptionList.iterator()?.next()?.userVS
+    }
+
+
+    @Transactional
+    private ResponseVS processDepositFromGroup(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        UserVS messageSigner = messageSMIMEReq.userVS
+        List<UserVS> receptorList = []
+        GroupVS groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
+        String msg;
+        if(!groupVS) {
+            msg = messageSource.getMessage('groupNotFoundByIBANErrorMsg',
+                    [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), locale)
+            log.error "${methodName} - ${msg}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
+                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+        }
+        ResponseVS responseVS
+        TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
+        messageJSON.toUserIBAN?.each { it ->
+            UserVS userVS = getUserFromGroup(groupVS, it)
+            if(!userVS) {
+                msg = messageSource.getMessage('groupUserNotFoundByIBANErrorMsg', [it, groupVS.name].toArray(), locale)
+                log.error "${methodName} - ${msg}"
+                responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
+                        message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+            } else {
+                receptorList.add(userVS)
+            }
+        }
+
+        if(operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS) {
+            def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
+                eq("groupVS", groupVS)
+                eq("state", SubscriptionVS.State.ACTIVE)
+            }
+            subscriptionList.each { it ->
+                receptorList.add(it.userVS)
+            }
+        }
+        if(responseVS != null) return responseVS
+        Currency currency = Currency.getInstance(messageJSON.currency)
+        boolean transactionWithUsersIBAN = (operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER ||
+                operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP ||
+                operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS)
+        Date transactionValidTo = DateUtils.getDateFromString(messageJSON.validTo)
+        if (!messageJSON.amount || !messageJSON.currency || receptorList.isEmpty() || !messageJSON.validTo||
+                !transactionWithUsersIBAN || Calendar.getInstance().getTime().after(transactionValidTo) ||
+                !messageJSON.subject) {
+            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
+                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+        }
+
+        BigDecimal amount = new BigDecimal(messageJSON.amount)
+        BigDecimal numUsersBigDecimal = new BigDecimal(receptorList.size())
+        BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
+
+
+        UserVSAccount groupAccount = UserVSAccount.findWhere(IBAN:messageJSON.fromUserIBAN)
+        if(! groupAccount?.balance.compareTo(amount) > 0 ) {
+            msg = messageSource.getMessage('balanceErrorMsg', ["${groupAccount?.balance} ${groupAccount.currencyCode}",
+                   "${amount} ${currency.getCurrencyCode()}"].toArray(), locale)
+            log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
+                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+        }
+
+        TransactionVS.Type transactionVSType
+        switch(operationType) {
+            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
+                transactionVSType = TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS
+                msg = messageSource.getMessage('vicketDepositFromGroupToMemberGroupOKMsg', null, locale)
+                break;
+            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
+                transactionVSType = TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER
+                msg = messageSource.getMessage('vicketDepositFromGroupToMemberOKMsg', null, locale)
+                break;
+            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                transactionVSType = TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS
+                msg = messageSource.getMessage('vicketDepositFromGroupToAllMembersGroupOKMsg', null, locale)
+                break;
+        }
+        String metaInfMsg
+
+        TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
+                fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo: transactionValidTo,
+                subject:messageJSON.subject, fromUserVS:groupVS, currencyCode: currency.getCurrencyCode(), type:transactionVSType).save()
+        groupAccount.balance = groupAccount.balance.subtract(messageJSON.amount)
+        groupAccount.save()
+        receptorList.each { toUser ->
+            UserVSAccount userAccount = UserVSAccount.findWhere(IBAN:toUser.IBAN)
+            userAccount.balance = userAccount.balance.add(userPart)
+            userAccount.save()
+            TransactionVS transaction = new TransactionVS(amount: userPart, messageSMIME:messageSMIMEReq,
+                    fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo:transactionValidTo,
+                    transactionParent: transactionParent, subject:messageJSON.subject, fromUserVS:groupVS,
+                    toUserVS: toUser, currencyCode: currency.getCurrencyCode(), type:transactionVSType).save()
+            metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}")
+            log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
+        }
+
+        metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${operationType.toString()}")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", metaInf:metaInfMsg,
+                type:TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE)
+    }
+
     private ResponseVS processUserAllocation(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
 
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
@@ -183,7 +312,7 @@ class TransactionVSService {
             TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEResp,
                     state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
                     subject:subject, fromUserVS:signer, toUserVS: userVSService.getSystemUser(),
-                    currency:currency, type:TransactionVS.Type.USER_ALLOCATION).save()
+                    currencyCode: currency.getCurrencyCode(), type:TransactionVS.Type.USER_ALLOCATION).save()
 
             def usersToDeposit = UserVS.createCriteria().scroll {
                 eq("type", UserVS.Type.USER)
@@ -194,7 +323,7 @@ class TransactionVSService {
                 UserVS userVS = (UserVS) usersToDeposit.get(0);
                 TransactionVS userTransaction = new TransactionVS(transactionParent:transactionParent, amount:userPart,
                         state:TransactionVS.State.OK, validTo: weekToCalendar.getTime(),
-                        subject:subject, fromUserVS: systemUser, toUserVS:userVS, currency:currency,
+                        subject:subject, fromUserVS: systemUser, toUserVS:userVS, currencyCode: currency.getCurrencyCode(),
                         type:TransactionVS.Type.USER_ALLOCATION_INPUT).save()
                 if((usersToDeposit.getRowNumber() % 100) == 0) {
                     sessionFactory.currentSession.flush()

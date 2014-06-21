@@ -3,6 +3,7 @@ package org.votingsystem.vicket.model;
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.vicket.service.TransactionVSService;
 import org.votingsystem.vicket.util.ApplicationContextHolder;
@@ -27,7 +28,8 @@ public class TransactionVS  implements Serializable {
     public static final long serialVersionUID = 1L;
 
     public enum Type { VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_SEND, VICKET_CANCELLATION,
-        VICKET_SOURCE_INPUT;}
+        VICKET_SOURCE_INPUT, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,
+        VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 

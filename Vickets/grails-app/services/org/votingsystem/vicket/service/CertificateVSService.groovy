@@ -38,7 +38,7 @@ class CertificateVSService {
         ResponseVS responseVS = null;
         UserVS userSigner = messageSMIMEReq.getUserVS()
         String msg
-        if(!userVSService.isUserAdmin()) {
+        if(!userVSService.isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                          TypeVS.CERT_CA_NEW.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"
@@ -65,22 +65,30 @@ class CertificateVSService {
             certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509NewCACert),
                     type:CertificateVS.Type.CERTIFICATE_AUTHORITY,
                     state:CertificateVS.State.OK,
+                    description:messageJSON.info,
                     content:x509NewCACert.getEncoded(),
                     serialNumber:x509NewCACert.getSerialNumber()?.longValue(),
                     validFrom:x509NewCACert.getNotBefore(),
                     validTo:x509NewCACert.getNotAfter()).save()
+            msg = messageSource.getMessage('cert.newCACertMsg', null, locale)
         } else {
-            msg = messageSource.getMessage('newCACertRepeatedErrorMsg',
-                    [x509NewCACert.getSerialNumber().toString()].toArray(), locale)
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName,
-                    "newCACertRepeated", "certificateVS_${certificateVS.id}"),
-                    reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            if(certificateVS.type != CertificateVS.Type.CERTIFICATE_AUTHORITY) {
+                certificateVS.type = CertificateVS.Type.CERTIFICATE_AUTHORITY
+                certificateVS.description = "${certificateVS.description} #### ${messageJSON.info}"
+                certificateVS.save()
+                msg = messageSource.getMessage('certUpdatedToCAMsg', [x509NewCACert.getSerialNumber().toString()].toArray(), locale)
+            } else {
+                msg = messageSource.getMessage('newCACertRepeatedErrorMsg',
+                        [x509NewCACert.getSerialNumber().toString()].toArray(), locale)
+                return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName,
+                        "newCACertRepeated", "certificateVS_${certificateVS.id}"),
+                        reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
+            }
         }
         log.debug "addCertificateAuthority - new CA - id:'${certificateVS?.id}'"
         signatureVSService.loadCertAuthorities() //load changes
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CERT_CA_NEW,
-                metaInf:MetaInfMsg.getOKMsg(methodName, "certificateVS_${certificateVS.id}"),
-                message:messageSource.getMessage('cert.newCACertMsg', null, locale))
+                metaInf:MetaInfMsg.getOKMsg(methodName, "certificateVS_${certificateVS.id}"), message:msg)
     }
 
     @Transactional

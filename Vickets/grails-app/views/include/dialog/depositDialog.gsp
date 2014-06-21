@@ -256,6 +256,8 @@
         return result
     }
 
+    depositDialogCallback('{"message":"Transaction OK","statusCode":200}')
+
     function depositDialogCallback(appMessage) {
         console.log("depositDialogCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
@@ -280,21 +282,38 @@
 
     function depositDialogAddReceptor (userId) {
         var receptorJSON = userMap[userId]
-        if(receptorMap[userId] == null) {
-            receptorMap[receptorJSON.id] = receptorJSON
-            var name = getUserVSName(receptorJSON)
-            var newFieldHTML = receptorTemplate.format(userId, name);
-            $("#fieldsBox #fields").append($(newFieldHTML))
-            if(Object.keys(receptorMap).length == 1){
-                $("#selectReceptorlblDiv").hide()
-                $("#fieldsDiv").show()
-            }
+        switch(operation) {
+            case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
+                document.getElementById("fields").innerHTML= ''
+                receptorMap[receptorJSON.id] = receptorJSON
+                var name = getUserVSName(receptorJSON)
+                var newFieldHTML = receptorTemplate.format(userId, name);
+                $("#fieldsBox #fields").append($(newFieldHTML))
+                if(Object.keys(receptorMap).length == 1){
+                    $("#selectReceptorlblDiv").hide()
+                    $("#fieldsDiv").show()
+                }
+                break;
+            case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
+                if(receptorMap[userId] == null) {
+                    receptorMap[receptorJSON.id] = receptorJSON
+                    var name = getUserVSName(receptorJSON)
+                    var newFieldHTML = receptorTemplate.format(userId, name);
+                    $("#fieldsBox #fields").append($(newFieldHTML))
+                    if(Object.keys(receptorMap).length == 1){
+                        $("#selectReceptorlblDiv").hide()
+                        $("#fieldsDiv").show()
+                    }
+                }
+                break;
+            case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                break;
         }
     }
 
     function removeReceptor(removeButton) {
          var userId = $(removeButton).attr('data-userid')
-         $(removeButton).parent().fadeOut(1000, function() { $(removeButton).parent().remove(); });
+         $(removeButton).parent().fadeOut(400, function() { $(removeButton).parent().remove(); });
          delete receptorMap[userId];
          if(Object.keys(receptorMap).length == 0){
             $("#fieldsDiv").hide()
