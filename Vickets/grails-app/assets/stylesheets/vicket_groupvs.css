@@ -33,28 +33,26 @@
 }
 
 .groupvsDiv {
-    display:inline;
-    width:450px;
-    max-width: 450px;
     background-color: #f2f2f2;
-    margin: 10px 5px 5px 10px;
-    -moz-border-radius: 3px; border-radius: 3px;
+    -moz-border-radius: 3px; border-radius: 4px;
     cursor: pointer;
-    height:150px;
-    overflow:hidden;
-    float:left;
 }
 
 .groupvsInfoDiv {
     position:relative;
     font-size: 0.9em;
-    height:70px;
+    max-height:6em; /* exactly three lines */
     padding: 10px;
     vertical-align:middle;
     padding: 0px 5px 20px 5px;
-    overflow: hidden;
+    line-height:1.5;
     text-overflow: ellipsis;
+    overflow: hidden;
+    word-wrap:break-word;
+    text-align:  justify;
+
 }
+
 
 .groupvsSubjectDiv {
     font-size: 1.1em;
@@ -83,13 +81,25 @@
 }
 
 .groupvsActive {
-    border: 1px solid #e3411a;
+    border: 1px solid #195;
 }
 
 .groupvsActive .groupvsSubjectDiv{
-    background-color:#e3411a;
+    background-color:#195;
 }
 
+.groupvsActive .groupvsRepresentativeDiv {
+    position: relative;
+    white-space:nowrap;
+    color:#fff;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+    font-size: 0.9em;
+    padding: 5px;
+    bottom: 0px;
+    background-color:#184;
+}
 
 .groupvsPending {
     border: 1px solid #fba131;
@@ -108,23 +118,24 @@
 }
 
 .groupvsFinished {
-    border: 1px solid #cc1606;
+    border: 1px solid #e76;
 }
 
 .groupvsFinished .groupvsSubjectDiv{
-    background-color:#cc1606;
+    background-color:#e76;
 }
 
-.groupvsRepresentativeDiv {
+.groupvsFinished .groupvsRepresentativeDiv {
     position: relative;
     white-space:nowrap;
-    color:#91140a;
+    color:#fff;
     overflow:hidden;
     text-overflow: ellipsis;
     font-weight: bold;
     font-size: 0.9em;
     padding: 5px;
     bottom: 0px;
+    background-color:#d65;
 }
 
 .groupvsPendingBox {

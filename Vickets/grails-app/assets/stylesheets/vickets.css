@@ -234,3 +234,12 @@ input:focus:valid {
     font-weight: bold;
     color:#6c0404;
 }
+
+.eventContentDiv {
+    border: #f2f2f2 solid 1px;
+    margin:0px 0px 0px 0px;
+    min-height:300px;
+    padding: 10px 10px 10px 10px;
+    word-wrap:break-word;
+    overflow: hidden;
+}

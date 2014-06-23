@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import org.votingsystem.model.CertificateVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -20,6 +21,7 @@ class CertificateVSService {
     def userVSService
     def signatureVSService
     def messageSource
+    def grailsLinkGenerator
 
     /*
      * Método para poder añadir certificados de confianza.
@@ -87,7 +89,9 @@ class CertificateVSService {
         }
         log.debug "addCertificateAuthority - new CA - id:'${certificateVS?.id}'"
         signatureVSService.loadCertAuthorities() //load changes
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CERT_CA_NEW,
+        String certURL = "${grailsLinkGenerator.link(controller:"certificateVS", action:"cert", absolute:true)}/${x509NewCACert.getSerialNumber().toString()}"
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CERT_CA_NEW,contentType: ContentTypeVS.JSON,
+                data:[message:msg, URL:certURL, statusCode:ResponseVS.SC_OK],
                 metaInf:MetaInfMsg.getOKMsg(methodName, "certificateVS_${certificateVS.id}"), message:msg)
     }
 

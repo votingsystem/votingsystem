@@ -59,7 +59,7 @@ class SignatureVSService {
 		certChainFile.createNewFile()
 		certChainFile.setBytes(pemCertsArray)
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
-        return [signedMailGenerator:signedMailGenerator, encryptor:encryptor,
+        return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, rootCAPrivateCredential:rootCAPrivateCredential,
                 localServerCertSigner:localServerCertSigner, serverPrivateKey:serverPrivateKey];
 	}
 
@@ -72,6 +72,11 @@ class SignatureVSService {
         if(serverPrivateKey == null) serverPrivateKey = init().serverPrivateKey
         return serverPrivateKey
     }
+    private X500PrivateCredential getRootCAPrivateCredential() {
+        if(rootCAPrivateCredential == null) rootCAPrivateCredential = init().rootCAPrivateCredential
+        return rootCAPrivateCredential
+    }
+
 
 	public File getSignedFile (String fromUser, String toUser,
 		String textToSign, String subject, Header header) {
@@ -199,7 +204,7 @@ class SignatureVSService {
 
     public KeyStore generateKeyStore(String userNIF) throws Exception {
         KeyStore keyStore = KeyStoreUtil.createUserKeyStore(ContextVS.CERT_VALID_FROM, ContextVS.USER_KEYSTORE_PERIOD,
-                ContextVS.PASSWORD.toCharArray(), ContextVS.END_ENTITY_ALIAS, rootCAPrivateCredential,
+                ContextVS.PASSWORD.toCharArray(), ContextVS.END_ENTITY_ALIAS, getRootCAPrivateCredential(),
                 "GIVENNAME=FirstName_" + userNIF + " ,SURNAME=lastName_" + userNIF + ", SERIALNUMBER=" + userNIF);
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, ContextVS.PASSWORD.toCharArray());
         String userSubPath = StringUtils.getUserDirPath(userNIF);

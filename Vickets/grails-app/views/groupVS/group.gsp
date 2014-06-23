@@ -85,7 +85,7 @@
     <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
 
     <div style="margin: 15px 0 15px 0;">
-        <div class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
+        <div class="eventContentDiv" style="">
             ${raw(groupvsMap?.description)}
         </div>
         <div class="row" style="width:1000px;">
@@ -110,6 +110,9 @@
             </li>
             <li style="">
                 <a href="#transactionsFrom" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="expensesLbl"/></a>
+            </li>
+            <li style="">
+                <a href="#userList" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="usersLbl"/></a>
             </li>
         </ul>
 
@@ -173,6 +176,9 @@
                     </table>
                 </div>
             </div>
+            <div class="tab-pane fade" id="userList" style="top:0px;">
+                <g:include view="/include/userList.gsp"/>
+            </div>
         </div>
 
     </div>
@@ -190,10 +196,10 @@
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
+    var userListURL = "${createLink(controller: 'groupVS', action: 'listUsers')}/${groupvsMap?.id}"
 
     var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
     var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
-
 
     $(function() {
 

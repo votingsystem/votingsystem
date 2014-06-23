@@ -256,8 +256,6 @@
         return result
     }
 
-    depositDialogCallback('{"message":"Transaction OK","statusCode":200}')
-
     function depositDialogCallback(appMessage) {
         console.log("depositDialogCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)

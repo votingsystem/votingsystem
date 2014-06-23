@@ -156,8 +156,7 @@
             console.log("transactionvs selected: " + optionSelected)
             var targetURL = updateMenuLink("${createLink(controller: 'certificateVS', action: 'certs')}")
             if("" != optionSelected) {
-                history.pushState(null, null, targetURL);
-                targetURL = targetURL + optionSelected
+                targetURL = targetURL + "?" + optionSelected + "&"
             }
             dynatable.settings.dataset.ajaxUrl= targetURL
             history.pushState(null, null, targetURL);

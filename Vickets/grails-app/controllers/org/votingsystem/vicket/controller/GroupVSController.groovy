@@ -195,28 +195,39 @@ class GroupVSController {
         if(params.long('id')) {
             GroupVS groupVS = null
             Map resultMap = [:]
-            GroupVS.withTransaction {
-                groupVS = GroupVS.get(params.long('id'))
-            }
+            GroupVS.withTransaction { groupVS = GroupVS.get(params.long('id')) }
             if(!groupVS) {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
             }
             resultMap = [groupName: groupVS.name, id:groupVS.id]
-
+            UserVS.State state = UserVS.State.ACTIVE
+            try {state = UserVS.State.valueOf(params.state)} catch(Exception ex) {}
             if(request.contentType?.contains("json")) {
                 def userList
                 SubscriptionVS.withTransaction {
                     userList = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
                         eq("groupVS", groupVS)
+                        if(params.searchText) {
+                            userVS {
+                                or {
+                                    ilike('name', "%${params.searchText}%")
+                                    ilike('firstName', "%${params.searchText}%")
+                                    ilike('lastName', "%${params.searchText}%")
+                                    ilike('nif', "%${params.searchText}%")
+                                }
+                                and { eq("state", state) }
+                            }
+                        } else {
+                            userVS { eq("state", state) }
+                        }
                     }
                 }
-
                 def resultList = []
                 userList.each {userItem ->
                     resultList.add(userVSService.getSubscriptionVSDataMap(userItem))
                 }
-                resultMap = ["${message(code: 'uservsRecordsLbl')}":resultList, queryRecordCount: userList.totalCount,
+                resultMap = [userVSList:resultList, queryRecordCount: userList.totalCount,
                              numTotalUsers:userList.totalCount ]
                 render resultMap as JSON
             } else {

@@ -219,7 +219,8 @@ var dynatableParams = {
   }
 
 var dynatableFeatures =  {
-    search: false
+    search: false,
+    pushState: false
 }
 
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
@@ -273,17 +274,6 @@ function getFnName(fn) {
 }
 
 var menuType = 'user'
-
-
-function getMenuURL(baseURL) {
-    var selectedMenuType = getParameterByName('menu')
-    if(baseURL.indexOf("?") < 0) {
-        baseURL = baseURL + "?menu=" + menuType;
-    } else {
-        baseURL = baseURL + "&menu=" + menuType;
-    }
-    return baseURL
-}
 
 function updateMenuLinks() {
     var selectedMenuType = getParameterByName('menu')
