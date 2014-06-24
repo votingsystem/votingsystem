@@ -197,8 +197,10 @@ class GroupVSService {
 
         def transactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('fromUserVS', groupVS)
+            isNull("transactionParent")
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
+
         def transactionFromListJSON = []
         transactionListDB.each { transaction ->
             transactionFromListJSON.add(transactionVSService.getTransactionMap(transaction))

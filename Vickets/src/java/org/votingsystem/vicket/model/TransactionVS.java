@@ -27,8 +27,8 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type { VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_SEND, VICKET_CANCELLATION,
-        VICKET_SOURCE_INPUT, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,
+    public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, VICKET_SOURCE_INPUT,
+        VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,
         VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS;}
 
     public enum State { OK, REPEATED, CANCELLED;}
@@ -51,10 +51,11 @@ public class TransactionVS  implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
 
-    //This is for Transactions From Vicket Sources
+    //This is for Transactions From Vicket Sources, and not anonymous transactions
     @Column(name="fromUserIBAN") private String fromUserIBAN;
     @Column(name="fromUser") private String fromUser;
 
+    @Column(name="toUserIBAN") private String toUserIBAN;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
 
@@ -187,6 +188,14 @@ public class TransactionVS  implements Serializable {
         this.fromUserIBAN = fromUserIBAN;
     }
 
+    public String getToUserIBAN() {
+        return toUserIBAN;
+    }
+
+    public void setToUserIBAN(String toUserIBAN) {
+        this.toUserIBAN = toUserIBAN;
+    }
+
     public String getFromUser() {
         return fromUser;
     }
@@ -196,9 +205,7 @@ public class TransactionVS  implements Serializable {
     }
 
     public void afterInsert() {
-        if(Type.USER_ALLOCATION_INPUT != getType()) {
-            ((TransactionVSService)ApplicationContextHolder.getBean("transactionVSService")).notifyListeners(this);
-        }
+        ((TransactionVSService)ApplicationContextHolder.getBean("transactionVSService")).notifyListeners(this);
     }
 
 }

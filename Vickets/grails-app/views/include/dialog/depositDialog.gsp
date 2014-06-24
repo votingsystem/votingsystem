@@ -53,8 +53,8 @@
                                 <g:message code="userSearchLbl" /></button>
                         </div>
 
-                        <div id="uservs_tableDiv" style="margin: 20px auto 0px auto; max-width: 800px; overflow:auto; visibility: hidden;">
-                            <table class="table white_headers_table" id="uservs_table" style="">
+                        <div id="deposit_dialog_uservs_tableDiv" style="margin: 20px auto 0px auto; max-width: 800px; overflow:auto; visibility: hidden;">
+                            <table class="table white_headers_table" id="deposit_dialog_uservs_table" style="">
                                 <thead>
                                 <tr style="color: #ff0000;">
                                     <th data-dynatable-column="uservsNIF" style="width: 60px;"><g:message code="nifLbl"/></th>
@@ -109,17 +109,17 @@
         var selectReceptorMsg
         switch(depositType) {
             case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
-                caption = fromUser + '<br/><div style="font-weight: normal;"><g:message code="vicketDepositFromGroupToMember"/></div>'
+                caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMember'/></div>"
                 selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
                 document.getElementById('receptorPanelDiv').style.display = 'block'
                 break;
             case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
-                caption = fromUser + '<br/><div style="font-weight: normal;"><g:message code="vicketDepositFromGroupToMemberGroup"/></div>'
+                caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMemberGroup'/></div>"
                 selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
                 document.getElementById('receptorPanelDiv').style.display = 'block'
                 break;
             case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
-                caption = fromUser + '<br/><div style="font-weight: normal;"><g:message code="vicketDepositFromGroupToAllMembers"/></div>'
+                caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
                 selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
                  document.getElementById('receptorPanelDiv').style.display = 'none'
                 break;
@@ -134,11 +134,11 @@
         userMap = {}
         if(document.getElementById("fields") != null) document.getElementById("fields").innerHTML= ''
 
-        var uservs_table = document.getElementById("uservs_table");
-        var uservs_tableBody = uservs_table.getElementsByTagName('tbody');
-        var numRows = uservs_tableBody.length;
-        while(numRows) uservs_table.removeChild(uservs_tableBody[--numRows]);
-        document.getElementById("uservs_table").style.visibility = 'hidden'
+        var deposit_dialog_uservs_table = document.getElementById("deposit_dialog_uservs_table");
+        var deposit_dialog_uservs_tableBody = deposit_dialog_uservs_table.getElementsByTagName('tbody');
+        var numRows = deposit_dialog_uservs_tableBody.length;
+        while(numRows) deposit_dialog_uservs_table.removeChild(deposit_dialog_uservs_tableBody[--numRows]);
+        document.getElementById("deposit_dialog_uservs_table").style.visibility = 'hidden'
 
         $("#fieldsDiv").hide()
         $("#selectReceptorlblDiv").show()
@@ -167,7 +167,7 @@
          } });
 
 
-        $('#uservs_table').dynatable({
+        $('#deposit_dialog_uservs_table').dynatable({
             features: {
                 paginate: false,
                 search: false,
@@ -186,14 +186,14 @@
                 _rowWriter: depositDialogUserRowWriter
             }
         });
-        dynatable = $('#uservs_table').data('dynatable');
+        dynatable = $('#deposit_dialog_uservs_table').data('dynatable');
         dynatable.settings.params.records = 'userVSList'
         dynatable.settings.params.queryRecordCount = 'queryRecordCount'
         dynatable.settings.params.totalRecordCount = 'numTotalUsers'
 
 
-        $('#uservs_table').bind('dynatable:afterUpdate',  function() {
-            document.getElementById('uservs_table').style.visibility = 'visible'
+        $('#deposit_dialog_uservs_table').bind('dynatable:afterUpdate',  function() {
+            document.getElementById('deposit_dialog_uservs_table').style.visibility = 'visible'
         })
 
         $('#depositDialogForm').bootstrapValidator({
@@ -263,6 +263,7 @@
             var caption = '<g:message code="depositERRORLbl"/>'
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "<g:message code='depositOKLbl'/>"
+                $('#depositDialog').modal('hide');
             }
             var msg = appMessageJSON.message
             showResultDialog(caption, msg)

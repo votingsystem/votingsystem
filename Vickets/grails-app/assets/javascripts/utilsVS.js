@@ -306,13 +306,14 @@ function updateMenuLinks() {
     }
 }
 
-function updateMenuLink(urlToUpdate) {
+function updateMenuLink(urlToUpdate, param) {
     var selectedMenuType = getParameterByName('menu')
     if("" == selectedMenuType.trim() || urlToUpdate == null || "" == urlToUpdate.trim()) {
         return urlToUpdate
     }
     if(urlToUpdate.indexOf("?") < 0) urlToUpdate = urlToUpdate + "?menu=" + selectedMenuType
     else urlToUpdate = urlToUpdate + "&menu=" + selectedMenuType
+    if(param != null) urlToUpdate = urlToUpdate + "&" + param
     return urlToUpdate
 }
 

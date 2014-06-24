@@ -24,11 +24,13 @@
 
             <h3><div class="pageHeader text-center"> ${uservsMap?.name}</div></h3>
 
-            <div style="margin: 15px 0 15px 0;">
+            <div style="margin: 15px 0 0px 0;">
                 <div id="userDescriptionDiv" class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
                     ${raw(uservsMap?.description)}
                 </div>
             </div>
+            <div class="text-right" style="margin: 0px 0 15px 0; font-size: 0.9em;"><b>IBAN: </b>${uservsMap?.IBAN}</div>
+
 
             <g:if test="${"user".equals(params.menu)}">
                 <g:if test="${UserVS.State.ACTIVE.toString().equals(uservsMap?.state)}">

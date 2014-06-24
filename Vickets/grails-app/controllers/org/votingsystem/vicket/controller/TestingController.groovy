@@ -31,9 +31,6 @@ class TestingController {
     def auditingService
     def filesService
 
-    //logTransactionVS(int status, String type, String fromUser, String toUser, String currency, BigDecimal amount, String msg, Date dateCreated, String subject)
-
-
     def index() {  }
 
     def dockspawn() { }
@@ -58,18 +55,13 @@ class TestingController {
             int transactionvsItemId = new Random().nextInt(transactionTypes.length);
             TransactionVS.Type transactionType = transactionTypes[transactionvsItemId]
             LoggerVS.logTransactionVS(Long.valueOf(idx), ResponseVS.SC_OK, transactionType.toString(), "fromUser${randomInt}",
-                    "toUser${randomInt}", Currency.getInstance("EUR").getCurrencyCode(), new BigDecimal(randomInt), "message ${randomInt}",
-                    Calendar.getInstance().getTime(), "Subject - ${randomInt}")
+                    "toUser${randomInt}", Currency.getInstance("EUR").getCurrencyCode(), new BigDecimal(randomInt),
+                    Calendar.getInstance().getTime(), "Subject - ${randomInt}", true)
         }
         Long finish = System.currentTimeMillis()
         Long duration = finish - init;
         String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
         render " --- Done numVotes : ${numVotes} - duration in millis: ${duration} - duration: ${durationStr}"
-    }
-
-    def monitor() {
-        filesService.monitorFile(new File("/home/jgzornoza/github/SistemaVotacion/Vickets/VicketReports/VicketTransactionsReports.log"))
-        render "OK"
     }
 
     def accounts() {}

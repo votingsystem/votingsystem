@@ -42,7 +42,7 @@
     })
 
     function userListRowWriter(rowIndex, jsonSubscriptionData, columns, cellWriter) {
-        var userURL = "user/" + jsonSubscriptionData.uservs.id + "?mode=details&menu=" + getParameterByName('menu')
+        var userURL = userBaseURL + "/" + jsonSubscriptionData.uservs.id + "?mode=details&menu=" + getParameterByName('menu')
 
         var userState
         switch(jsonSubscriptionData.state) {
@@ -58,9 +58,6 @@
             default:
                 userState = jsonSubscriptionData.state
         }
-
-        var cssClass = "span4", tr;
-        if (rowIndex % 3 === 0) { cssClass += ' first'; }
         tr = '<tr><td class="text-center"><a href="#" onclick="openWindow(\'' + userURL + '\')">' + jsonSubscriptionData.uservs.NIF + '</a></td>' +
             '<td class="text-center">' + jsonSubscriptionData.uservs.IBAN + '</td>' +
             '<td class="text-center">' + jsonSubscriptionData.uservs.name + '</td>' +

@@ -156,7 +156,7 @@ class CertificateVSService {
         X509Certificate x509Cert = CertUtil.loadCertificate (certificate.content)
         //SerialNumber as String to avoid Javascript problem handling such big numbers
         def certMap = [serialNumber:"${certificate.serialNumber}",
-               isRoot:CertUtil.isSelfSigned(x509Cert),
+               isRoot:CertUtil.isSelfSigned(x509Cert), description:certificate.description,
                pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8"),
                type:certificate.type.toString(), state:certificate.state.toString(),
                subjectDN:x509Cert.getSubjectDN().toString(),

@@ -65,7 +65,7 @@ class GroupVSController {
             groupList.each {groupItem ->
                 resultList.add(groupVSService.getGroupVSDataMap(groupItem))
             }
-            resultMap = ["${message(code: 'groupvsRecordsLbl')}":resultList, queryRecordCount: groupList.totalCount,
+            resultMap = [groupvsRecords:resultList, queryRecordCount: groupList.totalCount,
                          numTotalGroups:groupList.totalCount ]
             render resultMap as JSON
         }
@@ -156,18 +156,22 @@ class GroupVSController {
     def user() {
         GroupVS groupVS = null
         UserVS userVS = null
-        SubscriptionVS subscriptionVS = null
-        GroupVS.withTransaction {groupVS = GroupVS.get(params.long('id')) }
-        UserVS.withTransaction { userVS = UserVS.get(params.long('userId'))}
-        SubscriptionVS.withTransaction { subscriptionVS = SubscriptionVS.findWhere(userVS:userVS, groupVS:groupVS)}
-        if(!subscriptionVS) {
+        grails.orm.PagedResultList subscriptionVSList = null
+        SubscriptionVS.withTransaction {
+            subscriptionVSList = SubscriptionVS.createCriteria().list(max: params.max, offset: params.offset) {
+                eq("groupVS.id", params.long('id'))
+                eq("userVS.id", params.long('userId'))
+            }
+        }
+        if(subscriptionVSList.isEmpty()) {
             return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
                     message: message(code: 'groupUserNotFoundMsg', args:[params.id, params.userId]))]
+        } else {
+            Map subscriptionMap = userVSService.getSubscriptionVSDetailedDataMap(subscriptionVSList.iterator().next())
+            if(request.contentType?.contains("json")) {
+                render subscriptionMap as JSON
+            } else render(view:'user', model: [subscriptionMap:subscriptionMap])
         }
-        Map subscriptionMap = userVSService.getSubscriptionVSDetailedDataMap(subscriptionVS)
-        if(request.contentType?.contains("json")) {
-            render subscriptionMap as JSON
-        } else render(view:'user', model: [subscriptionMap:subscriptionMap])
     }
 
     def users() {

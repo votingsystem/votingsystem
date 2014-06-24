@@ -112,4 +112,33 @@
         }
         return resultStr
     };
+
+    function getTransactionVSDescription(transactionType) {
+        var transactionDescription
+        switch(transactionType) {
+            case 'VICKET_REQUEST':
+                transactionDescription = "<g:message code="selectVicketRequestLbl"/>"
+                break;
+            case 'VICKET_SEND':
+                transactionDescription = "<g:message code="selectVicketSendLbl"/>"
+                break;
+            case 'VICKET_CANCELLATION':
+                transactionDescription = "<g:message code="selectVicketCancellationLbl"/>"
+                break;
+            case 'VICKET_SOURCE_INPUT':
+                transactionDescription = "<g:message code="vicketSourceInputLbl"/>"
+                break;
+            case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':
+                transactionDescription = "<g:message code="vicketDepositFromGroupToMember"/>"
+                break;
+            case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP':
+                transactionDescription = "<g:message code="vicketDepositFromGroupToMemberGroup"/>"
+                break;
+            case 'VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS':
+                transactionDescription = "<g:message code="vicketDepositFromGroupToAllMembers"/>"
+                break;
+        }
+        return transactionDescription
+    }
+
 </script>

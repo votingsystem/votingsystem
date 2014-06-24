@@ -11,20 +11,14 @@
                 </a>
             </li>
             <li>
-                <a href="#"><i class="fa fa-users"></i><g:message code="groupvsLbl"/></a>
-                <h2><g:message code="groupvsLbl"/><i class="fa fa-users"></i></h2>
-                <ul>
-                    <li>
-                        <a href="${createLink(controller: 'groupVS')}" style="">
-                            <g:message code="selectGroupvsLbl"/> <i class="fa fa-list"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${createLink(controller: 'groupVS', action: 'newGroup')}" style="">
-                            <g:message code="newGroupVSLbl"/> <i class="fa fa-plus"></i>
-                        </a>
-                    </li>
-                </ul>
+                <a href="${createLink(controller: 'groupVS')}" style="">
+                    <i class="fa fa-users"></i><g:message code="selectGroupvsLbl"/> <i class="fa fa-list"></i>
+                </a>
+            </li>
+            <li>
+                <a href="${createLink(controller: 'groupVS', action: 'newGroup')}" style="">
+                    <i class="fa fa-users"></i><g:message code="newGroupVSLbl"/> <i class="fa fa-plus"></i>
+                </a>
             </li>
             <li>
                 <a  href="${createLink(controller: 'app', action: 'contact')}"

@@ -96,7 +96,7 @@
             },
             dataset: {
                 ajax: true,
-                ajaxUrl: updateMenuLink("<g:createLink controller="certificateVS" action="certs"/>?" + optionValue),
+                ajaxUrl: updateMenuLink("<g:createLink controller="certificateVS" action="certs"/>", optionValue),
                 ajaxOnLoad: false,
                 perPageDefault: 50,
                 records: []

@@ -86,9 +86,9 @@ class AuditingService {
         File file = new File(basePath)
         file.mkdirs()
         log.debug("basePath: ${file.absolutePath}")
-        //Save user USER_ALLOCATION transactions
 
-        def userAllocations = TransactionVS.createCriteria().scroll {
+
+        /*def userAllocations = TransactionVS.createCriteria().scroll {
             eq("type", TransactionVS.Type.USER_ALLOCATION)
             eq("state", TransactionVS.State.OK)
             ge("dateCreated", weekFromCalendar.getTime())
@@ -131,7 +131,7 @@ class AuditingService {
                         break;
                 }
             }
-        }
+        }*/
     }
 
 

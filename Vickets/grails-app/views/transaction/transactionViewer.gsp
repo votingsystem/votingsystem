@@ -65,31 +65,14 @@
     var fromUserTemplate
     var toUserTemplate
 
-    <g:if test="${'VICKET_SEND'.equals(transactionvsMap.type)}">
-        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectVicketSendLbl"/>"
-    </g:if>
-    <g:elseif test="${'VICKET_SOURCE_INPUT'.equals(transactionvsMap.type)}">
-        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="vicketSourceInputLbl"/>"
+    document.getElementById("transactionTypeMsg").innerHTML = getTransactionVSDescription("${transactionvsMap.type}")
+
+    <g:if test="${'VICKET_SOURCE_INPUT'.equals(transactionvsMap.type)}">
         fromUserTemplate = document.getElementById("fromUserVicketSource").innerHTML
         var fromUserIBANInfoURL = "${createLink(uri:'/IBAN')}/from/${transactionvsMap.fromUserVS.payer.fromUserIBAN}"
         document.getElementById("fromUserDiv").innerHTML = fromUserTemplate.format("${transactionvsMap.fromUserVS.payer.fromUser}",
             "${transactionvsMap.fromUserVS.payer.fromUserIBAN}", fromUserIBANInfoURL)
-
-
-    </g:elseif>
-    <g:elseif test="${'USER_ALLOCATION_INPUT'.equals(transactionvsMap.type)}">
-        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectUserAllocationInputLbl"/>"
-    </g:elseif>
-    <g:elseif test="${'USER_ALLOCATION'.equals(transactionvsMap.type)}">
-        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectUserAllocationLbl"/>"
-    </g:elseif>
-    <g:elseif test="${'VICKET_REQUEST'.equals(transactionvsMap.type)}">
-        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectVicketRequestLbl"/>"
-    </g:elseif>
-    <g:elseif test="${'VICKET_CANCELLATION'.equals(transactionvsMap.type)}">
-        document.getElementById("transactionTypeMsg").innerHTML = "<g:message code="selectVicketCancellationLbl"/>"
-    </g:elseif>
-
+    </g:if>
 
     <g:if test="${'GROUP'.equals(transactionvsMap.fromUserVS.type)}">
         fromUserTemplate = document.getElementById("groupUserData").innerHTML

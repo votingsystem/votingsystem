@@ -78,17 +78,11 @@ class TransactionController {
                         else if(dateFrom) {ge("dateCreated", dateFrom)}
                         else if(dateTo) {le("dateCreated", dateTo)}
                     }
-                    not {
-                        eq("type", TransactionVS.Type.USER_ALLOCATION_INPUT)
-                    }
                 }
                 totalTransactions = transactionList.totalCount
             } else {
                 transactionList = TransactionVS.createCriteria().list(max: params.max, offset: params.offset,
                         sort:sortParam?.key, order:sortParam?.value){
-                    not {
-                        eq("type", TransactionVS.Type.USER_ALLOCATION_INPUT)
-                    }
                 };
                 totalTransactions = transactionList.totalCount
             }
@@ -97,7 +91,7 @@ class TransactionController {
         transactionList.each {transactionItem ->
             resultList.add(transactionVSService.getTransactionMap(transactionItem))
         }
-        def resultMap = ["${message(code: 'transactionRecordsLbl')}":resultList, queryRecordCount: totalTransactions,
+        def resultMap = [transactionRecords:resultList, queryRecordCount: totalTransactions,
                         numTotalTransactions:totalTransactions ]
         render resultMap as JSON
     }

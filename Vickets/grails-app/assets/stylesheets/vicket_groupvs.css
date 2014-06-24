@@ -81,11 +81,11 @@
 }
 
 .groupvsActive {
-    border: 1px solid #195;
+    border: 1px solid #59b;
 }
 
 .groupvsActive .groupvsSubjectDiv{
-    background-color:#195;
+    background-color:#59b;
 }
 
 .groupvsActive .groupvsRepresentativeDiv {
@@ -98,7 +98,7 @@
     font-size: 0.9em;
     padding: 5px;
     bottom: 0px;
-    background-color:#184;
+    background-color:#379;
 }
 
 .groupvsPending {
@@ -112,7 +112,7 @@
 .numTotalUsersDiv {
     right: 0px;
     display: block;
-    color:#e3411a;
+    color:#379;
     margin: 0px 20px 0px 0px;
     text-transform:uppercase;
 }

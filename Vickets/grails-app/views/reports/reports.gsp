@@ -83,21 +83,6 @@
 
     })
 
-    function loadHTTPTransactions()  {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open( "GET", "${createLink(controller: 'reports', action: 'index')}", true );
-
-        xmlHttp.onreadystatechange=function() {
-            if (xmlHttp.readyState==4 && xmlHttp.status == 200) {
-                var jsonResult = JSON.parse(xmlHttp.responseText);
-                dynatable.records.updateFromJson({Transacciones: jsonResult.Transacciones});
-                dynatable.records.init();
-                dynatable.process();
-            }
-        }
-        xmlHttp.send();
-    }
-
     function addRecordToTable(record)  {
         //dynatable.settings.dataset.originalRecords.push(record);
         dynatable.settings.dataset.records.push(record);
@@ -106,8 +91,6 @@
 
 
     function rowWriter(rowIndex, reportsData, columns, cellWriter) {
-        var cssClass = "span4", tr;
-        if (rowIndex % 3 === 0) { cssClass += ' first'; }
         tr = '<tr><td class="text-center">' + reportsData.date + '</td><td class="text-center">' + reportsData.message + '</td></tr>'
         return tr
     }

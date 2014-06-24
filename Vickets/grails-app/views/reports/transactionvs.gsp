@@ -19,8 +19,7 @@
         <div style="display:table-cell;margin: auto; vertical-align: top;">
             <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
                 <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
-                <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
-                <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
+
                 <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
                 <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
                 <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
@@ -35,9 +34,8 @@
         <table class="table white_headers_table" id="transaction_table" style="">
             <thead>
             <tr style="color: #ff0000;">
-                <th data-dynatable-column="type" style="width: 240px;"><g:message code="typeLbl"/></th>
-                <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
-                <th data-dynatable-column="currency" style="max-width:60px;"><g:message code="currencyLbl"/></th>
+                <th data-dynatable-column="type" style="width: 300px;"><g:message code="typeLbl"/></th>
+                <th data-dynatable-column="amount" style="width:40px;"><g:message code="amountLbl"/></th>
                 <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
                 <th data-dynatable-column="subject" style="min-width:280px;"><g:message code="subjectLbl"/></th>
                 <!--<th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>-->
@@ -71,7 +69,7 @@
                 }
         });
         dynatable = $('#transaction_table').data('dynatable');
-        dynatable.settings.params.records = '<g:message code="transactionRecordsLbl"/>'
+        dynatable.settings.params.records = 'transactionRecords'
         dynatable.settings.params.queryRecordCount = 'queryRecordCount'
         dynatable.settings.params.totalRecordCount = 'numTotalTransactions'
 
@@ -100,21 +98,6 @@
 
     })
 
-    function loadHTTPTransactions()  {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open( "GET", "${createLink(controller: 'transaction', action: 'index')}", true );
-
-        xmlHttp.onreadystatechange=function() {
-            if (xmlHttp.readyState==4 && xmlHttp.status == 200) {
-                var jsonResult = JSON.parse(xmlHttp.responseText);
-                dynatable.records.updateFromJson({Transacciones: jsonResult.Transacciones});
-                dynatable.records.init();
-                dynatable.process();
-            }
-        }
-        xmlHttp.send();
-    }
-
     function addRecordToTable(record)  {
         //dynatable.settings.dataset.originalRecords.push(record);
         dynatable.settings.dataset.records.push(record);
@@ -122,34 +105,12 @@
     }
 
     function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
-        var transactionType
-        switch(jsonTransactionData.type) {
-            case 'VICKET_SEND':
-                transactionType = '<g:message code="selectVicketSendLbl"/>'
-                break;
-            case 'USER_ALLOCATION':
-                transactionType = '<g:message code="selectUserAllocationLbl"/>'
-                break;
-            case 'USER_ALLOCATION_INPUT':
-                transactionType = '<g:message code="selectUserAllocationInputLbl"/>'
-                break;
-            case 'VICKET_REQUEST':
-                transactionType = '<g:message code="selectVicketRequestLbl"/>'
-                break;
-            case 'VICKET_CANCELLATION':
-                transactionType = '<g:message code="selectVicketCancellationLbl"/>'
-                break;
-            default:
-                transactionType = jsonTransactionData.type
-        }
+        var transactionType = getTransactionVSDescription(jsonTransactionData.type)
         var transactionURL = jsonTransactionData.id
-
-        var cssClass = "span4", tr;
-        if (rowIndex % 3 === 0) { cssClass += ' first'; }
+        var amount = jsonTransactionData.amount.toFixed(2) + " " + jsonTransactionData.currency
         tr = '<tr><td title="' + transactionType + '" class="text-center">' +
-            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-center">' +
-            jsonTransactionData.amount + '</td>' +
-        '<td class="text-center">' + jsonTransactionData.currency + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
+            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-right">' +
+            amount + '</td>' + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
         '</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
         return tr
     }

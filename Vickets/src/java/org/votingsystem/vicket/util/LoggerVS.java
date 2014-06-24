@@ -4,6 +4,7 @@ import grails.converters.JSON;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,20 +39,19 @@ public class LoggerVS {
         transactionslog.info(new JSON(dataMap) + ",");
     }
 
-    public static void logTransactionVS(long id, int status, String type, String fromUser, String toUser,
-         String currency, BigDecimal amount, String msg, Date dateCreated, String subject) {
+    public static void logTransactionVS(long id, String state, String type, String fromUser, String toUser,
+         String currency, BigDecimal amount, Date dateCreated, String subject, boolean isParent) {
         Map<String,Object> dataMap = new HashMap();
         dataMap.put("id", id);
-        dataMap.put("status", status);
-        dataMap.put("date", Calendar.getInstance().getTime());
+        dataMap.put("state", state);
         dataMap.put("fromUser", fromUser);
         dataMap.put("toUser", toUser);
         dataMap.put("type", type);
         dataMap.put("subject", subject);
         dataMap.put("currency", currency);
-        dataMap.put("amount", amount.setScale(2));
-        dataMap.put("message", msg);
+        dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
         dataMap.put("dateCreated", dateCreated);
+        dataMap.put("isParent", isParent);
         transactionslog.info(new JSON(dataMap) + ",");
     }
 

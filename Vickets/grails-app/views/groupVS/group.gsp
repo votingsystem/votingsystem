@@ -121,8 +121,8 @@
         <!-- Tab panes -->
         <div class="tab-content" style="min-height: 600px;">
             <div class="tab-pane fade in active" id="transactionsTo">
-                <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                    <table class="table white_headers_table" id="transaction_table" style="">
+                <div id="transactionTo_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
+                    <table class="table white_headers_table" id="transactionTo_table" style="">
                         <thead>
                         <tr style="color: #ff0000;">
                             <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
@@ -137,7 +137,7 @@
                             <% def transactionToDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
                             <tr>
                                 <td class="text-center">${transactionVSService.getTransactionTypeDescription(it.type, request.locale)}</td>
-                                <td class="text-center">${it.amount} ${it.currency}</td>
+                                <td class="text-right">${it.amount} ${it.currency}</td>
                                 <td class="text-center">${transactionToDate}</td>
                                 <td class="text-center">
                                     <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
@@ -149,12 +149,12 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="transactionsFrom" style="top:0px;">
-                <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                    <table class="table white_headers_table" id="transaction_table" style="">
+                <div id="transactionFrom_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
+                    <table class="table white_headers_table" id="transactionFrom_table" style="">
                         <thead>
                         <tr style="color: #ff0000;">
                             <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
-                            <th data-dynatable-column="amount" style="width:150px;"><g:message code="amountLbl"/></th>
+                            <th data-dynatable-column="amount" style="width:80px;"><g:message code="amountLbl"/></th>
                             <th data-dynatable-column="dateCreated" style="width:180px;"><g:message code="dateLbl"/></th>
                             <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
                         </tr>
@@ -164,7 +164,7 @@
                             <g:set var="transactionURL" value="${createLink(uri:'/transaction', absolute:true)}/${it.id}" scope="page" />
                             <% def transactionDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
                             <tr>
-                                <td class="text-center">${it.type}</td>
+                                <td class="text-center">${transactionVSService.getTransactionTypeDescription(it.type, request.locale)}</td>
                                 <td class="text-right">${it.amount} ${it.currency}</td>
                                 <td class="text-center">${transactionDate}</td>
                                 <td class="text-center">
@@ -189,14 +189,15 @@
             <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
     </g:if>
 </div>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 <g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>
 <g:include view="/include/dialog/depositDialog.gsp"/>
+<g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
     var userListURL = "${createLink(controller: 'groupVS', action: 'listUsers')}/${groupvsMap?.id}"
+    var userBaseURL = "${createLink(controller: 'groupVS')}/${groupvsMap?.id}/user"
 
     var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
     var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
@@ -257,54 +258,6 @@
             var msg = appMessageJSON.message
             showResultDialog(caption, msg)
         }
-    }
-
-    function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
-        var transactionType
-        switch(jsonTransactionData.type) {
-            case 'VICKET_SEND':
-                transactionType = '<g:message code="selectVicketSendLbl"/>'
-                break;
-            case 'USER_ALLOCATION':
-                transactionType = '<g:message code="selectUserAllocationLbl"/>'
-                break;
-            case 'USER_ALLOCATION_INPUT':
-                transactionType = '<g:message code="selectUserAllocationInputLbl"/>'
-                break;
-            case 'VICKET_REQUEST':
-                transactionType = '<g:message code="selectVicketRequestLbl"/>'
-                break;
-            case 'VICKET_CANCELLATION':
-                transactionType = '<g:message code="selectVicketCancellationLbl"/>'
-                break;
-            case 'VICKET_SOURCE_INPUT':
-                transactionType = '<g:message code="vicketSourceInputLbl"/>'
-                break;
-            default:
-                transactionType = jsonTransactionData.type
-        }
-        var transactionURL = jsonTransactionData.id
-
-        var cssClass = "span4", tr;
-        var amount = jsonTransactionData.amount + " " + jsonTransactionData.currency
-        if (rowIndex % 3 === 0) { cssClass += ' first'; }
-        tr = '<tr><td title="' + transactionType + '" class="text-center"><a href="#" onclick="openWindow(\'' + transactionURL + '\')">' +
-            transactionType + '</a></td><td class="text-center">' + amount + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
-            '</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
-        return tr
-    }
-
-// VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS,
-    function makeDepositFromGroupVSToMember() {
-        alert("makeDepositFromGroupVSToMember")
-    }
-
-    function makeDepositFromGroupVSToMemberGroup() {
-        alert("makeDepositFromGroupVSToMemberGroup")
-    }
-
-    function makeDepositFromGroupVSToAllMembers() {
-        alert("makeDepositFromGroupVSToAllMembers")
     }
 
 </g:applyCodec>

@@ -19,8 +19,6 @@
         <div style="display:table-cell;margin: auto; vertical-align: top;">
             <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
                 <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
-                <option value="USER_ALLOCATION"> - <g:message code="selectUserAllocationLbl"/> - </option>
-                <option value="USER_ALLOCATION_INPUT"> - <g:message code="selectUserAllocationInputLbl"/> - </option>
                 <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
                 <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
                 <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
@@ -35,7 +33,7 @@
         <table class="table white_headers_table" id="transaction_table" style="">
             <thead>
             <tr style="color: #ff0000;">
-                <th data-dynatable-column="type" style="width: 260px;"><g:message code="typeLbl"/></th>
+                <th data-dynatable-column="type" style="width: 280px;"><g:message code="typeLbl"/></th>
                 <th data-dynatable-column="amount" style="width:150px;"><g:message code="amountLbl"/></th>
                 <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="dateLbl"/></th>
                 <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
@@ -79,19 +77,16 @@ $(function() {
             dataset: {
                 ajax: true,
                 ajaxUrl: "${createLink(controller: 'transaction', action: 'index')}",
-                    ajaxOnLoad: false,
+                    ajaxOnLoad: true,
                     perPageDefault: 50,
                     records: []
                 },
-                writers: {
-                    _rowWriter: rowWriter
-                }
+                writers: { _rowWriter: rowWriter1 }
         });
         dynatable = $('#transaction_table').data('dynatable');
-        dynatable.settings.params.records = '<g:message code="transactionRecordsLbl"/>'
+        dynatable.settings.params.records = 'transactionRecords'
         dynatable.settings.params.queryRecordCount = 'queryRecordCount'
         dynatable.settings.params.totalRecordCount = 'numTotalTransactions'
-
 
         $('#transaction_table').bind('dynatable:afterUpdate',  function() {
             console.log("page loaded")
@@ -116,58 +111,18 @@ $(function() {
 
     })
 
-    function loadHTTPTransactions()  {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open( "GET", "${createLink(controller: 'transaction', action: 'index')}", true );
-
-        xmlHttp.onreadystatechange=function() {
-            if (xmlHttp.readyState==4 && xmlHttp.status == 200) {
-                var jsonResult = JSON.parse(xmlHttp.responseText);
-                dynatable.records.updateFromJson({Transacciones: jsonResult.Transacciones});
-                dynatable.records.init();
-                dynatable.process();
-            }
-        }
-        xmlHttp.send();
-    }
-
     function addRecordToTable(record)  {
         //dynatable.settings.dataset.originalRecords.push(record);
         dynatable.settings.dataset.records.push(record);
         dynatable.process();
     }
 
-    function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
-        var transactionType
-        switch(jsonTransactionData.type) {
-            case 'VICKET_SEND':
-                transactionType = '<g:message code="selectVicketSendLbl"/>'
-                break;
-            case 'USER_ALLOCATION':
-                transactionType = '<g:message code="selectUserAllocationLbl"/>'
-                break;
-            case 'USER_ALLOCATION_INPUT':
-                transactionType = '<g:message code="selectUserAllocationInputLbl"/>'
-                break;
-            case 'VICKET_REQUEST':
-                transactionType = '<g:message code="selectVicketRequestLbl"/>'
-                break;
-            case 'VICKET_CANCELLATION':
-                transactionType = '<g:message code="selectVicketCancellationLbl"/>'
-                break;
-            case 'VICKET_SOURCE_INPUT':
-                transactionType = '<g:message code="vicketSourceInputLbl"/>'
-                break;
-            default:
-                transactionType = jsonTransactionData.type
-        }
+    function rowWriter1(rowIndex, jsonTransactionData, columns, cellWriter) {
+        var transactionType = getTransactionVSDescription(jsonTransactionData.type)
         var transactionURL = jsonTransactionData.id
-
-        var cssClass = "span4", tr;
         var amount = jsonTransactionData.amount + " " + jsonTransactionData.currency
-        if (rowIndex % 3 === 0) { cssClass += ' first'; }
         tr = '<tr><td title="' + transactionType + '" class="text-center">' +
-            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-right" style="max-width:10px;">' +
+            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-right" style="">' +
             amount + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
         '</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
         return tr

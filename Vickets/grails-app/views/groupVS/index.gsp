@@ -21,7 +21,7 @@
     <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
             <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
-                <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
+                <option value="ACTIVE"  style="color:#59b;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
                 <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
                 <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
             </select>
@@ -68,7 +68,7 @@
 
         dynatable = $('#groupvsList').data('dynatable');
 
-        dynatable.settings.params.records = '<g:message code="groupvsRecordsLbl"/>'
+        dynatable.settings.params.records = 'groupvsRecords'
         dynatable.settings.params.queryRecordCount = 'numTotalGroups'
 
         $('#groupvsTypeSelect').on('change', function (e) {

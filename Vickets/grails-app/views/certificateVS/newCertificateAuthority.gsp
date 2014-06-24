@@ -52,7 +52,6 @@
 </body>
 </html>
 <asset:script>
-
     $(function() {
         $('#mainForm').submit(function(event){
             event.preventDefault();

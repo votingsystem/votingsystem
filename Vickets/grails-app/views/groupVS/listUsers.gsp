@@ -29,6 +29,7 @@
 </html>
 <asset:script>
     var userListURL = "${createLink(controller: 'groupVS', action: 'listUsers')}/${subscriptionMap?.id}"
+        var userBaseURL = "user"
 
     $(function() {
         $("#navBarSearchInput").css( "visibility", "visible" );

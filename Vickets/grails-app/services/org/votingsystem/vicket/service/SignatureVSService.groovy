@@ -133,18 +133,6 @@ class  SignatureVSService {
 		return result
 	}
 
-    public Set<TrustAnchor> getTrustAnchors() {
-        if(!trustAnchors) {
-            Set<X509Certificate> trustedCerts = getTrustedCerts()
-            trustAnchors = new HashSet<TrustAnchor>();
-            for(X509Certificate certificate: trustedCerts) {
-                TrustAnchor anchor = new TrustAnchor(certificate, null);
-                trustAnchors.add(anchor);
-            }
-        }
-        return trustAnchors;
-    }
-
     /**
      * Generate V3 Certificate from CSR
      */
@@ -203,25 +191,31 @@ class  SignatureVSService {
             trustedCertsHashMap.put(x509Cert.getSerialNumber()?.longValue(), certificate)
         }
         trustedCerts = new HashSet<X509Certificate>(trustedCertsSet);
+        trustAnchors = new HashSet<TrustAnchor>();
+        for(X509Certificate certificate: trustedCerts) {
+            TrustAnchor anchor = new TrustAnchor(certificate, null);
+            trustAnchors.add(anchor);
+        }
         log.debug("loadCertAuthorities - loaded '${trustedCertsHashMap?.keySet().size()}' authorities")
-        return [trustedCertsHashMap: trustedCertsHashMap, trustedCerts:trustedCerts]
+        return [trustedCertsHashMap: trustedCertsHashMap, trustedCerts:trustedCerts, trustAnchors:trustAnchors]
     }
 
+
+    public Set<TrustAnchor> getTrustAnchors() {
+        if(!trustAnchors) trustAnchors = loadCertAuthorities().trustAnchors
+        return trustAnchors;
+    }
 
     private Set<X509Certificate> getTrustedCerts() {
         if(!trustedCerts)  trustedCerts = loadCertAuthorities().trustedCerts
         return trustedCerts;
     }
 
-	public byte[] getSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
+	public SMIMEMessageWrapper getSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
 		log.debug "getSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		mimeMessage.writeTo(baos);
-		baos.close();
-		return baos.toByteArray();
+		return getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header);
 	}
 
     public ResponseVS getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,

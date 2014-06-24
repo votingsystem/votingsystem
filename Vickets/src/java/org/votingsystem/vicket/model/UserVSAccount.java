@@ -28,7 +28,7 @@ public class UserVSAccount implements Serializable {
     @NumberFormat(style= NumberFormat.Style.CURRENCY)
     private BigDecimal balance = null;
 
-    @Column(name="currency", nullable=false) private String currencyCode;
+    @Column(name="currencyCode", nullable=false) private String currencyCode;
     @Column(name="IBAN") private String IBAN;
 
     @ManyToOne(fetch=FetchType.LAZY)

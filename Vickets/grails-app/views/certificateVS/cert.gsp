@@ -62,6 +62,10 @@
                 </g:if>
             </div>
         </div>
+        <div style="width: 600px; max-height:400px; overflow-y: auto; margin:20px auto 0px auto;">
+            <div>${raw(certMap.description)}</div>
+        </div>
+
         <div style="width: 600px; margin:20px auto 0px auto;">
             <label><g:message code="certPublicKeyLbl"/></label>
             <textarea id="pemCertTextArea" class="form-control" rows="20" readonly></textarea>

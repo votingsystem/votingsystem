@@ -95,6 +95,10 @@ public class SessionVSHelper {
         //log.debug("--- broadcastList - message: " + messageStr)
         List<String> errorList = new ArrayList<String>();
         for(String listener : listeners) {
+            if(listener == null) {
+                listeners.remove(listener);
+                continue;
+            }
             SessionVS sessionVS = sessionMap.get(listener);
             Session session = sessionVS.getSession();
             if(session.isOpen()) {

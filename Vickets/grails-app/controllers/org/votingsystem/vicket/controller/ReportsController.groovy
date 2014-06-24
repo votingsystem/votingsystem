@@ -36,18 +36,14 @@ class ReportsController {
             RollingFileAppender appender = transactionslog.getAppender("VicketTransactionsReports")
             File reportsFile = new File(appender.file)
             //testfile.eachLine{ line ->}
-            def messageJSON = JSON.parse("{\"${message(code: 'transactionRecordsLbl')}\":[" + reportsFile.text + "]}")
-            int numTotalTransactions = 0
+            def messageJSON = JSON.parse("{\"transactionRecords\":[" + reportsFile.text + "]}")
             if(params.transactionvsType) {
-                messageJSON["${message(code: 'transactionRecordsLbl')}"] = messageJSON["${message(code: 'transactionRecordsLbl')}"].findAll() { item ->
-                    if(item.type.equals(params.transactionvsType)) {
-                        numTotalTransactions++
-                        return item
-                    }
+                messageJSON.transactionRecords = messageJSON["transactionRecords"].findAll() { item ->
+                    if(item.type.equals(params.transactionvsType)) { return item }
                 }
             }
-            messageJSON.numTotalTransactions = numTotalTransactions
-            messageJSON.queryRecordCount = numTotalTransactions
+            messageJSON.numTotalTransactions = messageJSON.transactionRecords.size()
+            messageJSON.queryRecordCount = messageJSON.transactionRecords.size()
             render messageJSON as JSON
             return false
         } else {

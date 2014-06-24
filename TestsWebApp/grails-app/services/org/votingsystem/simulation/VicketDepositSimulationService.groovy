@@ -134,7 +134,7 @@ class VicketDepositSimulationService {
             Map signatureContentMap = [amount:simulationData.getDepositAmount().toString(),
                     "UUID": UUID.randomUUID().toString(), currency:simulationData.getCurrency().toString(),
                     subject:simulationData.getSubject(),
-                    typeVS:TypeVS.VICKET_USER_ALLOCATION, IBAN:"ESkk bbbb gggg xxcc cccc cccc"]
+                    typeVS:TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE, IBAN:"ESkk bbbb gggg xxcc cccc cccc"]
             String signatureContentStr = new JSONObject(signatureContentMap).toString()
             log.debug("makeDeposit ${signatureContentStr}")
             SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(userNif,
