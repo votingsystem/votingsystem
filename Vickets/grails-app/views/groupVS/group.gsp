@@ -26,7 +26,7 @@
             </li>
         </ol>
     </div>
-<div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 0px 30px;">
+<div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 150px 30px;">
     <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
     </div>
 

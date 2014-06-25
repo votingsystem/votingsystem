@@ -10,7 +10,7 @@
     <asset:stylesheet src="vickets.css"/>
 </head>
 <body>
-<div class="" style="max-width:1000px; margin: 0px auto 0px auto; padding:0px 30px 0px 30px;">
+<div class="" style="max-width:1000px; margin: 0px auto 0px auto; padding:20px 30px 0px 30px;">
     <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
     <div style=""><b><g:message code="subjectLbl"/>: </b>${transactionvsMap.subject}</div>
     <div style=""><b><g:message code="amountLbl"/>: </b>${transactionvsMap.amount} ${transactionvsMap.currency}</div>
@@ -23,21 +23,39 @@
         <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
             <g:message code="pagerLbl"/></div>
             <div id="fromUserDiv">
-                <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.fromUserVS.name}</div>
                 <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.fromUserVS.nif}</div>
+                <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.fromUserVS.name}</div>
             </div>
     </g:if>
     <g:else>
         <div style="font-weight: bold;"><g:message code="anonymousPagerLbl"/></div>
     </g:else>
 </div>
-<div style="margin:20px 0px 0px 20px;">
-    <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;"><g:message code="receptorLbl"/></div>
-    <div id="toUserDiv">
-        <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.toUserVS.name}</div>
-        <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.toUserVS.nif}</div>
-    </div>
-</div >
+
+<g:if test="${transactionvsMap.childTransactions && !transactionvsMap.childTransactions.isEmpty()}">
+    <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;margin:10px 0px 0px 0px;">
+        <g:message code="transactionsTriggeredLbl"/></div>
+    <g:each in="${transactionvsMap.childTransactions}">
+        <div style="margin:0px 0px 0px 20px;">
+            <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;"><g:message code="receptorLbl"/></div>
+            <div id="toUserDiv">
+                <div style=""><b><g:message code="nifLbl"/>: </b>${it.toUserVS.nif}</div>
+                <div style=""><b><g:message code="nameLbl"/>: </b>${it.toUserVS.name}</div>
+                <div style=""><b><g:message code="amountLbl"/>: </b>${it.amount} ${it.currency}</div>
+            </div>
+        </div >
+    </g:each>
+</g:if>
+<g:elseif test="${transactionvsMap.toUserVS}">
+    <div style="margin:20px 0px 0px 20px;">
+        <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;"><g:message code="receptorLbl"/></div>
+        <div id="toUserDiv">
+            <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.toUserVS.nif}</div>
+            <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.toUserVS.name}</div>
+        </div>
+    </div >
+</g:elseif>
+
     <div style="max-width: 600px;">
         <button type="button" class="btn btn-accept-vs" onclick="openReceipt();"
                 style="margin:10px 0px 0px 0px; float:right;"><g:message code="openReceiptLbl"/>
@@ -78,7 +96,7 @@
         fromUserTemplate = document.getElementById("groupUserData").innerHTML
         document.getElementById("fromUserDiv").innerHTML = fromUserTemplate.format("${transactionvsMap.fromUserVS.name}")
     </g:if>
-    <g:if test="${'GROUP'.equals(transactionvsMap.toUserVS.type)}">
+    <g:if test="${'GROUP'.equals(transactionvsMap.toUserVS?.type)}">
         toUserTemplate = document.getElementById("groupUserData").innerHTML
         document.getElementById("toUserDiv").innerHTML = toUserTemplate.format("${transactionvsMap.toUserVS.name}",
             "${transactionvsMap.toUserVS.id}")

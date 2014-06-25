@@ -1,12 +1,21 @@
 <html>
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-money.png')}" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title><g:message code="appTitle"/></title>
         <g:javascript library="jquery" plugin="jquery"/>
+        <asset:stylesheet src="jquery-ui-1.10.4.custom.min.css"/>
+        <asset:javascript src="jquery-ui-1.10.4.custom.min.js"/>
         <link rel="stylesheet" href="${resource(dir: 'font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
 
         <asset:stylesheet src="bootstrap.min.css"/>
         <asset:javascript src="bootstrap.min.js"/>
 
-        <asset:stylesheet src="votingSystem.css"/>
+        <asset:javascript src="jquery.multilevelpushmenu.min.js"/>
+        <asset:stylesheet src="jquery.multilevelpushmenu.css"/>
+
+        <asset:stylesheet src="vickets.css"/>
         <asset:javascript src="utilsVS.js"/>
         <g:include view="/include/utils_js.gsp"/>
         <style type="text/css" media="screen">
@@ -15,13 +24,13 @@
     </head>
     <body>
     <div class="container">
-        <a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'serverNameLbl', null)}</a>
+        <h2><a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'appTitle', null)}</a></h2>
         <ul class="nav nav-tabs">
             <li class="active" style="">
-                <a href="#mainTab" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="infoLabel"/></a>
+                <a href="#mainTab" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="infoLbl"/></a>
             </li>
             <li style="">
-                <a href="#serviceList" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="serviceURLSMsg"/></a>
+                <a href="#serviceList" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="serviceListLbl"/></a>
             </li>
             <li style="">
                 <a href="#appData" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="appDataLabel"/></a>
@@ -32,18 +41,12 @@
                 <div class="container"  style="height:100%;">
                     <div id="content" class="content">
                         <div class="mainLinkContainer">
-                            <div class="mainLink"><a href="${grailsApplication.config.grails.serverURL}/">${message(code: 'mainPageLabel', null)}</a></div>
-                            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/AccessControl">${message(code: 'sourceCodeLabel', null)}</a></div>
-                            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Control-de-Acceso">${message(code: 'wikiLabel', null)}</a></div>
+                            <div class="mainLink"><a href="http://www.sistemavotacion.org"><g:message code="webSiteLbl"/></a></div>
+                            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/Vickets">
+                                <g:message code="sourceCodeLbl"/></a>
+                            </div>
                         </div>
                         <p id="contentText" style="margin: 40px 0px 0px 0px;">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
-                        <p>
-                            <i class="fa fa-gears" style="color:#388746;"></i>
-                            <a id="clientToolLink" class="appLink" style="color: #09287e; font-size: 0.9em;"
-                               href="${grailsApplication.config.grails.serverURL}/app/ClientTool.zip">
-                                <g:message code="clientToolLinkText"/>
-                            </a>
-                        </p>
                     </div>
                 </div>
             </div>
@@ -54,14 +57,15 @@
                 <g:include controller="serverInfo" action="appData" />
             </div>
         </div>
+
+
         <div class="infoFooter" style="margin: 0px auto 20px 0;width:100%;font-size: 0.7em; position:relative;">
             <p style="text-align: center;">
                 <a  class="appLink" href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}">
                     ${message(code: 'emailLabel', null)}</a>
             </p>
         </div>
-        <div>
-        </div>
+
         </div>
 	</body>
 </html>
@@ -71,3 +75,4 @@
       });
 
 </asset:script>
+<asset:deferredScripts/>

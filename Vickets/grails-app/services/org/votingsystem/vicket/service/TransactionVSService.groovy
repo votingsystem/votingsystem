@@ -369,6 +369,7 @@ class TransactionVSService {
         } else return responseVS
     }
 
+    @Transactional
     public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
         if(transaction.fromUserVS) {
@@ -392,13 +393,24 @@ class TransactionVSService {
         transactionMap.amount = transaction.amount.setScale(2, RoundingMode.FLOOR).toString()
         transactionMap.currency = transaction.currencyCode
 
-        String messageSMIMEURL = null
-        TransactionVS.withTransaction {
-            if(transaction.transactionParent) {
-                messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.transactionParent.messageSMIME?.id}"
-            } else messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.getMessageSMIME()?.id}"
+        if(transaction.messageSMIME) {
+            String messageSMIMEURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${transaction.messageSMIME?.id}"
             transactionMap.messageSMIMEURL = messageSMIMEURL
         }
+
+        if(transaction.transactionParent == null) {
+            def childTransactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+                eq('transactionParent', transaction)
+            }
+            if(!childTransactionListDB.isEmpty()) {
+                List childTransactionList = []
+                childTransactionListDB.each {childTransaction ->
+                    childTransactionList.add(getTransactionMap(childTransaction))
+                }
+                transactionMap.childTransactions = childTransactionList
+            }
+        }
+
         return transactionMap
     }
 

@@ -15,6 +15,11 @@
     </div>
 <g:if test="${'VICKET_DEPOSIT_FROM_VICKET_SOURCE'.equals(operation)}">
     <div id="contentTemplate" class="" style="display:none;">
+
+    </div>
+</g:if>
+<g:else>
+    <div id="contentTemplate" class="" style="display:none;">
         <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
         <div style=""><b><g:message code="subjectLbl"/>: </b>{0}</div>
         <div style=""><b><g:message code="amountLbl"/>: </b>{1}</div>
@@ -35,12 +40,13 @@
             </div>
         </div >
     </div>
-</g:if>
+</g:else>
 </body>
 </html>
 <asset:script>
     var contentStr = '{"operation":"VICKET_DEPOSIT_FROM_VICKET_SOURCE","fromUser":"Implantación proyecto Vickets","fromUserIBAN":"ES5378788989451111111111","toUserIBAN":"ES8978788989450000000004","amount":"101010.10","validTo":"2014/06/16 00:00:00","subject":"Ingreso de fuente externa","currency":"EUR","UUID":"21489925-7a50-4453-af8a-cb6b579b1602"}'
     $(function() {
+        showContent(contentStr)
 
     })
 

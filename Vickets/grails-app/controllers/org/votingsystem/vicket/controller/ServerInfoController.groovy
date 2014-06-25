@@ -46,6 +46,25 @@ class ServerInfoController {
 	}
 
     /**
+     * @httpMethod [GET]
+     * @return La lista de servicios de la aplicación
+     */
+    def serviceList () { }
+
+    /**
+     * @httpMethod [GET]
+     * @return Datos de las versiones de algunos componentes de la aplicación
+     */
+    def appData () { }
+
+    /**
+     * @httpMethod [GET]
+     * @return Información general de la aplicación
+     */
+    def info () { }
+
+
+    /**
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.
      */
     def exceptionHandler(final Exception exception) {

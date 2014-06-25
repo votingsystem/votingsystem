@@ -35,6 +35,15 @@
                         <label><g:message code="subjectLbl"/></label>
                         <textarea id="depositDialogSubject" class="form-control" rows="2" required="" name="subject"></textarea>
                     </div>
+                    <div id="tagDataDiv" style="margin:15px 0px 15px 0px; border: 1px solid #ccc; font-size: 1.1em; display: none; padding: 5px;">
+                        <div style="display:table-cell;font-weight: bold; margin:0px 10px 0px 0px;">
+                            <g:message code="depositWithTagAdvertMsg"/>
+                        </div>
+                        <div style="display: table-cell;vertical-align: middle;">
+                            <button type="button" onclick="showAddTagDialog(refreshTags)" class="btn btn-danger">
+                                <g:message code="addTagLbl" /></button>
+                        </div>
+                    </div>
 
                     <label id="selectReceptorlblDiv" style=""></label>
                     <div id="receptorPanelDiv">
@@ -88,6 +97,7 @@
         <div class='newReceptorNameDiv' style='font-size:1.2em;padding:0px 0 0 10px;vertical-align:middle;display:inline; width:100%;'>{1}</div>
     </div>
 </div>
+<g:include view="/include/dialog/addTagDialog.gsp"/>
 <asset:script>
 
     var operation
@@ -96,8 +106,13 @@
     var dateValidTo
     var receptorMap = {}
     var userMap = {}
+    var selectedTagsMap = {}
     var groupId
     var receptorTemplate = document.getElementById('newReceptorTemplate').innerHTML
+
+    function refreshTags() {
+       console.log(" ========== refreshTags")
+    }
 
     function showDepositDialog(depositType, fromUser, fromIBAN, validTo, targetGroupId) {
         operation = depositType
@@ -121,7 +136,8 @@
             case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                 caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
                 selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
-                 document.getElementById('receptorPanelDiv').style.display = 'none'
+                document.getElementById('receptorPanelDiv').style.display = 'none'
+                document.getElementById('tagDataDiv').style.display = 'table'
                 break;
         }
         document.getElementById('depositDialogCaption').innerHTML = caption
@@ -151,7 +167,6 @@
         userMap = {}
         var textToSearch = document.getElementById("userSearchInput").value
         if(textToSearch.trim() == "") return
-        dynatable.settings.dataset.ajax = true
         var targetURL
         if(groupId != null) targetURL = "${createLink(controller: 'userVS', action: 'searchGroup')}?searchText=" + textToSearch + "&groupId=" + groupId
         else targetURL = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
@@ -177,7 +192,7 @@
             inputs: dynatableInputs,
             params: dynatableParams,
             dataset: {
-                ajax: false,
+                ajax: true,
                 ajaxOnLoad: false,
                 perPageDefault: 50,
                 records: []

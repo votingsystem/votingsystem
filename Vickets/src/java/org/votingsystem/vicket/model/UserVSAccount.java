@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -25,14 +26,20 @@ public class UserVSAccount implements Serializable {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
 
-    @NumberFormat(style= NumberFormat.Style.CURRENCY)
-    private BigDecimal balance = null;
+    @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal balance = null;
 
     @Column(name="currencyCode", nullable=false) private String currencyCode;
     @Column(name="IBAN") private String IBAN;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
+
+    //Owning Entity side of the relationship
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @JoinTable(name = "uservsaccount_balancetagvs", joinColumns = {
+            @JoinColumn(name = "UserVSAccount", referencedColumnName = "id", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "BalanceTagVS", nullable = false, referencedColumnName = "id") })
+    private Set<BalanceTagVS> tagVSSet;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -91,5 +98,13 @@ public class UserVSAccount implements Serializable {
 
     public void setIBAN(String IBAN) {
         this.IBAN = IBAN;
+    }
+
+    public Set<BalanceTagVS> getTagVSSet() {
+        return tagVSSet;
+    }
+
+    public void setTagVSSet(Set<BalanceTagVS> tagVSSet) {
+        this.tagVSSet = tagVSSet;
     }
 }
