@@ -1,8 +1,7 @@
-package org.votingsystem.vicket.model;
+package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
-import org.springframework.format.annotation.NumberFormat;
-import org.votingsystem.model.UserVS;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -26,7 +25,7 @@ public class UserVSAccount implements Serializable {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
 
-    @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal balance = null;
+    @Column(name="balance", nullable=false) private BigDecimal balance = null;
 
     @Column(name="currencyCode", nullable=false) private String currencyCode;
     @Column(name="IBAN") private String IBAN;
@@ -34,12 +33,8 @@ public class UserVSAccount implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
 
-    //Owning Entity side of the relationship
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-    @JoinTable(name = "uservsaccount_balancetagvs", joinColumns = {
-            @JoinColumn(name = "UserVSAccount", referencedColumnName = "id", nullable = false) },
-            inverseJoinColumns = { @JoinColumn(name = "BalanceTagVS", nullable = false, referencedColumnName = "id") })
-    private Set<BalanceTagVS> tagVSSet;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="tag") private VicketTagVS tag;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -100,11 +95,12 @@ public class UserVSAccount implements Serializable {
         this.IBAN = IBAN;
     }
 
-    public Set<BalanceTagVS> getTagVSSet() {
-        return tagVSSet;
+    public VicketTagVS getTag() {
+        return tag;
     }
 
-    public void setTagVSSet(Set<BalanceTagVS> tagVSSet) {
-        this.tagVSSet = tagVSSet;
+    public void setTag(VicketTagVS tag) {
+        this.tag = tag;
     }
+
 }

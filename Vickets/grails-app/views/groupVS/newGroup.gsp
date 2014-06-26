@@ -30,11 +30,21 @@
         <form id="mainForm">
 
             <div class="form-inline">
-                <div style="margin:0px 0px 20px 0px" class="row">
-                    <input type="text" name="subject" id="groupSubject" style="width:400px"  required
-                           title="<g:message code="subjectLbl"/>" class="form-control"
-                           placeholder="<g:message code="newGroupNameLbl"/>"
-                           onchange="this.setCustomValidity('')" />
+                <div style="margin:0px 0px 20px 0px; display: table;">
+                    <div style="display: table-cell;">
+                        <input type="text" name="subject" id="groupSubject" style="width:400px"  required
+                               title="<g:message code="subjectLbl"/>" class="form-control"
+                               placeholder="<g:message code="newGroupNameLbl"/>"
+                               onchange="this.setCustomValidity('')" />
+                    </div>
+                    <div style="width:100%;display: table-cell" class="text-right">
+                        <button type="button" onclick="showAddTagDialog(3, selectedTagsMap, refreshTagsDiv)" class="btn btn-danger">
+                        <g:message code="addTagLbl" /></button>
+                    </div>
+                </div>
+                <div id="tagsDiv" style="display: none; padding:0px 0px 0px 30px;">
+                    <div style=" display: table-cell; font-size: 1.1em; font-weight: bold;"><g:message code='tagsLbl'/>:</div>
+                    <div id="selectedTagDiv" style="margin:0px 0px 15px 0px; padding: 5px; display: table-cell;"></div>
                 </div>
             </div>
 
@@ -53,10 +63,28 @@
         </form>
     </div>
 </div>
+<g:include view="/include/dialog/addTagDialog.gsp"/>
 <g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
 <asset:script>
+
+    var selectedTagsMap = {}
+
+    function refreshTagsDiv(selectedTags) {
+        selectedTagsMap = selectedTags
+        document.getElementById("selectedTagDiv").innerHTML = ''
+        Object.keys(selectedTagsMap).forEach(function(entry) {
+            var tagDiv = document.createElement("div");
+            tagDiv.classList.add('form-group');
+            tagDiv.setAttribute("style","margin: 10px 0px 5px 10px;display:inline;");
+            tagDiv.innerHTML = tagTemplate.format(entry, tagMap[entry]);
+            document.querySelector("#selectedTagDiv").appendChild(tagDiv);
+        });
+
+        if(Object.keys(selectedTagsMap).length == 0) document.getElementById("tagsDiv").style.display= 'none'
+        else document.getElementById("tagsDiv").style.display= 'table'
+    }
 
     $(function() {
         $('#mainForm').submit(function(event){
@@ -80,10 +108,18 @@
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
             webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),groupvsName:$("#groupSubject").val(),
-                        operation:Operation.VICKET_GROUP_NEW}
+                        tags:selectedTagsMap, operation:Operation.VICKET_GROUP_NEW}
+            if(Object.keys(selectedTagsMap).length > 0) {
+                var tagList = []
+                Object.keys(selectedTagsMap).forEach(function(entry) {
+                    tagList.push({id:entry, name:selectedTagsMap[entry]})
+                })
+                webAppMessage.signedContent.tags = tagList
+            }
+
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             webAppMessage.callerCallback = getFnName(newGroupVSCallback)
-            //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+            console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         });
 

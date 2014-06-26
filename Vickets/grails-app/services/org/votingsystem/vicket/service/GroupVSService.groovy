@@ -3,9 +3,10 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.vicket.model.UserVSAccount
+import org.votingsystem.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
 
@@ -107,13 +108,23 @@ class GroupVSService {
         groupVS = GroupVS.findWhere(name:messageJSON.groupvsName.trim())
         if(groupVS) {
             msg = messageSource.getMessage('nameGroupRepeatedMsg', [messageJSON.groupvsName].toArray(), locale)
-            log.error "saveGroup - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
+            log.error "${methodName} - DATA ERROR - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(type:TypeVS.ERROR, message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "nameGroupRepeatedMsg"))
         }
 
+        Set<VicketTagVS> tagSet
+        if(messageJSON.tags) {
+            tagSet = new HashSet<VicketTagVS>()
+            messageJSON.tags.each {tag ->
+                VicketTagVS vicketTagVS = VicketTagVS.findWhere(id:Long.valueOf(tag.id), name:tag.name)
+                if(vicketTagVS) tagSet.add(vicketTagVS)
+                else log.error("Tag '${tag}' not found ")
+            }
+        }
+
         groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, representative:userSigner,
-                description:messageJSON.groupvsInfo).save()
+                description:messageJSON.groupvsInfo,tagVSSet:tagSet).save()
         groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
         new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:groupVS,
                 balance:BigDecimal.ZERO, IBAN:groupVS.getIBAN()).save()
@@ -123,11 +134,11 @@ class GroupVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(fromUser, toUser,
+        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getSignedMimeMessage(fromUser, toUser,
                 messageSMIMEReq.getSmimeMessage()?.getSignedContent(), subject, null)
         log.debug("${metaInf}")
         MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf,
-                smimeParent:messageSMIMEReq, content:smimeMessageRespBytes).save() }
+                smimeParent:messageSMIMEReq, content:smimeMessageResp.getBytes()).save() }
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
     }
 
@@ -176,6 +187,13 @@ class GroupVSService {
         Map resultMap = [id:groupVS.id, IBAN:groupVS.IBAN, name:groupVS.name, description:groupVS.description,
             state:groupVS.state.toString(), dateCreated:groupVS.dateCreated,
             representative:userVSService.getUserVSDataMap(groupVS.representative), type:groupVS.type.toString()]
+        if(groupVS.tagVSSet) {
+            List tagList = []
+            groupVS.tagVSSet.each {tag ->
+                tagList.add([id:tag.id, name:tag.name])
+            }
+            resultMap.tags = tagList
+        }
         SubscriptionVS.withTransaction {
             def result = SubscriptionVS.createCriteria().list(offset: 0) {
                 eq("groupVS", groupVS)

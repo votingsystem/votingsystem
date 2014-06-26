@@ -30,15 +30,16 @@
         <mapping class="org.votingsystem.model.TagVS" />
         <mapping class="org.votingsystem.model.UserRequestCsrVS" />
         <mapping class="org.votingsystem.model.UserVS" />
+        <mapping class="org.votingsystem.model.UserVSAccount" />
         <mapping class="org.votingsystem.model.GroupVS" />
         <mapping class="org.votingsystem.model.VicketSource" />
+        <mapping class="org.votingsystem.model.VicketTagVS" />
         <mapping class="org.votingsystem.model.VoteVSCanceller"/>
         <mapping class="org.votingsystem.model.VoteVS" />
 
-        <mapping class="org.votingsystem.vicket.model.BalanceTagVS" />
+
         <mapping class="org.votingsystem.vicket.model.MessageVS" />
         <mapping class="org.votingsystem.vicket.model.TransactionVS" />
-        <mapping class="org.votingsystem.vicket.model.UserVSAccount" />
         <mapping class="org.votingsystem.vicket.model.Vicket" />
         <mapping class="org.votingsystem.vicket.model.VicketBatchRequest" />
 

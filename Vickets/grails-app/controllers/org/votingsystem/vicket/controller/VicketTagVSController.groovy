@@ -3,8 +3,9 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.vicket.model.BalanceTagVS
-import org.votingsystem.vicket.model.UserVSAccount
+import org.votingsystem.model.UserVS
+import org.votingsystem.model.UserVSAccount
+import org.votingsystem.model.VicketTagVS
 
 /**
  * @infoController Aplicación
@@ -13,7 +14,7 @@ import org.votingsystem.vicket.model.UserVSAccount
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
-class BalanceTagVSController {
+class VicketTagVSController {
 
     def index() {
         if("POST".equals(request.method)) {
@@ -21,16 +22,16 @@ class BalanceTagVSController {
             if(!requestJSON.tag) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code: 'missingParamErrorMsg', args:['tag']))]
             } else  {
-                BalanceTagVS tag
-                BalanceTagVS.withTransaction { tag = BalanceTagVS.findWhere(name:requestJSON.tag.toLowerCase()) }
-                if(!tag) tag = new BalanceTagVS(name:requestJSON.tag.toLowerCase()).save()
+                VicketTagVS tag
+                VicketTagVS.withTransaction { tag = VicketTagVS.findWhere(name:requestJSON.tag) }
+                if(!tag) tag = new VicketTagVS(name:requestJSON.tag).save()
                 def result = [id:tag.id, name:tag.name]
                 render  result as JSON
             }
         } else {
             def listDB
-            BalanceTagVS.withTransaction {
-                listDB = BalanceTagVS.createCriteria().list(offset: 0) {
+            VicketTagVS.withTransaction {
+                listDB = VicketTagVS.createCriteria().list(offset: 0) {
                     if(params.tag) { ilike('name', "%${params.tag}%") }
                 }
             }

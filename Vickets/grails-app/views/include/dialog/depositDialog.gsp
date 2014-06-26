@@ -36,11 +36,12 @@
                         <textarea id="depositDialogSubject" class="form-control" rows="2" required="" name="subject"></textarea>
                     </div>
                     <div id="tagDataDiv" style="margin:15px 0px 15px 0px; border: 1px solid #ccc; font-size: 1.1em; display: none; padding: 5px;">
-                        <div style="display:table-cell;font-weight: bold; margin:0px 10px 0px 0px;">
-                            <g:message code="depositWithTagAdvertMsg"/>
+                        <div style="display:table-cell;font-weight: bold; margin:0px 10px 0px 0px; padding:5px;">
+                            <div id="tagDataDivMsg"><g:message code="depositWithTagAdvertMsg"/></div>
+                            <div id="selectedTagDivDepositDialog" style="display: none;"></div>
                         </div>
                         <div style="display: table-cell;vertical-align: middle;">
-                            <button type="button" onclick="showAddTagDialog(refreshTags)" class="btn btn-danger">
+                            <button id="selectTagButton" type="button" onclick="showAddTagDialog(1, selectedTagsMapDepositDialog, refreshTagsDivDepositDialog)" class="btn btn-danger">
                                 <g:message code="addTagLbl" /></button>
                         </div>
                     </div>
@@ -106,12 +107,32 @@
     var dateValidTo
     var receptorMap = {}
     var userMap = {}
-    var selectedTagsMap = {}
+    var selectedTagsMapDepositDialog = {}
     var groupId
     var receptorTemplate = document.getElementById('newReceptorTemplate').innerHTML
 
-    function refreshTags() {
-       console.log(" ========== refreshTags")
+    function refreshTagsDivDepositDialog(selectedTagsMap) {
+        selectedTagsMapDepositDialog = selectedTagsMap
+        document.getElementById("selectedTagDivDepositDialog").innerHTML = ''
+
+        Object.keys(selectedTagsMapDepositDialog).forEach(function(entry) {
+            var tagDiv = document.createElement("div");
+            tagDiv.classList.add('form-group');
+            tagDiv.setAttribute("style","margin: 10px 0px 5px 10px;display:inline;");
+            tagDiv.innerHTML = tagTemplate.format(entry, tagMap[entry]);
+            document.querySelector("#selectedTagDivDepositDialog").appendChild(tagDiv);
+        });
+
+        if(Object.keys(selectedTagsMapDepositDialog).length == 0){
+            document.getElementById("tagDataDivMsg").innerHTML = '<g:message code='depositWithTagAdvertMsg'/>'
+            document.getElementById("selectTagButton").innerHTML = '<g:message code='addTagLbl'/>'
+
+            document.getElementById("selectedTagDivDepositDialog").style.display= 'none'
+        } else {
+            document.getElementById("tagDataDivMsg").innerHTML = '<g:message code='depositWithTagSelectedAdvertMsg'/>'
+            document.getElementById("selectTagButton").innerHTML = '<g:message code='changeTagLbl'/>'
+            document.getElementById("selectedTagDivDepositDialog").style.display= 'block'
+        }
     }
 
     function showDepositDialog(depositType, fromUser, fromIBAN, validTo, targetGroupId) {
@@ -142,6 +163,7 @@
         }
         document.getElementById('depositDialogCaption').innerHTML = caption
         document.getElementById('selectReceptorlblDiv').innerHTML = selectReceptorMsg
+        refreshTagsDivDepositDialog({})
         $('#depositDialog').modal('show');
     }
 
@@ -250,6 +272,13 @@
                         toUserIBAN:getToUserIBAN(), amount: $("#amount").val(), currency:"EUR", fromUser:fromUserName,
                         fromUserIBAN:fromUserIBAN, toUserIBAN:getToUserIBAN() , validTo:dateValidTo }
 
+                    if(Object.keys(selectedTagsMapDepositDialog).length > 0) {
+                        var tagList = []
+                        Object.keys(selectedTagsMapDepositDialog).forEach(function(entry) {
+                            tagList.push({id:entry, name:selectedTagsMapDepositDialog[entry]})
+                        })
+                        webAppMessage.signedContent.tags = tagList
+                    }
                     webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                     webAppMessage.callerCallback = 'depositDialogCallback'
                     console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

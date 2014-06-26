@@ -83,6 +83,16 @@
     </g:if>
 
     <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
+    <g:if test="${groupvsMap?.tags != null && !groupvsMap.tags.isEmpty()}">
+        <div id="tagsDiv" style="padding:0px 0px 0px 30px;">
+            <div style=" display: table-cell; font-size: 1.1em; font-weight: bold;"><g:message code='tagsLbl'/>:</div>
+            <div id="selectedTagDiv" style="margin:0px 0px 15px 0px; padding: 5px 5px 0px 5px; display: table-cell;">
+                <g:each in="${groupvsMap?.tags}">
+                    <a class="btn btn-default" href="#" role="button" style="margin:0px 10px 0px 0px;">${it.name}</a>
+                </g:each>
+            </div>
+        </div>
+    </g:if>
 
     <div style="margin: 15px 0 15px 0;">
         <div class="eventContentDiv" style="">

@@ -7,7 +7,7 @@ import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.vicket.model.UserVSAccount
+import org.votingsystem.model.UserVSAccount
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
@@ -110,15 +110,20 @@ class TransactionVSService {
             UserVSAccount accountFrom
             UserVSAccount accountTo
             boolean isParent = true
+            boolean accountToNewTag = false
             switch (transactionVS.type) {
                 case TransactionVS.Type.VICKET_SOURCE_INPUT: //fromUserIBAN is not a system IBAN
-                    accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN, currencyCode:transactionVS.currencyCode)
+                    accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
+                            currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
+                    if(!accountTo) accountToNewTag = true
                     break;
                 case TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     if(transactionVS.transactionParent != null) {
                         isParent = false
                         accountFrom = UserVSAccount.findWhere(IBAN:transactionVS.fromUserIBAN, currencyCode:transactionVS.currencyCode)
-                        accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN, currencyCode:transactionVS.currencyCode)
+                        accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
+                                currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
+                        if(!accountTo) accountToNewTag = true
                     } else return;
                     break;
                 case TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
@@ -126,13 +131,21 @@ class TransactionVSService {
                         isParent = false
                         accountFrom = UserVSAccount.findWhere(IBAN:transactionVS.fromUserIBAN, currencyCode:transactionVS.currencyCode)
                         accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN, currencyCode:transactionVS.currencyCode)
+                        if(!accountTo) accountToNewTag = true
                     } else return;
                     break;
                 case TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                     if(transactionVS.transactionParent != null) {
                         accountFrom = UserVSAccount.findWhere(IBAN:transactionVS.fromUserIBAN, currencyCode:transactionVS.currencyCode)
                         accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN, currencyCode:transactionVS.currencyCode)
-                    } else return;
+                        if(!accountTo) accountToNewTag = true
+                    } else {
+                        //To system before share out among receptors
+                        accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN, currencyCode:transactionVS.currencyCode)
+                        accountTo.balance = accountTo.balance.add(transactionVS.amount)
+                        accountTo.save()
+                        return;
+                    }
                     break;
                 default:
                     log.error("Unprocessed TransactionVS.Type: ${transactionVS.type.toString()}")
@@ -144,11 +157,16 @@ class TransactionVSService {
             if(accountTo) {
                 accountTo.balance = accountTo.balance.add(transactionVS.amount)
                 accountTo.save()
+            } else if(accountToNewTag) {
+                accountTo = new UserVSAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
+                        currencyCode:transactionVS.currencyCode, tag:transactionVS.tag).save()
+                log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
+                        "tag '${accountTo.tag.name}' - amount '${accountTo.balance}'")
             }
             LoggerVS.logTransactionVS(transactionVS.id, transactionVS.state.toString(), transactionVS.type.toString(),
                     transactionVS.fromUserIBAN, transactionVS.toUserIBAN, transactionVS.getCurrencyCode(),
-                    transactionVS, transactionVS.dateCreated, transactionVS.subject, isParent)
-            log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionAmount} ${transactionVS.currencyCode} " +
+                    transactionVS.amount, transactionVS.dateCreated, transactionVS.subject, isParent)
+            log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionVS.amount} ${transactionVS.currencyCode} " +
                     " - fromIBAN '${transactionVS.fromUserIBAN}' toIBAN '${accountTo?.IBAN}'")
         }
     }
@@ -184,11 +202,17 @@ class TransactionVSService {
         if(!validTo.after(Calendar.getInstance().getTime())) {
             throw new Exception(messageSource.getMessage('depositDateRangeERRORMsg', [messageJSON.validTo].toArray(), locale))
         }
+        VicketTagVS tag
+        if(messageJSON.tags && !messageJSON.tags.isEmpty()) {
+            Map paramTag = messageJSON.tags.iterator().next()
+            tag = VicketTagVS.findWhere(id:Long.valueOf(paramTag.id), name:paramTag.name)
+            if(!tag) log.error("Unknown tag '${paramTag}'")
+        }
 
         TransactionVS transaction = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
                 fromUserIBAN: messageJSON.fromUserIBAN, toUserIBAN:messageJSON.toUserIBAN, fromUser: messageJSON.fromUser,
                 state:TransactionVS.State.OK, validTo:validTo, subject:subject, fromUserVS:signer, toUserVS: toUser,
-                currencyCode: currency.getCurrencyCode(), type:TransactionVS.Type.VICKET_SOURCE_INPUT).save()
+                currencyCode: currency.getCurrencyCode(), type:TransactionVS.Type.VICKET_SOURCE_INPUT, tag:tag).save()
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}")
         log.debug("${metaInfMsg} - from VicketSource '${signer.id}' to userVS '${toUser.id}' ")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", metaInf:metaInfMsg,
@@ -259,6 +283,14 @@ class TransactionVSService {
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }
 
+        VicketTagVS tag
+        if(messageJSON.tags && !messageJSON.tags.isEmpty()) {
+            Map paramTag = messageJSON.tags.iterator().next()
+            tag = VicketTagVS.findWhere(id:Long.valueOf(paramTag.id), name:paramTag.name)
+            if(!tag) log.error("Unknown tag '${paramTag}'")
+        }
+
+
         BigDecimal amount = new BigDecimal(messageJSON.amount)
         BigDecimal numUsersBigDecimal = new BigDecimal(receptorList.size())
         BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
@@ -283,13 +315,13 @@ class TransactionVSService {
                 TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
                         fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo: transactionValidTo,
                         subject:messageJSON.subject, fromUserVS:groupVS, currencyCode: currency.getCurrencyCode(),
-                        type:transactionVSType).save()
+                        type:transactionVSType, tag:tag).save()
                 receptorList.each { toUser ->
                     TransactionVS transaction = new TransactionVS(amount: userPart, messageSMIME:messageSMIMEReq,
                             fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo:transactionValidTo,
                             transactionParent: transactionParent, subject:messageJSON.subject, fromUserVS:groupVS,
                             toUserIBAN:toUser.IBAN, toUserVS: toUser, currencyCode: currency.getCurrencyCode(),
-                            type:transactionVSType).save()
+                            type:transactionVSType, tag:tag).save()
                     metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}")
                     log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
                 }
@@ -301,13 +333,13 @@ class TransactionVSService {
                 TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
                         fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo: transactionValidTo,
                         subject:messageJSON.subject, fromUserVS:groupVS, currencyCode: currency.getCurrencyCode(),
-                        type:transactionVSType).save()
+                        type:transactionVSType, tag:tag).save()
                 receptorList.each { toUser ->
                     TransactionVS transaction = new TransactionVS(amount: userPart, messageSMIME:messageSMIMEReq,
                             fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo:transactionValidTo,
                             transactionParent: transactionParent, subject:messageJSON.subject, fromUserVS:groupVS,
                             toUserIBAN:toUser.IBAN, toUserVS: toUser, currencyCode: currency.getCurrencyCode(),
-                            type:transactionVSType).save()
+                            type:transactionVSType, tag:tag).save()
                     metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}")
                     log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
                 }
@@ -320,7 +352,7 @@ class TransactionVSService {
                 TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
                         fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo: transactionValidTo,
                         subject:messageJSON.subject, fromUserVS:groupVS, currencyCode: currency.getCurrencyCode(),
-                        type:transactionVSType, toUserIBAN:systemUser.getIBAN(), toUserVS: systemUser).save()
+                        type:transactionVSType, toUserIBAN:systemUser.getIBAN(), toUserVS: systemUser, tag:tag).save()
                 receptorList.each { toUser ->
                     messageJSON.messageSMIMEParentId = messageSMIMEReq.id
                     messageJSON.toUser = toUser.getNif()
@@ -335,7 +367,7 @@ class TransactionVSService {
                             fromUserVS:systemUser, fromUserIBAN: systemUser.getIBAN(), state:TransactionVS.State.OK,
                             validTo:transactionValidTo, transactionParent: transactionParent, subject:messageJSON.subject,
                             toUserVS: toUser, toUserIBAN:toUser.IBAN,currencyCode: currency.getCurrencyCode(),
-                            type:transactionVSType).save()
+                            type:transactionVSType, tag:tag).save()
                     metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}")
                     log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
                 }
@@ -409,6 +441,10 @@ class TransactionVSService {
                 }
                 transactionMap.childTransactions = childTransactionList
             }
+        }
+
+        if(transaction.tag) {
+            transactionMap.tags = [[id:transaction.tag.id, name:transaction.tag.name]]
         }
 
         return transactionMap

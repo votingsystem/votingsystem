@@ -45,6 +45,7 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.StringUtils;
 import org.w3c.dom.Document;
 
 import java.io.File;
@@ -279,7 +280,7 @@ public class BrowserVS extends Region {
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
-        final String jsCommand = callbackFunction + "('" + Utils.escapeStringJS(messageJSON.toString()) + "')";
+        final String jsCommand = callbackFunction + "('" + StringUtils.escapeStringJS(messageJSON.toString()) + "')";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {

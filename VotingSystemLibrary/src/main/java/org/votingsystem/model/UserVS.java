@@ -15,6 +15,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -31,14 +32,6 @@ public class UserVS implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static Logger log = Logger.getLogger(UserVS.class);
-
-    public CertificateVS getCertificateVS() {
-        return certificateVS;
-    }
-
-    public void setCertificateVS(CertificateVS certificateVS) {
-        this.certificateVS = certificateVS;
-    }
 
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, VICKET_SOURCE}
 
@@ -79,6 +72,13 @@ public class UserVS implements Serializable {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
+
+    //Owning Entity side of the relationship
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @JoinTable(name = "uservs_vickettagvs", joinColumns = {
+            @JoinColumn(name = "UserVSAccount", referencedColumnName = "id", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "VicketTagVS", nullable = false, referencedColumnName = "id") })
+    private Set<VicketTagVS> tagVSSet;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
 
@@ -331,6 +331,22 @@ public class UserVS implements Serializable {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public CertificateVS getCertificateVS() {
+        return certificateVS;
+    }
+
+    public void setCertificateVS(CertificateVS certificateVS) {
+        this.certificateVS = certificateVS;
+    }
+
+    public Set<VicketTagVS> getTagVSSet() {
+        return tagVSSet;
+    }
+
+    public void setTagVSSet(Set<VicketTagVS> tagVSSet) {
+        this.tagVSSet = tagVSSet;
     }
 
     @Transient public String getSignatureBase64() {

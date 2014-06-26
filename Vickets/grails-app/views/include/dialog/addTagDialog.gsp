@@ -21,33 +21,26 @@
                 </h4>
             </div>
             <div class="modal-body">
-                <div id="tagFieldsDiv" class="tagBox" style="display:none;">
-                    <fieldset id="tagFieldsBox">
-                        <legend id="tagFieldsLegend" style="border: none;"><g:message code="tagsLbl"/></legend>
-                        <div id="tagFields" style=""></div>
-                    </fieldset>
-                </div>
-
-                <div id="selectedTagDiv" style="border: 1px solid #ccc; padding: 5px; margin:0px 0px 10px 0px; display: none;">
+                <div id="tagDialogSelectedTagDiv" style="border-bottom: 1px solid #ccc; padding: 5px;
+                        margin:0px 0px 10px 0px; display: none;">
                     <label><g:message code="selectedTagsLbl"/></label>
-                    <div id="selectedTagList" class="" style=""></div>
+                    <div id="tagDialogSelectedTagList" class="" style=""></div>
                 </div>
 
                 <div id="tagSearchPanel" class="form-group form-inline text-center"
                      style="margin:15px auto 0px auto;display: inline-block; width: 100%;">
                     <input id="tagSearchInput" type="text" class="form-control" style="width:220px; display: inline;"
                            placeholder="<g:message code="tagLbl"/>">
-                    <button type="button" onclick="processTagSearch()" class="btn btn-danger" style="display: inline;">
+                    <button type="button" onclick="processTagSearch()" class="btn btn-default" style="display: inline;">
                         <g:message code="tagSearchLbl" /></button>
                 </div>
 
                 <div id="tagDialogSearchMessage" class="" style=""></div>
-                <div id="tagList" class="" style="margin: 10px 0px 0px 0px;"></div>
+                <div id="tagDialogTagListSearch" class="" style="margin: 10px 0px 0px 0px;"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-accept-vs" data-dismiss="modal" onclick="closeAddTagDialog();">
-                    <g:message code="acceptLbl"/></button>
-                <button type="button" class="btn btn-default btn-cancel-vs" data-dismiss="modal" style="">
+                <button type="button" class="btn btn-default btn-cancel-vs"
+                        onclick="refreshTagCallback(selectedTagsMapTagDialog);" data-dismiss="modal" style="">
                     <g:message code="closeLbl"/>
                 </button>
             </div>
@@ -70,56 +63,88 @@
 </div>
 <asset:script>
 
-    var addTagDialogClientCallback = null
-    var dynatableTagDialog
+    var refreshTagCallback
     var tagMap = {}
+    var selectedTagsMapTagDialog
     var newTagTemplate = document.getElementById('newTagTemplate').innerHTML
     var tagTemplate = document.getElementById('tagTemplate').innerHTML
+    var maxNumTags
 
-    function closeAddTagDialog() {
-        if(addTagDialogClientCallback != null) addTagDialogClientCallback()
-        $('#addTagDialog').modal('hide')
-    }
-
-    function showAddTagDialog(callback) {
+    function showAddTagDialog(maxNumberTags, selectedTags, callback) {
         console.log("showAddTagDialog");
+        maxNumTags = maxNumberTags
+        refreshTagCallback = callback
+        document.getElementById("tagSearchInput").value= ''
+        document.getElementById("tagDialogTagListSearch").innerHTML = ''
+        document.getElementById("tagDialogSelectedTagList").innerHTML = ''
+        document.getElementById("tagDialogSelectedTagDiv").style.display= 'none'
+        selectedTagsMapTagDialog = selectedTags
+        refreshTagsTagDialog()
         $('#addTagDialog').modal('show')
-        addTagDialogClientCallback = callback
     }
 
     function removeTag(tagButton) {
         var tagDataId = $(tagButton).attr('data-tagId')
-        delete selectedTagsMap[tagDataId];
+        delete selectedTagsMapTagDialog[tagDataId];
         $(tagButton).parent().fadeOut(400, function() { $(tagButton).parent().remove(); });
-        if(Object.keys(selectedTagsMap).length == 0){
-            document.getElementById("selectedTagDiv").style.display= 'none'
+        if(Object.keys(selectedTagsMapTagDialog).length == 0){
+            document.getElementById("tagDialogSelectedTagDiv").style.display= 'none'
         }
+        refreshTagCallback(selectedTagsMapTagDialog)
     }
 
-    function addTag(newTagButton) {
-        var tagDataId = $(newTagButton).attr('data-tagId')
-        selectedTagsMap[tagDataId] = tagMap[tagDataId]
-        document.getElementById("selectedTagList").innerHTML = ''
-        $(newTagButton).parent().fadeOut(400, function() { $(newTagButton).parent().remove(); });
-
-        Object.keys(selectedTagsMap).forEach(function(entry) {
+    function refreshTagsTagDialog() {
+        document.getElementById("tagDialogSelectedTagList").innerHTML = ''
+        Object.keys(selectedTagsMapTagDialog).forEach(function(entry) {
             var tagDiv = document.createElement("div");
             tagDiv.classList.add('form-group');
             tagDiv.setAttribute("style","margin: 10px 0px 5px 10px;display:inline;");
             tagDiv.innerHTML = tagTemplate.format(entry, tagMap[entry]);
-            document.querySelector("#selectedTagList").appendChild(tagDiv);
+            document.querySelector("#tagDialogSelectedTagList").appendChild(tagDiv);
         });
-        document.getElementById("selectedTagDiv").style.display= 'block'
+        if(maxNumTags != null && Object.keys(selectedTagsMapTagDialog).length > maxNumTags) {
+            removeTag(document.getElementById("tagDialogSelectedTagList").getElementsByTagName('button')[0])
+        }
+        if(Object.keys(selectedTagsMapTagDialog).length > 0)
+            document.getElementById("tagDialogSelectedTagDiv").style.display= 'block'
+    }
+
+    function addTag(newTagButton) {
+        $(newTagButton).parent().fadeOut(400, function() { $(newTagButton).parent().remove(); });
+        var tagDataId = $(newTagButton).attr('data-tagId')
+        selectedTagsMapTagDialog[tagDataId] = tagMap[tagDataId]
+        refreshTagsTagDialog()
+        refreshTagCallback(selectedTagsMapTagDialog)
     }
 
     function processTagSearch() {
         userMap = {}
         var tagTextToSearch = document.getElementById("tagSearchInput").value
         if(tagTextToSearch.trim() == "") return
-        document.getElementById('tagList').innerHTML=''
-        dynatableTagDialog.settings.dataset.ajaxUrl = "${createLink(controller: 'balanceTagVS', action: 'index')}?tag=" + tagTextToSearch
-        dynatableTagDialog.paginationPage.set(1);
-        dynatableTagDialog.process();
+        document.getElementById("tagDialogTagListSearch").innerHTML = ''
+        getHTTPRequest("${createLink(controller: 'vicketTagVS', action: 'index')}?tag=" + tagTextToSearch);
+    }
+
+    function getHTTPRequest (tagetURL) {
+        console.log("getHTTPRequest - tagetURL: " + tagetURL)
+        var request = new XMLHttpRequest();
+        request.open('GET', tagetURL, true);
+        request.onload = function (e) {
+            if (request.readyState === 4) {
+                if (request.status === 200) {// Check if the get was successful.
+                    var responseJSON = toJSON(request.responseText)
+                    responseJSON.tagRecords.forEach(function (entry) {
+                        var tagDiv = document.createElement("div");
+                        tagDiv.classList.add('form-group');
+                        tagDiv.setAttribute("style","margin: 10px 0px 5px 10px;display:inline;");
+                        tagDiv.innerHTML = newTagTemplate.format(entry.id, entry.name);
+                        tagMap[entry.id] = entry.name;
+                        document.querySelector("#tagDialogTagListSearch").appendChild(tagDiv);
+                    });
+                } else console.error(request.statusText);
+            } else console.error(request.statusText);
+        };
+        request.send(null);
     }
 
     $(function() {
@@ -127,37 +152,6 @@
             processTagSearch();
             e.preventDefault();
         }});
-
-        $('#tagList').dynatable({
-            features: {
-                paginate: false,
-                search: false,
-                recordCount: false,
-                perPageSelect: false
-            },
-            inputs: dynatableInputs,
-            params: dynatableParams,
-            dataset: {
-                ajax: true,
-                ajaxOnLoad: false,
-                perPageDefault: 50,
-                records: []
-            },
-            writers: {
-                _rowWriter: tagDialogTagRowWriter
-            }
-        });
-
-        dynatableTagDialog = $('#tagList').data('dynatable');
-
-        dynatableTagDialog.settings.params.records = 'tagRecords'
-        dynatableTagDialog.settings.params.queryRecordCount = 'numTotalTags'
     })
-
-
-    function tagDialogTagRowWriter(rowIndex, jsonTagData, columns, cellWriter) {
-        tagMap[jsonTagData.id] = jsonTagData.name
-        return newTagTemplate.format(jsonTagData.id, jsonTagData.name);
-    }
 
 </asset:script>

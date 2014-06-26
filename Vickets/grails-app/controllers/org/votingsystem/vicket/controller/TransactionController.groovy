@@ -251,7 +251,7 @@ class TransactionController {
         Throwable rootCause = StackTraceUtils.extractRootCause(exception)
         log.error " Exception occurred. ${rootCause.getMessage()}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
-        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: metaInf,
                 metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
     }
 

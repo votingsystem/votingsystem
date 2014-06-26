@@ -5,6 +5,7 @@ import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.VicketTagVS;
 import org.votingsystem.vicket.service.TransactionVSService;
 import org.votingsystem.vicket.util.ApplicationContextHolder;
 
@@ -39,6 +40,9 @@ public class TransactionVS  implements Serializable {
     @Column(name="subject") private String subject;
 
     @Column(name="currency", nullable=false) private String currencyCode;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="tag") private VicketTagVS tag;
 
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;
@@ -206,6 +210,14 @@ public class TransactionVS  implements Serializable {
 
     public void afterInsert() {
         ((TransactionVSService)ApplicationContextHolder.getBean("transactionVSService")).notifyListeners(this);
+    }
+
+    public VicketTagVS getTag() {
+        return tag;
+    }
+
+    public void setTag(VicketTagVS tag) {
+        this.tag = tag;
     }
 
 }

@@ -11,7 +11,7 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
 import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.vicket.model.UserVSAccount
+import org.votingsystem.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.util.IbanVSUtil

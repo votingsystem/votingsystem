@@ -11,7 +11,7 @@ import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.vicket.model.UserVSAccount
+import org.votingsystem.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
 

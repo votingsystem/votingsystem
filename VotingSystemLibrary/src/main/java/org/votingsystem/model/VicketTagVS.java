@@ -1,7 +1,4 @@
-package org.votingsystem.vicket.model;
-
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.UserVS;
+package org.votingsystem.model;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,8 +11,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 @Entity
-@Table(name="BalanceTagVS")
-public class BalanceTagVS implements java.io.Serializable {
+@Table(name="VicketTagVS")
+public class VicketTagVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,11 +23,11 @@ public class BalanceTagVS implements java.io.Serializable {
     @Column(name="frequency") private Long frequency;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
-    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) private Set<UserVSAccount> userVSAccountSet;
+    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) private Set<UserVS> userVSSet;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    public BalanceTagVS() { }
+    public VicketTagVS() { }
    
     public Long getId() {
         return this.id;
@@ -72,12 +69,15 @@ public class BalanceTagVS implements java.io.Serializable {
         return lastUpdated;
     }
 
-
-    public Set<UserVSAccount> getUserVSAccountSet() {
-        return userVSAccountSet;
+    public Set<UserVS> getUserVSSet() {
+        return userVSSet;
     }
 
-    public void setUserVSAccountSet(Set<UserVSAccount> userVSAccountSet) {
-        this.userVSAccountSet = userVSAccountSet;
+    public void setUserVSSet(Set<UserVS> userVSSet) {
+        this.userVSSet = userVSSet;
+    }
+
+    public void beforeInsert() {
+        setName(name.toUpperCase());
     }
 }
