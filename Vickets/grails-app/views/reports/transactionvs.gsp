@@ -107,7 +107,12 @@
     function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
         var transactionType = getTransactionVSDescription(jsonTransactionData.type)
         var transactionURL = jsonTransactionData.id
-        var amount = jsonTransactionData.amount.toFixed(2) + " " + jsonTransactionData.currency
+
+        var amount
+        if(isNaN(jsonTransactionData.amount)) amount = jsonTransactionData.amount.toFixed(2) + " " + jsonTransactionData.currency
+        else  amount = jsonTransactionData.amount + " " + jsonTransactionData.currency
+
+
         tr = '<tr><td title="' + transactionType + '" class="text-center">' +
             '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-right">' +
             amount + '</td>' + '</td><td class="text-center">' + jsonTransactionData.dateCreated +

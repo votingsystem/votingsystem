@@ -12,25 +12,35 @@
 <body>
 <div class="" style="max-width:1000px; margin: 0px auto 0px auto; padding:20px 30px 0px 30px;">
     <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
+    <g:if test="${transactionvsMap?.tags != null && !transactionvsMap.tags.isEmpty()}">
+        <div id="tagsDiv" style="padding:0px 0px 0px 30px;">
+            <div style=" display: table-cell; font-size: 1.1em; font-weight: bold;"><g:message code='tagsLbl'/>:</div>
+            <div id="selectedTagDiv" style="margin:0px 0px 15px 0px; padding: 5px 5px 0px 5px; display: table-cell;" class="btn-group-xs">
+                <g:each in="${transactionvsMap?.tags}">
+                    <a class="btn btn-default" href="#" role="button" style="margin:0px 10px 0px 0px;">${it.name}</a>
+                </g:each>
+            </div>
+        </div>
+    </g:if>
     <div style=""><b><g:message code="subjectLbl"/>: </b>${transactionvsMap.subject}</div>
     <div style=""><b><g:message code="amountLbl"/>: </b>${transactionvsMap.amount} ${transactionvsMap.currency}</div>
     <div style=""><b><g:message code="dateCreatedLbl"/>: </b>${formatDate(date:transactionvsMap.dateCreated, formatName:'webViewDateFormat')}</div>
     <g:if test="${transactionvsMap.validTo}">
         <div style=""><b><g:message code="validToLbl"/>: </b>${formatDate(date:transactionvsMap.validTo, formatName:'webViewDateFormat')}</div>
     </g:if>
-<div style="margin-left: 20px;">
-    <g:if test="${transactionvsMap.fromUserVS}">
-        <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
-            <g:message code="pagerLbl"/></div>
-            <div id="fromUserDiv">
-                <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.fromUserVS.nif}</div>
-                <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.fromUserVS.name}</div>
-            </div>
-    </g:if>
-    <g:else>
-        <div style="font-weight: bold;"><g:message code="anonymousPagerLbl"/></div>
-    </g:else>
-</div>
+    <div style="margin-left: 20px;">
+        <g:if test="${transactionvsMap.fromUserVS}">
+            <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
+                <g:message code="pagerLbl"/></div>
+                <div id="fromUserDiv">
+                    <div style=""><b><g:message code="nifLbl"/>: </b>${transactionvsMap.fromUserVS.nif}</div>
+                    <div style=""><b><g:message code="nameLbl"/>: </b>${transactionvsMap.fromUserVS.name}</div>
+                </div>
+        </g:if>
+        <g:else>
+            <div style="font-weight: bold;"><g:message code="anonymousPagerLbl"/></div>
+        </g:else>
+    </div>
 
 <g:if test="${transactionvsMap.childTransactions && !transactionvsMap.childTransactions.isEmpty()}">
     <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;margin:10px 0px 0px 0px;">

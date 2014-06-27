@@ -220,7 +220,8 @@ var dynatableParams = {
 
 var dynatableFeatures =  {
     search: false,
-    pushState: false
+    pushState: false,
+    recordCount: false
 }
 
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/

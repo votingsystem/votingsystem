@@ -6,6 +6,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.UserVSAccount
 import org.votingsystem.model.VicketSource
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.model.TransactionVS
@@ -15,6 +16,9 @@ import org.votingsystem.vicket.util.MetaInfMsg
 
 import java.lang.reflect.Constructor
 import java.util.concurrent.ConcurrentHashMap
+
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 
 /**
  * @infoController TestingController
@@ -31,11 +35,19 @@ class TestingController {
     def auditingService
     def filesService
 
-    def index() {  }
+    def index() { }
 
     def dockspawn() { }
 
     def validator() { }
+
+    def tagAcccount() {
+        UserVSAccount groupAccount
+        UserVSAccount.withTransaction {
+            groupAccount = UserVSAccount.findWhere(IBAN:"ES1978788989450000000003")
+        }
+        render groupAccount as JSON
+    }
 
     def IBAN() {
         render IbanVSUtil.getInstance().getIBAN(1111111111)

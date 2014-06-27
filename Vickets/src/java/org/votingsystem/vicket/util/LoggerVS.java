@@ -2,6 +2,7 @@ package org.votingsystem.vicket.util;
 
 import grails.converters.JSON;
 import org.apache.log4j.Logger;
+import org.votingsystem.model.VicketTagVS;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -40,7 +41,7 @@ public class LoggerVS {
     }
 
     public static void logTransactionVS(long id, String state, String type, String fromUser, String toUser,
-         String currency, BigDecimal amount, Date dateCreated, String subject, boolean isParent) {
+         String currency, BigDecimal amount, VicketTagVS tag, Date dateCreated, String subject, boolean isParent) {
         Map<String,Object> dataMap = new HashMap();
         dataMap.put("id", id);
         dataMap.put("state", state);
@@ -50,6 +51,7 @@ public class LoggerVS {
         dataMap.put("subject", subject);
         dataMap.put("currency", currency);
         dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
+        if(tag != null) dataMap.put("tag", tag.getName());
         dataMap.put("dateCreated", dateCreated);
         dataMap.put("isParent", isParent);
         transactionslog.info(new JSON(dataMap) + ",");

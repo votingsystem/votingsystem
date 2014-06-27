@@ -40,11 +40,6 @@
                     style="margin:10px 20px 0px 0px;" onclick="$('#cancelGroupVSDialog').modal('show')">
                 <g:message code="cancelGroupVSLbl"/> <i class="fa fa-times"></i>
             </button>
-            <button id="adminGroupVSUsersButton" type="submit" class="btn btn-warning" onclick="adminGroupUsers('${groupvsMap.id}');"
-                    style="margin:10px 20px 0px 0px;">
-                <g:message code="adminGroupVSUsersLbl"/> <i class="fa fa-users"></i>
-            </button>
-
             <div class="btn-group">
                 <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" style="margin:10px 20px 0px 0px;">
                     <g:message code="makeDepositFromGroupVSLbl"/>  <i class="fa fa-money"></i>
@@ -85,8 +80,8 @@
     <h3><div class="pageHeader text-center"> ${groupvsMap?.name}</div></h3>
     <g:if test="${groupvsMap?.tags != null && !groupvsMap.tags.isEmpty()}">
         <div id="tagsDiv" style="padding:0px 0px 0px 30px;">
-            <div style=" display: table-cell; font-size: 1.1em; font-weight: bold;"><g:message code='tagsLbl'/>:</div>
-            <div id="selectedTagDiv" style="margin:0px 0px 15px 0px; padding: 5px 5px 0px 5px; display: table-cell;">
+            <div style=" display: table-cell; font-size: 1.1em; font-weight: bold; vertical-align: middle;"><g:message code='tagsLbl'/>:</div>
+            <div id="selectedTagDiv" class="btn-group btn-group-sm" style="margin:0px 0px 15px 0px; padding: 5px 5px 0px 5px; display: table-cell;">
                 <g:each in="${groupvsMap?.tags}">
                     <a class="btn btn-default" href="#" role="button" style="margin:0px 10px 0px 0px;">${it.name}</a>
                 </g:each>
@@ -94,7 +89,7 @@
         </div>
     </g:if>
 
-    <div style="margin: 15px 0 15px 0;">
+    <div style="margin: 5px 0 15px 0;">
         <div class="eventContentDiv" style="">
             ${raw(groupvsMap?.description)}
         </div>
@@ -116,6 +111,9 @@
         <!-- Nav tabs -->
         <ul class="nav nav-tabs">
             <li class="active" style="">
+                <a href="#balanceList" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="balanceListLbl"/></a>
+            </li>
+            <li style="">
                 <a href="#transactionsTo" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="incomeLbl"/></a>
             </li>
             <li style="">
@@ -130,7 +128,12 @@
 
         <!-- Tab panes -->
         <div class="tab-content" style="min-height: 600px;">
-            <div class="tab-pane fade in active" id="transactionsTo">
+            <div class="tab-pane fade in active" id="balanceList" style="top:0px;">
+                <script>
+                    var balanceListURL = "${createLink(controller:'userVSAccount', action:'balance', absolute:true)}?id=${groupvsMap.id}" </script>
+                <g:include view="/include/balanceList.gsp"/>
+            </div>
+            <div class="tab-pane fade" id="transactionsTo">
                 <div id="transactionTo_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
                     <table class="table white_headers_table" id="transactionTo_table" style="">
                         <thead>

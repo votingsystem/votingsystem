@@ -20,10 +20,13 @@ public class UserVSAccount implements Serializable {
 
     private static Logger log = Logger.getLogger(UserVSAccount.class);
 
+    public enum State {ACTIVE, SUSPENDED, CANCELLED}
+
     public static final long serialVersionUID = 1L;
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
+    @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.ACTIVE;
 
     @Column(name="balance", nullable=false) private BigDecimal balance = null;
 
@@ -103,4 +106,11 @@ public class UserVSAccount implements Serializable {
         this.tag = tag;
     }
 
+    public UserVSAccount.State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
 }

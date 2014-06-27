@@ -142,7 +142,7 @@ class VicketService {
                         [vicket.serialNumber].toArray(), locale).getBytes()
             }
             return new ResponseVS(statusCode:statusCode, messageBytes: messageBytes, contentType: contentType,
-                    type:TypeVS.VICKET_CANCEL_ERROR)
+                    type:TypeVS.ERROR)
             return new ResponseVS(type:TypeVS.ERROR, messageBytes: messageBytes, contentType: contentType,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "VicketState_" + vicket.getState().toString()),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)

@@ -2,10 +2,7 @@ package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
-import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.VicketTagVS;
+import org.votingsystem.model.*;
 import org.votingsystem.vicket.service.TransactionVSService;
 import org.votingsystem.vicket.util.ApplicationContextHolder;
 
@@ -13,6 +10,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -71,6 +69,7 @@ public class TransactionVS  implements Serializable {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
+    @Transient private Map<UserVSAccount, BigDecimal> accountFromMovements;
 
     public Long getId() {
         return id;
@@ -218,6 +217,14 @@ public class TransactionVS  implements Serializable {
 
     public void setTag(VicketTagVS tag) {
         this.tag = tag;
+    }
+
+    public Map<UserVSAccount, BigDecimal> getAccountFromMovements() {
+        return accountFromMovements;
+    }
+
+    public void setAccountFromMovements(Map<UserVSAccount, BigDecimal> accountFromMovements) {
+        this.accountFromMovements = accountFromMovements;
     }
 
 }

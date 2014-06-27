@@ -30,9 +30,9 @@
         <form id="mainForm">
 
             <div class="form-inline">
-                <div style="margin:0px 0px 20px 0px; display: table;">
-                    <div style="display: table-cell;">
-                        <input type="text" name="subject" id="groupSubject" style="width:400px"  required
+                <div style="margin:0px 0px 10px 0px; display: table; height: 10px;">
+                    <div style="display: table-cell;padding:0px; margin:0px;">
+                        <input type="text" name="subject" id="groupSubject" style="width:400px;"  required
                                title="<g:message code="subjectLbl"/>" class="form-control"
                                placeholder="<g:message code="newGroupNameLbl"/>"
                                onchange="this.setCustomValidity('')" />
@@ -43,7 +43,8 @@
                     </div>
                 </div>
                 <div id="tagsDiv" style="display: none; padding:0px 0px 0px 30px;">
-                    <div style=" display: table-cell; font-size: 1.1em; font-weight: bold;"><g:message code='tagsLbl'/>:</div>
+                    <div style=" display: table-cell; font-size: 1.1em; font-weight: bold; vertical-align: middle;">
+                        <g:message code='tagsLbl'/>:</div>
                     <div id="selectedTagDiv" style="margin:0px 0px 15px 0px; padding: 5px; display: table-cell;"></div>
                 </div>
             </div>

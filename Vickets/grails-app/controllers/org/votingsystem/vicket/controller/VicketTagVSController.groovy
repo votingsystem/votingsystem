@@ -7,6 +7,8 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.UserVSAccount
 import org.votingsystem.model.VicketTagVS
 
+import java.text.Normalizer
+
 /**
  * @infoController Aplicación
  * @descController Servicios de acceso a la aplicación web principal
@@ -16,6 +18,8 @@ import org.votingsystem.model.VicketTagVS
  * */
 class VicketTagVSController {
 
+    def userVSService
+
     def index() {
         if("POST".equals(request.method)) {
             def requestJSON = request.JSON
@@ -24,7 +28,13 @@ class VicketTagVSController {
             } else  {
                 VicketTagVS tag
                 VicketTagVS.withTransaction { tag = VicketTagVS.findWhere(name:requestJSON.tag) }
-                if(!tag) tag = new VicketTagVS(name:requestJSON.tag).save()
+                if(!tag) {
+                    String tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(
+                            "\\p{InCombiningDiacriticalMarks}+", "");
+                    tag = new VicketTagVS(name:tagName).save()
+                    new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
+                            userVS:userVSService.getSystemUser(), IBAN:userVSService.getSystemUser().getIBAN(), tag:tag).save()
+                }
                 def result = [id:tag.id, name:tag.name]
                 render  result as JSON
             }
@@ -40,6 +50,18 @@ class VicketTagVSController {
             Map result = [tagRecords:resultList, numTotalTags:listDB.totalCount]
             render result as JSON
         }
+    }
+
+    def test () {
+        def listDB
+        VicketTagVS.withTransaction {
+            listDB = VicketTagVS.createCriteria().list(offset: 0) { }
+        }
+        listDB.each { it ->
+            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
+                    userVS:userVSService.getSystemUser(), IBAN:userVSService.getSystemUser().getIBAN(), tag:it).save()
+        }
+        render "OK"
     }
 
     /**

@@ -75,7 +75,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         //Without this WebView always send requests with 'en-us,en;q=0.5'
         URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
             public URLStreamHandler createURLStreamHandler(String protocol) {
-                if (protocol.contains("http")) {
+                if (protocol.toLowerCase().contains("http") || protocol.toLowerCase().contains("https")) {
                     return new URLStreamHandler() {
                         protected URLConnection openConnection(URL url) throws IOException {
                             URLConnection reConnection = new sun.net.www.protocol.http.HttpURLConnection(url, null);

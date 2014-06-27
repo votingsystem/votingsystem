@@ -198,7 +198,7 @@
     }
 
     $(function() {
-        $("#userSearchInput").bind('keypress', function(e) {if (e.which == 13) {
+         $("#userSearchInput").bind('keypress', function(e) {if (e.which == 13) {
             processUserSearch();
             e.preventDefault();
          } });

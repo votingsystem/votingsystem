@@ -155,6 +155,16 @@ class UrlMappings {
             }
         }
 
+        "/userVS/$id/balance"{
+            controller = "userVSAccount"
+            action = "balance"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
+
+
         "/model/request" {
             controller = "model"
             action = [POST:"processRequestFileMap"]
