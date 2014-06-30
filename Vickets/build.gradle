@@ -37,4 +37,10 @@ task war(dependsOn:['copyApps', 'installEditor']) << {task ->
 	announce.announce("'$project.name' - WebApp WAR file generated", "local")
 }
 
+task installPolymer(type:Exec) {
+    workingDir './web-app/polymer/.'
+    commandLine 'bower', 'install'
+}
+
+
 defaultTasks 'war'

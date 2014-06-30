@@ -116,7 +116,7 @@ class VicketFilters {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
                     log.debug("before - contentType: ${contentTypeVS}")
                     if(!contentTypeVS?.isPKCS7()) return;
-                    byte[] requestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
+                    byte[] requestBytes = org.apache.commons.io.IOUtils.toByteArray(request.getInputStream(request.getInputStream()))
                     //log.debug "---- pkcs7DocumentsFilter - before  - consulta: ${new String(requestBytes)}"
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
