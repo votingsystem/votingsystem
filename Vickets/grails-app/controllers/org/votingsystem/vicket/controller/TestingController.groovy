@@ -35,6 +35,8 @@ class TestingController {
     def auditingService
     def filesService
 
+    def polymer() { }
+
     def index() { }
 
     def dockspawn() { }
