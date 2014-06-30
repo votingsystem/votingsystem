@@ -4,15 +4,15 @@
     <title></title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <asset:stylesheet src="polymer.css"/>
-    <script src="${resource(dir: '/polymer/platform', file: 'platform.js')}"> </script>
-    <link rel="import" href="${resource(dir: '/polymer/font-roboto', file: 'roboto.html')}">
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
 
 
 
-    <link rel="import" href="${resource(dir: '/polymer/core-header-panel', file: 'core-header-panel.html')}">
-    <link rel="import" href="${resource(dir: '/polymer/core-toolbar', file: 'core-toolbar.html')}">
-    <link rel="import" href="${resource(dir: '/polymer/paper-tabs', file: 'paper-tabs.html')}">
-    <link rel="import" href="${resource(dir: '/polymer/paper-input', file: 'paper-input.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-header-panel', file: 'core-header-panel.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-toolbar', file: 'core-toolbar.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 
 
 
@@ -58,6 +58,18 @@
     <div layout horizontal center-justified>
         <paper-input floatinglabel label="<g:message code="onlyNumbersLbl" />" validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl" />"></paper-input>
     </div>
+
+
+<polymer-element name="intro-tag" noscript>
+    <template>
+        <!-- bind yourName to the published property, name -->
+        <p>{{yourName}}</p>
+        <!-- bind yourName to the value attribute -->
+        <p>What's your name? <input value="{{yourName}}" placeholder="Enter name..."></p>
+    </template>
+</polymer-element>
+
+<intro-tag></intro-tag>
 
 <div layout horizontal center center-justified style="height:100px;"><div>OMG, centered!</div> </div>
 

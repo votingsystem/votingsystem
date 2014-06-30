@@ -6,9 +6,8 @@
 
 /web-app/tools
 /web-app/android
-/web-app/ckeditor
+/web-app/bower_components
 
-/grails-app/controllers/org/votingsystem/accesscontrol/controller/Prueba*
 
 /build
 /logs

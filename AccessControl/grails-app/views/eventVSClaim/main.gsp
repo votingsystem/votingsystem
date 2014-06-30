@@ -2,7 +2,7 @@
 <head>
     <meta name="layout" content="main" />
     <asset:stylesheet src="jquery.dynatable.css"/>
-    <asset:javascript src="jquery.dynatable.js"/>
+    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
     <asset:javascript src="jquery.stickytableheaders.js"/>
 </head>
 <body>

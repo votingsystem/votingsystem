@@ -4,7 +4,7 @@
 <head>
     <link href="${resource(dir: 'css', file:'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
     <asset:javascript src="jquery.stickytableheaders.js"/>
-    <asset:javascript src="jquery.dynatable.js"/>
+    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
     <asset:stylesheet src="jquery.dynatable.css"/>
     <meta name="layout" content="main" />
 </head>

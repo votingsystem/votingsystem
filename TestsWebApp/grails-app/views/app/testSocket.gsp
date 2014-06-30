@@ -3,8 +3,8 @@
 <head>
     <title>VotingSystem WebSocket Test</title>
     <g:javascript library="jquery" plugin="jquery"/>
-    <asset:stylesheet src="bootstrap.min.css"/>
-    <asset:javascript src="bootstrap.min.js"/>
+    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
+    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
     <style type="text/css" media="screen">
         #connect-container {
             float: left;

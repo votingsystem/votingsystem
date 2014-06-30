@@ -11,11 +11,10 @@ Si no se modifican los archivos <b>grails-app/conf/DataSource.groovy</b> las apl
 ejecutando en el servidor una instancia de la base de datos PostgreSQL según se explica en [este documento]
 (https://github.com/jgzornoza/SistemaVotacion/wiki/Configuraci%C3%B3n-de-la-base-de-datos)
 
-#### Instalación de Polymer
-Algunos componentes de la aplicación necesitan Polymer (http://www.polymer-project.org/). Para poder construir la
-aplicación es necesario tener instalado Bower(http://bower.io/) y ejecutar
+#### Instalación de las librerías web
+Para poder construir la aplicación es necesario tener instalado Bower(http://bower.io/) y ejecutar
 
-    gradle installPolymer
+    gradle installAllBowerComponents
 
 #### Generación de los certificados de pruebas
 

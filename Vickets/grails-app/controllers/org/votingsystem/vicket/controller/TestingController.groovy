@@ -37,6 +37,10 @@ class TestingController {
 
     def polymer() { }
 
+    def polymerTabs() { }
+
+    def scaffold() { }
+
     def index() { }
 
     def dockspawn() { }

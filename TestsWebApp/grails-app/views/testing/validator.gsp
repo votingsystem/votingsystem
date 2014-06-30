@@ -3,8 +3,8 @@
 <head>
     <title>Validator</title>
     <meta name="layout" content="main" />
-    <asset:stylesheet src="bootstrapValidator.min.css"/>
-    <asset:javascript src="bootstrapValidator.min.js"/>
+    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrapValidator/dist/js', file: 'bootstrapValidator.min.js')}"></script>
+    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrapValidator/dist/css', file: 'bootstrapValidator.min.css')}" type="text/css"/>
     <style>
     textarea { }
     input[id="subject"] { }

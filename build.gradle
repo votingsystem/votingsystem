@@ -142,11 +142,8 @@ def copyClientTool(project) {
 
 task copyAppsAll(dependsOn: [':AccessControl:copyApps', 'ControlCenter:copyApps', ':Vickets:copyApps']) {}
 
-
-task installEditor(dependsOn: [':TestsWebApp:installEditor', ':AccessControl:installEditor'])  { }
-
 task initDevEnvironment(dependsOn: ['VotingSystemLibrary:classes', 'initDevEnvironmentApps']) {}
-task initDevEnvironmentApps(dependsOn: [':installCerts', ':installEditor', ':AccessControl:copyApps']) {}
+task initDevEnvironmentApps(dependsOn: [':installCerts', ':AccessControl:copyApps']) {}
 initDevEnvironmentApps.mustRunAfter tasks.getByPath('VotingSystemLibrary:classes')
 
 
@@ -165,21 +162,6 @@ def installGrailsRestDocPlugin(project) {
 	project.announce.announce("GrailsRestDocPlugin installed", "local")
 }
 
-
-def installCkeditor(project) {
-	println ckeditorVersion
-	File apiFile = file("libs/gckeditor_${ckeditorVersion}_standard.zip")
-	if(!apiFile.exists()) {
-		String fileURL = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${ckeditorVersion}/ckeditor_${ckeditorVersion}_standard.zip"
-		println "--- downloading ${fileURL}"
-		ant.get(src:fileURL, dest:apiFile)
-	}
-	if(!project.file("web-app/ckeditor").exists()) {
-		ant.unzip(src:apiFile, dest:project.file("web-app"))
-		project.announce.announce("CKEDITOR installed on project $project.name", "local")
-	} else println "--- CKEDITOR already installed on project '$project.name'"
-}
-
 def runCommand(project, targetDir, commands) {
 	ProcessBuilder pb  = new ProcessBuilder(commands);
 	pb.directory(targetDir);
@@ -190,6 +172,9 @@ def runCommand(project, targetDir, commands) {
 		throw new Exception("runCommand - project: '${project.name}' - commands: ${commands} - failed")
 	}
 }
+
+task installAllBowerComponents(dependsOn: ['AccessControl:installBowerComponents', 'ControlCenter:installBowerComponents',
+           'TestsWebApp:installBowerComponents', 'Vickets:installBowerComponents']) { }
 
 // This is a task that generates the gradlew scripts, allowing users to run gradle without having gradle installed
 // on their system.

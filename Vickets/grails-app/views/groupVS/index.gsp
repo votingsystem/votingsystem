@@ -5,7 +5,7 @@
     <asset:javascript src="jquery.grid-a-licious.min.js"/>
     <asset:javascript src="clamp.min.js"/>
     <asset:javascript src="jquery.stickytableheaders.js"/>
-    <asset:javascript src="jquery.dynatable.js"/>
+    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
     <asset:stylesheet src="jquery.dynatable.css"/>
     <asset:stylesheet src="vicket_groupvs.css"/>
 </head>

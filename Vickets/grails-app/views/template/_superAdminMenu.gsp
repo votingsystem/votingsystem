@@ -27,7 +27,7 @@
             </li>
             <li>
                 <a  href="${createLink(controller: 'userVS', action: 'save')}"
-                    style="color:#f9f9f9;"><g:message code="newUserCertLbl"/></i>
+                    style="color:#f9f9f9;"><g:message code="newUserCertLbl"/> <i class="fa fa-users"></i>
                 </a>
             </li>
             <li>

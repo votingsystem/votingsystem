@@ -4,11 +4,17 @@
 /grails-app/views/restDoc
 /grails-app/views/restDocTemplates
 
+/web-app/bower_components
 
 /web-app/android
 /web-app/ckeditor
 /web-app/tools
 /web-app/polymer
+
+/web-app/designer
+/web-app/topeka
+/web-app/polymer-tutorial-master
+
 
 /build
 /logs

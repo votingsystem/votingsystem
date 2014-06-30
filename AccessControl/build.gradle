@@ -8,7 +8,7 @@ dependencies {
     compile (project(':VotingSystemLibrary'))
 }
 
-task copyApps(dependsOn: [':generateVotingSystemApps',':installEditor']) {
+task copyApps(dependsOn: [':generateVotingSystemApps']) {
 	doLast {
 		copyVotingSystemApps(project)
 	}
@@ -22,10 +22,6 @@ task runApp << { task ->
 	runCommand(project, file(".") ,["grails", "run-app"])	
 }
 
-task installEditor << { task ->
-	installCkeditor(project)
-}
-
 task installGrailsRestDocPlugin << { task ->
 	installGrailsRestDocPlugin(project)
 }
@@ -34,9 +30,14 @@ task generateRestDocs() << {task ->
 	runCommand(project, file(".") ,["grails", "generate-rest-docs"])
 }
 
-task war(dependsOn:['copyApps', 'installEditor']) << {task ->
+task war(dependsOn:['copyApps']) << {task ->
     runCommand(project, file(".") ,["grails", "war"])
 	announce.announce("'$project.name' - WebApp WAR file generated", "local")
+}
+
+task installBowerComponents(type:Exec) {
+    workingDir './web-app'
+    commandLine 'bower', 'install'
 }
 
 defaultTasks 'war'

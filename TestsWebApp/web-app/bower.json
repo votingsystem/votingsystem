@@ -1,0 +1,31 @@
+{
+  "name": "Vickets",
+  "version": "0.1.0",
+  "authors": [
+    "JJ <jgzornoza@gmail.com>"
+  ],
+  "description": "Moneda electrónica",
+  "keywords": [
+    "vickets",
+    "voting-system"
+  ],
+  "license": "Apache 2",
+  "homepage": "http://www.sistemavotacion.org",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies":{
+      "font-awesome":"font-awesome#~4.1.0",
+      "bootstrap":"bootstrap#~3.1.1",
+      "bootstrapValidator":"bootstrapValidator#~0.4.5",
+      "dynatable":"dynatable#~0.3.1",
+      "ckeditor":"ckeditor#~4.3.5",
+      "jquery-ui":"jquery-ui#~1.11.0",
+      "multilevelpushmenu":"multilevelpushmenu#~2.1.4"
+  }
+
+}
