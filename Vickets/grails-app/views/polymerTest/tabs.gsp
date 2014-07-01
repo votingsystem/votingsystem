@@ -85,6 +85,17 @@
 
         <paper-input floatinglabel label="<g:message code="onlyNumbersLbl" />" validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl" />"></paper-input>
 
+
+    <core-item icon="settings" label="Settings"></core-item>
+        <paper-input floatinglabel label="Fecha en formato DD/MM/YYYY" validate="^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$" error="No es una fecha Correcta">
+        </paper-input>
+    </div>
+
+    <core-item icon="settings" label="Settings"></core-item>
+        <paper-input floatinglabel label="Hora en formato hh:mm" validate="^((((0[13578])|([13578])|(1[02]))[\/](([1-9])|([0-2][0-9])|(3[01])))|(((0[469])|([469])|(11))[\/](([1-9])|([0-2][0-9])|(30)))|((2|02)[\/](([1-9])|([0-2][0-9]))))[\/]\d{4}$|^\d{4}$" error="No es una hora Correcta">
+        </paper-input>
+    </div>
+
     <core-item icon="settings" label="Settings"></core-item>
         <paper-input floatinglabel label="Sólo números (floatinglabel)" validate="^[0-9]*$" error="Is not a number"> </paper-input>
     </div>

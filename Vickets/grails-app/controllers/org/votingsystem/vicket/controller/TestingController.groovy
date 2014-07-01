@@ -35,11 +35,8 @@ class TestingController {
     def auditingService
     def filesService
 
-    def polymer() { }
 
-    def polymerTabs() { }
 
-    def scaffold() { }
 
     def index() { }
 

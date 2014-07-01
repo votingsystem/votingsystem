@@ -4,15 +4,10 @@
 </head>
 <body>
     <div class="text-left" style="max-width: 1000px; margin:auto;">
-        <div style="margin: 30px auto;"><votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'elections')}">
-            <g:message code="subscribeToVotingFeedsLbl"/></votingSystem:feed>
+        <div style="margin: 30px auto;">
+            <a href="${createLink(controller:'subscriptionVS', action:'elections')}">
+                <i class="fa fa-rss-square" style="margin:3px 0 0 10px; color: #f0ad4e;"></i> <g:message code="subscribeToVotingFeedsLbl"/></a>
         </div>
-        <!--<div style="margin: 30px auto;"><votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'manifests')}">
-            <g:message code="subscribeToManifestFeedsLbl"/></votingSystem:feed>
-        </div>
-        <div style="margin: 30px auto;"><votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'claims')}">
-            <g:message code="subscribeToClaimFeedsLbl"/></votingSystem:feed>
-        </div>-->
     </div>
 </body>
 </html>
