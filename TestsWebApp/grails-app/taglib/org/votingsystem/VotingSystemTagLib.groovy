@@ -6,10 +6,6 @@ class VotingSystemTagLib {
 	
 	static namespace = "votingSystem"
 	
-	def textEditor = {attrs, body ->
-		out << render(template: "/template/taglib/textEditorPC", model:[attrs: attrs])
-	}
-	
 	def datePicker = { attrs, body ->		
 		out << render(template: "/template/taglib/datePicker", model:[attrs: attrs])
 	}

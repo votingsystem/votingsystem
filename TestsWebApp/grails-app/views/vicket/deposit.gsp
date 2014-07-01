@@ -111,9 +111,6 @@ function setInvalidMsg(event) {
     }
 }
 
-var electionEditorDiv = $("#electionEditorDiv")
-
-
 $('#vicketDepositSimulationDataForm').submit(function(event){
 	event.preventDefault();
  	$(".errorMsgWrapper").fadeOut()

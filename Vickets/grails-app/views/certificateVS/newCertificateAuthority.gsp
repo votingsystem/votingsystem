@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 
@@ -29,7 +30,7 @@
         <form id="mainForm">
             <div style="position:relative; width:100%;">
                 <label><g:message code="interestInfoLbl"/></label>
-                <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
 
             <div class="form-group" style="margin:15px 0px 0px 0px;">
@@ -59,10 +60,9 @@
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
                 return
             }
-            var editorDiv = $("#editorDiv")
-            var editorContent = getEditor_editorDivData()
-            if(editorContent.length == 0) {
-                editorDiv.addClass( "formFieldError" );
+            var textEditor = document.querySelector('#textEditor')
+            if(textEditor.getData() == 0) {
+                textEditor.classList.add("formFieldError");
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
                 return
             }
@@ -73,7 +73,7 @@
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink( controller:'certificateVS', action:"addCertificateAuthority", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newCertificateAuthorityMsgSubject'/>"
-            webAppMessage.signedContent = {info:getEditor_editorDivData(),certChainPEM:$("#pemCert").val(),
+            webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:$("#pemCert").val(),
                         operation:Operation.CERT_CA_NEW}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             webAppMessage.callerCallback = 'newCACertCallback'

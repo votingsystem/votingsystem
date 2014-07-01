@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-
+    <asset:stylesheet src="polymer.css"/>
 
 
     <link rel="import" href="${resource(dir: '/bower_components/core-header-panel', file: 'core-header-panel.html')}">
@@ -14,6 +14,10 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-item', file: 'core-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-menu-button', file: 'core-menu-button.html')}">
+
+    <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
 
@@ -68,6 +72,15 @@
 
     <!-- main page content will go here -->
     <div style="margin:50px 0px 0px 0px;">
+        <div style="width:500px; margin:0px auto 0px auto;">
+            <votingsystem-texteditor id="textEditor" type="mobile"></votingsystem-texteditor>
+            <paper-button raisedButton class="colored hover" label="Settings" onClick="setData()">setData</paper-button>
+            <paper-button raisedButton class="colored hover" label="Settings" onClick="getData()">getData</paper-button>
+        </div>
+
+
+
+
         <div layout horizontal center center-justified style="height:100px;"><div>OMG, centered!</div> </div>
 
         <paper-input floatinglabel label="<g:message code="onlyNumbersLbl" />" validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl" />"></paper-input>
@@ -75,6 +88,11 @@
     <core-item icon="settings" label="Settings"></core-item>
         <paper-input floatinglabel label="Sólo números (floatinglabel)" validate="^[0-9]*$" error="Is not a number"> </paper-input>
     </div>
+
+
+
+
+
 
     <core-menu-button icon="menu">
 
@@ -90,6 +108,22 @@
 
 
 <script>
+
+    function setData() {
+        console.log("======= setData")
+        document.querySelector('#textEditor').setData("================$gfdgdfg")
+    }
+
+    function getData() {
+        console.log("======= getData: " + document.querySelector('#textEditor').getData())
+
+    }
+
+
+    document.addEventListener('polymer-ready', function() {
+        document.querySelector('#textEditor').setData('Blim bliim')
+    });
+
     var tabs = document.querySelector('paper-tabs');
     tabs.addEventListener('core-select', function() {
         console.log("Selected: " + tabs.selected);

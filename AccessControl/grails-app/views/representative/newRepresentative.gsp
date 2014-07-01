@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 <div id="contentDiv" style="margin: 0px auto 0px auto; max-width: 1200px;">
@@ -24,7 +25,7 @@
         </div>
         <form id="mainForm">
             <div style="position:relative; width:100%;">
-                <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
 
             <div class="" style="margin:10px 10px 10px 10px;">
@@ -51,23 +52,22 @@
 <asset:script>
 
     var selectedImagePath = null
+    var textEditor = document.querySelector('#textEditor')
 
     $(function() {
 
         $('#mainForm').submit(function(event){
             event.preventDefault();
-            var editorDiv = $("#editorDiv")
-            var editorContent = getEditor_editorDivData()
-            if(editorContent.length == 0) {
-                editorDiv.addClass( "formFieldError" );
+
+            if(textEditor.getData().length == 0) {
+                textEditor.classList.add("formFieldError");
                 showResultDialog('<g:message code="dataFormERRORLbl"/>',
                     '<g:message code="emptyDocumentERRORMsg"/>')
                 return
-            } else editorDiv.removeClass( "formFieldError" );
+            } else textEditor.classList.removeClass( "formFieldError" );
             if(selectedImagePath == null) {
                 $("#selectImageButton").addClass("btn-danger");
-                showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                    '<g:message code="missingImageERRORMsg"/>')
+                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="missingImageERRORMsg"/>')
                 return
             }
             $("#selectImageButton").removeClass("btn-danger");
@@ -75,7 +75,7 @@
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.filePath = selectedImagePath
-            webAppMessage.signedContent = {representativeInfo:getEditor_editorDivData(), operation:Operation.REPRESENTATIVE_DATA}
+            webAppMessage.signedContent = {representativeInfo:textEditor.getData(), operation:Operation.REPRESENTATIVE_DATA}
             webAppMessage.serviceURL = "${createLink( controller:'representative', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"

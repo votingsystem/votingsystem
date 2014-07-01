@@ -3,6 +3,7 @@
 <head>
     <title><g:message code="manifestProtocolSimulationCaption"/></title>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 <div class="pageContenDiv">
@@ -76,7 +77,7 @@
                            onchange="this.setCustomValidity('')"/>
                 </div>
 
-                <votingSystem:textEditor id="manifestEditorDiv" style="height:300px;"/>
+                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
 
                 <div id="backupDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
                     <div class="checkBox" style="display:table-cell;vertical-align: middle;">
@@ -112,6 +113,7 @@
 </body>
 </html>
 <asset:script>
+    var textEditor = document.querySelector('#textEditor')
 
         $(function() {
         $("#requestBackup").click(function () {
@@ -143,9 +145,7 @@ $("#testButton").click(function () {
     showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
 });
 
-
-var manifestEditorDiv = $("#manifestEditorDiv")
-allFields = $( [] ).add(manifestEditorDiv);
+allFields = $( [] );
 
 var callerCallback
 
@@ -160,15 +160,12 @@ $('#manifestProtocolSimulationDataForm').submit(function(event){
 
  	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
-    getEditor_manifestEditorDivData()
 	if(!isValidForm()) {
 		return false
 	}
 
 	var dateBeginStr = new Date().format()
-	var event = {subject:$('#subject').val(),
-	        content:getEditor_manifestEditorDivData(),
-	        dateBegin:dateBeginStr,
+	var event = {subject:$('#subject').val(), content:textEditor.getData(), dateBegin:dateBeginStr,
 	        dateFinish:document.getElementById("dateFinish").getValidatedDate().format()}
 
 	 var simulationData = {service:"manifestSimulationService", status:"INIT_SIMULATION",
@@ -187,6 +184,7 @@ $('#manifestProtocolSimulationDataForm').submit(function(event){
 });
 
 function isValidForm() {
+    textEditor.classList.remove("formFieldError");
 	if(!document.getElementById('accessControlURL').validity.valid) {
 		$("#accessControlURL").addClass("formFieldError");
 		showResultDialog('<g:message code="dataFormERRORLbl"/>',
@@ -217,9 +215,9 @@ function isValidForm() {
 		return false
 	}
 
-	if('' == getEditor_manifestEditorDivData()) {
+    if(textEditor.getData().length == 0) {
+        textEditor.classList.add("formFieldError");
 		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>')
-		manifestEditorDiv.addClass("formFieldError");
 		return false
 	}
 	return true

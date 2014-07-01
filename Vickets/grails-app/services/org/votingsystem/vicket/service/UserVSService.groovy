@@ -83,7 +83,7 @@ class UserVSService {
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         X509Certificate x509Certificate = certChain.iterator().next();
 
-        //{info:getEditor_editorDivData(),certChainPEM:$("#pemCert").val(), operation:Operation.VICKET_SOURCE_NEW}
+        //{info:textEditor.getData(),certChainPEM:$("#pemCert").val(), operation:Operation.VICKET_SOURCE_NEW}
 
         VicketSource vicketSource = UserVS.getUserVS(x509Certificate, new VicketSource())
         String validatedNIF = org.votingsystem.util.NifUtils.validate(vicketSource.getNif())

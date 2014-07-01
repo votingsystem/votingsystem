@@ -3,6 +3,7 @@
 <head>
     <title><g:message code="electionProtocolSimulationCaption"/></title>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body style="overflow-y: scroll;">
 <div class="pageContenDiv">
@@ -161,7 +162,7 @@
                                onchange="this.setCustomValidity('')"/>
                     </div>
 
-                    <votingSystem:textEditor id="electionEditorDiv" style="height:250px;"/>
+                    <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
 
                     <div id="backupDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
                         <div class="checkBox" style="display:table-cell;vertical-align: middle;">
@@ -212,6 +213,7 @@
 </body>
 </html>
 <asset:script>
+var textEditor = document.querySelector('#textEditor')
 
 $(function() {$('#backupDiv').hide()})
 
@@ -299,25 +301,22 @@ $("#requestBackup").click(function () {
 	}
 })
 
-var electionEditorDiv = $("#electionEditorDiv")
 dateFinish    = $("#dateFinish")
 dateInit    = $("#dateInit")
-electionEditorDivButton = $("#addElectionFieldButton");
-allFields = $( [] ).add(electionEditorDiv).add(electionEditorDivButton);
+allFields = $( [] ).add(electionEditorDivButton);
 
 
 $('#electionProtocolSimulationDataForm').submit(function(event){
 	event.preventDefault();
  	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
-    getEditor_electionEditorDivData()
 	if(!isValidForm()) {
 		return false
 	}
 
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
-	        content:getEditor_electionEditorDivData(),
+	        content:textEditor.getData(),
 	        dateBegin:document.getElementById("dateInit").getValidatedDate().format(),
 	        dateFinish:document.getElementById("dateFinish").getValidatedDate().format()}
 
@@ -372,6 +371,7 @@ function isValidForm() {
 	//numRepresentativesMsg"/></label>numRepresentativesWithVote numUsersWithRepresentativeMsg numUsersWithRepresentativeWithVote
     var dateInit = document.getElementById("dateInit").getValidatedDate()
     var dateFinish = document.getElementById("dateFinish").getValidatedDate()
+    textEditor.classList.remove("formFieldError");
 
 	if(!document.getElementById('accessControlURL').validity.valid) {
 		$("#accessControlURL").addClass( "formFieldError" );
@@ -407,9 +407,9 @@ function isValidForm() {
 	}
 
 
-	if('' == getEditor_electionEditorDivData()) {
+    if(textEditor.getData() == 0) {
+        textEditor.classList.add("formFieldError");
 		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>')
-		electionEditorDiv.addClass("formFieldError");
 		return false
 	}
 
@@ -452,10 +452,7 @@ $("#testButton").click(function () {
     showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
 });
 
-
-
 $("#addElectionFieldButton").click(function () {
-    getEditor_electionEditorDivData()
     showAddVoteOptionDialog(addElectionField)
 });
 

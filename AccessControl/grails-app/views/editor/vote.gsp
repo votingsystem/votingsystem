@@ -3,6 +3,7 @@
 <html>
 <head>
 	<meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 
@@ -36,7 +37,7 @@
 	</div>
 
     <div style="position:relative; width:100%;">
-        <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+        <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
     </div>
 
     <div class="container-fluid">
@@ -98,6 +99,7 @@
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
+    var textEditor = document.querySelector('#textEditor')
     var numVoteOptions = 0
     var controlCenters = {};
 
@@ -132,7 +134,7 @@
         if(pollOptions == null) return false;
         var eventVS = new EventVS();
         eventVS.subject = subject.val();
-        eventVS.content = getEditor_editorDivData();
+        eventVS.content = textEditor.getData();
         eventVS.dateBegin = dateBegin.format();
         eventVS.dateFinish = dateFinish.format();
         eventVS.controlCenter = controlCenters[$('#controlCenterSelect').val()]
@@ -154,9 +156,8 @@
         dateRangeDiv = $("#dateRangeDiv"),
         dateBegin = document.getElementById("dateBegin").getValidatedDate(),
         dateFinish = document.getElementById("dateFinish").getValidatedDate(),
-        editorDiv = $("#editorDiv"),
         addOptionButton = $("#addOptionButton"),
-        allFields = $( [] ).add( subject ).add(editorDiv);
+        allFields = $( [] ).add( subject );
         allFields.removeClass("formFieldError");
         allFields.removeClass("has-error");
 
@@ -188,8 +189,8 @@
             return null
         }
 
-        if(getEditor_editorDivData() == 0) {
-            editorDiv.addClass( "formFieldError" );
+        if(textEditor.getData() == 0) {
+            textEditor.classList.add("formFieldError");
             showResultDialog('<g:message code="dataFormERRORLbl"/>','<g:message code="emptyDocumentERRORMsg"/>')
             return null;
         }

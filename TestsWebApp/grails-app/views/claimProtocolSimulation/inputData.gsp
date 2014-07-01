@@ -3,6 +3,7 @@
 <head>
     <title><g:message code="claimProtocolSimulationCaption"/></title>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body style="overflow-y: scroll;">
 <div class="pageContenDiv" style="max-width: 1300px;">
@@ -73,7 +74,7 @@
                            onchange="this.setCustomValidity('')"/>
                 </div>
 
-                <votingSystem:textEditor id="claimEditorDiv" style="height:300px;"/>
+                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
 
                 <div id="backupDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
                     <div class="checkBox" style="display:table-cell;vertical-align: middle;">
@@ -122,6 +123,7 @@
 </body>
 </html> 
 <asset:script>
+    var textEditor = document.querySelector('#textEditor')
 
 $("#requestBackup").click(function () {
 	if($("#requestBackup").is(':checked')) {
@@ -131,15 +133,14 @@ $("#requestBackup").click(function () {
 	}
 })
 
-var claimEditorDiv = $("#claimEditorDiv")
-allFields = $( [] ).add(claimEditorDiv);
+allFields = $( [] );
 
 function submitForm(form) {
     if(!isValidForm()) return false
 
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
-	        content:getEditor_claimEditorDivData(),
+	        content:textEditor.getData(),
 	        dateBegin:dateBeginStr,
 	        dateFinish:document.getElementById("dateFinish").getValidatedDate().format()}
 
@@ -170,6 +171,7 @@ function submitForm(form) {
 
 
 function isValidForm() {
+    textEditor.classList.remove("formFieldError");
  	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
 
@@ -200,9 +202,9 @@ function isValidForm() {
 		return false
 	}
 
-	if('' == getEditor_claimEditorDivData()) {
-		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>') 
-		claimEditorDiv.addClass("formFieldError");
+    if(textEditor.getData() == 0) {
+		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>')
+        textEditor.classList.add("formFieldError");
 		return false
 	}
 	return true
@@ -233,7 +235,6 @@ $("#testButton").click(function () {
 
 
 $("#addClaimFieldButton").click(function () {
-    getEditor_claimEditorDivData()
     showAddClaimFieldDialog(addClaimField)
 });
 

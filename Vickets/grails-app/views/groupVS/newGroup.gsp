@@ -1,6 +1,8 @@
 <html>
 <head>
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 
@@ -50,7 +52,7 @@
             </div>
 
             <div style="position:relative; width:100%;">
-                <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
@@ -63,6 +65,8 @@
 
         </form>
     </div>
+
+
 </div>
 <g:include view="/include/dialog/addTagDialog.gsp"/>
 <g:include view="/include/dialog/resultDialog.gsp"/>
@@ -71,6 +75,8 @@
 <asset:script>
 
     var selectedTagsMap = {}
+    var textEditor = document.querySelector('#textEditor')
+
 
     function refreshTagsDiv(selectedTags) {
         selectedTagsMap = selectedTags
@@ -90,14 +96,13 @@
     $(function() {
         $('#mainForm').submit(function(event){
             event.preventDefault();
+            textEditor.classList.remove("formFieldError");
             if(!document.getElementById('groupSubject').validity.valid) {
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
                 return
             }
-            var editorDiv = $("#editorDiv")
-            var editorContent = getEditor_editorDivData()
-            if(editorContent.length == 0) {
-                editorDiv.addClass( "formFieldError" );
+            if(textEditor.getData().length == 0) {
+                textEditor.classList.add("formFieldError");
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
                 return
             }
@@ -108,7 +113,7 @@
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
-            webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(),groupvsName:$("#groupSubject").val(),
+            webAppMessage.signedContent = {groupvsInfo:textEditor.getData(),groupvsName:$("#groupSubject").val(),
                         tags:selectedTagsMap, operation:Operation.VICKET_GROUP_NEW}
             if(Object.keys(selectedTagsMap).length > 0) {
                 var tagList = []

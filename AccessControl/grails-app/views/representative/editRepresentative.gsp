@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 <div style="margin: 0px auto 0px auto; max-width: 1200px;">
@@ -27,7 +28,7 @@
 
             <form id="mainForm">
                 <div style="position:relative; width:100%;">
-                    <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+                    <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
                 </div>
 
                 <div class="" style="margin:10px 10px 10px 10px;">
@@ -59,21 +60,20 @@
 </html>
 <asset:script>
     var selectedImagePath = null
+    var textEditor = document.querySelector('#textEditor')
 
     $(function() {
 
         $("#editRepresentativeDialog").modal("show");
 
-    	var editorDiv = $("#editorDiv")
         $('#mainForm').submit(function(event){
             event.preventDefault();
-            var editorContent = getEditor_editorDivData()
-            if(editorContent.length == 0) {
-                editorDiv.addClass( "formFieldError" );
+            if(textEditor.getData().length == 0) {
+                textEditor.classList.add("formFieldError");
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
 
                 return false;
-            } else editorDiv.removeClass( "formFieldError" );
+            } else textEditor.classList.remove( "formFieldError" );
             if(selectedImagePath == null) {
                 $("#selectImageButton").addClass("btn-danger");
                 showResultDialog('<g:message code="dataFormERRORLbl"/>',
@@ -120,7 +120,7 @@
         console.log("showRepresentativeData: " + representativeDataJSON)
         var editRepresentativeHeader = editRepresentativeHeaderTemplate.format(representativeDataJSON.fullName)
         $(".pageHeader").append(editRepresentativeHeader)
-        setDataEditor_editorDiv(representativeDataJSON.info)
+        textEditor.setData(representativeDataJSON.info)
         $("#contentDiv").css("visibility", "visible" );
     }
 

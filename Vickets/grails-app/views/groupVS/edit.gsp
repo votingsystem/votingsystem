@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 
@@ -27,7 +28,7 @@
 
         <form id="mainForm">
             <div style="position:relative; width:100%;">
-                <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
@@ -48,16 +49,15 @@
 </body>
 </html>
 <asset:script>
+    var textEditor = document.querySelector('#textEditor')
 
     $(function() {
         showGroupData()
 
         $('#mainForm').submit(function(event){
             event.preventDefault();
-            var editorDiv = $("#editorDiv")
-            var editorContent = getEditor_editorDivData()
-            if(editorContent.length == 0) {
-                editorDiv.addClass( "formFieldError" );
+            if(textEditor.getData() == 0) {
+                textEditor.classList.add("formFieldError");
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
                 return
             }
@@ -66,7 +66,7 @@
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/${groupvsMap.id}"
             webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
-            webAppMessage.signedContent = {groupvsInfo:getEditor_editorDivData(), groupvsName:'${groupvsMap.name}',
+            webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), groupvsName:'${groupvsMap.name}',
                 id:'${groupvsMap.id}', operation:Operation.VICKET_GROUP_NEW}
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             webAppMessage.callerCallback = getFnName(editGroupVSCallback)
@@ -98,6 +98,6 @@
         console.log("showGroupData")
         var editRepresentativeHeader = editGroupHeaderTemplate.format('${groupvsMap.name}')
         $(".pageHeader").append(editRepresentativeHeader)
-        setDataEditor_editorDiv('${raw(groupvsMap?.description)}')
+        textEditor.setData('${raw(groupvsMap?.description)}')
     }
 </asset:script>

@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta name="layout" content="main" />
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 
@@ -28,7 +29,7 @@
     </div>
 
     <div style="position:relative; width:100%;">
-        <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+        <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
     </div>
 	
 	<div style="margin:0px 0px 30px 0px;">
@@ -74,6 +75,7 @@
 </html>
 <asset:script>
     var numClaimFields = 0
+    var textEditor = document.querySelector('#textEditor')
 
     $(function() {
         if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
@@ -83,7 +85,7 @@
         if(!validateForm()) return false;
         var eventVS = new EventVS();
         eventVS.subject = $("#subject").val();
-        eventVS.content = getEditor_editorDivData();
+        eventVS.content = textEditor.getData();
         eventVS.dateFinish = document.getElementById("dateFinish").getValidatedDate().format();
         var claimFields = new Array();
         $("#fieldsBox").children().each(function(){
@@ -131,8 +133,7 @@
     function validateForm() {
         var subject = $("#subject"),
         dateFinish = document.getElementById("dateFinish").getValidatedDate(),
-        editorDiv = $("#editorDiv"),
-        allFields = $([]).add(subject).add(dateFinish).add(editorDiv);
+        allFields = $([]).add(subject).add(dateFinish)
         allFields.removeClass( "formFieldError" );
 
         if(!document.getElementById('subject').validity.valid) {
@@ -151,8 +152,8 @@
             return false
         }
 
-        if(getEditor_editorDivData().length == 0) {
-            editorDiv.addClass( "formFieldError" );
+        if(textEditor.getData() == 0) {
+            textEditor.classList.add("formFieldError");
             showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
             return false;
         }
