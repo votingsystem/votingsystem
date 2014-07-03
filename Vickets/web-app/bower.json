@@ -21,8 +21,7 @@
   "dependencies":{
       "chai": "~1.9.1",
       "mocha": "~1.19.0",
-
-      "votingsystem-texteditor":"votingsystem-texteditor#~0.2.0",
+      "votingsystem-texteditor":"votingsystem-texteditor#~0.2.2",
 
       "font-awesome":"font-awesome#~4.1.0",
       "bootstrap":"bootstrap#~3.1.1",
@@ -49,6 +48,7 @@
       "core-localstorage":"Polymer/core-localstorage",
       "core-list":"Polymer/core-list",
       "core-menu-button":"Polymer/core-menu-button",
+      "observe-js":"Polymer/observe-js",
       "core-pages":"Polymer/core-pages",
       "core-range":"Polymer/core-range",
       "core-scaffold":"Polymer/core-scaffold",

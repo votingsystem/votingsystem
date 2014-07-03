@@ -1,0 +1,200 @@
+<!--
+
+
+Example:
+
+@group Paper Elements
+@element votingsystem-advanced-search-dialog
+@status alpha
+@homepage http://votingsystem.github.io/votingsystem-advanced-search-dialog
+
+
+-->
+<link href="../polymer/polymer.html" rel="import">
+<link href="../core-overlay/core-overlay.html" rel="import">
+<link href="../paper-shadow/paper-shadow.html" rel="import">
+<link href="../paper-dialog/paper-dialog.html" rel="import">
+<link href="../paper-fab/paper-fab.html" rel="import">
+<link href="../paper-input/paper-input.html" rel="import">
+<link href="../core-icons/iconsets/icons.html" rel="import">
+
+
+<link rel="import" href="./locales/messages.html">
+
+
+<!-- a simple dialog element made with core-overlay -->
+<polymer-element name="x-dialog" attributes="opened autoCloseDisabled">
+    <template>
+        <style>
+            :host {
+                box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                overflow: hidden;
+                background: white;
+                outline: 1px solid rgba(0,0,0,0.2);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            }
+        </style>
+        <core-overlay id="overlay" layered backdrop opened="{{opened}}" autoCloseDisabled="{{autoCloseDisabled}}"  transition="core-transition-center"></core-overlay>
+        <content></content>
+    </template>
+    <script>
+
+        Polymer('x-dialog', {
+
+            ready: function() {
+                this.$.overlay.target = this;
+            },
+
+            toggle: function() {
+                this.$.overlay.toggle();
+            }
+
+        });
+
+    </script>
+</polymer-element>
+
+
+
+<polymer-element name="votingsystem-advanced-search-dialog" attributes="opened transition">
+    <template>
+        <x-dialog id="searchDialog"  class="dialog" on-core-overlay-open="{{resetForm}}">
+            <!-- place all overlay styles inside the overlay target -->
+            <style no-shim>
+                .dialog {
+                    box-sizing: border-box;
+                    -moz-box-sizing: border-box;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 13px;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    overflow: hidden;
+                    background: white;
+                    outline: 1px solid rgba(0,0,0,0.2);
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+
+                    width: auto;
+                    height: auto;
+                    padding: 10px 15px 15px 15px;;
+                    margin: auto, auto;
+                }
+            </style>
+            <div layout horizontal center center-justified style="height: 60px;">
+                <div style="font-size: 1.5em;color: #ba0011; margin:0px 30px 0px 0px;">{{messages.caption}}</div>
+                <paper-fab id="check" icon="check" hidden?="{{!isValidForm}}" on-tap="{{submitForm}}" class="mini"></paper-fab>
+            </div>
+
+
+            <div layout horizontal center center-justified style="">
+                <div style="font-weight: bold;">{{messages.fromDate}}: </div>
+                <div>
+                    <input id='fromDate' type="date" value="{{fromDateValue}}" on-change="{{validateForm}}" style="width: auto;">
+                </div>
+                <div>
+                    <input id='fromTime' type="time" value="{{fromTimeValue}}"  on-change="{{validateForm}}" style="width: auto; margin:0px 0px 0px 10px;">
+                </div>
+            </div>
+
+            <div layout horizontal center center-justified style="margin:10px 0px 0px 0px;">
+                <label style="font-weight: bold;">{{messages.toDate}}: </label>
+                <div>
+                    <input id='toDate' type="date" value="{{toDateValue}}"  on-change="{{validateForm}}"  style="width: auto;">
+                </div>
+                <div>
+                    <input id='toTime' type="time" value="{{toTimeValue}}" on-change="{{validateForm}}" style="width: auto; margin:0px 0px 0px 10px;">
+                </div>
+            </div>
+            <div layout horizontal center center-justified style="">
+                <paper-input id="searchInputMessage" value="{{searchInputMessageValue}}" label="{{messages.searchInputMessage}}" on-input="{{validateForm}}"></paper-input>
+            </div>
+
+        </x-dialog>
+    </template>
+
+    <script>
+
+        Polymer('votingsystem-advanced-search-dialog', {
+            isValidForm:false,
+            searchInputMessageValue:'init',
+
+
+            ready: function() {
+                if(locales[navigator.language]) {
+                    console.log(this.tagName + " messages for locale " + navigator.language)
+                    this.messages = locales[navigator.language]
+                } else this.messages = locales['es']
+
+
+
+            },
+
+            resetForm:function() {
+                this.searchInputMessageValue = ""
+                this.fromDateValue = ""
+            },
+
+            validateForm: function() {
+                if(this.$ == null) return
+                if(this.$.searchInputMessage.inputValue.length > 0 && !this.$.searchInputMessage.invalid) {
+                    this.isValidForm = true;
+                } else this.isValidForm = false;
+                console.log('validateForm - searchInputMessage invalid: ' + this.$.searchInputMessage.invalid + " - isValidForm: " +
+                        this.isValidForm + " - inputValue.length: " + this.$.searchInputMessage.inputValue.length +
+                        " - value.length: " + this.$.searchInputMessage.value.length)
+            },
+
+
+            /**
+             * The `submit-form` event with the form data
+             *
+             * @event submit-form
+             */
+            submitForm: function() {
+                console.log('submitForm')
+                this.fire('submit-form', {name: "Probando"});
+            },
+
+
+            /**
+             * Set opened to true to show the dialog and to false to hide it.
+             * A dialog may be made intially opened by setting its opened attribute.
+
+             * @attribute opened
+             * @type boolean
+             * @default false
+             */
+            opened: false,
+
+            /**
+             * @attribute heading
+             * @type string
+             * @default ''
+             */
+            heading: '',
+
+            /**
+             * Set this property to the id of a <core-transition> element to specify
+             * the transition to use when opening/closing this dialog.
+             *
+             * @attribute transition
+             * @type string
+             * @default ''
+             */
+            transition: '',
+
+            /**
+             * Toggle the dialog's opened state.
+             * @method toggle
+             */
+            toggle: function() {
+                this.$.searchDialog.toggle();
+            }
+
+        });
+
+    </script>
+
+</polymer-element>
