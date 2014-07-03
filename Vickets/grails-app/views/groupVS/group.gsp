@@ -128,7 +128,7 @@
         <div class="tab-content" style="min-height: 600px;">
             <div class="tab-pane fade in active" id="balanceList" style="top:0px;">
                 <g:include view="/include/balance-list.gsp"/>
-                <balance-list url="${createLink(controller:'userVSAccount', action:'balance', absolute:true)}?id=${groupvsMap.id}"></balance-list>
+                <balance-list url="${createLink(controller:'userVSAccount', action:'balance')}?id=${groupvsMap.id}"></balance-list>
             </div>
             <div class="tab-pane fade" id="transactionsTo">
                 <div id="transactionTo_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">

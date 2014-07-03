@@ -4,6 +4,7 @@
 /grails-app/views/restDoc
 /grails-app/views/restDocTemplates
 
+/web-app/bower_components
 
 /web-app/android
 /web-app/ckeditor
