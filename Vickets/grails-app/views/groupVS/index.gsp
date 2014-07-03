@@ -3,7 +3,6 @@
 <head>
     <meta name="layout" content="main" />
     <asset:javascript src="jquery.grid-a-licious.min.js"/>
-    <asset:javascript src="clamp.min.js"/>
     <asset:javascript src="jquery.stickytableheaders.js"/>
     <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
     <asset:stylesheet src="jquery.dynatable.css"/>

@@ -23,13 +23,13 @@
     <h3><div class="pageHeader text-center">
         <g:message code="groupvsUserListPageHeader"/> '${subscriptionMap?.groupName}'</div>
     </h3>
-    <g:include view="/include/userList.gsp"/>
+    <g:include view="/include/user-list.gsp"/>
+    <user-list url="${createLink(controller: 'groupVS', action: 'listUsers')}/${subscriptionMap?.id}"
+               userURLPrefix="user" menuType="${params.menu}"></user-list>
 </div>
 </body>
 </html>
 <asset:script>
-    var userListURL = "${createLink(controller: 'groupVS', action: 'listUsers')}/${subscriptionMap?.id}"
-        var userBaseURL = "user"
 
     $(function() {
         $("#navBarSearchInput").css( "visibility", "visible" );

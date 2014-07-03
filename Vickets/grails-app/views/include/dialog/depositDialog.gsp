@@ -63,20 +63,39 @@
                                 <g:message code="userSearchLbl" /></button>
                         </div>
 
-                        <div id="deposit_dialog_uservs_tableDiv" style="margin: 20px auto 0px auto; max-width: 800px; overflow:auto; visibility: hidden;">
-                            <table class="table white_headers_table" id="deposit_dialog_uservs_table" style="">
-                                <thead>
-                                <tr style="color: #ff0000;">
-                                    <th data-dynatable-column="uservsNIF" style="width: 60px;"><g:message code="nifLbl"/></th>
-                                    <th data-dynatable-column="uservsName" style=""><g:message code="nameLbl"/></th>
-                                    <!--<th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>-->
-                                </tr>
-                                </thead>
-                            </table>
-                        </div>
+                        <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+                        <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+
+                        <polymer-element name="dialog-user-list" attributes="url">
+                            <template>
+                                <core-ajax id="ajax" auto url="{{url}}" response="{{userListJSON}}" handleAs="json" method="get"
+                                           contentType="json"></core-ajax>
+                                <div layout vertical center style="max-width: 800px; overflow:auto;">
+                                    <table class="table white_headers_table" id="uservs_table" style="">
+                                        <thead>
+                                            <tr style="color: #ff0000;">
+                                                <th data-dynatable-column="uservsNIF" style="width: 60px;"><g:message code="nifLbl"/></th>
+                                                <th data-dynatable-column="uservsName" style=""><g:message code="nameLbl"/></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        <template repeat="{{userJSON in userListJSON.userVSList}}">
+                                            <tr>
+                                                <td class="text-center">{{userJSON.nif}}</td>
+                                                <td class="text-center">{{userJSON.name}}</td>
+                                            </tr>
+                                        </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <script>
+                                Polymer('dialog-user-list', {
+                                    ready: function() { this.url = this.url || '';} });
+                            </script>
+                        </polymer-element>
+                        <dialog-user-list id="dialogUserList" url=""></dialog-user-list>
                     </div>
-
-
                 </div>
                 <div class="modal-footer">
                     <button id="depositDialogSubmitButton" type="submit" class="btn btn-accept-vs">
@@ -192,9 +211,7 @@
         var targetURL
         if(groupId != null) targetURL = "${createLink(controller: 'userVS', action: 'searchGroup')}?searchText=" + textToSearch + "&groupId=" + groupId
         else targetURL = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
-        dynatable.settings.dataset.ajaxUrl = targetURL
-        dynatable.paginationPage.set(1);
-        dynatable.process();
+        document.querySelector('#dialogUserList').setAttribute("url", targetURL)
     }
 
     $(function() {
@@ -202,36 +219,6 @@
             processUserSearch();
             e.preventDefault();
          } });
-
-
-        $('#deposit_dialog_uservs_table').dynatable({
-            features: {
-                paginate: false,
-                search: false,
-                recordCount: false,
-                perPageSelect: false
-            },
-            inputs: dynatableInputs,
-            params: dynatableParams,
-            dataset: {
-                ajax: true,
-                ajaxOnLoad: false,
-                perPageDefault: 50,
-                records: []
-            },
-            writers: {
-                _rowWriter: depositDialogUserRowWriter
-            }
-        });
-        dynatable = $('#deposit_dialog_uservs_table').data('dynatable');
-        dynatable.settings.params.records = 'userVSList'
-        dynatable.settings.params.queryRecordCount = 'queryRecordCount'
-        dynatable.settings.params.totalRecordCount = 'numTotalUsers'
-
-
-        $('#deposit_dialog_uservs_table').bind('dynatable:afterUpdate',  function() {
-            document.getElementById('deposit_dialog_uservs_table').style.visibility = 'visible'
-        })
 
         $('#depositDialogForm').bootstrapValidator({
                 excluded: [':disabled'],

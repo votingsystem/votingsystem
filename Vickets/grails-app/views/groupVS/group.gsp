@@ -8,13 +8,9 @@
 <html>
 <head>
     <link href="${resource(dir: 'css', file:'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
-    <asset:javascript src="jquery.stickytableheaders.js"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:stylesheet src="jquery.dynatable.css"/>
-
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrapValidator/dist/js', file: 'bootstrapValidator.min.js')}"></script>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrapValidator/dist/css', file: 'bootstrapValidator.min.css')}" type="text/css"/>
-
     <meta name="layout" content="main" />
 </head>
 <body>
@@ -131,9 +127,8 @@
         <!-- Tab panes -->
         <div class="tab-content" style="min-height: 600px;">
             <div class="tab-pane fade in active" id="balanceList" style="top:0px;">
-                <script>
-                    var balanceListURL = "${createLink(controller:'userVSAccount', action:'balance', absolute:true)}?id=${groupvsMap.id}" </script>
-                <g:include view="/include/balanceList.gsp"/>
+                <g:include view="/include/balance-list.gsp"/>
+                <balance-list url="${createLink(controller:'userVSAccount', action:'balance', absolute:true)}?id=${groupvsMap.id}"></balance-list>
             </div>
             <div class="tab-pane fade" id="transactionsTo">
                 <div id="transactionTo_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
@@ -192,7 +187,10 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="userList" style="top:0px;">
-                <g:include view="/include/userList.gsp"/>
+                <g:include view="/include/user-list.gsp"/>
+                <user-list url="${createLink(controller: 'groupVS', action: 'listUsers')}/${groupvsMap?.id}"
+                           userURLPrefix="${createLink(controller: 'groupVS')}/${groupvsMap?.id}/user"
+                           menuType="${params.menu}"></user-list>
             </div>
         </div>
 
@@ -211,8 +209,6 @@
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
-    var userListURL = "${createLink(controller: 'groupVS', action: 'listUsers')}/${groupvsMap?.id}"
-    var userBaseURL = "${createLink(controller: 'groupVS')}/${groupvsMap?.id}/user"
 
     var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
     var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
@@ -274,6 +270,5 @@
             showResultDialog(caption, msg)
         }
     }
-
 </g:applyCodec>
 </asset:script>
