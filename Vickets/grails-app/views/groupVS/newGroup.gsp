@@ -68,7 +68,7 @@
 
 
 </div>
-<g:include view="/include/dialog/addTagDialog.gsp"/>
+
 <g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>

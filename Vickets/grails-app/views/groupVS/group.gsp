@@ -8,7 +8,6 @@
 <html>
 <head>
     <link href="${resource(dir: 'css', file:'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrapValidator/dist/js', file: 'bootstrapValidator.min.js')}"></script>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrapValidator/dist/css', file: 'bootstrapValidator.min.css')}" type="text/css"/>
     <meta name="layout" content="main" />

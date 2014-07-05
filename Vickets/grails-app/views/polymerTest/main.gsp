@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-money.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="appTitle"/></title>
@@ -9,38 +10,24 @@
     <asset:stylesheet src="vickets.css"/>
 
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-icon-button', file: 'paper-icon-button.html')}">
-
-    <g:javascript library="jquery" plugin="jquery"/>
-    <asset:stylesheet src="jquery-ui-1.10.4.custom.min.css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/jquery-ui', file: 'jquery-ui.min.js')}"></script>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
-
-    <asset:javascript src="utilsVS.js"/>
-    <g:include view="/include/utils_js.gsp"/>
-    <g:layoutHead/>
+    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <style shim-shadowdom>
         paper-item {
             padding: 10px;
             border-bottom: 1px solid #f9f9f9;
         }
     </style>
-    <g:layoutHead/>
 </head>
 <body style="margin:0px auto 0px auto;">
 <polymer-element name="nav-bar">
 
     <template>
-        <votingsystem-navbar id="_navbar" style="display: none;">
+        <votingsystem-navbar>
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
                 <core-toolbar id="core_toolbar" class="dark-theme" style="background-color: #ba0011;">
 
@@ -106,17 +93,47 @@
                 </core-menu>
             </core-header-panel>
             <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
-            <content></content>
+            <div>Content goes here...
+
+                <div class="card">
+
+                <div id="">
+                    <div class="content">
+
+                        <div layout horizontal style="z-index: 20;">
+                            <div>
+                                <label center center-justified>{{messages.fromDate}}: </label>
+                                <paper-input id="dateFrom" value={{dateFromValue}} on-input="{{validateForm}}" floatinglabel label="Fecha (dd/mm/aaaa)"
+                                             validate="^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$"
+                                             error="No es una fecha válida!" style="width:170px; margin:0px 10px 0px 10px;">
+                                </paper-input>
+                            </div>
+                            <div>
+                                <paper-input id="hourFrom" value={{dateFromHour}} on-input="{{validateForm}}" floatinglabel label="Hora (HH:mm)"
+                                             validate="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                             error="No es una hora válida!" style="width:120px;margin:0px 0px 0px 0px;">
+                                </paper-input>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div layout horizontal center center-justified style="margin:10px 0px 0px 0px;">
+                        <paper-input id="searchInputMessage" value="{{searchInputMessageValue}}" label="{{messages.searchInputMessage}}" on-input="{{validateForm}}"></paper-input>
+                    </div>
+                </div>
+                    <paper-ripple class="recenteringTouch" fit></paper-ripple>
+                </div>
+
+            </div>
         </votingsystem-navbar>
     </template>
     <script>
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
 
-            ready: function() {
-                this.$._navbar.style.display = 'block';
-                this.fire('nav-bar-ready');
-            },
+            ready: function() { },
 
             drawerItemSelected: function() {
                 if('changeToAdmin' == this.$.coreSelector.selectedItem.id) {
@@ -130,19 +147,11 @@
     </script>
 </polymer-element>
 
-<div id="navBarDiv" style="display: none;">
-    <nav-bar id="navBar" style="" class="">
-        <g:layoutBody/>
-    </nav-bar>
-</div>
+<nav-bar id="navBar" style="display:none;" class=""></nav-bar>
 
-<g:include view="/include/dialog/windowAlertModal.gsp"/>
 </body>
 </html>
 <asset:script>
-    var navBarDiv = document.querySelector('#navBarDiv')
-    navBarDiv.addEventListener('nav-bar-ready', function(e) {
-        navBarDiv.style.display = 'block';
-    });
+    document.querySelector('#navBar').style.display = 'block';
 </asset:script>
 <asset:deferredScripts/>

@@ -24,6 +24,33 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
+
+    <template is="auto-binding">
+        <core-ajax id="ajax" auto url="{{url}}" response="{{userListJSON}}" handleAs="json" method="get"
+                   contentType="json"></core-ajax>
+        <div layout vertical center style="max-width: 800px; overflow:auto;">
+            <table class="table white_headers_table" id="uservs_table" style="">
+                <thead>
+                <tr style="color: #ff0000;">
+                    <th data-dynatable-column="uservsNIF" style="width: 60px;"><g:message code="nifLbl"/></th>
+                    <th data-dynatable-column="uservsName" style=""><g:message code="nameLbl"/></th>
+                </tr>
+                </thead>
+                <tbody>
+                <template repeat="{{userJSON in userListJSON.userVSList}}">
+                    <tr>
+                        <td class="text-center">{{userJSON.nif}}</td>
+                        <td class="text-center">{{userJSON.name}}</td>
+                    </tr>
+                </template>
+                </tbody>
+            </table>
+        </div>
+
+
+    </template>
+
+
     <div id="uservs_tableDiv" style="margin: 20px auto 0px auto; max-width: 800px; overflow:auto; visibility: hidden;">
         <table class="table white_headers_table" id="uservs_table" style="">
             <thead>

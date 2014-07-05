@@ -65,7 +65,7 @@ class GroupVSController {
             groupList.each {groupItem ->
                 resultList.add(groupVSService.getGroupVSDataMap(groupItem))
             }
-            resultMap = [groupvsRecords:resultList, queryRecordCount: groupList.totalCount,
+            resultMap = [groupvsList:resultList, queryRecordCount: groupList.totalCount,
                          numTotalGroups:groupList.totalCount ]
             render resultMap as JSON
         }

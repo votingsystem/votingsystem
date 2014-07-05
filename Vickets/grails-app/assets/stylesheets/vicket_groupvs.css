@@ -97,7 +97,7 @@
 }
 
 .groupvsDiv .groupvsRepresentativeDiv {
-    position: absolute;
+    position:absolute;
     display: none;
     bottom: 0px;
     left: 0px;

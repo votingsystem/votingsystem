@@ -29,10 +29,8 @@
       "dynatable":"dynatable#~0.3.1",
       "ckeditor":"ckeditor#~4.3.5",
       "jquery-ui":"jquery-ui#~1.11.0",
-      "multilevelpushmenu":"multilevelpushmenu#~2.1.4",
 
-
-	  "polymer": "Polymer/polymer#~0.3.3",
+	  "polymer": "Polymer/polymer",
       "core-ajax":"Polymer/core-ajax",
       "core-animation":"Polymer/core-animation",
       "core-animated-pages":"Polymer/core-animated-pages",
@@ -41,6 +39,7 @@
       "core-drag-drop":"Polymer/core-drag-drop",
       "paper-elements":"Polymer/paper-elements",
       "paper-fab":"Polymer/paper-fab",
+      "paper-item":"Polymer/paper-item",
       "core-field":"Polymer/core-field",
       "core-layout":"Polymer/core-layout",
       "core-layout-grid":"Polymer/core-layout-grid",
@@ -57,7 +56,11 @@
       "core-splitter":"Polymer/core-splitter",
       "core-style":"Polymer/core-style",
       "core-tooltip":"Polymer/core-tooltip",
-      "core-tests":"Polymer/core-tests"
+      "core-tests":"Polymer/core-tests",
+
+      "polymer-layout":"Polymer/polymer-layout"
+
+
   }
 
 }

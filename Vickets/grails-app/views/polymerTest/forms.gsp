@@ -3,8 +3,11 @@
 <head>
     <title>PolymerTest - forms</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <meta name="layout" content="main" />
+
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
@@ -57,7 +60,7 @@
     </style>
 </head>
 
-<body>
+<body style="height: 800px;">
 <div>
     <paper-button label="Test button" onclick="showDialog()"></paper-button>
 </div>
@@ -66,9 +69,18 @@
 <polymer-element name="advanced-search-form">
     <template>
 
-        <paper-input id="dateFrom" value={{dateFromValue}} on-input="{{validateForm}}" floatinglabel label="Sólo números"
+
+        <paper-input id="numberId" value={{dateFromValue}} on-input="{{validateForm}}" floatinglabel label="Sólo números"
                      validate="^[0-9]*$" error="Input is not a number!">
         </paper-input>
+
+        <paper-input id="dateFrom" value={{dateFromValue}} on-input="{{validateForm}}" floatinglabel label="Sólo fechas"
+                     validate="^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$"
+                     error="Input is not a date!">
+        </paper-input>
+
+
+
 
         <paper-fab id="check" icon="check" hidden?="{{!isValidForm}}" on-tap="{{submitForm}}" showing></paper-fab>
         <paper-fab id="bug" icon="bug-report" showing?="{{bugShowing}}" on-tap="{{toggleBugButton}}"></paper-fab>

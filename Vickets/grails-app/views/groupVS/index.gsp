@@ -3,10 +3,8 @@
 <head>
     <meta name="layout" content="main" />
     <asset:javascript src="jquery.grid-a-licious.min.js"/>
-    <asset:javascript src="jquery.stickytableheaders.js"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:stylesheet src="jquery.dynatable.css"/>
     <asset:stylesheet src="vicket_groupvs.css"/>
+    <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 </head>
 <body>
 <div class="pageContenDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
@@ -16,7 +14,6 @@
             <li class="active"><g:message code="groupvsLbl"/></li>
         </ol>
     </div>
-
     <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
             <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
@@ -30,151 +27,127 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <div id="groupvsList" class="" style=""></div>
-</div>
+    <polymer-element name="groupvs-details" attributes="groupvs index isHero">
+        <template>
+            <style>
+            .view {
+                background-color: tomato;
+            }
+            </style>
+            <div class="view" flex vertical center center-justified layout hero-id="groupvs-{{index}}" hero?="{{isHero}}">
+                <span cross-fade>{{groupvs.name}}</span>
+            </div>
+            </template>
+        <script>
+            Polymer('groupvs-details', {
+                isSelected: false
+            })
+        </script>
+    </polymer-element>
 
-<div id="groupvsTemplate" style="display:none;">
-    <g:render template="/template/groupvs" model="[isTemplate:'true']"/>
+
+
+    <polymer-element name="groupvs-list" attributes="url">
+        <template>
+            <style></style>
+            <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json" method="get"
+                       contentType="json"></core-ajax>
+            <core-icon-button icon="{{$.pages.selected != 0 ? 'arrow-back' : 'menu'}}" on-tap="{{back}}"></core-icon-button>
+            <core-animated-pages id="pages" flex selected="0" on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all hero-transition">
+
+
+                <div id="_groupvsList" class="" style="" hero-p>
+                    <template repeat="{{groupvs, i in groupvsData.groupvsList}}">
+                        <div id="{{groupvs.id}}" groupvs="{{groupvs}}" on-tap="{{selectView}}"
+                             class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' hero-p isHero="{{$.pages.selected === i + 1 || $.pages.selected === 0}}" cross-fade>
+                            <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
+                            <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
+                            <div class='groupvsInfoDiv'>{{groupvs.description | getHtml}}</div>
+                            <div style="position: relative;display: {{(groupvs.state == 'CANCELLED')?'block':'none'}};">
+                                <div class='groupvsMessageCancelled' style=""><g:message code="groupvsCancelledLbl"/></div>
+                            </div>
+                            <div class='groupvsRepresentativeDiv text-right'>{{groupvs | getRepresentativeName}}</div>
+                        </div>
+                        {{(i +1) == groupvsData.groupvsList.length ? true: false | groupvsListBounded}}
+                    </template>
+
+                </div>
+
+                <template repeat="{{groupvs, i in groupvsData.groupvsList}}">
+                    <groupvs-details vertical layout groupvs="{{groupvs}}" index="{{i}}" hero-p isHero="{{$.pages.selected === item + 1 || $.pages.selected === 0}}"></groupvs-details>
+                </template>
+
+            </core-animated-pages>
+        </template>
+        <script>
+            Polymer('groupvs-list', {
+                ready: function() {
+                    this.$.ajax.addEventListener('core-complete', function() {
+                        $('p').each(function(index, item) {
+                            if($.trim($(item).text()) === "") {
+                                $(item).slideUp(); // $(item).remove();
+                            }
+                        });
+                    })
+                },
+                selectView :  function(e) {
+                    var i = e.target.templateInstance.model.i;
+                    this.$.pages.selected = i+1;
+                },
+                back:function() {
+                    this.lastSelected = this.$.pages.selected;
+                    console.log("this.lastSelected: " + this.lastSelected);
+                    this.$.pages.selected = 0;
+                },
+                getRepresentativeName:function(groupvs) {
+                    return groupvs.representative.firstName + " " + groupvs.representative.lastName
+                },
+                getHtml:function(htmlEncoded) {
+                    var element = document.createElement("p");
+                    element.innerHTML = htmlEncoded;
+                    return element.innerText;
+                },
+                groupvsClicked:function(groupvsURL) {
+                    window.location.href = groupvsURL
+                },
+                groupvsListBounded:function(isBounded) {
+                    if(isBounded)  $("#_groupvsList").gridalicious({width: 300, gutter: 20, selector: '.item',
+                        animate: true, animationOptions: {speed: 200, duration: 300}});
+                },
+                groupvsClass:function(state) {
+                    switch (state) {
+                        case 'ACTIVE': return "groupvsActive"
+                        case 'PENDING': return "groupvsPending"
+                        case 'CANCELLED': return "groupvsFinished"
+                    }
+                }
+            });
+        </script>
+    </polymer-element>
+    <groupvs-list id="groupvsList" url="${createLink(controller: 'groupVS')}?menu=${params.menu}"></groupvs-list>
+
 </div>
 </body>
 </html>
 <asset:script>
-    var dynatable
-    var groupvsArray;
-
     $(function() {
-        initGridalicious()
-
         $("#navBarSearchInput").css( "visibility", "visible" );
-        $('#groupvsList').dynatable({
-            features: dynatableFeatures,
-            inputs: dynatableInputs,
-            params: dynatableParams,
-            table: {
-                bodyRowSelector: 'li'
-            },
-            dataset: {
-                ajax: true,
-                ajaxUrl: "<g:createLink controller="groupVS"/>?menu=" + menuType,
-                ajaxOnLoad: false,
-                perPageDefault: 50,
-                records: []
-            },
-            writers: {
-                _rowWriter: groupVSWriter
-            }
-        });
-
-        dynatable = $('#groupvsList').data('dynatable');
-
-        dynatable.settings.params.records = 'groupvsRecords'
-        dynatable.settings.params.queryRecordCount = 'numTotalGroups'
-
         $('#groupvsTypeSelect').on('change', function (e) {
             var groupvsType = $(this).val()
             var optionSelected = $("option:selected", this);
             console.log("groupvsTypeSelect - selected: " + groupvsType)
-
             var targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType;
             if("" != groupvsType) {
                 history.pushState(null, null, targetURL);
                 targetURL = targetURL + "&state=" + groupvsType
             }
-            dynatable.settings.dataset.ajaxUrl= targetURL
-            dynatable.paginationPage.set(1);
-            dynatable.process();
+            document.querySelector("#groupvsList").url = targetURL
         });
-
-        $('#groupvsList').bind('dynatable:afterUpdate',  function() {
-            $("#groupvsList").gridalicious('append', groupvsArray);
-            $('p').each(function(index, item) {
-                if($.trim($(item).text()) === "") {
-                    $(item).slideUp(); // $(item).remove();
-                }
-            });
-            updateMenuLinks()
-            $('.groupvsDiv').click(function() {
-                window.location.href = $(this).attr('data-href')
-            })
-        })
-
-        $('#groupvsList').bind('dynatable:afterProcess',  function() { })
-
-        $('#groupvsList').bind('dynatable:beforeProcess',  function() {
-            initGridalicious();
-        })
-
     })
-
-    function initGridalicious() {
-        groupvsArray = new Array;
-        document.getElementById("groupvsList").innerHTML = ''
-        $("#groupvsList").gridalicious({width: 300, gutter: 20, selector: '.item', animate: true,
-            animationOptions: {speed: 200, duration: 300, complete:onCompleted() }});
-    }
-
-    function onCompleted() {
-        updateMenuLinks()
-        $('.groupvsDiv').click(function() {
-            window.location.href = $(this).attr('data-href')
-        })
-    }
-
-    function GroupVS(groupJSON, htmlTemplate) {
-        if(groupJSON != null) {
-            this.id = groupJSON.id
-            this.dateCreated = groupJSON.dateCreated
-            this.description = groupJSON.description
-            this.representative = groupJSON.representative
-            this.numActiveUsers = groupJSON.numActiveUsers
-            this.numPendingUsers = groupJSON.numPendingUsers
-            this.state = groupJSON.state
-            this.name = groupJSON.name
-            this.url = "${createLink( controller:'groupVS')}/" + this.id
-        }
-
-        if(htmlTemplate != null) {
-            this.groupHTML = htmlTemplate.format(this.name, this.description, this.numActiveUsers,
-                this.representative.firstName + " " + this.representative.lastName);
-        }
-    }
-
-    function UserVS() {}
-
-    UserVS.State = {
-        ACTIVE:"ACTIVE",
-        PENDING:"PENDING",
-        CANCELLED:"CANCELLED"
-    }
-
-    GroupVS.prototype.getElement = function() {
-        var $newGroup = $(this.groupHTML)
-        var $groupDiv = $newGroup.find(".groupvsDiv");
-        if(UserVS.State.ACTIVE == this.state) $groupDiv.addClass("groupvsActive");
-        if(UserVS.State.PENDING == this.state) $groupDiv.addClass("groupvsPending");
-        if(UserVS.State.CANCELLED == this.state) {
-            $groupDiv.addClass("groupvsFinished");
-            $groupDiv.find(".groupvsMessageCancelled").text("<g:message code="groupvsCancelledLbl"/>")
-        }
-        $groupDiv.attr('id', this.id)
-        $groupDiv.attr('data-href', this.url)
-        return $newGroup.html();
-    }
-
-    var groupvsTemplate = $('#groupvsTemplate').html()
-
-    function groupVSWriter(rowIndex, jsonAjaxData, columns, cellWriter) {
-        var groupVS = new GroupVS(jsonAjaxData, groupvsTemplate)
-        groupvsArray.push(groupVS.getElement());
-        return ''
-    }
 
     function processUserSearch(textToSearch) {
         $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
         $('#pageInfoPanel').css("display", "block")
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'groupVS')}?searchText=" + textToSearch
-        dynatable.paginationPage.set(1);
-        dynatable.process();
+        document.querySelector("#groupvsList").url = "${createLink(controller: 'search', action: 'groupVS')}?searchText=" + textToSearch
     }
-
 </asset:script>

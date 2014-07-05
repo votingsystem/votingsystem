@@ -14,10 +14,15 @@ class PolymerTestController {
 
     def tabs() { }
 
-    def scaffold() { }
+    def toolbar() {}
 
     def layout() { }
 
     def forms() {}
 
+    def main() {}
+
+    def transitions() {}
+
+    def transitions1() {}
 }
