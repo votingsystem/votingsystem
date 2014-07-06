@@ -13,6 +13,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages/transitions', file: 'hero-transition.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages/transitions', file: 'cross-fade.html')}">
 
     <link rel="import" href="${resource(dir: '/bower_components/core-icons', file: 'core-icons.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
@@ -37,7 +38,7 @@
                 background-color: blue;
             }
             </style>
-            <div id="hero" hero-id="bar" hero></div>
+            <div id="hero" hero-id="bar" hero>x-el</div>
         </template>
     </polymer-element>
 
@@ -53,8 +54,8 @@
                 background-color: orange;
             }
             </style>
-            <div id="hero1" hero-id="foo" hero></div>
-            <div id="hero2" hero-id="bar" hero></div>
+            <div id="hero1" hero-id="foo" hero>Foo - x-page-1</div>
+            <div id="hero2" hero-id="bar" hero>Bar - x-page-1</div>
         </template>
     </polymer-element>
 
@@ -65,7 +66,7 @@
                 position: absolute;
                 top: 200px;
                 left: 300px;
-                width: 300px;
+                width: 600px;
                 height: 300px;
                 background-color: orange;
             }
@@ -75,20 +76,24 @@
                 width: 400px;
             }
             </style>
-            // The below element is one level of shadow from the core-animated-pages and will
-            // be transitioned.
-            <div id="hero1" hero-id="foo" hero></div>
-            // The below element contains a hero inside its shadowRoot making it two levels away
-            // from the core-animated-pages, and will not be transitioned.
-            <x-el></x-el>
+
+            <div id="hero1" hero-id="foo" hero>One level shadown - x-page-2</div>
+
+            <x-el>Two level shadow</x-el>
         </template>
     </polymer-element>
 
     <template id="template2" is="auto-binding">
         <core-icon-button icon="{{$.pages.selected != 0 ? 'arrow-back' : 'menu'}}" on-tap="{{selectView}}" style="fill: red;"></core-icon-button>
-        <core-animated-pages  id="pages" transitions="hero-transition">
-            <x-page-1></x-page-1>
-            <x-page-2></x-page-2>
+        <core-animated-pages  id="pages" transitions="cross-fade">
+            <section>
+                <x-page-1 cross-fade></x-page-1>
+            </section>
+            <section>
+                <x-page-2 cross-fade></x-page-2>
+            </section>
+
+
         </core-animated-pages>
     </template>
 

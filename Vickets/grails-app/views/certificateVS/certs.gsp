@@ -2,9 +2,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+
     <meta name="layout" content="main" />
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:stylesheet src="jquery.dynatable.css"/>
+    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <style type="text/css" media="screen">
         .certDiv {
             display:inline;
@@ -31,7 +31,7 @@
     </div>
     <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div id="certTypeSelectDiv" style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="certTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
+            <select id="certTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control" onchange="certTypeSelect(this)">
                 <option value="&type=USER&state=OK"> - <g:message code="certUserStateOKLbl"/> - </option>
                 <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - <g:message code="certAuthorityStateOKLbl"/> - </option>
                 <option value="&type=USER&state=CANCELLED"> - <g:message code="certUserStateCancelledLbl"/> - </option>
@@ -42,129 +42,96 @@
 
     <h3><div id="pageHeader" class="pageHeader text-center"><g:message code="trustedCertsPageTitle"/></div></h3>
 
-    <div id="certList" class="row container" style="width:1300px;"><ul></ul></div>
+    <polymer-element name="cert-list" attributes="url menuType">
+        <template>
+            <style></style>
+            <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="json"></core-ajax>
+            <div flex horizontal wrap around-justified layout>
+                <template repeat="{{cert in responseData.certList}}">
+                    <div class="certDiv card" style="" on-tap="{{showCert}}">
+                        <div>
+                            <div style="display: inline;">
+                                <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
+                                    <g:message code="serialNumberLbl"/>: </span>{{cert.serialNumber}}</div>
+                                <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em;
+                                    font-weight: bold; float: right;">{{cert.state | getState}}</div>
+                            </div>
+                        </div>
+                        <div class='groupvsSubjectDiv'><span style="font-weight: bold;"><g:message code="subjectLbl"/>: </span>{{cert.subjectDN}}</div>
+                        <div class=''><span style="font-weight: bold;"><g:message code="issuerLbl"/>: </span>
+                            <a href="{{ cert.issuerSerialNumber | issuerURL}}">{{cert.issuerDN}}</a></div>
+                        <div class=''><span style="font-weight: bold;"><g:message code="signatureAlgotithmLbl"/>: </span>{{cert.sigAlgName}}</div>
+                        <div>
+                            <div class='' style="display: inline;">
+                                <span style="font-weight: bold;"><g:message code="noBeforeLbl"/>: </span>{{cert.notBefore}}</div>
+                            <div class='' style="display: inline; margin:0px 0px 0px 20px;">
+                                <span style="font-weight: bold;"><g:message code="noAfterLbl"/>: </span>{{cert.notAfter}}</div>
+                        </div>
+                        <div>
+                            <div class="text-center" style="font-weight: bold; display: {{cert.isRoot ? 'inline': 'none'}};
+                            margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;"><g:message code="rootCertLbl"/></div>
 
-    <div style="margin:0px auto 0px auto;">
-        <g:each in="${certsMap.certList}">
-        </g:each>
-    </div>
-</div>
-<div id="certificateVSTemplate" style="display:none;">
-    <div>
-        <li class="certDiv" style="">
-            <a class="targetURL" href="{0}"></a>
-            <div>
-                <div style="display: inline;">
-                    <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
-                        <g:message code="serialNumberLbl"/>: </span>{1}</div>
-                    <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em; font-weight: bold; float: right;">{2}</div>
-                </div>
+                        </div>
+                    </div>
+                </template>
             </div>
-            <div class='groupvsSubjectDiv'><span style="font-weight: bold;"><g:message code="subjectLbl"/>: </span>{3}</div>
-            <div class=''><span style="font-weight: bold;"><g:message code="issuerLbl"/>: </span><a href="{9}">{4}</a></div>
-            <div class=''><span style="font-weight: bold;"><g:message code="signatureAlgotithmLbl"/>: </span>{5}</div>
-            <div>
-                <div class='' style="display: inline;">
-                    <span style="font-weight: bold;"><g:message code="noBeforeLbl"/>: </span>{6}</div>
-                <div class='' style="display: inline; margin:0px 0px 0px 20px;">
-                    <span style="font-weight: bold;"><g:message code="noAfterLbl"/>: </span>{7}</div>
-            </div>
-            <div>
-                    <div class="text-center" style="font-weight: bold; display: {8};
-                    margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;"><g:message code="rootCertLbl"/></div>
+        </template>
+        <script>
+            Polymer('cert-list', {
+                ready: function() {},
+                showCert :  function(e) {
+                    var targetURL = "${createLink( controller:'certificateVS', action:'cert')}/" +
+                            e.target.templateInstance.model.cert.serialNumber + "?menu=" + menuType
+                    window.location.href = targetURL
+                },
+                getState:function(state){
+                    var stateLbl
+                    if("${CertificateVS.State.OK.toString()}" == state) stateLbl = "<g:message code="certOKLbl"/>"
+                    else if("${CertificateVS.State.CANCELLED.toString()}" ==  state) stateLbl = "<g:message code="certCancelledLbl"/>"
+                    else stateLbl = state
+                },
+                issuerURL: function(issuerSerialNumber) {
+                    var issuerTargetURL = "#"
+                    if(issuerSerialNumber != null) issuerTargetURL =
+                            "${createLink( controller:'certificateVS', action:'cert')}/" + issuerSerialNumber + "?menu=" + menuType
+                    return issuerTargetURL
+                }
+            });
+        </script>
+    </polymer-element>
 
-            </div>
-        </li>
-    </div>
+    <cert-list id="certList"></cert-list>
+
+
 </div>
 </body>
 </html>
 <asset:script>
-    var dynatable
+    <g:if test="${CertificateVS.Type.USER.toString().equals(certsMap.type)}">
+        document.getElementById("pageHeader").innerHTML = "<g:message code="userCertsPageTitle"/>"
+    </g:if><g:elseif test="${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString().equals(certsMap.type)}">
+        document.getElementById("pageHeader").innerHTML = "<g:message code="trustedCertsPageTitle"/>"
+    </g:elseif><g:else>
+        document.getElementById("pageHeader").innerHTML = "${certsMap?.type?.toString()}"
+    </g:else>
+
     var certType = getParameterByName('type')
     var certState = getParameterByName('state')
     var optionValue = "&type=" + ((certType == "")? "USER":certType) + "&state=" + ((certState == "")?"OK":certState)
     setPageHeader(optionValue)
 
-    $(function() {
-        $('#certList').dynatable({
-            features: dynatableFeatures,
-            inputs: dynatableInputs,
-            params: dynatableParams,
-            table: {
-                bodyRowSelector: 'li'
-            },
-            dataset: {
-                ajax: true,
-                ajaxUrl: updateMenuLink("<g:createLink controller="certificateVS" action="certs"/>", optionValue),
-                ajaxOnLoad: false,
-                perPageDefault: 50,
-                records: []
-            },
-            writers: {
-                _rowWriter: certificateVSWriter
-            }
-        });
+    document.querySelector("#certList").url = updateMenuLink("<g:createLink controller="certificateVS" action="certs"/>", optionValue)
 
-        $('#certTypeSelectDiv > select > option[value="' + optionValue + '"]').attr("selected", "selected")
-
-        dynatable = $('#certList').data('dynatable');
-        dynatable.settings.params.records = 'certList'
-        dynatable.settings.params.queryRecordCount = 'queryRecordCount'
-        dynatable.settings.params.totalRecordCount = 'numTotalCerts'
-
-
-        <g:if test="${CertificateVS.Type.USER.toString().equals(certsMap.type)}">
-            document.getElementById("pageHeader").innerHTML = "<g:message code="userCertsPageTitle"/>"
-        </g:if><g:elseif test="${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString().equals(certsMap.type)}">
-            document.getElementById("pageHeader").innerHTML = "<g:message code="trustedCertsPageTitle"/>"
-        </g:elseif><g:else>
-            document.getElementById("pageHeader").innerHTML = "${certsMap?.type?.toString()}"
-        </g:else>
-
-        var newCertificateVSTemplate = $('#certificateVSTemplate').html()
-        function certificateVSWriter(rowIndex, jsonAjaxData, columns, cellWriter) {
-
-            var targetURL = "${createLink( controller:'certificateVS', action:'cert')}/" + jsonAjaxData.serialNumber
-            var issuerTargetURL = "#"
-            if(jsonAjaxData.issuerSerialNumber != null) issuerTargetURL =
-                    "${createLink( controller:'certificateVS', action:'cert')}/" + jsonAjaxData.issuerSerialNumber
-
-            var stateLbl
-            if("${CertificateVS.State.OK.toString()}" == jsonAjaxData.state) stateLbl = "<g:message code="certOKLbl"/>"
-            else if("${CertificateVS.State.CANCELLED.toString()}" == jsonAjaxData.state) stateLbl = "<g:message code="certCancelledLbl"/>"
-            else stateLbl = jsonAjaxData.state
-
-            var displayValue = "none"
-            if(jsonAjaxData.isRoot) displayValue = "inline"
-
-            var newCertificateVSHTML = newCertificateVSTemplate.format(targetURL, jsonAjaxData.serialNumber, stateLbl,
-                    jsonAjaxData.subjectDN, jsonAjaxData.issuerDN, jsonAjaxData.sigAlgName, jsonAjaxData.notBefore,
-                    jsonAjaxData.notAfter, displayValue, issuerTargetURL);
-            return newCertificateVSHTML
-        }
-
-        $('#certList').bind('dynatable:afterUpdate',  function() {
-            updateMenuLinks()
-            $('.certDiv').click(function() {
-                window.location.href = $(this).find('.targetURL').attr('href')
-            }
-        )})
-
-        $('#certTypeSelect').on('change', function (e) {
-            var optionSelected = $(this).val()
-            console.log("transactionvs selected: " + optionSelected)
-            var targetURL = updateMenuLink("${createLink(controller: 'certificateVS', action: 'certs')}")
-            if("" != optionSelected) {
-                targetURL = targetURL + "?" + optionSelected + "&"
-            }
-            dynatable.settings.dataset.ajaxUrl= targetURL
+    function certTypeSelect(selected) {
+        var optionSelected = selected.value
+        console.log("certTypeSelect: " + optionSelected)
+        if("" != optionSelected) {
+            targetURL = "${createLink(controller: 'certificateVS', action: 'certs')}?menu=" + menuType + optionSelected
             history.pushState(null, null, targetURL);
             setPageHeader(targetURL)
-            dynatable.paginationPage.set(1);
-            dynatable.process();
-        });
-    })
+            document.querySelector("#certList").url = targetURL
+        }
+    }
 
     function setPageHeader(urlParams) {
         if(urlParams.indexOf("${CertificateVS.Type.USER}") > -1)

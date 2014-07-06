@@ -74,8 +74,8 @@
                                     <table class="table white_headers_table" id="uservs_table" style="">
                                         <thead>
                                             <tr style="color: #ff0000;">
-                                                <th data-dynatable-column="uservsNIF" style="width: 60px;"><g:message code="nifLbl"/></th>
-                                                <th data-dynatable-column="uservsName" style=""><g:message code="nameLbl"/></th>
+                                                <th style="width: 60px;"><g:message code="nifLbl"/></th>
+                                                <th style=""><g:message code="nameLbl"/></th>
                                             </tr>
                                         </thead>
                                         <tbody>

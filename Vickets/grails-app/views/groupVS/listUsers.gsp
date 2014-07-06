@@ -2,9 +2,6 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <asset:javascript src="jquery.stickytableheaders.js"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:stylesheet src="jquery.dynatable.css"/>
 </head>
 <body>
 <div class="pageContenDiv">
@@ -24,7 +21,7 @@
         <g:message code="groupvsUserListPageHeader"/> '${subscriptionMap?.groupName}'</div>
     </h3>
     <g:include view="/include/user-list.gsp"/>
-    <user-list url="${createLink(controller: 'groupVS', action: 'listUsers')}/${subscriptionMap?.id}"
+    <user-list id="userList" url="${createLink(controller: 'groupVS', action: 'listUsers')}/${subscriptionMap?.id}"
                userURLPrefix="user" menuType="${params.menu}"></user-list>
 </div>
 </body>
@@ -40,9 +37,7 @@
     function processUserSearch(textToSearch) {
         $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
         $('#pageInfoPanel').css("display", "block")
-        dynatable.settings.dataset.ajaxUrl= targetURL + "?searchText=" + textToSearch
-        dynatable.paginationPage.set(1);
-        dynatable.process();
+        document.querySelector("#userList").url = targetURL + "?searchText=" + textToSearch
     }
 
 </asset:script>

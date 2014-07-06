@@ -4,7 +4,10 @@
     <title>PolymerTest - forms</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
-    <meta name="layout" content="main" />
+    <asset:stylesheet src="polymer.css"/>
+
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 
     <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
@@ -14,7 +17,6 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-icons/iconsets', file: 'icons.html')}">
-
 
     <style>
         body {
@@ -56,7 +58,6 @@
             pointer-events: none;
         }
 
-
     </style>
 </head>
 
@@ -69,7 +70,6 @@
 <polymer-element name="advanced-search-form">
     <template>
 
-
         <paper-input id="numberId" value={{dateFromValue}} on-input="{{validateForm}}" floatinglabel label="Sólo números"
                      validate="^[0-9]*$" error="Input is not a number!">
         </paper-input>
@@ -78,9 +78,6 @@
                      validate="^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$"
                      error="Input is not a date!">
         </paper-input>
-
-
-
 
         <paper-fab id="check" icon="check" hidden?="{{!isValidForm}}" on-tap="{{submitForm}}" showing></paper-fab>
         <paper-fab id="bug" icon="bug-report" showing?="{{bugShowing}}" on-tap="{{toggleBugButton}}"></paper-fab>
@@ -94,8 +91,6 @@
 
     </template>
 
-
-
     <script>
         Polymer('advanced-search-form', {
             ready: function() { },
@@ -106,6 +101,7 @@
             toggleBugButton: function() {
                 console.log('toggleBugButton')
                 this.bugShowing = !this.bugShowing;
+                this.$.confirmation.toggle()
             },
             validateForm: function() {
                 if(this.$ == null) return

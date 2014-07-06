@@ -134,10 +134,10 @@
                     <table class="table white_headers_table" id="transactionTo_table" style="">
                         <thead>
                         <tr style="color: #ff0000;">
-                            <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
-                            <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
-                            <th data-dynatable-column="dateCreated" style="width:180px;"><g:message code="dateLbl"/></th>
-                            <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
+                            <th style="width: 290px;"><g:message code="typeLbl"/></th>
+                            <th style="max-width:80px;"><g:message code="amountLbl"/></th>
+                            <th style="width:180px;"><g:message code="dateLbl"/></th>
+                            <th style="min-width:300px;"><g:message code="subjectLbl"/></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -162,10 +162,10 @@
                     <table class="table white_headers_table" id="transactionFrom_table" style="">
                         <thead>
                         <tr style="color: #ff0000;">
-                            <th data-dynatable-column="type" style="width: 290px;"><g:message code="typeLbl"/></th>
-                            <th data-dynatable-column="amount" style="width:80px;"><g:message code="amountLbl"/></th>
-                            <th data-dynatable-column="dateCreated" style="width:180px;"><g:message code="dateLbl"/></th>
-                            <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
+                            <th style="width: 290px;"><g:message code="typeLbl"/></th>
+                            <th style="width:80px;"><g:message code="amountLbl"/></th>
+                            <th style="width:180px;"><g:message code="dateLbl"/></th>
+                            <th style="min-width:300px;"><g:message code="subjectLbl"/></th>
                         </tr>
                         </thead>
                         <tbody>

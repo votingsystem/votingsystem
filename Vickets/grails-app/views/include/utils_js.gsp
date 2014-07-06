@@ -45,31 +45,6 @@
 
     };
 
-    var dynatableInputs = {
-        queries: null,
-        sorts: null,
-        multisort: ['ctrlKey', 'shiftKey', 'metaKey'],
-        page: null,
-        queryEvent: 'blur change',
-        recordCountTarget: null,
-        recordCountPlacement: 'after',
-        paginationLinkTarget: null,
-        paginationLinkPlacement: 'after',
-        paginationPrev: '«',
-        paginationNext: '»',
-        paginationGap: [1,2,2,1],
-        searchTarget: null,
-        searchPlacement: 'before',
-        perPageTarget: null,
-        perPagePlacement: 'before',
-        perPageText: '',
-        recordCountText: '',
-        pageText:'',
-        recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
-        recordCountTotalTemplate: '{recordsQueryCount}',
-        processingText: '<span class="dynatableLoading">"<g:message code="updatingLbl"/><i class="fa fa-refresh fa-spin"></i></span>'
-    }
-
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {
         // time difference in ms

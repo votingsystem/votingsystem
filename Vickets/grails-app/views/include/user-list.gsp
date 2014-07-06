@@ -16,11 +16,11 @@
           <table class="table white_headers_table" id="uservs_table" style="">
               <thead>
               <tr style="color: #ff0000;">
-                  <th data-dynatable-column="nif" style="width: 120px;"><g:message code="nifLbl"/></th>
-                  <th data-dynatable-column="name" style="max-width:80px;">IBAN</th>
-                  <th data-dynatable-column="name" style="max-width:80px;"><g:message code="nameLbl"/></th>
-                  <th data-dynatable-column="state" style="max-width:60px;"><g:message code="stateLbl"/></th>
-                  <th data-dynatable-column="lastUpdate" style="width:200px;"><g:message code="lastUpdateLbl"/></th>
+                  <th style="width: 120px;"><g:message code="nifLbl"/></th>
+                  <th style="max-width:80px;">IBAN</th>
+                  <th style="max-width:80px;"><g:message code="nameLbl"/></th>
+                  <th style="max-width:60px;"><g:message code="stateLbl"/></th>
+                  <th style="width:200px;"><g:message code="lastUpdateLbl"/></th>
               </tr>
               </thead>
               <tbody>

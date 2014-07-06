@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layout" content="main" />
-    <asset:javascript src="jquery.grid-a-licious.min.js"/>
+    <g:if test="${!params.iframe}">
+        <meta name="layout" content="main" />
+    </g:if>
     <asset:stylesheet src="vicket_groupvs.css"/>
     <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 </head>
@@ -49,14 +50,28 @@
 
     <polymer-element name="groupvs-list" attributes="url">
         <template>
-            <style></style>
+            <style>
+
+            .card {
+                position: relative;
+                display: inline-block;
+                width: 300px;
+                height: 200px;
+                vertical-align: top;
+                background-color: #fff;
+                box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+                margin: 10px;
+            }
+            </style>
+            <asset:stylesheet src="vicket_groupvs.css"/>
             <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json" method="get"
-                       contentType="json"></core-ajax>
+                       contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
             <core-icon-button icon="{{$.pages.selected != 0 ? 'arrow-back' : 'menu'}}" on-tap="{{back}}"></core-icon-button>
+
             <core-animated-pages id="pages" flex selected="0" on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all hero-transition">
 
+                <div id="_groupvsList" class="" style="" flex horizontal wrap around-justified layout hero-p>
 
-                <div id="_groupvsList" class="" style="" hero-p>
                     <template repeat="{{groupvs, i in groupvsData.groupvsList}}">
                         <div id="{{groupvs.id}}" groupvs="{{groupvs}}" on-tap="{{selectView}}"
                              class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' hero-p isHero="{{$.pages.selected === i + 1 || $.pages.selected === 0}}" cross-fade>
@@ -68,9 +83,7 @@
                             </div>
                             <div class='groupvsRepresentativeDiv text-right'>{{groupvs | getRepresentativeName}}</div>
                         </div>
-                        {{(i +1) == groupvsData.groupvsList.length ? true: false | groupvsListBounded}}
                     </template>
-
                 </div>
 
                 <template repeat="{{groupvs, i in groupvsData.groupvsList}}">
@@ -78,6 +91,7 @@
                 </template>
 
             </core-animated-pages>
+
         </template>
         <script>
             Polymer('groupvs-list', {
@@ -103,16 +117,13 @@
                     return groupvs.representative.firstName + " " + groupvs.representative.lastName
                 },
                 getHtml:function(htmlEncoded) {
-                    var element = document.createElement("p");
+                    var element = document.createElement("div");
                     element.innerHTML = htmlEncoded;
-                    return element.innerText;
+                    //Firefox bug with innerHTML
+                    return (typeof element.innerText == 'undefined' ? htmlEncoded:element.innerText);
                 },
                 groupvsClicked:function(groupvsURL) {
                     window.location.href = groupvsURL
-                },
-                groupvsListBounded:function(isBounded) {
-                    if(isBounded)  $("#_groupvsList").gridalicious({width: 300, gutter: 20, selector: '.item',
-                        animate: true, animationOptions: {speed: 200, duration: 300}});
                 },
                 groupvsClass:function(state) {
                     switch (state) {

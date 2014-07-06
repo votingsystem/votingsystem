@@ -13,6 +13,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
 
 
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog',
@@ -25,6 +26,17 @@
 <body style="height: 800px;">
 
 <paper-button label="Avanced search dialog" onclick="showAvancedSearchDialog()"></paper-button>
+
+<paper-button label="Overlay dialog" onclick="showOverlayDialog()"></paper-button>
+
+
+<core-overlay id="confirmation" layout vertical center center-justified  class="card"
+              transition="paper-dialog-transition-center" style="position: absolute; top:30px;">
+    <h3>Dialog</h3>
+    <input placeholder="say something..." autofocus>
+    <div>I agree with this wholeheartedly.</div>
+    <button core-overlay-toggle>OK</button>
+</core-overlay>
 
 <votingsystem-advanced-search-dialog id="advancedSearchDialog" transition="paper-dialog-transition-center" opened="true" >
 </votingsystem-advanced-search-dialog>
@@ -45,6 +57,10 @@
         console.log(" ====== submit-form - addEventListener - e: " + e + " - detail: " + JSON.stringify(e.detail))
     });
 
+    function showOverlayDialog() {
+        var dialog = document.querySelector('#confirmation');
+        dialog.toggle();
+    }
 
     function showDialog() {
         var dialog = document.querySelector('#paperDialog');
@@ -55,6 +71,9 @@
         var dialog = document.querySelector('#advancedSearchDialog');
         dialog.toggle();
     }
+
+
+
 
     function acceptButton() {
         console.log("acceptButton")

@@ -29,10 +29,10 @@
     <g:include view="/include/utils_js.gsp"/>
     <g:layoutHead/>
     <style shim-shadowdom>
-        paper-item {
-            padding: 10px;
-            border-bottom: 1px solid #f9f9f9;
-        }
+    paper-item {
+        padding: 10px;
+        border-bottom: 1px solid #f9f9f9;
+    }
     </style>
     <g:layoutHead/>
 </head>
@@ -47,60 +47,60 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                    <g:if test="${"admin".equals(params.menu)}">
-                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'groupVS')}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'groupVS', action: 'newGroup')}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
-                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
-                        </paper-item>
-                        {{ "<g:message code="adminPageTitle"/>" | setTitle}}
-                    </g:if>
-                    <g:elseif test="${"superadmin".equals(params.menu)}">
-                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'userVS', action: 'newVicketSource')}">
-                            <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newVicketSourceLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority')}">
-                            <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> <g:message code="newCAAuthorityLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'certificateVS', action: 'certs')}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateCertLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'userVS', action: 'save')}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newUserCertLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
-                        </paper-item>
-                        <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact')}" on-click="{{changeToAdminMenu}}">
-                            <g:message code="changeToAdminMenuLbl"/>
-                        </paper-item>
-                        {{ "<g:message code="superAdminTitle"/>" | setTitle}}
-                    </g:elseif>
-                    <g:else>
-                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'groupVS')}">
-                            <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
-                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
-                        </paper-item>
-                        {{ "<g:message code="usersPageTitle"/>" | setTitle}}
-                    </g:else>
+                        <g:if test="${"admin".equals(params.menu)}">
+                            <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
+                                <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'groupVS')}">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'groupVS', action: 'newGroup')}">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
+                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
+                            </paper-item>
+                            {{ "<g:message code="adminPageTitle"/>" | setTitle}}
+                        </g:if>
+                        <g:elseif test="${"superadmin".equals(params.menu)}">
+                            <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
+                                <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'userVS', action: 'newVicketSource')}">
+                                <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newVicketSourceLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority')}">
+                                <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> <g:message code="newCAAuthorityLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'certs')}">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateCertLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'userVS', action: 'save')}">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newUserCertLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
+                            </paper-item>
+                            <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact')}" on-click="{{changeToAdminMenu}}">
+                                <g:message code="changeToAdminMenuLbl"/>
+                            </paper-item>
+                            {{ "<g:message code="superAdminTitle"/>" | setTitle}}
+                        </g:elseif>
+                        <g:else>
+                            <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
+                                <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'groupVS')}">
+                                <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
+                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
+                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
+                            </paper-item>
+                            {{ "<g:message code="usersPageTitle"/>" | setTitle}}
+                        </g:else>
 
                     </core-selector>
                 </core-menu>
@@ -135,6 +135,7 @@
         <g:layoutBody/>
     </nav-bar>
 </div>
+
 
 <g:include view="/include/dialog/windowAlertModal.gsp"/>
 </body>

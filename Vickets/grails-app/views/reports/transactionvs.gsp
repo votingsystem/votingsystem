@@ -2,9 +2,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <asset:stylesheet src="jquery.dynatable.css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:javascript src="jquery.stickytableheaders.js"/>
+    <link rel="import" href="${resource(dir: '/bower_components/vicket-transaction-table', file: 'vicket-transaction-table.html')}">
 </head>
 <body>
 <div class="pageContenDiv">
@@ -17,7 +15,8 @@
 
     <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
+            <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                    class="form-control" onchange="transactionvsTypeSelect(this)">
                 <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
 
                 <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
@@ -30,109 +29,32 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-        <table class="table white_headers_table" id="transaction_table" style="">
-            <thead>
-            <tr style="color: #ff0000;">
-                <th data-dynatable-column="type" style="width: 300px;"><g:message code="typeLbl"/></th>
-                <th data-dynatable-column="amount" style="width:40px;"><g:message code="amountLbl"/></th>
-                <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="datecreatedLbl"/></th>
-                <th data-dynatable-column="subject" style="min-width:280px;"><g:message code="subjectLbl"/></th>
-                <!--<th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>-->
-            </tr>
-            </thead>
-        </table>
-    </div>
+    <vicket-transaction-table id="recordList" url="${createLink(controller: 'reports', action: 'transactionvs')}"></vicket-transaction-table>
+
 </div>
 </body>
 
 </html>
 <asset:script>
-
-    var dynatable
-
-    $(function() {
-        $("#navBarSearchInput").css( "visibility", "visible" );
-        $('#transaction_table').dynatable({
-                features: dynatableFeatures,
-                inputs: dynatableInputs,
-                params: dynatableParams,
-                dataset: {
-                    ajax: true,
-                    ajaxUrl: "${createLink(controller: 'reports', action: 'transactionvs')}",
-                    ajaxOnLoad: false,
-                    perPageDefault: 100000,
-                    records: []
-                },
-                writers: {
-                    _rowWriter: rowWriter
-                }
-        });
-        dynatable = $('#transaction_table').data('dynatable');
-        dynatable.settings.params.records = 'transactionRecords'
-        dynatable.settings.params.queryRecordCount = 'queryRecordCount'
-        dynatable.settings.params.totalRecordCount = 'numTotalTransactions'
-
-
-        $('#transaction_table').bind('dynatable:afterUpdate',  function() {
-            console.log("page loaded")
-            $('#dynatable-record-count-transaction_table').css('visibility', 'visible');
-        })
-
-        //$("#transaction_table").stickyTableHeaders({fixedOffset: $('.navbar')});
-        $("#transaction_table").stickyTableHeaders();
-
-        $('#transactionvsTypeSelect').on('change', function (e) {
-            var transactionvsType = $(this).val()
-            var optionSelected = $("option:selected", this);
-            console.log("transactionvs selected: " + transactionvsType)
-            var targetURL = "${createLink(controller: 'reports', action: 'transactionvs')}";
-            if("" != transactionvsType) {
-                history.pushState(null, null, targetURL);
-                targetURL = targetURL + "?transactionvsType=" + transactionvsType
-            }
-            dynatable.settings.dataset.ajaxUrl= targetURL
-            dynatable.paginationPage.set(1);
-            dynatable.process();
-        });
-
-    })
-
-    function addRecordToTable(record)  {
-        //dynatable.settings.dataset.originalRecords.push(record);
-        dynatable.settings.dataset.records.push(record);
-        dynatable.process();
-    }
-
-    function rowWriter(rowIndex, jsonTransactionData, columns, cellWriter) {
-        var transactionType = getTransactionVSDescription(jsonTransactionData.type)
-        var transactionURL = jsonTransactionData.id
-
-        var amount
-        if(isNaN(jsonTransactionData.amount)) amount = jsonTransactionData.amount.toFixed(2) + " " + jsonTransactionData.currency
-        else  amount = jsonTransactionData.amount + " " + jsonTransactionData.currency
-
-
-        tr = '<tr><td title="' + transactionType + '" class="text-center">' +
-            '<a href="#" onclick="openWindow(\'' + transactionURL + '\')">' + transactionType + '</a></td><td class="text-right">' +
-            amount + '</td>' + '</td><td class="text-center">' + jsonTransactionData.dateCreated +
-        '</td><td title="' + jsonTransactionData.subject + '" class="text-center">' + jsonTransactionData.subject + '</td></tr>'
-        return tr
+    function transactionvsTypeSelect(selected) {
+        var transactionvsType = selected.value
+        console.log("transactionvsType: " + transactionvsType)
+        if("" != transactionvsType) {
+            targetURL = "${createLink(controller: 'reports', action: 'transactionvs')}";
+            history.pushState(null, null, targetURL);
+            targetURL = targetURL + "?transactionvsType=" + transactionvsType
+            document.querySelector("#recordList").url = targetURL
+        }
     }
 
     function processUserSearch(textToSearch) {
-        $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
-        $('#pageInfoPanel').css("display", "block")
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
-        dynatable.paginationPage.set(1);
-        dynatable.process();
+        document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"
+        document.querySelector("#pageInfoPanel").style.display = "block"
+        document.querySelector("#recordList").url = "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
     }
 
     function processUserSearchJSON(jsonData) {
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'transaction', action: 'index')}"
-        dynatable.settings.dataset.ajaxData = jsonData
-        dynatable.paginationPage.set(1);
-        dynatable.process();
+        document.querySelector("#recordList").params = jsonData
+        document.querySelector("#recordList").url = "${createLink(controller: 'transaction', action: 'index')}"
     }
-
 </asset:script>

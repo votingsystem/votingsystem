@@ -30,9 +30,9 @@
         <table class="table white_headers_table" id="messagevs_table" style="">
             <thead>
             <tr style="color: #ff0000;">
-                <th data-dynatable-column="dateCreated" style="width:270px;"><g:message code="dateLbl"/></th>
-                <th data-dynatable-column="fromUser" style="width:270px;"><g:message code="fromUserLbl"/></th>
-                <th data-dynatable-column="operation" style="width:270px;"></th>
+                <th style="width:270px;"><g:message code="dateLbl"/></th>
+                <th style="width:270px;"><g:message code="fromUserLbl"/></th>
+                <th style="width:270px;"></th>
             </tr>
             </thead>
         </table>
@@ -49,7 +49,6 @@
 
     var messageVSTemplate = document.getElementById("messageVSTemplate").innerHTML
     var messageVSMap = {}
-    var dynatable
     var messageVSTable = document.getElementById("messagevs_table")
 
 

@@ -3,6 +3,7 @@
 <head>
     <title></title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
     <asset:stylesheet src="polymer.css"/>
     <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
@@ -69,8 +70,8 @@
 
             </section>
             <section id="page2">
-                <div id="hero2" hero-id="hero" hero>
-                    <div id="bottom2" cross-fade></div>
+                <div id="hero2" class="card" hero-id="hero" hero>
+                    <div id="bottom2" cross-fade>ddd</div>
                 </div>
 
             </section>
