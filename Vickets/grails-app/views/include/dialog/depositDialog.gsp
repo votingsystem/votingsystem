@@ -66,35 +66,8 @@
                         <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
                         <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 
-                        <polymer-element name="dialog-user-list" attributes="url">
-                            <template>
-                                <core-ajax id="ajax" auto url="{{url}}" response="{{userListJSON}}" handleAs="json" method="get"
-                                           contentType="json"></core-ajax>
-                                <div layout vertical center style="max-width: 800px; overflow:auto;">
-                                    <table class="table white_headers_table" id="uservs_table" style="">
-                                        <thead>
-                                            <tr style="color: #ff0000;">
-                                                <th style="width: 60px;"><g:message code="nifLbl"/></th>
-                                                <th style=""><g:message code="nameLbl"/></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        <template repeat="{{userJSON in userListJSON.userVSList}}">
-                                            <tr>
-                                                <td class="text-center">{{userJSON.nif}}</td>
-                                                <td class="text-center">{{userJSON.name}}</td>
-                                            </tr>
-                                        </template>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </template>
-                            <script>
-                                Polymer('dialog-user-list', {
-                                    ready: function() { this.url = this.url || '';} });
-                            </script>
-                        </polymer-element>
-                        <dialog-user-list id="dialogUserList" url=""></dialog-user-list>
+                        <g:include view="/include/search-user.gsp"/>
+                        <search-user id="dialogUserList"></search-user>
                     </div>
                 </div>
                 <div class="modal-footer">

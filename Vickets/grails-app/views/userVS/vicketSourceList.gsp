@@ -2,8 +2,6 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:stylesheet src="jquery.dynatable.css"/>
 </head>
 <body>
 <div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
@@ -18,7 +16,8 @@
 
         <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
             <div style="display:table-cell;margin: auto; vertical-align: top;">
-                <select id="vicketSourceStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
+                <select id="vicketSourceStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                        class="form-control" onchange="vicketSourceState(this)">
                     <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveVicketSourceLbl"/> - </option>
                 </select>
             </div>
@@ -27,121 +26,62 @@
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
             background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
+        <polymer-element name="vicket-source-list" attributes="url">
+            <template>
+                <style></style>
+                <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="json"></core-ajax>
+                <div flex horizontal wrap around-justified layout>
+                    <template repeat="{{vicketSource in responseData.vicketSourceList}}">
+                        <div class='card vicketSourceDiv {{vicketSource | stateClass}}' on-click="{{showVicketSourceDetails}}">
+                            <div class='vicketSourceSubjectDiv'><h2>{{vicketSource.name}}</h2></div>
+                            <div class='vicketSourceDescriptionDiv'><p>{{vicketSource.description | getHtml}}</p></div>
+                            <div class='vicketSourceReasonDiv'>
+                                <p>{{vicketSource.reason}}</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <script>
+                Polymer('vicket-source-list', {
+                    showVicketSourceDetails:function(e) {
+                        var targetURL = "${createLink( controller:'userVS')}/" +
+                                e.target.templateInstance.model.vicketSource.id + "?menu=" + menuType
+                        window.location.href = targetURL
+                    },
+                    stateClass:function(vicketSource) {
+                        if('ACTIVE' == vicketSource.state) return "vicketSourceActive";
+                        if('PENDING' == vicketSource.state) return "vicketSourcePending";
+                        if('CLOSED' == vicketSource.state) return "vicketSourceFinished";
+                    },
+                    getHtml:function(htmlEncoded) {
+                        var element = document.createElement("div");
+                        element.innerHTML = htmlEncoded;
+                        //Firefox bug with innerHTML
+                        return (typeof element.innerText == 'undefined' ? htmlEncoded:element.innerText);
+                    }
+                });
+            </script>
+        </polymer-element>
+        <vicket-source-list id="vicketSourceList"></vicket-source-list>
+
         <div id="vicketSourceList" class="row container"><ul></ul></div>
     </div>
 </div>
 
-<div id="vicketSourceTemplate" style="display:none;">
-    <div>
-        <li class='vicketSourceDiv linkvs'>
-            <div class='vicketSourceSubjectDiv'><h2>{0}</h2></div>
-            <div class='vicketSourceDescriptionDiv'><p>{1}</p></div>
-            <div class='vicketSourceReasonDiv'>
-                <p> {2}</p>
-            </div>
-        </li>
-    </div>
-</div>
 </body>
 </html>
 <asset:script>
-    var dynatable
+    document.querySelector("#vicketSourceList").url = "<g:createLink controller="userVS" action="vicketSourceList"/>?menu=" + menuType
 
-    $(function() {
-        $('#vicketSourceList').dynatable({
-            features: dynatableFeatures,
-            inputs: dynatableInputs,
-            params: dynatableParams,
-            table: {
-                bodyRowSelector: 'li'
-            },
-            dataset: {
-                ajax: true,
-                ajaxUrl: "<g:createLink controller="userVS" action="vicketSourceList"/>?menu=" + menuType,
-                ajaxOnLoad: false,
-                perPageDefault: 50,
-                records: []
-            },
-            writers: {
-                _rowWriter: vicketSourceWriter
-            }
-        });
-
-        dynatable = $('#vicketSourceList').data('dynatable');
-
-        dynatable.settings.params.records = 'vicketSourceList'
-        dynatable.settings.params.queryRecordCount = 'numTotalVicketSources'
-
-
-        $('#vicketSourceStateSelect').on('change', function (e) {
-            var vicketSourceState = $(this).val()
-            var optionSelected = $("option:selected", this);
-            console.log("vicketSourceStateSelect - selected: " + vicketSourceState)
-            var targetURL = "${createLink(controller: 'userVS', action:'vicketSourceList')}?menu=" + menuType;
-            if("" != vicketSourceState) {
-                history.pushState(null, null, targetURL);
-                targetURL = targetURL + "&state=" + vicketSourceState
-            }
-            dynatable.settings.dataset.ajaxUrl= targetURL
-            dynatable.paginationPage.set(1);
-            dynatable.process();
-        });
-
-        $('#vicketSourceList').bind('dynatable:afterUpdate',  function() {
-            updateMenuLinks()
-            $('.vicketSourceDiv').click(function() {
-                window.location.href = $(this).attr('data-href')
-            }
-        )})
-
-    })
-
-
-    function VicketSource(vicketSourceJSON, htmlTemplate) {
-        if(vicketSourceJSON != null) {
-            this.id = vicketSourceJSON.id
-            this.dateCreated = vicketSourceJSON.dateCreated
-            this.description = vicketSourceJSON.description
-            this.state = vicketSourceJSON.state
-            this.name = vicketSourceJSON.name
-            this.reason = vicketSourceJSON.reason
-            this.url = "${createLink( controller:'userVS')}/" + this.id
+    function vicketSourceState(selected) {
+        var optionSelected = selected.value
+        console.log("vicketSourceStateSelect: " + optionSelected)
+        var targetURL = "${createLink(controller: 'userVS', action:'vicketSourceList')}?menu=" + menuType;
+        if("" != optionSelected) {
+            targetURL = targetURL + "&state=" + vicketSourceState
         }
-
-        if(htmlTemplate != null) {
-            this.groupHTML = htmlTemplate.format(this.name, this.description, this.reason);
-        }
+        history.pushState(null, null, targetURL);
+        document.querySelector("#vicketSourceList").url = targetURL
     }
-
-    function UserVS() {}
-
-    UserVS.State = {
-        ACTIVE:"ACTIVE",
-        PENDING:"PENDING",
-        CLOSED:"CLOSED"
-    }
-
-    VicketSource.prototype.getElement = function() {
-        var $newGroup = $(this.groupHTML)
-        var $li = $newGroup.find("li");
-
-        if(UserVS.State.ACTIVE == this.state) $li.addClass("vicketSourceActive");
-        if(UserVS.State.PENDING == this.state) $li.addClass("vicketSourcePending");
-        if(UserVS.State.CLOSED == this.state) {
-            $li.addClass("vicketSourceFinished");
-            $li.find(".cancelMessage").fadeIn(100)
-        }
-
-        $li.attr('id', this.id)
-        $li.attr('data-href', this.url)
-        return $newGroup.html();
-    }
-
-    var vicketSourceTemplate = $('#vicketSourceTemplate').html()
-
-    function vicketSourceWriter(rowIndex, jsonAjaxData, columns, cellWriter) {
-        var vicketSource = new VicketSource(jsonAjaxData, vicketSourceTemplate)
-        return vicketSource.getElement()
-    }
-
 </asset:script>

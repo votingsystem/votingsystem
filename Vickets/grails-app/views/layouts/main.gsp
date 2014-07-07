@@ -145,5 +145,6 @@
     navBarDiv.addEventListener('nav-bar-ready', function(e) {
         navBarDiv.style.display = 'block';
     });
+    updateMenuLinks()
 </asset:script>
 <asset:deferredScripts/>

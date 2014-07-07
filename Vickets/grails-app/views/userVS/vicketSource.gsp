@@ -3,9 +3,6 @@
 <html>
 <head>
     <link href="${resource(dir: 'css', file:'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
-    <asset:javascript src="jquery.stickytableheaders.js"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:stylesheet src="jquery.dynatable.css"/>
     <meta name="layout" content="main" />
 </head>
 <body>
@@ -51,12 +48,11 @@
                 <table class="table white_headers_table" id="transaction_table" style="">
                     <thead>
                     <tr style="color: #ff0000;">
-                        <th data-dynatable-column="amount" style="max-width:80px;"><g:message code="amountLbl"/></th>
-                        <th data-dynatable-column="currency" style="max-width:60px;"><g:message code="currencyLbl"/></th>
-                        <th data-dynatable-column="dateCreated" style="width:170px;"><g:message code="dateLbl"/></th>
-                        <th data-dynatable-column="subject" style="min-width:300px;"><g:message code="subjectLbl"/></th>
-                        <th data-dynatable-column="receiver" style="min-width:200px;"><g:message code="recipientLbl"/></th>
-                        <!--<th data-dynatable-no-sort="true"><g:message code="voucherLbl"/></th>-->
+                        <th style="max-width:80px;"><g:message code="amountLbl"/></th>
+                        <th style="max-width:60px;"><g:message code="currencyLbl"/></th>
+                        <th style="width:170px;"><g:message code="dateLbl"/></th>
+                        <th style="min-width:300px;"><g:message code="subjectLbl"/></th>
+                        <th style="min-width:200px;"><g:message code="recipientLbl"/></th>
                     </tr>
                     </thead>
                     <tbody>
