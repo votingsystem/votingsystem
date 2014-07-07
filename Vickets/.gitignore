@@ -1,5 +1,4 @@
-/web-app/WEB-INF/cms/*.jks
-/web-app/WEB-INF/cms/*.pem
+/web-app/WEB-INF/cms
 
 /grails-app/views/restDoc
 /grails-app/views/restDocTemplates
