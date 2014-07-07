@@ -3,7 +3,7 @@
 
 <polymer-element name="search-user" attributes="url">
     <template>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{userList}}" handleAs="json" method="get"
+        <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="json"></core-ajax>
         <div layout vertical center style="max-width: 800px; overflow:auto;">
             <table class="table white_headers_table" id="uservs_table" style="">
@@ -14,7 +14,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <template repeat="{{uservs in userList.userVSList}}">
+                <template repeat="{{uservs in responseData.userVSList}}">
                     <tr on-click="{{showUserDetails}}">
                         <td class="text-center">{{uservs.nif}}</td>
                         <td class="text-center">{{uservs.name}}</td>
@@ -28,8 +28,18 @@
         Polymer('search-user', {
             ready: function() { this.url = this.url || '';},
                 showUserDetails:function(e) {
-                    this.fire('user-clicked', {userId: e.target.templateInstance.model.uservs.id});
+                    this.fire('user-clicked', e.target.templateInstance.model.uservs);
+                },
+                emptyTable: function() {
+                    var tableRows = this.$.uservs_table.getElementsByTagName('tbody');
+                    var numRows = tableRows.length;
+                    while(numRows) this.$.uservs_table.removeChild(tableRows[--numRows]);
+                    this.$.uservs_table.style.visibility = 'hidden'
+                },
+                responseDataReceived: function() {
+                    console.log("search-user - responseDataReceived - num. users: " + this.responseData.userVSList.length)
                 }
+
             });
     </script>
 </polymer-element>

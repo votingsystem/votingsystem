@@ -1,0 +1,80 @@
+:host {
+  display: block;
+}
+
+/* To ensure your styling works under the Shadow DOM polyfill, see
+   www.polymer-project.org/docs/polymer/styling.html#directives */
+polyfill-next-selector { content: ':host > h2'; }
+::content h2 {
+  color: blue;
+}
+
+.tagBox {
+    margin: 10px auto 30px auto;
+    padding: 5px 10px 5px 10px;;
+    border: 1px solid #ccc;
+}
+
+.tagBox legend {
+    font-size: 1.2em;
+    font-weight: bold;
+    color:#6c0404;
+}
+
+.card {
+    position: relative;
+    display: inline-block;
+    background: #f7f7f7;
+    width: auto;
+    vertical-align: top;
+    box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+    padding:15px 15px 15px 20px;
+}
+
+paper-button {
+    margin: 1em;
+    width: 10em;
+}
+
+paper-button.colored {
+    color: #d33;
+    fill: #d33;
+}
+
+paper-button[raisedButton].colored {
+    background: #d33;
+    color: #fff;
+}
+paper-button[raisedButton].colored.hover:hover {
+    background: #6c0404;
+}
+paper-button[raisedButton].colored::shadow #ripple {
+    color: #6c0404;
+}
+paper-button[raisedButton].colored::shadow #focusBg {
+    background: #6c0404;
+}
+
+/* Button */
+.button {
+    display: inline-block;
+    position: relative;
+    width: 120px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 2px;
+    font-size: 0.9em;
+    background-color: #f9f9f9;
+    color: #646464;
+}
+
+.button.accept {
+    background-color: #6c0404;
+    color: #f9f9f9;
+}
+
+.button.raised {
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: 0.2s;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+}

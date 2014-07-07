@@ -1,0 +1,180 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-overlay/core-overlay.html">
+<link rel="import" href="../core-ajax/core-ajax.html">
+<link rel="import" href="../votingsystem-input/votingsystem-input.html">
+<link rel="import" href="../core-icons/core-icons.html">
+<link rel="import" href="../core-item/core-item.html">
+
+
+<!--
+Dialog to search and select tags
+
+##### Example
+
+    <votingsystem-select-tag-dialog></votingsystem-select-tag-dialog>
+
+@element votingsystem-select-tag-dialog
+@blurb Dialog to search and select tags
+@status alpha
+@homepage http://votingsystem.github.io/votingsystem-select-tag-dialog
+-->
+<polymer-element name="votingsystem-select-tag-dialog" attributes="caption opened serviceURL">
+
+  <template>
+        <script src="./i18n/messages.js" on-load="{{messagesLoaded}}"></script>
+        <link rel="stylesheet" href="votingsystem-select-tag-dialog.css" />
+        <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
+                    contentType="json"></core-ajax>
+
+      <core-overlay id="coreOverlay" flex vertical class="card" opened="{{opened}}"
+                    style="z-index:300; position: absolute; top:30px;" on-core-overlay-open="{{dialogVisible}}">
+
+          <h3>{{caption}}</h3>
+
+          <div layout vertical wrap layout style="border: 1px solid #6c0404;display:{{(selectedTagList == null || selectedTagList.length == 0) ? 'none':'block'}}">
+              <div style="font-weight: bold;">{{messages.selectedTagsLbl}}</div>
+              <div flex horizontal wrap layout style="">
+              <template repeat="{{tag in selectedTagList}}">
+                  <section>
+                      <div class="button raised" on-click="{{removeTag}}">
+                          <div fit>{{tag.name}} <core-icon icon="remove-circle" style="fill:#6c0404;"></core-icon></div>
+                          <paper-ripple fit></paper-ripple>
+                      </div>
+                  </section>
+              </template>
+              </div>
+          </div>
+
+          <div layout horizontal center center-justified>
+              <votingsystem-input id="tagSearchInput" floatinglabel label="{{messages.tagLbl}}" required autofocus>
+              </votingsystem-input>
+              <paper-button raisedButton label="{{messages.tagSearchLbl}}" class="colored hover"
+                            on-click="{{searchTag}}" style=""></paper-button>
+          </div>
+          <div flex horizontal wrap layout>
+              <template repeat="{{tag in searchedTagList}}">
+                  <section style>
+                      <div class="button raised" on-click="{{selectTag}}">
+                          <div fit>{{tag.name}} <core-icon icon="add-circle" style="fill:#6c0404;"></core-icon></div>
+                          <paper-ripple fit></paper-ripple>
+                      </div>
+                  </section>
+
+              </template>
+          </div>
+          <div layout horizontal style="margin:10px 20px 0px 0px;">
+              <div flex></div>
+              <div class="button raised accept" on-click="{{fireTags}}">
+                  <div class="center" fit>{{messages.acceptLbl}}</div>
+                  <paper-ripple fit></paper-ripple>
+              </div>
+          </div>
+
+      </core-overlay>
+      <conten></conten>
+  </template>
+
+  <script>
+
+    Polymer('votingsystem-select-tag-dialog', {
+        messagesLoaded:function() {
+            console.log("votingsystem-select-tag-dialog - messages for locale " + userLocale)
+            this.messages = localizedMessages
+        },
+        selectedTagList: [],
+        searchedTagList: [],
+
+      /**
+       * The `caption` of the dialog
+       *
+       * @attribute caption
+       * @type string
+       */
+      caption: null,
+
+        /**
+         * The `url` of the HTTP tag service
+         *
+         * @attribute url
+         * @type string
+         */
+        serviceURL: null,
+
+      ready: function() {
+          var tagdialog = this
+          this.$.tagSearchInput.onkeypress = function(event){
+              var chCode = ('charCode' in event) ? event.charCode : event.keyCode;
+              if (chCode == 13)  tagdialog.searchTag()
+          }
+      },
+
+        dialogVisible: function() {
+            this.$.tagSearchInput.inputValue = ''
+            this.selectedTagList = []
+            this.searchedTagList = []
+        },
+
+        /**
+         * Toggle the dialog's opened state.
+         * @method toggle
+         */
+        toggle: function() {
+            this.$.coreOverlay.toggle();
+        },
+
+        responseDataChanged:function () {
+            this.searchedTagList = this.responseData.tagRecords
+        },
+
+        searchTag: function() {
+            if(!this.$.tagSearchInput.invalid) {
+                this.$.ajax.url = this.serviceURL + "?tag=" + this.$.tagSearchInput.inputValue
+            }
+
+        },
+
+        selectTag: function(e) {
+            var selectedTag = e.target.templateInstance.model.tag
+            var isNewTag = true
+            for(tagIdx in this.selectedTagList) {
+                if(selectedTag.id == this.selectedTagList[tagIdx].id) isNewTag = false
+            }
+            console.log("selectTag: " + selectedTag.id + " - isNewTag: " + isNewTag)
+            if(isNewTag) {
+                this.selectedTagList.push(selectedTag)
+                for(tagIdx in this.searchedTagList) {
+                    if(selectedTag.id == this.searchedTagList[tagIdx].id) this.searchedTagList.splice(tagIdx, 1)
+                }
+            }
+        },
+
+        removeTag: function(e) {
+            var selectedTag = e.target.templateInstance.model.tag
+            for(tagIdx in this.selectedTagList) {
+                if(selectedTag.id == this.selectedTagList[tagIdx].id) {
+                    this.selectedTagList.splice(tagIdx, 1)
+                    this.searchedTagList.push(selectedTag)
+                }
+            }
+        },
+
+        reset: function() {
+            this.selectedTagList = []
+            this.searchedTagList = []
+        },
+
+      /**
+       * Fire the selected tags
+       * 
+       * @method fireTags
+       */
+      fireTags: function() {
+        this.fire('tag-selected', this.selectedTagList);
+          this.$.coreOverlay.toggle();
+      }
+
+    });
+
+  </script>
+
+</polymer-element>

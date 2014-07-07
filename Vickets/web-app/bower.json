@@ -25,7 +25,6 @@
 
       "font-awesome":"font-awesome#~4.1.0",
       "bootstrap":"bootstrap#~3.1.1",
-      "bootstrapValidator":"bootstrapValidator#~0.4.5",
       "ckeditor":"ckeditor#~4.3.5",
       "jquery-ui":"jquery-ui#~1.11.0",
 

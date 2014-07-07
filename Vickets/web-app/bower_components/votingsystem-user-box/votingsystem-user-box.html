@@ -1,0 +1,67 @@
+<polymer-element name="votingsystem-user-box" attributes="boxCaption">
+    <template>
+        <script src="./i18n/messages.js" on-load="{{messagesLoaded}}"></script>
+        <style>
+            .receptorsBox {
+                margin: 10px auto 30px auto;
+                padding: 5px 10px 5px 10px;;
+                border: 1px solid #ccc;
+            }
+            .receptorsBox legend {
+                font-size: 1.2em;
+                font-weight: bold;
+                color:#6c0404;
+            }
+        </style>
+        <div layout vertical id="fieldsDiv" class="receptorsBox" style="display:none;">
+            <fieldset id="fieldsBox">
+                <legend id="fieldsLegend" style="border: none;">{{boxCaption}}</legend>
+                <template repeat="{{uservs in uservsList}}">
+                    <div layout horizontal center style="padding: 0px 10px 0px 10px;">
+                        <button on-click="{{removeUser}}" type="button" class="btn btn-default"
+                                style="display:inline;margin:0px 20px 0px 0px;">{{messages.deleteLbl}}<i class="fa fa-times"></i>
+                        </button>
+                        <div style='font-size:1em;padding:0px 0 0 10px;vertical-align:middle;display:inline; width:100%;'>
+                            {{(uservs.firstName != null && "" != uservs.firstName) ? uservs.firstName + " " + uservs.lastName:uservs.name}}
+                        </div>
+                    </div>
+                </template>
+            </fieldset>
+        </div>
+    </template>
+    <script>
+        Polymer('votingsystem-user-box', {
+            uservsList:[],
+            messagesLoaded:function() {
+                console.log("votingsystem-user-box - messages for locale " + userLocale)
+                this.messages = localizedMessages
+            },
+            ready:function() { },
+            uservsListChanged:function () {
+                if(this.uservsList.length == 0) this.$.fieldsDiv.style.display = 'none'
+                else this.$.fieldsDiv.style.display = 'block'
+            },
+            addUser:function(userToAdd) {
+                var isNewUser = true
+                for(userIdx in this.uservsList) {
+                    if(userToAdd.id == this.uservsList[userIdx].id) isNewUser = false
+                }
+                console.log("votingsystem-user-box - addUser: " + userToAdd.nif + " - isNewUser: " + isNewUser)
+                if(isNewUser) this.uservsList.push(userToAdd)
+            },
+            getUserList:function(userList) {
+                return this.uservsList
+            },
+            removeUser:function(e) {
+                var userToDelete = e.target.templateInstance.model.uservs
+                for(userIdx in this.uservsList) {
+                    if(userToDelete.id == this.uservsList[userIdx].id) {
+                        this.uservsList.splice(userIdx, 1)
+                    }
+                }
+            },
+            removeUsers:function(e) {
+                this.uservsList = []
+            }
+        });</script>
+</polymer-element>

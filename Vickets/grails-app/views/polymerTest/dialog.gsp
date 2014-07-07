@@ -16,6 +16,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
 
 
+
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog',
             file: 'votingsystem-advanced-search-dialog.html')}">
 
@@ -28,7 +29,7 @@
 <paper-button label="Avanced search dialog" onclick="showAvancedSearchDialog()"></paper-button>
 
 <paper-button label="Overlay dialog" onclick="showOverlayDialog()"></paper-button>
-
+<paper-button label="Tag dialog" onclick="showTagDialog()"></paper-button>
 
 <core-overlay id="confirmation" layout vertical center center-justified  class="card"
               transition="paper-dialog-transition-center" style="position: absolute; top:30px;">
@@ -72,7 +73,9 @@
         dialog.toggle();
     }
 
+    function showTagDialog() {
 
+    }
 
 
     function acceptButton() {

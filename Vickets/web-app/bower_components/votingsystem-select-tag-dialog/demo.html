@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>votingsystem-select-tag-dialog Demo</title>
+
+  <script src="../platform/platform.js"></script>
+  <link rel="import" href="../polymer/polymer.html">
+  <link rel="import" href="../paper-button/paper-button.html">
+  <link rel="import" href="../paper-ripple/paper-ripple.html">
+  <link rel="import" href="votingsystem-select-tag-dialog.html">
+
+
+  <style shim-shadowdom>
+      body {
+          font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
+          font-size: 14px;
+          text-align: center;
+          padding: 1em 2em;
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+      }
+      h1 {
+          margin-bottom: 2em;
+      }
+
+      section {
+          display: inline-block;
+          background: #f7f7f7;
+          border-radius: 3px;
+          width: 25%;
+          text-align: center;
+          margin: 1%;
+          padding: 1em;
+      }
+
+      .label {
+          text-align: left;
+          color: #bbb;
+          font-size: 12px;
+          margin-top: 2em;
+      }
+  </style>
+    <script>
+        function showTagDialog() {
+            document.querySelector("#tagDialog").toggle()
+        }
+    </script>
+</head>
+<body unresolved>
+
+  <p>An example of using <code>&lt;votingsystem-select-tag-dialog></code>:</p>
+
+
+
+  <paper-button raisedButton label="Toggle tag dialog" class="colored hover"  onclick="showTagDialog()"></paper-button>
+
+  <votingsystem-select-tag-dialog id="tagDialog" opened="true" caption="Select Tag"
+                                  serviceURL="/Vickets/vicketTagVS/index"></votingsystem-select-tag-dialog>
+
+</body>
+</html>

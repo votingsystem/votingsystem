@@ -18,11 +18,11 @@ Example:
 <link href="../paper-input/paper-input.html" rel="import">
 <link href="../core-icons/iconsets/icons.html" rel="import">
 <link href="../core-icons/iconsets/icons.html" rel="import">
-<script src="./i18n/votingsystem-advanced-search-dialog-messages.js"></script>
 
 <!-- a simple dialog element made with core-overlay -->
 <polymer-element name="x-dialog" attributes="opened autoCloseDisabled">
     <template>
+        <script src="i18n/messages.js" on-load="{{messagesLoaded}}"></script>
         <style>
             :host {
                 box-sizing: border-box;
@@ -147,9 +147,11 @@ Example:
             isValidForm:false,
             searchInputMessageValue:'init',
 
-
-            ready: function() {
+            messagesLoaded:function() {
+                console.log("votingsystem-advanced-search-dialog - messages for locale " + userLocale)
                 this.messages = localizedMessages
+            },
+            ready: function() {
                 var isInputDateSupported = this.checkInputType("date")
                 console.log(" - isDateSupported: " + isInputDateSupported)
                 if(isInputDateSupported) {

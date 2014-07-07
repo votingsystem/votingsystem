@@ -21,7 +21,7 @@ class VicketTagVSController {
     def userVSService
 
     def index() {
-        if("POST".equals(request.method)) {
+        if("POST".equals(request.method)|| "OPTIONS".equals(request.method)) {
             def requestJSON = request.JSON
             if(!requestJSON.tag) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code: 'missingParamErrorMsg', args:['tag']))]
@@ -36,7 +36,9 @@ class VicketTagVSController {
                             userVS:userVSService.getSystemUser(), IBAN:userVSService.getSystemUser().getIBAN(), tag:tag).save()
                 }
                 def result = [id:tag.id, name:tag.name]
-                render  result as JSON
+                response.setHeader('Access-Control-Allow-Origin', "*")
+                if (params.callback) render "${params.callback}(${result as JSON})"
+                else render result as JSON
             }
         } else {
             def listDB

@@ -1,18 +1,19 @@
 var locales = {
     es: {
-        "typeLbl":"Tipo",
-        "amountLbl":"Cantidad",
-        "datecreatedLbl":"Fecha",
-        "subjectLbl":"Asunto"
+        "selectedTagsLbl":"Etiquetas seleccionadas",
+        "tagLbl":"Etiqueta",
+        "tagSearchLbl":"Buscar",
+        "acceptLbl":"Aceptar",
+        "closeLbl":"Cerrar"
     },
     en: {
-        "typeLbl":"Type",
-        "amountLbl":"Amount",
-        "datecreatedLbl":"Date",
-        "subjectLbl":"Subject"
+        "selectedTagsLbl":"Selectes tags",
+        "tagLbl":"Tag",
+        "tagSearchLbl":"Search",
+        "acceptLbl":"Accept",
+        "closeLbl":"Close"
     }
 }
-
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 function _getParameterByName(name) {
@@ -25,10 +26,8 @@ function _getParameterByName(name) {
 var localizedMessages
 var userLocale = _getParameterByName('locale') || navigator.language
 if(locales[userLocale]) {
-    console.log("messages for locale " + userLocale)
     localizedMessages = locales[userLocale]
 } else localizedMessages = locales['es']
-
 
 
 

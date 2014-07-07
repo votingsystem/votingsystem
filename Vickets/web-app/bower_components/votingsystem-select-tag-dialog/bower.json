@@ -1,0 +1,21 @@
+{
+  "name": "votingsystem-select-tag-dialog",
+  "version": "0.0.1",
+  "authors": [
+    "JJ <jgzornoza@gmail.com>"
+  ],
+  "description": "Dialog to search and select tags",
+  "keywords": "votingsystem, vickets, polymer, web-components",
+  "main": "votingsystem-select-tag-dialog.html",
+  "license": "Licensed under the Apache License, Version 2.0",
+  "homepage": "https://github.com/votingsystem/votingsystem-select-tag-dialog/",
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.3.3",
+    "core-overlay": "Polymer/core-overlay#~0.3.3",
+    "votingsystem-input":"votingsystem-input"
+  }
+
+}

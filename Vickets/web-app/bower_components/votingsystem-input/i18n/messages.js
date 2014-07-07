@@ -1,21 +1,9 @@
 var locales = {
     es: {
-    "caption":"Búsqueda avanzada",
-    "fromDate":"Desde",
-    "toDate":"Hasta",
-    "searchInputMessage":"Introduzca la cadena de búsqueda",
-    "accept":"Aceptar",
-    "dateLbl":"Fecha",
-    "hourLbl": "Hora"
+        "errorMsg":"Campo obligatorio"
     },
     en: {
-    "caption":"Avanced search",
-    "fromDate":"From date",
-    "toDate":"To date",
-    "searchInputMessage":"Enter search text",
-    "accept":"Accept",
-    "dateLbl":"Date",
-    "hourLbl": "Hour"
+        "errorMsg":"Required field"
     }
 }
 
@@ -30,10 +18,8 @@ function _getParameterByName(name) {
 var localizedMessages
 var userLocale = _getParameterByName('locale') || navigator.language
 if(locales[userLocale]) {
-    console.log("messages for locale " + userLocale)
     localizedMessages = locales[userLocale]
 } else localizedMessages = locales['es']
-
 
 
 

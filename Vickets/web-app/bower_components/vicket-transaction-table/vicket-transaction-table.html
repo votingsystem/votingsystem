@@ -1,11 +1,9 @@
 <link rel="import" href="../core-ajax/core-ajax.html">
-<script src="./i18n/vicket-transaction-table-messages.js"></script>
 
 <polymer-element name="vicket-transaction-table" attributes="url params newRecord">
     <template>
-        <style>
-
-        </style>
+        <script src="i18n/messages.js" on-load="{{messagesLoaded}}"></script>
+        <style></style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                    contentType="json" params="{{params}}"></core-ajax>
         <div layout vertical center>
@@ -35,9 +33,11 @@
     </template>
     <script>
         Polymer('vicket-transaction-table', {
-            ready:function() {
+            messagesLoaded:function() {
+                console.log("vicket-transaction-table - messages for locale " + userLocale)
                 this.messages = localizedMessages
             },
+            ready:function() { },
             transactionDescription: function(type) {
                 return getTransactionVSDescription(type)
             },

@@ -8,8 +8,6 @@
 <html>
 <head>
     <link href="${resource(dir: 'css', file:'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrapValidator/dist/js', file: 'bootstrapValidator.min.js')}"></script>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrapValidator/dist/css', file: 'bootstrapValidator.min.css')}" type="text/css"/>
     <meta name="layout" content="main" />
 </head>
 <body>
@@ -23,6 +21,7 @@
             </li>
         </ol>
     </div>
+<button onclick="showTagDialog()"> Tag diaog</button>
 <div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 150px 30px;">
     <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
     </div>
@@ -208,6 +207,9 @@
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
+    function showTagDialog() {
+    document.querySelector("#tagDialog").toggle()
+}
 
     var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
     var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
