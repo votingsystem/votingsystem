@@ -46,7 +46,12 @@
         </script>
     </polymer-element>
 
-
+    <polymer-element name="html-echo" attributes="html">
+        <script> Polymer('html-echo', {
+                htmlChanged: function() {// WARNING: potential XSS vulnerability if `html` comes from an untrusted source
+                    this.innerHTML = this.html;
+                }});</script>
+    </polymer-element>
 
     <polymer-element name="groupvs-list" attributes="url">
         <template>
@@ -77,7 +82,7 @@
                              class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' hero-p isHero="{{$.pages.selected === i + 1 || $.pages.selected === 0}}" cross-fade>
                             <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                             <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
-                            <div class='groupvsInfoDiv'>{{groupvs.description | getHtml}}</div>
+                            <div class='groupvsInfoDiv'><html-echo html="{{groupvs.description}}"></html-echo></div>
                             <div style="position: relative;display: {{(groupvs.state == 'CANCELLED')?'block':'none'}};">
                                 <div class='groupvsMessageCancelled' style=""><g:message code="groupvsCancelledLbl"/></div>
                             </div>
@@ -115,12 +120,6 @@
                 },
                 getRepresentativeName:function(groupvs) {
                     return groupvs.representative.firstName + " " + groupvs.representative.lastName
-                },
-                getHtml:function(htmlEncoded) {
-                    var element = document.createElement("div");
-                    element.innerHTML = htmlEncoded;
-                    //Firefox bug with innerHTML
-                    return (typeof element.innerText == 'undefined' ? htmlEncoded:element.innerText);
                 },
                 groupvsClicked:function(groupvsURL) {
                     window.location.href = groupvsURL

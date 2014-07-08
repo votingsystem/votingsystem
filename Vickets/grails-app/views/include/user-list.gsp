@@ -10,7 +10,7 @@
               text-decoration:underline;
           }
       </style>
-      <core-ajax id="ajax" auto url="{{url}}" response="{{userListJSON}}" handleAs="json" method="get"
+      <core-ajax id="ajax" auto url="{{url}}" response="{{userList}}" handleAs="json" method="get"
                  contentType="json"></core-ajax>
       <div layout vertical center>
           <table class="table white_headers_table" id="uservs_table" style="">
@@ -24,13 +24,13 @@
               </tr>
               </thead>
               <tbody>
-                  <template repeat="{{userJSON in userListJSON.userVSList}}">
-                      <tr><td class="text-center"><div data-userId="{{userJSON.uservs.id}}" on-click="{{openWindow}}"
-                              class="nifColumn">{{userJSON.uservs.NIF}}</div></td>
-                          <td class="text-center">{{userJSON.uservs.IBAN}}</td>
-                          <td class="text-center">{{userJSON.uservs.name}}</td>
-                          <td class="text-center">{{userJSON.state | userState}}</td>
-                          <td class="text-center">{{userJSON.lastUpdated}}</td></tr>
+                  <template repeat="{{uservs in userList.userVSList}}">
+                      <tr><td class="text-center"><div data-userId="{{uservs.uservs.id}}" on-click="{{openWindow}}"
+                              class="nifColumn">{{uservs.uservs.NIF}}</div></td>
+                          <td class="text-center">{{uservs.uservs.IBAN}}</td>
+                          <td class="text-center">{{uservs.uservs.name}}</td>
+                          <td class="text-center">{{uservs.state | userState}}</td>
+                          <td class="text-center">{{uservs.lastUpdated}}</td></tr>
                   </template>
               </tbody>
           </table>
@@ -38,7 +38,7 @@
   </template>
   <script>
     Polymer('user-list', {
-        ready: function() { },
+        ready: function() {console.log("====== " + this.tagName) },
         openWindow: function(e) {
             var userURL = this.userURLPrefix + "/" + e.target.getAttribute("data-userId") + "?mode=details&menu=" + this.menuType
             openWindow(userURL)

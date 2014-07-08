@@ -39,12 +39,10 @@
     <button core-overlay-toggle>OK</button>
 </core-overlay>
 
-<votingsystem-advanced-search-dialog id="advancedSearchDialog" transition="paper-dialog-transition-center" opened="true" >
+<votingsystem-advanced-search-dialog id="advancedSearchDialog" transition="paper-dialog-transition-center" opened="false" >
 </votingsystem-advanced-search-dialog>
 
-
 <paper-button label="paperDialog" onclick="openWindow('')"></paper-button>
-
 
 </body>
 </html>

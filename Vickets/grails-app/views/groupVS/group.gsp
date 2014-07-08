@@ -21,7 +21,7 @@
             </li>
         </ol>
     </div>
-<button onclick="showTagDialog()"> Tag diaog</button>
+<button onclick="showTagDialog()">Tag dialog</button>
 <div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 150px 30px;">
     <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
     </div>
@@ -203,6 +203,10 @@
 <g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>
 <g:include view="/include/dialog/depositDialog.gsp"/>
 <g:include view="/include/dialog/resultDialog.gsp"/>
+
+<footer>
+    <p style="text-align: center;"><small><a  class="appLink" href="mailto:jgzornoza@gmail.com">Contact</a></small></p>
+</footer>
 </body>
 </html>
 <asset:script>

@@ -143,7 +143,7 @@
     $('#depositDialog').on('hidden.bs.modal', function (e) {
         receptorBox.removeUsers()
         if(document.getElementById("fields") != null) document.getElementById("fields").innerHTML= ''
-        dialogUserList.emptyTable()
+        dialogUserList.reset()
         tagDialog.reset()
         document.querySelector("#fieldsDiv").style.display = 'none'
         document.getElementById("depositDialogForm").reset();

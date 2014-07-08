@@ -10,6 +10,8 @@ package org.votingsystem.vicket.controller
  * */
 class PolymerTestController {
 
+    def test() {}
+
     def dialog() { }
 
     def tabs() { }

@@ -1,6 +1,7 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubscriptionVS
@@ -13,6 +14,7 @@ import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.vicket.websocket.SessionVSHelper
 
 import java.lang.reflect.Constructor
 import java.util.concurrent.ConcurrentHashMap
@@ -34,11 +36,19 @@ class TestingController {
     def transactionVSService
     def auditingService
     def filesService
-
-
-
+    def webSocketService
 
     def index() { }
+
+    def testSocket() {}
+
+    def socketvs() {}
+
+    def broadcast() {
+        SessionVSHelper.getInstance().broadcast(new JSONObject([status:200, message:"Hello"]))
+        render "OK"
+        return false
+    }
 
     def dockspawn() { }
 

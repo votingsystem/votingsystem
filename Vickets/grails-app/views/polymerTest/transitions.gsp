@@ -19,6 +19,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 
     <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-animation', file: 'core-animation.html')}">
 
     <style>
     #hero1 {
@@ -79,8 +80,34 @@
     </template>
 
 
+<core-animation id="fadeout" duration="500">
+    <core-animation-keyframe>
+        <core-animation-prop name="opacity" value="1"></core-animation-prop>
+    </core-animation-keyframe>
+    <core-animation-keyframe>
+        <core-animation-prop name="opacity" value="0"></core-animation-prop>
+    </core-animation-keyframe>
+</core-animation>
+
+<div id="el">Fade me out</div><button onclick="fadeOut()">trigger fade</button>
+
 </body>
 <script>
+
+    //http://stackoverflow.com/questions/12991164/maintaining-final-state-at-end-of-css3-animation
+    function fadeOut() {
+        var animation = new CoreAnimation();
+        animation.duration = 500;
+        animation.keyframes = [
+            {opacity: 1},
+            {opacity: 0},
+            {display: 'none'}
+        ];
+        animation.target = document.getElementById('el');
+        animation.play();
+    }
+
+
     var template1 = document.querySelector('#template1')
 
     template1.addEventListener('template-bound', function(e) {

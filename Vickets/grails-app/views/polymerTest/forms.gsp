@@ -63,7 +63,7 @@
     </style>
 </head>
 
-<body style="height: 800px;">
+<body style="height: 800px; width: 1000px; margin 0ps">
 <div>
     <paper-button label="Test button" onclick="showDialog()"></paper-button>
 </div>
@@ -149,6 +149,26 @@
 </polymer-element>
 
 <intro-tag></intro-tag>
+
+
+<polymer-element name="form-test">
+    <template>
+        <form id="myForm" on-submit="{{ submitForm }}">
+            <input class="text" value="{{ someValue}}" name="text">
+            <button type="submit">Submit</button>
+        </form>
+    </template>
+    <script>
+        Polymer('form-test', {
+            submitForm: function(e) {
+                e.preventDefault();
+                this.$.myForm.submit();
+            }
+        });
+    </script>
+</polymer-element>
+
+<form-test></form-test>
 
 </body>
 </html>

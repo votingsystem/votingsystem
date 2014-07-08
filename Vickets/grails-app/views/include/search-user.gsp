@@ -1,11 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/votingsystem-input', file: 'votingsystem-input.html')}">
 
 <polymer-element name="search-user" attributes="url">
     <template>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="json"></core-ajax>
-        <div layout vertical center style="max-width: 800px; overflow:auto;">
+        <div layout vertical center style="max-width: 800px;">
             <table class="table white_headers_table" id="uservs_table" style="">
                 <thead>
                 <tr style="color: #ff0000;">
@@ -14,14 +15,15 @@
                 </tr>
                 </thead>
                 <tbody>
-                <template repeat="{{uservs in responseData.userVSList}}">
-                    <tr on-click="{{showUserDetails}}">
-                        <td class="text-center">{{uservs.nif}}</td>
-                        <td class="text-center">{{uservs.name}}</td>
-                    </tr>
-                </template>
+                    <template repeat="{{uservs in responseData.userVSList}}">
+                        <tr on-click="{{showUserDetails}}">
+                            <td class="text-center">{{uservs.nif}}</td>
+                            <td class="text-center">{{uservs.name}}</td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
+            <div id="emptySearchMsg" style="font-size: 1em; display: none;"><g:message code="emptyUserSearchResultMsg"/></div>
         </div>
     </template>
     <script>
@@ -30,14 +32,18 @@
                 showUserDetails:function(e) {
                     this.fire('user-clicked', e.target.templateInstance.model.uservs);
                 },
-                emptyTable: function() {
-                    var tableRows = this.$.uservs_table.getElementsByTagName('tbody');
-                    var numRows = tableRows.length;
-                    while(numRows) this.$.uservs_table.removeChild(tableRows[--numRows]);
+                reset: function() {
+                    console.log("===== reset " + this.id)
+                    this.responseData = {userVSList:[]}
                     this.$.uservs_table.style.visibility = 'hidden'
                 },
                 responseDataReceived: function() {
                     console.log("search-user - responseDataReceived - num. users: " + this.responseData.userVSList.length)
+                    if(this.responseData.userVSList.length > 0) this.$.uservs_table.style.visibility = 'visible'
+                    else {
+                        this.$.uservs_table.style.visibility = 'hidden'
+                        this.$.emptySearchMsg.style.display = 'block'
+                    }
                 }
 
             });

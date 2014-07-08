@@ -30,28 +30,24 @@
 
     <vicket-transaction-table id="recordList" url="${createLink(controller: 'transaction', action: 'index')}"></vicket-transaction-table>
 
+    <votingsystem-socket id="wssocket" url="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
 </div>
 </body>
 
 </html>
 <asset:script>
-    var socketService = new SocketService()
-    socketService.connect()
-    socketService.socket.onmessage = function (message) {
-        console.log('socket.onmessage - message.data: ' + message.data);
-        var messageJSON = toJSON(message.data)
-        document.querySelector("#recordList").newRecord = messageJSON
-    }
+    document.querySelector("#wssocket").addEventListener('on-message', function (e) {
+        document.querySelector("#recordList").newRecord = e.detail
+    })
 
-    socketService.socket.onopen = function () {
-        console.log('listener - WebSocket connection opened');
-        socketService.sendMessage({operation:Operation.LISTEN_TRANSACTIONS, locale:navigator.language})
-    };
+    document.addEventListener('polymer-ready', function() {
+        document.querySelector("#wssocket").sendMessage(JSON.stringify({operation:Operation.LISTEN_TRANSACTIONS, locale:navigator.language}))
+    });
 
-    function transactionvsTypeSelect(selected) {
-        var transactionvsType = selected.value
-        console.log("transactionvsType: " + transactionvsType)
-        targetURL = "${createLink(controller: 'transaction', action: 'index')}";
+function transactionvsTypeSelect(selected) {
+    var transactionvsType = selected.value
+    console.log("transactionvsType: " + transactionvsType)
+    targetURL = "${createLink(controller: 'transaction', action: 'index')}";
         if("" != transactionvsType) {
             targetURL = targetURL + "?transactionvsType=" + transactionvsType
         }
