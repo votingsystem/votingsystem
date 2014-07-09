@@ -156,7 +156,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
         stage.setTitle(ContextVS.getMessage("documentSignerDialogCaption"));
     }
 
-    private void showMessage(int statusCode, String message) {
+    private void showMessage(final int statusCode, final String message) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 MessageDialog messageDialog = new MessageDialog();

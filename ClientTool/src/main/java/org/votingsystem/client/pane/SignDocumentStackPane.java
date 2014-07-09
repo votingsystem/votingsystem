@@ -201,7 +201,7 @@ public class SignDocumentStackPane extends StackPane {
         new Thread(operationHandlerTask).start();
     }
 
-    private void showMessage(int statusCode, String message) {
+    private void showMessage(final int statusCode, final String message) {
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 MessageDialog messageDialog = new MessageDialog();

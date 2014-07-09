@@ -333,7 +333,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         WebSocketService.getInstance().setConnectionEnabled(!wsConnected.get());
     }
 
-    private void setVicketServerAvailable(boolean available) {
+    private void setVicketServerAvailable(final boolean available) {
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {
@@ -354,7 +354,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
 
-    private void setVotingSystemAvailable(boolean available) {
+    private void setVotingSystemAvailable(final boolean available) {
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 if(available) {

@@ -92,7 +92,7 @@ public class SignatureInfoPane extends GridPane {
 
         getColumnConstraints().addAll(new ColumnConstraints(), new ColumnConstraints(500), new ColumnConstraints());
 
-        GridPane signatureInfoGridPane = new GridPane();
+        final GridPane signatureInfoGridPane = new GridPane();
         CheckBox signatureInfoCheckBox = new CheckBox(ContextVS.getMessage("signatureInfoCheckBoxLbl"));
         signatureInfoCheckBox.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {

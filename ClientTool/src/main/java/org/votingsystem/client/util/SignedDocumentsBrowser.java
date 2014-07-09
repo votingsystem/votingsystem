@@ -189,7 +189,7 @@ public class SignedDocumentsBrowser extends StackPane{
         });
     }
 
-    public static void showDialog(String signedDocumentStr) {
+    public static void showDialog(final String signedDocumentStr) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 SignedDocumentsBrowser signedDocumentsBrowser = new SignedDocumentsBrowser();

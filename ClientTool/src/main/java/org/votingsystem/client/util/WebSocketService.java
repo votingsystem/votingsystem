@@ -167,7 +167,7 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
-    private void consumeMessage(String message) {
+    private void consumeMessage(final String message) {
         ResponseVS responseVS = ResponseVS.parseWebSocketResponse(message);
         logger.debug("consumeMessage - num. listeners: " + listeners.size() + " - type: " + responseVS.getType() +
                 " - status: " + responseVS.getStatusCode());
@@ -175,8 +175,8 @@ public class WebSocketService extends Service<ResponseVS> {
             case INIT_VALIDATED_SESSION:
                 if(responseVS.getMessageJSON().containsKey("messageVSList") &&
                         responseVS.getMessageJSON().getJSONArray("messageVSList").size() > 0) {
-                    String callbackMsg = responseVS.getMessageJSON().toString();
-                    String callback = "updateMessageVSList";
+                    final String callbackMsg = responseVS.getMessageJSON().toString();
+                    final String callback = "updateMessageVSList";
                     Platform.runLater(new Runnable() {
                         @Override public void run() {
                             browserVS = new BrowserVS();
