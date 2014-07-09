@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
  * @descController Servicios relacionados con las votaciones publicadas en el servidor.
  * 
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
 class EventVSElectionController {
 

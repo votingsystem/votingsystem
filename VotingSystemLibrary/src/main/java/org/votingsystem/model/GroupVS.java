@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity @Table(name="GroupVS") @DiscriminatorValue("GroupVS")
 public class GroupVS extends UserVS implements java.io.Serializable {

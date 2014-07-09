@@ -21,7 +21,7 @@ prefijo 'AC_' al name del archivo y poniendo como extensión la cadema '.pem'.
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
 
 Generación y configuración del almacén de claves de la aplicación:
-https://github.com/jgzornoza/SistemaVotacion/wiki/Almacenes-de-claves
+https://github.com/votingsystem/votingsystem/wiki/Almacenes-de-claves
 
 --------------------------------------------------------------------------------------------
 - Para renovar los certificados del servidor renombrar el archivo AccessControl.jks a AccessControl.jks_cancelled

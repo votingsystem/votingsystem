@@ -40,7 +40,7 @@ import java.util.Set;
 import static org.votingsystem.model.ContextVS.SIGNED_FILE_NAME;
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class HttpHelper {
     

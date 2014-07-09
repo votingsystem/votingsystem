@@ -5,7 +5,7 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.util.DateUtils
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 class FilesService {
 	

@@ -29,8 +29,8 @@
 			  		<div id="content" class="content">
 			           <div class="mainLinkContainer">
 				           <div class="mainLink"><a href="${grailsApplication.config.grails.serverURL}/">${message(code: 'mainPageLabel', null)}</a></div>
-				           <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/AccessControl">${message(code: 'sourceCodeLabel', null)}</a></div>
-				           <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Control-de-Acceso">${message(code: 'wikiLabel', null)}</a></div>
+				           <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/tree/master/AccessControl">${message(code: 'sourceCodeLabel', null)}</a></div>
+				           <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/wiki/Control-de-Acceso">${message(code: 'wikiLabel', null)}</a></div>
 			           </div>
 			           <p id="contentText" style="margin: 40px 0px 0px 0px;">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
    			           <p>

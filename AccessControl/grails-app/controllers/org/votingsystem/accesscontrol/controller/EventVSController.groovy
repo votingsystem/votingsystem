@@ -8,7 +8,7 @@ import org.votingsystem.model.*
  * @descController Servicios relacionados con los eventos del sistema.
  * 
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class EventVSController {
 

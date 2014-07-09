@@ -39,7 +39,7 @@
                     <div id="content" class="content">
                         <div class="mainLinkContainer">
                             <div class="mainLink"><a href="http://www.sistemavotacion.org"><g:message code="webSiteLbl"/></a></div>
-                            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/Vickets">
+                            <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/tree/master/Vickets">
                                 <g:message code="sourceCodeLbl"/></a>
                             </div>
                         </div>

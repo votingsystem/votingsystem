@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * To bypass id_kp_timeStamping ExtendedKeyUsage exception
  */
 public class CertExtensionCheckerVS extends PKIXCertPathChecker {

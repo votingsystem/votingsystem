@@ -32,7 +32,7 @@ import java.util.Locale;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  *
  * What is triple-DES -> http://www.rsa.com/rsalabs/node.asp?id=2231
  * http://www.bouncycastle.org/wiki/display/JA1/Frequently+Asked+Questions

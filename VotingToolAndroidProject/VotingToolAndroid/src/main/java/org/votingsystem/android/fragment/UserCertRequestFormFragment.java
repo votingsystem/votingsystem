@@ -56,7 +56,7 @@ import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class UserCertRequestFormFragment extends Fragment {
 

@@ -19,7 +19,7 @@ import org.votingsystem.model.TypeVS;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class DownloadReceiptDialogFragment extends DialogFragment {
 

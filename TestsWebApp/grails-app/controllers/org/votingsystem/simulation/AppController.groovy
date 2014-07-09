@@ -8,7 +8,7 @@ import org.votingsystem.model.TypeVS
  * @descController Servicios de acceso a la aplicación web principal
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
 class AppController {
 

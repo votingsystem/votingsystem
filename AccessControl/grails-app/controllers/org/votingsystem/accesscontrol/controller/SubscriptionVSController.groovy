@@ -15,7 +15,7 @@ import org.votingsystem.util.StringUtils
  * 				   con la asociación de Centros de Control.
  * 
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * 
  * Basado en 
  * http://blogs.bytecode.com.au/glen/2006/12/22/generating-rss-feeds-with-grails-and-rome.html

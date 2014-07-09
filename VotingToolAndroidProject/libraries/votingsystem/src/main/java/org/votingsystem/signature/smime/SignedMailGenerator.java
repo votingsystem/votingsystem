@@ -39,7 +39,7 @@ import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class SignedMailGenerator {
 	

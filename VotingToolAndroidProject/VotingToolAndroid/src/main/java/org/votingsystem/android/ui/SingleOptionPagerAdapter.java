@@ -18,7 +18,7 @@ import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SingleOptionPagerAdapter extends FragmentStatePagerAdapter
         implements PagerAdapterVS {

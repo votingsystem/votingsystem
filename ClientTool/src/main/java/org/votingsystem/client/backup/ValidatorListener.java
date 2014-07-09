@@ -4,7 +4,7 @@ import org.votingsystem.model.ResponseVS;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public interface ValidatorListener<T> {
     

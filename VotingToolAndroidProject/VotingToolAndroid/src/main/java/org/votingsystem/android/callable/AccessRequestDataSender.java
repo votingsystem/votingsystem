@@ -24,7 +24,7 @@ import static org.votingsystem.model.ContextVS.VOTE_SIGN_MECHANISM;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class AccessRequestDataSender implements Callable<ResponseVS> {
     

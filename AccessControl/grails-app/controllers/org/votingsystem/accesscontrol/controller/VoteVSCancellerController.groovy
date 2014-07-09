@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
  * @descController Servicios relacionados con la anulación de votos.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class VoteVSCancellerController {
 	
@@ -51,7 +51,7 @@ class VoteVSCancellerController {
      * @httpMethod [POST]
 	 * @serviceURL [/voteVSCanceller]
 	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] documento correspondiente al
-	 *              <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voto">anulador de voto</a>
+	 *              <a href="https://github.com/votingsystem/votingsystem/wiki/Anulador-de-voto">anulador de voto</a>
 	 * 				firmado y cifrado	 
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 
 	 * @return Recibo que consiste en el archivo firmado recibido con la signatureVS añadida del servidor. La respuesta viaja cifrada.

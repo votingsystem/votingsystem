@@ -2,7 +2,7 @@ package org.votingsystem.model;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  *
  * S/MIME signatures are usually "detached signatures": the signature information is separate
  * from the text being signed. The MIME type for this is multipart/signed with the second part

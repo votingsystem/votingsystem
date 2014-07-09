@@ -36,7 +36,7 @@ import java.util.UUID;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SignDocumentStackPane extends StackPane {
 

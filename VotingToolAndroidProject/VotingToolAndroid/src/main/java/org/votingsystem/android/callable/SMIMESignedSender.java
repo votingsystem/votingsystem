@@ -21,7 +21,7 @@ import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SMIMESignedSender implements Callable<ResponseVS> {
 

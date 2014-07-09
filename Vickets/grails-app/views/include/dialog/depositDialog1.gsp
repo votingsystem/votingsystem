@@ -8,33 +8,41 @@
 
 <polymer-element name="votingsystem-deposit-dialog" attributes="caption opened serviceURL">
     <template>
-        <core-overlay id="coreOverlay" flex vertical class="card" opened="{{opened}}"
-                      style="position: absolute; top:30px; height: auto;"
-                      on-core-overlay-open="{{dialogVisible}}">
+        <core-overlay id="coreOverlay" flex vertical class="card" opened="{{opened}}" on-core-overlay-open="{{dialogVisible}}"
+                      style="position: absolute; top:30px; background: #f9f9f9;">
         <div style="width:400px; padding:0px 0px 15px 0px; border: 1px solid #ccc;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
-                <h3 flex id="depositDialogCaption" style="color: #6c0404; font-weight: bold;">{{caption}}</h3>
+                <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
                 <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{toggle}}"></core-icon-button>
             </div>
-
+            <div class="center" style="font-weight: bold;color: {{status == 200?'#388746':'#ba0011'}}; text-decoration:underline;
+                    margin:10px 0px 10px 0px; display:{{messageToUser == null?'none':'block'}};">
+                {{messageToUser}} <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon></div>
             <div layout vertical style="padding: 5px 20px 0px 20px;">
                 <votingsystem-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
                                     validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl"/>" style="display: inline;" required>
                 </votingsystem-input>
-                <votingsystem-input id="depositDialogSubject" floatinglabel multiline
+                <votingsystem-input id="depositSubject" floatinglabel multiline
                                     label="<g:message code="subjectLbl"/>" required></votingsystem-input>
-                <div  layout horizontal id="tagDataDiv" style="margin:15px 0px 15px 0px; border: 1px solid #ccc; font-size: 1.1em; display: none; padding: 5px;">
-                    <div style="font-weight: bold; margin:0px 10px 0px 0px; padding:5px;">
-                        <div id="tagDataDivMsg"><g:message code="depositWithTagAdvertMsg"/></div>
-                        <div id="selectedTagDivDepositDialog" style="display: none;">
+                <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
+                        font-size: 1.1em; display: none; padding: 5px;">
+                    <div style="margin:0px 10px 0px 0px; padding:5px;">
+                        <div id="tagDataDivMsg" style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
+                            <g:message code="depositWithTagAdvertMsg"/>
+                        </div>
+                        <div id="tagDataDivMsg" style="font-weight:bold;display: {{selectedTags.length == 0? 'none':'block'}};">
+                            <g:message code="selectedTagsLbl"/>
+                        </div>
+                        <div id="selectedTagDivDepositDialog" style="display: {{selectedTags.length == 0? 'none':'block'}};">
                             <template repeat="{{tag in selectedTags}}">
-                                <button data-tagId='{{tag.id}}' onclick="removeTag(this)" type="button" class="btn btn-default"
+                                <button data-tagId='{{tag.id}}' on-click="{{removeTag}}" type="button" class="btn btn-default"
                                         style="margin:7px 10px 0px 0px;">{{tag.name}}  <i class="fa fa-minus-circle"></i>
                                 </button>
                             </template>
                         </div>
                     </div>
-                    <div class="button raised accept" on-click="{{fireTags}}" on-click="{{toggleTagDialog}}">
+                    <div class="button raised accept" on-click="{{toggleTagDialog}}"
+                         style="border: 1px solid #ccc; margin:0px 0px 0px 5px;">
                         <div id="selectTagButton" class="center" fit><g:message code="addTagLbl" /></div>
                         <paper-ripple fit></paper-ripple>
                     </div>
@@ -47,7 +55,7 @@
                         <input id="userSearchInput" type="text" class="form-control" style="width:220px; display: inline;"
                                placeholder="<g:message code="enterReceptorDataMsg"/>">
                         <div class="button raised accept" on-click="{{searchUser}}" style="border: 1px solid #ccc; margin:0px 0px 0px 5px;">
-                            <div id="selectTagButton" class="center" fit><g:message code="userSearchLbl" /></div>
+                            <div class="center" fit><g:message code="userSearchLbl" /></div>
                             <paper-ripple fit></paper-ripple>
                         </div>
                     </div>
@@ -55,7 +63,7 @@
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
-                    <div class="button raised accept" on-click="{{fireTags}}" style="border: 1px solid #ccc;">
+                    <div class="button raised accept" on-click="{{submitForm}}" style="border: 1px solid #ccc;">
                         <div class="center" fit><g:message code="acceptLbl"/></div>
                         <paper-ripple fit></paper-ripple>
                     </div>
@@ -69,19 +77,22 @@
     <script>
         Polymer('votingsystem-deposit-dialog', {
             operation:null,
+            maxNumberTags:3,
             fromUserName:null,
             fromUserIBAN:null,
             dateValidTo:null,
             groupId:null,
-            selectedTags: {},
+            selectedTags: [],
 
             ready: function() {
+                _votingSystemDepositDialogSelectorQuery = "#" + this.id
                 var depositDialog = this
                 this.$.userSearchList.addEventListener('user-clicked', function (e) {
                     depositDialog.$.receptorBox.addUser(e.detail)
                 })
 
                 this.$.tagDialog.addEventListener('tag-selected', function (e) {
+                    console.log("==== tag-selected: " + JSON.stringify(e.detail))
                     depositDialog.selectedTags = e.detail
                 })
 
@@ -95,13 +106,23 @@
 
             dialogVisible: function() {
                 this.$.userSearchInput.value = ""
+                this.messageToUser = null
                 this.$.receptorBox.removeUsers()
                 this.$.userSearchList.reset()
                 this.$.tagDialog.reset()
             },
 
             toggleTagDialog: function() {
-                this.$.tagDialog.toggle()
+                this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
+            },
+
+            removeTag: function(e) {
+                var tagToDelete = e.target.templateInstance.model.tag
+                for(tagIdx in this.selectedTags) {
+                    if(tagToDelete.id == this.selectedTags[tagIdx].id) {
+                        this.selectedTags.splice(tagIdx, 1)
+                    }
+                }
             },
 
             toggle: function() {
@@ -110,42 +131,39 @@
 
             submitForm: function () {
                 console.log(" ======= submitForm: " + this.$.amount.invalid)
-                var receptorList = this.$.receptorBox.getUserList()
-                if(document.querySelector("#amount").invalid) { return false;}
-                document.querySelector("#depositDialogSubmitButton").disabled = false;
-                switch(operation) {
+                switch(this.operation) {
                     case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
-                        if(receptorList.length == 0){
-                            showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                                    '<g:message code="receptorMissingErrorLbl"/>', function() {})
+                        if(this.$.receptorBox.getUserList().length == 0){
+                            this.setMessage(500, "<g:message code='receptorMissingErrorLbl'/>")
                             return false
                         }
                         break;
                     case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
-                        if(receptorList.length == 0){
-                            showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                                    '<g:message code="receptorsMissingErrorLbl"/>', function() {})
+                        if(this.$.receptorBox.getUserList().length == 0){
+                            this.setMessage(500, "<g:message code='receptorMissingErrorLbl'/>")
                             return false
                         }
                         break;
                     case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                         break;
                 }
-
+                if(this.$.amount.invalid) this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
+                if(this.$.depositSubject.invalid) this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
+                this.messageToUser = null
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, operation)
                 webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
                 webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink( controller:'transaction', action:"deposit", absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
-                webAppMessage.signedContent = {operation:operation, subject:$("#depositDialogSubject").val(),
-                    toUserIBAN:getToUserIBAN(), amount: $("#amount").val(), currency:"EUR", fromUser:fromUserName,
-                    fromUserIBAN:fromUserIBAN, toUserIBAN:getToUserIBAN() , validTo:dateValidTo }
+                webAppMessage.signedContent = {operation:this.operation, subject:this.$.depositSubject.value,
+                    toUserIBAN:this.toUserIBAN(), amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName,
+                    fromUserIBAN:this.fromUserIBAN, validTo:this.dateValidTo }
 
-                if(Object.keys(selectedTags).length > 0) {
+                if(this.selectedTags.length > 0) {
                     var tagList = []
-                    Object.keys(selectedTags).forEach(function(entry) {
-                        tagList.push({id:entry, name:selectedTags[entry]})
-                    })
+                    for(tagIdx in this.selectedTags) {
+                        tagList.push({id:this.selectedTags[tagIdx].id, name:this.selectedTags[tagIdx].name});
+                    }
                     webAppMessage.signedContent.tags = tagList
                 }
                 webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
@@ -154,6 +172,15 @@
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
 
+
+            toUserIBAN: function () {
+                var receptorList = this.$.receptorBox.getUserList()
+                var result = []
+                for(userIdx in receptorList) {
+                    result.push(receptorList[userIdx].IBAN);
+                }
+                return result
+            },
             searchUser: function() {
                 var textToSearch = this.$.userSearchInput.value
                 if(textToSearch.trim() == "") return
@@ -187,49 +214,47 @@
                 }
             },
 
-            show:function(depositType, fromUser, fromIBAN, validTo, targetGroupId) {
-                    this.operation = depositType
+            setMessage:function(status, message) {
+                this.status = status
+                this.messageToUser = message
+            },
+            show:function(operation, fromUser, fromIBAN, validTo, targetGroupId) {
+                    this.operation = operation
                     this.fromUserName = fromUser
                     this.fromUserIBAN = fromIBAN
                     this.dateValidTo = validTo
                     this.groupId = targetGroupId
-                    var caption
                     var selectReceptorMsg
-                    switch(depositType) {
+                    switch(operation) {
                         case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
-                            caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMember'/></div>"
+                            this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMember'/></div>"
                             selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
                             document.getElementById('receptorPanelDiv').style.display = 'block'
                             break;
                         case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
-                            caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMemberGroup'/></div>"
+                            this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMemberGroup'/></div>"
                             selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
                             document.getElementById('receptorPanelDiv').style.display = 'block'
                             break;
                         case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
-                            caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
+                            this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
                             selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
                             document.getElementById('receptorPanelDiv').style.display = 'none'
                             document.getElementById('tagDataDiv').style.display = 'table'
                             break;
                     }
-                    this.$.depositDialogCaption.innerHTML = caption
-                    this.selectedTags = {}
+                    this.selectedTags = []
                     this.$.coreOverlay.toggle()
                 }
             });
 
+        var _votingSystemDepositDialogSelectorQuery
         function depositDialogCallback(appMessage) {
             console.log("depositDialogCallback - message from native client: " + appMessage);
             var appMessageJSON = JSON.parse(appMessage)
             if(appMessageJSON != null) {
-                var caption = '<g:message code="depositERRORLbl"/>'
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    caption = "<g:message code='depositOKLbl'/>"
-                    $('#depositDialog').modal('hide');
-                }
-                var msg = appMessageJSON.message
-                showResultDialog(caption, msg)
+                document.querySelector(_votingSystemDepositDialogSelectorQuery).setMessage(
+                        appMessageJSON.statusCode, appMessageJSON.message)
             }
         }
     </script>

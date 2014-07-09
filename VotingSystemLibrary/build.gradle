@@ -7,8 +7,6 @@ apply plugin: 'ivy-publish'
 apply plugin: 'maven-publish'
 apply plugin: "idea"
 
-sourceCompatibility = 7
-targetCompatibility = 7
 
 install {
     repositories.mavenInstaller {
@@ -42,7 +40,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingSystemLibrary',
+        attributes 'url':'https://github.com/votingsystem/votingsystem/tree/master/VotingSystemLibrary',
                 'provider': 'sistemavotacion.org'
     }
 
@@ -69,7 +67,7 @@ jar {
 
                 pom.withXml {
                     asNode().appendNode('description', 'Helper library for Voting System - ' +
-                            'https://github.com/jgzornoza/SistemaVotacion')
+                            'https://github.com/votingsystem/votingsystem')
                 }
             }
 

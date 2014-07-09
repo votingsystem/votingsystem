@@ -7,7 +7,7 @@ import java.security.cert.Certificate;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public interface ContentSignerVS {
     

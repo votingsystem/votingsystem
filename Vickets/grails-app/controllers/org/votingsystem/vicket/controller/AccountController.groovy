@@ -8,7 +8,7 @@ import org.votingsystem.model.TypeVS
  * @descController Servicios relacionados con cuentas IBAN
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
 class AccountController {
 

@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
  * @descController Servicios relacionados con las solicitudes de acceso recibidas en una votación.
  * 
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 class AccessRequestVSController {
     
@@ -22,7 +22,7 @@ class AccessRequestVSController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/accessRequestVS/$id]
 	 * @param [id] Obligatorio. El identificador de la solicitud de acceso en la base de datos.
-	 * @return <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Solicitud-de-acceso">
+	 * @return <a href="https://github.com/votingsystem/votingsystem/wiki/Solicitud-de-acceso">
 	 * 			La solicitud de acceso</a> solicitada.
 	 */
     def index () {
@@ -38,7 +38,7 @@ class AccessRequestVSController {
     }
 
 	/**
-	 * Servicio que valida las <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Solicitud-de-acceso">
+	 * Servicio que valida las <a href="https://github.com/votingsystem/votingsystem/wiki/Solicitud-de-acceso">
 	 * solicitudes de acceso</a> recibidas en una votación.
 	 *
 	 * @httpMethod [POST]

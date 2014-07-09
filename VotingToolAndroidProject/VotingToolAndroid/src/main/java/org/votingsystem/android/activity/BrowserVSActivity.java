@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class BrowserVSActivity extends ActionBarActivity {
 	

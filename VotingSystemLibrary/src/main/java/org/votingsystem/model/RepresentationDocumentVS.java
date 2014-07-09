@@ -11,7 +11,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @Entity @Table(name="RepresentationDocumentVS")
 public class RepresentationDocumentVS implements Serializable {

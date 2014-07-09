@@ -18,7 +18,7 @@ import java.security.cert.X509Certificate
  * @descController Servicios relacionados con validación y signatureVS de certificados.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class CsrController {
 

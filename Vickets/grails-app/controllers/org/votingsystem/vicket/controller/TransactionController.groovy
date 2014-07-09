@@ -103,7 +103,7 @@ class TransactionController {
      *
      * @httpMethod [POST]
      * @serviceURL [/transaction/vicketBatch]
-     * @requestContentType Documento JSON con la extructura https://github.com/jgzornoza/SistemaVotacion/wiki/Lote-de-Vickets
+     * @requestContentType Documento JSON con la extructura https://github.com/votingsystem/votingsystem/wiki/Lote-de-Vickets
      * @responseContentType [application/pkcs7-mime]. Documento JSON cifrado en el que figuran los recibos de los model recibidos.
      * @return
      */

@@ -34,7 +34,7 @@ import java.io.FileOutputStream;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SignDocumentPane extends GridPane implements SignDocumentStackPane.OperationListener {
 

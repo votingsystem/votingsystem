@@ -6,7 +6,7 @@ import javax.persistence.Table;
 
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity @Table(name="VicketSource") @DiscriminatorValue("VicketSource")
 public class VicketSource extends UserVS implements java.io.Serializable {

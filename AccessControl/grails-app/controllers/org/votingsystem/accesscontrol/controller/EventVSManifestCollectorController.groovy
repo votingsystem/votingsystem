@@ -10,7 +10,7 @@ import org.votingsystem.model.ResponseVS
  * @descController Servicios relacionados con la recogida de firmas.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class EventVSManifestCollectorController {
 	

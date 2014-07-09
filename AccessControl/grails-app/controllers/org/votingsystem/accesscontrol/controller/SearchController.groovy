@@ -9,7 +9,7 @@ import org.votingsystem.util.DateUtils
  * @descController Servicios de búsqueda sobre los datos generados por la aplicación
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
 class SearchController {
 

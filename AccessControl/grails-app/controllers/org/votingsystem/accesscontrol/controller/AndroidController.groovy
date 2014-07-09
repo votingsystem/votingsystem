@@ -4,7 +4,7 @@ package org.votingsystem.accesscontrol.controller
  * @descController Controlador que sirve la aplicación para clientes Android.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class AndroidController {
 	

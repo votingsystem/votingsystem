@@ -28,7 +28,7 @@ import static org.votingsystem.model.ContextVS.EVENT_STATE_KEY;
 import static org.votingsystem.model.ContextVS.TYPEVS_KEY;
 /**
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class EventVSPagerActivity extends ActionBarActivity {
 

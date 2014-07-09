@@ -20,7 +20,7 @@ import java.security.cert.Certificate
 import java.util.concurrent.Callable
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class ServerInitializer implements Callable<ResponseVS> {
     

@@ -9,7 +9,7 @@ import org.votingsystem.util.DateUtils
  * @descController Servicios relacionados con la publicación de manifiestos.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class EventVSManifestController {
 

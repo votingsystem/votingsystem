@@ -14,7 +14,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 //import org.apache.solr.analysis.StandardTokenizerFactory;
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 //@Indexed
 @Entity @Table(name="EventVS")

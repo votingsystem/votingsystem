@@ -11,7 +11,7 @@ import org.votingsystem.model.TypeVS
  * @descController Informes de la aplicación en formato JSON
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
 class ReportsController {
 

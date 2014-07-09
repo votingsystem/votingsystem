@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
  * @descController Servicio que procesa los votesVS recibidos.
  * 
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
 class VoteVSController {
 
@@ -24,8 +24,8 @@ class VoteVSController {
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
 	 * @contentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo de voto firmado por el
-	 *        <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Certificado-de-voto">certificado de VoteVS.</a>
-	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
+	 *        <a href="https://github.com/votingsystem/votingsystem/wiki/Certificado-de-voto">certificado de VoteVS.</a>
+	 * @return  <a href="https://github.com/votingsystem/votingsystem/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
 	 */
 	def index() {
 		MessageSMIME messageSMIMEReq = request.messageSMIMEReq

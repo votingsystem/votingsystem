@@ -6,7 +6,7 @@ package org.votingsystem.vicket.controller
  * @descController Servicios que ofrecen datos sobre la aplicación
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  * */
 class PolymerTestController {
 
