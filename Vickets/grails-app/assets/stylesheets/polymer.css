@@ -160,7 +160,7 @@ html,body {
     position: relative;
     display: inline-block;
     vertical-align: top;
-    background-color: #fff;
+    background-color: #f9f9f9;
     box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
 }
 
@@ -202,29 +202,5 @@ html,body {
     color: #d23f31;
 }
 
-paper-button {
-    margin: 1em;
-    width: 10em;
-}
-
-paper-button.colored {
-    color: #ba0011;
-    fill: #ba0011;
-}
-
-paper-button[raisedButton].colored {
-    background: #ba0011;
-    color: #fff;
-}
-paper-button[raisedButton].colored.hover:hover {
-    color: #ba0011;
-    background: #fff;
-}
-paper-button[raisedButton].colored::shadow #ripple {
-    color: #ba0011;
-}
-paper-button[raisedButton].colored::shadow #focusBg {
-    background: #ba0011;
-}
 
 

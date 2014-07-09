@@ -150,7 +150,6 @@
     })
 
     function processUserSearch() {
-        console.log(" ======= processUserSearch")
         var textToSearch = document.getElementById("userSearchInput").value
         if(textToSearch.trim() == "") return
         var targetURL
@@ -166,8 +165,6 @@
         }
     }
 
-
-
     function depositDialogCallback(appMessage) {
         console.log("depositDialogCallback - message from native client: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
@@ -182,12 +179,9 @@
         }
     }
 
-
-
     function submitForm() {
-        console.log(" ======= submitForm: " + document.querySelector("#amount").invalid)
         var receptorList = receptorBox.getUserList()
-        console.log(" ======= receptorList.length: " + receptorList.length)
+        console.log("receptorList.length: " + receptorList.length)
         if(document.querySelector("#amount").invalid) { return false;}
 
 
@@ -232,5 +226,4 @@
             console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
-
 </asset:script>

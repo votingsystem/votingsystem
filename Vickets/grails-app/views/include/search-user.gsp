@@ -33,7 +33,6 @@
                     this.fire('user-clicked', e.target.templateInstance.model.uservs);
                 },
                 reset: function() {
-                    console.log("===== reset " + this.id)
                     this.responseData = {userVSList:[]}
                     this.$.uservs_table.style.visibility = 'hidden'
                 },

@@ -27,7 +27,7 @@
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
             <button id="cancelCertButton" type="submit" class="btn btn-warning"
-                    style="margin:10px 20px 0px 0px;" onclick="showCancelSubscriptionFormDialog(cancelCert)">
+                    style="margin:10px 20px 0px 0px;" onclick="document.querySelector('#reasonDialog').toggle()">
                 <g:message code="cancelCertLbl"/> <i class="fa fa fa-check"></i>
             </button>
         </g:if>
@@ -74,48 +74,48 @@
 </div>
 <div id="pemCertDiv" style="display:none;">${certMap.pemCert}</div>
 
-<g:include view="/include/dialog/cancelCertFormDialog.gsp"/>
+<g:include view="/include/dialog/get-reason-dialog.gsp"/>
+<get-reason-dialog id="reasonDialog" caption="<g:message code="cancelCertFormCaption"/>" opened="false"
+                   isForAdmins="true"></get-reason-dialog>
 </body>
 </html>
 <asset:script>
-    $(function() {
-        <g:if test="${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString().equals(certMap.type)}">
-            document.getElementById('pageHeaderDiv').innerHTML = "<g:message code="trustedCertPageTitle"/>"
-        </g:if><g:elseif test="${CertificateVS.Type.USER.toString().equals(certMap.type)}">
-            document.getElementById('pageHeaderDiv').innerHTML = "<g:message code="userCertPageTitle"/>"
-        </g:elseif>
-        <g:if test="${certMap.issuerSerialNumber}">
-            document.getElementById('issuerURL').href =
-                "${createLink( controller:'certificateVS', action:'cert')}/${certMap.issuerSerialNumber}"
-        </g:if>
-        document.getElementById('pemCertTextArea').value = document.getElementById("pemCertDiv").innerHTML.trim()
-        <g:if test="${CertificateVS.State.OK.toString().equals(certMap.state)}">
-            document.getElementById('certStateDiv').innerHTML = "<g:message code="certOKLbl"/>"
-        </g:if>
-        <g:elseif test="${CertificateVS.State.CANCELLED.toString().equals(certMap.state)}">
-            document.getElementById('certStateDiv').innerHTML = "<g:message code="certCancelledLbl"/>"
+
+    document.addEventListener('polymer-ready', function() {
+        document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_EDIT)
+            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+            webAppMessage.serviceURL = "${createLink(controller:'certificateVS', action:'editCert',absolute:true)}"
+            webAppMessage.signedMessageSubject = "<g:message code="cancelCertMessageSubject"/>"
+            webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
+                changeCertToState:"${CertificateVS.State.CANCELLED.toString()}", serialNumber:"${certMap.serialNumber}"}
+            //signed and encrypted
+            webAppMessage.contentType = 'application/x-pkcs7-signature'
+            webAppMessage.callerCallback = 'cancelCertCallback'
+            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        })
+    });
+
+    <g:if test="${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString().equals(certMap.type)}">
+        document.getElementById('pageHeaderDiv').innerHTML = "<g:message code="trustedCertPageTitle"/>"
+    </g:if><g:elseif test="${CertificateVS.Type.USER.toString().equals(certMap.type)}">
+        document.getElementById('pageHeaderDiv').innerHTML = "<g:message code="userCertPageTitle"/>"
+    </g:elseif>
+    <g:if test="${certMap.issuerSerialNumber}">
+        document.getElementById('issuerURL').href =
+            "${createLink( controller:'certificateVS', action:'cert')}/${certMap.issuerSerialNumber}"
+    </g:if>
+    document.getElementById('pemCertTextArea').value = document.getElementById("pemCertDiv").innerHTML.trim()
+    <g:if test="${CertificateVS.State.OK.toString().equals(certMap.state)}">
+        document.getElementById('certStateDiv').innerHTML = "<g:message code="certOKLbl"/>"
+    </g:if>
+    <g:elseif test="${CertificateVS.State.CANCELLED.toString().equals(certMap.state)}">
+        document.getElementById('certStateDiv').innerHTML = "<g:message code="certCancelledLbl"/>"
             if(document.getElementById('cancelCertButton') != null)
                 document.getElementById('cancelCertButton').style.display = "none"
-        </g:elseif>
-
-    })
-
-    function cancelCert () {
-        console.log("cancelCert")
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_EDIT)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-        webAppMessage.serviceURL = "${createLink(controller:'certificateVS', action:'editCert',absolute:true)}"
-        webAppMessage.signedMessageSubject = "<g:message code="cancelCertMessageSubject"/>"
-        webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:$("#cancelCertReason").val(),
-            changeCertToState:"${CertificateVS.State.CANCELLED.toString()}", serialNumber:"${certMap.serialNumber}"}
-        //signed and encrypted
-        webAppMessage.contentType = 'application/x-pkcs7-signature'
-        webAppMessage.callerCallback = 'cancelCertCallback'
-        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-    }
-
+    </g:elseif>
     function cancelCertCallback () {
         location.reload();
     }

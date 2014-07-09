@@ -1,12 +1,8 @@
-:host {
-  display: block;
-}
-
 /* To ensure your styling works under the Shadow DOM polyfill, see
    www.polymer-project.org/docs/polymer/styling.html#directives */
-polyfill-next-selector { content: ':host > h2'; }
-::content h2 {
-  color: blue;
+
+:host {
+  display: block;
 }
 
 .tagBox {
@@ -24,57 +20,36 @@ polyfill-next-selector { content: ':host > h2'; }
 .card {
     position: relative;
     display: inline-block;
-    background: #f7f7f7;
-    width: auto;
+    background: #f9f9f9;
+    width:400px;
     vertical-align: top;
+    border: 1px solid #ccc;
     box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
     padding:15px 15px 15px 20px;
 }
 
-paper-button {
-    margin: 1em;
-    width: 10em;
-}
-
 paper-button.colored {
-    color: #d33;
-    fill: #d33;
+    color: #4285f4;
+    fill: #4285f4;
 }
 
 paper-button[raisedButton].colored {
-    background: #d33;
+    background: #4285f4;
     color: #fff;
 }
 paper-button[raisedButton].colored.hover:hover {
-    background: #6c0404;
+    background: #3367d6;
 }
 paper-button[raisedButton].colored::shadow #ripple {
-    color: #6c0404;
+    color: #2a56c6;
 }
 paper-button[raisedButton].colored::shadow #focusBg {
-    background: #6c0404;
-}
-
-/* Button */
-.button {
-    display: inline-block;
-    position: relative;
-    width: 120px;
-    height: 32px;
-    line-height: 32px;
-    border-radius: 2px;
-    font-size: 0.9em;
-    background-color: #f9f9f9;
-    color: #646464;
-}
-
-.button.accept {
-    background-color: #6c0404;
-    color: #f9f9f9;
+    background: #3367d6;
 }
 
 .button.raised {
     transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     transition-delay: 0.2s;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+    border: 1px solid #6c0404;
 }

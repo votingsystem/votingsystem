@@ -4,6 +4,7 @@
 <link rel="import" href="../votingsystem-input/votingsystem-input.html">
 <link rel="import" href="../core-icons/core-icons.html">
 <link rel="import" href="../core-item/core-item.html">
+<link rel="import" href="../paper-button/paper-button.html">
 
 
 <!--
@@ -26,51 +27,56 @@ Dialog to search and select tags
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                     contentType="json"></core-ajax>
 
-      <core-overlay id="coreOverlay" flex vertical class="card" opened="{{opened}}"
-                    style="z-index:300; position: absolute; top:30px;" on-core-overlay-open="{{dialogVisible}}">
 
-          <h3>{{caption}}</h3>
+      <core-overlay flex vertical id="coreOverlay" vertical class="card" opened="{{opened}}" layered="true"
+                    style="position: absolute; top:30px;">
+          <div layout vertical style="max-width: 400px; padding:10px;">
+              <h3>{{caption}}</h3>
 
-          <div layout vertical wrap layout style="border: 1px solid #6c0404;display:{{(selectedTagList == null || selectedTagList.length == 0) ? 'none':'block'}}">
-              <div style="font-weight: bold;">{{messages.selectedTagsLbl}}</div>
+              <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
+                display:{{(selectedTagList == null || selectedTagList.length == 0) ? 'none':'block'}}">
+                  <div style="font-weight: bold; margin:0px 0px 5px 0px;">{{messages.selectedTagsLbl}}</div>
+                  <div flex horizontal wrap layout style="">
+                  <template repeat="{{tag in selectedTagList}}">
+                      <section>
+                          <div class="center button raised" on-click="{{removeTag}}" style="margin:0px 5px 0px 0px;">
+                              <div fit>{{tag.name}}
+                                <core-icon icon="remove-circle" style="fill:#6c0404; padding:0px 0px 0px 0px;"></core-icon>
+                              </div>
+                              <paper-ripple fit></paper-ripple>
+                          </div>
+                      </section>
+                  </template>
+                  </div>
+              </div>
+
+              <div flex layout horizontal center center-justified>
+                  <votingsystem-input id="tagSearchInput" floatinglabel label="{{messages.tagLbl}}" required autofocus>
+                  </votingsystem-input>
+                  <paper-button raisedButton label="{{messages.tagSearchLbl}}" class="colored hover"
+                                on-click="{{searchTag}}" style=""></paper-button>
+              </div>
               <div flex horizontal wrap layout style="">
-              <template repeat="{{tag in selectedTagList}}">
-                  <section>
-                      <div class="button raised" on-click="{{removeTag}}">
-                          <div fit>{{tag.name}} <core-icon icon="remove-circle" style="fill:#6c0404;"></core-icon></div>
-                          <paper-ripple fit></paper-ripple>
-                      </div>
-                  </section>
-              </template>
+                  <template repeat="{{tag in searchedTagList}}">
+                      <section style>
+                          <div class="center button raised" on-click="{{selectTag}}" style="margin:0px 5px 0px 0px;">
+                              <div fit>{{tag.name}}
+                                  <core-icon icon="add-circle" style="fill:#6c0404; padding:0px 0px 0px 0px;"></core-icon>
+                              </div>
+                              <paper-ripple fit></paper-ripple>
+                          </div>
+                      </section>
+
+                  </template>
+              </div>
+              <div layout horizontal style="margin:10px 20px 0px 0px;">
+                  <div flex></div>
+                  <paper-button raisedButton class="colored" label="{{messages.acceptLbl}}"
+                                on-click="{{fireTags}}" style=""></paper-button>
               </div>
           </div>
-
-          <div layout horizontal center center-justified>
-              <votingsystem-input id="tagSearchInput" floatinglabel label="{{messages.tagLbl}}" required autofocus>
-              </votingsystem-input>
-              <paper-button raisedButton label="{{messages.tagSearchLbl}}" class="colored hover"
-                            on-click="{{searchTag}}" style=""></paper-button>
-          </div>
-          <div flex horizontal wrap layout>
-              <template repeat="{{tag in searchedTagList}}">
-                  <section style>
-                      <div class="button raised" on-click="{{selectTag}}">
-                          <div fit>{{tag.name}} <core-icon icon="add-circle" style="fill:#6c0404;"></core-icon></div>
-                          <paper-ripple fit></paper-ripple>
-                      </div>
-                  </section>
-
-              </template>
-          </div>
-          <div layout horizontal style="margin:10px 20px 0px 0px;">
-              <div flex></div>
-              <div class="button raised accept" on-click="{{fireTags}}">
-                  <div class="center" fit>{{messages.acceptLbl}}</div>
-                  <paper-ripple fit></paper-ripple>
-              </div>
-          </div>
-
       </core-overlay>
+
       <conten></conten>
   </template>
 
@@ -92,6 +98,15 @@ Dialog to search and select tags
        */
       caption: null,
 
+        isShowingTags: false,
+        /**
+         * The `maxNumberTags` user can select
+         *
+         * @attribute maxNumberTags
+         * @type number
+         */
+        maxNumberTags:3,
+
         /**
          * The `url` of the HTTP tag service
          *
@@ -108,10 +123,12 @@ Dialog to search and select tags
           }
       },
 
-        dialogVisible: function() {
+        openedChanged: function() {
             this.$.tagSearchInput.inputValue = ''
-            this.selectedTagList = []
             this.searchedTagList = []
+            if(!this.isShowingTags) this.selectedTagList = []
+            else this.isShowingTags = false
+            this.async(function() {this.$.coreOverlay.style.top = "30px" }, null, 1);
         },
 
         /**
@@ -120,6 +137,7 @@ Dialog to search and select tags
          */
         toggle: function() {
             this.$.coreOverlay.toggle();
+
         },
 
         responseDataChanged:function () {
@@ -139,8 +157,13 @@ Dialog to search and select tags
             for(tagIdx in this.selectedTagList) {
                 if(selectedTag.id == this.selectedTagList[tagIdx].id) isNewTag = false
             }
-            console.log("selectTag: " + selectedTag.id + " - isNewTag: " + isNewTag)
+            console.log("selectTag: " + selectedTag.id + " - isNewTag: " + isNewTag + " - maxNumTags: " + this.maxNumTags +
+                    " - num. tags selected: " + this.selectedTagList.length)
             if(isNewTag) {
+                if(this.selectedTagList.length == this.maxNumTags ) {
+                    this.searchedTagList.push(this.selectedTagList[0])
+                    this.selectedTagList.splice(0, 1)
+                }
                 this.selectedTagList.push(selectedTag)
                 for(tagIdx in this.searchedTagList) {
                     if(selectedTag.id == this.searchedTagList[tagIdx].id) this.searchedTagList.splice(tagIdx, 1)
@@ -163,14 +186,23 @@ Dialog to search and select tags
             this.searchedTagList = []
         },
 
+        show: function (maxNumberTags, selectedTags) {
+            this.$.coreOverlay.opened = true
+            this.maxNumTags = maxNumberTags
+            console.log("======= selectedTags: " + JSON.stringify(selectedTags))
+            if(selectedTags == null) this.selectedTagList = []
+            else this.selectedTagList = selectedTags
+            this.isShowingTags = true
+        },
+
       /**
        * Fire the selected tags
        * 
        * @method fireTags
        */
       fireTags: function() {
-        this.fire('tag-selected', this.selectedTagList);
-          this.$.coreOverlay.toggle();
+            this.fire('tag-selected', this.selectedTagList);
+            this.$.coreOverlay.toggle();
       }
 
     });
