@@ -10,7 +10,6 @@
 
     <link rel="import" href="${resource(dir: '/bower_components/core-header-panel', file: 'core-header-panel.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-toolbar', file: 'core-toolbar.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages/transitions', file: 'hero-transition.html')}">

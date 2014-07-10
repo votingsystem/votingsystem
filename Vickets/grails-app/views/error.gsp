@@ -3,7 +3,6 @@
 <head>
     <title><g:if env="development">Grails Runtime Exception</g:if><g:else>Error</g:else></title>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
     <asset:stylesheet src="vickets.css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>

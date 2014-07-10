@@ -32,9 +32,4 @@
         return false
     }
 
-    $(document).ready(function(){
-        $('#testForm').submit(function(event){event.preventDefault();});
-        $("#submitButton").click(function(){});
-    });
-
 </asset:script>

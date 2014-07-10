@@ -84,7 +84,6 @@
     </div>
 </div>
 <div id="certificateListDiv" style="display:none;">${uservsMap.certificateList as grails.converters.JSON}</div>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 <g:include view="/include/dialog/sendMessageVSDialog.gsp"/>
 </body>
 </html>
@@ -116,7 +115,7 @@
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = '<g:message code="sendMessageOKCaption"/>'
             }
-            showResultDialog(caption, msg, callBackResult)
+            showMessageVS(caption, msg, callBackResult)
         }
         window.scrollTo(0,0);
     }

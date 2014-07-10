@@ -3,30 +3,52 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 
 <g:include view="/include/search-user.gsp"/>
 
-<polymer-element name="votingsystem-deposit-dialog" attributes="caption opened serviceURL">
+<polymer-element name="vicket-deposit-dialog" attributes="caption opened serviceURL">
 <template>
-    <core-overlay id="coreOverlay" flex vertical class="card" opened="{{opened}}" layered="true" transition="test"
-                  sizingTarget="{{$.container}}" style="position:absolute; top:10px;background: #f9f9f9;">
-        <div id="container" style="width:400px; padding:0px 0px 15px 0px; border: 1px solid #ccc;">
+        <style>
+        .card {
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
+            background-color: #f9f9f9;
+            box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+            border: 1px solid #ccc;
+        }
+        paper-button.button {
+            background-color: #f9f9f9;
+            color: #6c0404;
+            border: 1px solid #ccc;
+            margin:10px;
+            vertical-align: middle;
+            line-height: 24px;
+            height: 35px;
+        }
+        </style>
+
+        <div id="container" class="card" style="width:500px; padding:0px 0px 15px 0px;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
                 <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
-                <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{toggle}}"></core-icon-button>
+                <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{close}}"></core-icon-button>
             </div>
+
             <div class="center card" style="font-weight: bold;color: {{status == 200?'#388746':'#ba0011'}};
             margin:10px; border: 1px solid #ccc; background: #f9f9f9;padding:10px 20px 10px 20px; display:{{messageToUser == null?'none':'block'}};">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div id="messageToUser"></div>
                     <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon></div>
-                </div>
+            </div>
             <div layout vertical style="padding: 5px 20px 0px 20px;">
                 <votingsystem-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
-                                    validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl"/>" style="display: inline;" required>
+                                    validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl"/>" style="" required>
                 </votingsystem-input>
-                <votingsystem-input id="depositSubject" floatinglabel multiline
+                <votingsystem-input id="depositSubject" floatinglabel
                                     label="<g:message code="subjectLbl"/>" required></votingsystem-input>
+
+
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
                 font-size: 1.1em; display: none; padding: 5px;">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
@@ -50,33 +72,30 @@
                         <paper-ripple fit></paper-ripple>
                     </div>
                 </div>
-                <div>{{selectReceptorMsg}}</div>
+                <div class="center" style="padding: 10px;">{{selectReceptorMsg}}</div>
                 <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
 
                 <div id="receptorPanelDiv">
-                    <div layout horizontal id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
-                        <input id="userSearchInput" type="text" class="form-control" style="width:220px; display: inline;"
+                    <div layout horizontal center center-justified id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
+                        <input id="userSearchInput" type="text" class="form-control" style="width:200px;"
                                placeholder="<g:message code="enterReceptorDataMsg"/>">
-                        <div class="button raised accept" on-click="{{searchUser}}" style="border: 1px solid #ccc; margin:0px 0px 0px 5px;">
-                            <div class="center" fit><g:message code="userSearchLbl" /></div>
-                        </div>
+                        <paper-button raisedButton class="button" label="<g:message code="userSearchLbl"/>"
+                                      on-click="{{searchUser}}" style="width:180px;"></paper-button>
                     </div>
                     <search-user id="userSearchList"></search-user>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
-                    <div class="button raised accept" on-click="{{submitForm}}" style="border: 1px solid #ccc;">
-                        <div class="center" fit><g:message code="acceptLbl"/></div>
-                    </div>
+                    <paper-button raisedButton class="button" label="<g:message code="acceptLbl"/>"
+                                  on-click="{{submitForm}}" style=""></paper-button>
                 </div>
             </div>
         </div>
-    </core-overlay>
     <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
                                     serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
 </template>
 <script>
-    Polymer('votingsystem-deposit-dialog', {
+    Polymer('vicket-deposit-dialog', {
         operation:null,
         maxNumberTags:3,
         fromUserName:null,
@@ -84,8 +103,10 @@
         dateValidTo:null,
         groupId:null,
         selectedTags: [],
+        opened:false,
 
         ready: function() {
+            this.style.display = 'none'
             this.randomStr = Math.random().toString(36).substring(7)
             window[this.randomStr] = this
             this.callbackFunction = "window['" + this.randomStr + "'].setClientToolMessage"
@@ -105,16 +126,18 @@
                     depositDialog.searchUser()
                 }
             }
+            if(this.opened) show()
         },
 
         openedChanged: function() {
+            console.log("======= openedChanged: " + this.opened)
             this.$.userSearchInput.value = ""
             this.setMessage(200, null)
             this.$.receptorBox.removeUsers()
             this.$.userSearchList.reset()
             this.$.tagDialog.reset()
-            this.async(function() {this.$.coreOverlay.style.top = "50px" }, null, 1);
-            this.$.coreOverlay.style.top = "10px"
+            if(this.opened) this.show()
+            else this.style.display = 'none'
         },
 
         toggleTagDialog: function() {
@@ -130,8 +153,8 @@
             }
         },
 
-        toggle: function() {
-            this.$.coreOverlay.toggle()
+        close: function() {
+            this.style.display = 'none'
         },
 
         submitForm: function () {
@@ -172,8 +195,8 @@
                 webAppMessage.signedContent.tags = tagList
             }
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = this.callbackFunction
-            console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage) + " - callerCallback: " + this.callbackFunction)
+            webAppMessage.callerCallback = this.randomStr
+            console.log(this.tagName + " - randomStr: " + this.randomStr)
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
 
@@ -201,7 +224,7 @@
             if(appMessageJSON != null) window[this.randomStr].setMessage(appMessageJSON.statusCode, appMessageJSON.message)
         },
         setMessage:function(status, message) {
-            console.log("=== status: " + status, "===== message: " + message)
+            console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
             this.status = status
             this.messageToUser = message
             this.$.messageToUser.innerHTML = message
@@ -229,7 +252,7 @@
                     break;
             }
             this.selectedTags = []
-            this.$.coreOverlay.opened = true
+            this.style.display = 'block'
         }
     });
 </script>

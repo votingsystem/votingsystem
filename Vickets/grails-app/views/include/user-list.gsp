@@ -38,7 +38,7 @@
   </template>
   <script>
     Polymer('user-list', {
-        ready: function() {console.log("====== " + this.tagName) },
+        ready: function() {console.log(this.tagName + " - ready") },
         openWindow: function(e) {
             var userURL = this.userURLPrefix + "/" + e.target.getAttribute("data-userId") + "?mode=details&menu=" + this.menuType
             openWindow(userURL)

@@ -17,13 +17,12 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-icon-button', file: 'paper-icon-button.html')}">
 
-    <g:javascript library="jquery" plugin="jquery"/>
-    <asset:stylesheet src="jquery-ui-1.10.4.custom.min.css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/jquery-ui', file: 'jquery-ui.min.js')}"></script>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
 
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
+
+
+    <link rel="import" href="${resource(dir: '/misc', file: 'layout.html')}">
 
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
@@ -69,7 +68,8 @@
                             <paper-item data-href="${createLink(controller: 'userVS', action: 'newVicketSource')}">
                                 <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newVicketSourceLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority')}">
+                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority')}"
+                                        style="padding:30px 10px 30px 10px;">
                                 <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> <g:message code="newCAAuthorityLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'certificateVS', action: 'certs')}">
@@ -81,7 +81,8 @@
                             <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
                             </paper-item>
-                            <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact')}" on-click="{{changeToAdminMenu}}">
+                            <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact')}" on-click="{{changeToAdminMenu}}"
+                                        style="padding:30px 10px 30px 10px;">
                                 <g:message code="changeToAdminMenuLbl"/>
                             </paper-item>
                             {{ "<g:message code="superAdminTitle"/>" | setTitle}}
@@ -121,7 +122,7 @@
             drawerItemSelected: function() {
                 if('changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                     window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
-                } else  window.location.href = this.coreSelectorValue
+                } else  window.location.href = this.coreSelectorValue + "?menu=${params.menu}"
             },
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
@@ -136,15 +137,20 @@
     </nav-bar>
 </div>
 
+<g:include view="/include/dialog/votingsystem-message-dialog.gsp"/>
+<div layout horizontal center center-justified style="top:100px;">
+    <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+</div>
 
-<g:include view="/include/dialog/windowAlertModal.gsp"/>
 </body>
 </html>
 <asset:script>
-    var navBarDiv = document.querySelector('#navBarDiv')
-    navBarDiv.addEventListener('nav-bar-ready', function(e) {
+    document.querySelector('#navBarDiv').addEventListener('nav-bar-ready', function(e) {
         navBarDiv.style.display = 'block';
     });
-    updateMenuLinks()
+
+    document.addEventListener('polymer-ready', function() {
+        updateMenuLinks()
+    });
 </asset:script>
 <asset:deferredScripts/>

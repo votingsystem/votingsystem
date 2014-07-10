@@ -26,7 +26,7 @@
             </ul>
         </div>
 
-        <form id="mainForm">
+        <form onsubmit="return submitForm()">
             <div style="position:relative; width:100%;">
                 <label><g:message code="interestInfoLbl"/></label>
                 <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
@@ -48,47 +48,40 @@
         </form>
     </div>
 </div>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
 <asset:script>
     var textEditor = document.querySelector('#textEditor')
 
 
-    $(function() {
-        $('#mainForm').submit(function(event){
-            event.preventDefault();
-            if(!document.getElementById('pemCert').validity.valid) {
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
-                return
-            }
+    function submitForm() {
+        if(!document.getElementById('pemCert').validity.valid) {
+            showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
+            return false
+        }
 
-            if(textEditor.getData() == 0) {
-                textEditor.classList.add("formFieldError");
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
-                return
-            }
+        if(textEditor.getData() == 0) {
+            textEditor.classList.add("formFieldError");
+            showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
+            return false
+        }
 
-            console.log("newCA - sendSignature ")
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_CA_NEW)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"save", absolute:true)}"
-            webAppMessage.signedMessageSubject = "<g:message code='newCertificateUserMsgSubject'/>"
-            webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:$("#pemCert").val(),
-                        operation:Operation.CERT_USER_NEW}
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = 'newUserCertCallback'
-            //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-        });
-    });
+        console.log("newCA - sendSignature ")
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_CA_NEW)
+        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+        webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"save", absolute:true)}"
+        webAppMessage.signedMessageSubject = "<g:message code='newCertificateUserMsgSubject'/>"
+        webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
+                    operation:Operation.CERT_USER_NEW}
+        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        webAppMessage.callerCallback = 'newUserCertCallback'
+        //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        return false
+    }
 
     var newCertURL = null
-
-    function resultCallback() {
-        window.location.href = newCertURL
-    }
 
     function newUserCertCallback(appMessage) {
         console.log("newGroupVSCallback - message from native client: " + appMessage);
@@ -101,9 +94,12 @@
                 var msgTemplate = '<g:message code='accessLinkMsg'/>';
             }
             newCertURL = updateMenuLink(appMessageJSON.URL)
-            showResultDialog(caption, msg, resultCallback)
+            showMessageVS(msg, caption)
         }
         window.scrollTo(0,0);
     }
 
+    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-accepted', function() {
+        window.location.href = newCertURL
+    })
 </asset:script>

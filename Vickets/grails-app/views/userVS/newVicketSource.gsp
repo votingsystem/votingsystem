@@ -29,7 +29,7 @@
             </ul>
         </div>
 
-        <form id="mainForm">
+        <form onsubmit="return submitForm()">
             <div style="position:relative; width:100%;">
                 <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
@@ -50,65 +50,59 @@
         </form>
     </div>
 </div>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
 <asset:script>
     var textEditor = document.querySelector('#textEditor')
 
-    $(function() {
-        $('#mainForm').submit(function(event){
-            event.preventDefault();
-
-            if(!document.getElementById('pemCert').validity.valid) {
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
-                return
-            }
-
-            if(textEditor.getData() == 0) {
-                textEditor.classList.add("formFieldError");
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
-                return
-            }
-
-            console.log("newGroup - sendSignature ")
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_SOURCE_NEW)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newVicketSource", absolute:true)}"
-            webAppMessage.signedMessageSubject = "<g:message code='newVicketSourceMsgSubject'/>"
-            webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:$("#pemCert").val(),
-                operation:Operation.VICKET_SOURCE_NEW}
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = 'newVicketSourceCallback'
-            //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-        });
-
-      });
-
-    var vicketSourceURL = null
-
-    function resultOKCallback() {
-        window.location.href = updateMenuLink(vicketSourceURL)
+    function submiForm() {
+        if(!document.getElementById('pemCert').validity.valid) {
+            showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
+            return false
+        }
+        if(textEditor.getData() == 0) {
+            textEditor.classList.add("formFieldError");
+            showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
+            return false
+        }
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_SOURCE_NEW)
+        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+        webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newVicketSource", absolute:true)}"
+        webAppMessage.signedMessageSubject = "<g:message code='newVicketSourceMsgSubject'/>"
+        webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
+            operation:Operation.VICKET_SOURCE_NEW}
+        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        webAppMessage.callerCallback = 'newVicketSourceCallback'
+        //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        return false
     }
+
+    var appMessageJSON = null
 
     function newVicketSourceCallback(appMessage) {
         console.log("newGroupVSCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        var callBackResult = null
+        appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
             var caption = '<g:message code="newVicketSourceERRORCaption"/>'
             var msg = appMessageJSON.message
+            statusCode = appMessageJSON.statusCode
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = '<g:message code="newVicketSourceOKCaption"/>'
                 var msgTemplate = '<g:message code='accessLinkMsg'/>';
-                callBackResult = resultOKCallback
-                vicketSourceURL = appMessageJSON.URL
             }
-            showResultDialog(caption, msg, callBackResult)
+            showMessageVS(caption, msg)
         }
         window.scrollTo(0,0);
     }
+
+    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-accepted', function() {
+        if(appMessageJSON != null) {
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                window.location.href = updateMenuLink(appMessageJSON.URL)
+            }
+        }
+    })
 
 </asset:script>

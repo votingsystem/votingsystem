@@ -37,6 +37,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
+import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.model.ContentTypeVS;
@@ -72,6 +73,7 @@ public class BrowserVS extends Region {
     private ComboBox comboBox;
     private VBox mainVBox;
     private BrowserVSPane browserHelper;
+    private String caption;
     private AtomicInteger offset = new AtomicInteger(0);
 
 
@@ -238,15 +240,18 @@ public class BrowserVS extends Region {
         // process page loading
         webView.getEngine().getLoadWorker().stateProperty().addListener(
                 new ChangeListener<Worker.State>() {
+                    Document document;
                     @Override
                     public void changed(ObservableValue<? extends Worker.State> ov,
                                         Worker.State oldState, Worker.State newState) {
-                        //logger.debug("newState: " + newState);
+                        logger.debug(" ========== newState: " + newState);
                         if (newState == Worker.State.SUCCEEDED) {
                             JSObject win = (JSObject) webView.getEngine().executeScript("window");
                             win.setMember("clientTool", new JavafxClient());
                             webView.getEngine().executeScript("notifiyClientToolConnection()");
-                        }else if (newState.equals(Worker.State.FAILED)) {
+                            document = webView.getEngine().getDocument();
+                            document.createDocumentFragment();
+                        } else if (newState.equals(Worker.State.FAILED)) {
                             showMessage(ContextVS.getMessage("connectionErrorMsg"));
                         }
                         if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {
@@ -274,13 +279,14 @@ public class BrowserVS extends Region {
         });
     }
 
-    public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction) {
+    public void sendMessageToBrowserApp(int statusCode, String message, String callerCallback) {
         logger.debug("sendMessageToBrowserApp - statusCode: " + statusCode + " - message: " + message);
         Map resultMap = new HashMap();
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
         JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
-        final String jsCommand = callbackFunction + "('" + StringUtils.escapeStringJS(messageJSON.toString()) + "')";
+        final String jsCommand = "setClientToolMessage('" + callerCallback + "', '" +
+                new String(Base64.encode(messageJSON.toString().getBytes())) + "')";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
@@ -289,9 +295,11 @@ public class BrowserVS extends Region {
         });
     }
 
-    public void sendMessageToBrowserApp(JSONObject messageJSON, String callbackFunction) {
+
+    public void sendMessageToBrowserApp(JSONObject messageJSON, String callerCallback) {
         logger.debug("sendMessageToBrowserApp - messageJSON: " + messageJSON.toString());
-        final String jsCommand = callbackFunction + "(" + messageJSON.toString() + ")";
+        final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
+                new String(Base64.encode(messageJSON.toString().getBytes())) + "')";
         logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
@@ -333,12 +341,14 @@ public class BrowserVS extends Region {
     }
 
 
-    public void loadURL(final String urlToLoad, final String caption) {
-
+    public void loadURL(final String urlToLoad, String caption) {
+        final StringBuilder browserCaption = new StringBuilder();
+        if(caption == null && this.caption != null) browserCaption.append(this.caption);
+        else if(caption != null) browserCaption.append(caption);
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 webView.getEngine().load(urlToLoad);
-                if(caption != null) browserStage.setTitle(caption);
+                if(browserCaption != null) browserStage.setTitle(browserCaption.toString());
                 browserStage.show();
             }
         });

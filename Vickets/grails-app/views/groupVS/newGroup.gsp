@@ -29,7 +29,7 @@
             </ul>
         </div>
 
-        <form id="mainForm">
+        <form onsubmit="return submitForm();">
 
             <div class="form-inline">
                 <div style="margin:0px 0px 10px 0px; display: table; height: 10px;">
@@ -70,11 +70,11 @@
             </div>
 
         </form>
+
     </div>
 </div>
 <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
                 serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 </body>
 </html>
 <asset:script>
@@ -102,44 +102,31 @@
             else document.querySelector("#tagsDiv").style.display = 'block'
     })
 
-    $(function() {
-        $('#mainForm').submit(function(event){
-            event.preventDefault();
-            textEditor.classList.remove("formFieldError");
-            if(!document.getElementById('groupSubject').validity.valid) {
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="fillAllFieldsERRORLbl"/>')
-                return
-            }
-            if(textEditor.getData().length == 0) {
-                textEditor.classList.add("formFieldError");
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
-                return
-            }
-
-            console.log("newGroup - sendSignature ")
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_NEW)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
-            webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
-            webAppMessage.signedContent = {groupvsInfo:textEditor.getData(),groupvsName:$("#groupSubject").val(),
-                        tags:selectedTagsMap, operation:Operation.VICKET_GROUP_NEW}
-            if(Object.keys(selectedTagsMap).length > 0) {
-                var tagList = []
-                Object.keys(selectedTagsMap).forEach(function(entry) {
-                    tagList.push({id:entry, name:selectedTagsMap[entry]})
-                })
-                webAppMessage.signedContent.tags = tagList
-            }
-
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = getFnName(newGroupVSCallback)
-            console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-        });
-
-      });
-
+    function submitForm(){
+        textEditor.classList.remove("formFieldError");
+        if(!document.getElementById('groupSubject').validity.valid) {
+            showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
+            return false
+        }
+        if(textEditor.getData().length == 0) {
+            textEditor.classList.add("formFieldError");
+            showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
+            return false
+        }
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_NEW)
+        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+        webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
+        webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
+        webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
+            groupvsName:document.querySelector("#groupSubject").value, operation:Operation.VICKET_GROUP_NEW}
+        webAppMessage.signedContent.tags = document.querySelector('#selectedTags').selectedTags
+        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        webAppMessage.callerCallback = getFnName(newGroupVSCallback)
+        console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        return false
+    }
 
     function newGroupVSCallback(appMessage) {
         console.log("newGroupVSCallback - message from native client: " + appMessage);
@@ -152,7 +139,7 @@
                 caption = '<g:message code="newGroupOKCaption"/>'
                 window.location.href = appMessageJSON.URL + "?menu=" + menuType
             }
-            showResultDialog(caption, msg)
+            showMessageVS(msg, caption)
         }
         window.scrollTo(0,0);
     }

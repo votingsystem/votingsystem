@@ -50,8 +50,6 @@ class TestingController {
         return false
     }
 
-    def dockspawn() { }
-
     def validator() { }
 
     def tagAcccount() {

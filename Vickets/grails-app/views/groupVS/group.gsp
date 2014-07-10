@@ -8,6 +8,7 @@
 <html>
 <head>
     <link href="${resource(dir: 'css', file:'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
+    <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
     <meta name="layout" content="main" />
 </head>
 <body>
@@ -21,7 +22,6 @@
             </li>
         </ol>
     </div>
-<button onclick="showTagDialog()">Tag dialog</button>
 <div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 150px 30px;">
     <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
     </div>
@@ -33,7 +33,7 @@
                 <g:message code="editDataLbl"/> <i class="fa fa-edit"></i>
             </button>
             <button id="cancelGroupVSButton" type="submit" class="btn btn-warning"
-                    style="margin:10px 20px 0px 0px;" onclick="$('#cancelGroupVSDialog').modal('show')">
+                    style="margin:10px 20px 0px 0px;" onclick="document.querySelector('#cancelGroupDialog').show()">
                 <g:message code="cancelGroupVSLbl"/> <i class="fa fa-times"></i>
             </button>
             <div class="btn-group">
@@ -99,110 +99,22 @@
         </div>
     </div>
 
-    <div style="border: 1px solid #ccc; padding: 10px; margin: 20px 0 0 0;">
-        <div class="text-center" style="font-size: 1.2em;font-weight: bold; color:#6c0404; padding: 0px 0 0 0; ">
-            <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>
-        </div>
 
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs">
-            <li class="active" style="">
-                <a href="#balanceList" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="balanceListLbl"/></a>
-            </li>
-            <li style="">
-                <a href="#transactionsTo" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="incomeLbl"/></a>
-            </li>
-            <li style="">
-                <a href="#transactionsFrom" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="expensesLbl"/></a>
-            </li>
-            <li style="">
-                <a href="#userList" data-toggle="tab" style="padding: 5px 30px 5px 30px;"><g:message code="usersLbl"/></a>
-            </li>
-        </ul>
-
-        <g:set var="transactionVSService" bean="transactionVSService"/>
-
-        <!-- Tab panes -->
-        <div class="tab-content" style="min-height: 600px;">
-            <div class="tab-pane fade in active" id="balanceList" style="top:0px;">
-                <g:include view="/include/balance-list.gsp"/>
-                <balance-list url="${createLink(controller:'userVSAccount', action:'balance')}?id=${groupvsMap.id}"></balance-list>
-            </div>
-            <div class="tab-pane fade" id="transactionsTo">
-                <div id="transactionTo_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                    <table class="table white_headers_table" id="transactionTo_table" style="">
-                        <thead>
-                        <tr style="color: #ff0000;">
-                            <th style="width: 290px;"><g:message code="typeLbl"/></th>
-                            <th style="max-width:80px;"><g:message code="amountLbl"/></th>
-                            <th style="width:180px;"><g:message code="dateLbl"/></th>
-                            <th style="min-width:300px;"><g:message code="subjectLbl"/></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <g:each in="${groupvsMap?.transactionToList}">
-                            <g:set var="transactionURL" value="${createLink(uri:'/transaction', absolute:true)}/${it.id}" scope="page" />
-                            <% def transactionToDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
-                            <tr>
-                                <td class="text-center">${transactionVSService.getTransactionTypeDescription(it.type, request.locale)}</td>
-                                <td class="text-right">${it.amount} ${it.currency}</td>
-                                <td class="text-center">${transactionToDate}</td>
-                                <td class="text-center">
-                                    <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
-                                </td>
-                            </tr>
-                        </g:each>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="transactionsFrom" style="top:0px;">
-                <div id="transactionFrom_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                    <table class="table white_headers_table" id="transactionFrom_table" style="">
-                        <thead>
-                        <tr style="color: #ff0000;">
-                            <th style="width: 290px;"><g:message code="typeLbl"/></th>
-                            <th style="width:80px;"><g:message code="amountLbl"/></th>
-                            <th style="width:180px;"><g:message code="dateLbl"/></th>
-                            <th style="min-width:300px;"><g:message code="subjectLbl"/></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <g:each in="${groupvsMap?.transactionFromList}">
-                            <g:set var="transactionURL" value="${createLink(uri:'/transaction', absolute:true)}/${it.id}" scope="page" />
-                            <% def transactionDate = formatDate(date:it.dateCreated, formatName:'webViewDateFormat')%>
-                            <tr>
-                                <td class="text-center">${transactionVSService.getTransactionTypeDescription(it.type, request.locale)}</td>
-                                <td class="text-right">${it.amount} ${it.currency}</td>
-                                <td class="text-center">${transactionDate}</td>
-                                <td class="text-center">
-                                    <a href="#" onclick="openWindow('${transactionURL}')">${it.subject}</a>
-                                </td>
-                            </tr>
-                        </g:each>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="userList" style="top:0px;">
-                <g:include view="/include/user-list.gsp"/>
-                <user-list url="${createLink(controller: 'groupVS', action: 'listUsers')}/${groupvsMap?.id}"
-                           userURLPrefix="${createLink(controller: 'groupVS')}/${groupvsMap?.id}/user"
-                           menuType="${params.menu}"></user-list>
-            </div>
-        </div>
-
-    </div>
 
     <g:if test="${!"admin".equals(params.menu) && !"user".equals(params.menu)}">
         <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
             <g:message code="clientToolNeededMsg"/>.
             <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
     </g:if>
+
 </div>
-<g:include view="/include/dialog/cancelGroupVSDialog.gsp"/>
-<g:include view="/include/dialog/depositDialog.gsp"/>
-<g:include view="/include/dialog/resultDialog.gsp"/>
+
+<g:include view="/include/dialog/cancel-group-dialog.gsp"/>
+<div style="position:absolute; top:0px; width:100%;">
+    <div layout horizontal center center-justified style="">
+        <cancel-group-dialog id="cancelGroupDialog"></cancel-group-dialog>
+    </div>
+</div>
 
 <footer>
     <p style="text-align: center;"><small><a  class="appLink" href="mailto:jgzornoza@gmail.com">Contact</a></small></p>
@@ -211,34 +123,27 @@
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
-    function showTagDialog() {
-    document.querySelector("#tagDialog").toggle()
-}
 
     var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
     var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
 
-    $(function() {
+    <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
 
-        <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
-
-        </g:if>
-        <g:if test="${UserVS.State.PENDING.toString().equals(groupvsMap?.state)}">
-            $(".pageHeader").css("color", "#fba131")
-            $("#messagePanel").addClass("groupvsPendingBox");
-            $("#messagePanel").text("<g:message code="groupvsPendingLbl"/>")
+    </g:if>
+    <g:if test="${UserVS.State.PENDING.toString().equals(groupvsMap?.state)}">
+        $(".pageHeader").css("color", "#fba131")
+        $("#messagePanel").addClass("groupvsPendingBox");
+        $("#messagePanel").text("<g:message code="groupvsPendingLbl"/>")
             $("#messagePanel").css("display", "block")
 
-        </g:if>
-        <g:if test="${UserVS.State.CANCELLED.toString().equals(groupvsMap?.state)}">
-            $(".pageHeader").css("color", "#6c0404")
-            $("#messagePanel").addClass("groupvsClosedBox");
-            $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
+    </g:if>
+    <g:if test="${UserVS.State.CANCELLED.toString().equals(groupvsMap?.state)}">
+        $(".pageHeader").css("color", "#6c0404")
+        $("#messagePanel").addClass("groupvsClosedBox");
+        $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
             $("#messagePanel").css("display", "block")
             $("#adminButtonsDiv").css("display", "none")
-        </g:if>
-
-    });
+    </g:if>
 
     function editGroup() {
         window.location.href = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/${groupvsMap.id}?menu=admin"
@@ -272,7 +177,7 @@
                 caption = "<g:message code='groupSubscriptionOKLbl'/>"
             }
             var msg = appMessageJSON.message
-            showResultDialog(caption, msg)
+            showMessageVS(msg, caption)
         }
     }
 </g:applyCodec>

@@ -17,7 +17,8 @@
     </div>
     <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control">
+            <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                    class="form-control" onchange="groupvsTypeSelect(this)">
                 <option value="ACTIVE"  style="color:#59b;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
                 <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
                 <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
@@ -140,24 +141,22 @@
 </body>
 </html>
 <asset:script>
-    $(function() {
-        $("#navBarSearchInput").css( "visibility", "visible" );
-        $('#groupvsTypeSelect').on('change', function (e) {
-            var groupvsType = $(this).val()
-            var optionSelected = $("option:selected", this);
-            console.log("groupvsTypeSelect - selected: " + groupvsType)
-            var targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType;
-            if("" != groupvsType) {
-                history.pushState(null, null, targetURL);
-                targetURL = targetURL + "&state=" + groupvsType
-            }
+    document.querySelector("#navBarSearchInput").style.visibility = "visible"
+
+    function groupvsTypeSelect(selected) {
+        var optionSelected = selected.value
+        console.log("certTypeSelect: " + optionSelected)
+        if("" != optionSelected) {
+            targetURL = "${createLink(controller: 'groupVS')}?menu=" + menuType;
+            history.pushState(null, null, targetURL);
             document.querySelector("#groupvsList").url = targetURL
-        });
-    })
+        }
+    }
 
     function processUserSearch(textToSearch) {
-        $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
-        $('#pageInfoPanel').css("display", "block")
+        document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"
+        document.querySelector("#pageInfoPanel").style.display = 'block'
         document.querySelector("#groupvsList").url = "${createLink(controller: 'search', action: 'groupVS')}?searchText=" + textToSearch
     }
+
 </asset:script>

@@ -5,10 +5,8 @@
         <g:if test="${receiptPageTitle != null}">${receiptPageTitle}</g:if>
         <g:else><g:message code="receiptPageLbl"/></g:else>
     </title>
-    <g:javascript library="jquery" plugin="jquery"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
     <asset:stylesheet src="vickets.css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>

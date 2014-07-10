@@ -94,19 +94,24 @@ DateUtils.parseInputType = function (dateStr) {
 	}
 
 
-//https://github.com/sairam/bootstrap-prompts/blob/master/bootstrap-prompts-alert.js
 window._originalAlert = window.alert;
 window.alert = function(text) {
-    var bootStrapAlert = function() {
-        if(! $.fn.modal.Constructor) return false;
-        if($('#windowAlertModal').length == 1) return true;
-    }
-    if ( bootStrapAlert() ){
-        $('#windowAlertModal .modal-body p').text(text);
-        $('#windowAlertModal').modal('show');
+    if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
+        document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+        document.querySelector("#_votingsystemMessageDialog").setMessage(text)
     }  else {
-        console.log('bootstrap was not found');
+        console.log('votingsystem-message-dialog not found');
         window._originalAlert(text);
+    }
+}
+
+function showMessageVS(message, caption) {
+    if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
+            document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+        document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption)
+    }  else {
+        console.log('votingsystem-message-dialog not found');
+        window._originalAlert(message);
     }
 }
 
@@ -338,4 +343,9 @@ function notifiyClientToolConnection() {
 
 function reloadPage() {
     location.reload();
+}
+
+//Message -> base64 encoded JSON
+function setClientToolMessage(callerId, message) {
+    window[callerId].setClientToolMessage(atob(message))
 }

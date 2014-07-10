@@ -6,24 +6,29 @@
     <template>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="json"></core-ajax>
-        <div layout vertical center style="max-width: 800px;">
-            <table class="table white_headers_table" id="uservs_table" style="">
-                <thead>
-                <tr style="color: #ff0000;">
-                    <th style="width: 60px;"><g:message code="nifLbl"/></th>
-                    <th style=""><g:message code="nameLbl"/></th>
-                </tr>
-                </thead>
-                <tbody>
+        <div layout vertical center style="">
+            <div style="display: {{responseData == null || responseData.userVSList.length == 0? 'none':'block'}}; width: 400px;">
+                <table class="table white_headers_table" id="uservs_table" style="">
+                    <thead>
+                    <tr style="color: #ff0000;">
+                        <th style="width: 60px;"><g:message code="nifLbl"/></th>
+                        <th style=""><g:message code="nameLbl"/></th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     <template repeat="{{uservs in responseData.userVSList}}">
                         <tr on-click="{{showUserDetails}}">
                             <td class="text-center">{{uservs.nif}}</td>
                             <td class="text-center">{{uservs.name}}</td>
                         </tr>
                     </template>
-                </tbody>
-            </table>
-            <div id="emptySearchMsg" style="font-size: 1em; display: none;"><g:message code="emptyUserSearchResultMsg"/></div>
+                    </tbody>
+                </table>
+            </div>
+            <div id="emptySearchMsg" style="font-size: 1em; font-weight: bold;
+                    display: {{responseData.userVSList.length == 0? 'block':'none'}};">
+                <g:message code="emptyUserSearchResultMsg"/>
+            </div>
         </div>
     </template>
     <script>

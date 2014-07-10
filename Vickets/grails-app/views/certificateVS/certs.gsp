@@ -2,7 +2,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <meta name="layout" content="main" />
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <style type="text/css" media="screen">
@@ -70,7 +69,6 @@
                         <div>
                             <div class="text-center" style="font-weight: bold; display: {{cert.isRoot ? 'inline': 'none'}};
                             margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;"><g:message code="rootCertLbl"/></div>
-
                         </div>
                     </div>
                 </template>

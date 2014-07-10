@@ -2,11 +2,9 @@
 <html>
 <head>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <g:javascript library="jquery" plugin="jquery"/>
+    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
     <asset:stylesheet src="vickets.css"/>
 </head>
 <body>
@@ -87,9 +85,6 @@
 </body>
 </html>
 <asset:script>
-
-    $(function() { })
-
     var fromUserTemplate
     var toUserTemplate
 

@@ -26,55 +26,49 @@
             </ul>
         </div>
 
-        <form id="mainForm">
-            <div style="position:relative; width:100%;">
-                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
-            </div>
+        <div style="position:relative; width:100%;">
+            <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+        </div>
 
-            <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
-                <div style="position:absolute; right:0;">
-                    <button type="submit" class="btn btn-default">
-                        <g:message code="saveChangesLbl"/> <i class="fa fa fa-check"></i>
-                    </button>
-                </div>
+        <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
+            <div style="position:absolute; right:0;">
+                <button onclick="submitForm()" class="btn btn-default">
+                    <g:message code="saveChangesLbl"/> <i class="fa fa fa-check"></i>
+                </button>
             </div>
-
-        </form>
+        </div>
     </div>
 
 
 </div>
 
-<g:include view="/include/dialog/resultDialog.gsp"/>
-</body>
 </html>
 <asset:script>
     var textEditor = document.querySelector('#textEditor')
 
-    $(function() {
-        showGroupData()
+    document.addEventListener('polymer-ready', function() {
+        document.querySelector(".pageHeader").innerHTML = "<g:message code="editingGroupMsgTitle"/>".format('${groupvsMap.name}')
+        document.querySelector('#textEditor').setData('${raw(groupvsMap?.description)}')
+    });
 
-        $('#mainForm').submit(function(event){
-            event.preventDefault();
-            if(textEditor.getData() == 0) {
-                textEditor.classList.add("formFieldError");
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
-                return
-            }
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_EDIT)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/${groupvsMap.id}"
-            webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
-            webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), groupvsName:'${groupvsMap.name}',
-                id:'${groupvsMap.id}', operation:Operation.VICKET_GROUP_NEW}
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = getFnName(editGroupVSCallback)
-            //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-        });
-
-      });
+    function submitForm(){
+        if(textEditor.getData() == 0) {
+            textEditor.classList.add("formFieldError");
+            showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
+            return
+        }
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_EDIT)
+        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+        webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/${groupvsMap.id}"
+        webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
+        webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), groupvsName:'${groupvsMap.name}',
+            id:'${groupvsMap.id}', operation:Operation.VICKET_GROUP_NEW}
+        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        webAppMessage.callerCallback = getFnName(editGroupVSCallback)
+        //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+    }
 
     function editGroupVSCallback(appMessage) {
         console.log("editGroupVSCallback - message from native client: " + appMessage);
@@ -87,17 +81,9 @@
                 var msgTemplate = '<g:message code='accessLinkMsg'/>';
                 msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
             }
-            showResultDialog(caption, msg)
+            showMessageVS(msg, caption)
         }
         window.scrollTo(0,0);
     }
 
-    var editGroupHeaderTemplate = "<g:message code="editingGroupMsgTitle"/>"
-
-    function showGroupData() {
-        console.log("showGroupData")
-        var editRepresentativeHeader = editGroupHeaderTemplate.format('${groupvsMap.name}')
-        $(".pageHeader").append(editRepresentativeHeader)
-        textEditor.setData('${raw(groupvsMap?.description)}')
-    }
 </asset:script>

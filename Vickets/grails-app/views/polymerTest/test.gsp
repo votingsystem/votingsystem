@@ -19,8 +19,10 @@
         <button onclick="document.querySelector('#getReasonDialog').toggle()" style="margin:10px;">Get reason dialog</button>
     </div>
     <div layout vertical>
-        <g:include view="/include/dialog/votingsystem-deposit-dialog.gsp"/>
-        <votingsystem-deposit-dialog id="depositDialog" caption="Realizar ingreso"></votingsystem-deposit-dialog>
+        <g:include view="/include/vicket-deposit-dialog.gsp"/>
+        <div layout horizontal center center-justified style="">
+            <vicket-deposit-dialog id="depositDialog" caption="Realizar ingreso"></vicket-deposit-dialog>
+        </div>
 
 
         <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
@@ -29,11 +31,26 @@
         <g:include view="/include/dialog/get-reason-dialog.gsp"/>
         <get-reason-dialog id="getReasonDialog" opened="false" caption="<g:message code="cancelCertFormCaption"/>"
                            isForAdmins="true"></get-reason-dialog>
+
+
+
     </div>
 </div>
 </body>
 </html>
 <asset:script>
+    var input = 'hola'
+    var imputBase64 = btoa(input)
+    var imputBase64Decoded = atob(imputBase64)
+    console.log("input: " + input + " -imputBase64: " + imputBase64 + " - imputBase64Decoded: " +imputBase64Decoded)
 
+
+
+    document.addEventListener('polymer-ready', function() {
+        var depositDialog = document.querySelector('#depositDialog')
+        console.log(" ========= callbackFunction: " + depositDialog.callbackFunction)
+        window[depositDialog.randomStr].setClientToolMessage('testing 123')
+
+    });
 </asset:script>
 <asset:deferredScripts/>

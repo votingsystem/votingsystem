@@ -68,7 +68,6 @@
          * @param {String} the data to show on editor
          */
         setData: function(dataToSet) {
-            console.log("======= setData: " + dataToSet + " - this.isEditorLoaded: " + this.isEditorLoaded)
             if(!this.isEditorLoaded) this.data = dataToSet
             else this.editor.insertHtml(dataToSet);
         }

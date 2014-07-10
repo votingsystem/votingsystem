@@ -174,8 +174,7 @@
                 caption = "<g:message code='depositOKLbl'/>"
                 $('#depositDialog').modal('hide');
             }
-            var msg = appMessageJSON.message
-            showResultDialog(caption, msg)
+            showMessageVS(appMessageJSON.message, caption)
         }
     }
 
@@ -189,15 +188,13 @@
             switch(operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     if(receptorList.length == 0){
-                        showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                            '<g:message code="receptorMissingErrorLbl"/>', function() {})
+                        showMessageVS('<g:message code="receptorMissingErrorLbl"/>', '<g:message code="dataFormERRORLbl"/>')
                         return false
                     }
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
                     if(receptorList.length == 0){
-                        showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                            '<g:message code="receptorsMissingErrorLbl"/>', function() {})
+                        showMessageVS('<g:message code="receptorsMissingErrorLbl"/>', '<g:message code="dataFormERRORLbl"/>')
                         return false
                     }
                     break;

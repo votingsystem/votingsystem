@@ -58,7 +58,6 @@
     </div>
 </div>
 <div id="certificateListDiv" style="display:none;">${uservsMap.certificateList as grails.converters.JSON}</div>
-<g:include view="/include/dialog/resultDialog.gsp"/>
 <g:include view="/include/dialog/sendMessageVSDialog.gsp"/>
 </body>
 </html>
@@ -118,18 +117,16 @@
 
     function sendMessageVSCallback(appMessage) {
         var appMessageJSON = toJSON(appMessage)
-        var callBackResult = null
         if(appMessageJSON != null) {
             var caption = '<g:message code="sendMessageERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = '<g:message code="sendMessageOKCaption"/>'
             }
-            showResultDialog(caption, msg, callBackResult)
+            showMessageVS(msg, caption)
         }
         window.scrollTo(0,0);
     }
-
 
     function editGroup() {
         window.location.href = updateMenuLink("${createLink( controller:'groupVS', action:'edit', absolute:true)}/${uservsMap.id}")

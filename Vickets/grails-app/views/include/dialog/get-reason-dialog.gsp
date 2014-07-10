@@ -29,7 +29,7 @@
                     height: 35px;
                 }
             </style>
-            <div id="container" layout vertical class="card" style="overflow-y: auto; width:350px; padding:10px;">
+            <div id="container" layout vertical class="card" style="overflow-y: auto; width:450px; padding:10px;">
                 <h3 style="color: #6c0404;">{{caption}}</h3>
 
                 <div id="adminsMsg" class="center" style="color: #6c0404;"><core-icon icon="warning" style="fill:#6c0404;"></core-icon>

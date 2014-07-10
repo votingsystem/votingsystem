@@ -4,11 +4,9 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <g:javascript library="jquery" plugin="jquery"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
     <asset:stylesheet src="vickets.css"/>
 </head>
 <body>
@@ -16,7 +14,8 @@
 
     <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
         <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="messagevsStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 300px;" class="form-control">
+            <select id="messagevsStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 300px;"
+                    class="form-control" onchange="messagevsStateSelect(this)">
                 <option value="PENDING"> - <g:message code="selectPendingMessaVSLbl"/> - </option>
                 <option value="CONSUMED"> - <g:message code="selectConsumedMessaVSLbl"/> - </option>
             </select>
@@ -41,7 +40,6 @@
 </div>
 <div id="messageVSTemplate" class="text-center"></div>
 </body>
-    <g:include view="/include/dialog/windowAlertModal.gsp"/>
 </html>
 <asset:script>
 
@@ -92,21 +90,13 @@
         setMessageVSList(appMessageJSON.messageVSList)
     }
 
-
-    $(function() {
-        //setMessageVSList(messageVSList)
-
-        $('#messagevsStateSelect').on('change', function (e) {
-            var messagevsState = $(this).val()
-            console.log("messagevsStateSelect: " + messagevsState)
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS_GET)
-            webAppMessage.signedMessageSubject = "<g:message code="getMessageSubject"/>"
-            webAppMessage.document = {operation:Operation.MESSAGEVS_GET, state:messagevsState}
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-
-        });
-
-    })
+    function messagevsStateSelect(selected) {
+        var optionSelected = selected.value
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS_GET)
+        webAppMessage.signedMessageSubject = "<g:message code="getMessageSubject"/>"
+        webAppMessage.document = {operation:Operation.MESSAGEVS_GET, state:optionSelected}
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+    }
 
     function decryptMessageVS(messageVSId) {
         console.log("decryptMessageVS: " + messageVSId)

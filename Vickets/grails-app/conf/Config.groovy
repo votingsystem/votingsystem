@@ -11,7 +11,7 @@
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 
-grails.views.javascript.library="jquery"
+//grails.views.javascript.library="jquery"
 
 grails.converters.default.pretty.print=true
 grails.gorm.failOnError=true
