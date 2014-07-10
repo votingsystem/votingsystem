@@ -6,8 +6,9 @@
         <style>
             .receptorsBox {
                 margin: 10px auto 30px auto;
-                padding: 5px 0px 5px 0px;;
-                border: 1px solid #ccc;
+                padding: 5px 0px 0px 0px;;
+                border: none;
+                width:450px;
             }
             .receptorsBox legend {
                 font-size: 1.2em;
@@ -15,9 +16,9 @@
                 color:#6c0404;
             }
         </style>
-        <div layout vertical id="fieldsDiv" class="receptorsBox" style="display:none;">
-            <fieldset id="fieldsBox">
-                <legend id="fieldsLegend" style="border: none; margin:5px 0px 5px 0px;">{{boxCaption}}</legend>
+        <div layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;display:{{ uservsList.length == 0?'none':'block'}}">
+            <fieldset class="receptorsBox" id="fieldsBox" style="">
+                <legend id="fieldsLegend" style="border: none; margin:5px 0px 0px 0px;">{{boxCaption}}</legend>
                 <template repeat="{{uservs in uservsList}}">
                     <div layout horizontal style="padding: 0px 10px 0px 10px;">
                         <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{removeUser}}"></core-icon-button>
@@ -37,10 +38,6 @@
                 this.messages = localizedMessages
             },
             ready:function() { },
-            uservsListChanged:function () {
-                if(this.uservsList.length == 0) this.$.fieldsDiv.style.display = 'none'
-                else this.$.fieldsDiv.style.display = 'block'
-            },
             addUser:function(userToAdd) {
                 var isNewUser = true
                 for(userIdx in this.uservsList) {

@@ -30,7 +30,27 @@ Dialog to search and select tags
 
       <core-overlay flex vertical id="coreOverlay" vertical class="card" opened="{{opened}}" layered="true"
                     style="position: absolute; top:30px;">
-          <div layout vertical style="max-width: 400px; padding:10px;">
+          <!-- place all overlay styles inside the overlay target -->
+          <style no-shim>
+              .card {
+                  position: relative;
+                  display: inline-block;
+                  vertical-align: top;
+                  background-color: #f9f9f9;
+                  box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+                  border: 1px solid #ccc;
+              }
+              paper-button.button {
+                  background-color: #f9f9f9;
+                  color: #6c0404;
+                  border: 1px solid #ccc;
+                  margin:10px;
+                  vertical-align: middle;
+                  line-height: 24px;
+                  height: 35px;
+              }
+          </style>
+          <div layout vertical style="max-width: 450px; padding:10px;">
               <h3>{{caption}}</h3>
 
               <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
@@ -53,7 +73,7 @@ Dialog to search and select tags
               <div flex layout horizontal center center-justified>
                   <votingsystem-input id="tagSearchInput" floatinglabel label="{{messages.tagLbl}}" required autofocus>
                   </votingsystem-input>
-                  <paper-button raisedButton label="{{messages.tagSearchLbl}}" class="colored hover"
+                  <paper-button raisedButton label="{{messages.tagSearchLbl}}" class="button"
                                 on-click="{{searchTag}}" style=""></paper-button>
               </div>
               <div flex horizontal wrap layout style="">
@@ -71,8 +91,9 @@ Dialog to search and select tags
               </div>
               <div layout horizontal style="margin:10px 20px 0px 0px;">
                   <div flex></div>
-                  <paper-button raisedButton class="colored" label="{{messages.acceptLbl}}"
-                                on-click="{{fireTags}}" style=""></paper-button>
+                  <paper-button raisedButton class="button" label="{{messages.acceptLbl}}" on-click="{{fireTags}}" style="">
+
+                  </paper-button>
               </div>
           </div>
       </core-overlay>
@@ -189,7 +210,6 @@ Dialog to search and select tags
         show: function (maxNumberTags, selectedTags) {
             this.$.coreOverlay.opened = true
             this.maxNumTags = maxNumberTags
-            console.log("======= selectedTags: " + JSON.stringify(selectedTags))
             if(selectedTags == null) this.selectedTagList = []
             else this.selectedTagList = selectedTags
             this.isShowingTags = true
