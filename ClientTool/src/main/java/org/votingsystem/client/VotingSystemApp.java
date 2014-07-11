@@ -43,10 +43,7 @@ import java.net.URLStreamHandlerFactory;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -129,6 +126,15 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         this.primaryStage = primaryStage;
         ContextVS.initSignatureClient(this, "log4jClientTool.properties", "clientToolMessages.properties", locale);
         browserVS = new BrowserVS();
+        try {
+            String testStr = "hola con acentuación en España";
+            String encodedTestStr = new String(Base64.getEncoder().encode(testStr.getBytes("UTF8")), "UTF8");
+            String decodedTestStr = new String(Base64.getDecoder().decode(encodedTestStr.getBytes("UTF8")), "UTF8");
+            //String decodedTestStr = new String(Base64.getDecoder().decode("aG9sYSBjb24gYWNlbnR1YWNp824gZW4gRXNwYfFh".getBytes("UTF8")), "UTF8");
+        } catch(Exception ex){
+            ex.printStackTrace();
+        }
+
         new Thread(new Runnable() {
             @Override public void run() {
                 boolean loadedFromJar = false;

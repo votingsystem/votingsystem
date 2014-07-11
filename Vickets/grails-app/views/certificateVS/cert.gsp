@@ -90,13 +90,16 @@
             webAppMessage.signedMessageSubject = "<g:message code="cancelCertMessageSubject"/>"
             webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                 changeCertToState:"${CertificateVS.State.CANCELLED.toString()}", serialNumber:"${certMap.serialNumber}"}
-            //signed and encrypted
             webAppMessage.contentType = 'application/x-pkcs7-signature'
-            webAppMessage.callerCallback = 'cancelCertCallback'
+            var objectId = Math.random().toString(36).substring(7)
+            window[objectId] = {setClientToolMessage: function(appMessage) {location.reload();}}
+            webAppMessage.callerCallback = objectId
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         })
     });
+
+
 
     <g:if test="${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString().equals(certMap.type)}">
         document.getElementById('pageHeaderDiv').innerHTML = "<g:message code="trustedCertPageTitle"/>"
@@ -116,7 +119,4 @@
             if(document.getElementById('cancelCertButton') != null)
                 document.getElementById('cancelCertButton').style.display = "none"
     </g:elseif>
-    function cancelCertCallback () {
-        location.reload();
-    }
 </asset:script>

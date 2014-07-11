@@ -38,7 +38,15 @@ class TestingController {
     def filesService
     def webSocketService
 
-    def index() { }
+    def index() {}
+
+    def index2() {
+        String messageStr =  message(code:'newVicketGroupOKMsg', args:['España acentúación'], encodeAs:'JavaScript')
+        log.debug("========= messageStr: " + messageStr)
+        Map responseMap = [status:200, message:messageStr]
+        render responseMap as JSON
+        return false
+    }
 
     def testSocket() {}
 

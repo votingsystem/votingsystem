@@ -26,10 +26,6 @@
 </html>
 <asset:script>
 
-    function submitForm(form) {
-        var result = document.getElementById("testTime").getValidatedTime()
-        console.log("result: " + result)
-        return false
-    }
 
 </asset:script>
+<asset:deferredScripts/>

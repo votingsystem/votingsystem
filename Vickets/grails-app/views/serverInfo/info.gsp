@@ -18,18 +18,17 @@
         font-weight:bold;
         line-height: 1;
         display:block;
-        margin: 10px auto 5px 100px;
-        color:#0066cc;
+        margin: 10px auto 0px auto;
+        color:#ba0011;
         text-decoration: none;
-        padding:10px;
     }
     </style>
 </head>
 <body >
-<h2 class="center">
+<h3 class="center">
     <a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'appTitle', null)}</a>
-</h2>
-<polymer-element name="tab-test">
+</h3>
+<polymer-element name="info-page-tabs">
     <template>
         <style shim-shadowdom>
         .tabContent {
@@ -52,7 +51,8 @@
         }
         </style>
         <div  style="width: 1000px; margin:0px auto 0px auto;">
-            <paper-tabs  style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}">
+            <paper-tabs  style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
+                         selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
                 <paper-tab name="info" style="width: 400px"><g:message code="infoLbl"/></paper-tab>
                 <paper-tab name="serviceList"><g:message code="serviceListLbl"/></paper-tab>
                 <paper-tab name="appData"><g:message code="appDataLabel"/></paper-tab>
@@ -75,11 +75,11 @@
     </template>
 
     <script>
-        Polymer('tab-test', {
+        Polymer('info-page-tabs', {
             selectedTab:'info'
         });
     </script>
 </polymer-element>
-<tab-test style="width: 1000px;"></tab-test>
+<info-page-tabs style="width: 1000px;"></info-page-tabs>
 </body>
 </html>

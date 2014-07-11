@@ -4,7 +4,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 
 
-<polymer-element name="get-reason-dialog" attributes="caption opened isForAdmins">
+<polymer-element name="get-reason-dialog" attributes="caption opened isForAdmins messageToUser">
     <template>
         <style></style>
         <core-overlay flex vertical id="coreOverlay" vertical opened="{{opened}}" layered="true"
@@ -32,8 +32,13 @@
             <div id="container" layout vertical class="card" style="overflow-y: auto; width:450px; padding:10px;">
                 <h3 style="color: #6c0404;">{{caption}}</h3>
 
-                <div id="adminsMsg" class="center" style="color: #6c0404;"><core-icon icon="warning" style="fill:#6c0404;"></core-icon>
-                    <g:message code="systemAdminReservedOperationMsg"/></div>
+                <div class="center" style="color: #6c0404;display:{{isForAdmins?'block':'none'}}">
+                    <core-icon icon="warning" style="fill:#6c0404;"></core-icon>
+                    <g:message code="systemAdminReservedOperationMsg"/>
+                </div>
+                <div class="center" style="color: #6c0404;display:{{messageToUser?'block':'none'}}">
+                    {{messageToUser}}
+                </div>
                 <div style="margin:20px 0px 10px 0px;">
                     <paper-input id="reason" multiline floatingLabel rows="3" label="<g:message code="cancelSubscriptionFormMsg"/>"></paper-input>
                 </div>
@@ -53,10 +58,6 @@
         isForAdmins: false,
         ready: function() {
         },
-        isForAdminsChanged:function() {
-            if(this.isForAdmins) this.$.adminsMsg.style.display = 'block'
-            else this.$.adminsMsg.style.display = 'none'
-        },
         openedChanged: function() {
             this.async(function() {this.$.coreOverlay.style.top = "50px" }, null, 1);
         },
@@ -65,6 +66,9 @@
         },
         toggle: function() {
             this.$.coreOverlay.toggle();
+        },
+        show: function(message) {
+            this.messageToUser = message;
         }
     });
 </script>

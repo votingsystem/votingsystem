@@ -93,18 +93,6 @@ DateUtils.parseInputType = function (dateStr) {
 		return dateObject
 	}
 
-
-window._originalAlert = window.alert;
-window.alert = function(text) {
-    if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
-        document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
-        document.querySelector("#_votingsystemMessageDialog").setMessage(text)
-    }  else {
-        console.log('votingsystem-message-dialog not found');
-        window._originalAlert(text);
-    }
-}
-
 function showMessageVS(message, caption) {
     if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
             document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
@@ -264,6 +252,7 @@ function getFnName(fn) {
 }
 
 var menuType = 'user'
+if(getParameterByName('menu') != null) menuType = getParameterByName('menu')
 
 function updateMenuLinks() {
     var selectedMenuType = getParameterByName('menu')
@@ -326,7 +315,7 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
         return
     }
     var messageToSignatureClient = JSON.stringify(messageJSON)
-    console.log("setJSONMessageToSignatureClient - messageToSignatureClient: " + messageToSignatureClient);
+    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
     clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
 }
 
@@ -341,11 +330,9 @@ function notifiyClientToolConnection() {
     }
 }
 
-function reloadPage() {
-    location.reload();
-}
-
 //Message -> base64 encoded JSON
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
 function setClientToolMessage(callerId, message) {
-    window[callerId].setClientToolMessage(atob(message))
+    var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
+    window[callerId].setClientToolMessage(b64_to_utf8)
 }

@@ -84,42 +84,17 @@
     </div>
 </div>
 <div id="certificateListDiv" style="display:none;">${uservsMap.certificateList as grails.converters.JSON}</div>
-<g:include view="/include/dialog/sendMessageVSDialog.gsp"/>
 </body>
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
 
-    $(function() {
-        <g:if test="${uservsMap?.description == null}">
-            document.getElementById("userDescriptionDiv").style.display = 'none'
-        </g:if>
-        <g:if test="${UserVS.State.ACTIVE.toString().equals(uservsMap?.state)}">
+    <g:if test="${uservsMap?.description == null}">
+        document.getElementById("userDescriptionDiv").style.display = 'none'
+    </g:if>
+    <g:if test="${UserVS.State.ACTIVE.toString().equals(uservsMap?.state)}">
 
-        </g:if>
-
-    });
-
-    function showMessageVSDialog() {
-        console.log(showMessageVSDialog)
-        showSendMessageVSDialog("${uservsMap?.nif}",
-            "<g:message code="uservsMessageVSLbl" args="${[uservsMap?.name]}"/>", sendMessageVSCallback)
-    }
-
-    function sendMessageVSCallback(appMessage) {
-        var appMessageJSON = toJSON(appMessage)
-        var callBackResult = null
-        if(appMessageJSON != null) {
-            var caption = '<g:message code="sendMessageERRORCaption"/>'
-            var msg = appMessageJSON.message
-            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="sendMessageOKCaption"/>'
-            }
-            showMessageVS(caption, msg, callBackResult)
-        }
-        window.scrollTo(0,0);
-    }
-
+    </g:if>
 
     function editGroup() {
         window.location.href = updateMenuLink("${createLink( controller:'groupVS', action:'edit', absolute:true)}/${uservsMap.id}")
@@ -130,8 +105,8 @@
     }
 
     addClientToolListener(function() {
-        if(document.getElementById("clientToolMsg") != null)
-            document.getElementById("clientToolMsg").style.display = 'none'
+        if(document.querySelector("#clientToolMsg") != null)
+            document.querySelector("#clientToolMsg").style.display = 'none'
     })
 
 </g:applyCodec>

@@ -139,6 +139,11 @@ and `responsiveWidth` to change the layout of the scaffold.
       this.$.coreDrawerPanel.openDrawer();
     },
 
+      searchVisible: function(isVisible) {
+          if(isVisible) this.$.searchButton.style.display = 'block'
+          else this.$.searchButton.style.display = 'none'
+      },
+
     /**
       * Close the drawer panel
       * @method closeDrawer
@@ -149,7 +154,7 @@ and `responsiveWidth` to change the layout of the scaffold.
 
     ready: function() {   },
 
-      toogleSearchPanel:function () {
+    toogleSearchPanel:function () {
           if('block' == this.$.searchPanel.style.display) this.$.searchPanel.style.display = 'none'
           else this.$.searchPanel.style.display = 'block'
     }

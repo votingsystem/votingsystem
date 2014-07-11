@@ -101,15 +101,6 @@
         </template>
         <script>
             Polymer('groupvs-list', {
-                ready: function() {
-                    this.$.ajax.addEventListener('core-complete', function() {
-                        $('p').each(function(index, item) {
-                            if($.trim($(item).text()) === "") {
-                                $(item).slideUp(); // $(item).remove();
-                            }
-                        });
-                    })
-                },
                 selectView :  function(e) {
                     var i = e.target.templateInstance.model.i;
                     this.$.pages.selected = i+1;
@@ -141,7 +132,9 @@
 </body>
 </html>
 <asset:script>
-    document.querySelector("#navBarSearchInput").style.visibility = "visible"
+    document.addEventListener('polymer-ready', function() {
+        document.querySelector("#navBar").searchVisible('false')
+    });
 
     function groupvsTypeSelect(selected) {
         var optionSelected = selected.value

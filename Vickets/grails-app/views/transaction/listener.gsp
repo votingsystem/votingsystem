@@ -3,6 +3,7 @@
 <head>
     <meta name="layout" content="main" />
     <link rel="import" href="${resource(dir: '/bower_components/vicket-transaction-table', file: 'vicket-transaction-table.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
 </head>
 <body>
 <div class="pageContenDiv">
@@ -36,11 +37,11 @@
 
 </html>
 <asset:script>
-    document.querySelector("#wssocket").addEventListener('on-message', function (e) {
-        document.querySelector("#recordList").newRecord = e.detail
-    })
 
     document.addEventListener('polymer-ready', function() {
+        document.querySelector("#wssocket").addEventListener('on-message', function (e) {
+            document.querySelector("#recordList").newRecord = e.detail
+        })
         document.querySelector("#wssocket").sendMessage(JSON.stringify({operation:Operation.LISTEN_TRANSACTIONS, locale:navigator.language}))
     });
 

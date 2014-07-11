@@ -166,7 +166,7 @@
     }
 
     function depositDialogCallback(appMessage) {
-        console.log("depositDialogCallback - message from native client: " + appMessage);
+        console.log("depositDialogCallback - message: " + appMessage);
         var appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
             var caption = '<g:message code="depositERRORLbl"/>'

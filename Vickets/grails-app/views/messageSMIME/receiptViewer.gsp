@@ -54,14 +54,14 @@
         console.log("saveReceipt")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SAVE_RECEIPT)
         webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
-        webAppMessage.callerCallback = 'saveReceiptCallback'
-        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-    }
 
-    function saveReceiptCallback(appMessage) {
-        console.log("saveReceiptCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        console.log("saveReceiptCallback - message from native client: " + appMessage);
+        var objectId = Math.random().toString(36).substring(7)
+        window[objectId] = {setClientToolMessage: function(appMessage) {
+            console.log("saveReceiptCallback - message: " + appMessage);
+            var appMessageJSON = toJSON(appMessage)
+            console.log("saveReceiptCallback - message: " + appMessage); }}
+        webAppMessage.callerCallback = objectId
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
 </asset:script>

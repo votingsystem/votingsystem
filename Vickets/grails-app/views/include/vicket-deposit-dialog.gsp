@@ -107,9 +107,9 @@
 
         ready: function() {
             this.style.display = 'none'
-            this.randomStr = Math.random().toString(36).substring(7)
-            window[this.randomStr] = this
-            this.callbackFunction = "window['" + this.randomStr + "'].setClientToolMessage"
+            this.objectId = Math.random().toString(36).substring(7)
+            window[this.objectId] = this
+            this.callbackFunction = "window['" + this.objectId + "'].setClientToolMessage"
             var depositDialog = this
             this.$.userSearchList.addEventListener('user-clicked', function (e) {
                 depositDialog.$.receptorBox.addUser(e.detail)
@@ -130,7 +130,6 @@
         },
 
         openedChanged: function() {
-            console.log("======= openedChanged: " + this.opened)
             this.$.userSearchInput.value = ""
             this.setMessage(200, null)
             this.$.receptorBox.removeUsers()
@@ -195,8 +194,8 @@
                 webAppMessage.signedContent.tags = tagList
             }
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = this.randomStr
-            console.log(this.tagName + " - randomStr: " + this.randomStr)
+            webAppMessage.callerCallback = this.objectId
+            console.log(this.tagName + " - objectId: " + this.objectId)
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
 
@@ -221,7 +220,7 @@
         setClientToolMessage:function(appMessage) {
             console.log(this.tagName + " - " + this.id + " - setClientToolMessage: " + appMessage);
             var appMessageJSON = JSON.parse(appMessage)
-            if(appMessageJSON != null) window[this.randomStr].setMessage(appMessageJSON.statusCode, appMessageJSON.message)
+            if(appMessageJSON != null) window[this.objectId].setMessage(appMessageJSON.statusCode, appMessageJSON.message)
         },
         setMessage:function(status, message) {
             console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)

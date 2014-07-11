@@ -10,19 +10,15 @@
 
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
     <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
-
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-icon-button', file: 'paper-icon-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-
-
-
-    <link rel="import" href="${resource(dir: '/misc', file: 'layout.html')}">
 
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
@@ -35,13 +31,13 @@
     </style>
     <g:layoutHead/>
 </head>
-<body style="margin:0px auto 0px auto;">
+<body id="vicketsPage" style="margin:0px auto 0px auto;">
 <polymer-element name="nav-bar">
 
     <template>
         <votingsystem-navbar id="_navbar" style="display: none;">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
-                <core-toolbar id="core_toolbar" class="dark-theme" style="background-color: #ba0011;">
+                <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
 
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
@@ -100,6 +96,9 @@
                             <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
                                 <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                             </paper-item>
+                            <paper-item data-href="test">
+                                Testing Testing
+                            </paper-item>
                             {{ "<g:message code="usersPageTitle"/>" | setTitle}}
                         </g:else>
 
@@ -107,25 +106,41 @@
                 </core-menu>
             </core-header-panel>
             <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
-            <content></content>
+            <content id="content"></content>
+            <div id="testing"></div>
         </votingsystem-navbar>
+
+        <core-ajax id="ajax" auto url=""
+                on-core-response="{{ajaxResponse}}"></core-ajax>
+
     </template>
     <script>
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
 
             ready: function() {
+                this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
                 this.fire('nav-bar-ready');
             },
 
             drawerItemSelected: function() {
+                this.fire('item-selected', this.coreSelectorValue)
                 if('changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                     window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
-                } else  window.location.href = this.coreSelectorValue + "?menu=${params.menu}"
+                } else if('test' == this.coreSelectorValue) {
+                    console.log("============ test")
+                    this.$.ajax.url = "http://vickets:8086/Vickets/groupVS/3/user/4?mode=details&menu=admin"
+                }  else window.location.href = this.coreSelectorValue + "?menu=${params.menu}"
+            },
+            searchVisible: function(isVisible) {
+                this.$._navbar.searchVisible(isVisible)
             },
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
+            },
+            ajaxResponse: function(appTitle) {
+                loadTest(this.$.ajax.response)
             }
         });
     </script>
@@ -136,7 +151,6 @@
         <g:layoutBody/>
     </nav-bar>
 </div>
-
 <g:include view="/include/dialog/votingsystem-message-dialog.gsp"/>
 <div layout horizontal center center-justified style="top:100px;">
     <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
@@ -145,12 +159,29 @@
 </body>
 </html>
 <asset:script>
-    document.querySelector('#navBarDiv').addEventListener('nav-bar-ready', function(e) {
-        navBarDiv.style.display = 'block';
-    });
-
     document.addEventListener('polymer-ready', function() {
         updateMenuLinks()
     });
+
+    document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {
+        navBarDiv.style.display = 'block';
+    });
+
+    function loadTest(content) {
+        document.querySelector("#navBar").innerHTML = content
+
+        var matches = document.querySelectorAll("#navBar script");
+        for( i in matches) {
+          //console.log(matches[i].innerHTML);
+          //eval(matches[i].innerHTML);
+          console.log("--------------- matches[i].id: " + matches[i].id)
+          if('vicketScript' == matches[i].id) {
+            console.log("evaluting vicketScript")
+            eval(document.getElementById('vicketScript').innerHTML);
+          }
+
+
+        }
+    }
 </asset:script>
 <asset:deferredScripts/>

@@ -58,74 +58,70 @@
     </div>
 </div>
 <div id="certificateListDiv" style="display:none;">${uservsMap.certificateList as grails.converters.JSON}</div>
-<g:include view="/include/dialog/sendMessageVSDialog.gsp"/>
+<g:include view="/include/dialog/send-message-dialog.gsp"/>
+<div layout horizontal center center-justified style="top:100px;">
+    <send-message-dialog id="sendMessageDialog"></send-message-dialog>
+</div>
 </body>
 </html>
 <asset:script>
 <g:applyCodec encodeAs="none">
-
-
-    $(function() {
-
-        <g:if test="${uservsMap?.description == null}">
-            document.getElementById("userDescriptionDiv").style.display = 'none'
-        </g:if>
-        <g:if test="${UserVS.State.ACTIVE.toString().equals(uservsMap?.state)}">
-
-        </g:if>
-
-
-        <g:if test="${"admin".equals(params.menu)}">
-            enableAdminMenu()
-        </g:if>
-        <g:elseif test="${"user".equals(params.menu)}">
-            enableUserMenu()
-        </g:elseif>
-        <g:elseif test="${"superadmin".equals(params.menu)}">
-
-        </g:elseif>
-        <g:if test="${UserVS.State.PENDING.toString().equals(uservsMap?.state)}">
-            $(".pageHeader").css("color", "#fba131")
-            $("#messagePanel").addClass("groupvsPendingBox");
-            $("#messagePanel").text("<g:message code="groupvsPendingLbl"/>")
-            $("#messagePanel").css("display", "visible")
-
-        </g:if>
-        <g:if test="${UserVS.State.CANCELLED.toString().equals(uservsMap?.state)}">
-            $(".pageHeader").css("color", "#6c0404")
-            $("#messagePanel").addClass("groupvsClosedBox");
-            $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
-            $("#messagePanel").css("display", "visible")
-            $("#adminButtonsDiv").css("display", "none")
-        </g:if>
+    document.addEventListener('polymer-ready', function() {
+        document.querySelector("#sendMessageDialog").addEventListener('message-response', function(e) {
+            var appMessageJSON = JSON.parse(e.detail)
+            if(appMessageJSON != null) {
+                var caption = '<g:message code="sendMessageERRORCaption"/>'
+                var msg = appMessageJSON.message
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = '<g:message code="sendMessageOKCaption"/>'
+                }
+                showMessageVS(msg, caption)
+            }
+            window.scrollTo(0,0);
+        });
     });
 
-    function enableAdminMenu() {
-    }
+    <g:if test="${uservsMap?.description == null}">
+        document.querySelector("#userDescriptionDiv").style.display = 'none'
+    </g:if>
+    <g:if test="${UserVS.State.ACTIVE.toString().equals(uservsMap?.state)}">
+
+    </g:if>
+
+    <g:if test="${"admin".equals(params.menu)}">
+        enableAdminMenu()
+    </g:if>
+    <g:elseif test="${"user".equals(params.menu)}">
+        enableUserMenu()
+    </g:elseif>
+    <g:elseif test="${"superadmin".equals(params.menu)}">
+
+    </g:elseif>
+    <g:if test="${UserVS.State.PENDING.toString().equals(uservsMap?.state)}">
+        document.querySelector("pageHeader").style.color = "#fba131"
+        document.querySelector("#messagePanel").className += "groupvsPendingBox";
+        document.querySelector("#messagePanel").innerHTML = "<g:message code="groupvsPendingLbl"/>"
+        document.querySelector("pageHeader").style.display = 'block'
+    </g:if>
+    <g:if test="${UserVS.State.CANCELLED.toString().equals(uservsMap?.state)}">
+        document.querySelector("pageHeader").style.color = "#6c0404"
+        document.querySelector("#messagePanel").className += "groupvsClosedBox";
+        document.querySelector("#messagePanel").innerHTML = "<g:message code="groupvsClosedLbl"/>"
+        document.querySelector("pageHeader").style.display = 'block'
+        document.querySelector("adminButtonsDiv").style.display = 'none'
+    </g:if>
+
+    function enableAdminMenu() { }
 
     function enableUserMenu() {
-        document.getElementById("sendMessageVSButton").style.display = 'inline'
-        document.getElementById("makeDepositButton").style.display = 'inline'
+        document.querySelector("#sendMessageVSButton").style.display = 'inline'
+        document.querySelector("#makeDepositButton").style.display = 'inline'
     }
-
 
     function showMessageVSDialog() {
-        console.log(showMessageVSDialog)
-        showSendMessageVSDialog("${uservsMap?.nif}",
-            "<g:message code="uservsMessageVSLbl" args="${[uservsMap?.name]}"/>", sendMessageVSCallback)
-    }
-
-    function sendMessageVSCallback(appMessage) {
-        var appMessageJSON = toJSON(appMessage)
-        if(appMessageJSON != null) {
-            var caption = '<g:message code="sendMessageERRORCaption"/>'
-            var msg = appMessageJSON.message
-            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="sendMessageOKCaption"/>'
-            }
-            showMessageVS(msg, caption)
-        }
-        window.scrollTo(0,0);
+        document.querySelector("#sendMessageDialog").show("${uservsMap?.nif}",
+            "<g:message code="uservsMessageVSLbl" args="${[uservsMap?.name]}"/>",
+            toJSON(document.getElementById("certificateListDiv").innerHTML))
     }
 
     function editGroup() {
@@ -137,9 +133,7 @@
     }
 
     addClientToolListener(function() {
-        if(document.getElementById("clientToolMsg") != null)
-            document.getElementById("clientToolMsg").style.display = 'none'
+        if(document.querySelector("#clientToolMsg") != null) document.querySelector("#clientToolMsg").style.display = 'none'
     })
-
 </g:applyCodec>
 </asset:script>

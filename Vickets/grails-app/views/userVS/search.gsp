@@ -31,7 +31,7 @@
 </html>
 <asset:script>
     document.querySelector("#uservsTable").addEventListener('user-clicked', function(e) {
-        window.location.href ="${createLink(controller: 'userVS')}/" + e.detail.userId + "?menu=" + menuType
+        window.location.href ="${createLink(controller: 'userVS')}/" + e.detail.id + "?menu=" + menuType
     });
 
     document.querySelector("#userSearchInput").onkeypress = function(event){

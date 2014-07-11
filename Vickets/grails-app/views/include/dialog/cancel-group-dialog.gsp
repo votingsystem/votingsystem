@@ -42,8 +42,8 @@
 
             ready: function() {
                 this.style.display = 'none'
-                this.randomStr = Math.random().toString(36).substring(7)
-                window[this.randomStr] = this
+                this.objectId = Math.random().toString(36).substring(7)
+                window[this.objectId] = this
                 document.querySelector("#_votingsystemMessageDialog").addEventListener('message-accepted', function() {
                     if(this.appMessageJSON != null && ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                         window.location.href = updateMenuLink(appMessageJSON.URL)
@@ -81,8 +81,8 @@
                 webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
                 webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:"${groupvsMap.name}", id:${groupvsMap.id}}
                 webAppMessage.contentType = 'application/x-pkcs7-signature'
-                webAppMessage.callerCallback = this.randomStr
-                console.log(this.tagName + "this.randomStr: " + this.randomStr)
+                webAppMessage.callerCallback = this.objectId
+                console.log(this.tagName + "this.objectId: " + this.objectId)
                 webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }

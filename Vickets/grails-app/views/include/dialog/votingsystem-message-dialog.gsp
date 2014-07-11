@@ -19,33 +19,36 @@
             height: 35px;
         }
         </style>
-        <div class="card" style="width:400px; padding:20px">
-            <div style="margin:10px 10px 20px 10px; font-size: 1.3em; font-weight: bold; color:#6c0404;display:{{caption? 'block':'none'}}">{{caption}}</div>
-            <div class="center" style="font-size: 1.3em; color:#888; font-weight: bold;">{{message}}</div>
-            <div layout horizontal style="margin:10px 20px 0px 0px;">
-                <div flex></div>
-                <paper-button raisedButton class="button" label="<g:message code="acceptLbl"/>"
-                              on-click="{{accept}}" style=""></paper-button>
+        <div class="card" style="width:400px;z-index: 3000; display: {{isVisible?'block':'none'}}">
+            <div layout horizontal center center-justified style="background: #6c0404;">
+                <div flex style="font-size: 1.3em; margin:0px 0px 0px 30px;font-weight: bold; color:#f9f9f9;display:{{caption? 'block':'none'}}">
+                    {{caption}}
+                </div>
+                <div>
+                    <core-icon-button on-click="{{accept}}" icon="close" style="fill:#f9f9f9;"></core-icon-button>
+                </div>
             </div>
+            <div style="font-size: 1.3em; color:#6c0404; font-weight: bold; text-align: center; padding:30px 20px 30px 20px;">{{message}}</div>
         </div>
     </template>
     <script>
         Polymer('votingsystem-message-dialog', {
-            ready: function() {
-                this.style.display = 'none'
-            },
+            isVisible:false,
 
-            setMessage: function(message, caption) {
+            ready: function() { },
+
+            setMessage: function(message, caption, callerId) {
                 this.message = message
                 this.caption = caption
-                this.style.display = 'block'
+                this.callerId = callerId
+                this.isVisible = true
             },
 
             accept: function(message, caption) {
                 this.message = null
                 this.caption = null
-                this.style.display = 'none'
-                this.fire('message-accepted', '')
+                this.isVisible = false
+                this.fire('message-accepted', this.callerId)
             }
         });
     </script>

@@ -102,6 +102,7 @@
             else document.querySelector("#tagsDiv").style.display = 'block'
     })
 
+    var appMessageJSON
     function submitForm(){
         textEditor.classList.remove("formFieldError");
         if(!document.getElementById('groupSubject').validity.valid) {
@@ -122,25 +123,29 @@
             groupvsName:document.querySelector("#groupSubject").value, operation:Operation.VICKET_GROUP_NEW}
         webAppMessage.signedContent.tags = document.querySelector('#selectedTags').selectedTags
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        webAppMessage.callerCallback = getFnName(newGroupVSCallback)
-        console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+
+        var objectId = Math.random().toString(36).substring(7)
+        window[objectId] = {setClientToolMessage: function(appMessage) {
+            console.log("newGroupVSCallback - message: " + appMessage);
+            appMessageJSON = toJSON(appMessage)
+            var callBackResult = null
+            if(appMessageJSON != null) {
+                var caption = '<g:message code="newGroupERRORCaption"/>'
+                var msg = appMessageJSON.message
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = '<g:message code="newGroupOKCaption"/>'
+                }
+                showMessageVS(msg, caption)
+            }
+            window.scrollTo(0,0); }}
+        webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        appMessageJSON = null
         return false
     }
 
-    function newGroupVSCallback(appMessage) {
-        console.log("newGroupVSCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        var callBackResult = null
-        if(appMessageJSON != null) {
-            var caption = '<g:message code="newGroupERRORCaption"/>'
-            var msg = appMessageJSON.message
-            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="newGroupOKCaption"/>'
-                window.location.href = appMessageJSON.URL + "?menu=" + menuType
-            }
-            showMessageVS(msg, caption)
-        }
-        window.scrollTo(0,0);
-    }
+    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-accepted', function (e) {
+        if(appMessageJSON != null) window.location.href = appMessageJSON.URL + "?menu=" + menuType
+    })
+
 </asset:script>

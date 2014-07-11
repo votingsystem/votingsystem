@@ -65,25 +65,24 @@
         webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), groupvsName:'${groupvsMap.name}',
             id:'${groupvsMap.id}', operation:Operation.VICKET_GROUP_NEW}
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        webAppMessage.callerCallback = getFnName(editGroupVSCallback)
-        //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+        var objectId = Math.random().toString(36).substring(7)
+        window[objectId] = {setClientToolMessage: function(appMessage) {
+                console.log("editGroupVSCallback - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                if(appMessageJSON != null) {
+                    var caption = '<g:message code="editGroupERRORCaption"/>'
+                    var msg = appMessageJSON.message
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = '<g:message code="editGroupOKCaption"/>'
+                        var msgTemplate = '<g:message code='accessLinkMsg'/>';
+                        msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
+                    }
+                    showMessageVS(msg, caption)
+                }
+                window.scrollTo(0,0);
+            }}
+        webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-    }
-
-    function editGroupVSCallback(appMessage) {
-        console.log("editGroupVSCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        if(appMessageJSON != null) {
-            var caption = '<g:message code="editGroupERRORCaption"/>'
-            var msg = appMessageJSON.message
-            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="editGroupOKCaption"/>'
-                var msgTemplate = '<g:message code='accessLinkMsg'/>';
-                msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
-            }
-            showMessageVS(msg, caption)
-        }
-        window.scrollTo(0,0);
     }
 
 </asset:script>

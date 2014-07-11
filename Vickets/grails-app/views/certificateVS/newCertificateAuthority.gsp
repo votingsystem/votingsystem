@@ -64,8 +64,6 @@
             showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
             return false
         }
-
-        console.log("newCA - sendSignature ")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_CA_NEW)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
@@ -74,16 +72,17 @@
         webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
                     operation:Operation.CERT_CA_NEW}
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        webAppMessage.callerCallback = 'newCACertCallback'
-        //console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+        var objectId = Math.random().toString(36).substring(7)
+        window[objectId] = callbackListener
+        webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         return false
     }
 
-    var callBackResult = null
     var appMessageJSON
-    function newCACertCallback(appMessage) {
-        console.log("newGroupVSCallback - message from native client: " + appMessage);
+
+    var callbackListener = {setClientToolMessage: function(appMessage) {
+        console.log("newCertifiateAuthorityCallback - message: " + appMessage);
         appMessageJSON = toJSON(appMessage)
         if(appMessageJSON != null) {
             var caption = '<g:message code="newCACertERRORCaption"/>'
@@ -92,10 +91,10 @@
                 caption = '<g:message code="newCACertOKCaption"/>'
                 var msgTemplate = '<g:message code='accessLinkMsg'/>';
             }
-            showMessageVS(caption, msg)
+            showMessageVS(msg, caption)
         }
         window.scrollTo(0,0);
-    }
+    }}
 
     document.querySelector("#_votingsystemMessageDialog").addEventListener('message-accepted', function() {
         if(appMessageJSON != null) {

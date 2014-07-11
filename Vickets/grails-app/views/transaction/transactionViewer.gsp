@@ -111,29 +111,26 @@
         console.log("openReceipt")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
         webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
-        webAppMessage.callerCallback = 'saveReceiptCallback'
+        var objectId = Math.random().toString(36).substring(7)
+        window[objectId] = {setClientToolMessage: function(appMessage) {
+            console.log("openReceiptCallback - message: " + appMessage);
+            var appMessageJSON = toJSON(appMessage)
+            console.log("openReceiptCallback - message from native client: " + appMessage);  }}
+        webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-    }
-
-    function openReceiptCallback(appMessage) {
-        console.log("openReceiptCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        console.log("openReceiptCallback - message from native client: " + appMessage);
     }
 
     function saveReceipt() {
         console.log("saveReceipt")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT)
         webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
-        webAppMessage.callerCallback = 'saveReceiptCallback'
+        var objectId = Math.random().toString(36).substring(7)
+        window[objectId] = {setClientToolMessage: function(appMessage) {
+            console.log("saveReceiptCallback - message from native client: " + appMessage);
+            var appMessageJSON = toJSON(appMessage)
+            console.log("saveReceiptCallback - message from native client: " + appMessage); }}
+        webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
-
-    function saveReceiptCallback(appMessage) {
-        console.log("saveReceiptCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        console.log("saveReceiptCallback - message from native client: " + appMessage);
-    }
-
 </asset:script>
 <asset:deferredScripts/>

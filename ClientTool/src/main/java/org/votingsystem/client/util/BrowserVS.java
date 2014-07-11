@@ -24,10 +24,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.web.PopupFeatures;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebHistory;
-import javafx.scene.web.WebView;
+import javafx.scene.web.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -37,7 +34,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
-import org.bouncycastle.util.encoders.Base64;
+import java.util.Base64;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.model.ContentTypeVS;
@@ -48,6 +45,7 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,6 +53,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -75,7 +74,6 @@ public class BrowserVS extends Region {
     private BrowserVSPane browserHelper;
     private String caption;
     private AtomicInteger offset = new AtomicInteger(0);
-
 
     public BrowserVS() {
         this(new WebView());
@@ -244,17 +242,21 @@ public class BrowserVS extends Region {
                     @Override
                     public void changed(ObservableValue<? extends Worker.State> ov,
                                         Worker.State oldState, Worker.State newState) {
-                        logger.debug(" ========== newState: " + newState);
+                        logger.debug(" ========== newState: " + newState + " - " + webView.getEngine().getLocation());
                         if (newState == Worker.State.SUCCEEDED) {
-                            JSObject win = (JSObject) webView.getEngine().executeScript("window");
-                            win.setMember("clientTool", new JavafxClient());
-                            webView.getEngine().executeScript("notifiyClientToolConnection()");
-                            document = webView.getEngine().getDocument();
-                            document.createDocumentFragment();
+                            Document doc = webView.getEngine().getDocument();
+                            Element element = doc.getElementById("vicketsPage");
+                            if(element != null) {
+                                JSObject win = (JSObject) webView.getEngine().executeScript("window");
+                                win.setMember("clientTool", new JavafxClient());
+                                webView.getEngine().executeScript("notifiyClientToolConnection()");
+                            }
                         } else if (newState.equals(Worker.State.FAILED)) {
                             showMessage(ContextVS.getMessage("connectionErrorMsg"));
-                        }
+                        } else if (newState.equals(Worker.State.SCHEDULED)) { }
                         if(newState.equals(Worker.State.FAILED) || newState.equals(Worker.State.SUCCEEDED)) {
+
+
                         }
                     }
                 }
@@ -284,28 +286,36 @@ public class BrowserVS extends Region {
         Map resultMap = new HashMap();
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
-        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
-        final String jsCommand = "setClientToolMessage('" + callerCallback + "', '" +
-                new String(Base64.encode(messageJSON.toString().getBytes())) + "')";
-        logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                webView.getEngine().executeScript(jsCommand);
-            }
-        });
+        try {
+            JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
+            final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
+                    new String(Base64.getEncoder().encode(messageJSON.toString().getBytes("UTF8")), "UTF8") + "')";
+            logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
+            PlatformImpl.runLater(new Runnable() {
+                @Override public void run() {
+                    webView.getEngine().executeScript(jsCommand);
+                }
+            });
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
 
 
     public void sendMessageToBrowserApp(JSONObject messageJSON, String callerCallback) {
         logger.debug("sendMessageToBrowserApp - messageJSON: " + messageJSON.toString());
-        final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
-                new String(Base64.encode(messageJSON.toString().getBytes())) + "')";
-        logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                webView.getEngine().executeScript(jsCommand);
-            }
-        });
+        try {
+            final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
+                    new String(Base64.getEncoder().encode(messageJSON.toString().getBytes("UTF8")), "UTF8") + "')";
+            logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
+            PlatformImpl.runLater(new Runnable() {
+                @Override public void run() {
+                    webView.getEngine().executeScript(jsCommand);
+                }
+            });
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
 
     /**

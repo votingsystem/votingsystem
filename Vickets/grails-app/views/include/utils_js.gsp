@@ -70,4 +70,15 @@
         return transactionDescription
     }
 
+    window._originalAlert = window.alert;
+    window.alert = function(text) {
+        if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
+                document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+            document.querySelector("#_votingsystemMessageDialog").setMessage(text,
+                    "<g:message code="messageLbl"/>")
+        }  else {
+            console.log('votingsystem-message-dialog not found');
+            window._originalAlert(text);
+        }
+    }
 </script>
