@@ -38,7 +38,10 @@ class TestingController {
     def filesService
     def webSocketService
 
-    def index() {}
+    def index() {
+
+
+    }
 
     def index2() {
         String messageStr =  message(code:'newVicketGroupOKMsg', args:['España acentúación'], encodeAs:'JavaScript')

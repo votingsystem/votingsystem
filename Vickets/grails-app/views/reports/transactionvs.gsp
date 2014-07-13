@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layout" content="main" />
-    <link rel="import" href="${resource(dir: '/bower_components/vicket-transaction-table', file: 'vicket-transaction-table.html')}">
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-transaction-table', file: 'votingsystem-transaction-table.html')}">
 </head>
 <body>
 <div class="pageContenDiv">
@@ -29,7 +31,8 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <vicket-transaction-table id="recordList" url="${createLink(controller: 'reports', action: 'transactionvs')}"></vicket-transaction-table>
+    <votingsystem-transaction-table id="recordList" url="${createLink(controller: 'reports', action: 'transactionvs')}"
+        transactionBaseURL="${createLink(controller: 'transaction')}"></votingsystem-transaction-table>
 
 </div>
 </body>

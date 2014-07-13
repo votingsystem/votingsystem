@@ -2,8 +2,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link href="${resource(dir: 'css', file:'vicket_groupvs.css')}" type="text/css" rel="stylesheet"/>
-    <meta name="layout" content="main" />
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
+    <link href="${resource(dir: 'css', file:'vickets_groupvs.css')}" type="text/css" rel="stylesheet"/>
 </head>
 <body>
 <div class="pageContenDiv" style="max-width: 1000px; padding:0px 30px 0px 30px;">

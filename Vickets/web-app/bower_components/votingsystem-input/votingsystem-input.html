@@ -26,7 +26,6 @@ Example:
 <polymer-element name="votingsystem-input" extends="core-input" attributes="label floatingLabel maxRows error required" on-down="{{downAction}}" on-up="{{upAction}}">
 
 <template>
-    <script src="i18n/messages.js" on-load="{{messagesLoaded}}"></script>
     <link href="votingsystem-input.css" rel="stylesheet">
 
     <div id="floatedLabel" class="hidden"><span id="floatedLabelSpan">{{label}}</span></div>
@@ -67,17 +66,10 @@ Example:
     </div>
 
 </template>
-
+<script src="./i18n/messages.js"></script>
 <script>
 
 Polymer('votingsystem-input', {
-    messagesLoaded:function() {
-        console.log("votingsystem-input - messages for locale " + userLocale)
-        this.messages = localizedMessages
-        if(this.error == null) {
-            this.error = this.messages.errorMsg
-        }
-    },
 
     /**
      * The label for this input. It normally appears as grey text inside
@@ -98,6 +90,12 @@ Polymer('votingsystem-input', {
     required: null,
 
     ready: function() {
+        console.log(this.tagName + " ready - locale: " + userLocale)
+        this.messages = localizedMessages
+        this.label = ""
+        if(this.error == null) {
+            this.error = this.messages.errorMsg
+        }
         if(this.required != null) {
             this.invalid = true
             if(this.validate == null) {

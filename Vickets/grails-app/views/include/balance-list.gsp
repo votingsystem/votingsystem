@@ -3,37 +3,35 @@
 
 <polymer-element name="balance-list" attributes="url">
     <template>
-        <style></style>
+        <style> </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{balanceList}}" handleAs="json" method="get"
                    contentType="json"></core-ajax>
-        <div layout vertical center style="max-width: 1200px; overflow:auto;">
-            <table class="table white_headers_table" id="balance_table" style="">
-                <thead>
-                    <tr style="color: #ff0000;">
-                        <th style="max-width:80px;"><g:message code="tagLbl"/></th>
-                        <th style="max-width:80px;"><g:message code="amountLbl"/></th>
-                        <th style="width: 120px;"><g:message code="currencyLbl"/></th>
-                        <th style="width:200px;"><g:message code="lastUpdateLbl"/></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template repeat="{{account in balanceList.accounts}}">
-                        <tr>
-                            <td class="text-center">{{account.tag.name}}</td>
-                            <td class="text-center">{{account.amount | formatAmount}}</td>
-                            <td class="text-center">{{account.currency}}</td>
-                            <td class="text-center">{{account.lastUpdated}}</td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
+        <!--JavaFX Webkit gives problems with tables and templates -->
+        <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
+            <div layout horizontal center center-justified class="tableHeadervs">
+                <div flex style="width: 80px;"><g:message code="tagLbl"/></div>
+                <div flex style="width:80px;"><g:message code="amountLbl"/></div>
+                <div flex style="width:120px;"><g:message code="currencyLbl"/></div>
+                <div flex style="width:200px;"><g:message code="lastUpdateLbl"/></div>
+            </div>
+            <div>
+                <template repeat="{{account in balanceList.accounts}}">
+                    <div layout horizontal center center-justified class="rowvs">
+                        <div flex style="width: 80px;">{{account.tag.name}}</div>
+                        <div flex style="width:80px;">{{account.amount | formatAmount}}</div>
+                        <div flex style="width:120px;">{{account.currency}}</div>
+                        <div flex style="width:200px;">{{account.lastUpdated}}</div>
+                    </div>
+                </template>
+            </div>
         </div>
+
     </template>
     <script>
         Polymer('balance-list', {
             ready: function() {},
             formatAmount: function(amount) {
-                return amount.toFixed(2)
+                if(amount) return amount.toFixed(2)
             }
         });
     </script>

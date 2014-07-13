@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <asset:stylesheet src="polymer.css"/>
     <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
     <style>
     html,body {
@@ -25,7 +24,7 @@
     </style>
 </head>
 <body >
-<h3 class="center">
+<h3 style="text-align: center;">
     <a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'appTitle', null)}</a>
 </h3>
 <polymer-element name="info-page-tabs">

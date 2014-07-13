@@ -7,7 +7,7 @@
             vertical-align: top;
             background-color: #f9f9f9;
             box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-            border: 1px solid #ccc;
+            border: 1px solid #6c0404;
         }
         paper-button.button {
             background-color: #f9f9f9;
@@ -18,14 +18,15 @@
             line-height: 24px;
             height: 35px;
         }
+
         </style>
         <div class="card" style="width:400px;z-index: 3000; display: {{isVisible?'block':'none'}}">
-            <div layout horizontal center center-justified style="background: #6c0404;">
+            <div layout horizontal center center-justified style="background: #ba0011;">
                 <div flex style="font-size: 1.3em; margin:0px 0px 0px 30px;font-weight: bold; color:#f9f9f9;display:{{caption? 'block':'none'}}">
                     {{caption}}
                 </div>
                 <div>
-                    <core-icon-button on-click="{{accept}}" icon="close" style="fill:#f9f9f9;"></core-icon-button>
+                    <core-icon-button on-click="{{accept}}" icon="close" style="fill:#f9f9f9; color:#f9f9f9;"></core-icon-button>
                 </div>
             </div>
             <div style="font-size: 1.3em; color:#6c0404; font-weight: bold; text-align: center; padding:30px 20px 30px 20px;">{{message}}</div>

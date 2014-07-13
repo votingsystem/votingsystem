@@ -2,7 +2,6 @@
 
 <polymer-element name="votingsystem-user-box" attributes="boxCaption">
     <template>
-        <script src="./i18n/messages.js" on-load="{{messagesLoaded}}"></script>
         <style>
             .receptorsBox {
                 margin: 10px auto 30px auto;
@@ -30,14 +29,15 @@
             </fieldset>
         </div>
     </template>
+    <script src="./i18n/messages.js"></script>
     <script>
         Polymer('votingsystem-user-box', {
-            uservsList:[],
-            messagesLoaded:function() {
-                console.log("votingsystem-user-box - messages for locale " + userLocale)
+
+            ready:function() {
+                this.uservsList = []
+                console.log(this.tagName + " ready - locale: " + userLocale)
                 this.messages = localizedMessages
             },
-            ready:function() { },
             addUser:function(userToAdd) {
                 var isNewUser = true
                 for(userIdx in this.uservsList) {

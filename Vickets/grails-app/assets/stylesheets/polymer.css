@@ -1,7 +1,6 @@
 html,body {
     height: 100%;
     margin: 0;
-
     font-family: 'RobotoDraft', sans-serif;
 }
 
@@ -181,25 +180,6 @@ html,body {
 .dialog > .button {
     width: 90px;
     float: right;
-}
-
-
-
-/* Misc */
-.center {
-    text-align: center;
-}
-
-.label {
-    padding: 0 16px;
-}
-
-.label-blue {
-    color: #ba0011;
-}
-
-.label-red {
-    color: #d23f31;
 }
 
 

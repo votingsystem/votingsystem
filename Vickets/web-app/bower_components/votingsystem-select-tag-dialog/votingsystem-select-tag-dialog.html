@@ -22,13 +22,12 @@ Dialog to search and select tags
 <polymer-element name="votingsystem-select-tag-dialog" attributes="caption opened serviceURL">
 
   <template>
-        <script src="./i18n/messages.js" on-load="{{messagesLoaded}}"></script>
         <link rel="stylesheet" href="votingsystem-select-tag-dialog.css" />
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                     contentType="json"></core-ajax>
 
 
-      <core-overlay flex vertical id="coreOverlay" vertical class="card" opened="{{opened}}" layered="true"
+      <core-overlay flex vertical id="coreOverlay" vertical class="card tag1" opened="{{opened}}" layered="true"
                     style="position: absolute; top:30px;">
           <!-- place all overlay styles inside the overlay target -->
           <style no-shim>
@@ -100,16 +99,10 @@ Dialog to search and select tags
 
       <conten></conten>
   </template>
-
+  <script type="text/javascript" src="./i18n/messages.js"></script>
   <script>
 
     Polymer('votingsystem-select-tag-dialog', {
-        messagesLoaded:function() {
-            console.log("votingsystem-select-tag-dialog - messages for locale " + userLocale)
-            this.messages = localizedMessages
-        },
-        selectedTagList: [],
-        searchedTagList: [],
 
       /**
        * The `caption` of the dialog
@@ -137,6 +130,10 @@ Dialog to search and select tags
         serviceURL: null,
 
       ready: function() {
+          console.log("========= ready: " + localizedMessages)
+          this.selectedTagList = [],
+          this.searchedTagList =[],
+          this.messages = localizedMessages
           var tagdialog = this
           this.$.tagSearchInput.onkeypress = function(event){
               var chCode = ('charCode' in event) ? event.charCode : event.keyCode;

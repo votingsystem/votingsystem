@@ -105,10 +105,10 @@
 
         var objectId = Math.random().toString(36).substring(7)
         window[objectId] = {setClientToolMessage: function(appMessage) {
-            var messageVSJSON = toJSON(messageVS)
-            showWindowAlertModalMsg(messageVS.messageContent, '<g:message code="messageVSDecryptedCaption"/>') }}
-        webAppMessage.callerCallback = objectId
+            var messageVS = JSON.parse(appMessage)
+            showMessageVS(messageVS.messageContent, '<g:message code="messageVSDecryptedCaption"/>') }}
 
+        webAppMessage.callerCallback = objectId
         webAppMessage.documentToDecrypt = messageVSMap[messageVSId]
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }

@@ -35,7 +35,7 @@ class GroupVSController {
             }
             if(request.contentType?.contains("json")) {
                 render resultMap as JSON
-            } else render(view:'group', model: [groupvsMap:resultMap])
+            } else render(view:'groupvs', model: [groupvsMap:resultMap])
         } else if(request.contentType?.contains("json")) {
             Map resultMap = [:]
             def result

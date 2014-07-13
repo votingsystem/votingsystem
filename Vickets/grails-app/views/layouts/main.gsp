@@ -5,34 +5,22 @@
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-money.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="appTitle"/></title>
-    <asset:stylesheet src="polymer.css"/>
     <asset:stylesheet src="vickets.css"/>
-
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-icon-button', file: 'paper-icon-button.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <g:layoutHead/>
-    <style shim-shadowdom>
-    paper-item {
-        padding: 10px;
-        border-bottom: 1px solid #f9f9f9;
-    }
-    </style>
+    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
+    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>
-<body id="vicketsPage" style="margin:0px auto 0px auto;">
-<polymer-element name="nav-bar">
+<body style="margin:0px auto 0px auto;background-color: #f9f9f9;">
+<polymer-element name="nav-bar" attributes="url">
 
     <template>
         <votingsystem-navbar id="_navbar" style="display: none;">
@@ -96,9 +84,6 @@
                             <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
                                 <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                             </paper-item>
-                            <paper-item data-href="test">
-                                Testing Testing
-                            </paper-item>
                             {{ "<g:message code="usersPageTitle"/>" | setTitle}}
                         </g:else>
 
@@ -107,31 +92,39 @@
             </core-header-panel>
             <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
             <content id="content"></content>
-            <div id="testing"></div>
         </votingsystem-navbar>
 
-        <core-ajax id="ajax" auto url=""
-                on-core-response="{{ajaxResponse}}"></core-ajax>
+        <core-ajax id="ajax" auto url="" handleAs="document" on-core-response="{{ajaxResponse}}"></core-ajax>
 
     </template>
     <script>
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
-
+            url:'',
+            newURL:'',
+            newURLChanged: function() {
+                console.log("newURLChanged - newURL: " + this.newURL)
+                this.url = updateMenuLink(this.newURL, "mode=innerPage")
+            },
             ready: function() {
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
                 this.fire('nav-bar-ready');
+                var navBar = this
+                window.addEventListener('popstate', function(event) {
+                    console.log('newURL: ' + document.location.href);
+                    navBar.newURL = document.location.href
+                });
             },
-
+            urlChanged: function() {
+                console.log("main.gsp - draw item selected")
+                this.$.ajax.url =  this.url;
+            },
             drawerItemSelected: function() {
                 this.fire('item-selected', this.coreSelectorValue)
-                if('changeToAdmin' == this.$.coreSelector.selectedItem.id) {
+                if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                     window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
-                } else if('test' == this.coreSelectorValue) {
-                    console.log("============ test")
-                    this.$.ajax.url = "http://vickets:8086/Vickets/groupVS/3/user/4?mode=details&menu=admin"
-                }  else window.location.href = this.coreSelectorValue + "?menu=${params.menu}"
+                } else this.newURL = this.coreSelectorValue
             },
             searchVisible: function(isVisible) {
                 this.$._navbar.searchVisible(isVisible)
@@ -140,48 +133,71 @@
                 this.appTitle = appTitle
             },
             ajaxResponse: function(appTitle) {
-                loadTest(this.$.ajax.response)
+                console.log("main.gsp - ajax-response - newURL: " + this.newURL)
+                history.pushState(null, null, this.newURL);
+                this.fire('ajax-response', this.$.ajax.response)
             }
         });
     </script>
 </polymer-element>
 
-<div id="navBarDiv" style="display: none;">
-    <nav-bar id="navBar" style="" class="">
-        <g:layoutBody/>
-    </nav-bar>
-</div>
-<g:include view="/include/dialog/votingsystem-message-dialog.gsp"/>
-<div layout horizontal center center-justified style="top:100px;">
-    <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+<nav-bar id="navBar" style="display:none;" class="">
+    <g:layoutBody/>
+</nav-bar>
+<div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
+    <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
 </div>
 
+<div layout horizontal center center-justified style="padding:100px 0px 0px 0px;">
+    <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+</div>
 </body>
 </html>
 <asset:script>
+    window.addEventListener('WebComponentsReady', function(e) {  });
+
     document.addEventListener('polymer-ready', function() {
-        updateMenuLinks()
+        console.log("main.gsp - polymer-ready")
+        update_a_elements(document.getElementsByTagName('a'))
     });
 
     document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {
-        navBarDiv.style.display = 'block';
+        document.querySelector('#navBar').style.display = 'block';
+        document.querySelector('#loadingDiv').style.display = 'none';
     });
 
-    function loadTest(content) {
-        document.querySelector("#navBar").innerHTML = content
+    document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
+        var ajaxDocument = e.detail
+        var links = ajaxDocument.querySelectorAll('link')
+        for (var i = 0; i < links.length; i++) {
+            //console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
+            if('import' == links[i].rel) {
+                document.head.appendChild(links[i]);
+            }
+        }
+        for (var i = 0; i < ajaxDocument.scripts.length; i++) {
+            var script = document.createElement("script");
+            script.innerHTML = ajaxDocument.scripts[i].innerHTML;
+            //console.log("script.innerHTML: " + script.innerHTML)
+            document.head.appendChild(script);
+        }
 
-        var matches = document.querySelectorAll("#navBar script");
-        for( i in matches) {
-          //console.log(matches[i].innerHTML);
-          //eval(matches[i].innerHTML);
-          console.log("--------------- matches[i].id: " + matches[i].id)
-          if('vicketScript' == matches[i].id) {
-            console.log("evaluting vicketScript")
-            eval(document.getElementById('vicketScript').innerHTML);
-          }
+        document.querySelector("#navBar").innerHTML = ajaxDocument.body.innerHTML
+        update_a_elements(document.querySelectorAll("#navBar a"))
+    });
 
+    function update_a_elements(elementsArray) {
+         for (var i = 0; i < elementsArray.length; i++) {
+            //console.log("elementsArray[i].href: " + elementsArray[i].href)
+            if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
+                elementsArray[i].addEventListener('click', function(e) {
+                    document.querySelector('#navBar').newURL = e.target.href
+                    e.preventDefault()
+                });
+            } else console.log("main.gsp - not system url: " + elementsArray[i].href)
 
         }
     }
+
 </asset:script>
 <asset:deferredScripts/>

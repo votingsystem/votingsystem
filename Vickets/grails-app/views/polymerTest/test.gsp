@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <asset:stylesheet src="polymer.css"/>
-    <asset:stylesheet src="vickets.css"/>
-    <asset:javascript src="utilsVS.js"/>
-    <meta name="layout" content="main" />
-
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body style="width:1200px; margin:0px auto 0px auto; height: 1200px; padding:10px 10px 50px 10px;">
 <div layout vertical>
@@ -33,6 +31,8 @@
 
 
     </div>
+
+
 </div>
 </body>
 </html>

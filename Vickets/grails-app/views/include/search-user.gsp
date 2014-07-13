@@ -4,28 +4,38 @@
 
 <polymer-element name="search-user" attributes="url">
     <template>
+        <style>
+            .header {
+                margin: 10px 0px 0px 0px;
+                color:#6c0404;
+                border-bottom: 2px solid #ccc;
+                background: white;
+                box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.24);
+                font-weight: bold;
+            }
+            .rowvs {
+                border-bottom: 1px solid #ccc; padding: 10px; cursor: pointer;
+            }
+        </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="json"></core-ajax>
         <div layout vertical center style="">
-            <div style="display: {{responseData == null || responseData.userVSList.length == 0? 'none':'block'}}; width: 400px;">
-                <table class="table white_headers_table" id="uservs_table" style="">
-                    <thead>
-                    <tr style="color: #ff0000;">
-                        <th style="width: 60px;"><g:message code="nifLbl"/></th>
-                        <th style=""><g:message code="nameLbl"/></th>
-                    </tr>
-                    </thead>
-                    <tbody>
+            <div style="display: {{responseData == null || responseData.userVSList.length == 0? 'none':'block'}};">
+                <div layout horizontal id="uservs_table" class="header">
+                    <div class="center" style="width: 300px;"><g:message code="nifLbl"/></div>
+                    <div class="center" style="width:300px"><g:message code="nameLbl"/></div>
+                </div>
+                <div>
                     <template repeat="{{uservs in responseData.userVSList}}">
-                        <tr on-click="{{showUserDetails}}">
-                            <td class="text-center">{{uservs.nif}}</td>
-                            <td class="text-center">{{uservs.name}}</td>
-                        </tr>
+                        <div layout horizontal center center justified on-click="{{showUserDetails}}" class="rowvs">
+                            <div class="center" style="width:300px">{{uservs.nif}}</div>
+                            <div class="center" style="width:300px">{{uservs.name}}</div>
+                        </div>
                     </template>
-                    </tbody>
-                </table>
+                </div>
             </div>
-            <div id="emptySearchMsg" style="font-size: 1em; font-weight: bold;
+
+            <div class="center" id="emptySearchMsg" style="font-size: 1em; font-weight: bold;
                     display: {{responseData.userVSList.length == 0? 'block':'none'}};">
                 <g:message code="emptyUserSearchResultMsg"/>
             </div>
@@ -43,11 +53,7 @@
                 },
                 responseDataReceived: function() {
                     console.log("search-user - responseDataReceived - num. users: " + this.responseData.userVSList.length)
-                    if(this.responseData.userVSList.length > 0) this.$.uservs_table.style.visibility = 'visible'
-                    else {
-                        this.$.uservs_table.style.visibility = 'hidden'
-                        this.$.emptySearchMsg.style.display = 'block'
-                    }
+
                 }
 
             });

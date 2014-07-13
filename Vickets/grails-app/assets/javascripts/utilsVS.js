@@ -255,11 +255,6 @@ var menuType = 'user'
 if(getParameterByName('menu') != null) menuType = getParameterByName('menu')
 
 function updateMenuLinks() {
-    var selectedMenuType = getParameterByName('menu')
-    if("" == selectedMenuType.trim()) {
-        return
-    }
-    menuType = selectedMenuType
     var elem = 'a'
     var attr = 'href'
     var elems = document.getElementsByTagName(elem);
@@ -268,7 +263,7 @@ function updateMenuLinks() {
     arrayElements.concat(Array.prototype.slice.call(groupElements))
     for (var i = 0; i < elems.length; i++) {
         if(elems[i][attr].indexOf("mailto:") > -1) continue
-        if(elems[i][attr].indexOf("menu=" + selectedMenuType) < 0) {
+        if(elems[i][attr].indexOf("menu=" + menuType) < 0) {
             if(elems[i][attr].indexOf("?") < 0) {
                 elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
             } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
@@ -277,7 +272,7 @@ function updateMenuLinks() {
     for (var j = 0; j < groupElements.length; j++) {
         var attrValue = groupElements[j].getAttribute("data-href")
         if(attrValue == null) continue
-        if(attrValue.indexOf("menu=" + selectedMenuType) < 0) {
+        if(attrValue.indexOf("menu=" + menuType) < 0) {
             if(attrValue.indexOf("?") < 0) {
                 groupElements[j].setAttribute("data-href", attrValue + "?menu=" + menuType )
             } else groupElements[j].setAttribute("data-href", attrValue + "&menu=" + menuType );
@@ -286,14 +281,13 @@ function updateMenuLinks() {
 }
 
 function updateMenuLink(urlToUpdate, param) {
-    var selectedMenuType = getParameterByName('menu')
-    if("" == selectedMenuType.trim() || urlToUpdate == null || "" == urlToUpdate.trim()) {
-        return urlToUpdate
+    var result = urlToUpdate
+    if(result.indexOf("menu=") < 0) {
+        if(result.indexOf("?") < 0) result = result + "?menu=" + menuType
+        else result = result + "&menu=" + menuType
     }
-    if(urlToUpdate.indexOf("?") < 0) urlToUpdate = urlToUpdate + "?menu=" + selectedMenuType
-    else urlToUpdate = urlToUpdate + "&menu=" + selectedMenuType
-    if(param != null) urlToUpdate = urlToUpdate + "&" + param
-    return urlToUpdate
+    if(param != null) result = result + "&" + param
+    return result
 }
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
