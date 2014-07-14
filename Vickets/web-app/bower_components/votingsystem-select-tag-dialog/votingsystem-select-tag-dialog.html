@@ -130,10 +130,10 @@ Dialog to search and select tags
         serviceURL: null,
 
       ready: function() {
-          console.log("========= ready: " + localizedMessages)
+          console.log(this.tagName + " ready - locale: " + userLocale)
+          this.messages = localizedMessages
           this.selectedTagList = [],
           this.searchedTagList =[],
-          this.messages = localizedMessages
           var tagdialog = this
           this.$.tagSearchInput.onkeypress = function(event){
               var chCode = ('charCode' in event) ? event.charCode : event.keyCode;

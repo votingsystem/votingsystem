@@ -1,0 +1,7 @@
+{
+  "name": "votingsystem-transaction-table",
+  "private": true,
+  "dependencies": {
+    "core-ajax": "Polymer/core-ajax#>=0.3.0 <1.0.0"
+  }
+}
