@@ -93,10 +93,10 @@ DateUtils.parseInputType = function (dateStr) {
 		return dateObject
 	}
 
-function showMessageVS(message, caption) {
+function showMessageVS(message, caption, callerId, isConfirmMessage) {
     if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
             document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
-        document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption)
+        document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption, callerId, isConfirmMessage)
     }  else {
         console.log('votingsystem-message-dialog not found');
         window._originalAlert(message);
@@ -305,7 +305,7 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
         console.log("setJSONMessageToSignatureClient - clientTool: " + clientTool)
     } catch(e) {
         console.log(e)
-        alert(e)
+        window.alert(e)
         return
     }
     var messageToSignatureClient = JSON.stringify(messageJSON)

@@ -15,17 +15,27 @@
     <g:layoutHead/>
 </head>
 <body style="margin:0px auto 0px auto; max-width: 1200px;">
-<g:layoutBody/>
-
-<div layout horizontal center center-justified style="top:100px;">
-    <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+<div id="pageLayoutDiv" style="display:none;">
+    <g:layoutBody/>
+</div>
+<div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
+    <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
 </div>
 
+<div layout horizontal center center-justified style="position:absolute; top:100px; width:1200px;">
+    <div>
+        <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+    </div>
+</div>
 </body>
 </html>
 <asset:script>
     document.addEventListener('polymer-ready', function() {
+        document.querySelector('#pageLayoutDiv').style.display = 'block';
+        document.querySelector('#loadingDiv').style.display = 'none';
         updateMenuLinks()
     });
+
+
 </asset:script>
 <asset:deferredScripts/>

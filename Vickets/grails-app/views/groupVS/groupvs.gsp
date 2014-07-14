@@ -1,3 +1,5 @@
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-page-tabs']"/>">
+
 <%@ page import="org.votingsystem.model.UserVS; org.votingsystem.model.GroupVS" %>
 <%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
 def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
@@ -12,9 +14,13 @@ def groupName = groupvsMap.name.replaceAll("'", "&apos;")
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-menu-button', file: 'paper-menu-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-deposit-dialog.gsp']"/>">
 </head>
 <body>
-<div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
+<div class="row" style="width: 100%; margin: 0px auto 0px auto;">
     <ol class="breadcrumbVS pull-left">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li><a href="${createLink(controller: 'groupVS')}"><g:message code="groupvsLbl"/></a></li>
@@ -29,33 +35,43 @@ def groupName = groupvsMap.name.replaceAll("'", "&apos;")
     </div>
 
     <g:if test="${("admin".equals(params.menu) || "superadmin".equals(params.menu)) && UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
-        <div id="adminButtonsDiv" class="">
-            <button id="editGroupVSButton" type="submit" class="btn btn-warning" onclick="editGroup();"
-                    style="margin:10px 20px 0px 0px;">
-                <g:message code="editDataLbl"/> <i class="fa fa-edit"></i>
-            </button>
-            <button id="cancelGroupVSButton" type="submit" class="btn btn-warning"
-                    style="margin:10px 20px 0px 0px;" onclick="document.querySelector('#cancelGroupDialog').show()">
-                <g:message code="cancelGroupVSLbl"/> <i class="fa fa-times"></i>
-            </button>
-            <div class="btn-group">
-                <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" style="margin:10px 20px 0px 0px;">
-                    <g:message code="makeDepositFromGroupVSLbl"/>  <i class="fa fa-money"></i>
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,'${groupName}', '${groupvsMap?.IBAN}',
-                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')"><a href="#">
-                        <g:message code="makeDepositFromGroupVSToMemberLbl"/></a></li>
-                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, '${groupName}', '${groupvsMap?.IBAN}',
-                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')"><a href="#">
-                        <g:message code="makeDepositFromGroupVSToMemberGroupLbl"/></a></li>
-                    <li onclick="showDepositDialog(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, '${groupName}', '${groupvsMap?.IBAN}',
-                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')"><a href="#">
-                        <g:message code="makeDepositFromGroupVSToAllMembersLbl"/></a></li>
-                </ul>
-            </div>
+        <div id="adminButtonsDiv" class="" layout horizontal center center-justified>
+                <paper-button icon="create" class="button" label="<g:message code="editDataLbl"/>"
+                              raisedButton onclick="editGroup()"></paper-button>
+                <paper-button icon="delete" class="button" label="<g:message code="cancelGroupVSLbl"/>"
+                              raisedButton onclick="showConfirmCancelGroup()"></paper-button>
+                <paper-menu-button id="selectDepositPaperButton" valign="bottom" style="width: 0px;padding:0px;">
+                    <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="id" onCoreSelect="optionSelected(event)">
+                        <paper-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></paper-item>
+                        <paper-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></paper-item>
+                        <paper-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl" onclick="document.querySelector('#depositDialog').show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, '${groupName}', '${groupvsMap?.IBAN}',
+                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')"/>"></paper-item>
+                    </core-selector>
+                </paper-menu-button>
+                <paper-button icon="credit-card" class="button" label="<g:message code="makeDepositFromGroupVSLbl"/>"
+                              raisedButton onclick="openDepositOptions()"></paper-button>
 
+            <script>
+                function openDepositOptions() {
+                    document.querySelector("#selectDepositPaperButton").opened = true
+                }
+                document.querySelector("#coreSelector").addEventListener('core-select', function(e) {
+                    if(e.detail.isSelected) {
+                        console.log("coreSelector: " + e.detail.item.id)
+                        if('fromGroupToMember' == e.detail.item.id) {
+                            document.querySelector('#depositDialog').show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,'${groupName}', '${groupvsMap?.IBAN}',
+                                    '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')
+                        } else if('fromGroupToMemberGroup' == e.detail.item.id) {
+                            document.querySelector('#depositDialog').show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, '${groupName}', '${groupvsMap?.IBAN}',
+                            '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')
+                        } else if('fromGroupToAllMember' == e.detail.item.id) {
+                            document.querySelector('#depositDialog').show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, '${groupName}', '${groupvsMap?.IBAN}',
+                                    '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', '${groupvsMap?.id}')
+                        }
+                        document.querySelector("#coreSelector").selected = null
+                    }
+                })
+            </script>
         </div>
     </g:if>
 
@@ -105,7 +121,6 @@ def groupName = groupvsMap.name.replaceAll("'", "&apos;")
         <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>
     </div>
 
-    <g:include view="/groupVS/groupvs-page-tabs.gsp"/>
     <group-page-tabs style="width: 1000px;"></group-page-tabs>
 
     <g:if test="${!"admin".equals(params.menu) && !"user".equals(params.menu)}">
@@ -113,13 +128,11 @@ def groupName = groupvsMap.name.replaceAll("'", "&apos;")
             <g:message code="clientToolNeededMsg"/>.
             <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
     </g:if>
-
 </div>
 
-<g:include view="/include/dialog/cancel-group-dialog.gsp"/>
-<div style="position:absolute; top:0px; width:100%;">
-    <div layout horizontal center center-justified style="">
-        <cancel-group-dialog id="cancelGroupDialog"></cancel-group-dialog>
+<div layout horizontal center center-justified style="position:absolute; top:80px; width: 100%; max-width: 1200px; margin: 0px auto 0px auto;">
+    <div>
+        <vicket-deposit-dialog id="depositDialog"></vicket-deposit-dialog>
     </div>
 </div>
 </body>
@@ -127,29 +140,30 @@ def groupName = groupvsMap.name.replaceAll("'", "&apos;")
 <asset:script>
     <g:applyCodec encodeAs="none">
 
-        var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
-        var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
 
-        <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
+    var groupvsRepresentative = {id:${groupvsMap.representative.id}, nif:"${groupvsMap.representative.nif}"}
+    var groupVSData = {id:${groupvsMap.id}, name:escape('${groupvsMap.name.replaceAll("'", "&apos;")}') , representative:groupvsRepresentative}
 
-        </g:if>
-        <g:if test="${UserVS.State.PENDING.toString().equals(groupvsMap?.state)}">
-            $(".pageHeader").css("color", "#fba131")
-            $("#messagePanel").addClass("groupvsPendingBox");
-            $("#messagePanel").text("<g:message code="groupvsPendingLbl"/>")
-            $("#messagePanel").css("display", "block")
+    <g:if test="${UserVS.State.ACTIVE.toString().equals(groupvsMap?.state)}">
 
-        </g:if>
-        <g:if test="${UserVS.State.CANCELLED.toString().equals(groupvsMap?.state)}">
-            $(".pageHeader").css("color", "#6c0404")
-            $("#messagePanel").addClass("groupvsClosedBox");
-            $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
-            $("#messagePanel").css("display", "block")
-            $("#adminButtonsDiv").css("display", "none")
-        </g:if>
+    </g:if>
+    <g:if test="${UserVS.State.PENDING.toString().equals(groupvsMap?.state)}">
+        $(".pageHeader").css("color", "#fba131")
+        $("#messagePanel").addClass("groupvsPendingBox");
+        $("#messagePanel").text("<g:message code="groupvsPendingLbl"/>")
+        $("#messagePanel").css("display", "block")
 
-        function editGroup() {
-            window.location.href = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/${groupvsMap.id}?menu=admin"
+    </g:if>
+    <g:if test="${UserVS.State.CANCELLED.toString().equals(groupvsMap?.state)}">
+        $(".pageHeader").css("color", "#6c0404")
+        $("#messagePanel").addClass("groupvsClosedBox");
+        $("#messagePanel").text("<g:message code="groupvsClosedLbl"/>")
+        $("#messagePanel").css("display", "block")
+        $("#adminButtonsDiv").css("display", "none")
+    </g:if>
+
+    function editGroup() {
+        window.location.href = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/${groupvsMap.id}?menu=admin"
     }
 
     function adminGroupUsers(groupId) {
@@ -182,6 +196,51 @@ def groupName = groupvsMap.name.replaceAll("'", "&apos;")
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
+
+    function showConfirmCancelGroup() {
+        showMessageVS("<g:message code="cancelGroupVSDialogMsg" args="${[groupvsMap.name]}"/>",
+            "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
+    }
+
+    var appMessageJSON
+    var resultCallbackId = 'resultCallbackId'
+    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-accepted', function(e) {
+        console.log("message-accepted - cancelgroup: " + e.detail)
+        if('cancel_group' == e.detail) {
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
+            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+            webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/${groupvsMap.id}"
+            webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
+            webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:"${groupvsMap.name}", id:${groupvsMap.id}}
+            webAppMessage.contentType = 'application/x-pkcs7-signature'
+            var objectId = Math.random().toString(36).substring(7)
+            window[objectId] = {setClientToolMessage: function(appMessage) {
+                    appMessageJSON = toJSON(appMessage)
+                    if(appMessageJSON != null) {
+                        var caption = '<g:message code="groupCancelERRORLbl"/>'
+                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                            caption = "<g:message code='groupCancelOKLbl'/>"
+                        }
+                        showMessageVS(appMessageJSON.message, caption, resultCallbackId)
+                    }
+                }}
+
+            webAppMessage.callerCallback = this.objectId
+            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            appMessageJSON = null
+        }
+    });
+
+    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-closed', function(e) {
+        console.log("message-closed - detail: " + e.detail)
+        if(resultCallbackId == e.detail) {
+            if(appMessageJSON != null && ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                window.location.href = updateMenuLink(appMessageJSON.URL)
+            }
+        }
+    })
 
     </g:applyCodec>
 </asset:script>

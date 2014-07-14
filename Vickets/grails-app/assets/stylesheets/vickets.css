@@ -131,18 +131,6 @@ fieldset[disabled] .btn-accept-vs.active {
     background-color: #f9f9f9;
 }
 
-input:required {
-    border: 1px solid rgba(253, 8, 8, 0.29);
-}
-
-input:focus:invalid {
-    /*background: url('../images/icon_16/cancel.png') no-repeat right;*/
-}
-
-input:focus:valid {
-    /*background: url('../images/icon_16/ok.png') no-repeat right;*/
-}
-
 .pageHeader {
     color: #6c0404;
     font-weight: bold;
@@ -245,13 +233,15 @@ input:focus:valid {
 }
 
 paper-button.button {
-    background-color: #f9f9f9;
+    background-color: #fafafa;
     color: #6c0404;
     border: 1px solid #ccc;
-    margin:10px;
     vertical-align: middle;
-    line-height: 24px;
-    height: 35px;
+    padding-bottom: 5px;
+    white-space: nowrap;
+    background: none;
+    font-size: 13px;
+    padding: 0px 0px 10px 0px;
 }
 
 .tableHeadervs {
@@ -261,7 +251,8 @@ paper-button.button {
     background: white;
     box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16);
     font-weight: bold;
-    padding:10px 0px 10px 0px;
+    padding:5px 0px 5px 0px;
+    width: 100%;
 }
 
 .tableHeadervs div {
@@ -269,7 +260,10 @@ paper-button.button {
 }
 
 .rowvs {
-    border-bottom: 1px solid #ccc; padding: 10px 0px 10px 0px; cursor: pointer;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0px 10px 0px;
+    cursor: pointer;
+    width: 100%;
 }
 
 .rowvs div {

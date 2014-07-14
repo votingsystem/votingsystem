@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../core-overlay/core-overlay.html">
 <link rel="import" href="../core-ajax/core-ajax.html">
-<link rel="import" href="../votingsystem-input/votingsystem-input.html">
+<link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../core-icons/core-icons.html">
 <link rel="import" href="../core-item/core-item.html">
 <link rel="import" href="../paper-button/paper-button.html">
@@ -70,8 +70,8 @@ Dialog to search and select tags
               </div>
 
               <div flex layout horizontal center center-justified>
-                  <votingsystem-input id="tagSearchInput" floatinglabel label="{{messages.tagLbl}}" required autofocus>
-                  </votingsystem-input>
+                  <paper-input id="tagSearchInput" floatinglabel label="{{messages.tagLbl}}" required autofocus>
+                  </paper-input>
                   <paper-button raisedButton label="{{messages.tagSearchLbl}}" class="button"
                                 on-click="{{searchTag}}" style=""></paper-button>
               </div>
@@ -132,8 +132,8 @@ Dialog to search and select tags
       ready: function() {
           console.log(this.tagName + " ready - locale: " + userLocale)
           this.messages = localizedMessages
-          this.selectedTagList = [],
-          this.searchedTagList =[],
+          this.selectedTagList = []
+          this.searchedTagList =[]
           var tagdialog = this
           this.$.tagSearchInput.onkeypress = function(event){
               var chCode = ('charCode' in event) ? event.charCode : event.keyCode;

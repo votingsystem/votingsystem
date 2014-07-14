@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-input', file: 'votingsystem-input.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
 
@@ -14,9 +14,9 @@
 
             <form id="depositDialogForm"  method="post"  class="">
                 <div layout vertical style="padding: 5px 20px 0px 20px;">
-                    <votingsystem-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
+                    <paper-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
                                         validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl"/>" style="display: inline;" required>
-                    </votingsystem-input>
+                    </paper-input>
                     <div class="form-group" style="margin:15px 0px 15px 0px;">
                         <label><g:message code="subjectLbl"/></label>
                         <textarea id="depositDialogSubject" class="form-control" rows="2" required="" name="subject"></textarea>

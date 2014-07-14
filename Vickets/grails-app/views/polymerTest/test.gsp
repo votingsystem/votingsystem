@@ -4,6 +4,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 </head>
 <body style="width:1200px; margin:0px auto 0px auto; height: 1200px; padding:10px 10px 50px 10px;">
 <div layout vertical>
@@ -14,7 +15,11 @@
         <button onclick="showMessageVS('msg msg msg ', 'caption')" style="margin:10px;">Message dialog</button>
     </div>
     <div layout vertical>
-        <g:include view="/include/vicket-deposit-dialog.gsp"/>
+
+        <paper-input id="depositSubject" floatinglabel
+                            label="<g:message code="subjectLbl"/>" required></paper-input>
+
+        <g:include view="/polymer/dialog/vicket-deposit-dialog.gsp"/>
         <div layout horizontal center center-justified style="">
             <vicket-deposit-dialog id="depositDialog" caption="Realizar ingreso"></vicket-deposit-dialog>
         </div>

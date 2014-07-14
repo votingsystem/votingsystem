@@ -67,13 +67,11 @@
                 <div id="hero1" hero-id="hero" hero>
                     <div id="bottom1" cross-fade></div>
                 </div>
-
             </section>
             <section id="page2">
                 <div id="hero2" class="card" hero-id="hero" hero>
                     <div id="bottom2" cross-fade>ddd</div>
                 </div>
-
             </section>
         </core-animated-pages>
     </template>

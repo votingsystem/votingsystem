@@ -98,7 +98,7 @@
         return false
     }
 
-    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-accepted', function() {
+    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-closed', function() {
         if(appMessageJSON != null) {
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 window.location.href = updateMenuLink(appMessageJSON.URL)

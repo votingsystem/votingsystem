@@ -15,7 +15,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#~0.3.3",
     "core-overlay": "Polymer/core-overlay#~0.3.3",
-    "votingsystem-input":"votingsystem-input"
+    "paper-input":"paper-input"
   }
 
 }

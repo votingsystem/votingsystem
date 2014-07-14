@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-input', file: 'votingsystem-input.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
@@ -42,11 +42,11 @@
                     <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon></div>
             </div>
             <div layout vertical style="padding: 5px 20px 0px 20px;">
-                <votingsystem-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
-                                    validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl"/>" style="" required>
-                </votingsystem-input>
-                <votingsystem-input id="depositSubject" floatinglabel
-                                    label="<g:message code="subjectLbl"/>" required></votingsystem-input>
+                <paper-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
+                            validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl"/>" style="" required>
+                </paper-input>
+                <paper-input id="depositSubject" floatinglabel error="<g:message code="requiredLbl"/>"
+                                    label="<g:message code="subjectLbl"/>" required></paper-input>
 
 
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
@@ -106,6 +106,7 @@
         opened:false,
 
         ready: function() {
+            console.log(this.tagName + " - " + this.id)
             this.style.display = 'none'
             this.objectId = Math.random().toString(36).substring(7)
             window[this.objectId] = this
@@ -129,16 +130,6 @@
             if(this.opened) show()
         },
 
-        openedChanged: function() {
-            this.$.userSearchInput.value = ""
-            this.setMessage(200, null)
-            this.$.receptorBox.removeUsers()
-            this.$.userSearchList.reset()
-            this.$.tagDialog.reset()
-            if(this.opened) this.show()
-            else this.style.display = 'none'
-        },
-
         toggleTagDialog: function() {
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
         },
@@ -153,6 +144,15 @@
         },
 
         close: function() {
+            console.log(this.id + " - close")
+            this.$.userSearchInput.value = ""
+            this.$.amount.value = ""
+            this.$.depositSubject.value = ""
+            this.$.userSearchList.url = ""
+            this.setMessage(200, null)
+            this.$.receptorBox.removeUsers()
+            this.$.userSearchList.reset()
+            this.$.tagDialog.reset()
             this.style.display = 'none'
         },
 
@@ -174,8 +174,14 @@
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                     break;
             }
-            if(this.$.amount.invalid) this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
-            if(this.$.depositSubject.invalid) this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
+            if(this.$.amount.invalid) {
+                this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
+                return
+            }
+            if(this.$.depositSubject.invalid) {
+                this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
+                return
+            }
             this.setMessage(200, null)
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
@@ -229,6 +235,7 @@
             this.$.messageToUser.innerHTML = message
         },
         show:function(operation, fromUser, fromIBAN, validTo, targetGroupId) {
+            console.log(this.id + " - show - operation: " + operation)
             this.operation = operation
             this.fromUserName = fromUser
             this.fromUserIBAN = fromIBAN

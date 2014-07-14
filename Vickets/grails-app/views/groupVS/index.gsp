@@ -5,7 +5,6 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <asset:stylesheet src="vickets_groupvs.css"/>
-    <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-list']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 </head>
@@ -38,7 +37,7 @@
 </html>
 <asset:script>
     document.addEventListener('polymer-ready', function() {
-        document.querySelector("#navBar").searchVisible('false')
+        if(document.querySelector("#navBar") != null) document.querySelector("#navBar").searchVisible('false')
     });
 
     function groupvsTypeSelect(selected) {
