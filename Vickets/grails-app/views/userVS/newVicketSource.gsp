@@ -98,11 +98,12 @@
         return false
     }
 
-    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-closed', function() {
+    document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {
         if(appMessageJSON != null) {
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 window.location.href = updateMenuLink(appMessageJSON.URL)
             }
         }
-    })
+    });
+
 </asset:script>

@@ -30,15 +30,13 @@
             <li class="active"><g:message code="certsPageTitle"/></li>
         </ol>
     </div>
-    <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
-        <div id="certTypeSelectDiv" style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="certTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control" onchange="certTypeSelect(this)">
-                <option value="&type=USER&state=OK"> - <g:message code="certUserStateOKLbl"/> - </option>
-                <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - <g:message code="certAuthorityStateOKLbl"/> - </option>
-                <option value="&type=USER&state=CANCELLED"> - <g:message code="certUserStateCancelledLbl"/> - </option>
-                <option value="&type=CERTIFICATE_AUTHORITY&state=CANCELLED"> - <g:message code="certAuthorityStateCancelledLbl"/> - </option>
-            </select>
-        </div>
+    <div layout horizontal center center-justified>
+        <select id="certTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control" onchange="certTypeSelect(this)">
+            <option value="&type=USER&state=OK"> - <g:message code="certUserStateOKLbl"/> - </option>
+            <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - <g:message code="certAuthorityStateOKLbl"/> - </option>
+            <option value="&type=USER&state=CANCELLED"> - <g:message code="certUserStateCancelledLbl"/> - </option>
+            <option value="&type=CERTIFICATE_AUTHORITY&state=CANCELLED"> - <g:message code="certAuthorityStateCancelledLbl"/> - </option>
+        </select>
     </div>
 
     <h3><div id="pageHeader" class="pageHeader text-center"><g:message code="trustedCertsPageTitle"/></div></h3>

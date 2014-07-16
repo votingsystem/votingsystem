@@ -9,7 +9,7 @@ html {
 body {
     font-family: 'RobotoDraft', sans-serif;
     color:#434343;
-    background-color: #f9f9f9;
+    background-color: #fefefe;
     margin: 0 auto 0 auto;
     padding: 0 0px 0 0px;
 }
@@ -131,6 +131,7 @@ fieldset[disabled] .btn-accept-vs.active {
     background-color: #f9f9f9;
 }
 
+
 .pageHeader {
     color: #6c0404;
     font-weight: bold;
@@ -225,8 +226,8 @@ fieldset[disabled] .btn-accept-vs.active {
 
 .eventContentDiv {
     border: #f2f2f2 solid 1px;
+    background: #fefefe;
     margin:0px 0px 0px 0px;
-    min-height:300px;
     padding: 10px 10px 10px 10px;
     word-wrap:break-word;
     overflow: hidden;
@@ -241,7 +242,7 @@ paper-button.button {
     white-space: nowrap;
     background: none;
     font-size: 13px;
-    padding: 0px 0px 10px 0px;
+    padding: 0px 0px 0px 0px;
 }
 
 .tableHeadervs {

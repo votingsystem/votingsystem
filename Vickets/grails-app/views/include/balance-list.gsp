@@ -3,7 +3,33 @@
 
 <polymer-element name="balance-list" attributes="url">
     <template>
-        <style> </style>
+        <style>
+            .tableHeadervs {
+                margin: 0px 0px 0px 0px;
+                color:#6c0404;
+                border-bottom: 2px solid #ccc;
+                background: white;
+                box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+                font-weight: bold;
+                padding:5px 0px 5px 0px;
+                width: 100%;
+            }
+
+            .tableHeadervs div {
+                text-align:center;
+            }
+
+            .rowvs {
+                border-bottom: 1px solid #ccc;
+                padding: 10px 0px 10px 0px;
+                cursor: pointer;
+                width: 100%;
+            }
+
+            .rowvs div {
+                text-align:center;
+            }
+        </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{balanceList}}" handleAs="json" method="get"
                    contentType="json"></core-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
@@ -11,7 +37,7 @@
             <div layout horizontal center center-justified class="tableHeadervs">
                 <div flex style="width: 80px;"><g:message code="tagLbl"/></div>
                 <div flex style="width:80px;"><g:message code="amountLbl"/></div>
-                <div flex style="width:120px;"><g:message code="currencyLbl"/></div>
+                <div style=""><g:message code="currencyLbl"/></div>
                 <div flex style="width:200px;"><g:message code="lastUpdateLbl"/></div>
             </div>
             <div>
@@ -19,7 +45,7 @@
                     <div layout horizontal center center-justified class="rowvs">
                         <div flex style="width: 80px;">{{account.tag.name}}</div>
                         <div flex style="width:80px;">{{account.amount | formatAmount}}</div>
-                        <div flex style="width:120px;">{{account.currency}}</div>
+                        <div style="">{{account.currency}}</div>
                         <div flex style="width:200px;">{{account.lastUpdated}}</div>
                     </div>
                 </template>

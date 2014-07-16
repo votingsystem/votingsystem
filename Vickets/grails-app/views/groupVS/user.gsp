@@ -7,6 +7,9 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
+<style>
+
+</style>
 <body>
     <div style="max-width: 600px; margin:0px auto 0px auto;">
         <div id="messageDiv" class="text-center" style="font-size: 1.4em; color:#6c0404; font-weight: bold;"></div>
@@ -15,13 +18,13 @@
             <div id="nameDiv" style="font-size: 1.2em;font-weight: bold;">${subscriptionMap.uservs.name}</div>
             <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>: <span id="dateCreatedDiv"></span></div>
         </div>
-        <button id="activateUserButton" type="button" class="btn btn-warning" onclick="activateUser();"
-                style="margin:10px 0px 0px 0px; "><g:message code="activateUserLbl"/> <i class="fa fa-thumbs-o-up"></i>
+        <button id="activateUserButton" type="button" class="btn btn-default" onclick="activateUser();"
+                style="margin:10px 0px 0px 0px;"><g:message code="activateUserLbl"/> <i class="fa fa-thumbs-o-up"></i>
         </button>
-        <button id="deActivateUserButton" type="button" class="btn btn-warning" onclick="document.querySelector('#reasonDialog').toggle();"
+        <button id="deActivateUserButton" type="button" class="btn btn-default" onclick="document.querySelector('#reasonDialog').toggle();"
                 style="margin:10px 0px 0px 10px; "><g:message code="deActivateUserLbl"/> <i class="fa fa-thumbs-o-down"></i>
         </button>
-        <button id="makeDepositButton" type="button" class="btn btn-warning" onclick="makeDeposit();"
+        <button id="makeDepositButton" type="button" class="btn btn-default" onclick="makeDeposit();"
                 style="margin:10px 0px 0px 10px; "><g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
         </button>
         <div id="receipt" style="display:none;">

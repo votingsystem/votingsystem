@@ -61,11 +61,10 @@
                     }
                     this.$.balanceList.url = "${createLink(controller:'userVSAccount', action:'balance')}?id=" + this.groupvs.id
                 }
-
+                this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.id + "/user"
+                this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvs.id
             },
             groupvsWithDetailsChanged:function() {
-                this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvsWithDetails.id + "/user"
-                this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvsWithDetails.id
                 this.$.transactionFromTable.transactionList = this.groupvsWithDetails.transactionFromList
                 this.$.transactionToTable.transactionList = this.groupvsWithDetails.transactionToList
             }

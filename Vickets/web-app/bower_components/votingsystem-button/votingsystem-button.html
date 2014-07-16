@@ -1,0 +1,46 @@
+<polymer-element name="votingsystem-button" attributes="width color">
+    <template>
+        <style shim-shadowdom>
+            .button {
+                display: inline-block;
+                position: relative;
+                padding: 0px 3px 0px 3px;
+                height: 32px;
+                line-height: 32px;
+                border-radius: 2px;
+                font-size: 1.3em;
+                background-color: #fff;
+                color: #6c0404;
+                cursor: pointer;
+            }
+
+            .button i {
+                margin:0px 0px 0px 5px;
+            }
+
+            .button.raised {
+                transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                transition-delay: 0.2s;
+                box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+            }
+            .view { :host {position: relative;} }
+        </style>
+        <div id="buttonDiv" class="button raised" on-click="{{editGroup}}" on-click="{{editGroup}}">
+            <div style="text-align: center;" fit>
+                    <content></content>
+            </div>
+            <paper-ripple fit></paper-ripple>
+        </div>
+
+    </template>
+    <script>
+        Polymer('votingsystem-button', {
+            widthChanged:function() {
+               this.$.buttonDiv.style.width = this.width
+            },
+            colorChanged:function() {
+                this.$.buttonDiv.style.color = this.color
+            }
+        })
+    </script>
+</polymer-element>

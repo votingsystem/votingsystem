@@ -69,7 +69,6 @@ public class BrowserVS extends Region {
     private MessageDialog messageDialog;
     private WebView webView;
     private WebView smallView;
-    private ComboBox comboBox;
     private VBox mainVBox;
     private BrowserVSPane browserHelper;
     private String caption;
@@ -121,7 +120,6 @@ public class BrowserVS extends Region {
     private void initComponents() {
         final WebHistory history = webView.getEngine().getHistory();
         smallView = new WebView();
-        comboBox = new ComboBox();
         browserStage = new Stage();
         browserStage.initModality(Modality.WINDOW_MODAL);
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
@@ -176,28 +174,34 @@ public class BrowserVS extends Region {
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
 
-        final TextField urlInputText = new TextField("");
-        urlInputText.setPrefWidth(400);
-        urlInputText.setOnKeyPressed(new EventHandler<KeyEvent>() {
+        final TextField locationField = new TextField("");
+        locationField.setPrefWidth(400);
+        HBox.setHgrow(locationField, Priority.ALWAYS);
+        locationField.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override public void handle(KeyEvent ke) {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
-                    if(!"".equals(urlInputText.getText())) {
+                    if(!"".equals(locationField.getText())) {
                         String targetURL = null;
-                        if(urlInputText.getText().startsWith("http://") || urlInputText.getText().startsWith("https://")) {
-                            targetURL = urlInputText.getText().trim();
-                        } else targetURL = "http://" + urlInputText.getText().trim();
+                        if(locationField.getText().startsWith("http://") || locationField.getText().startsWith("https://")) {
+                            targetURL = locationField.getText().trim();
+                        } else targetURL = "http://" + locationField.getText().trim();
                         loadURL(targetURL, null);
                     }
                 }
             }
         });
 
+        webView.getEngine().locationProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                locationField.setText(newValue);
+            }
+        });
 
-        comboBox.setPrefWidth(300);
         toolBar = new HBox();
         toolBar.setAlignment(Pos.CENTER);
         toolBar.getStyleClass().add("browser-toolbar");
-        toolBar.getChildren().addAll(prevButton, forwardButton, urlInputText, reloadButton, comboBox , createSpacer());
+        toolBar.getChildren().addAll(prevButton, forwardButton, locationField, reloadButton , createSpacer());
 
         //handle popup windows
         webView.getEngine().setCreatePopupHandler(
@@ -215,23 +219,8 @@ public class BrowserVS extends Region {
             @Override
         public void onChanged(Change<? extends WebHistory.Entry> c) {
                 c.next();
-                for (WebHistory.Entry e : c.getRemoved()) {
-                    comboBox.getItems().remove(e.getUrl());
-                }
-                for (WebHistory.Entry e : c.getAddedSubList()) {
-                    comboBox.getItems().add(e.getUrl());
-                }
                 if(history.getCurrentIndex() > 0) prevButton.setDisable(false);
                 logger.debug("== currentIndex= " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
-            }
-        });
-
-        //set the behavior for the history combobox
-        comboBox.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override
-            public void handle(javafx.event.ActionEvent ev) {
-                int offset = comboBox.getSelectionModel().getSelectedIndex() - history.getCurrentIndex();
-                history.go(offset);
             }
         });
 
@@ -242,10 +231,10 @@ public class BrowserVS extends Region {
                     @Override
                     public void changed(ObservableValue<? extends Worker.State> ov,
                                         Worker.State oldState, Worker.State newState) {
-                        logger.debug(" ========== newState: " + newState + " - " + webView.getEngine().getLocation());
+                        //logger.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
                         if (newState == Worker.State.SUCCEEDED) {
                             Document doc = webView.getEngine().getDocument();
-                            Element element = doc.getElementById("vicketsPage");
+                            Element element = doc.getElementById("voting_system_page");
                             if(element != null) {
                                 JSObject win = (JSObject) webView.getEngine().executeScript("window");
                                 win.setMember("clientTool", new JavafxClient());
@@ -274,11 +263,6 @@ public class BrowserVS extends Region {
             @Override public void onChanged(Change<? extends Node> c) {}
         });
 
-        webView.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
-            @Override public void changed(ObservableValue<? extends Document> prop, Document oldDoc, Document newDoc) {
-                if(ContextVS.getInstance().getBoolProperty(ContextVS.IS_DEBUG_ENABLED, false)) enableFirebug( webView.getEngine());
-            }
-        });
     }
 
     public void sendMessageToBrowserApp(int statusCode, String message, String callerCallback) {
@@ -317,22 +301,6 @@ public class BrowserVS extends Region {
             logger.error(ex.getMessage(), ex);
         }
     }
-
-    /**
-     * waiting until the WebView has loaded a document before trying to trigger Firebug.
-     * http://stackoverflow.com/questions/17387981/javafx-webview-webengine-firebuglite-or-some-other-debugger
-     * Enables Firebug Lite for debugging a webEngine.
-     * @param engine the webEngine for which debugging is to be enabled.
-     */
-    private static void enableFirebug(final WebEngine engine) {
-        engine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && " +
-                "document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : " +
-                "document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', " +
-                "'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');" +
-                "(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);" +
-                "E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
-    }
-
 
     public void showMessage(ResponseVS responseVS) {
         String finalMsg = responseVS.getMessage() == null? "":responseVS.getMessage();

@@ -95,7 +95,8 @@
         return false
     }
 
-    document.querySelector("#_votingsystemMessageDialog").addEventListener('message-closed', function() {
+    document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {
         if(appMessageJSON.URL != null) window.location.href = updateMenuLink(appMessageJSON.URL)
-    })
+    });
+
 </asset:script>

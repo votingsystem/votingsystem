@@ -1,9 +1,11 @@
+<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 <polymer-element name="votingsystem-message-dialog">
     <template>
-        <style>
+        <style no-shim>
+        .view { :host {position: relative;} }
         .card {
             position: relative;
             display: inline-block;
@@ -21,7 +23,14 @@
             line-height: 24px;
             height: 35px;
         }
+        paper-button:hover {
+            background: #ba0011;
+            color: #f9f9f9;
+        }
 
+        paper-button::shadow #ripple {
+            color: green;
+        }
         </style>
         <div class="card" style="width:400px;z-index: 3000; display: {{isVisible?'block':'none'}}">
             <div layout horizontal center center-justified style="background: #ba0011;">
@@ -35,9 +44,9 @@
             <div style="font-size: 1.3em; color:#6c0404; font-weight: bold; text-align: center; padding:30px 20px 30px 20px;">
                 <votingsystem-html-echo html="{{message}}"></votingsystem-html-echo>
             </div>
-            <div layout horizontal style="margin:0px 20px 0px 0px; ">
+            <div layout horizontal style="margin:0px 20px 0px 0px;">
                 <div flex></div>
-                <div style="display:{{isConfirmMessage?'block':'none'}}">
+                <div style="margin:10px 0px 10px 0px;display:{{isConfirmMessage?'block':'none'}};">
                     <paper-button raisedButton class="button" label="<g:message code="acceptLbl"/>"
                                   on-click="{{accept}}" style=""></paper-button>
                 </div>
@@ -46,6 +55,7 @@
     </template>
     <script>
         Polymer('votingsystem-message-dialog', {
+            isVisible:false,
             ready: function() {
                 this.isVisible = false
                 this.isConfirmMessage = this.isConfirmMessage || false
@@ -55,22 +65,22 @@
                 this.message = message
                 this.caption = caption
                 this.callerId = callerId
-                this.isConfirmMessage = true
+                this.isConfirmMessage = isConfirmMessage
                 this.isVisible = true
             },
 
             accept: function() {
                 var callerId = this.callerId
                 this.close()
-                this.fire('message-accepted', callerId)
+                this.fire('core-signal', {name: "messagedialog-accept", data: callerId});
             },
 
             close: function() {
-                this.fire('message-closed', this.callerId)
+                this.isVisible = false
+                this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});
                 this.message = null
                 this.callerId = null
                 this.caption = null
-                this.isVisible = false
                 this.isConfirmMessage = false
             }
         });

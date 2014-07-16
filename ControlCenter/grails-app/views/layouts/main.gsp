@@ -22,7 +22,7 @@
 
 	<g:layoutHead/>
 </head>
-<body>
+<body id="voting_system_page">
 <div>
     <div id="navBarMainMenu">
         <nav>

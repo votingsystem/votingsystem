@@ -54,6 +54,8 @@
       "core-style":"Polymer/core-style",
       "core-tooltip":"Polymer/core-tooltip",
       "core-tests":"Polymer/core-tests",
+      "core-signals":"Polymer/core-signals",
+
 
       "polymer-layout":"Polymer/polymer-layout",
       "polymer-flex-layout":"Polymer/polymer-flex-layout"

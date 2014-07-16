@@ -12,14 +12,12 @@
 <body>
 <div class="pageContenDiv" style="max-width: 1000px; padding: 20px 30px 0px 30px;">
 
-    <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
-        <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="messagevsStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 300px;"
-                    class="form-control" onchange="messagevsStateSelect(this)">
-                <option value="PENDING"> - <g:message code="selectPendingMessaVSLbl"/> - </option>
-                <option value="CONSUMED"> - <g:message code="selectConsumedMessaVSLbl"/> - </option>
-            </select>
-        </div>
+    <div layout horizontal center center-justified>
+        <select id="messagevsStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                class="form-control" onchange="messagevsStateSelect(this)">
+            <option value="PENDING"> - <g:message code="selectPendingMessaVSLbl"/> - </option>
+            <option value="CONSUMED"> - <g:message code="selectConsumedMessaVSLbl"/> - </option>
+        </select>
     </div>
 
     <div id="adviceMessageDiv"><g:message code="messageVSPendingMsg"/></div>

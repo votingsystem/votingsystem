@@ -4,8 +4,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-user.gsp']"/>">
 
-<g:include view="/include/search-user.gsp"/>
 
 <polymer-element name="vicket-deposit-dialog" attributes="caption opened serviceURL">
 <template>
@@ -14,7 +14,9 @@
             position: relative;
             display: inline-block;
             vertical-align: top;
-            background-color: #f9f9f9;
+            height: auto;
+            width:auto;
+            background-color: #fefefe;
             box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
             border: 1px solid #ccc;
         }
@@ -27,9 +29,17 @@
             line-height: 24px;
             height: 35px;
         }
+        paper-button:hover {
+            background: #ba0011;
+            color: #f9f9f9;
+        }
+
+        paper-button::shadow #ripple {
+            color: white;
+        }
         </style>
 
-        <div id="container" class="card" style="width:500px; padding:0px 0px 15px 0px;">
+        <div id="container" class="card" style="width:600px; padding:0px 0px 15px 0px;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
                 <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
                 <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{close}}"></core-icon-button>
@@ -50,7 +60,7 @@
 
 
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
-                font-size: 1.1em; display: none; padding: 5px;">
+                        font-size: 1.1em; display: none; padding: 5px;">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
                         <div id="tagDataDivMsg" style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
                             <g:message code="depositWithTagAdvertMsg"/>
@@ -108,9 +118,6 @@
         ready: function() {
             console.log(this.tagName + " - " + this.id)
             this.style.display = 'none'
-            this.objectId = Math.random().toString(36).substring(7)
-            window[this.objectId] = this
-            this.callbackFunction = "window['" + this.objectId + "'].setClientToolMessage"
             var depositDialog = this
             this.$.userSearchList.addEventListener('user-clicked', function (e) {
                 depositDialog.$.receptorBox.addUser(e.detail)
@@ -153,11 +160,11 @@
             this.$.receptorBox.removeUsers()
             this.$.userSearchList.reset()
             this.$.tagDialog.reset()
+            this.$.tagDataDiv.style.display = 'none'
             this.style.display = 'none'
         },
 
         submitForm: function () {
-            console.log(" ======= submitForm: " + this.$.amount.invalid)
             switch(this.operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     if(this.$.receptorBox.getUserList().length == 0){
@@ -200,8 +207,21 @@
                 webAppMessage.signedContent.tags = tagList
             }
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = this.objectId
-            console.log(this.tagName + " - objectId: " + this.objectId)
+            var objectId = Math.random().toString(36).substring(7)
+            var vicketDepositDialog = this
+            window[objectId] = {setClientToolMessage: function(appMessage) {
+                var appMessageJSON = JSON.parse(appMessage)
+                if(appMessageJSON != null) {
+                    var caption
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = "<g:message code='depositOKLbl'/>"
+                        vicketDepositDialog.close()
+                    } else caption = '<g:message code="depositERRORLbl"/>'
+                    showMessageVS(appMessageJSON.message, caption)
+                }
+            }}
+            webAppMessage.callerCallback = objectId
+            console.log(this.tagName + " - objectId: " + objectId)
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
 
@@ -222,12 +242,6 @@
             this.$.userSearchList.url = targetURL
         },
 
-        /*This method is called from JavaFX client. So we put referencens on global window */
-        setClientToolMessage:function(appMessage) {
-            console.log(this.tagName + " - " + this.id + " - setClientToolMessage: " + appMessage);
-            var appMessageJSON = JSON.parse(appMessage)
-            if(appMessageJSON != null) window[this.objectId].setMessage(appMessageJSON.statusCode, appMessageJSON.message)
-        },
         setMessage:function(status, message) {
             console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
             this.status = status
@@ -241,20 +255,21 @@
             this.fromUserIBAN = fromIBAN
             this.dateValidTo = validTo
             this.groupId = targetGroupId
-            var selectReceptorMsg
             switch(operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMember'/></div>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
+                    this.$.receptorBox.multiSelection = false
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
                     this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMemberGroup'/></div>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
-                    document.getElementById('receptorPanelDiv').style.display = 'block'
+                    this.$.receptorBox.multiSelection = true
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                     this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
                     this.selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
+                    this.$.tagDataDiv.style.display = 'block'
                     break;
             }
             this.selectedTags = []

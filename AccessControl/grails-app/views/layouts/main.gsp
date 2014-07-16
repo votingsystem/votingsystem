@@ -22,7 +22,7 @@
 
     <g:layoutHead/>
 </head>
-<body>
+<body id="voting_system_page">
 <div>
     <div class="navbar navbar-vickets" style="display:table; margin: 0px 0px 0px 0px; width:100%;">
         <div style="display:table-cell;width: 200px; margin:0px; padding:0px;">

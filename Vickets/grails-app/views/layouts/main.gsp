@@ -15,18 +15,23 @@
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
+
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>
-<body style="margin:0px auto 0px auto;background-color: #f9f9f9;">
-<polymer-element name="nav-bar" attributes="url">
-
+<body id="voting_system_page" style="margin:0px auto 0px auto;background-color: #f9f9f9;">
+<polymer-element name="nav-bar" attributes="url loading">
     <template>
+        <core-ajax id="ajax" auto url="" handleAs="document" on-core-response="{{ajaxResponse}}"></core-ajax>
+        <!-- put core signals names in lower case !!!-->
+        <core-signals on-core-signal-innerpage="{{innerPageSignal}}"></core-signals>
         <votingsystem-navbar id="_navbar" style="display: none;">
             <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
                 <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
-
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
@@ -37,7 +42,7 @@
                             <paper-item data-href="${createLink(controller: 'groupVS')}">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'groupVS', action: 'newGroup')}">
+                            <paper-item data-href="http://vickets:8086/Vickets/groupVS/edit/3">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
@@ -86,26 +91,22 @@
                             </paper-item>
                             {{ "<g:message code="usersPageTitle"/>" | setTitle}}
                         </g:else>
-
                     </core-selector>
                 </core-menu>
             </core-header-panel>
             <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
             <content id="content"></content>
         </votingsystem-navbar>
-
-        <core-ajax id="ajax" auto url="" handleAs="document" on-core-response="{{ajaxResponse}}"></core-ajax>
-
+        <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
+            <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+        </div>
+        <content id="content"></content>
     </template>
     <script>
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
             url:'',
             newURL:'',
-            newURLChanged: function() {
-                console.log("newURLChanged - newURL: " + this.newURL)
-                this.url = updateMenuLink(this.newURL, "mode=innerPage")
-            },
             ready: function() {
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
@@ -116,8 +117,15 @@
                     navBar.newURL = document.location.href
                 });
             },
+            newURLChanged: function() {
+                console.log("newURLChanged - newURL: " + this.newURL)
+                this.loading= true;
+                this.url = updateMenuLink(this.newURL, "mode=innerPage")
+            },
+            innerPageSignal:function(e, detail, sender) {
+                this.newURL = detail;
+            },
             urlChanged: function() {
-                console.log("main.gsp - draw item selected")
                 this.$.ajax.url =  this.url;
             },
             drawerItemSelected: function() {
@@ -134,8 +142,8 @@
             },
             ajaxResponse: function(appTitle) {
                 console.log("main.gsp - ajax-response - newURL: " + this.newURL)
-                history.pushState(null, null, this.newURL);
-                this.fire('ajax-response', this.$.ajax.response)
+                history.pushState(null, null, updateMenuLink(this.newURL));
+                this.asyncFire('ajax-response', this.$.ajax.response)
             }
         });
     </script>
@@ -151,9 +159,16 @@
 <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;">
     <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
 </div>
+<core-signals id="coreSignals"></core-signals>
 </body>
 </html>
 <asset:script>
+
+    document.addEventListener('votingsystem-signal-innerPage', function(e) {
+        console.log('main.gsp -votingsystem-signal-innerPage - newURL: ' + e.detail)
+        document.querySelector('#navBar').newURL = e.detail
+    });
+
     window.addEventListener('WebComponentsReady', function(e) {  });
 
     document.addEventListener('polymer-ready', function() {
@@ -170,19 +185,26 @@
         var ajaxDocument = e.detail
         var links = ajaxDocument.querySelectorAll('link')
         for (var i = 0; i < links.length; i++) {
-            //console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
+            console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
             if('import' == links[i].rel) {
+                if(i == (links.length - 1)) {
+                    links[i].onload = function() {
+                      document.querySelector('#navBar').loading = false;
+                    };
+                }
                 document.head.appendChild(links[i]);
             }
         }
+        if(links.length == 0) document.querySelector('#navBar').loading = false;
+
         for (var i = 0; i < ajaxDocument.scripts.length; i++) {
             var script = document.createElement("script");
             script.innerHTML = ajaxDocument.scripts[i].innerHTML;
-            //console.log("script.innerHTML: " + script.innerHTML)
+            console.log("script.src: " + script.src)
             document.head.appendChild(script);
         }
-
         document.querySelector("#navBar").innerHTML = ajaxDocument.body.innerHTML
+
         update_a_elements(document.querySelectorAll("#navBar a"))
     });
 
@@ -195,7 +217,6 @@
                     e.preventDefault()
                 });
             } else console.log("main.gsp - not system url: " + elementsArray[i].href)
-
         }
     }
 

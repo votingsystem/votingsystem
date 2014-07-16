@@ -15,17 +15,15 @@
         </ol>
     </div>
 
-    <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
-        <div style="display:table-cell;margin: auto; vertical-align: top;">
-            <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                    class="form-control" onchange="transactionvsTypeSelect(this)">
-                <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
+    <div layout horizontal center center-justified>
+        <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                class="form-control" onchange="transactionvsTypeSelect(this)">
+            <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
 
-                <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
-                <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
-                <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
-            </select>
-        </div>
+            <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
+            <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
+            <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
+        </select>
     </div>
 
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;

@@ -7,73 +7,77 @@
     <votingsystem-texteditor></votingsystem-texteditor>
 
 @element votingsystem-texteditor
-@blurb Element providing solution to no problem in particular.
+@blurb Element wrapping ckeditor
 @status alpha
 @homepage http://jgzornoza.github.io/votingsystem-texteditor
 -->
-<polymer-element name="votingsystem-texteditor" attributes="type">
-  <template>
-    <div id="internalcontainer"></div>
-  </template>
-  <script>
-      var editor
-      var editorConfig
+<polymer-element name="votingsystem-texteditor" attributes="dataJSON type">
+    <template>
+        <div id="internalcontainer"></div>
+    </template>
+    <script>
+        var editor
+        var editorConfig
 
-    Polymer('votingsystem-texteditor', {
-        /**
-       * @attribute author
-       * @type string
-       */
-      author: 'jgzornoza',
-      isEditorLoaded: false,
-      
-      /**
-       * `fancy` is a property that does something fancy.
-       * 
-       * @property fancy
-       * @type bool
-       */
-      data: '',
+        Polymer('votingsystem-texteditor', {
+            isEditorLoaded: false,
 
-      ready: function() {
-          if('mobile' == this.type) this.editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList',
-                '-', 'Link', 'Unlink' ], [ 'FontSize', 'TextColor', 'BGColor' ]]}
-          else {
-              this.editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
-                  [ 'FontSize', 'TextColor', 'BGColor' ]]}
-          }
-          this.editor =  CKEDITOR.appendTo( this.$.internalcontainer, this.editorConfig);
-          var textEditor = this
-          CKEDITOR.on('instanceReady',function( ev ) {
-              textEditor.isEditorLoaded = true
-              if(textEditor.data != null) {
-                  textEditor.editor.insertHtml(textEditor.data);
-                  textEditor.data = null;
-              }
-          });
-      },
+            /**
+             * `fancy` is a property that does something fancy.
+             *
+             * @property fancy
+             * @type bool
+             */
+            data: '',
 
-      /**
-       * `getData` return data in the editor
-       * @method getData
-       * @return {String} The editor data.
-       */
-      getData: function() {
-          return this.editor.getData().trim()
-      },
+            ready: function() {
+                if(this.dataJSON != null && "" != this.dataJSON.trim()) {
+                    this.data = JSON.parse(this.dataJSON).content
+                }
+                if('mobile' == this.type) this.editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList',
+                    '-', 'Link', 'Unlink' ], [ 'FontSize', 'TextColor', 'BGColor' ]]}
+                else {
+                    this.editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
+                        [ 'FontSize', 'TextColor', 'BGColor' ]]}
+                }
+                this.editor =  CKEDITOR.appendTo( this.$.internalcontainer, this.editorConfig);
+                var textEditor = this
+                CKEDITOR.on('instanceReady',function( ev ) {
+                    textEditor.isEditorLoaded = true
+                    if(textEditor.data != null) {
+                        textEditor.editor.insertHtml(textEditor.data);
+                        textEditor.data = null;
+                    }
+                });
+            },
 
-        /**
-         * `setData` sets data in the editor
-         * @method setData
-         * @param {String} the data to show on editor
-         */
-        setData: function(dataToSet) {
-            if(!this.isEditorLoaded) this.data = dataToSet
-            else this.editor.insertHtml(dataToSet);
-        }
+            dataJSONChanged: function() {
+                if(this.dataJSON != null && "" != this.dataJSON.trim()) {
+                    setData(JSON.parse(this.dataJSON).content)
+                }
+            },
 
-    });
+            /**
+             * `getData` return data in the editor
+             * @method getData
+             * @return {String} The editor data.
+             */
+            getData: function() {
+                return this.editor.getData().trim()
+            },
 
-  </script>
+            /**
+             * `setData` sets data in the editor
+             * @method setData
+             * @param {String} the data to show on editor
+             */
+            setData: function(dataToSet) {
+                if(!this.isEditorLoaded) this.data = dataToSet
+                else this.editor.insertHtml(dataToSet);
+            }
+
+        });
+
+    </script>
 
 </polymer-element>

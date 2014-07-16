@@ -9,6 +9,31 @@
             color: #0000ff;
             text-decoration:underline;
         }
+        .tableHeadervs {
+            margin: 0px 0px 0px 0px;
+            color:#6c0404;
+            border-bottom: 2px solid #ccc;
+            background: white;
+            box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+            font-weight: bold;
+            padding:5px 0px 5px 0px;
+            width: 100%;
+        }
+
+        .tableHeadervs div {
+            text-align:center;
+        }
+
+        .rowvs {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0px 10px 0px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .rowvs div {
+            text-align:center;
+        }
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{userList}}" handleAs="json" method="get"
                    contentType="json"></core-ajax>
@@ -25,7 +50,7 @@
                 <template repeat="{{uservs in userList.userVSList}}">
                     <div layout horizontal center center justified class="rowvs">
                         <div class="nifColumn" style="width: 110px;">
-                            <a on-click="{{openWindow}}"> {{uservs.uservs.NIF}}</a>
+                            <a on-click="{{userSelected}}"> {{uservs.uservs.NIF}}</a>
                         </div>
                         <div style="width:200px;">{{uservs.uservs.IBAN}}</div>
                         <div flex style="width:150px;">{{uservs.uservs.name}}</div>
@@ -39,9 +64,9 @@
     <script>
         Polymer('user-list', {
             ready: function() {console.log(this.tagName + " - ready") },
-            openWindow: function(e) {
-                var userURL = this.userURLPrefix + "/" + e.target.templateInstance.model.uservs.uservs.id + "?mode=details&menu=" + this.menuType
-                openWindow(userURL)
+            userSelected: function(e) {
+                console.log(this.tagName + " - userSelected -userId: " + e.target.templateInstance.model.uservs.uservs.id)
+                this.fire('core-signal', {name: "uservs-selected", data: e.target.templateInstance.model.uservs.uservs.id});
             },
             userState: function(state) {
                 var userState

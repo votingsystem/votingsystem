@@ -1,6 +1,6 @@
 <link rel="import" href="../core-icon/core-icon.html">
 
-<polymer-element name="votingsystem-user-box" attributes="boxCaption">
+<polymer-element name="votingsystem-user-box" attributes="boxCaption multiSelection">
     <template>
         <style>
             .receptorsBox {
@@ -34,6 +34,7 @@
         Polymer('votingsystem-user-box', {
 
             ready:function() {
+                this.multiSelection = this.multiSelection || true
                 this.uservsList = []
                 console.log(this.tagName + " ready - locale: " + userLocale)
                 this.messages = localizedMessages
@@ -43,8 +44,12 @@
                 for(userIdx in this.uservsList) {
                     if(userToAdd.id == this.uservsList[userIdx].id) isNewUser = false
                 }
-                console.log("votingsystem-user-box - addUser: " + userToAdd.nif + " - isNewUser: " + isNewUser)
-                if(isNewUser) this.uservsList.push(userToAdd)
+                console.log("votingsystem-user-box - addUser: " + userToAdd.nif + " - isNewUser: " + isNewUser +
+                        " - multiSelection: " + this.multiSelection)
+                if(isNewUser) {
+                    if(!this.multiSelection) this.uservsList = [userToAdd]
+                    else this.uservsList.push(userToAdd)
+                }
             },
             getUserList:function(userList) {
                 return this.uservsList

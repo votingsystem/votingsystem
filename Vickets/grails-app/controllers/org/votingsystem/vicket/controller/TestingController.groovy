@@ -2,25 +2,15 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.SubscriptionVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.UserVSAccount
-import org.votingsystem.model.VicketSource
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.IbanVSUtil
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.vicket.util.WebViewWrapper
 import org.votingsystem.vicket.websocket.SessionVSHelper
-
-import java.lang.reflect.Constructor
-import java.util.concurrent.ConcurrentHashMap
-
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 
 /**
  * @infoController TestingController
@@ -38,16 +28,19 @@ class TestingController {
     def filesService
     def webSocketService
 
-    def index() {
+    def index() { }
 
-
+    def webViewLoadTest() {
+        WebViewWrapper webViewTest = WebViewWrapper.getInstance()
+        webViewTest.loadWebView("http://vickets:8086/Vickets/polymerTest/webView?mode=simplePage");
+        render "webViewLoadTest - OK"
+        return false
     }
 
-    def index2() {
-        String messageStr =  message(code:'newVicketGroupOKMsg', args:['España acentúación'], encodeAs:'JavaScript')
-        log.debug("========= messageStr: " + messageStr)
-        Map responseMap = [status:200, message:messageStr]
-        render responseMap as JSON
+    def webViewJSTest() {
+        String jsCommand = "serverMessage('message to server webkit')"
+        WebViewWrapper webViewTest = WebViewWrapper.getInstance().executeScript(jsCommand);
+        render "webViewJSTest - OK"
         return false
     }
 

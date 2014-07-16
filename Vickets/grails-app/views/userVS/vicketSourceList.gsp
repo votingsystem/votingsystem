@@ -16,13 +16,11 @@
             </ol>
         </div>
 
-        <div style="display: table;width:90%;vertical-align: middle;margin:0px 0 10px 0px;">
-            <div style="display:table-cell;margin: auto; vertical-align: top;">
-                <select id="vicketSourceStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                        class="form-control" onchange="vicketSourceState(this)">
-                    <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveVicketSourceLbl"/> - </option>
-                </select>
-            </div>
+        <div layout horizontal center center-justified>
+            <select id="vicketSourceStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                    class="form-control" onchange="vicketSourceState(this)">
+                <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveVicketSourceLbl"/> - </option>
+            </select>
         </div>
 
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
