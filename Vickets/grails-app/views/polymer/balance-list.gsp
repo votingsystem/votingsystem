@@ -38,7 +38,7 @@
                 <div flex style="width: 80px;"><g:message code="tagLbl"/></div>
                 <div flex style="width:80px;"><g:message code="amountLbl"/></div>
                 <div style=""><g:message code="currencyLbl"/></div>
-                <div flex style="width:200px;"><g:message code="lastUpdateLbl"/></div>
+                <div flex style=""><g:message code="lastUpdateLbl"/></div>
             </div>
             <div>
                 <template repeat="{{account in balanceList.accounts}}">
@@ -46,7 +46,7 @@
                         <div flex style="width: 80px;">{{account.tag.name}}</div>
                         <div flex style="width:80px;">{{account.amount | formatAmount}}</div>
                         <div style="">{{account.currency}}</div>
-                        <div flex style="width:200px;">{{account.lastUpdated}}</div>
+                        <div flex style="">{{account.lastUpdated}}</div>
                     </div>
                 </template>
             </div>

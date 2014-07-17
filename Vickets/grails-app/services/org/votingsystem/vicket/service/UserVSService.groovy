@@ -243,7 +243,7 @@ class UserVSService {
         Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,
                 dateCancelled:subscriptionVS.dateCancelled, lastUpdated:subscriptionVS.lastUpdated,
                 messageURL:subscriptionMessageURL,adminMessages:adminMessages,
-                uservs:[id:subscriptionVS.userVS.id, NIF:subscriptionVS.userVS.nif,
+                uservs:[id:subscriptionVS.userVS.id, NIF:subscriptionVS.userVS.nif, IBAN:subscriptionVS.userVS.IBAN,
                       name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}"],
                 groupvs:[name:subscriptionVS.groupVS.name, id:subscriptionVS.groupVS.id],
                 state:subscriptionVS.state.toString(), dateCreated:subscriptionVS.dateCreated]

@@ -76,7 +76,7 @@
 </div>
 <div id="pemCertDiv" style="display:none;">${certMap.pemCert}</div>
 
-<g:include view="/include/dialog/get-reason-dialog.gsp"/>
+<g:include view="/polymer/dialog/get-reason-dialog.gsp"/>
 <get-reason-dialog id="reasonDialog" caption="<g:message code="cancelCertFormCaption"/>" opened="false"
                    isForAdmins="true"></get-reason-dialog>
 </body>

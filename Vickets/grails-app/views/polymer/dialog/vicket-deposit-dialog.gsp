@@ -4,18 +4,19 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-user.gsp']"/>">
 
 
 <polymer-element name="vicket-deposit-dialog" attributes="caption opened serviceURL">
 <template>
-        <style>
+        <style no-shim>
+        .view { :host {position: relative;} }
         .card {
             position: relative;
             display: inline-block;
             vertical-align: top;
             height: auto;
-            width:auto;
             background-color: #fefefe;
             box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
             border: 1px solid #ccc;
@@ -46,9 +47,9 @@
             </div>
 
             <div class="center card" style="font-weight: bold;color: {{status == 200?'#388746':'#ba0011'}};
-            margin:10px; border: 1px solid #ccc; background: #f9f9f9;padding:10px 20px 10px 20px; display:{{messageToUser == null?'none':'block'}};">
+            margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;padding:10px 20px 10px 20px; display:{{messageToUser == null?'none':'block'}};">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                    <div id="messageToUser"></div>
+                    <div id="messageToUser">{{messageToUser}}</div>
                     <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon></div>
             </div>
             <div layout vertical style="padding: 5px 20px 0px 20px;">
@@ -60,7 +61,7 @@
 
 
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
-                        font-size: 1.1em; display: none; padding: 5px;">
+                        font-size: 1.1em; display: none; padding: 5px; display:{{isDepositToAll ? 'block':'none'}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
                         <div id="tagDataDivMsg" style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
                             <g:message code="depositWithTagAdvertMsg"/>
@@ -76,23 +77,23 @@
                             </template>
                         </div>
                     </div>
-                    <div class="button raised accept" on-click="{{toggleTagDialog}}"
-                         style="border: 1px solid #ccc; margin:0px 0px 0px 5px;">
-                        <div id="selectTagButton" class="center" fit><g:message code="addTagLbl" /></div>
-                        <paper-ripple fit></paper-ripple>
-                    </div>
+                    <votingsystem-button on-click="{{toggleTagDialog}}" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <g:message code="addTagLbl"/>
+                    </votingsystem-button>
                 </div>
-                <div class="center" style="padding: 10px;">{{selectReceptorMsg}}</div>
-                <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                <div style="display:{{isDepositToAll ? 'none':'block'}}">
+                    <div class="center" style="padding: 10px;">{{selectReceptorMsg}}</div>
+                    <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
 
-                <div id="receptorPanelDiv">
-                    <div layout horizontal center center-justified id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
-                        <input id="userSearchInput" type="text" class="form-control" style="width:200px;"
-                               placeholder="<g:message code="enterReceptorDataMsg"/>">
-                        <paper-button raisedButton class="button" label="<g:message code="userSearchLbl"/>"
-                                      on-click="{{searchUser}}" style="width:180px;"></paper-button>
+                    <div id="receptorPanelDiv">
+                        <div layout horizontal center center-justified id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
+                            <input id="userSearchInput" type="text" class="form-control" style="width:200px;"
+                                   placeholder="<g:message code="enterReceptorDataMsg"/>">
+                            <paper-button raisedButton class="button" label="<g:message code="userSearchLbl"/>"
+                                          on-click="{{searchUser}}" style="width:180px;"></paper-button>
+                        </div>
+                        <search-user id="userSearchList"></search-user>
                     </div>
-                    <search-user id="userSearchList"></search-user>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
@@ -101,8 +102,14 @@
                 </div>
             </div>
         </div>
-    <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                                    serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
+
+    <div style="position: absolute; width: 100%; top:0px;left:0px;">
+        <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
+            <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
+                serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
+        </div>
+    </div>
+
 </template>
 <script>
     Polymer('vicket-deposit-dialog', {
@@ -118,6 +125,7 @@
         ready: function() {
             console.log(this.tagName + " - " + this.id)
             this.style.display = 'none'
+            this.isDepositToAll = false
             var depositDialog = this
             this.$.userSearchList.addEventListener('user-clicked', function (e) {
                 depositDialog.$.receptorBox.addUser(e.detail)
@@ -152,6 +160,7 @@
 
         close: function() {
             console.log(this.id + " - close")
+            this.isDepositToAll = false
             this.$.userSearchInput.value = ""
             this.$.amount.value = ""
             this.$.depositSubject.value = ""
@@ -246,7 +255,6 @@
             console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
             this.status = status
             this.messageToUser = message
-            this.$.messageToUser.innerHTML = message
         },
         show:function(operation, fromUser, fromIBAN, validTo, targetGroupId) {
             console.log(this.id + " - show - operation: " + operation)
@@ -267,6 +275,7 @@
                     this.$.receptorBox.multiSelection = true
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                    this.isDepositToAll = true
                     this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
                     this.selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
                     this.$.tagDataDiv.style.display = 'block'

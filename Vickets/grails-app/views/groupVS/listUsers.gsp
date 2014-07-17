@@ -4,6 +4,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/user-list.gsp']"/>">
 </head>
 <body>
 <div class="pageContenDiv">
@@ -22,7 +23,6 @@
     <h3><div class="pageHeader text-center">
         <g:message code="groupvsUserListPageHeader"/> '${subscriptionMap?.groupName}'</div>
     </h3>
-    <g:include view="/include/user-list.gsp"/>
     <user-list id="userList" url="${createLink(controller: 'groupVS', action: 'listUsers')}/${subscriptionMap?.id}"
                userURLPrefix="user" menuType="${params.menu}"></user-list>
 </div>

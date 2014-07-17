@@ -1,4 +1,4 @@
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/include/dialog/get-reason-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/get-reason-dialog.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix">
@@ -18,50 +18,60 @@
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div style="max-width: 600px; margin:0px auto 0px auto;">
-            <div layout horizontal center center-justified>
+            <div layout horizontal center center-justified style="width:100%;">
                 <paper-fab icon="{{showFab ? 'arrow-back' : ''}}"  on-tap="{{back}}"
                            style="color:#f9f9f9;visibility:{{$.pages.selected != 0 ? 'visible':'hidden'}}"></paper-fab>
                 <div flex id="messageDiv" class="text-center" style="font-size: 1.4em; color:#6c0404; font-weight: bold;"></div>
             </div>
             <div id="" style="border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
-                <div id="" style="font-size: 1.2em; font-weight: bold;">{{subscriptionData.uservs.NIF}}</div>
+                <div layout horizontal>
+                    <div id="" style="font-weight: bold;">NIF: {{subscriptionData.uservs.NIF}}</div>
+                    <div id="" style="margin:0px 0px 0px 15px; font-weight: bold;" flex>IBAN: {{subscriptionData.uservs.IBAN}}</div>
+                </div>
+
                 <div id="nameDiv" style="font-size: 1.2em;font-weight: bold;">{{subscriptionData.uservs.name}}</div>
                 <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>:
                     <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
             </div>
             <div layout horizontal center center-justified>
-                <button id="activateUserButton" type="button" class="btn btn-default" on-click="{{activateUser}}"
+                <votingsystem-button id="activateUserButton" type="button" on-click="{{activateUser}}"
                         style="margin:10px 0px 0px 0px;display:{{isActive?'none':'block'}}"><g:message code="activateUserLbl"/> <i class="fa fa-thumbs-o-up"></i>
-                </button>
-                <button id="deActivateUserButton" type="button" class="btn btn-default" on-click="{{initCancellation}}"
+                </votingsystem-button>
+                <votingsystem-button id="deActivateUserButton" on-click="{{initCancellation}}"
                         style="margin:10px 0px 0px 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
                     <g:message code="deActivateUserLbl"/> <i class="fa fa-thumbs-o-down"></i>
-                </button>
-                <button id="makeDepositButton" type="button" class="btn btn-default" onclick="{{makeDeposit}}"
+                </votingsystem-button>
+                <votingsystem-button id="makeDepositButton" on-click="{{makeDeposit}}"
                         style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} "><g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
-                </button>
+                </votingsystem-button>
             </div>
             <div id="receipt" style="display:none;">
 
             </div>
         </div>
-        <get-reason-dialog id="reasonDialog" caption="<g:message code="cancelSubscriptionFormCaption"/>" opened="false"
-                           messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></get-reason-dialog>
+        <div style="position: absolute; width: 100%; top:0px;left:0px;">
+            <div layout horizontal center center-justified style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
+                <get-reason-dialog id="reasonDialog" caption="<g:message code="cancelSubscriptionFormCaption"/>" opened="false"
+                                   messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></get-reason-dialog>
+            </div>
+        </div>
+
     </template>
     <script>
         Polymer('groupvs-user', {
             ready :  function(e) {
                 this.menuType = menuType
+                var hostElement = this
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
                     var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_DEACTIVATE)
                     webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
                     webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                     webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'deActivateUser',absolute:true)}"
-                    webAppMessage.signedMessageSubject = "<g:message code="deActivateGroupUserMessageSubject"/>" + " '" + this.subscriptionData.groupvs.name + "'"
+                    webAppMessage.signedMessageSubject = "<g:message code="deActivateGroupUserMessageSubject"/>" + " '" + hostElement.subscriptionData.groupvs.name + "'"
                     webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEACTIVATE,
-                        groupvs:{name:this.subscriptionData.groupvs.name, id:this.subscriptionData.groupvs.id},
-                        uservs:{name:this.subscriptionData.uservs.name, NIF:this.subscriptionData.uservs.NIF}, reason:e.detail}
+                        groupvs:{name:hostElement.subscriptionData.groupvs.name, id:hostElement.subscriptionData.groupvs.id},
+                        uservs:{name:hostElement.subscriptionData.uservs.name, NIF:hostElement.subscriptionData.uservs.NIF}, reason:e.detail}
                     webAppMessage.contentType = 'application/x-pkcs7-signature'
                     var objectId = Math.random().toString(36).substring(7)
                     window[objectId] = {setClientToolMessage: function(appMessage) {
@@ -88,7 +98,7 @@
                 this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId + "?mode=simplePage&menu=" + menuType
             },
             back:function() {
-                this.fire('back-pressed', this.userId)
+                this.fire('core-signal', {name: "uservs-details-closed", data: this.userId});
             },
             activateUser : function(e) {
                 console.log("activateUser")
@@ -123,7 +133,7 @@
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
             initCancellation : function(e) {
-                document.querySelector('#reasonDialog').toggle();
+                this.$.reasonDialog.toggle();
             },
             makeDeposit : function(e) {
                 console.log("makeDeposit")

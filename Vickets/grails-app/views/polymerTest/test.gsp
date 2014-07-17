@@ -31,7 +31,7 @@
         <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
                                         serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
 
-        <g:include view="/include/dialog/get-reason-dialog.gsp"/>
+        <g:include view="/polymer/dialog/get-reason-dialog.gsp"/>
         <get-reason-dialog id="getReasonDialog" opened="false" caption="<g:message code="cancelCertFormCaption"/>"
                            isForAdmins="true"></get-reason-dialog>
 
@@ -39,7 +39,7 @@
 
     </div>
 
-    <votingsystem-button width="200px" color="#008000">
+    <votingsystem-button>
         Testing <i class="fa fa-pencil-square-o"></i>
     </votingsystem-button>
 

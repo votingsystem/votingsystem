@@ -5,7 +5,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link href="${resource(dir: 'css', file:'vickets_groupvs.css')}" type="text/css" rel="stylesheet"/>
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/send-message-dialog.gsp']"/>">
 </head>
 <body>
 <div class="pageContenDiv" style="max-width: 1000px; padding:0px 30px 0px 30px;">
@@ -60,7 +60,6 @@
     </div>
 </div>
 <div id="certificateListDiv" style="display:none;">${uservsMap.certificateList as grails.converters.JSON}</div>
-<g:include view="/include/dialog/send-message-dialog.gsp"/>
 <div layout horizontal center center-justified style="top:100px;">
     <send-message-dialog id="sendMessageDialog"></send-message-dialog>
 </div>

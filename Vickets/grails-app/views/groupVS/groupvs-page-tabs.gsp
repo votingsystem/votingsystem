@@ -1,6 +1,6 @@
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/include/balance-list.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-list.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-transaction-table', file: 'votingsystem-transaction-table.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/include/user-list.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/user-list.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 
@@ -16,14 +16,15 @@
                 background-color: transparent;
                 color:#ba0011;
                 box-shadow: none;
+                cursor: pointer;
             }
             paper-tabs.transparent-teal::shadow #selectionBar { background-color: #ba0011; }
             paper-tabs.transparent-teal paper-tab::shadow #ink { color: #ba0011; }
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsWithDetails}}" handleAs="json" method="get"
                    contentType="json"></core-ajax>
-        <div  style="width: 1000px; margin:0px auto 0px auto;">
-            <paper-tabs  style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
+        <div  style="margin:0px auto 0px auto;">
+            <paper-tabs  style="margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
                          selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
                 <paper-tab name="balanceList" style="width: 400px"><g:message code="balanceListLbl"/></paper-tab>
                 <paper-tab name="transactionsTo"><g:message code="incomeLbl"/></paper-tab>

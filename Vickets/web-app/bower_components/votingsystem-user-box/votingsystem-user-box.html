@@ -1,7 +1,10 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-ajax/core-ajax.html">
 <link rel="import" href="../core-icon/core-icon.html">
 
 <polymer-element name="votingsystem-user-box" attributes="boxCaption multiSelection">
     <template>
+        <core-ajax auto handleAs="json" url="./i18n/messages.json" response="{{locales}}"></core-ajax>
         <style>
             .receptorsBox {
                 margin: 10px auto 30px auto;
@@ -29,15 +32,18 @@
             </fieldset>
         </div>
     </template>
-    <script src="./i18n/messages.js"></script>
     <script>
         Polymer('votingsystem-user-box', {
-
+            localesChanged:function() {
+                var results = new RegExp("[\\?&]locale=([^&#]*)").exec(location.search);
+                var userLocale = ((results == null) ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))) || navigator.language
+                if(this.locales[userLocale]) this.messages = this.locales[userLocale]
+                else this.messages = this.locales['es']
+                console.log(this.tagName + " loaded locales for: " + userLocale)
+            },
             ready:function() {
                 this.multiSelection = this.multiSelection || true
                 this.uservsList = []
-                console.log(this.tagName + " ready - locale: " + userLocale)
-                this.messages = localizedMessages
             },
             addUser:function(userToAdd) {
                 var isNewUser = true

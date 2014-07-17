@@ -3,6 +3,7 @@
 <polymer-element name="votingsystem-transaction-table" attributes="url transactionBaseURL transactionList">
     <template>
         <link rel="stylesheet" href="votingsystem-transaction-table.css" />
+        <core-ajax auto handleAs="json" url="./i18n/messages.json" response="{{locales}}"></core-ajax>
         <style></style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                    contentType="json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
@@ -28,13 +29,16 @@
             </div>
         </div>
     </template>
-    <script src="./i18n/messages.js"></script>
     <script>
         Polymer('votingsystem-transaction-table', {
-            ready:function() {
-                console.log(this.tagName + " - " + this.id + " - ready - locale: " + userLocale)
-                this.messages = localizedMessages
+            localesChanged:function() {
+                var results = new RegExp("[\\?&]locale=([^&#]*)").exec(location.search);
+                var userLocale = ((results == null) ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))) || navigator.language
+                if(this.locales[userLocale]) this.messages = this.locales[userLocale]
+                else this.messages = this.locales['es']
+                console.log(this.tagName + " loaded locales for: " + userLocale)
             },
+            ready:function() { },
             transactionDescription: function(type) {
                 return getTransactionVSDescription(type)
             },

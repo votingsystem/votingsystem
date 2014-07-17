@@ -20,7 +20,7 @@
 
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
 
-    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
+    <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
     <g:layoutHead/>
 </head>
 <body id="voting_system_page" style="margin:0px auto 0px auto;background-color: #f9f9f9;">
@@ -216,7 +216,7 @@
                     document.querySelector('#navBar').newURL = e.target.href
                     e.preventDefault()
                 });
-            } else console.log("main.gsp - not system url: " + elementsArray[i].href)
+            } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)
         }
     }
 

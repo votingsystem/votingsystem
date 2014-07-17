@@ -39,6 +39,7 @@
             background-color: transparent;
             color:#ba0011;
             box-shadow: none;
+            cursor: pointer;
         }
 
         paper-tabs.transparent-teal::shadow #selectionBar {

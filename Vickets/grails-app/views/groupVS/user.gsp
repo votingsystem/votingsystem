@@ -31,7 +31,7 @@
 
         </div>
     </div>
-<g:include view="/include/dialog/get-reason-dialog.gsp"/>
+<g:include view="/polymer/dialog/get-reason-dialog.gsp"/>
 <get-reason-dialog id="reasonDialog" caption="<g:message code="cancelSubscriptionFormCaption"/>" opened="false"
        messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></get-reason-dialog>
 </body>

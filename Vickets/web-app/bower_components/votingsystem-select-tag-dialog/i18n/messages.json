@@ -1,0 +1,18 @@
+{
+    "es": {
+        "selectedTagsLbl":"Etiquetas seleccionadas",
+        "searchResultLbl":"Resultado de la búsqueda",
+        "tagLbl":"Etiqueta",
+        "tagSearchLbl":"Buscar",
+        "acceptLbl":"Aceptar",
+        "closeLbl":"Cerrar"
+    },
+    "en": {
+        "selectedTagsLbl":"Selected tags",
+        "searchResultLbl":"Search result",
+        "tagLbl":"Tag",
+        "tagSearchLbl":"Search",
+        "acceptLbl":"Accept",
+        "closeLbl":"Close"
+    }
+}

@@ -1,11 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../core-overlay/core-overlay.html">
 <link rel="import" href="../core-ajax/core-ajax.html">
 <link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../core-icons/core-icons.html">
-<link rel="import" href="../core-item/core-item.html">
-<link rel="import" href="../paper-button/paper-button.html">
-
+<link rel="import" href="../votingsystem-button/votingsystem-button.html">
+<link rel="import" href="../core-icon-button/core-icon-button.html">
 
 <!--
 Dialog to search and select tags
@@ -20,16 +17,11 @@ Dialog to search and select tags
 @homepage http://votingsystem.github.io/votingsystem-select-tag-dialog
 -->
 <polymer-element name="votingsystem-select-tag-dialog" attributes="caption opened serviceURL">
-
-  <template>
+    <template>
         <link rel="stylesheet" href="votingsystem-select-tag-dialog.css" />
+        <core-ajax auto handleAs="json" url="./i18n/messages.json" response="{{locales}}"></core-ajax>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                     contentType="json"></core-ajax>
-
-
-      <core-overlay flex vertical id="coreOverlay" vertical class="card tag1" opened="{{opened}}" layered="true"
-                    style="position: absolute; top:30px;">
-          <!-- place all overlay styles inside the overlay target -->
           <style no-shim>
               .view { :host {position: relative;} }
               .card {
@@ -39,33 +31,29 @@ Dialog to search and select tags
                   background-color: #f9f9f9;
                   box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
                   border: 1px solid #ccc;
+                  width:500px;
               }
-              paper-button.button {
+              button {
                   background-color: #f9f9f9;
                   color: #6c0404;
                   border: 1px solid #ccc;
                   margin:10px;
-                  vertical-align: middle;
-                  line-height: 24px;
-                  height: 35px;
               }
           </style>
-          <div layout vertical style="max-width: 450px; padding:10px;">
-              <h3>{{caption}}</h3>
+          <div id="container" class="card" layout vertical style="max-width: 500px; padding:10px;">
+              <div layout horizontal style="padding: 0px 10px 0px 20px;" >
+                  <h3 flex style="color: #6c0404; font-weight: bold;">{{caption}}</h3>
+                  <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{close}}"></core-icon-button>
+              </div>
+
 
               <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
                 display:{{(selectedTagList == null || selectedTagList.length == 0) ? 'none':'block'}}">
                   <div style="font-weight: bold; margin:0px 0px 5px 0px;">{{messages.selectedTagsLbl}}</div>
                   <div flex horizontal wrap layout style="">
                   <template repeat="{{tag in selectedTagList}}">
-                      <section>
-                          <div class="center button raised" on-click="{{removeTag}}" style="margin:0px 5px 0px 0px;">
-                              <div fit>{{tag.name}}
-                                <core-icon icon="remove-circle" style="fill:#6c0404; padding:0px 0px 0px 0px;"></core-icon>
-                              </div>
-                              <paper-ripple fit></paper-ripple>
-                          </div>
-                      </section>
+                      <paper-button raisedButton label="{{tag.name}}" class="button" icon="remove-circle"
+                                    on-click="{{removeTag}}" style="margin:5px 5px 0px 0px;"></paper-button>
                   </template>
                   </div>
               </div>
@@ -73,158 +61,163 @@ Dialog to search and select tags
               <div flex layout horizontal center center-justified>
                   <paper-input id="tagSearchInput" floatinglabel label="{{messages.tagLbl}}" required autofocus>
                   </paper-input>
-                  <paper-button raisedButton label="{{messages.tagSearchLbl}}" class="button"
-                                on-click="{{searchTag}}" style=""></paper-button>
+                  <votingsystem-button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px;">
+                    {{messages.tagSearchLbl}} <i class="fa fa-search"></i>
+                  </votingsystem-button>
               </div>
+
+                <div style="display: {{searchString!= null ? 'block':'none'}}">{{messages.searchResultLbl}} '{{searchString}}'</div>
+
+
               <div flex horizontal wrap layout style="">
                   <template repeat="{{tag in searchedTagList}}">
-                      <section style>
-                          <div class="center button raised" on-click="{{selectTag}}" style="margin:0px 5px 0px 0px;">
-                              <div fit>{{tag.name}}
-                                  <core-icon icon="add-circle" style="fill:#6c0404; padding:0px 0px 0px 0px;"></core-icon>
-                              </div>
-                              <paper-ripple fit></paper-ripple>
-                          </div>
-                      </section>
-
+                      <paper-button raisedButton class="button" label="{{tag.name}}" on-click="{{selectTag}}"
+                                    icon="add-circle" style="margin:5px 5px 0px 0px;">
+                      </paper-button>
                   </template>
               </div>
               <div layout horizontal style="margin:10px 20px 0px 0px;">
                   <div flex></div>
-                  <paper-button raisedButton class="button" label="{{messages.acceptLbl}}" on-click="{{fireTags}}" style="">
-
-                  </paper-button>
+                  <votingsystem-button on-click="{{processTags}}">
+                      {{messages.acceptLbl}} <i class="fa fa-check"></i>
+                  </votingsystem-button>
               </div>
           </div>
-      </core-overlay>
+    </template>
+    <script>
+        Polymer('votingsystem-select-tag-dialog', {
+            localesChanged:function() {
+                var results = new RegExp("[\\?&]locale=([^&#]*)").exec(location.search);
+                var userLocale = ((results == null) ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))) || navigator.language
+                if(this.locales[userLocale]) this.messages = this.locales[userLocale]
+                else this.messages = this.locales['es']
+                console.log(this.tagName + " loaded locales for: " + userLocale)
+            },
+          /**
+           * The `caption` of the dialog
+           *
+           * @attribute caption
+           * @type string
+           */
+          caption: null,
 
-      <conten></conten>
-  </template>
-  <script type="text/javascript" src="./i18n/messages.js"></script>
-  <script>
+            isShowingTags: false,
+            /**
+             * The `maxNumberTags` user can select
+             *
+             * @attribute maxNumberTags
+             * @type number
+             */
+            maxNumberTags:3,
 
-    Polymer('votingsystem-select-tag-dialog', {
+            /**
+             * The `url` of the HTTP tag service
+             *
+             * @attribute url
+             * @type string
+             */
+            serviceURL: null,
 
-      /**
-       * The `caption` of the dialog
-       *
-       * @attribute caption
-       * @type string
-       */
-      caption: null,
+              ready: function() {
+                  this.searchString = null
+                  this.style.display = 'none'
+                  this.selectedTagList = []
+                  this.searchedTagList =[]
+                  var tagdialog = this
+                  this.$.tagSearchInput.onkeypress = function(event){
+                      var chCode = ('charCode' in event) ? event.charCode : event.keyCode;
+                      if (chCode == 13)  tagdialog.searchTag()
+                  }
+              },
 
-        isShowingTags: false,
-        /**
-         * The `maxNumberTags` user can select
-         *
-         * @attribute maxNumberTags
-         * @type number
-         */
-        maxNumberTags:3,
-
-        /**
-         * The `url` of the HTTP tag service
-         *
-         * @attribute url
-         * @type string
-         */
-        serviceURL: null,
-
-      ready: function() {
-          console.log(this.tagName + " ready - locale: " + userLocale)
-          this.messages = localizedMessages
-          this.selectedTagList = []
-          this.searchedTagList =[]
-          var tagdialog = this
-          this.$.tagSearchInput.onkeypress = function(event){
-              var chCode = ('charCode' in event) ? event.charCode : event.keyCode;
-              if (chCode == 13)  tagdialog.searchTag()
-          }
-      },
-
-        openedChanged: function() {
-            this.$.tagSearchInput.inputValue = ''
-            this.searchedTagList = []
-            if(!this.isShowingTags) this.selectedTagList = []
-            else this.isShowingTags = false
-            this.async(function() {this.$.coreOverlay.style.top = "30px" }, null, 1);
-        },
-
-        /**
-         * Toggle the dialog's opened state.
-         * @method toggle
-         */
-        toggle: function() {
-            this.$.coreOverlay.toggle();
-
-        },
-
-        responseDataChanged:function () {
-            this.searchedTagList = this.responseData.tagRecords
-        },
-
-        searchTag: function() {
-            if(!this.$.tagSearchInput.invalid) {
-                this.$.ajax.url = this.serviceURL + "?tag=" + this.$.tagSearchInput.inputValue
-            }
-
-        },
-
-        selectTag: function(e) {
-            var selectedTag = e.target.templateInstance.model.tag
-            var isNewTag = true
-            for(tagIdx in this.selectedTagList) {
-                if(selectedTag.id == this.selectedTagList[tagIdx].id) isNewTag = false
-            }
-            console.log("selectTag: " + selectedTag.id + " - isNewTag: " + isNewTag + " - maxNumTags: " + this.maxNumTags +
-                    " - num. tags selected: " + this.selectedTagList.length)
-            if(isNewTag) {
-                if(this.selectedTagList.length == this.maxNumTags ) {
-                    this.searchedTagList.push(this.selectedTagList[0])
-                    this.selectedTagList.splice(0, 1)
+            openedChanged: function() {
+                if(this.opened) {
+                    this.style.display = 'block'
+                } else {
+                    this.style.display = 'none'
+                    this.$.tagSearchInput.inputValue = ''
+                    this.searchedTagList = []
+                    this.selectedTagList = []
+                    this.isShowingTags = false
                 }
-                this.selectedTagList.push(selectedTag)
-                for(tagIdx in this.searchedTagList) {
-                    if(selectedTag.id == this.searchedTagList[tagIdx].id) this.searchedTagList.splice(tagIdx, 1)
+            },
+
+            close:function() {
+                this.opened = false;
+            },
+            /**
+             * Toggle the dialog's opened state.
+             * @method toggle
+             */
+            toggle: function() {
+                this.opened = !this.opened
+            },
+
+            responseDataChanged:function () {
+                this.searchedTagList = this.responseData.tagRecords
+            },
+
+            searchTag: function() {
+                if(!this.$.tagSearchInput.invalid) {
+                    this.$.ajax.url = this.serviceURL + "?tag=" + this.$.tagSearchInput.inputValue
+                    this.searchString = this.$.tagSearchInput.inputValue
                 }
-            }
-        },
 
-        removeTag: function(e) {
-            var selectedTag = e.target.templateInstance.model.tag
-            for(tagIdx in this.selectedTagList) {
-                if(selectedTag.id == this.selectedTagList[tagIdx].id) {
-                    this.selectedTagList.splice(tagIdx, 1)
-                    this.searchedTagList.push(selectedTag)
+            },
+
+            selectTag: function(e) {
+                var selectedTag = e.target.templateInstance.model.tag
+                var isNewTag = true
+                for(tagIdx in this.selectedTagList) {
+                    if(selectedTag.id == this.selectedTagList[tagIdx].id) isNewTag = false
                 }
+                console.log("selectTag: " + selectedTag.id + " - isNewTag: " + isNewTag + " - maxNumTags: " + this.maxNumTags +
+                        " - num. tags selected: " + this.selectedTagList.length)
+                if(isNewTag) {
+                    if(this.selectedTagList.length == this.maxNumTags ) {
+                        this.searchedTagList.push(this.selectedTagList[0])
+                        this.selectedTagList.splice(0, 1)
+                    }
+                    this.selectedTagList.push(selectedTag)
+                    for(tagIdx in this.searchedTagList) {
+                        if(selectedTag.id == this.searchedTagList[tagIdx].id) this.searchedTagList.splice(tagIdx, 1)
+                    }
+                }
+            },
+
+            removeTag: function(e) {
+                var selectedTag = e.target.templateInstance.model.tag
+                for(tagIdx in this.selectedTagList) {
+                    if(selectedTag.id == this.selectedTagList[tagIdx].id) {
+                        this.selectedTagList.splice(tagIdx, 1)
+                        this.searchedTagList.push(selectedTag)
+                    }
+                }
+            },
+
+            reset: function() {
+                this.selectedTagList = []
+                this.searchedTagList = []
+            },
+
+            show: function (maxNumberTags, selectedTags) {
+                this.opened = true
+                this.maxNumTags = maxNumberTags
+                if(selectedTags == null) this.selectedTagList = []
+                else this.selectedTagList = selectedTags
+                this.isShowingTags = true
+            },
+
+            /**
+            * Fire the selected tags
+            *
+            * @method processTags
+            */
+            processTags: function() {
+                this.fire('tag-selected', this.selectedTagList);
+                this.opened = false
             }
-        },
 
-        reset: function() {
-            this.selectedTagList = []
-            this.searchedTagList = []
-        },
-
-        show: function (maxNumberTags, selectedTags) {
-            this.$.coreOverlay.opened = true
-            this.maxNumTags = maxNumberTags
-            if(selectedTags == null) this.selectedTagList = []
-            else this.selectedTagList = selectedTags
-            this.isShowingTags = true
-        },
-
-      /**
-       * Fire the selected tags
-       * 
-       * @method fireTags
-       */
-      fireTags: function() {
-            this.fire('tag-selected', this.selectedTagList);
-            this.$.coreOverlay.toggle();
-      }
-
-    });
-
-  </script>
-
+        });
+    </script>
 </polymer-element>

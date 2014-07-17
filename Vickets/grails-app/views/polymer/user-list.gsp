@@ -41,7 +41,7 @@
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div layout horizontal center class="tableHeadervs">
                 <div style="width: 110px;"><g:message code="nifLbl"/></div>
-                <div style="width:200px;">IBAN</div>
+                <!--<div style="width:200px;">IBAN</div>-->
                 <div flex style="width:150px;"><g:message code="nameLbl"/></div>
                 <div style="width:80px;"><g:message code="stateLbl"/></div>
                 <div style="width:170px;"><g:message code="lastUpdateLbl"/></div>
@@ -52,7 +52,7 @@
                         <div class="nifColumn" style="width: 110px;">
                             <a on-click="{{userSelected}}"> {{uservs.uservs.NIF}}</a>
                         </div>
-                        <div style="width:200px;">{{uservs.uservs.IBAN}}</div>
+                        <!--<div style="width:200px;">{{uservs.uservs.IBAN}}</div>-->
                         <div flex style="width:150px;">{{uservs.uservs.name}}</div>
                         <div style="width:80px;">{{uservs.state | userState}}</div>
                         <div style="width:170px;">{{uservs.lastUpdated}}</div>

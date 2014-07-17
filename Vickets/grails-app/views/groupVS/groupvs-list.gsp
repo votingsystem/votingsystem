@@ -20,9 +20,10 @@
         <asset:stylesheet src="vickets_groupvs.css"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json" method="get"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
+        <core-signals on-core-signal-uservs-details-closed="{{closeUserDetails}}"></core-signals>
         <core-animated-pages id="pages" flex selected="0" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
-            <section>
+            <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>
                         <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
@@ -35,7 +36,8 @@
 
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{groupvs in groupvsData.groupvsList}}">
-                            <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
+                            <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}'
+                                 style="width: 300px;" cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
                                 <div class='groupvsInfoDiv'><votingsystem-html-echo html="{{groupvs.description}}"></votingsystem-html-echo></div>
@@ -49,9 +51,9 @@
                 </div>
             </section>
 
-            <section>
+            <section id="page2">
                 <div cross-fade>
-                    <groupvs-details id="groupDetails" vertical layout groupvs="{{groupvs}}"></groupvs-details>
+                    <groupvs-details id="groupDetails" page="{{subpage}}" vertical layout groupvs="{{groupvs}}"></groupvs-details>
                 </div>
             </section>
         </core-animated-pages>
@@ -67,6 +69,9 @@
                 this.$.groupDetails.addEventListener('back-pressed', function() {
                     groupListElement.shadowRoot.querySelector("#pages").selected = 0;
                 });
+            },
+            closeUserDetails:function(e, detail, sender) {
+                this.subpage = 0;
             },
             showGroupDetails :  function(e) {
                 this.$.groupDetails.groupvs = e.target.templateInstance.model.groupvs;

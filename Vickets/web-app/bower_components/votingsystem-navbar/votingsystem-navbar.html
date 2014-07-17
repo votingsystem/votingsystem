@@ -62,7 +62,12 @@ and `responsiveWidth` to change the layout of the scaffold.
         background-color: #ba0011;
         color: #fff;
     }
-    
+
+    core-header-panel #mainContainer {
+        height: 0px;
+    }
+
+
     #drawerPanel:not([narrow]) #menuButton {
       display: none;
     }
@@ -81,9 +86,9 @@ and `responsiveWidth` to change the layout of the scaffold.
 
     </div>
 
-    <core-header-panel main mode="{{mode}}" style="">
+    <core-header-panel id="mainHeaderPanel" main mode="{{mode}}" style="">
 
-      <core-toolbar>
+      <core-toolbar id="coreToolbar">
         <core-icon-button id="menuButton" icon="menu" on-tap="{{togglePanel}}"></core-icon-button>
         <content select="[tool]">
 
@@ -128,7 +133,8 @@ and `responsiveWidth` to change the layout of the scaffold.
       * @method togglePanel
       */    
     togglePanel: function() {
-      this.$.coreDrawerPanel.togglePanel();
+        //this.$.mainHeaderPanel.$.mainContainer.style.minHeight = 0
+        this.$.coreDrawerPanel.togglePanel();
     },
 
     /**

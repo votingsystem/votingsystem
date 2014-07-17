@@ -7,8 +7,7 @@
 <polymer-element name="get-reason-dialog" attributes="caption opened isForAdmins messageToUser">
     <template>
         <style></style>
-        <core-overlay flex vertical id="coreOverlay" vertical opened="{{opened}}" layered="true"
-                      sizingTarget="{{$.container}}" style="position: absolute; top:30px;">
+        <core-overlay flex vertical id="coreOverlay" vertical opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
             <!-- place all overlay styles inside the overlay target -->
             <style no-shim>
                 .card {
@@ -56,11 +55,8 @@
     Polymer('get-reason-dialog', {
         opened: false,
         isForAdmins: false,
-        ready: function() {
-        },
-        openedChanged: function() {
-            this.async(function() {this.$.coreOverlay.style.top = "50px" }, null, 1);
-        },
+        ready: function() { },
+        openedChanged: function() {},
         submitForm: function() {
             this.fire('on-submit', this.$.reason.value);
         },
