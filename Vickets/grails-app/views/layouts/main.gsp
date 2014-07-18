@@ -20,7 +20,7 @@
 
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
 
-    <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
+    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
 </head>
 <body id="voting_system_page" style="margin:0px auto 0px auto;background-color: #f9f9f9;">
@@ -40,9 +40,9 @@
                                 <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'groupVS')}">
-                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
+                                <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
                             </paper-item>
-                            <paper-item data-href="http://vickets:8086/Vickets/groupVS/edit/3">
+                            <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup')}"">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
@@ -152,7 +152,7 @@
 <nav-bar id="navBar" style="display:none;" class="">
     <g:layoutBody/>
 </nav-bar>
-<div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
+<div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto;z-index: 10;">
     <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
 </div>
 

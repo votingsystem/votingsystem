@@ -25,6 +25,7 @@ class GroupVSService {
     def subscriptionVSService
     def transactionVSService
 
+
 	public void init() { }
 
     public ResponseVS cancelGroup(GroupVS groupVS, MessageSMIME messageSMIMEReq, Locale locale) {

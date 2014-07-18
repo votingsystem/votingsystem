@@ -47,7 +47,7 @@
             </div>
 
             <div id="transaction_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                <table class="table white_headers_table" id="transaction_table" style="">
+                <table class="table tableHeadervs" id="transaction_table" style="">
                     <thead>
                     <tr style="color: #ff0000;">
                         <th style="max-width:80px;"><g:message code="amountLbl"/></th>

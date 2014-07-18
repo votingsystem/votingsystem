@@ -9,9 +9,8 @@
             .tableHeadervs {
                 margin: 0px 0px 0px 0px;
                 color:#6c0404;
-                border-bottom: 2px solid #ccc;
+                border-bottom: 1px solid #6c0404;
                 background: white;
-                box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16);
                 font-weight: bold;
                 padding:5px 0px 5px 0px;
                 width: 100%;

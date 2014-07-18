@@ -26,10 +26,10 @@
         <div  style="margin:0px auto 0px auto;">
             <paper-tabs  style="margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
                          selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
-                <paper-tab name="balanceList" style="width: 400px"><g:message code="balanceListLbl"/></paper-tab>
-                <paper-tab name="transactionsTo"><g:message code="incomeLbl"/></paper-tab>
-                <paper-tab name="transactionsFrom"><g:message code="expensesLbl"/></paper-tab>
-                <paper-tab name="userList"><g:message code="usersLbl"/></paper-tab>
+                <paper-tab name="balanceList" style="width: 400px, padding:2px;"><g:message code="balanceListLbl"/></paper-tab>
+                <paper-tab name="transactionsTo" style="padding:2px;"><g:message code="incomeLbl"/></paper-tab>
+                <paper-tab name="transactionsFrom" style="padding:2px;"><g:message code="expensesLbl"/></paper-tab>
+                <paper-tab name="userList" style="padding:2px;"><g:message code="usersLbl"/></paper-tab>
             </paper-tabs>
             <div id="balanceList" class="tabContent" style="display:{{selectedTab == 'balanceList'?'block':'none'}}">
                 <balance-list id="balanceList"></balance-list>

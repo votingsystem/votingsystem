@@ -23,7 +23,7 @@
             <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="json"></core-ajax>
             <div layout vertical center>
                 <div id="record_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-                    <table class="table white_headers_table" id="record_table" style="">
+                    <table class="table tableHeadervs" id="record_table" style="">
                         <thead>
                         <tr style="color: #ff0000;">
                             <th style="width: 220px;"><g:message code="dateLbl"/></th>

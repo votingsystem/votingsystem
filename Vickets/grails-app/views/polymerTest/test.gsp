@@ -48,6 +48,9 @@
 </html>
 <asset:script>
 
+    document.addEventListener('polymer-ready', function() {
+    });
+
     function showEditor() {
 
     }

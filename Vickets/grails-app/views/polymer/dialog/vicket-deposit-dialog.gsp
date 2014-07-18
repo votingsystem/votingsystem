@@ -43,7 +43,9 @@
         <div id="container" class="card" style="width:600px; padding:0px 0px 15px 0px;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
                 <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
-                <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{close}}"></core-icon-button>
+                <div style="cursor:pointer; z-index:10;" on-click="{{close}}">
+                    <core-icon-button icon="close" style="fill:#6c0404;"></core-icon-button>
+                </div>
             </div>
 
             <div class="center card" style="font-weight: bold;color: {{status == 200?'#388746':'#ba0011'}};
@@ -63,13 +65,11 @@
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
                         font-size: 1.1em; display: none; padding: 5px; display:{{isDepositToAll ? 'block':'none'}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
-                        <div id="tagDataDivMsg" style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
+                        <div style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
                             <g:message code="depositWithTagAdvertMsg"/>
                         </div>
-                        <div id="tagDataDivMsg" style="font-weight:bold;display: {{selectedTags.length == 0? 'none':'block'}};">
+                        <div layout horizontal center center-justified style="font-weight:bold;display: {{selectedTags.length == 0? 'none':'block'}};">
                             <g:message code="selectedTagsLbl"/>
-                        </div>
-                        <div id="selectedTagDivDepositDialog" style="display: {{selectedTags.length == 0? 'none':'block'}};">
                             <template repeat="{{tag in selectedTags}}">
                                 <button data-tagId='{{tag.id}}' on-click="{{removeTag}}" type="button" class="btn btn-default"
                                         style="margin:7px 10px 0px 0px;">{{tag.name}}  <i class="fa fa-minus-circle"></i>
@@ -89,16 +89,18 @@
                         <div layout horizontal center center-justified id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
                             <input id="userSearchInput" type="text" class="form-control" style="width:200px;"
                                    placeholder="<g:message code="enterReceptorDataMsg"/>">
-                            <paper-button raisedButton class="button" label="<g:message code="userSearchLbl"/>"
-                                          on-click="{{searchUser}}" style="width:180px;"></paper-button>
+                            <votingsystem-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
+                                <g:message code="userSearchLbl"/> <i class="fa fa-search"></i>
+                            </votingsystem-button>
                         </div>
                         <search-user id="userSearchList"></search-user>
                     </div>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
-                    <paper-button raisedButton class="button" label="<g:message code="acceptLbl"/>"
-                                  on-click="{{submitForm}}" style=""></paper-button>
+                    <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                        <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
+                    </votingsystem-button>
                 </div>
             </div>
         </div>
@@ -114,7 +116,7 @@
 <script>
     Polymer('vicket-deposit-dialog', {
         operation:null,
-        maxNumberTags:3,
+        maxNumberTags:1,
         fromUserName:null,
         fromUserIBAN:null,
         dateValidTo:null,
@@ -217,20 +219,20 @@
             }
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             var objectId = Math.random().toString(36).substring(7)
-            var vicketDepositDialog = this
+            var hostElement = this
             window[objectId] = {setClientToolMessage: function(appMessage) {
                 var appMessageJSON = JSON.parse(appMessage)
                 if(appMessageJSON != null) {
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "<g:message code='depositOKLbl'/>"
-                        vicketDepositDialog.close()
+                        hostElement.close()
                     } else caption = '<g:message code="depositERRORLbl"/>'
                     showMessageVS(appMessageJSON.message, caption)
                 }
             }}
+            console.log(this.tagName + " - window[objectId] - objectId: " + objectId)
             webAppMessage.callerCallback = objectId
-            console.log(this.tagName + " - objectId: " + objectId)
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
 

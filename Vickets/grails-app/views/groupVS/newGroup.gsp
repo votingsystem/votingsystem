@@ -25,35 +25,32 @@
 
         <div class="text-left" style="margin:10px 0 10px 0;">
             <ul>
+                <li><g:message code="newGroupVSAdviceMsg3"/></li>
                 <li><g:message code="signatureRequiredMsg"/></li>
                 <li><g:message code="newGroupVSAdviceMsg2"/></li>
-                <li><g:message code="newGroupVSAdviceMsg3"/></li>
             </ul>
         </div>
 
         <form onsubmit="return submitForm();">
 
-            <div class="form-inline">
-                <div style="margin:0px 0px 10px 0px; display: table; height: 10px;">
-                    <div style="display: table-cell;padding:0px; margin:0px;">
-                        <input type="text" name="subject" id="groupSubject" style="width:400px;"  required
-                               title="<g:message code="subjectLbl"/>" class="form-control"
-                               placeholder="<g:message code="newGroupNameLbl"/>"
-                               onchange="this.setCustomValidity('')" />
+            <div layout vertical>
+                <div layout horizontal center center-justified style="">
+                    <div flex style="margin: 0px 0px 0px 20px;">
+                        <paper-input id="groupSubject" floatinglabel style="width:400px;" label="<g:message code="newGroupNameLbl"/>"
+                                     validate="" error="<g:message code="requiredLbl"/>" style="" required>
+                        </paper-input>
                     </div>
-                    <div style="width:100%;display: table-cell" class="text-right">
-                        <button type="button" onclick="showTagDialog()" class="btn btn-danger">
+                    <button type="button" onclick="showTagDialog()" class="btn btn-danger">
                         <g:message code="addTagLbl" /></button>
-                    </div>
                 </div>
-                <div id="tagsDiv" style="padding:0px 0px 0px 30px; display:none;">
-                    <div style=" display: table-cell; font-size: 1.1em; font-weight: bold; vertical-align: middle;">
-                        <g:message code='tagsLbl'/>:</div>
-                    <div id="selectedTagDiv" style="margin:0px 0px 15px 0px; padding: 5px; display: table-cell;">
+                <div id="tagsDiv" style="padding:5px 0px 5px 30px; display:none;">
+                    <div layout horizontal center>
+                        <div style="font-size: 0.9em; font-weight: bold;color:#888; margin:0px 5px 0px 0px;">
+                            <g:message code='tagsLbl'/>
+                        </div>
                         <template id="selectedTags" is="auto-binding" repeat="{{tag in selectedTags}}">
-                            <button data-tagId='{{tag.id}}' onclick="removeTag(this)" type="button" class="btn btn-default"
-                                    style="margin:7px 10px 0px 0px;">{{tag.name}}  <i class="fa fa-minus-circle"></i>
-                            </button>
+                            <a class="btn btn-default" on-click="{{removeTag}}" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">
+                                {{tag.name}} <i class="fa fa-minus"></i></a>
                         </template>
                     </div>
                 </div>
@@ -65,9 +62,9 @@
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
-                    <button type="submit" class="btn btn-default">
-                        <g:message code="newGroupVSLbl"/> <i class="fa fa fa-check"></i>
-                    </button>
+                    <votingsystem-button onclick="submitForm()" style="margin: 0px 0px 0px 5px;">
+                        <g:message code="newGroupVSLbl"/> <i class="fa fa-check"></i>
+                    </votingsystem-button>
                 </div>
             </div>
 
@@ -75,15 +72,37 @@
 
     </div>
 </div>
-<votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
+<div style="position: absolute; width: 100%; top:0px;left:0px;">
+    <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
+        <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
+                    serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
+    </div>
+</div>
+
 </body>
 </html>
 <asset:script>
     var textEditor = document.querySelector('#textEditor')
 
-    function removeTag(button) {
-        var tagDataId = button.getAttribute('data-tagId')
+    document.querySelector("#selectedTags").addEventListener('template-bound', function(e) {
+        var scope = e.target;
+        scope.removeTag = function(e) {
+            var tagDataId = e.target.templateInstance.model.tag.id
+            for(tagIdx in document.querySelector('#selectedTags').selectedTags) {
+                if(tagDataId == document.querySelector('#selectedTags').selectedTags[tagIdx].id) {
+                    document.querySelector('#selectedTags').selectedTags.splice(tagIdx, 1)
+                }
+            }
+            if(document.querySelector("#selectedTags").selectedTags.length == 0)
+                document.querySelector("#tagsDiv").style.display = 'none'
+            else document.querySelector("#tagsDiv").style.display = 'block'
+        }
+
+    })
+
+    function removeTag(e) {
+        var tagDataId = e.target.templateInstance.model.tag.id
+        console.log("========= tagDataId: " + tagDataId)
         for(tagIdx in document.querySelector('#selectedTags').selectedTags) {
             if(tagDataId == document.querySelector('#selectedTags').selectedTags[tagIdx].id) {
                 document.querySelector('#selectedTags').selectedTags.splice(tagIdx, 1)
@@ -95,19 +114,20 @@
     }
 
     function showTagDialog() {
+        console.log("showTagDialog")
         document.querySelector("#tagDialog").show(3, document.querySelector('#selectedTags').selectedTags)
     }
 
     document.querySelector("#tagDialog").addEventListener('tag-selected', function (e) {
-            document.querySelector("#selectedTags").selectedTags = e.detail
-            if(e.detail.length == 0) document.querySelector("#tagsDiv").style.display = 'none'
-            else document.querySelector("#tagsDiv").style.display = 'block'
+        document.querySelector("#selectedTags").selectedTags = e.detail
+        if(e.detail.length == 0) document.querySelector("#tagsDiv").style.display = 'none'
+        else document.querySelector("#tagsDiv").style.display = 'block'
     })
 
     var appMessageJSON
     function submitForm(){
         textEditor.classList.remove("formFieldError");
-        if(!document.getElementById('groupSubject').validity.valid) {
+        if(document.querySelector('#groupSubject').invalid) {
             showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
             return false
         }

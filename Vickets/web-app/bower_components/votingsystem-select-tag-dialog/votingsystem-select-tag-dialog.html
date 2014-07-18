@@ -31,7 +31,7 @@ Dialog to search and select tags
                   background-color: #f9f9f9;
                   box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
                   border: 1px solid #ccc;
-                  width:500px;
+                  width:550px;
               }
               button {
                   background-color: #f9f9f9;
@@ -52,8 +52,8 @@ Dialog to search and select tags
                   <div style="font-weight: bold; margin:0px 0px 5px 0px;">{{messages.selectedTagsLbl}}</div>
                   <div flex horizontal wrap layout style="">
                   <template repeat="{{tag in selectedTagList}}">
-                      <paper-button raisedButton label="{{tag.name}}" class="button" icon="remove-circle"
-                                    on-click="{{removeTag}}" style="margin:5px 5px 0px 0px;"></paper-button>
+                      <a class="btn btn-default" on-click="{{removeTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                          {{tag.name}} <i class="fa fa-minus"></i></a>
                   </template>
                   </div>
               </div>
@@ -66,14 +66,14 @@ Dialog to search and select tags
                   </votingsystem-button>
               </div>
 
-                <div style="display: {{searchString!= null ? 'block':'none'}}">{{messages.searchResultLbl}} '{{searchString}}'</div>
-
+              <div style="text-align:center; display: {{searchString!= null ? 'block':'none'}}">
+                {{messages.searchResultLbl}} <b>'{{searchString}}'</b>
+              </div>
 
               <div flex horizontal wrap layout style="">
                   <template repeat="{{tag in searchedTagList}}">
-                      <paper-button raisedButton class="button" label="{{tag.name}}" on-click="{{selectTag}}"
-                                    icon="add-circle" style="margin:5px 5px 0px 0px;">
-                      </paper-button>
+                      <a class="btn btn-default" on-click="{{selectTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                          {{tag.name}} <i class="fa fa-plus"></i></a>
                   </template>
               </div>
               <div layout horizontal style="margin:10px 20px 0px 0px;">
@@ -138,7 +138,10 @@ Dialog to search and select tags
                     this.$.tagSearchInput.inputValue = ''
                     this.searchedTagList = []
                     this.selectedTagList = []
+                    this.$.tagSearchInput.value = ""
                     this.isShowingTags = false
+                    this.searchString = null
+                    this.$.ajax.url = null
                 }
             },
 

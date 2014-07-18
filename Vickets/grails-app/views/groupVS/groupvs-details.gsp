@@ -7,13 +7,14 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
 
 <%
     def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
     def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
     def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
 %>
-<polymer-element name="groupvs-details" attributes="groupvs selectedItem">
+<polymer-element name="groupvs-details" attributes="groupvs selectedItem subpage">
     <template>
         <style shim-shadowdom>
         .view { :host {position: relative;} }
@@ -24,70 +25,66 @@
         <core-animated-pages id="groupDetailsPages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all" style="" selectedItem="{{selectedItem}}">
 
-            <section id="page1">
-
+        <section id="page1">
         <div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 150px 30px;"  cross-fade>
             <div layout horizontal center center-justified>
+                <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em; display:{{subpage ? 'block':'none'}}">
+                    <i class="fa fa-arrow-left"></i></votingsystem-button>
 
-            <div layout horizontal center center-justified style="min-width: 120px;">
-                <paper-fab icon="arrow-back"  on-tap="{{back}}"  style="color:#f9f9f9;"></paper-fab>
-            </div>
+                <div layout vertical flex>
+                    <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
+                    </div>
+                    <div layout horizontal center center-justified style="margin:10px 0px 0px 30px; display:{{isAdminView?'block':'none'}}">
+                        <paper-menu-button id="groupConfigOptions" valign="bottom" style="width: 0px;padding:0px;">
+                            <core-selector target="{{$.groupOptions}}" id="groupOptionsSelector" valueattr="id" on-core-select="{{configGroup}}">
+                                <div id="groupOptions" style=" border: 1px solid #6c0404;">
+                                    <paper-item id="editGroup" label="<g:message code="editDataLbl"/>">
+                                        <div flex></div><i class="fa fa-pencil-square-o"></i></paper-item>
+                                    <paper-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>">
+                                        <div flex></div><i class="fa fa-trash-o"></i></paper-item>
+                                </div>
+                            </core-selector>
+                        </paper-menu-button>
+                        <votingsystem-button on-click="{{openConfigGroupOptions}}">
+                            <g:message code="configGroupvsLbl"/> <i class="fa fa-cogs"></i>
+                        </votingsystem-button>
 
-            <div layout vertical flex>
-                <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
-                </div>
-                <div layout horizontal center center-justified style="margin:0px 0px 0px 0px; display:{{isAdminView?'block':'none'}}">
-                    <votingsystem-button on-click="{{editGroup}}">
-                        <g:message code="editDataLbl"/> <i class="fa fa-pencil-square-o"></i>
-                    </votingsystem-button>
-                    <votingsystem-button on-click="{{showConfirmCancelGroup}}">
-                        <g:message code="cancelGroupVSLbl"/> <i class="fa fa-trash-o"></i>
-                    </votingsystem-button>
+                        <paper-menu-button id="selectDepositOptions" valign="bottom" style="width: 0px;padding:0px;">
+                            <core-selector target="{{$.depositOptions}}" id="coreSelector" valueattr="id" on-core-select="{{showDepositDialog}}">
+                                <div id="depositOptions" style=" border: 1px solid #6c0404;">
+                                    <paper-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></paper-item>
+                                    <paper-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></paper-item>
+                                    <paper-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"</paper-item>
+                                </div>
+                            </core-selector>
+                        </paper-menu-button>
+                        <votingsystem-button on-click="{{openDepositDialogOptions}}">
+                            <g:message code="makeDepositFromGroupVSLbl"/> <i class="fa fa-money"></i>
+                        </votingsystem-button>
+                    </div>
 
-                    <paper-menu-button id="selectDepositPaperButton" valign="bottom" style="width: 0px;padding:0px;">
-                        <core-selector target="{{$.depositOptions}}" id="coreSelector" selected="{{coreSelectorValue}}" valueattr="id" on-core-select="{{showDepositDialog}}">
-                            <div id="depositOptions" style=" border: 1px solid #6c0404;">
-                                <paper-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></paper-item>
-                                <paper-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></paper-item>
-                                <paper-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"</paper-item>
+                    <div layout horizontal center center-justified style="margin:10px 0px 0px 30px;display:{{isUserView?'block':'none'}}">
+                        <votingsystem-button on-click="{{subscribeToGroup}}">
+                            <g:message code="subscribeGroupVSLbl"/> <i class="fa fa-sign-in"></i>
+                        </votingsystem-button>
+                        <votingsystem-button on-click="{{subscribeToGroup}}">
+                            <g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
+                        </votingsystem-button>
+                    </div>
+
+                    <div layout horizontal center center-justified style="margin:5px 0px 5px 0px;">
+                        <div flex id="pageHeader" class="pageHeader text-center"><h3>{{groupvs.name}}</h3></div>
+                        <div id="tagsDiv" style="padding:7px 0px 0px 7px; display:{{groupvs.tags.length > 0?'block':'none'}}">
+                            <div style="font-size: 0.9em; font-weight: bold;color:#888;"><g:message code='tagsLbl'/></div>
+                            <div layout horizontal>
+                                <template repeat="{{tag in groupvs.tags}}">
+                                    <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
+                                </template>
                             </div>
-                        </core-selector>
-                    </paper-menu-button>
-                    <votingsystem-button on-click="{{openDepositDialogOptions}}">
-                        <g:message code="makeDepositFromGroupVSLbl"/> <i class="fa fa-money"></i>
-                    </votingsystem-button>
-                </div>
-
-
-                <div layout horizontal center center-justified style="display:{{isUserView?'block':'none'}}">
-                    <button id="subscribeButton" type="submit" class="btn btn-default" on-click="{{subscribeToGroup}}"
-                            style="margin:15px 0px 0px 30px;color:#6c0404;">
-                        <g:message code="subscribeGroupVSLbl"/> <i class="fa fa-sign-in"></i>
-                    </button>
-
-                    <button id="subscribeButton" type="submit" class="btn btn-default" on-click=""
-                            style="margin:15px 0px 0px 30px;color:#6c0404;">
-                        <g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
-                    </button>
-                </div>
-
-                <div layout horizontal center center-justified style="margin:5px 0px 5px 0px;">
-                    <div flex id="pageHeader" class="pageHeader text-center"><h3>{{groupvs.name}}</h3></div>
-                    <div id="tagsDiv" style="padding:7px 0px 0px 7px; display:{{groupvs.tags.length > 0?'block':'none'}}">
-                        <div style="font-size: 0.9em; font-weight: bold; "><g:message code='tagsLbl'/>: </div>
-                        <div layout horizontal>
-                            <template repeat="{{tag in groupvs.tags}}">
-                                <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
-                            </template>
                         </div>
                     </div>
                 </div>
-
             </div>
-            </div>
-
-
-
 
             <div style="margin: 5px 0 15px 0;">
                 <div class="eventContentDiv" style="">
@@ -103,9 +100,10 @@
                 </div>
             </div>
 
-            <div style="border-top: 1px solid #6c0404; display:block; padding-top: 15px;margin-top: 25px;">
+            <div style="border-top: 2px solid #ccc; display:block; padding-top: 15px;margin-top: 25px;">
                 <div class="text-center" style="font-size: 1.2em;font-weight: bold; color:#6c0404; padding: 0px 0 0 0; ">
-                    <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>
+                    <!--<g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>-->
+                    <g:message code="weekMovementsLbl"/>
                 </div>
 
                 <group-page-tabs id="groupTabs" groupvs="{{groupvs}}" style=""></group-page-tabs>
@@ -117,12 +115,12 @@
                 <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/>
             </div>
         </div>
-            </section>
-            <section  id="page2">
-                <div cross-fade>
-                    <groupvs-user id="userDescription"></groupvs-user>
-                </div>
-            </section>
+        </section>
+        <section  id="page2">
+        <div cross-fade>
+            <groupvs-user id="userDescription"></groupvs-user>
+        </div>
+        </section>
 
         </core-animated-pages>
 
@@ -135,10 +133,10 @@
     <script>
         Polymer('groupvs-details', {
             isSelected: false,
+            subpage:false,
             groupvs: null,
-            selectedItem: null,
             ready :  function() {
-                console.log(this.tagName + " - ready")
+                console.log(this.tagName + " - ready - subpage: " + this.subpage)
             },
             closeUserDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeUserDetails")
@@ -231,6 +229,19 @@
                 }
 
              },
+            configGroup:function(e) {
+                if(e.detail.isSelected) {
+                    if('cancelGroup' == e.detail.item.id) {
+                        showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.name),
+                                "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
+                    } else if('editGroup' == e.detail.item.id) {
+                        var editorURL = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.id + "?menu=admin"
+                        //var editorURL = "${createLink(controller: 'groupVS', action: 'newGroup')}"
+                        this.fire('core-signal', {name: "innerpage", data: editorURL});
+                    }
+                    this.$.coreSelector.selected = null
+                }
+            },
             showDepositDialog:function(e) {
                 if(e.detail.isSelected) {
                     if('fromGroupToMember' == e.detail.item.id) {
@@ -247,20 +258,13 @@
                 }
             },
             back:function() {
-                this.fire('back-pressed', this.groupvs.id)
+                this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.id});
             },
             openDepositDialogOptions:function() {
-                this.$.selectDepositPaperButton.opened = true
+                this.$.selectDepositOptions.opened = true
             },
-            showConfirmCancelGroup: function () {
-                showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.name),
-                    "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
-            },
-            editGroup :  function() {
-                var editorURL = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.id + "?menu=admin"
-                //var editorURL = "${createLink(controller: 'groupVS', action: 'newGroup')}"
-                this.fire('core-signal', {name: "innerpage", data: editorURL});
-
+            openConfigGroupOptions:function() {
+                this.$.groupConfigOptions.opened = true
             },
             showUserDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - showUserDetails")

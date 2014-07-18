@@ -44,8 +44,9 @@
 
                 <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
                     <div flex></div>
-                    <paper-button raisedButton class="button" label="<g:message code="acceptLbl"/>"
-                                  on-click="{{submitForm}}" style=""></paper-button>
+                    <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                        <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
+                    </votingsystem-button>
                 </div>
                <content></content>
             </div>

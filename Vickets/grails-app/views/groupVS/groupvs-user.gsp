@@ -1,7 +1,9 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/get-reason-dialog.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
 
-<polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix">
+
+<polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix subpage">
     <template>
         <style no-shim>
         .card {
@@ -18,11 +20,12 @@
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div style="max-width: 600px; margin:0px auto 0px auto;">
-            <div layout horizontal center center-justified style="width:100%;">
-                <paper-fab icon="{{showFab ? 'arrow-back' : ''}}"  on-tap="{{back}}"
-                           style="color:#f9f9f9;visibility:{{$.pages.selected != 0 ? 'visible':'hidden'}}"></paper-fab>
+            <section layout horizontal center center-justified style="width:100%;">
+                <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em;display:{{subpage ? 'block':'none'}}">
+                    <i class="fa fa-arrow-left"></i></votingsystem-button>
+
                 <div flex id="messageDiv" class="text-center" style="font-size: 1.4em; color:#6c0404; font-weight: bold;"></div>
-            </div>
+            </section>
             <div id="" style="border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
                 <div layout horizontal>
                     <div id="" style="font-weight: bold;">NIF: {{subscriptionData.uservs.NIF}}</div>

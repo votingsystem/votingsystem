@@ -21,9 +21,9 @@
         </div>
         <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
             <div style="position:absolute; right:0;">
-                <button on-click="{{submitForm}}" class="btn btn-default">
-                    <g:message code="saveChangesLbl"/> <i class="fa fa fa-check"></i>
-                </button>
+                <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                    <g:message code="saveChangesLbl"/> <i class="fa fa-check"></i>
+                </votingsystem-button>
             </div>
         </div>
     </template>

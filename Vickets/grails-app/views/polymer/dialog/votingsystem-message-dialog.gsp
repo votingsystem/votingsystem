@@ -41,14 +41,15 @@
                     <core-icon-button on-click="{{close}}" icon="close" style="fill:#f9f9f9; color:#f9f9f9;"></core-icon-button>
                 </div>
             </div>
-            <div style="font-size: 1.3em; color:#6c0404; font-weight: bold; text-align: center; padding:30px 20px 30px 20px;">
+            <div style="font-size: 1.3em; color:#6c0404; font-weight: bold; text-align: center; padding:30px 20px 30px 20px; display:block;word-wrap:break-word;">
                 <votingsystem-html-echo html="{{message}}"></votingsystem-html-echo>
             </div>
             <div layout horizontal style="margin:0px 20px 0px 0px;">
                 <div flex></div>
                 <div style="margin:10px 0px 10px 0px;display:{{isConfirmMessage?'block':'none'}};">
-                    <paper-button raisedButton class="button" label="<g:message code="acceptLbl"/>"
-                                  on-click="{{accept}}" style=""></paper-button>
+                    <votingsystem-button on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
+                        <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
+                    </votingsystem-button>
                 </div>
             </div>
         </div>

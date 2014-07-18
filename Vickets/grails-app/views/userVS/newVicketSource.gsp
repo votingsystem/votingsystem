@@ -43,9 +43,9 @@
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
-                    <button type="submit" class="btn btn-default">
+                    <votingsystem-button onclick="submitForm()" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                         <g:message code="newVicketSourceLbl"/> <i class="fa fa fa-check"></i>
-                    </button>
+                    </votingsystem-button>
                 </div>
             </div>
 
