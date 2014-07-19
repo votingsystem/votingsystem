@@ -113,7 +113,6 @@ public class SessionVSHelper {
                     }
                 }
             } else {
-                if(errorList == null) errorList = new ArrayList<String>();
                 errorList.add(listener);
             }
         }

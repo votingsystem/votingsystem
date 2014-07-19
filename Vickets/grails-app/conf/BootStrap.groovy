@@ -4,10 +4,10 @@ import org.votingsystem.model.ContextVS
 
 class BootStrap {
 
+    def systemService
     def timeStampService
     def signatureVSService
     def filesService
-    def userVSService
     def grailsApplication
 
     def init = { servletContext ->
@@ -18,7 +18,7 @@ class BootStrap {
         filesService.init()
         signatureVSService.init();
         timeStampService.init();
-        userVSService.init()
+        systemService.init()
     }
 
     def destroy = { }

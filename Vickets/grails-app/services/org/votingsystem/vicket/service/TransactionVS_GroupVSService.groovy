@@ -22,7 +22,7 @@ class TransactionVS_GroupVSService {
 
     def walletVSService
     def messageSource
-    def userVSService
+    def systemService
     def signatureVSService
 
     @Transactional
@@ -54,7 +54,7 @@ class TransactionVS_GroupVSService {
         VicketTagVS tag
         if(messageJSON.tags && !messageJSON.tags.size() == 1) { //transactions can only have one tag associated
             tag = VicketTagVS.findWhere(id:Long.valueOf(messageJSON.tags[0].id), name:messageJSON.tags[0].name)
-            if(!tag) throw new Exception("Unknown tag '${paramTag}'")
+            if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0].name}'")
         } else if(messageJSON.tags.size() > 1) {
             throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
         }
@@ -99,10 +99,11 @@ class TransactionVS_GroupVSService {
                 msg = messageSource.getMessage('vicketDepositFromGroupToMemberGroupOKMsg',
                         ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
             }
+            UserVS systemUser = systemService.getSystemUser()
             TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
-                    fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo: transactionValidTo,
-                    subject:messageJSON.subject, fromUserVS:groupVS, currencyCode: currency.getCurrencyCode(),
-                    type:transactionVSType, tag:tag).save()
+                    fromUserIBAN: messageJSON.fromUserIBAN, toUserIBAN:systemUser.getIBAN(), state:TransactionVS.State.OK,
+                    validTo: transactionValidTo, subject:messageJSON.subject, fromUserVS:groupVS, type:transactionVSType,
+                    accountFromMovements: accountFromMovements, currencyCode: currency.getCurrencyCode(), tag:tag).save()
             receptorList.each { toUser ->
                 TransactionVS transaction = new TransactionVS(amount: userPart, messageSMIME:messageSMIMEReq,
                         fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo:transactionValidTo,
@@ -149,14 +150,13 @@ class TransactionVS_GroupVSService {
         TransactionVS.Type transactionVSType = TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS
         msg = messageSource.getMessage('vicketDepositFromGroupToAllMembersGroupOKMsg',
                 ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
-        UserVS systemUser = userVSService.getSystemUser()
-        TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
+        UserVS systemUser = systemService.getSystemUser()
+        TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
                 fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo: transactionValidTo,
                 subject:messageJSON.subject, fromUserVS:groupVS, currencyCode: currency.getCurrencyCode(),
                 type:transactionVSType, toUserIBAN:systemUser.getIBAN(), toUserVS: systemUser, tag:tag,
                 accountFromMovements: accountFromMovements).save()
 
-        UserVSAccount systemAccountForTag = UserVSAccount.findWhere(userVS:systemUser, tag:tag, state: UserVSAccount.State.ACTIVE)
         subscriptionList.each { it ->
             messageJSON.messageSMIMEParentId = messageSMIMEReq.id
             messageJSON.toUser = it.toUser.getNif()
@@ -171,7 +171,7 @@ class TransactionVS_GroupVSService {
                     fromUserVS:systemUser, fromUserIBAN: systemUser.getIBAN(), state:TransactionVS.State.OK,
                     validTo:transactionValidTo, transactionParent: transactionParent, subject:messageJSON.subject,
                     toUserVS: it.toUser, toUserIBAN:it.toUser.IBAN,currencyCode: currency.getCurrencyCode(),
-                    type:transactionVSType, accountFromMovements: [(systemAccountForTag):userPart], tag:tag).save()
+                    type:transactionVSType, tag:tag).save()
             metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
             log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${it.toUser.id}' ")
         }

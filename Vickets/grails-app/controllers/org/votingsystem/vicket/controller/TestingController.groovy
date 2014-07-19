@@ -12,6 +12,8 @@ import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.WebViewWrapper
 import org.votingsystem.vicket.websocket.SessionVSHelper
 
+import java.text.Normalizer
+
 /**
  * @infoController TestingController
  * @descController Servicios de acceso a la aplicación web principal

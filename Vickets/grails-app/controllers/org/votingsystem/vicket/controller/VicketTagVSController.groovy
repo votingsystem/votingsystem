@@ -21,7 +21,7 @@ import java.text.Normalizer
  * */
 class VicketTagVSController {
 
-    def userVSService
+    def systemService
 
     def index() {
         if("POST".equals(request.method)|| "OPTIONS".equals(request.method)) {
@@ -32,11 +32,13 @@ class VicketTagVSController {
                 VicketTagVS tag
                 VicketTagVS.withTransaction { tag = VicketTagVS.findWhere(name:requestJSON.tag) }
                 if(!tag) {
-                    String tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(
+                    String tagName = requestJSON.tag.toUpperCase().replaceAll("Ñ", "_____")
+                    tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(
                             "\\p{InCombiningDiacriticalMarks}+", "");
+                    tagName = tagName.replaceAll("_____", "Ñ")
                     tag = new VicketTagVS(name:tagName).save()
                     new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
-                            userVS:userVSService.getSystemUser(), IBAN:userVSService.getSystemUser().getIBAN(), tag:tag).save()
+                            userVS:systemService.getSystemUser(), IBAN:systemService.getSystemUser().getIBAN(), tag:tag).save()
                 }
                 def result = [id:tag.id, name:tag.name]
                 response.setHeader('Access-Control-Allow-Origin', "*")
@@ -64,7 +66,7 @@ class VicketTagVSController {
         }
         listDB.each { it ->
             new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
-                    userVS:userVSService.getSystemUser(), IBAN:userVSService.getSystemUser().getIBAN(), tag:it).save()
+                    userVS:systemService.getSystemUser(), IBAN:systemService.getSystemUser().getIBAN(), tag:it).save()
         }
         render "OK"
     }

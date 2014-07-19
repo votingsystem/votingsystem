@@ -33,26 +33,6 @@ class UserVSService {
     def messageSource
     def subscriptionVSService
     def transactionVSService
-    private UserVS systemUser
-
-    public synchronized Map init() throws Exception {
-        log.debug("init")
-        systemUser = UserVS.findWhere(type:UserVS.Type.SYSTEM)
-        if(!systemUser) {
-            systemUser = new UserVS(nif:grailsApplication.config.VotingSystem.systemNIF, type:UserVS.Type.SYSTEM,
-                    name:grailsApplication.config.VotingSystem.serverName).save()
-            systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id))
-            systemUser.save()
-            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser, balance:BigDecimal.ZERO,
-                    IBAN:systemUser.getIBAN()).save()
-        }
-        return [systemUser:systemUser]
-    }
-
-    public UserVS getSystemUser() {
-        if(!systemUser) systemUser = init().systemUser
-        return systemUser;
-    }
 
     public ResponseVS saveVicketSource(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();

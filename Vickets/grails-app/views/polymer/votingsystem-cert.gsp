@@ -1,12 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 
-<polymer-element name="cert-data" attributes="url certStr">
+<polymer-element name="votingsystem-cert" attributes="url certmap-data cert subpage">
     <template>
         <style no-shim>
         .view { :host {position: relative;} }
+        .pageWidth {width: 600px;}
         .certDiv {
-            width: 600px;
-            background-color: #f2f2f2;
+            background-color: #fefefe;
             padding: 10px;
             height: 150px;
             -moz-border-radius: 5px; border-radius: 5px;
@@ -14,19 +14,27 @@
         }
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{cert}}" handleAs="json" method="get" contentType="json"></core-ajax>
-        <div flex vertical>
-                <h3>
-                    <div id="pageHeaderDiv" class="pageHeader text-center"></div>
-                </h3>
-                <div class="certDiv" style="margin:0px auto 0px auto;">
-                    <div style="display: inline;">
+        <div layout vertical center center-justified >
+                <div layout horizontal class="pageWidth">
+                    <template if="{{subpage != null || subcert != null}}">
+                        <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
+                            <i class="fa fa-arrow-left"></i></votingsystem-button>
+                    </template>
+
+                    <h3 flex>
+                        <div id="pageHeaderDiv" class="pageHeader text-center"></div>
+                    </h3>
+                </div>
+
+                <div class="certDiv pageWidth">
+                    <div style="">
                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
-                            <g:message code="serialNumberLbl"/>: </span>---{{cert.serialNumber}}</div>
+                            <g:message code="serialNumberLbl"/>: </span>{{cert.serialNumber}}</div>
                         <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em; font-weight: bold; float: right;"></div>
                     </div>
                     <div class='groupvsSubjectDiv'><span style="font-weight: bold;"><g:message code="subjectLbl"/>: </span>{{cert.subjectDN}}</div>
                     <div class=''><span style="font-weight: bold;"><g:message code="issuerLbl"/>: </span>
-                        <a id="issuerURL" on-click="{{certIssuerClicked}}">{{cert.issuerDN}}</a>
+                        <a id="issuerURL" on-click="{{certIssuerClicked}}" style="cursor: pointer;">{{cert.issuerDN}}</a>
                     </div>
                     <div class=''><span style="font-weight: bold;"><g:message code="signatureAlgotithmLbl"/>: </span>{{cert.sigAlgName}}</div>
                     <div>
@@ -54,10 +62,8 @@
         </div>
     </template>
     <script>
-        Polymer('cert-data', {
-            ready: function() {},
-            certStrChanged : function() {
-                this.cert = JSON.parse(this.certStr)
+        Polymer('votingsystem-cert', {
+            certChanged: function() {
                 this.$.pemCertTextArea.value = this.cert.pemCert
                 if('CERTIFICATE_AUTHORITY' == this.cert.type) {
                     this.$.pageHeaderDiv.innerHTML = "<g:message code="trustedCertPageTitle"/>"
@@ -70,11 +76,31 @@
                     this.$.certStateDiv.innerHTML = "<g:message code="certCancelledLbl"/>"
                 }
             },
-
+            ready: function() {
+                this.certsSelectedStack = []
+                if(this['certmap-data'] != null) {
+                    this.cert = JSON.parse(this['certmap-data'])
+                }
+            },
+            back:function() {
+                var previousCert = this.certsSelectedStack.pop()
+                if(previousCert != null) {
+                    this.url = ""
+                    this.cert = previousCert
+                    if(this.certsSelectedStack.length == 0) this.subcert = null
+                } else {
+                    console.log(this.tagName + " - core-signal-votingsystem-cert-closed")
+                    this.fire('core-signal', {name: "votingsystem-cert-closed", data: this.cert.id});
+                }
+            },
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = e.target.templateInstance.model.cert.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    console.log(this.tagName + " - certIssuerClicked: " + "${createLink( controller:'certificateVS', action:'cert')}/" + issuerSerialNumber)
+                    var certURL = "${createLink( controller:'certificateVS', action:'cert', absolute:true)}/" + issuerSerialNumber
+                    console.log(this.tagName + " - certIssuerClicked: " + certURL)
+                    this.certsSelectedStack.push(this.cert)
+                    this.url = certURL
+                    this.subcert = true
                 }
             }
         })

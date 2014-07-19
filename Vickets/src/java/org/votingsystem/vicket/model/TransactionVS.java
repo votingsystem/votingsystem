@@ -208,7 +208,7 @@ public class TransactionVS  implements Serializable {
     }
 
     public void afterInsert() {
-        ((TransactionVSService)ApplicationContextHolder.getBean("transactionVSService")).notifyListeners(this);
+        ((TransactionVSService)ApplicationContextHolder.getBean("transactionVSService")).updateBalances(this);
     }
 
     public VicketTagVS getTag() {

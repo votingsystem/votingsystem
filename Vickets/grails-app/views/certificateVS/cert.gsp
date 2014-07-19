@@ -5,7 +5,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/certificateVS/cert-data.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/votingsystem-cert.gsp']"/>">
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/get-reason-dialog.gsp']"/>">
 
     <style type="text/css" media="screen">
@@ -24,18 +24,17 @@
 
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">
-            <button id="cancelCertButton" type="submit" class="btn btn-warning"
-                    style="margin:10px 20px 0px 0px;" onclick="document.querySelector('#reasonDialog').toggle()">
-                <g:message code="cancelCertLbl"/> <i class="fa fa fa-check"></i>
-            </button>
+            <votingsystem-button onclick="document.querySelector('#reasonDialog').toggle()">
+                <g:message code="cancelCertLbl"/>
+            </votingsystem-button>
         </g:if>
     </div>
     <div>
-        <cert-data id="certData" certStr="${certMap as grails.converters.JSON}"></cert-data>
+        <votingsystem-cert id="certData" certmap-data='${certMap as grails.converters.JSON}'></votingsystem-cert>
     </div>
 </div>
 
-<div style="position: absolute; width: 100%; top:0px;left:0px;">
+<div style="position: absolute; width: 100%; top:0px;left:0px;visibility:hidden">
     <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
         <get-reason-dialog id="reasonDialog" caption="<g:message code="cancelCertFormCaption"/>" opened="false"
                            isForAdmins="true"></get-reason-dialog>
