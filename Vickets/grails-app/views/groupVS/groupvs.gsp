@@ -7,14 +7,6 @@
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-details']"/>">
 </head>
 <body>
-
-<groupvs-details id="groupvsDetails"></groupvs-details>
+    <groupvs-details groupvs-data="${groupvsMap as grails.converters.JSON}" id="groupvsDetails"></groupvs-details>
 </body>
 </html>
-<asset:script>
-    document.addEventListener('polymer-ready', function() {
-        <g:applyCodec encodeAs="none">
-            document.querySelector("#groupvsDetails").groupvs = ${groupvsMap as grails.converters.JSON}
-        </g:applyCodec>
-    });
-</asset:script>

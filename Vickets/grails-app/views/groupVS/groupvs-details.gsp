@@ -8,19 +8,22 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-transactionvs.gsp']"/>">
 
 <%
     def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
     def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
     def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
 %>
-<polymer-element name="groupvs-details" attributes="groupvs selectedItem subpage">
+<polymer-element name="groupvs-details" attributes="groupvs-data selectedItem subpage">
     <template>
         <style shim-shadowdom>
         .view { :host {position: relative;} }
         </style>
         <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
-              on-core-signal-uservs-selected="{{showUserDetails}}" on-core-signal-uservs-details-closed="{{closeUserDetails}}"></core-signals>
+              on-core-signal-uservs-selected="{{showUserDetails}}" on-core-signal-uservs-details-closed="{{closeUserDetails}}"
+              on-core-signal-transactionvs-selected="{{showTransaction}}"
+              on-core-signal-vicket-transactionvs-closed="{{closeTransactionvs}}"></core-signals>
 
         <core-animated-pages id="groupDetailsPages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all" style="" selectedItem="{{selectedItem}}">
@@ -28,8 +31,10 @@
         <section id="page1">
         <div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 150px 30px;"  cross-fade>
             <div layout horizontal center center-justified>
-                <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em; display:{{subpage ? 'block':'none'}}">
-                    <i class="fa fa-arrow-left"></i></votingsystem-button>
+                <template if="{{subpage}}">
+                    <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
+                        <i class="fa fa-arrow-left"></i></votingsystem-button>
+                </template>
 
                 <div layout vertical flex>
                     <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
@@ -108,18 +113,24 @@
 
                 <group-page-tabs id="groupTabs" groupvs="{{groupvs}}" style=""></group-page-tabs>
             </div>
-
-            <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;
-                    display:{{(!isAdminView && !isUserView) ? 'block':'none'}}">
-                <g:message code="clientToolNeededMsg"/>.
-                <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/>
-            </div>
+            <template if="{{!isClientToolConnected}}">
+                <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;
+                display:{{(!isAdminView && !isUserView) ? 'block':'none'}}">
+                    <g:message code="clientToolNeededMsg"/>.
+                    <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/>
+                </div>
+            </template>
         </div>
         </section>
         <section  id="page2">
-        <div cross-fade>
-            <groupvs-user id="userDescription"></groupvs-user>
-        </div>
+            <div cross-fade>
+                <groupvs-user subpage id="userDescription"></groupvs-user>
+            </div>
+        </section>
+        <section  id="page3">
+            <div cross-fade>
+                <vicket-transactionvs subpage id="transactionViewer" style="margin:0px auto 0px auto;"></vicket-transactionvs>
+            </div>
         </section>
 
         </core-animated-pages>
@@ -137,10 +148,24 @@
             groupvs: null,
             ready :  function() {
                 console.log(this.tagName + " - ready - subpage: " + this.subpage)
+                this.isClientToolConnected = isClientToolConnected
+                if(this['groupvs-data'] != null) {
+                    this.groupvs = JSON.parse(this['groupvs-data'])
+                }
+            },
+            closeTransactionvs:function(e, detail, sender) {
+                console.log(this.tagName + " - closeTransactionvs")
+                this.page = 0;
             },
             closeUserDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeUserDetails")
                 this.page = 0;
+            },
+            showTransaction:function(e, detail, sender) {
+                var transactionURL = "${createLink(controller: 'transaction', action:'get', absolute:true)}/" + detail
+                console.log(this.tagName + " - showTransaction - transactionURL: " + transactionURL)
+                this.$.transactionViewer.url = transactionURL
+                this.page = 2;
             },
             messagedialog:function(e, detail, sender) {
                 console.log("messagedialog signal - cancelgroup: " + detail)
@@ -171,8 +196,8 @@
                 }
             },
             messagedialogClosed:function(e) {
-                console.log("messagedialog signal - messagedialogClosed: " + detail)
-                if(this.tagName == detail) {
+                console.log("messagedialog signal - messagedialogClosed: " + e)
+                if(this.tagName == e) {
                     if(this.appMessageJSON != null && ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                         window.location.href = updateMenuLink(this.appMessageJSON.URL)
                     }

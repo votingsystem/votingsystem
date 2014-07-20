@@ -48,6 +48,9 @@ public class Formatter {
                 case SEND_SMIME_VOTE:
                     result = formatVote(jsonObject);
                     break;
+                case VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                    result = formatVicketDepositFromGroupToAllMembers(jsonObject);
+                    break;
                 default:
                     logger.debug("Formatter nor found for "  + operation.getType());
                     result = textToFormat;
@@ -70,7 +73,14 @@ public class Formatter {
         return result.toString();
     }
 
-    public static String getEvento (EventVS evento) {
+    private static String formatVicketDepositFromGroupToAllMembers(JSONObject jsonObject){
+        StringBuilder result = new StringBuilder("<html>");
+        return result.toString();
+    }
+
+
+
+    public static String getEvent (EventVS evento) {
         logger.debug("getEvento - evento: " + evento.getId());
         if (evento == null) return null;
         StringBuilder result = new StringBuilder("<html>");

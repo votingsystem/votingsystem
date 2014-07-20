@@ -21,18 +21,18 @@
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div style="max-width: 600px; margin:0px auto 0px auto;">
             <section layout horizontal center center-justified style="width:100%;">
-                <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em;display:{{subpage ? 'block':'none'}}">
+                <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em;display:{{subpage != null ? 'block':'none'}}">
                     <i class="fa fa-arrow-left"></i></votingsystem-button>
 
                 <div flex id="messageDiv" class="text-center" style="font-size: 1.4em; color:#6c0404; font-weight: bold;"></div>
             </section>
             <div id="" style="border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
                 <div layout horizontal>
-                    <div id="" style="font-weight: bold;">NIF: {{subscriptionData.uservs.NIF}}</div>
-                    <div id="" style="margin:0px 0px 0px 15px; font-weight: bold;" flex>IBAN: {{subscriptionData.uservs.IBAN}}</div>
+                    <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
+                    <div style="font-weight: bold;color:#888;">IBAN: {{subscriptionData.uservs.IBAN}}</div>
                 </div>
 
-                <div id="nameDiv" style="font-size: 1.2em;font-weight: bold;">{{subscriptionData.uservs.name}}</div>
+                <div id="nameDiv" style="font-size: 1.2em;font-weight: bold; margin:5px 0px 5px 0px;">{{subscriptionData.uservs.name}}</div>
                 <div id="contentDiv" style=""><g:message code="subscriptionRequestDateLbl"/>:
                     <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
             </div>

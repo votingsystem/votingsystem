@@ -60,6 +60,8 @@
                     if(this.groupvs.transactionFromList == null) {
                         this.$.ajax.url = "${createLink(controller: 'groupVS')}/" + this.groupvs.id
                     }
+                    this.$.transactionFromTable.transactionList = this.groupvs.transactionFromList
+                    this.$.transactionToTable.transactionList = this.groupvs.transactionToList
                     this.$.balanceList.url = "${createLink(controller:'userVSAccount', action:'balance')}?id=" + this.groupvs.id
                 }
                 this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.id + "/user"

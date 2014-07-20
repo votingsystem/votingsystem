@@ -29,8 +29,7 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <votingsystem-transaction-table id="recordList" url="${createLink(controller: 'transaction', action: 'index', absolute: true)}"
-            transactionBaseURL="${createLink(controller: 'transaction', action:'get')}"></votingsystem-transaction-table>
+    <votingsystem-transaction-table id="recordList" url="${createLink(controller: 'transaction', action: 'index', absolute: true)}"></votingsystem-transaction-table>
 
     <votingsystem-socket id="wssocket" url="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
 </div>

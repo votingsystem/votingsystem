@@ -34,13 +34,14 @@ class TransactionController {
             }
             if(result) {
                 receipt = new String(result.messageSMIME.content, "UTF-8")
-                resultMap = transactionVSService.getTransactionMap(result)
+                resultMap = transactionVSService.getTransactionMap(result, request.locale)
+                resultMap.receipt = receipt
             }
         }
         if(request.contentType?.contains("json")) {
             render resultMap as JSON
         } else {
-            render(view:'transactionViewer', model: [transactionvsMap:resultMap, receipt:receipt])
+            render(view:'transactionViewer', model: [transactionvsMap:resultMap])
         }
     }
 

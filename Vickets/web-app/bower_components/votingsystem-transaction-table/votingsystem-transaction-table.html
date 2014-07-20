@@ -1,6 +1,6 @@
 <link rel="import" href="../core-ajax/core-ajax.html">
 
-<polymer-element name="votingsystem-transaction-table" attributes="url transactionBaseURL transactionList">
+<polymer-element name="votingsystem-transaction-table" attributes="url transactionList">
     <template>
         <link rel="stylesheet" href="votingsystem-transaction-table.css" />
         <core-ajax auto handleAs="json" url="./i18n/messages.json" response="{{locales}}"></core-ajax>
@@ -10,19 +10,19 @@
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div layout horizontal center center-justified class="tableHeadervs">
-                <div flex style="width:300px;">{{messages.typeLbl}}</div>
-                <div flex style="width:120px;">{{messages.amountLbl}}</div>
-                <div flex style="width:170px;">{{messages.datecreatedLbl}}</div>
+                <div style="width:300px;">{{messages.typeLbl}}</div>
+                <div style="width:120px;">{{messages.amountLbl}}</div>
+                <div style="width:170px;">{{messages.datecreatedLbl}}</div>
                 <div flex style="width:280px;">{{messages.subjectLbl}}</div>
             </div>
             <div>
                 <template repeat="{{transaction in transactionList}}">
                     <div layout horizontal center center justified on-click="{{showUserDetails}}" class="rowvs">
-                        <div flex style="width: 300px;">
-                            <a on-click="{{openWindow}}"> {{transaction.type| transactionDescription}}</a>
+                        <div style="width: 300px;">
+                            <a on-click="{{showTransactionDetails}}"> {{transaction.type| transactionDescription}}</a>
                         </div>
-                        <div flex style="width:120px;">{{transaction | amount}}</div>
-                        <div flex style="width:170px;">{{transaction.dateCreated}}</div>
+                        <div style="width:120px;">{{transaction | amount}}</div>
+                        <div style="width:170px;">{{transaction.dateCreated}}</div>
                         <div flex style="width:280px;">{{transaction.subject}}</div>
                     </div>
                 </template>
@@ -42,8 +42,8 @@
             transactionDescription: function(type) {
                 return getTransactionVSDescription(type)
             },
-            openWindow: function(e) {
-                openWindow(this.transactionBaseURL + "/" + e.target.templateInstance.model.transaction.id)
+            showTransactionDetails: function(e) {
+                this.fire('core-signal', {name: "transactionvs-selected", data: e.target.templateInstance.model.transaction.id});
             },
             newRecordChanged: function(e) {
                 console.log("newRecordChanged: " + this.newRecord)

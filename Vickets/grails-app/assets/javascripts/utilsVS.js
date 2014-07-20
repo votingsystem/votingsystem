@@ -326,12 +326,14 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
     clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
 }
 
+var isClientToolConnected = false
 var clientToolListeners = []
 function addClientToolListener(listener) {
     clientToolListeners.push(listener)
 }
 
 function notifiyClientToolConnection() {
+    isClientToolConnected = true
     for(var i = 0; i < clientToolListeners.length; i++) {
         clientToolListeners[i]()
     }

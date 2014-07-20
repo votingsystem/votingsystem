@@ -123,8 +123,12 @@ class TransactionVSService {
         } else log.error("TransactionVS '${transactionVS.id}' with state ${transactionVS.state}")
     }
 
-    @Transactional
     public Map getTransactionMap(TransactionVS transaction) {
+        return getTransactionMap(transaction, null)
+    }
+
+    @Transactional
+    public Map getTransactionMap(TransactionVS transaction, Locale locale) {
         Map transactionMap = [:]
         if(transaction.fromUserVS) {
             transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.getDefaultName(),
@@ -142,6 +146,7 @@ class TransactionVSService {
         transactionMap.dateCreated = transaction.dateCreated
         if(transaction.validTo) transactionMap.validTo = transaction.validTo
         transactionMap.id = transaction.id
+        if(locale) transactionMap.description = getTransactionTypeDescription(transaction.getType().toString(), locale)
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount.setScale(2, RoundingMode.FLOOR).toString()
