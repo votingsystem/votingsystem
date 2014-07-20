@@ -293,6 +293,7 @@ function updateMenuLinks() {
 }
 
 function updateMenuLink(urlToUpdate, param) {
+    if(urlToUpdate == null) return
     var result = urlToUpdate
     if(result.indexOf("menu=") < 0) {
         if(result.indexOf("?") < 0) result = result + "?menu=" + menuType

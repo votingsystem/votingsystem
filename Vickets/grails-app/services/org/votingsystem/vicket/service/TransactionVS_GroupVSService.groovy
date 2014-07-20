@@ -55,7 +55,7 @@ class TransactionVS_GroupVSService {
         if(messageJSON.tags && !messageJSON.tags.size() == 1) { //transactions can only have one tag associated
             tag = VicketTagVS.findWhere(id:Long.valueOf(messageJSON.tags[0].id), name:messageJSON.tags[0].name)
             if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0].name}'")
-        } else if(messageJSON.tags.size() > 1) {
+        } else if(messageJSON.tags?.size() > 1) {
             throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
         }
         BigDecimal amount = new BigDecimal(messageJSON.amount)
@@ -159,10 +159,10 @@ class TransactionVS_GroupVSService {
 
         subscriptionList.each { it ->
             messageJSON.messageSMIMEParentId = messageSMIMEReq.id
-            messageJSON.toUser = it.toUser.getNif()
+            messageJSON.toUser = it.userVS.getNif()
             messageJSON.numUsers = subscriptionList.totalCount
             messageJSON.toUserAmount = userPart.toString()
-            SMIMEMessageWrapper receipt = signatureVSService.getSignedMimeMessage(systemUser.getNif(), it.toUser.getNif(),
+            SMIMEMessageWrapper receipt = signatureVSService.getSignedMimeMessage(systemUser.getNif(), it.userVS.getNif(),
                     messageJSON.toString(), TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS.toString(), null)
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:messageSMIMEReq,
                     type:TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, content:receipt.getBytes()).save()
@@ -170,10 +170,10 @@ class TransactionVS_GroupVSService {
             TransactionVS transaction = new TransactionVS(amount: userPart, messageSMIME:messageSMIMEReceipt,
                     fromUserVS:systemUser, fromUserIBAN: systemUser.getIBAN(), state:TransactionVS.State.OK,
                     validTo:transactionValidTo, transactionParent: transactionParent, subject:messageJSON.subject,
-                    toUserVS: it.toUser, toUserIBAN:it.toUser.IBAN,currencyCode: currency.getCurrencyCode(),
+                    toUserVS: it.userVS, toUserIBAN:it.userVS.IBAN,currencyCode: currency.getCurrencyCode(),
                     type:transactionVSType, tag:tag).save()
             metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
-            log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${it.toUser.id}' ")
+            log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${it.userVS.id}' ")
         }
         metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${operationType.toString()}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:operationType)

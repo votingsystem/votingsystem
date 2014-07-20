@@ -106,33 +106,28 @@
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
             url:'',
-            newURL:'',
             ready: function() {
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
                 this.fire('nav-bar-ready');
                 var navBar = this
                 window.addEventListener('popstate', function(event) {
-                    console.log('newURL: ' + document.location.href);
-                    navBar.newURL = document.location.href
+                    navBar.url = document.location.href
                 });
             },
-            newURLChanged: function() {
-                console.log("newURLChanged - newURL: " + this.newURL)
-                this.loading= true;
-                this.url = updateMenuLink(this.newURL, "mode=innerPage")
-            },
             innerPageSignal:function(e, detail, sender) {
-                this.newURL = detail;
+                this.url = detail;
             },
             urlChanged: function() {
-                this.$.ajax.url =  this.url;
+                this.loading= true;
+                history.pushState(null, null, this.url);
+                this.$.ajax.url =  updateMenuLink(this.url, "mode=innerPage")
             },
             drawerItemSelected: function() {
                 this.fire('item-selected', this.coreSelectorValue)
                 if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                     window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
-                } else this.newURL = this.coreSelectorValue
+                } else this.url = this.coreSelectorValue
             },
             searchVisible: function(isVisible) {
                 this.$._navbar.searchVisible(isVisible)
@@ -141,9 +136,9 @@
                 this.appTitle = appTitle
             },
             ajaxResponse: function(appTitle) {
-                console.log("main.gsp - ajax-response - newURL: " + this.newURL)
-                history.pushState(null, null, updateMenuLink(this.newURL));
+                console.log(this.tagName + " - ajax-response - newURL: " + this.url)
                 this.asyncFire('ajax-response', this.$.ajax.response)
+                this.url = null
             }
         });
     </script>
@@ -166,7 +161,7 @@
 
     document.addEventListener('votingsystem-signal-innerPage', function(e) {
         console.log('main.gsp -votingsystem-signal-innerPage - newURL: ' + e.detail)
-        document.querySelector('#navBar').newURL = e.detail
+        document.querySelector('#navBar').url = e.detail
     });
 
     window.addEventListener('WebComponentsReady', function(e) {  });
@@ -213,7 +208,7 @@
             //console.log("elementsArray[i].href: " + elementsArray[i].href)
             if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
                 elementsArray[i].addEventListener('click', function(e) {
-                    document.querySelector('#navBar').newURL = e.target.href
+                    document.querySelector('#navBar').url = e.target.href
                     e.preventDefault()
                 });
             } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)

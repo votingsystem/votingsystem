@@ -102,7 +102,6 @@
 
     function removeTag(e) {
         var tagDataId = e.target.templateInstance.model.tag.id
-        console.log("========= tagDataId: " + tagDataId)
         for(tagIdx in document.querySelector('#selectedTags').selectedTags) {
             if(tagDataId == document.querySelector('#selectedTags').selectedTags[tagIdx].id) {
                 document.querySelector('#selectedTags').selectedTags.splice(tagIdx, 1)

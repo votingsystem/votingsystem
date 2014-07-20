@@ -149,6 +149,21 @@ class VicketService {
         }
     }
 
+    public ResponseVS cancelVicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        //messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
+        log.debug(smimeMessageReq.getSignedContent())
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = smimeMessageReq.getFrom().toString()
+        String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
+        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                smimeMessageReq, subject)
+        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
+                content:smimeMessageResp.getBytes()).save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.VICKET_CANCEL, data:messageSMIMEResp,
+                contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
+    }
 
     public ResponseVS processVicketDeposit(MessageSMIME messageSMIMEReq, VicketBatchRequest batchRequest, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -229,6 +244,31 @@ class VicketService {
             messageSMIMEReq.save()
             return resultResponseVS
         }
+    }
+
+    def csrService
+
+
+    public ResponseVS processVicketRequest(MessageSMIME messageSMIMEReq, byte[] csrRequest, Locale locale) {
+        log.debug("processVicketRequest");
+        //To avoid circular references issues
+        ResponseVS responseVS = processRequest(messageSMIMEReq, locale)
+        if (ResponseVS.SC_OK == responseVS.statusCode) {
+            ResponseVS vicketGenBatchResponse = csrService.signVicketBatchRequest(csrRequest,
+                    responseVS.data.amount, responseVS.data.currency, locale)
+            if (ResponseVS.SC_OK == vicketGenBatchResponse.statusCode) {
+                UserVS userVS = messageSMIMEReq.userVS
+                TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
+                        state:TransactionVS.State.OK, currency:responseVS.data.currency,
+                        subject: messageSource.getMessage('vicketRequest', null, locale), messageSMIME: messageSMIMEReq,
+                        fromUserVS: userVS, toUserVS: userVS, type:TransactionVS.Type.VICKET_REQUEST).save()
+
+                Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
+                Map resultMap = [transactionList:[transactionMap], issuedVickets:vicketGenBatchResponse.data]
+                return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_ENCRYPTED,
+                        type:TypeVS.VICKET_REQUEST, messageBytes:"${resultMap as JSON}".getBytes());
+            } else return vicketGenBatchResponse
+        } else return responseVS
     }
 
 }

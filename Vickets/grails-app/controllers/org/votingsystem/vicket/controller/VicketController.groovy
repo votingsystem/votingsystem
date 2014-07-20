@@ -51,7 +51,7 @@ class VicketController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = transactionVSService.processVicketRequest(messageSMIMEReq,
+        ResponseVS responseVS = vicketService.processVicketRequest(messageSMIMEReq,
                 params[ContextVS.CSR_FILE_NAME], request.getLocale())
         if(!responseVS.contentType) responseVS.setContentType(ContentTypeVS.ENCRYPTED);
         return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]

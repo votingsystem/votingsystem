@@ -108,10 +108,10 @@
                     var caption = '<g:message code="activateUserERRORLbl"/>'
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "<g:message code='activateUserOKLbl'/>"
-                        $("#messageDiv").text("<g:message code="userStateActiveLbl"/>")
-                        $("#activateUserButton").css("display", "none")
-                        $("#makeDepositButton").css("display", "visible")
-                        $("#deActivateUserButton").css("display", "visible")
+                        document.querySelector("#messageDiv").innerHTML = "<g:message code="userStateActiveLbl"/>"
+                        document.querySelector("#activateUserButton").style.display = 'none'
+                        document.querySelector("#makeDepositButton").style.display = 'block'
+                        document.querySelector("#deActivateUserButton").style.display = 'block'
                     }
                     showMessageVS(appMessageJSON.message, caption)
                 }}}

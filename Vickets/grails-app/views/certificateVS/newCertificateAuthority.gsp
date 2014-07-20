@@ -42,9 +42,9 @@
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
-                    <button type="submit" class="btn btn-default">
-                        <g:message code="doOperationLbl"/> <i class="fa fa fa-check"></i>
-                    </button>
+                    <votingsystem-button onclick="submitForm()" style="margin: 0px 0px 0px 5px;">
+                        <g:message code="addCALbl"/> <i class="fa fa-check"></i>
+                    </votingsystem-button>
                 </div>
             </div>
 

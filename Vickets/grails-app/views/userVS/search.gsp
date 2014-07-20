@@ -24,7 +24,7 @@
         </div>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
-        <search-user id="uservsTable" style="width:1000px;"></search-user>
+        <search-user id="uservsTable" style="width:800px; margin:10px 0px 0px 0px;"></search-user>
     </div>
 
 </div>
@@ -32,10 +32,11 @@
 
 </html>
 <asset:script>
-    document.addEventListener('polymer-ready', function() {
-        document.querySelector("#uservsTable").addEventListener('user-clicked', function(e) {
-            window.location.href ="${createLink(controller: 'userVS')}/" + e.detail.id + "?menu=" + menuType
-        });
+
+    document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
+        if(document.querySelector("#navBar") != null) {
+            document.querySelector("#navBar").url = "${createLink(controller: 'userVS')}/" + e.detail.id + "?menu=" + menuType
+        } else window.location.href = "${createLink(controller: 'userVS')}/" + e.detail.id + "?menu=" + menuType
     });
 
     function searchInputKeyPress(e){

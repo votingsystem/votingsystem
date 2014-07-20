@@ -4,6 +4,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 </head>
 <body>
 
@@ -32,6 +33,9 @@
         </div>
 
         <form onsubmit="return submitForm()">
+            <paper-input id="vicketSourceIBAN" floatinglabel style="width:400px; margin:0px 0px 0px 20px;" label="<g:message code="IBANLbl"/>"
+                         validate="" error="<g:message code="requiredLbl"/>" style="" required>
+            </paper-input>
             <div style="position:relative; width:100%;">
                 <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
@@ -59,6 +63,10 @@
     var appMessageJSON = null
 
     function submitForm() {
+        if(document.querySelector('#vicketSourceIBAN').invalid) {
+            showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
+            return false
+        }
         if(!document.querySelector('#pemCert').validity.valid) {
             showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
             return false
@@ -74,7 +82,7 @@
         webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newVicketSource", absolute:true)}"
         webAppMessage.signedMessageSubject = "<g:message code='newVicketSourceMsgSubject'/>"
         webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
-            operation:Operation.VICKET_SOURCE_NEW}
+            IBAN:document.querySelector("#vicketSourceIBAN").value, operation:Operation.VICKET_SOURCE_NEW}
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         var objectId = Math.random().toString(36).substring(7)
         window[objectId] = {setClientToolMessage: function(appMessage) {
@@ -107,3 +115,4 @@
     });
 
 </asset:script>
+<asset:deferredScripts/>
