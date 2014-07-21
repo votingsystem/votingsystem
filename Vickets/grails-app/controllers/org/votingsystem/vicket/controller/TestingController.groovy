@@ -2,6 +2,7 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.hibernate.ScrollableResults
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.UserVSAccount
@@ -30,7 +31,15 @@ class TestingController {
     def filesService
     def webSocketService
 
-    def index() { }
+    def balanceService
+
+
+    def index() {
+        balanceService.initWeek();
+
+        render "OK"
+        return false
+    }
 
     def webViewLoadTest() {
         WebViewWrapper webViewTest = WebViewWrapper.getInstance()

@@ -41,7 +41,7 @@
                 </div>
                 <div>
                     <template repeat="{{uservs in userVSList}}">
-                        <div layout horizontal center center justified on-click="{{showUserDetails}}" class="rowvs">
+                        <div layout horizontal center center justified on-click="{{showUserDetails}}">
                             <div flex>{{uservs.nif}}</div>
                             <div flex>{{uservs.name}}</div>
                         </div>

@@ -4,7 +4,7 @@
 
 <polymer-element name="votingsystem-user-box" attributes="boxCaption multiSelection">
     <template>
-        <core-ajax auto handleAs="json" url="./i18n/messages.json" response="{{locales}}"></core-ajax>
+        <core-ajax auto handleAs="json" url="{{urlLocales}}" response="{{locales}}"></core-ajax>
         <style>
             .receptorsBox {
                 margin: 10px auto 30px auto;
@@ -42,6 +42,7 @@
                 console.log(this.tagName + " loaded locales for: " + userLocale)
             },
             ready:function() {
+                this.urlLocales = window['serverURL'] + "/bower_components/" + this.tagName.toLowerCase() + "/i18n/messages.json"
                 this.multiSelection = this.multiSelection || true
                 this.uservsList = []
             },

@@ -6,6 +6,7 @@
 
 <polymer-element name="group-page-tabs" attributes="groupvs">
     <template>
+        <g:include view="/include/styles.gsp"/>
         <style shim-shadowdom>
             .tabContent {
                 padding: 10px 20px 10px 20px;

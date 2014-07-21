@@ -35,25 +35,22 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
+                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
+                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
+                        </paper-item>
+                        <paper-item data-href="${createLink(controller: 'groupVS')}">
+                            <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
+                        </paper-item>
+                        <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
+                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
+                        </paper-item>
                         <g:if test="${"admin".equals(params.menu)}">
-                            <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
-                                <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'groupVS')}">
-                                <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
-                            </paper-item>
                             <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup')}"">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
-                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                             </paper-item>
                             {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                         </g:if>
                         <g:elseif test="${"superadmin".equals(params.menu)}">
-                            <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
-                                <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
-                            </paper-item>
                             <paper-item data-href="${createLink(controller: 'userVS', action: 'newVicketSource')}">
                                 <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newVicketSourceLbl"/>
                             </paper-item>
@@ -67,9 +64,6 @@
                             <paper-item data-href="${createLink(controller: 'userVS', action: 'save')}">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newUserCertLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
-                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
-                            </paper-item>
                             <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact')}" on-click="{{changeToAdminMenu}}"
                                         style="padding:30px 10px 30px 10px;">
                                 <g:message code="changeToAdminMenuLbl"/>
@@ -77,20 +71,14 @@
                             {{ "<g:message code="superAdminTitle"/>" | setTitle}}
                         </g:elseif>
                         <g:else>
-                            <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
-                                <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'groupVS')}">
-                                <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
-                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
-                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
-                            </paper-item>
                             {{ "<g:message code="usersPageTitle"/>" | setTitle}}
                         </g:else>
+                        <paper-item data-href="${createLink(controller: 'reports', action:'index')}"">
+                            <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> <g:message code="reportsPageTitle"/>
+                        </paper-item>
+                        <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
+                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
+                        </paper-item>
                     </core-selector>
                 </core-menu>
             </core-header-panel>
@@ -119,15 +107,20 @@
                 this.url = detail;
             },
             urlChanged: function() {
-                this.loading= true;
-                history.pushState(null, null, this.url);
-                this.$.ajax.url =  updateMenuLink(this.url, "mode=innerPage")
+                if(this.url != null) {
+                    this.loading= true;
+                    history.pushState(null, null, this.url);
+                    this.$.ajax.url =  updateMenuLink(this.url, "mode=innerPage")
+                }
             },
             drawerItemSelected: function() {
                 this.fire('item-selected', this.coreSelectorValue)
                 if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                     window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
-                } else this.url = this.coreSelectorValue
+                } else {
+                    this.url = this.coreSelectorValue
+                    this.coreSelectorValue = null
+                }
             },
             searchVisible: function(isVisible) {
                 this.$._navbar.searchVisible(isVisible)

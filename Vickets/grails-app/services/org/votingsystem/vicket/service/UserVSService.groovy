@@ -10,6 +10,7 @@ import org.votingsystem.model.SubscriptionVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
+import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.model.UserVSAccount
 import org.votingsystem.vicket.util.MetaInfMsg
@@ -23,6 +24,7 @@ import java.security.cert.X509Certificate
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class UserVSService {
 	
 	static transactional = false
@@ -158,12 +160,9 @@ class UserVSService {
     }
 
 	public Map getUserVS(Date fromDate){
-		def usersVS
-		UserVS.withTransaction {
-			usersVS = UserVS.createCriteria().list(offset: 0) {
-				gt("dateCreated", fromDate)
-			}
-		}
+        def usersVS = UserVS.createCriteria().list(offset: 0) {
+            gt("dateCreated", fromDate)
+        }
 		return [totalNumUsu:usersVS?usersVS.getTotalCount():0]
 	}
 
@@ -214,12 +213,9 @@ class UserVSService {
     public Map getSubscriptionVSDetailedDataMap(SubscriptionVS subscriptionVS){
         String subscriptionMessageURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${subscriptionVS.subscriptionSMIME.id}"
         def adminMessages = []
-        SubscriptionVS.withTransaction {
-            subscriptionVS.adminMessageSMIMESet.each {adminMessage ->
-                adminMessages.add("${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${adminMessage.id}")
-            }
+        subscriptionVS.adminMessageSMIMESet.each {adminMessage ->
+            adminMessages.add("${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${adminMessage.id}")
         }
-
         Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,
                 dateCancelled:subscriptionVS.dateCancelled, lastUpdated:subscriptionVS.lastUpdated,
                 messageURL:subscriptionMessageURL,adminMessages:adminMessages,
@@ -236,6 +232,24 @@ class UserVSService {
         if(result) log.debug("isUserAdmin - nif: ${nif}")
 		return result
 	}
+
+    @Transactional
+    public Map getDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod){
+        Map resultMap = getUserVSDataMap(userVS)
+
+        def transactionFromListJSON = []
+        transactionVSService.getTransactionFromList(userVS, timePeriod).each { transaction ->
+            transactionFromListJSON.add(transactionVSService.getTransactionMap(transaction))
+        }
+
+        def transactionToListJSON = []
+        transactionVSService.getTransactionToList(userVS, timePeriod).each { transaction ->
+            transactionToListJSON.add(transactionVSService.getTransactionMap(transaction))
+        }
+        resultMap.transactionFromList = transactionFromListJSON
+        resultMap.transactionToList = transactionToListJSON
+        return resultMap
+    }
 
 }
 

@@ -3,6 +3,7 @@
 
 <polymer-element name="balance-list" attributes="url">
     <template>
+        <g:include view="/include/styles.gsp"/>
         <style>
             .tableHeadervs {
                 margin: 0px 0px 0px 0px;
@@ -41,7 +42,7 @@
             </div>
             <div>
                 <template repeat="{{account in balanceList.accounts}}">
-                    <div layout horizontal center center-justified class="rowvs">
+                    <div class="rowvs" layout horizontal center center-justified>
                         <div flex style="width: 80px;">{{account.tag.name}}</div>
                         <div flex style="width:80px;">{{account.amount | formatAmount}}</div>
                         <div style="">{{account.currency}}</div>

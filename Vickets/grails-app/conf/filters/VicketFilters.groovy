@@ -30,14 +30,16 @@ class VicketFilters {
         paramsCheck(controller:'*', action:'*') {
             before = {
                 if("assets".equals(params.controller) || params.isEmpty()) return
-                log.debug "###########################<${params.controller}> - before ################################"
-                log.debug "Method: " + request.method
-                log.debug "Params: " + params
-                log.debug "request.contentType: " + request.contentType
-                log.debug "getRemoteHost: " + request.getRemoteHost()
-                log.debug "Request: " + request.getRequestURI()  + " - RemoteAddr: " + request.getRemoteAddr()
-                log.debug "User agent: " + request.getHeader("User-Agent")
-                log.debug "-----------------------------------------------------------------------------------"
+                if(!"polymer".equals(params.controller)) {
+                    log.debug "###########################<${params.controller}> - before ################################"
+                    log.debug "Method: " + request.method
+                    log.debug "Params: " + params
+                    log.debug "request.contentType: " + request.contentType
+                    log.debug "getRemoteHost: " + request.getRemoteHost()
+                    log.debug "Request: " + request.getRequestURI()  + " - RemoteAddr: " + request.getRemoteAddr()
+                    log.debug "User agent: " + request.getHeader("User-Agent")
+                    log.debug "-----------------------------------------------------------------------------------"
+                }
                 if(!params.int("max")) params.max = 20
                 if(!params.int("offset")) params.offset = 0
                 if(!params.sort) params.sort = "dateCreated"
@@ -110,7 +112,7 @@ class VicketFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
-                if("assets".equals(params.controller) || params.isEmpty()) return
+                if("assets".equals(params.controller) || params.isEmpty() || "polymer".equals(params.controller)) return
                 ResponseVS responseVS = null
                 try {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)

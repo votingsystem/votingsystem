@@ -1,4 +1,6 @@
 <script>
+    window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
+
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {
         // time difference in ms

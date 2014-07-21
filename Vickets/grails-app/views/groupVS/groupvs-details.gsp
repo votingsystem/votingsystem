@@ -20,6 +20,7 @@
         <style shim-shadowdom>
         .view { :host {position: relative;} }
         </style>
+        <g:include view="/include/styles.gsp"/>
         <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
               on-core-signal-uservs-selected="{{showUserDetails}}" on-core-signal-uservs-details-closed="{{closeUserDetails}}"
               on-core-signal-transactionvs-selected="{{showTransaction}}"
@@ -29,10 +30,10 @@
                              transitions="cross-fade-all" style="" selectedItem="{{selectedItem}}">
 
         <section id="page1">
-        <div class="pageContenDiv" style="max-width: 1000px; padding: 0px 30px 150px 30px;"  cross-fade>
+        <div class="pageContenDiv" style="max-width: 1000px; margin:0px auto 0px auto;"  cross-fade>
             <div layout horizontal center center-justified>
                 <template if="{{subpage}}">
-                    <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
+                    <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
                         <i class="fa fa-arrow-left"></i></votingsystem-button>
                 </template>
 

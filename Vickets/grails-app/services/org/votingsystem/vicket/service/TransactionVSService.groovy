@@ -16,7 +16,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.util.IbanVSUtil
-
+import grails.orm.PagedResultList;
 import java.math.RoundingMode
 
 /**
@@ -128,6 +128,26 @@ class TransactionVSService {
     }
 
     @Transactional
+    public PagedResultList getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('fromUserVS', fromUserVS)
+//            isNull("transactionParent")
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+        }
+        return transactionList
+    }
+
+    @Transactional
+    public PagedResultList getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('toUserVS', toUserVS)
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+        }
+        return transactionList
+    }
+
+
+    @Transactional
     public Map getTransactionMap(TransactionVS transaction, Locale locale) {
         Map transactionMap = [:]
         if(transaction.fromUserVS) {
@@ -172,7 +192,7 @@ class TransactionVSService {
 
         if(transaction.tag) {
             transactionMap.tags = [[id:transaction.tag.id, name:transaction.tag.name]]
-        }
+        } else transactionMap.tags = []
 
         return transactionMap
     }

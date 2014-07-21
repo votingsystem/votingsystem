@@ -39,10 +39,10 @@ public class DateUtils {
         return calendar.get(Calendar.YEAR);
     }
     
-    public static Date getYesterdayDate () {
+    public static Date getDatePlus (int numDays) {
     	Calendar cal = new GregorianCalendar(); 
-    	int todayDay = cal.get(Calendar.DAY_OF_MONTH);
-    	cal.set(Calendar.DAY_OF_MONTH, todayDay-1);
+    	int todayDay = cal.get(Calendar.DAY_OF_YEAR);
+    	cal.set(Calendar.DAY_OF_YEAR, todayDay + numDays);
         return cal.getTime();
     }
 
@@ -165,10 +165,20 @@ public class DateUtils {
     }
 
     public static TimePeriod getCurrentWeekPeriod() {
-        Calendar weekFromCalendar = getMonday(Calendar.getInstance());
+        return getWeekPeriod(Calendar.getInstance());
+    }
+
+    public static TimePeriod getWeekPeriod(Calendar selectedDate) {
+        Calendar weekFromCalendar = getMonday(selectedDate);
         Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
         weekToCalendar.add(Calendar.DAY_OF_YEAR, 7);
         return new TimePeriod(weekFromCalendar.getTime(), weekToCalendar.getTime());
+    }
+
+    public static TimePeriod getWeekPeriod(Date selectedDate) {
+        Calendar selectedDateCalendar = Calendar.getInstance();
+        selectedDateCalendar.setTime(selectedDate);
+        return getWeekPeriod(selectedDateCalendar);
     }
 
     public static class TimePeriod {

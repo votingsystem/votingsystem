@@ -19,7 +19,7 @@ Dialog to search and select tags
 <polymer-element name="votingsystem-select-tag-dialog" attributes="caption opened serviceURL">
     <template>
         <link rel="stylesheet" href="votingsystem-select-tag-dialog.css" />
-        <core-ajax auto handleAs="json" url="./i18n/messages.json" response="{{locales}}"></core-ajax>
+        <core-ajax auto handleAs="json" url="{{urlLocales}}" response="{{locales}}"></core-ajax>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                     contentType="json"></core-ajax>
           <style no-shim>
@@ -119,6 +119,7 @@ Dialog to search and select tags
             serviceURL: null,
 
               ready: function() {
+                  this.urlLocales = window['serverURL'] + "/bower_components/" + this.tagName.toLowerCase() + "/i18n/messages.json"
                   this.searchString = null
                   this.style.display = 'none'
                   this.selectedTagList = []
@@ -211,11 +212,6 @@ Dialog to search and select tags
                 this.isShowingTags = true
             },
 
-            /**
-            * Fire the selected tags
-            *
-            * @method processTags
-            */
             processTags: function() {
                 this.fire('tag-selected', this.selectedTagList);
                 this.opened = false

@@ -90,6 +90,7 @@ class GroupVSService {
                 metaInf:MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}"))
     }
 
+    @Transactional
     public ResponseVS saveGroup(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         GroupVS groupVS = null
@@ -138,8 +139,7 @@ class GroupVSService {
         SMIMEMessageWrapper smimeMessageResp = signatureVSService.getSignedMimeMessage(fromUser, toUser,
                 messageSMIMEReq.getSmimeMessage()?.getSignedContent(), subject, null)
         log.debug("${metaInf}")
-        MessageSMIME.withTransaction { new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf,
-                smimeParent:messageSMIMEReq, content:smimeMessageResp.getBytes()).save() }
+        new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf, smimeParent:messageSMIMEReq, content:smimeMessageResp.getBytes()).save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_GROUP_NEW, data:groupVS)
     }
 
@@ -184,6 +184,7 @@ class GroupVSService {
                 metaInf:MetaInfMsg.getOKMsg(methodName, "subscriptionVS_${subscriptionVS.id}"))
     }
 
+    @Transactional
  	public Map getGroupVSDataMap(GroupVS groupVS){
         Map resultMap = [id:groupVS.id, IBAN:groupVS.IBAN, name:groupVS.name, description:groupVS.description,
             state:groupVS.state.toString(), dateCreated:groupVS.dateCreated,
@@ -195,42 +196,22 @@ class GroupVSService {
             }
             resultMap.tags = tagList
         }
-        SubscriptionVS.withTransaction {
-            def result = SubscriptionVS.createCriteria().list(offset: 0) {
-                eq("groupVS", groupVS)
-                eq("state", SubscriptionVS.State.ACTIVE)
-            }
-            resultMap.numActiveUsers = result.totalCount
-            result = SubscriptionVS.createCriteria().list(offset: 0) {
-                eq("groupVS", groupVS)
-                eq("state", SubscriptionVS.State.PENDING)
-            }
-            resultMap.numPendingUsers = result.totalCount
-        }
+        resultMap.numActiveUsers = SubscriptionVS.countByGroupVSAndState(groupVS, SubscriptionVS.State.ACTIVE)
+        resultMap.numPendingUsers = SubscriptionVS.countByGroupVSAndState(groupVS, SubscriptionVS.State.PENDING)
         return resultMap
 	}
 
     @Transactional
-    public Map getGroupVSDetailedDataMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
+    public Map getDetailedDataMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
         Map resultMap = getGroupVSDataMap(groupVS)
 
-        def transactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('fromUserVS', groupVS)
-            isNull("transactionParent")
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-        }
-
         def transactionFromListJSON = []
-        transactionListDB.each { transaction ->
+        transactionVSService.getTransactionFromList(groupVS, timePeriod).each { transaction ->
             transactionFromListJSON.add(transactionVSService.getTransactionMap(transaction))
         }
 
-        transactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('toUserVS', groupVS)
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-        }
         def transactionToListJSON = []
-        transactionListDB.each { transaction ->
+        transactionVSService.getTransactionToList(groupVS, timePeriod).each { transaction ->
             transactionToListJSON.add(transactionVSService.getTransactionMap(transaction))
         }
         resultMap.transactionFromList = transactionFromListJSON

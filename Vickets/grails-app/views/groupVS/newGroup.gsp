@@ -123,7 +123,7 @@
         else document.querySelector("#tagsDiv").style.display = 'block'
     })
 
-    var appMessageJSON
+    var appMessageJSON;
     function submitForm(){
         textEditor.classList.remove("formFieldError");
         if(document.querySelector('#groupSubject').invalid) {
@@ -170,3 +170,4 @@
     });
 
 </asset:script>
+<asset:deferredScripts/>

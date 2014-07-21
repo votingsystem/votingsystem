@@ -40,7 +40,7 @@
 
 <polymer-element name="votingsystem-advanced-search-dialog" attributes="opened transition">
     <template>
-        <core-ajax auto handleAs="json" url="./i18n/messages.json" response="{{locales}}"></core-ajax>
+        <core-ajax auto handleAs="json" url="{{urlLocales}}" response="{{locales}}"></core-ajax>
         <div>
             <x-dialog id="searchDialog"  class="dialog" opened="{{opened}}">
                 <!-- place all overlay styles inside the overlay target -->
@@ -130,6 +130,7 @@
                 console.log(this.tagName + " loaded locales for: " + userLocale)
             },
             ready: function() {
+                this.urlLocales = window['serverURL'] + "/bower_components/" + this.tagName.toLowerCase() + "/i18n/messages.json"
                 var hostElement
                 this.$.searchDialog.addEventListener('overlay-closed', function(e) {
                     hostElement.opened = e.detail

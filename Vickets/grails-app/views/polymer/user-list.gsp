@@ -47,7 +47,7 @@
             </div>
             <div>
                 <template repeat="{{uservs in userList.userVSList}}">
-                    <div layout horizontal center center justified class="rowvs">
+                    <div class="rowvs" layout horizontal center center justified>
                         <div class="nifColumn" style="width: 110px;">
                             <a on-click="{{userSelected}}"> {{uservs.uservs.NIF}}</a>
                         </div>
