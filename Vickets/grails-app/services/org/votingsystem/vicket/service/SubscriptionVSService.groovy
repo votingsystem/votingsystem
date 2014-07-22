@@ -3,17 +3,10 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
-import net.sf.json.JSONSerializer
-import org.bouncycastle.asn1.ASN1InputStream
-import org.bouncycastle.asn1.DERObject
-import org.bouncycastle.asn1.DEROctetString
-import org.bouncycastle.asn1.DERTaggedObject
-import org.bouncycastle.asn1.DERUTF8String
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.model.UserVSAccount
-import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
+import org.votingsystem.vicket.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 

@@ -147,6 +147,9 @@
             isSelected: false,
             subpage:false,
             groupvs: null,
+            groupvsChanged:function() {
+
+            },
             ready :  function() {
                 console.log(this.tagName + " - ready - subpage: " + this.subpage)
                 this.isClientToolConnected = isClientToolConnected

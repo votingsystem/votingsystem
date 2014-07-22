@@ -1,17 +1,10 @@
 package org.votingsystem.vicket.service
 
-import grails.converters.JSON
 import grails.transaction.Transactional
-import org.votingsystem.model.EventVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVSAccount
 import org.votingsystem.model.VicketTagVS
-import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.WalletVS
-
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
 * @author jgzornoza
@@ -23,14 +16,15 @@ class WalletVSService {
 
 	def grailsApplication
 	def messageSource
+    def systemService
 
 	public void init() { }
 
     @Transactional
     public WalletVS getWalletVSForTransactionVS(String fromUserIBAN, VicketTagVS tag, String currencyCode) {
         List accountList = []
-        def noTagAccount = UserVSAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:null)
-        if(noTagAccount) accountList.add(noTagAccount)
+        def wildTagAccount = UserVSAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:systemService.getWildTag())
+        if(wildTagAccount) accountList.add(wildTagAccount)
         if(tag) {
             def tagAccount = UserVSAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:tag)
             if(tagAccount) accountList.add(tagAccount)

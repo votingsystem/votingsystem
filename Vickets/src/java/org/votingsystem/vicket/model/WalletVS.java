@@ -9,14 +9,14 @@ import org.votingsystem.vicket.util.ApplicationContextHolder;
 import java.math.BigDecimal;
 import java.util.*;
 
+
 /**
- * Created by jgzornoza on 25/06/14.
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class WalletVS {
 
     private static Logger log = Logger.getLogger(WalletVS.class);
-
-    public static final String ACCOUNT_WITHOUT_TAG = "ACCOUNT_WITHOUT_TAG";
 
     private Set<UserVSAccount> accounts = null;
     private String currencyCode;
@@ -26,42 +26,41 @@ public class WalletVS {
         this.currencyCode = currencyCode;
         accounts = new HashSet(accountList);
         for(UserVSAccount account : accounts) {
-            if(account.getTag() == null) {
-                //There must be only one account without tag
-                tagDataMap.put(ACCOUNT_WITHOUT_TAG, account);
-            } else tagDataMap.put(account.getTag().getName(), account);
+            tagDataMap.put(account.getTag().getName(), account);
         }
     }
 
-    public ResponseVS<Map<UserVSAccount, BigDecimal>> getAccountMovementsForTransaction(VicketTagVS tag, BigDecimal amount) {
+    public ResponseVS<Map<UserVSAccount, BigDecimal>> getAccountMovementsForTransaction(
+            VicketTagVS tag, BigDecimal amount) throws Exception {
         if(amount.compareTo(BigDecimal.ZERO) < 0) {
             log.debug("getMovementsForTransaction - negative amount: " + amount);
             return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
                     "negativeAmountRequestedErrorMsg", amount.toString()));
         }
         Map<UserVSAccount, BigDecimal> result = new HashMap<UserVSAccount, BigDecimal>();
-        UserVSAccount noTagAccount = tagDataMap.get(ACCOUNT_WITHOUT_TAG);
-        if(tag != null) {
+        UserVSAccount wildTagAccount = tagDataMap.get(VicketTagVS.WILDTAG);
+        if(tag == null) throw new Exception("Transaction without tag!!!");
+        if(!VicketTagVS.WILDTAG.equals(tag.getName())) {
             UserVSAccount tagAccount = tagDataMap.get(tag.getName());
             if(tagAccount != null && tagAccount.getBalance().compareTo(amount) > 0) result.put(tagAccount, amount);
             else {
-                BigDecimal tagMissing = amount;
-                if(tagAccount != null) tagMissing = amount.subtract(tagAccount.getBalance());
-                if(noTagAccount.getBalance().compareTo(tagMissing) > 0) {
+                BigDecimal tagAccountDeficit = amount;
+                if(tagAccount != null) tagAccountDeficit = amount.subtract(tagAccount.getBalance());
+                if(wildTagAccount.getBalance().compareTo(tagAccountDeficit) > 0) {
                     if(tagAccount != null) result.put(tagAccount, tagAccount.getBalance());
-                    result.put(noTagAccount, tagMissing);
+                    result.put(wildTagAccount, tagAccountDeficit);
                 } else {
-                    BigDecimal available = tagAccount.getBalance().add(noTagAccount.getBalance());
+                    BigDecimal available = tagAccount.getBalance().add(wildTagAccount.getBalance());
                     return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
                             "lowBalanceForTagErrorMsg", tag.getName(), available.toString(), amount.toString()));
                 }
             }
         } else {
-            if(noTagAccount.getBalance().compareTo(amount) > 0) {
-                result.put(noTagAccount, amount);
+            if(wildTagAccount.getBalance().compareTo(amount) > 0) {
+                result.put(wildTagAccount, amount);
             } else {
                 return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
-                        "balanceErrorMsg", noTagAccount.getBalance() + " " + currencyCode,  amount + " " + currencyCode));
+                        "balanceErrorMsg", wildTagAccount.getBalance() + " " + currencyCode,  amount + " " + currencyCode));
             }
         }
         return new ResponseVS<Map<UserVSAccount, BigDecimal>>(ResponseVS.SC_OK,  result);

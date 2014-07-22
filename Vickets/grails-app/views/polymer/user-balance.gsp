@@ -1,10 +1,14 @@
 <polymer-element name="user-balance" attributes="balance">
     <template>
-        <div class="btn btn-default" layout vertical style="width:250px; margin:10px 0px 0px 10px;">
-            <div style=""><b>{{balance.name}}</b></div>
-            <div style=""><g:message code="incomeLbl"/>: {{income}}</div>
-            <div style=""><g:message code="expensesLbl"/>: {{expenses}}</div>
-        </div>
+        <g:include view="/include/styles.gsp"/>
+            <section id="page1">
+                <div class="btn btn-default" layout vertical style="width:250px; margin:10px 0px 0px 10px;"
+                     on-click="{{showBalanceDetails}}">
+                    <div style=""><b>{{balance.name}}</b></div>
+                    <div style=""><g:message code="incomeLbl"/>: {{income}}</div>
+                    <div style=""><g:message code="expensesLbl"/>: {{expenses}}</div>
+                </div>
+            </section>
     </template>
 
 
@@ -32,6 +36,10 @@
                     })
                 }
                 this.isVisible = true
+            },
+            showBalanceDetails:function() {
+                console.log("showBalanceDetails")
+                this.fire('core-signal', {name: "user-balance-show-details", data: this.balance});
             }
         });
     </script>

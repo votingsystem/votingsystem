@@ -9,12 +9,10 @@
 </head>
 <body>
 <div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
-    <div class="row">
-        <ol class="breadcrumbVS pull-left">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li class="active"><g:message code="certsPageTitle"/></li>
-        </ol>
-    </div>
+    <ol class="breadcrumbVS">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li class="active"><g:message code="certsPageTitle"/></li>
+    </ol>
 
     <cert-list id="certList" url="<g:createLink controller="certificateVS" action="certs"/>"></cert-list>
 

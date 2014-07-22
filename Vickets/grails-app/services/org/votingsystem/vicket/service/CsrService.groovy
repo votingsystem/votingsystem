@@ -10,11 +10,11 @@ import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
+import org.votingsystem.vicket.model.Vicket
 
 import java.security.cert.X509Certificate
 

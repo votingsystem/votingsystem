@@ -1,5 +1,6 @@
 <script>
     window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
+    window['isVotingSystemClient'] = isVotingSystemClient()
 
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {

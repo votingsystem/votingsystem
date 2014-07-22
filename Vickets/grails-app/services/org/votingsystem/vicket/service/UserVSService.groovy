@@ -2,21 +2,13 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.SubscriptionVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketSource
-import org.votingsystem.util.DateUtils
-import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.model.UserVSAccount
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.vicket.util.IbanVSUtil
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
+import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.util.IbanVSUtil
+import org.votingsystem.vicket.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 
@@ -251,5 +243,19 @@ class UserVSService {
         return resultMap
     }
 
+    @Transactional
+    public Map getDetailedDataMapWithBalances(UserVS userVS, DateUtils.TimePeriod timePeriod){
+        Map resultMap = getUserVSDataMap(userVS)
+
+        Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(userVS, timePeriod)
+        resultMap.transactionFromList = transactionsFromWithBalancesMap.transactionFromList
+        resultMap.balancesFrom = transactionsFromWithBalancesMap.balancesFrom
+
+        Map transactionsToWithBalancesMap = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
+        resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
+        resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
+
+        return resultMap
+    }
 }
 

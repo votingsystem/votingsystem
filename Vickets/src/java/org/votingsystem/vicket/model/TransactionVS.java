@@ -40,7 +40,7 @@ public class TransactionVS  implements Serializable {
     @Column(name="currency", nullable=false) private String currencyCode;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="tag") private VicketTagVS tag;
+    @JoinColumn(name="tag", nullable=false) private VicketTagVS tag;
 
     @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
     @OneToOne private MessageSMIME messageSMIME;

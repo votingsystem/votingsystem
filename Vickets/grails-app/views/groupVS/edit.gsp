@@ -8,13 +8,11 @@
 </head>
 <body>
     <div id="contentDiv" class="pageContenDiv" style="min-height: 1000px; margin:0px auto 0px auto; padding:0px 30px 0px 30px;">
-        <div class="row">
-            <ol class="breadcrumbVS pull-left">
-                <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-                <li><a href="${createLink(controller: 'groupVS', action: 'index')}"><g:message code="groupvsLbl"/></a></li>
-                <li class="active"><g:message code="editGroupVSLbl"/></li>
-            </ol>
-        </div>
+        <ol class="breadcrumbVS pull-left">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li><a href="${createLink(controller: 'groupVS', action: 'index')}"><g:message code="groupvsLbl"/></a></li>
+            <li class="active"><g:message code="editGroupVSLbl"/></li>
+        </ol>
         <groupvs-editor groupvs='${groupvsMap as grails.converters.JSON}'></groupvs-editor>
     </div>
 </body>

@@ -45,9 +45,11 @@
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
                         </paper-item>
                         <g:if test="${"admin".equals(params.menu)}">
-                            <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup')}"">
-                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
-                            </paper-item>
+                            <template if="{{isVotingSystemClient}}">
+                                <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup')}"">
+                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
+                                </paper-item>
+                            </template>
                             {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                         </g:if>
                         <g:elseif test="${"superadmin".equals(params.menu)}">
@@ -102,6 +104,8 @@
                 window.addEventListener('popstate', function(event) {
                     navBar.url = document.location.href
                 });
+                this.isVotingSystemClient = window['isVotingSystemClient']
+                console.log(this.tagName + " - ready - isVotingSystemClient: " + this.isVotingSystemClient)
             },
             innerPageSignal:function(e, detail, sender) {
                 this.url = detail;

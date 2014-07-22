@@ -3,6 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 
+
 <polymer-element name="groupvs-list" attributes="url">
     <template>
         <style no-shim>
@@ -10,7 +11,6 @@
             position: relative;
             display: inline-block;
             width: 300px;
-            height: 200px;
             vertical-align: top;
             background-color: #fff;
             box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
@@ -36,8 +36,7 @@
                     </div>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{groupvs in groupvsData.groupvsList}}">
-                            <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}'
-                                 style="width: 300px;" cross-fade>
+                            <div on-tap="{{showGroupDetails}}" class='card groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} <g:message code="usersLbl"/></div>
                                 <div class='groupvsInfoDiv'><votingsystem-html-echo html="{{groupvs.description}}"></votingsystem-html-echo></div>

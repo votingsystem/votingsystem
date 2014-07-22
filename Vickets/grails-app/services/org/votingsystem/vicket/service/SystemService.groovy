@@ -10,6 +10,7 @@ import org.votingsystem.vicket.util.IbanVSUtil
 class SystemService {
 
     private UserVS systemUser
+    private VicketTagVS wildTag
 
     public synchronized Map init() throws Exception {
         log.debug("init")
@@ -21,6 +22,7 @@ class SystemService {
             systemUser.save()
             new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser, balance:BigDecimal.ZERO,
                     IBAN:systemUser.getIBAN()).save()
+            new VicketTagVS(name:VicketTagVS.WILDTAG).save()
         }
         return [systemUser:systemUser]
     }
@@ -39,4 +41,8 @@ class SystemService {
         return systemUser;
     }
 
+    public VicketTagVS getWildTag() {
+        if(!wildTag) wildTag = VicketTagVS.findWhere(name:VicketTagVS.WILDTAG)
+        return wildTag
+    }
 }

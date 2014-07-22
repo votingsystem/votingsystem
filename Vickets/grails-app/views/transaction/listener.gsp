@@ -9,12 +9,10 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
-        <ol class="breadcrumbVS pull-left">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li class="active"><g:message code="transactionPageTitle"/></li>
-        </ol>
-    </div>
+    <ol class="breadcrumbVS pull-left">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li class="active"><g:message code="transactionPageTitle"/></li>
+    </ol>
 
     <div layout horizontal center center-justified>
         <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"

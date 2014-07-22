@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat
 class ReportsController {
 
     def filesService
+    def balanceService
 
     private static Logger reportslog = Logger.getLogger("reportsLog");
     private static Logger transactionslog = Logger.getLogger("transactionsLog");
@@ -65,6 +66,7 @@ class ReportsController {
             Map<String, File> reportFiles = filesService.getWeekReportFiles(timePeriod)
             if(reportFiles.reportsFile.exists()) render JSON.parse(reportFiles.reportsFile.text) as JSON
             else {
+                balanceService.calculatePeriod(timePeriod)
                 response.status = ResponseVS.SC_NOT_FOUND
                 render [:] as JSON
             }

@@ -1,22 +1,17 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import grails.orm.PagedResultList
 import grails.transaction.Transactional
-import org.apache.log4j.Logger
-import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONArray
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.model.UserVSAccount
-import org.votingsystem.vicket.model.WalletVS
-import org.votingsystem.vicket.util.LoggerVS
-import org.votingsystem.vicket.util.MetaInfMsg
-import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.ExceptionVS
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.IbanVSUtil
-import grails.orm.PagedResultList;
+import org.votingsystem.vicket.util.LoggerVS
+import org.votingsystem.vicket.util.MetaInfMsg
+
 import java.math.RoundingMode
 
 /**
@@ -138,6 +133,24 @@ class TransactionVSService {
     }
 
     @Transactional
+    public Map getTransactionFromListWithBalances(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('fromUserVS', fromUserVS)
+//            isNull("transactionParent")
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+        }
+        def transactionFromList = []
+        Map<String, BigDecimal> balancesMap = [:]
+        transactionList.each { transaction ->
+            if(balancesMap[transaction.tag.name]) {
+                balancesMap[transaction.tag.name] = ((BigDecimal) balancesMap[transaction.tag.name]).add(transaction.amount)
+            } else balancesMap[(transaction.tag.name)] = transaction.amount
+            transactionFromList.add(getTransactionMap(transaction))
+        }
+        return [transactionFromList:transactionFromList, balancesFrom:balancesMap]
+    }
+
+    @Transactional
     public PagedResultList getTransactionToList(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('toUserVS', toUserVS)
@@ -146,6 +159,22 @@ class TransactionVSService {
         return transactionList
     }
 
+    @Transactional
+    public Map getTransactionToListWithBalances(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('toUserVS', toUserVS)
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+        }
+        def transactionToList = []
+        Map<String, BigDecimal> balancesMap = [:]
+        transactionList.each { transaction ->
+            if(balancesMap[transaction.tag.name]) {
+                balancesMap[transaction.tag.name] = ((BigDecimal) balancesMap[transaction.tag.name]).add(transaction.amount)
+            } else balancesMap[(transaction.tag.name)] = transaction.amount
+            transactionToList.add(getTransactionMap(transaction))
+        }
+        return [transactionToList:transactionToList, balancesTo:balancesMap]
+    }
 
     @Transactional
     public Map getTransactionMap(TransactionVS transaction, Locale locale) {

@@ -36,6 +36,7 @@
 
         <div class="text-justify" style="margin: 20px auto 300px auto;font-size: 1.2em;">
             <h3 class="page-header">Alquimia digital</h3>
+            <p><b>La moneda electrónica sirve para poder añadir nuevas funcionalidades a la moneda tradicional</b></p>
             <p><b>Estímulo de actividad mediante monedas electrónicas</b></p>
             <p>Lo que necesitan las empresas es demanda efectiva, es decir, que sus potenciales compradores tengan más
             ingresos para gastar. Es solo el incremento de gasto por parte de los consumidores lo que puede hacer que

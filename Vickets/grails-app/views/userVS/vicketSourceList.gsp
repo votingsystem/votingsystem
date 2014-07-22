@@ -8,13 +8,11 @@
 <body>
 <div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
     <div style="margin:0px 30px 0px 30px;">
-        <div class="row">
-            <ol class="breadcrumbVS pull-left">
-                <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-                <li><a href="${createLink(controller: 'userVS', action:'search')}"><g:message code="usersvsLbl"/></a></li>
-                <li class="active"><g:message code="vicketSourceListPageLbl"/></li>
-            </ol>
-        </div>
+        <ol class="breadcrumbVS">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li><a href="${createLink(controller: 'userVS', action:'search')}"><g:message code="usersvsLbl"/></a></li>
+            <li class="active"><g:message code="vicketSourceListPageLbl"/></li>
+        </ol>
 
         <div layout horizontal center center-justified>
             <select id="vicketSourceStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"

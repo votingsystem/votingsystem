@@ -7,12 +7,10 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
-        <ol class="breadcrumbVS pull-left">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li class="active"><g:message code="reportsPageTitle"/></li>
-        </ol>
-    </div>
+    <ol class="breadcrumbVS">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li class="active"><g:message code="reportsPageTitle"/></li>
+    </ol>
 
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>

@@ -1,15 +1,9 @@
 package org.votingsystem.vicket.service
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64
-import grails.converters.JSON
 import grails.transaction.Transactional
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.UserVS
+import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
-import org.votingsystem.util.DateUtils
-import org.votingsystem.util.StringUtils
 
 @Transactional
 class AuditingService {

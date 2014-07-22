@@ -2,12 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketSource
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
@@ -53,12 +48,10 @@ class TransactionVS_VicketSourceService {
         }
 
         VicketTagVS tag
-        if(messageJSON.tags && !messageJSON.tags.size() == 1) { //transactions can only have one tag associated
+        if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
             tag = VicketTagVS.findWhere(id:Long.valueOf(messageJSON.tags[0].id), name:messageJSON.tags[0].name)
             if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0].name}'")
-        } else if(messageJSON.tags?.size() > 1) {
-            throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
-        }
+        } else throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
 
         UserVS systemUser = systemService.getSystemUser()
         TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,

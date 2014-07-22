@@ -14,13 +14,11 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <div class="row" style="max-width: 1300px; margin: 0px auto 0px auto;">
-        <ol class="breadcrumbVS pull-left">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'certificateVS', action: 'certs')}"><g:message code="certsPageTitle"/></a></li>
-            <li class="active"><g:message code="trustedCertPageTitle"/></li>
-        </ol>
-    </div>
+    <ol class="breadcrumbVS">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li><a href="${createLink(controller: 'certificateVS', action: 'certs')}"><g:message code="certsPageTitle"/></a></li>
+        <li class="active"><g:message code="trustedCertPageTitle"/></li>
+    </ol>
 
     <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
         <g:if test="${"admin".equals(params.menu) || "superadmin".equals(params.menu)}">

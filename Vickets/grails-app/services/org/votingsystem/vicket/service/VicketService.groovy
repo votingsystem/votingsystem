@@ -6,15 +6,15 @@ import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
 import org.votingsystem.model.*
-import org.votingsystem.vicket.util.MetaInfMsg
-import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.vicket.model.Vicket
-import org.votingsystem.vicket.model.VicketBatchRequest
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
+import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.Vicket
+import org.votingsystem.vicket.model.VicketBatchRequest
+import org.votingsystem.vicket.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 

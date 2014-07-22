@@ -9,13 +9,11 @@
 </head>
 <body>
 <div class="pageContenDiv" style="max-width: 1000px; padding:0px 30px 0px 30px;">
-    <div class="row" style="margin: 0px auto 0px auto;">
-        <ol class="breadcrumbVS pull-left">
-            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-            <li><a href="${createLink(controller: 'userVS', action:'search')}"><g:message code="usersvsLbl"/></a></li>
-            <li class="active"><g:message code="vicketSourcePageLbl"/></li>
-        </ol>
-    </div>
+    <ol class="breadcrumbVS">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li><a href="${createLink(controller: 'userVS', action:'search')}"><g:message code="usersvsLbl"/></a></li>
+        <li class="active"><g:message code="vicketSourcePageLbl"/></li>
+    </ol>
     <div class="pageContenDiv" style="max-width: 1000px; padding: 20px;">
         <div style="margin:0px 30px 0px 30px;">
             <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">

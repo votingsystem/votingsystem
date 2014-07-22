@@ -1,39 +1,38 @@
 package org.votingsystem.vicket.service
 
-import grails.transaction.Transactional
+import grails.converters.JSON
 import org.hibernate.ScrollableResults
-import org.votingsystem.model.AccessRequestVS
 import org.votingsystem.model.GroupVS
-import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
 import org.votingsystem.util.DateUtils
-import grails.converters.JSON;
 
 //@Transactional
 class BalanceService {
 
+    def systemService
+    def messageSource
+    def grailsApplication
     def sessionFactory
     def transactionVSService
     def groupVSService
     def userVSService
     def vicketSourceService
     def filesService
+    def signatureVSService
 
     //@Transactional
-    public ResponseVS initWeek() {
-        log.debug("initWeek")
-        //we know this is launch every Monday at 00:00 so we must select a day
+    public ResponseVS calculatePeriod(DateUtils.TimePeriod timePeriod) {
+        log.debug("calculatePeriod - timePeriod: ${timePeriod.toString()}")
+        //we know this is launch every Monday at 00:00 so we just make sure to select a day from last week
         long begin = System.currentTimeMillis()
-        Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
-        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
+
 
         int numTotalUsers = UserVS.countByDateCancelledIsNullOrDateCancelledGreaterThanEquals(timePeriod.getDateFrom())
 
         Map<String, File> weekReportFiles = filesService.getWeekReportFiles(timePeriod)
         File reportsFile = weekReportFiles.reportsFile
-
 
         List groupBalanceList = []
         List userBalanceList = []
@@ -69,14 +68,22 @@ class BalanceService {
         Map userBalances = [groupBalanceList:groupBalanceList, userBalanceList:userBalanceList, vicketSourceBalanceList:vicketSourceBalanceList]
         Map resultMap = [userBalances:userBalances]
         //transactionslog.info(new JSON(dataMap) + ",");
-        reportsFile.write(new JSON(resultMap).toString())
-        return new ResponseVS(ResponseVS.SC_OK)
+        JSON userBalancesJSON = new JSON(resultMap)
+        reportsFile.write(userBalancesJSON.toString())
+        Locale defaultLocale = new Locale(grailsApplication.config.VotingSystem.defaultLocale)
+
+        String subject =  messageSource.getMessage('periodBalancesReportMsgSubject',
+                ["[${DateUtils.getStringFromDate(timePeriod.getDateFrom())} - ${DateUtils.getStringFromDate(timePeriod.getDateTo())}]"].toArray(), defaultLocale)
+        ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
+                "", userBalancesJSON.toString(),subject)
+        responseVS.getSmimeMessage().writeTo(new FileOutputStream(weekReportFiles.systemReceipt))
+        return responseVS
     }
 
     private Map genBalanceForVicketSource(VicketSource vicketSource, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("genBalanceForVicketSource - id '${vicketSource.id}'")
-        Map dataMap = vicketSourceService.getDetailedDataMap(vicketSource, timePeriod)
+        Map dataMap = vicketSourceService.getDetailedDataMapWithBalances(vicketSource, timePeriod)
         if(vicketSource.state == UserVS.State.ACTIVE) {
 
         } else {}
@@ -86,7 +93,10 @@ class BalanceService {
     private Map genBalanceForGroupVS(GroupVS groupvs, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("genBalanceForGroupVS - id '${groupvs.id}'")
-        Map dataMap = groupVSService.getDetailedDataMap(groupvs, timePeriod)
+        Map dataMap = groupVSService.getDetailedDataMapWithBalances(groupvs, timePeriod)
+        //Now we calculate balances for each tag and make the beginning of period adjustment
+
+
         if(groupvs.state == UserVS.State.ACTIVE) {
 
         } else {}
@@ -96,7 +106,7 @@ class BalanceService {
     private Map genBalanceForUserVS(UserVS uservs, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("genBalanceForUserVS - id '${uservs.id}'")
-        Map dataMap = userVSService.getDetailedDataMap(uservs, timePeriod)
+        Map dataMap = userVSService.getDetailedDataMapWithBalances(uservs, timePeriod)
         if(uservs.state == UserVS.State.ACTIVE) {
 
         } else {}

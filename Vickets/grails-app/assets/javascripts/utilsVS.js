@@ -257,6 +257,11 @@ function isJavaFX () {
 	return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
 }
 
+function isVotingSystemClient () {
+    return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
+}
+
+
 function getFnName(fn) {
 	  var f = typeof fn == 'function';
 	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));

@@ -15,10 +15,10 @@ import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
+import org.votingsystem.vicket.util.MetaInfMsg
 
 import java.security.MessageDigest
 import java.security.cert.X509Certificate

@@ -1,77 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PolymerTest - dialog</title>
-    <asset:javascript src="utilsVS.js"/>
-    <asset:stylesheet src="polymer.css"/>
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
-    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
-
-    <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog-transition.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/paper-dialog', file: 'paper-dialog.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
-
-
-
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog',
-            file: 'votingsystem-advanced-search-dialog.html')}">
-
-    <style>
-    </style>
+    <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 </head>
+<body>
+<div layout vertical style="width:1200px;height: 1200px;margin:0px auto; ">
+    <div layout horizontal>
+        <button onclick="document.querySelector('#depositDialog').show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS)" style="margin:10px;">Deposit dialog</button>
+        <button onclick="document.querySelector('#tagDialog').show()"style="margin:10px;">Tag dialog</button>
+        <button onclick="document.querySelector('#getReasonDialog').toggle()" style="margin:10px;">Get reason dialog</button>
+        <button onclick="showMessageVS('msg msg msg ', 'caption', null, false)" style="margin:10px;">Message dialog</button>
+    </div>
+    <div layout vertical>
 
-<body style="height: 800px; width:1000px; margin: 0px auto 0px auto;">
+        <paper-input id="depositSubject" floatinglabel
+                     label="<g:message code="subjectLbl"/>" required></paper-input>
 
-<paper-button label="Avanced search dialog" onclick="showAvancedSearchDialog()"></paper-button>
-
-<paper-button label="Overlay dialog" onclick="showOverlayDialog()"></paper-button>
-<paper-button label="Tag dialog" onclick="showTagDialog()"></paper-button>
-
-<votingsystem-advanced-search-dialog id="advancedSearchDialog" transition="paper-dialog-transition-center" opened="false" >
-</votingsystem-advanced-search-dialog>
+        <g:include view="/polymer/dialog/vicket-deposit-dialog.gsp"/>
+        <div layout horizontal center center-justified style="">
+            <vicket-deposit-dialog id="depositDialog" caption="Realizar ingreso"></vicket-deposit-dialog>
+        </div>
 
 
-<paper-button label="paperDialog" onclick="openWindow('')"></paper-button>
+        <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
+                                        serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
 
+        <g:include view="/polymer/dialog/get-reason-dialog.gsp"/>
+        <get-reason-dialog id="getReasonDialog" opened="false" caption="<g:message code="cancelCertFormCaption"/>"
+                           isForAdmins="true"></get-reason-dialog>
+
+
+
+    </div>
+
+    <votingsystem-button>
+        Testing <i class="fa fa-pencil-square-o"></i>
+    </votingsystem-button>
+
+</div>
 </body>
 </html>
 <asset:script>
 
     document.addEventListener('polymer-ready', function() {
-
     });
 
-    document.getElementById("advancedSearchDialog").addEventListener('submit-form', function(e) {
-        console.log(" ====== submit-form - addEventListener - e: " + e + " - detail: " + JSON.stringify(e.detail))
-    });
-
-    function showOverlayDialog() {
-        var dialog = document.querySelector('#confirmation');
-        dialog.toggle();
-    }
-
-    function showDialog() {
-        var dialog = document.querySelector('#paperDialog');
-        dialog.toggle();
-    }
-
-    function showAvancedSearchDialog() {
-        var dialog = document.querySelector('#advancedSearchDialog');
-        dialog.toggle();
-    }
-
-    function showTagDialog() {
+    function showEditor() {
 
     }
-
-
-    function acceptButton() {
-        console.log("acceptButton")
-    }
-
 </asset:script>
 <asset:deferredScripts/>

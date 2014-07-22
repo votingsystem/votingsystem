@@ -33,8 +33,11 @@ class TestingController {
 
     def balanceService
 
+    def systemService
 
     def index() {
+
+
         balanceService.initWeek();
 
         render "OK"

@@ -1,8 +1,6 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.TypeVS
 import org.votingsystem.util.DateUtils
 
 import java.text.DateFormat
@@ -37,7 +35,8 @@ class FilesService {
         String baseDirPath ="${grailsApplication.config.VotingSystem.backupCopyPath}/weekReports/${dateFromPathPart}_${dateToPathPart}/"
         File baseDir = new File(baseDirPath)
         baseDir.mkdirs()
-        return [baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json")]
+        return [baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json"),
+                systemReceipt:new File("${baseDirPath}/receipt.p7s")]
     }
 
     private static final POLL_INTERVAL = 1000

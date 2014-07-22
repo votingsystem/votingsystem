@@ -5,10 +5,8 @@ import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
-import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.model.UserVSAccount
-import org.votingsystem.vicket.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
+import org.votingsystem.vicket.util.MetaInfMsg
 
 /**
 * @author jgzornoza
@@ -216,6 +214,21 @@ class GroupVSService {
         }
         resultMap.transactionFromList = transactionFromListJSON
         resultMap.transactionToList = transactionToListJSON
+        return resultMap
+    }
+
+    @Transactional
+    public Map getDetailedDataMapWithBalances(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
+        Map resultMap = getGroupVSDataMap(groupVS)
+
+        Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(groupVS, timePeriod)
+        resultMap.transactionFromList = transactionsFromWithBalancesMap.transactionFromList
+        resultMap.balancesFrom = transactionsFromWithBalancesMap.balancesFrom
+
+        Map transactionsToWithBalancesMap = transactionVSService.getTransactionToListWithBalances(groupVS, timePeriod)
+        resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
+        resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
+
         return resultMap
     }
 

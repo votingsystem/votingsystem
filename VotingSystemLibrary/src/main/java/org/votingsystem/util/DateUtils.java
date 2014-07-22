@@ -197,5 +197,9 @@ public class DateUtils {
         public Date getDateTo() {
             return dateTo;
         }
+
+        public String toString() {
+            return "Period from [" + dateFrom.toString() + " - " + dateTo.toString() + "]";
+        }
     }
 }

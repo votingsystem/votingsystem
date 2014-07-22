@@ -14,8 +14,6 @@ class PolymerTestController {
 
     def dialog() { }
 
-    def toolbar() {}
-
     def layout() { }
 
     def forms() {}

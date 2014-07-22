@@ -1,23 +1,20 @@
 package org.votingsystem.vicket.service
 
-import grails.converters.JSON
-import grails.transaction.Transactional
+import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.vicket.websocket.SessionVS
 import org.votingsystem.vicket.websocket.SessionVSHelper
-import net.sf.json.JSONObject;
+
 import javax.websocket.CloseReason
 import javax.websocket.Session
 import java.nio.ByteBuffer
-
 
 class WebSocketService {
 
