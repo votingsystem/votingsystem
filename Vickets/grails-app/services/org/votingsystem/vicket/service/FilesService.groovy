@@ -35,8 +35,8 @@ class FilesService {
         String baseDirPath ="${grailsApplication.config.VotingSystem.backupCopyPath}/weekReports/${dateFromPathPart}_${dateToPathPart}/"
         File baseDir = new File(baseDirPath)
         baseDir.mkdirs()
-        return [baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json"),
-                systemReceipt:new File("${baseDirPath}/receipt.p7s")]
+        File receiptFile = new File("${baseDirPath}/receipt.p7s")
+        return [baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json"), systemReceipt:receiptFile]
     }
 
     private static final POLL_INTERVAL = 1000

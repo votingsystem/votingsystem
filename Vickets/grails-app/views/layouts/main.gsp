@@ -26,7 +26,7 @@
 <body id="voting_system_page" style="margin:0px auto 0px auto;background-color: #f9f9f9;">
 <polymer-element name="nav-bar" attributes="url loading">
     <template>
-        <core-ajax id="ajax" auto url="" handleAs="document" on-core-response="{{ajaxResponse}}"></core-ajax>
+        <core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}"></core-ajax>
         <!-- put core signals names in lower case !!!-->
         <core-signals on-core-signal-innerpage="{{innerPageSignal}}"></core-signals>
         <votingsystem-navbar id="_navbar" style="display: none;">
@@ -35,38 +35,38 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener')}">
+                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener', absolute: true)}">
                             <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
                         </paper-item>
-                        <paper-item data-href="${createLink(controller: 'groupVS')}">
+                        <paper-item data-href="${createLink(controller: 'groupVS', absolute: true)}">
                             <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
                         </paper-item>
-                        <paper-item data-href="${createLink(controller: 'userVS', action: 'search')}">
+                        <paper-item data-href="${createLink(controller: 'userVS', action: 'search', absolute: true)}">
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
                         </paper-item>
                         <g:if test="${"admin".equals(params.menu)}">
                             <template if="{{isVotingSystemClient}}">
-                                <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup')}"">
+                                <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup', absolute: true)}"">
                                     <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
                                 </paper-item>
                             </template>
                             {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                         </g:if>
                         <g:elseif test="${"superadmin".equals(params.menu)}">
-                            <paper-item data-href="${createLink(controller: 'userVS', action: 'newVicketSource')}">
+                            <paper-item data-href="${createLink(controller: 'userVS', action: 'newVicketSource', absolute: true)}">
                                 <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newVicketSourceLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority')}"
+                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority', absolute: true)}"
                                         style="padding:30px 10px 30px 10px;">
                                 <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> <g:message code="newCAAuthorityLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'certs')}">
+                            <paper-item data-href="${createLink(controller: 'certificateVS', action: 'certs', absolute: true)}">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateCertLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'userVS', action: 'save')}">
+                            <paper-item data-href="${createLink(controller: 'userVS', action: 'save', absolute: true)}">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newUserCertLbl"/>
                             </paper-item>
-                            <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact')}" on-click="{{changeToAdminMenu}}"
+                            <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact', absolute: true)}" on-click="{{changeToAdminMenu}}"
                                         style="padding:30px 10px 30px 10px;">
                                 <g:message code="changeToAdminMenuLbl"/>
                             </paper-item>
@@ -75,10 +75,10 @@
                         <g:else>
                             {{ "<g:message code="usersPageTitle"/>" | setTitle}}
                         </g:else>
-                        <paper-item data-href="${createLink(controller: 'reports', action:'index')}"">
+                        <paper-item data-href="${createLink(controller: 'reports', action:'index', absolute: true)}"">
                             <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> <g:message code="reportsPageTitle"/>
                         </paper-item>
-                        <paper-item data-href="${createLink(controller: 'app', action: 'contact')}">
+                        <paper-item data-href="${createLink(controller: 'app', action: 'contact', absolute: true)}">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                         </paper-item>
                     </core-selector>
@@ -96,6 +96,7 @@
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
             url:'',
+            requestCounter:0,
             ready: function() {
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
@@ -111,19 +112,24 @@
                 this.url = detail;
             },
             urlChanged: function() {
-                if(this.url != null) {
-                    this.loading= true;
-                    history.pushState(null, null, this.url);
-                    this.$.ajax.url =  updateMenuLink(this.url, "mode=innerPage")
-                }
+                this.loadURL(this.url)
             },
-            drawerItemSelected: function() {
-                this.fire('item-selected', this.coreSelectorValue)
-                if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
-                    window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
-                } else {
-                    this.url = this.coreSelectorValue
-                    this.coreSelectorValue = null
+            loadURL: function(urlToLoad) {
+                console.log("========= " + urlToLoad)
+                this.loading= true;
+                history.pushState(null, null, this.url);
+                var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
+                if(this.$.ajax.url == newURL)  this.$.ajax.go()
+                else this.$.ajax.url = newURL
+            },
+            drawerItemSelected: function(e) {
+                if(e.detail.isSelected) {
+                    this.fire('item-selected', this.coreSelectorValue)
+                    if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
+                        window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
+                    } else {
+                        this.loadURL(this.coreSelectorValue)
+                    }
                 }
             },
             searchVisible: function(isVisible) {
@@ -132,10 +138,19 @@
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
             },
-            ajaxResponse: function(appTitle) {
-                console.log(this.tagName + " - ajax-response - newURL: " + this.url)
-                this.asyncFire('ajax-response', this.$.ajax.response)
-                this.url = null
+            ajaxResponse: function(e) {
+                console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
+                var innerPage = document.implementation.createHTMLDocument('');
+                innerPage.write(e.detail.xhr.responseText);
+                this.asyncFire('ajax-response', innerPage)
+            },
+            ajaxError: function(e) {
+                console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
+                if(ResponseVS.SC_PRECONDITION_FAILED == e.detail.xhr.status) {
+                    this.loading = false
+                    var response = e.detail.xhr.responseText
+                    showMessageVS(response, '<g:message code="errorLbl"/>')
+                }
             }
         });
     </script>
@@ -205,7 +220,7 @@
             //console.log("elementsArray[i].href: " + elementsArray[i].href)
             if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
                 elementsArray[i].addEventListener('click', function(e) {
-                    document.querySelector('#navBar').url = e.target.href
+                    document.querySelector('#navBar').loadURL(e.target.href)
                     e.preventDefault()
                 });
             } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)

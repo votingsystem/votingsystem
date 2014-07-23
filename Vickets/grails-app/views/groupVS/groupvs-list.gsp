@@ -18,7 +18,7 @@
         }
         </style>
         <asset:stylesheet src="vickets_groupvs.css"/>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json" method="get"
+        <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-uservs-details-closed="{{closeUserDetails}}"
                       on-core-signal-groupvs-details-closed="{{closeGroupDetails}}"></core-signals>

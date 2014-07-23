@@ -4,6 +4,7 @@ import grails.converters.JSON
 import groovy.io.FileType
 import org.apache.log4j.Logger
 import org.apache.log4j.RollingFileAppender
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.util.DateUtils
@@ -21,7 +22,6 @@ import java.text.SimpleDateFormat
 class ReportsController {
 
     def filesService
-    def balanceService
 
     private static Logger reportslog = Logger.getLogger("reportsLog");
     private static Logger transactionslog = Logger.getLogger("transactionsLog");
@@ -57,21 +57,38 @@ class ReportsController {
     }
 
     def forWeek() {
+        DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        Date selectedDate
+        DateUtils.TimePeriod timePeriod
+        Map<String, File> reportFiles
+        try {
+            selectedDate = formatter.parse(params.date)
+            timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(selectedDate)
+            reportFiles = filesService.getWeekReportFiles(timePeriod)
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            String msg = "Request date with errors: ${params.date}"
+            log.error(msg)
+            response.status = ResponseVS.SC_ERROR_REQUEST
+            render msg
+            return false
+
+        }
         if(request.contentType?.contains("json")) {
-            def requestJSON = request.JSON
-            DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-            Date selectedDate
-            if(params.date) selectedDate = formatter.parse(params.date)
-            DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(selectedDate)
-            Map<String, File> reportFiles = filesService.getWeekReportFiles(timePeriod)
-            if(reportFiles.reportsFile.exists()) render JSON.parse(reportFiles.reportsFile.text) as JSON
-            else {
-                balanceService.calculatePeriod(timePeriod)
+            if(reportFiles.reportsFile.exists()) {
+                render JSON.parse(reportFiles.reportsFile.text) as JSON
+            } else {
                 response.status = ResponseVS.SC_NOT_FOUND
                 render [:] as JSON
             }
             return false
-        } else render(view:'forWeek',  model: [date:params.date])
+        } else {
+            if(!reportFiles.reportsFile.exists()) {
+                response.status = ResponseVS.SC_PRECONDITION_FAILED
+                render(view:'/error412',  model: [message:message(code:'reportsForPeriodMissingMsg',
+                        args:[timePeriod.toString()])])
+            } else render(view:'forWeek',  model: [date:params.date])
+        }
     }
 
     def transactionvs() {

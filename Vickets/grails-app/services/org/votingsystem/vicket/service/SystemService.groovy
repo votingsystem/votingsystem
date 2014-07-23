@@ -11,6 +11,7 @@ class SystemService {
 
     private UserVS systemUser
     private VicketTagVS wildTag
+    def grailsApplication
 
     public synchronized Map init() throws Exception {
         log.debug("init")

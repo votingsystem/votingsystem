@@ -8,7 +8,8 @@
 
 <polymer-element name="week-reports" attributes="url params-data">
     <template>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{weekReport}}" handleAs="json" method="post" contentType="json" on-core-complete="{{ajaxComplete}}"/>
+        <core-ajax id="ajax" auto url="{{url}}" response="{{weekReport}}" handleAs="json" contentType="json"
+                   on-core-complete="{{ajaxComplete}}" on-core-response="{{coreResponse}}"/>
         <!--<google-chart id="chart"></google-chart>-->
         <core-signals on-core-signal-user-balance-show-details="{{showBalanceDetails}}"
                       on-core-signal-balance-details-closed="{{closeBalanceDetails}}"></core-signals>
@@ -58,10 +59,14 @@
                 })
                 var hostElement = this
                 // `async` lets the main loop resume and perform tasks, like DOM updates, then it calls your callback
-                this.async(function() { hostElement.calculateStatistics()});
+                this.async(function() { this.calculateStatistics()});
             },
-            ajaxComplete:function() {
-                console.log(this.tagName + " - ajaxComplete")
+            ajaxComplete:function(e) {
+                console.log(this.tagName + " - ajaxComplete - " + e.detail.xhr.status + " - id: " + e.target.id)
+
+            },
+            coreResponse:function(xhr) {
+                console.log(this.tagName + " - coreResponse")
             },
             calculateStatistics:function() {
                 var userBalances = this.shadowRoot.querySelectorAll("user-balance._uservs")

@@ -21,7 +21,7 @@
             balanceChanged: function() {
                 //console.log(this.tagName + " - " + this.id + " - balanceChanged " )
                 var hostElement = this
-                this.async(function() { hostElement.makeBalances()});
+                this.async(function() { this.makeBalances()});
             },
             makeBalances:function() {
                 this.expenses = 0

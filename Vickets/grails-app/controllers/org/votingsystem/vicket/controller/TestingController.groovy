@@ -37,8 +37,8 @@ class TestingController {
 
     def index() {
 
-
-        balanceService.initWeek();
+        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(Calendar.getInstance().getTime())
+        balanceService.calculatePeriod(timePeriod);
 
         render "OK"
         return false

@@ -7,7 +7,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
-
+import grails.transaction.Transactional
 import javax.mail.Header
 import java.security.cert.X509Certificate
 import java.text.DecimalFormat
@@ -16,6 +16,7 @@ import java.text.DecimalFormat
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class EventVSElectionService {
 
     def tagVSService
@@ -72,7 +73,7 @@ class EventVSElectionService {
 				Set<TagVS> tagSet = tagVSService.save(messageJSON.tags)
 				if(tagSet) eventVS.setTagVSSet(tagSet)
 			}
-			EventVSElection.withTransaction { eventVS.save() }
+            eventVS.save()
 			if (messageJSON.fieldsEventVS) {
 				Set<FieldEventVS> fieldsEventVS = fieldEventVSService.saveFieldsEventVS(eventVS, messageJSON.fieldsEventVS)
 				JSONArray arrayFieldsEventVS = new JSONArray()
@@ -112,7 +113,7 @@ class EventVSElectionService {
 			if(ResponseVS.SC_OK != encryptResponse.statusCode) {
 				eventVS.state = EventVS.State.ERROR
                 eventVS.metaInf = encryptResponse.message
-				EventVS.withTransaction { eventVS.save() }
+                eventVS.save()
 				log.error "saveEvent - ERROR ENCRYPTING MSG - ${encryptResponse.message}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:encryptResponse.message,
                         eventVS:eventVS, type:TypeVS.VOTING_EVENT_ERROR)
@@ -122,7 +123,7 @@ class EventVSElectionService {
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
 				eventVS.state = EventVS.State.ERROR
                 eventVS.metaInf = responseVS.message
-				EventVS.withTransaction { eventVS.save() }
+                eventVS.save()
 				msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',
                         [responseVS.message].toArray(),locale)
 				log.error "saveEvent - ERROR NOTIFYING CONTROL CENTER - ${msg}"
@@ -131,7 +132,7 @@ class EventVSElectionService {
 			}
 			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 				smimeParent:messageSMIMEReq, eventVS:eventVS,  content:smimeMessageRespBytes)
-			MessageSMIME.withTransaction { messageSMIMEResp.save() }
+            messageSMIMEResp.save()
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
                     data:messageSMIMEResp)
 		} catch(Exception ex) {
@@ -141,7 +142,8 @@ class EventVSElectionService {
 				message:msg, type:TypeVS.VOTING_EVENT_ERROR, eventVS:eventVS)
 		}
     }
-    
+
+    @Transactional
 	public synchronized ResponseVS generateBackup (EventVSElection eventVS, Locale locale) {
 		log.debug("generateBackup - eventVSId: ${eventVS.id}")
 		ResponseVS responseVS;
@@ -224,66 +226,58 @@ class EventVSElectionService {
 			new File(accessRequestBaseDir).mkdirs()
 			def votes = null
 			long begin = System.currentTimeMillis()
-			VoteVS.withTransaction {
-				def criteria = VoteVS.createCriteria()
-				votes = criteria.scroll {
-					eq("state", VoteVS.State.OK)
-					eq("eventVS", eventVS)
-				}
-				while (votes.next()) {
-					VoteVS voteVS = (VoteVS) votes.get(0);
-					UserVS representative = voteVS?.certificateVS?.userVS
-					String voteFilePath = null
-					if(representative) {//representative vote, not anonymous
-						voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
-					} else {
-						//user vote, is anonymous
-						voteFilePath = "${votesBaseDir}/${voteFileName}_${formatted.format(voteVS.id)}.p7m"
-					}
-					MessageSMIME messageSMIME = voteVS.messageSMIME
-					File smimeFile = new File(voteFilePath)
-					smimeFile.setBytes(messageSMIME.content)
-					if((votes.getRowNumber() % 100) == 0) {
-						String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-							System.currentTimeMillis() - begin)
-						log.debug("processed ${votes.getRowNumber()} votes of ${numTotalVotes} - ${elapsedTimeStr}");
-						sessionFactory.currentSession.flush()
-						sessionFactory.currentSession.clear()
-					}
-					if(((votes.getRowNumber() + 1) % 2000) == 0) {
-						votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
-						new File(votesBaseDir).mkdirs()
-					}	
-				}
-			}
-			
+            votes = VoteVS.createCriteria().scroll {
+                eq("state", VoteVS.State.OK)
+                eq("eventVS", eventVS)
+            }
+            while (votes.next()) {
+                VoteVS voteVS = (VoteVS) votes.get(0);
+                UserVS representative = voteVS?.certificateVS?.userVS
+                String voteFilePath = null
+                if(representative) {//representative vote, not anonymous
+                    voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
+                } else {
+                    //user vote, is anonymous
+                    voteFilePath = "${votesBaseDir}/${voteFileName}_${formatted.format(voteVS.id)}.p7m"
+                }
+                MessageSMIME messageSMIME = voteVS.messageSMIME
+                File smimeFile = new File(voteFilePath)
+                smimeFile.setBytes(messageSMIME.content)
+                if((votes.getRowNumber() % 100) == 0) {
+                    String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                            System.currentTimeMillis() - begin)
+                    log.debug("processed ${votes.getRowNumber()} votes of ${numTotalVotes} - ${elapsedTimeStr}");
+                    sessionFactory.currentSession.flush()
+                    sessionFactory.currentSession.clear()
+                }
+                if(((votes.getRowNumber() + 1) % 2000) == 0) {
+                    votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
+                    new File(votesBaseDir).mkdirs()
+                }
+            }
 			def accessRequests = null
 			begin = System.currentTimeMillis()
-			AccessRequestVS.withTransaction {
-				def criteria = AccessRequestVS.createCriteria()
-				accessRequests = criteria.scroll {
-					eq("state", AccessRequestVS.State.OK)
-					eq("eventVSElection", eventVS)
-				}
-				while (accessRequests.next()) {
-					AccessRequestVS accessRequest = (AccessRequestVS) accessRequests.get(0);
-					MessageSMIME messageSMIME = accessRequest.messageSMIME
-					File smimeFile = new File("${accessRequestBaseDir}/${accessRequestFileName}_${accessRequest.userVS.nif}.p7m")
-					smimeFile.setBytes(messageSMIME.content)
-					if((accessRequests.getRowNumber() % 100) == 0) {
-						String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-							System.currentTimeMillis() - begin)
-						log.debug(" - accessRequest ${accessRequests.getRowNumber()} of ${numTotalAccessRequests} - ${elapsedTimeStr}");
-						sessionFactory.currentSession.flush()
-						sessionFactory.currentSession.clear()
-					} 
-					if(((accessRequests.getRowNumber() + 1) % 2000) == 0) {
-						accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
-						new File(accessRequestBaseDir).mkdirs()
-					}
-				}
-				
-			}
+            accessRequests = AccessRequestVS.createCriteria().scroll {
+                eq("state", AccessRequestVS.State.OK)
+                eq("eventVSElection", eventVS)
+            }
+            while (accessRequests.next()) {
+                AccessRequestVS accessRequest = (AccessRequestVS) accessRequests.get(0);
+                MessageSMIME messageSMIME = accessRequest.messageSMIME
+                File smimeFile = new File("${accessRequestBaseDir}/${accessRequestFileName}_${accessRequest.userVS.nif}.p7m")
+                smimeFile.setBytes(messageSMIME.content)
+                if((accessRequests.getRowNumber() % 100) == 0) {
+                    String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                            System.currentTimeMillis() - begin)
+                    log.debug(" - accessRequest ${accessRequests.getRowNumber()} of ${numTotalAccessRequests} - ${elapsedTimeStr}");
+                    sessionFactory.currentSession.flush()
+                    sessionFactory.currentSession.clear()
+                }
+                if(((accessRequests.getRowNumber() + 1) % 2000) == 0) {
+                    accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
+                    new File(accessRequestBaseDir).mkdirs()
+                }
+            }
 			
 			def ant = new AntBuilder()
 			ant.zip(destfile: zipResult, basedir: "${filesDir}") {

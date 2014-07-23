@@ -1,6 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-transition', file: 'core-transition-css.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
+
 
 <polymer-element name="x-dialog" attributes="opened autoCloseDisabled">
     <template>
@@ -14,7 +16,6 @@
             -moz-user-select: none;
             overflow: hidden;
             background: white;
-            padding:30px 42px;
             outline: 1px solid rgba(0,0,0,0.2);
             box-shadow: 0 4px 16px rgba(0,0,0,0.2);
         }
@@ -37,9 +38,9 @@
 
 
 <!-- an element that uses the x-dialog element and core-overlay -->
-<polymer-element name="balance-details">
+<polymer-element name="balance-details" attributes="opened balance">
     <template>
-        <x-dialog id="dialog" class="dialog">
+        <x-dialog id="xDialog" class="dialog">
             <!-- place all overlay styles inside the overlay target -->
             <style no-shim>
             .dialog {
@@ -51,23 +52,37 @@
                 -moz-user-select: none;
                 overflow: auto;
                 background: white;
-                padding:30px 42px;
+                padding:10px 30px 30px 30px;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-
-            }
-
-            #dialog {
                 width: 500px;
             }
             </style>
-            <div layout vertical style="padding: 0px 10px 0px 20px;" >
-                <div layout horizontal style="padding: 0px 10px 0px 20px;" >
-                    <h3 id="caption" flex style="color: #6c0404; font-weight: bold;">Detalles del balance</h3>
-                    <div style="cursor:pointer; z-index:10;" on-click="{{tapHandler}}">
-                        <core-icon-button icon="close" style="fill:#6c0404;"></core-icon-button>
+            <div layout vertical style="" >
+                <div layout horizontal center center-justified style="" >
+                    <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"><g:message code="userBalanceLbl"/></h3>
+                    <div style="cursor:pointer;" on-click="{{tapHandler}}">
+                        <core-icon-button icon="close" style="fill:#6c0404;color:#6c0404;"></core-icon-button>
                     </div>
                 </div>
+                <div>
+                    {{balance.nif}}
+                </div>
+                <div layout horizontal>
+                    <div layout vertical>
+                        <g:message code="incomesLbl"/>
+                        <template repeat="{{transactionFrom in balance.transactionFromList}}">
+                            {{transactionFrom.amount}}
+                        </template>
+                    </div>
+                    <div layout vertical>
+                        <g:message code="expensesLbl"/>
+                        <template repeat="{{transactionFrom in balance.transactionFromList}}">
+                            {{transactionFrom.amount}}
+                        </template>
+                    </div>
+                </div>
+
 
 
             </div>
@@ -78,17 +93,17 @@
     <script>
 
         Polymer('balance-details', {
-
-            inputHandler: function(e) {
-                if (e.target.value === 'something') {
-                    this.$.confirmation.toggle();
-                }
+            ready: function(e) {
             },
+            balanceChanged: function() {
 
+            },
+            openedChanged:function() {
+                this.$.xDialog.opened = this.opened
+            },
             tapHandler: function() {
-                this.$.dialog.toggle();
+                this.$.xDialog.toggle();
             }
-
         });
 
     </script>

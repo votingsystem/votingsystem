@@ -43,6 +43,9 @@ class BalanceService {
                 isNull("dateCancelled")
                 ge("dateCancelled", timePeriod.getDateFrom())
             }
+            not {
+                eq("type", UserVS.Type.SYSTEM)
+            }
         }
         while (scrollableResults.next()) {
             UserVS userVS = (UserVS) scrollableResults.get(0);
@@ -65,7 +68,12 @@ class BalanceService {
 
 
         }
-        Map userBalances = [groupBalanceList:groupBalanceList, userBalanceList:userBalanceList, vicketSourceBalanceList:vicketSourceBalanceList]
+
+        UserVS systemUser = UserVS.findWhere(type:UserVS.Type.SYSTEM);
+        Map systemBalance = genBalanceForUserVS(systemUser, timePeriod)
+
+        Map userBalances = [systemBalance:systemBalance, groupBalanceList:groupBalanceList,
+                        userBalanceList:userBalanceList, vicketSourceBalanceList:vicketSourceBalanceList]
         Map resultMap = [userBalances:userBalances]
         //transactionslog.info(new JSON(dataMap) + ",");
         JSON userBalancesJSON = new JSON(resultMap)
