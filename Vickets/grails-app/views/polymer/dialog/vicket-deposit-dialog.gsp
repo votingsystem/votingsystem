@@ -38,8 +38,18 @@
         paper-button::shadow #ripple {
             color: white;
         }
+        .messageToUser {
+            font-weight: bold;
+            margin:10px auto 10px auto;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            padding:10px 20px 10px 20px;
+        }
         </style>
-
+    <google-chart
+            cols='[{"label": "Data", "type": "string"},{"label": "Value", "type": "number"}]'
+            rows='[["Something", 1]]'>
+    </google-chart>
         <div id="container" class="card" style="width:600px; padding:0px 0px 15px 0px;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
                 <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
@@ -48,8 +58,7 @@
                 </div>
             </div>
 
-            <div class="center card" style="font-weight: bold;color: {{status == 200?'#388746':'#ba0011'}};
-            margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;padding:10px 20px 10px 20px; display:{{messageToUser == null?'none':'block'}};">
+            <div class="messageToUser card" style="color: {{status == 200?'#388746':'#ba0011'}}; display:{{messageToUser == null?'none':'block'}};">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div id="messageToUser">{{messageToUser}}</div>
                     <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon></div>
@@ -219,18 +228,17 @@
             }
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             var objectId = Math.random().toString(36).substring(7)
-            var hostElement = this
             window[objectId] = {setClientToolMessage: function(appMessage) {
                 var appMessageJSON = JSON.parse(appMessage)
                 if(appMessageJSON != null) {
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "<g:message code='depositOKLbl'/>"
-                        hostElement.close()
+                        this.close()
                     } else caption = '<g:message code="depositERRORLbl"/>'
                     showMessageVS(appMessageJSON.message, caption)
                 }
-            }}
+            }.bind(this)}
             console.log(this.tagName + " - window[objectId] - objectId: " + objectId)
             webAppMessage.callerCallback = objectId
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

@@ -20,20 +20,18 @@
             },
             balanceChanged: function() {
                 //console.log(this.tagName + " - " + this.id + " - balanceChanged " )
-                var hostElement = this
                 this.async(function() { this.makeBalances()});
             },
             makeBalances:function() {
                 this.expenses = 0
                 this.income = 0
-                var hostElement = this
                 this.balance.transactionFromList.forEach(function(transaction) {
-                    hostElement.expenses = hostElement.expenses + Number(transaction.amount)
-                })
+                    this.expenses = this.expenses + Number(transaction.amount)
+                }.bind(this))
                 if(this.balance.transactionToList) {
                     this.balance.transactionToList.forEach(function(transaction) {
-                        hostElement.income = hostElement.income + Number(transaction.amount)
-                    })
+                        this.income = this.income + Number(transaction.amount)
+                    }.bind(this))
                 }
                 this.isVisible = true
             },

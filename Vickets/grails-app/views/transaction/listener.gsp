@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <ol class="breadcrumbVS pull-left">
+    <ol class="breadcrumbVS">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li class="active"><g:message code="transactionPageTitle"/></li>
     </ol>

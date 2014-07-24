@@ -28,7 +28,7 @@
         </g:if>
     </div>
     <div>
-        <votingsystem-cert id="certData" certmap-data='${certMap as grails.converters.JSON}'></votingsystem-cert>
+        <votingsystem-cert id="certData" certvs='${certMap as grails.converters.JSON}'></votingsystem-cert>
     </div>
 </div>
 

@@ -9,7 +9,7 @@
 
 <div id="contentDiv" class="pageContenDiv" style="min-height: 1000px; margin:0px auto 0px auto;">
     <div style="margin:0px 30px 0px 30px;">
-        <ol class="breadcrumbVS pull-left">
+        <ol class="breadcrumbVS">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li><a href="${createLink(controller: 'certificateVS', action: 'certs')}"><g:message code="certsPageTitle"/></a></li>
             <li class="active"><g:message code="newCACertLbl"/></li>

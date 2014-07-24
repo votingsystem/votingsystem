@@ -140,11 +140,17 @@ class TransactionVSService {
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
         def transactionFromList = []
-        Map<String, BigDecimal> balancesMap = [:]
+        Map<String, Map> balancesMap = [:]
         transactionList.each { transaction ->
-            if(balancesMap[transaction.tag.name]) {
-                balancesMap[transaction.tag.name] = ((BigDecimal) balancesMap[transaction.tag.name]).add(transaction.amount)
-            } else balancesMap[(transaction.tag.name)] = transaction.amount
+            if(balancesMap[transaction.currencyCode]) {
+                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
+                if(currencyMap[transaction.tag.name]) {
+                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
+                } else currencyMap[(transaction.tag.name)] = transaction.amount
+            } else {
+                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
+                balancesMap[(transaction.currencyCode)] = currencyMap
+            }
             transactionFromList.add(getTransactionMap(transaction))
         }
         return [transactionFromList:transactionFromList, balancesFrom:balancesMap]
@@ -166,11 +172,17 @@ class TransactionVSService {
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
         def transactionToList = []
-        Map<String, BigDecimal> balancesMap = [:]
+        Map<String, Map> balancesMap = [:]
         transactionList.each { transaction ->
-            if(balancesMap[transaction.tag.name]) {
-                balancesMap[transaction.tag.name] = ((BigDecimal) balancesMap[transaction.tag.name]).add(transaction.amount)
-            } else balancesMap[(transaction.tag.name)] = transaction.amount
+            if(balancesMap[transaction.currencyCode]) {
+                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
+                if(currencyMap[transaction.tag.name]) {
+                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
+                } else currencyMap[(transaction.tag.name)] = transaction.amount
+            } else {
+                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
+                balancesMap[(transaction.currencyCode)] = currencyMap
+            }
             transactionToList.add(getTransactionMap(transaction))
         }
         return [transactionToList:transactionToList, balancesTo:balancesMap]

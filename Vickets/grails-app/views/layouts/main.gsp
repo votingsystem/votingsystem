@@ -45,7 +45,7 @@
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
                         </paper-item>
                         <g:if test="${"admin".equals(params.menu)}">
-                            <template if="{{isVotingSystemClient}}">
+                            <template if="{{isClientToolConnected}}">
                                 <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup', absolute: true)}"">
                                     <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
                                 </paper-item>
@@ -57,7 +57,7 @@
                                 <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newVicketSourceLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority', absolute: true)}"
-                                        style="padding:30px 10px 30px 10px;">
+                                        style="margin:0px 10px 0px 0px;">
                                 <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> <g:message code="newCAAuthorityLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'certificateVS', action: 'certs', absolute: true)}">
@@ -66,9 +66,8 @@
                             <paper-item data-href="${createLink(controller: 'userVS', action: 'save', absolute: true)}">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newUserCertLbl"/>
                             </paper-item>
-                            <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact', absolute: true)}" on-click="{{changeToAdminMenu}}"
-                                        style="padding:30px 10px 30px 10px;">
-                                <g:message code="changeToAdminMenuLbl"/>
+                            <paper-item id="changeToAdmin" data-href="${createLink(controller: 'app', action: 'contact', absolute: true)}" on-click="{{changeToAdminMenu}}">
+                                <i class="fa fa-exchange" style="margin:0px 10px 0px 0px;"></i><g:message code="changeToAdminMenuLbl"/>
                             </paper-item>
                             {{ "<g:message code="superAdminTitle"/>" | setTitle}}
                         </g:elseif>
@@ -105,8 +104,8 @@
                 window.addEventListener('popstate', function(event) {
                     navBar.url = document.location.href
                 });
-                this.isVotingSystemClient = window['isVotingSystemClient']
-                console.log(this.tagName + " - ready - isVotingSystemClient: " + this.isVotingSystemClient)
+                this.isClientToolConnected = window['isClientToolConnected']
+                console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
             },
             innerPageSignal:function(e, detail, sender) {
                 this.url = detail;
@@ -115,7 +114,6 @@
                 this.loadURL(this.url)
             },
             loadURL: function(urlToLoad) {
-                console.log("========= " + urlToLoad)
                 this.loading= true;
                 history.pushState(null, null, this.url);
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
@@ -130,6 +128,7 @@
                     } else {
                         this.loadURL(this.coreSelectorValue)
                     }
+                    this.coreSelectorValue = null
                 }
             },
             searchVisible: function(isVisible) {

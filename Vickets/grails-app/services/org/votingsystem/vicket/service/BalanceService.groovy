@@ -88,6 +88,13 @@ class BalanceService {
         return responseVS
     }
 
+    public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) {
+        if(uservs instanceof VicketSource) return genBalanceForVicketSource(uservs, timePeriod)
+        else if (uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
+        else return genBalanceForUserVS(uservs, timePeriod)
+    }
+
+
     private Map genBalanceForVicketSource(VicketSource vicketSource, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("genBalanceForVicketSource - id '${vicketSource.id}'")

@@ -131,10 +131,9 @@
             },
             ready: function() {
                 this.urlLocales = window['serverURL'] + "/bower_components/" + this.tagName.toLowerCase() + "/i18n/messages.json"
-                var hostElement
                 this.$.searchDialog.addEventListener('overlay-closed', function(e) {
-                    hostElement.opened = e.detail
-                });
+                    this.opened = e.detail
+                }.bind(this));
             },
             openedChanged:function() {
                 console.log(this.tagName + " - openedChanged - opened: " + this.opened)

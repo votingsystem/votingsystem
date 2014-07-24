@@ -10,6 +10,14 @@ class UrlMappings {
         "/"(controller:"/app")
         "500"(view:'/error')
 
+        "/balance/userVS/$userId" {
+            controller = "balance"
+            action = "userVS"
+            constraints {
+                userId(matches:/\d*/)
+            }
+        }
+
         "/certificateVS/cert/$serialNumber"{
             controller = "certificateVS"
             action = "cert"
@@ -26,6 +34,9 @@ class UrlMappings {
         "/certificateVS/userVS/$userId" {
             controller = "certificateVS"
             action = "userVS"
+            constraints {
+                userId(matches:/\d*/)
+            }
         }
 
 

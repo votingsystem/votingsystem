@@ -1,11 +1,26 @@
 <polymer-element name="vicket-transactionvs" attributes="url subpage">
     <template>
-        <style>
-            .pageWidth {width: 1000px; margin: 0px auto 0px auto;}
+        <votingsystem-dialog id="xDialog" class="vicketTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+            <!-- place all overlay styles inside the overlay target -->
+        <style no-shim>
+            .vicketTransactionDialog {
+                box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 13px;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                overflow: auto;
+                background: white;
+                padding:10px 30px 30px 30px;
+                outline: 1px solid rgba(0,0,0,0.2);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                width: 400px;
+            }
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{transactionvs}}" handleAs="json" method="get" contentType="json"></core-ajax>
-        <div class="" style="max-width:1000px; margin:0px auto 0px auto;">
-            <div layout horizontal class="pageWidth">
+        <div class="" style="margin:0px auto 0px auto;">
+            <div layout horizontal>
                 <template if="{{subpage != null}}">
                     <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
                         <i class="fa fa-arrow-left"></i></votingsystem-button>
@@ -89,7 +104,7 @@
                         </div >
                     </template>
 
-                    <div layout horizontal>
+                    <div layout horizontal style="display:{{isClientToolConnected?'block':'none'}}">
                         <div flex></div>
                         <votingsystem-button on-click="{{openReceipt}}">
                             <g:message code="openReceiptLbl"/> <i class="fa fa-cogs"></i>
@@ -98,11 +113,23 @@
                 </div>
             </div>
         </div>
+        </votingsystem-dialog>
     </template>
     <script>
         Polymer('vicket-transactionvs', {
             publish: {
                 transactionvs: {value: {}}
+            },
+            ready: function() {
+                console.log(this.tagName + " - " + this.id + " - ready")
+                this.isClientToolConnected = window['isClientToolConnected']
+            },
+            onCoreOverlayOpen:function(e) {
+                if(e.detail == true) this.opened = true
+                else this.opened = false
+            },
+            openedChanged:function() {
+                this.async(function() { this.$.xDialog.opened = this.opened});
             },
             back:function() {
                 this.fire('core-signal', {name: "vicket-transactionvs-closed", data: this.transactionvs.id});
@@ -118,9 +145,6 @@
             showInfoIBAN:function(e) {
                 var fromUserIBANInfoURL = "${createLink(uri:'/IBAN')}/from/" + e.target.templateInstance.model.transactionvs.fromUserVS.payer.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
-            },
-            ready: function() {
-                console.log(this.tagName + " - " + this.id + " - ready")
             },
             formatDate : function(dateValue) {
 

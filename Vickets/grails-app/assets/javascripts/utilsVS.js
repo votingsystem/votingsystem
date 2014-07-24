@@ -260,11 +260,6 @@ function isJavaFX () {
 	return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
 }
 
-function isVotingSystemClient () {
-    return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
-}
-
-
 function getFnName(fn) {
 	  var f = typeof fn == 'function';
 	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
@@ -334,14 +329,15 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
     clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
 }
 
-var isClientToolConnected = false
+window['isClientToolConnected'] = false
+
 var clientToolListeners = []
 function addClientToolListener(listener) {
     clientToolListeners.push(listener)
 }
 
 function notifiyClientToolConnection() {
-    isClientToolConnected = true
+    window['isClientToolConnected'] = true
     for(var i = 0; i < clientToolListeners.length; i++) {
         clientToolListeners[i]()
     }

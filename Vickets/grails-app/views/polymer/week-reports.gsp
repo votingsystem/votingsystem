@@ -57,7 +57,6 @@
                 this.weekReport.userBalances.userBalanceList.forEach(function(entry) {
                     //console.log(" entry: " + JSON.stringify(entry))
                 })
-                var hostElement = this
                 // `async` lets the main loop resume and perform tasks, like DOM updates, then it calls your callback
                 this.async(function() { this.calculateStatistics()});
             },

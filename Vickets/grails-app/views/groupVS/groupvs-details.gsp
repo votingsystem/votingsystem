@@ -15,7 +15,7 @@
     def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
     def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
 %>
-<polymer-element name="groupvs-details" attributes="groupvs-data selectedItem subpage">
+<polymer-element name="groupvs-details" attributes="selectedItem subpage">
     <template>
         <style shim-shadowdom>
         .view { :host {position: relative;} }
@@ -41,6 +41,7 @@
                     <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
                     </div>
                     <div layout horizontal center center-justified style="margin:10px 0px 0px 30px; display:{{isAdminView?'block':'none'}}">
+
                         <paper-menu-button id="groupConfigOptions" valign="bottom" style="width: 0px;padding:0px;">
                             <core-selector target="{{$.groupOptions}}" id="groupOptionsSelector" valueattr="id" on-core-select="{{configGroup}}">
                                 <div id="groupOptions" style=" border: 1px solid #6c0404;">
@@ -51,9 +52,13 @@
                                 </div>
                             </core-selector>
                         </paper-menu-button>
-                        <votingsystem-button on-click="{{openConfigGroupOptions}}">
-                            <g:message code="configGroupvsLbl"/> <i class="fa fa-cogs"></i>
-                        </votingsystem-button>
+
+                        <template if="{{isClientToolConnected}}">
+                            <votingsystem-button on-click="{{openConfigGroupOptions}}">
+                                <g:message code="configGroupvsLbl"/> <i class="fa fa-cogs"></i>
+                            </votingsystem-button>
+                        </template>
+
 
                         <paper-menu-button id="selectDepositOptions" valign="bottom" style="width: 0px;padding:0px;">
                             <core-selector target="{{$.depositOptions}}" id="coreSelector" valueattr="id" on-core-select="{{showDepositDialog}}">
@@ -146,16 +151,12 @@
         Polymer('groupvs-details', {
             isSelected: false,
             subpage:false,
-            groupvs: null,
-            groupvsChanged:function() {
-
+            publish: {
+                groupvs: {value: {}}
             },
             ready :  function() {
                 console.log(this.tagName + " - ready - subpage: " + this.subpage)
-                this.isClientToolConnected = isClientToolConnected
-                if(this['groupvs-data'] != null) {
-                    this.groupvs = JSON.parse(this['groupvs-data'])
-                }
+                this.isClientToolConnected = window['isClientToolConnected']
             },
             closeTransactionvs:function(e, detail, sender) {
                 console.log(this.tagName + " - closeTransactionvs")

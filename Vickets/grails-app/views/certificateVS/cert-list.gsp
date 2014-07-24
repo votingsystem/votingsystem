@@ -11,7 +11,7 @@
             .view { :host {position: relative;} }
             .certDiv {
                 width:540px;
-                height: 200px;
+                height: 140px;
                 padding: 10px;
                 border:1px solid #ccc;
                 background-color: #fefefe;
@@ -97,7 +97,7 @@
             },
             showCert :  function(e) {
                 console.log(this.tagName + " - showCertDetails")
-                this.$.certDetails.cert = e.target.templateInstance.model.cert;
+                this.$.certDetails.certvs = e.target.templateInstance.model.cert;
                 this.page = 1;
             },
             responseDataChanged:function() {
