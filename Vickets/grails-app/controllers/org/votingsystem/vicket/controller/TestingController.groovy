@@ -5,7 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.hibernate.ScrollableResults
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.UserVSAccount
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.DateUtils
@@ -39,7 +39,6 @@ class TestingController {
 
         DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(Calendar.getInstance().getTime())
         balanceService.calculatePeriod(timePeriod);
-
         render "OK"
         return false
     }

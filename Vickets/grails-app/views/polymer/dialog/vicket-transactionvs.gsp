@@ -1,4 +1,6 @@
-<polymer-element name="vicket-transactionvs" attributes="url subpage">
+<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+
+<polymer-element name="vicket-transactionvs" attributes="url opened">
     <template>
         <votingsystem-dialog id="xDialog" class="vicketTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <!-- place all overlay styles inside the overlay target -->
@@ -7,7 +9,7 @@
                 box-sizing: border-box;
                 -moz-box-sizing: border-box;
                 font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
+                font-size: 1em;
                 -webkit-user-select: none;
                 -moz-user-select: none;
                 overflow: auto;
@@ -18,25 +20,19 @@
                 width: 400px;
             }
         </style>
+        <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{transactionvs}}" handleAs="json" method="get" contentType="json"></core-ajax>
         <div class="" style="margin:0px auto 0px auto;">
             <div layout horizontal>
-                <template if="{{subpage != null}}">
-                    <votingsystem-button isFab="true" on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
-                        <i class="fa fa-arrow-left"></i></votingsystem-button>
-                </template>
-                <h3 flex style="text-align: center;">{{transactionvs.description}}</h3>
+                <h3 flex style="text-align: center;color:#6c0404;">{{transactionvs.description}}</h3>
             </div>
             <div layout vertical center center-justified>
                 <div>
                     <template if="{{transactionvs.tags.length > 0}}">
-                        <div id="tagsDiv" style="padding:0px 0px 0px 30px;">
-                            <div style=" display: table-cell; font-size: 1.1em; font-weight: bold;"><g:message code='tagsLbl'/>:</div>
-                            <div id="selectedTagDiv" style="margin:0px 0px 15px 0px; padding: 5px 5px 0px 5px; display: table-cell;" class="btn-group-xs">
-                                <template repeat="{{tag in transactionvs.tags}}">
-                                    <a class="btn btn-default" style="margin:0px 10px 0px 0px;">{{tag.name}}</a>
-                                </template>
-                            </div>
+                        <div layout horizontal center center-justified>
+                            <template repeat="{{tag in transactionvs.tags}}">
+                                <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
+                            </template>
                         </div>
                     </template>
                     <div style=""><b><g:message code="subjectLbl"/>: </b>{{transactionvs.subject}}</div>
@@ -45,33 +41,36 @@
                     <template if="{{transactionvs.validTo}}">
                         <div style=""><b><g:message code="validToLbl"/>: </b>{{transactionvs.validTo}}</div>
                     </template>
-                    <div style="margin-left: 20px;">
-                        <template if="{{transactionvs.fromUserVS}}">
-                            <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
-                                <g:message code="pagerLbl"/></div>
-                            <div id="fromUserDiv">
-                                <template if="{{'VICKET_SOURCE_INPUT' != transactionvs.type}}">
-                                    <template if="{{'GROUP' == transactionvs.fromUserVS.type}}">
-                                        <div style=""><b><g:message code="groupLbl"/>: </b>
-                                            <a on-click="{{showFromUserInfo}}">{{transactionvs.fromUserVS.name}}</a>
-                                        </div>
-                                    </template>
-                                    <template if="{{'GROUP' != transactionvs.fromUserVS.type}}">
-                                        <div style=""><b><g:message code="nifLbl"/>: </b>{{transactionvs.fromUserVS.nif}}</div>
-                                        <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.fromUserVS.name}}</div>
-                                    </template>
+
+                    <template if="{{transactionvs.fromUserVS}}">
+                        <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
+                            <g:message code="pagerLbl"/></div>
+                        <div id="fromUserDiv" style="margin-left: 20px;">
+                            <template if="{{'VICKET_SOURCE_INPUT' != transactionvs.type}}">
+                                <template if="{{'GROUP' == transactionvs.fromUserVS.type}}">
+                                    <div style=""><b><g:message code="groupLbl"/>: </b>
+                                        <a on-click="{{showFromUserInfo}}">{{transactionvs.fromUserVS.name}}</a>
+                                    </div>
                                 </template>
-                                <template if="{{'VICKET_SOURCE_INPUT' == transactionvs.type && transactionvs.fromUserVS}}">
+                                <template if="{{'GROUP' != transactionvs.fromUserVS.type}}">
+                                    <div style=""><b><g:message code="nifLbl"/>: </b>{{transactionvs.fromUserVS.nif}}</div>
+                                    <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.fromUserVS.name}}</div>
+                                </template>
+                            </template>
+                            <template if="{{'VICKET_SOURCE_INPUT' == transactionvs.type && transactionvs.fromUserVS}}">
+                                <div style=""><b><g:message code="externalEntityLbl"/>: </b>{{transactionvs.fromUserVS.name}}</div>
+                                <template if="{{transactionvs.fromUserVS.payer.fromUser}}">
                                     <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.fromUserVS.payer.fromUser}}</div>
-                                    <div style=""><b><g:message code="IBANLbl"/>: </b>
-                                        <a on-click="{{showInfoIBAN}}">{{transactionvs.fromUserVS.payer.fromUserIBAN}}</a></div>
                                 </template>
-                            </div>
-                        </template>
-                        <template if="{{transactionvs.fromUserVS == null}}">
-                            <div style="font-weight: bold;"><g:message code="anonymousPagerLbl"/></div>
-                        </template>
-                    </div>
+
+                                <div style=""><b><g:message code="IBANLbl"/>: </b>
+                                    <a on-click="{{showInfoIBAN}}">{{transactionvs.fromUserVS.payer.fromUserIBAN}}</a></div>
+                            </template>
+                        </div>
+                    </template>
+                    <template if="{{transactionvs.fromUserVS == null}}">
+                        <div style="font-weight: bold;"><g:message code="anonymousPagerLbl"/></div>
+                    </template>
 
                     <template if="{{transactionvs.childTransactions}}">
                         <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;margin:10px 0px 0px 0px;">
@@ -104,7 +103,7 @@
                         </div >
                     </template>
 
-                    <div layout horizontal style="display:{{isClientToolConnected?'block':'none'}}">
+                    <div layout horizontal style="margin:10px 0px 0px 0px; display:{{isClientToolConnected?'block':'none'}}">
                         <div flex></div>
                         <votingsystem-button on-click="{{openReceipt}}">
                             <g:message code="openReceiptLbl"/> <i class="fa fa-cogs"></i>
@@ -125,14 +124,10 @@
                 this.isClientToolConnected = window['isClientToolConnected']
             },
             onCoreOverlayOpen:function(e) {
-                if(e.detail == true) this.opened = true
-                else this.opened = false
+                this.opened = this.$.xDialog.opened
             },
             openedChanged:function() {
                 this.async(function() { this.$.xDialog.opened = this.opened});
-            },
-            back:function() {
-                this.fire('core-signal', {name: "vicket-transactionvs-closed", data: this.transactionvs.id});
             },
             showToUserInfo:function(e) {
                 var groupURL = "${createLink(uri:'/groupVS')}/" + e.target.templateInstance.model.transactionvs.toUserVS.id

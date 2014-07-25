@@ -121,7 +121,7 @@ class VoteVSController {
 			}
 			if(!voteVS) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'voteVS.voteVSConCertNotFound', args:[params.hashHex]))]
+                        message(code: 'voteVSConCertNotFound', args:[params.hashHex]))]
 			}
 			 
 			if(VoteVS.State.CANCELLED.equals(voteVS.state)) {

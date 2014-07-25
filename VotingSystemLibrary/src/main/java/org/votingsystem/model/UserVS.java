@@ -76,7 +76,7 @@ public class UserVS implements Serializable {
     //Owning Entity side of the relationship
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinTable(name = "uservs_vickettagvs", joinColumns = {
-            @JoinColumn(name = "UserVSAccount", referencedColumnName = "id", nullable = false) },
+            @JoinColumn(name = "UserVS", referencedColumnName = "id", nullable = false) },
             inverseJoinColumns = { @JoinColumn(name = "VicketTagVS", nullable = false, referencedColumnName = "id") })
     private Set<VicketTagVS> tagVSSet;
 

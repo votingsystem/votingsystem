@@ -11,6 +11,12 @@
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 
+
+grails.views.javascript.library="jquery"
+
+grails.converters.default.pretty.print=true
+grails.gorm.failOnError=true
+
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 
 grails.reload.enabled = true

@@ -5,8 +5,10 @@ import grails.orm.PagedResultList
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.votingsystem.model.*
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
+import org.votingsystem.vicket.model.AlertVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
@@ -87,6 +89,12 @@ class TransactionVSService {
                 transactionVS.transactionParent?true:false)
     }
 
+    public void alert(AlertVS alertVS) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.error("${methodName} - " + alertVS.getMessage());
+        alertVS.save()
+    }
+
     public void updateBalances(TransactionVS transactionVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(transactionVS.state == TransactionVS.State.OK) {
@@ -136,7 +144,7 @@ class TransactionVSService {
     public Map getTransactionFromListWithBalances(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('fromUserVS', fromUserVS)
-//            isNull("transactionParent")
+            isNull("transactionParent")
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
         def transactionFromList = []
@@ -195,8 +203,7 @@ class TransactionVSService {
             transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.getDefaultName(),
                 type:transaction.fromUserVS.type.toString(), id:transaction.fromUserVS.id]
             if(transaction.fromUserIBAN) {
-                transactionMap.fromUserVS.payer = [fromUserIBAN: transaction.fromUserIBAN,
-                                                   fromUser:transaction.fromUser]
+                transactionMap.fromUserVS.payer = [fromUserIBAN: transaction.fromUserIBAN, fromUser:transaction.fromUser]
             }
         }
         if(transaction.toUserVS) {

@@ -6,7 +6,7 @@ import org.springframework.dao.DataAccessException
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.UserVSAccount
+import org.votingsystem.vicket.model.UserVSAccount
 
 /**
  * @infoController Aplicación

@@ -7,7 +7,7 @@ import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.UserVSAccount
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.model.VicketTagVS
 
 import java.text.Normalizer

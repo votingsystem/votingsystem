@@ -1,14 +1,13 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-menu-button', file: 'paper-menu-button.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-deposit-dialog.gsp']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-page-tabs.gsp']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-user.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-transactionvs.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/groupvs-user.gsp']"/>">
 
 <%
     def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
@@ -22,14 +21,8 @@
         </style>
         <g:include view="/include/styles.gsp"/>
         <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
-              on-core-signal-uservs-selected="{{showUserDetails}}" on-core-signal-uservs-details-closed="{{closeUserDetails}}"
-              on-core-signal-transactionvs-selected="{{showTransaction}}"
-              on-core-signal-vicket-transactionvs-closed="{{closeTransactionvs}}"></core-signals>
+              on-core-signal-uservs-selected="{{showUserDetails}}" on-core-signal-transactionvs-selected="{{showTransaction}}"></core-signals>
 
-        <core-animated-pages id="groupDetailsPages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
-                             transitions="cross-fade-all" style="" selectedItem="{{selectedItem}}">
-
-        <section id="page1">
         <div class="pageContenDiv" style="max-width: 1000px; margin:0px auto 0px auto;"  cross-fade>
             <div layout horizontal center center-justified>
                 <template if="{{subpage}}">
@@ -127,19 +120,9 @@
                 </div>
             </template>
         </div>
-        </section>
-        <section  id="page2">
-            <div cross-fade>
-                <groupvs-user subpage id="userDescription"></groupvs-user>
-            </div>
-        </section>
-        <section  id="page3">
-            <div cross-fade>
-                <vicket-transactionvs subpage id="transactionViewer" style="margin:0px auto 0px auto;"></vicket-transactionvs>
-            </div>
-        </section>
 
-        </core-animated-pages>
+        <groupvs-user id="userDescription"></groupvs-user>
+        <vicket-transactionvs id="transactionViewer"></vicket-transactionvs>
 
         <div layout horizontal center center-justified style="position:absolute; top:80px; width: 100%; max-width: 1200px; margin: 0px auto 0px auto;">
             <div>
@@ -158,19 +141,11 @@
                 console.log(this.tagName + " - ready - subpage: " + this.subpage)
                 this.isClientToolConnected = window['isClientToolConnected']
             },
-            closeTransactionvs:function(e, detail, sender) {
-                console.log(this.tagName + " - closeTransactionvs")
-                this.page = 0;
-            },
-            closeUserDetails:function(e, detail, sender) {
-                console.log(this.tagName + " - closeUserDetails")
-                this.page = 0;
-            },
             showTransaction:function(e, detail, sender) {
                 var transactionURL = "${createLink(controller: 'transaction', action:'get', absolute:true)}/" + detail
                 console.log(this.tagName + " - showTransaction - transactionURL: " + transactionURL)
                 this.$.transactionViewer.url = transactionURL
-                this.page = 2;
+                this.$.transactionViewer.opened = true
             },
             messagedialog:function(e, detail, sender) {
                 console.log("messagedialog signal - cancelgroup: " + detail)
@@ -298,8 +273,7 @@
             },
             showUserDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - showUserDetails")
-                this.$.userDescription.show("${createLink(controller: 'groupVS')}/" + this.groupvs.id + "/user", detail, true)
-                this.page = 1;
+                this.$.userDescription.show("${createLink(controller: 'groupVS')}/" + this.groupvs.id + "/user", detail)
             }
         })
     </script>

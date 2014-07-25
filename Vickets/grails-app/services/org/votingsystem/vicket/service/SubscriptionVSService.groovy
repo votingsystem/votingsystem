@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.votingsystem.model.*
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.MetaInfMsg
@@ -21,6 +22,7 @@ class SubscriptionVSService {
     def grailsApplication
 	def messageSource
     def userVSService
+    def systemService
 
     @Transactional public ResponseVS checkUser(UserVS userVS, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -56,7 +58,7 @@ class SubscriptionVSService {
             userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
             userVS.save()
             new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
-                    balance:BigDecimal.ZERO, IBAN:userVS.getIBAN()).save()
+                    balance:BigDecimal.ZERO, IBAN:userVS.getIBAN(), tag:systemService.getWildTag()).save()
             userVSDB = userVS
 			certificate = saveUserCertificate(userVS, deviceData);
             isNewUser = true

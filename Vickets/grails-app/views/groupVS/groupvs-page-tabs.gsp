@@ -57,16 +57,16 @@
             },
             groupvsChanged:function() {
                 console.log(this.tagName + " - groupvsChanged")
-                if(this.groupvs != null) {
+                if(this.groupvs != null && this.groupvs.id != null) {
                     if(this.groupvs.transactionFromList == null) {
                         this.$.ajax.url = "${createLink(controller: 'groupVS')}/" + this.groupvs.id
                     }
                     this.$.transactionFromTable.transactionList = this.groupvs.transactionFromList
                     this.$.transactionToTable.transactionList = this.groupvs.transactionToList
                     this.$.balanceList.url = "${createLink(controller:'userVSAccount', action:'balance')}?id=" + this.groupvs.id
+                    this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.id + "/user"
+                    this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvs.id
                 }
-                this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.id + "/user"
-                this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvs.id
             },
             groupvsWithDetailsChanged:function() {
                 this.$.transactionFromTable.transactionList = this.groupvsWithDetails.transactionFromList

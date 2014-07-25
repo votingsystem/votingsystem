@@ -80,23 +80,7 @@
 </body>
 </html>
 <asset:script>
-    var textEditor = document.querySelector('#textEditor')
 
-    document.querySelector("#selectedTags").addEventListener('template-bound', function(e) {
-        var scope = e.target;
-        scope.removeTag = function(e) {
-            var tagDataId = e.target.templateInstance.model.tag.id
-            for(tagIdx in document.querySelector('#selectedTags').selectedTags) {
-                if(tagDataId == document.querySelector('#selectedTags').selectedTags[tagIdx].id) {
-                    document.querySelector('#selectedTags').selectedTags.splice(tagIdx, 1)
-                }
-            }
-            if(document.querySelector("#selectedTags").selectedTags.length == 0)
-                document.querySelector("#tagsDiv").style.display = 'none'
-            else document.querySelector("#tagsDiv").style.display = 'block'
-        }
-
-    })
 
     function removeTag(e) {
         var tagDataId = e.target.templateInstance.model.tag.id
@@ -110,19 +94,38 @@
         else document.querySelector("#tagsDiv").style.display = 'block'
     }
 
+    var tagsInitialized = false
     function showTagDialog() {
-        console.log("showTagDialog")
+        console.log("showTagDialog - tagsInitialized: " + tagsInitialized)
+        if(!tagsInitialized) {
+            var selectedTagsDiv = document.querySelector("#selectedTags")
+            selectedTagsDiv.removeTag = function(e) {
+                var tagDataId = e.target.templateInstance.model.tag.id
+                for(tagIdx in document.querySelector('#selectedTags').selectedTags) {
+                    if(tagDataId == document.querySelector('#selectedTags').selectedTags[tagIdx].id) {
+                        document.querySelector('#selectedTags').selectedTags.splice(tagIdx, 1)
+                    }
+                }
+                if(document.querySelector("#selectedTags").selectedTags.length == 0)
+                    document.querySelector("#tagsDiv").style.display = 'none'
+                else document.querySelector("#tagsDiv").style.display = 'block'
+            }
+
+            document.querySelector("#tagDialog").addEventListener('tag-selected', function (e) {
+                document.querySelector("#selectedTags").selectedTags = e.detail
+                if(e.detail.length == 0) document.querySelector("#tagsDiv").style.display = 'none'
+                else document.querySelector("#tagsDiv").style.display = 'block'
+            })
+            tagsInitialized = true
+
+        }
         document.querySelector("#tagDialog").show(3, document.querySelector('#selectedTags').selectedTags)
     }
 
-    document.querySelector("#tagDialog").addEventListener('tag-selected', function (e) {
-        document.querySelector("#selectedTags").selectedTags = e.detail
-        if(e.detail.length == 0) document.querySelector("#tagsDiv").style.display = 'none'
-        else document.querySelector("#tagsDiv").style.display = 'block'
-    })
 
     var appMessageJSON;
     function submitForm(){
+        var textEditor = document.querySelector('#textEditor')
         textEditor.classList.remove("formFieldError");
         if(document.querySelector('#groupSubject').invalid) {
             showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
@@ -164,7 +167,8 @@
     }
 
     document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {
-        if(appMessageJSON != null) window.location.href = appMessageJSON.URL + "?menu=" + menuType
+        if(appMessageJSON != null && ResponseVS.SC_OK == appMessageJSON.statusCode)
+            window.location.href = appMessageJSON.URL + "?menu=" + menuType
     });
 
 </asset:script>

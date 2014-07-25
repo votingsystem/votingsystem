@@ -2,44 +2,58 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/user-balance.gsp']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-details.gsp']"/>">
 
-<link rel="import" href="${resource(dir: '/bower_components/google-chart', file: 'google-chart.html')}">
 
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 
 <polymer-element name="week-reports" attributes="url params-data">
     <template>
+        <style no-shim>
+            .sectionHeader {
+                text-align: center;
+                color: #6c0404;
+                font-size: 1.2em;
+                font-weight: bold;
+                margin:20px 0px 0px 0px;
+            }
+        </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{weekReport}}" handleAs="json" contentType="json"
                    on-core-complete="{{ajaxComplete}}" on-core-response="{{coreResponse}}"/>
-        <!--<google-chart id="chart"></google-chart>-->
         <core-signals on-core-signal-user-balance-show-details="{{showBalanceDetails}}"
                       on-core-signal-balance-details-closed="{{closeBalanceDetails}}"></core-signals>
 
-            <h3><g:message code="usersLbl"/></h3>
-            <div layout flex horizontal wrap>
-                <template repeat="{{user in weekReport.userBalances.userBalanceList}}">
-                    <user-balance class="_uservs" balance="{{user}}"></user-balance>
+            <div layout horizontal center center-justified>
+                <template bind="{{weekReport.userBalances}}">
+                    <div>
+                        <user-balance class="_uservs" balance="{{systemBalance}}"></user-balance>
+
+                    </div>
                 </template>
             </div>
 
+            <div class="sectionHeader"><g:message code="vicketSourcesLbl"/></div>
+            <div layout flex horizontal wrap around-justified>
+                <template repeat="{{vicketSource in weekReport.userBalances.vicketSourceBalanceList}}">
+                    <user-balance class="_vicketSource" balance="{{vicketSource}}"></user-balance>
+                </template>
+            </div>
 
-            <h3><g:message code="groupsLbl"/></h3>
-            <div layout flex horizontal wrap>
+            <div class="sectionHeader"><g:message code="groupsLbl"/></div>
+            <div layout flex horizontal wrap around-justified>
                 <template repeat="{{group in weekReport.userBalances.groupBalanceList}}">
                     <user-balance class="_group" balance="{{group}}"></user-balance>
                 </template>
             </div>
 
-            <h3><g:message code="vicketSourcesLbl"/></h3>
-            <div layout flex horizontal wrap>
-                <template repeat="{{vicketSource in weekReport.userBalances.vicketSourceBalanceList}}">
-                    <user-balance class="_vicketSource" balance="{{vicketSource}}"></user-balance>
+            <div class="sectionHeader"><g:message code="usersLbl"/></div>
+            <div layout flex horizontal wrap around-justified>
+                <template repeat="{{user in weekReport.userBalances.userBalanceList}}">
+                    <user-balance class="_uservs" balance="{{user}}"></user-balance>
                 </template>
             </div>
 
             <section>
                 <balance-details id="balanceDetails"></balance-details>
             </section>
-
 
     </template>
 
@@ -48,8 +62,6 @@
             ready: function() {
                 console.log(this.tagName + " - ready - url: " + this.url)
                 this.$.ajax.url = this.url
-                /*this.$.chart.cols = [{"label": "Data", "type": "string"},{"label": "Value", "type": "number"}]
-                this.$.chart.rows = [["Something", 1]]*/
             },
             weekReportChanged: function() {
                 console.log(this.tagName + " - weekReportChanged")
@@ -75,7 +87,7 @@
             },
             showBalanceDetails:function(e, detail, sender) {
                 this.$.balanceDetails.balance = detail
-                this.$.balanceDetails.tapHandler()
+                this.$.balanceDetails.opened = true
 
             },
             closeBalanceDetails:function(e, detail, sender) {

@@ -95,7 +95,6 @@
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
             url:'',
-            requestCounter:0,
             ready: function() {
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
@@ -140,7 +139,9 @@
             ajaxResponse: function(e) {
                 console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
                 var innerPage = document.implementation.createHTMLDocument('');
+                innerPage.open();
                 innerPage.write(e.detail.xhr.responseText);
+                innerPage.close();
                 this.asyncFire('ajax-response', innerPage)
             },
             ajaxError: function(e) {
@@ -190,9 +191,11 @@
     document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
         var ajaxDocument = e.detail
         var links = ajaxDocument.querySelectorAll('link')
+        var numImports = 0
         for (var i = 0; i < links.length; i++) {
             console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
             if('import' == links[i].rel) {
+                ++numImports
                 if(i == (links.length - 1)) {
                     links[i].onload = function() {
                       document.querySelector('#navBar').loading = false;
@@ -201,7 +204,7 @@
                 document.head.appendChild(links[i]);
             }
         }
-        if(links.length == 0) document.querySelector('#navBar').loading = false;
+        if(numImports == 0) document.querySelector('#navBar').loading = false;
 
         for (var i = 0; i < ajaxDocument.scripts.length; i++) {
             var script = document.createElement("script");

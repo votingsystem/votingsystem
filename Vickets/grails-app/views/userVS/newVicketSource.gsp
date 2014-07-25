@@ -57,10 +57,10 @@
 </body>
 </html>
 <asset:script>
-    var textEditor = document.querySelector('#textEditor')
     var appMessageJSON = null
 
     function submitForm() {
+        var textEditor = document.querySelector('#textEditor')
         if(document.querySelector('#vicketSourceIBAN').invalid) {
             showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
             return false

@@ -49,20 +49,19 @@ class TransactionVS_VicketSourceService {
 
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
-            tag = VicketTagVS.findWhere(id:Long.valueOf(messageJSON.tags[0].id), name:messageJSON.tags[0].name)
+            tag = VicketTagVS.findWhere(name:messageJSON.tags[0].name)
             if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0].name}'")
         } else throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
 
-        UserVS systemUser = systemService.getSystemUser()
         TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
-                fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK, validTo:validTo,
-                subject:subject, fromUserVS:signer, currencyCode: currency.getCurrencyCode(),
-                type:TransactionVS.Type.VICKET_SOURCE_INPUT, toUserIBAN:systemUser.getIBAN(), toUserVS: systemUser,
-                tag:tag).save()
+                fromUserVS:signer, fromUserIBAN: messageJSON.fromUserIBAN, fromUser:messageJSON.fromUser,
+                state:TransactionVS.State.OK, validTo:validTo,
+                subject:subject, currencyCode: currency.getCurrencyCode(),
+                type:TransactionVS.Type.VICKET_SOURCE_INPUT,  tag:tag).save()
 
         TransactionVS transaction = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
-                fromUserIBAN: systemUser.IBAN, toUserIBAN:messageJSON.toUserIBAN,
-                state:TransactionVS.State.OK, validTo:validTo, subject:subject, fromUserVS:systemUser, toUserVS: toUser,
+                fromUserVS:signer, fromUserIBAN: messageJSON.fromUserIBAN, toUserIBAN:messageJSON.toUserIBAN,
+                state:TransactionVS.State.OK, validTo:validTo, subject:subject, toUserVS: toUser,
                 transactionParent: transactionParent, currencyCode: currency.getCurrencyCode(),
                 type:TransactionVS.Type.VICKET_SOURCE_INPUT, tag:tag).save()
         //transaction?.errors.each { log.error("processDepositFromVicketSource - error - ${it}")}

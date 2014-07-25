@@ -1,7 +1,7 @@
 package org.votingsystem.vicket.service
 
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.UserVSAccount
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.model.WalletVS
 
 

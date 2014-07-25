@@ -7,6 +7,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
 import org.votingsystem.util.DateUtils
+import org.votingsystem.vicket.model.TransactionVS
 
 //@Transactional
 class BalanceService {
@@ -69,8 +70,7 @@ class BalanceService {
 
         }
 
-        UserVS systemUser = UserVS.findWhere(type:UserVS.Type.SYSTEM);
-        Map systemBalance = genBalanceForUserVS(systemUser, timePeriod)
+        Map systemBalance = genBalanceForSystem(systemService.getSystemUser(), timePeriod)
 
         Map userBalances = [systemBalance:systemBalance, groupBalanceList:groupBalanceList,
                         userBalanceList:userBalanceList, vicketSourceBalanceList:vicketSourceBalanceList]
@@ -89,6 +89,7 @@ class BalanceService {
     }
 
     public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) {
+        if(UserVS.Type.SYSTEM == uservs.type) return genBalanceForSystem(uservs, timePeriod)
         if(uservs instanceof VicketSource) return genBalanceForVicketSource(uservs, timePeriod)
         else if (uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
         else return genBalanceForUserVS(uservs, timePeriod)
@@ -126,6 +127,58 @@ class BalanceService {
 
         } else {}
         return dataMap
+    }
+
+    private Map genBalanceForSystem(UserVS systemUser, DateUtils.TimePeriod timePeriod) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug("genBalanceForSystem - timePeriod [${timePeriod.toString()}]")
+        Map resultMap = userVSService.getUserVSDataMap(systemUser)
+
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            isNull('transactionParent')
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+        }
+        def transactionFromList = []
+        Map<String, Map> balancesMap = [:]
+        transactionList.each { transaction ->
+            if(balancesMap[transaction.currencyCode]) {
+                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
+                if(currencyMap[transaction.tag.name]) {
+                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
+                } else currencyMap[(transaction.tag.name)] = transaction.amount
+            } else {
+                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
+                balancesMap[(transaction.currencyCode)] = currencyMap
+            }
+            transactionFromList.add(transactionVSService.getTransactionMap(transaction))
+        }
+        resultMap.transactionFromList = transactionFromList
+        resultMap.balancesFrom = balancesMap
+
+        transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            isNotNull('transactionParent')
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+        }
+
+        def transactionToList = []
+        balancesMap = [:]
+        transactionList.each { transaction ->
+            if(balancesMap[transaction.currencyCode]) {
+                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
+                if(currencyMap[transaction.tag.name]) {
+                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
+                } else currencyMap[(transaction.tag.name)] = transaction.amount
+            } else {
+                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
+                balancesMap[(transaction.currencyCode)] = currencyMap
+            }
+            transactionToList.add(transactionVSService.getTransactionMap(transaction))
+        }
+
+        resultMap.transactionToList = transactionToList
+        resultMap.balancesTo = balancesMap
+
+        return resultMap
     }
 
 }

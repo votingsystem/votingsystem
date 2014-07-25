@@ -2,7 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.UserVSAccount
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.vicket.util.IbanVSUtil
 

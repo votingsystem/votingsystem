@@ -14,24 +14,19 @@
                 padding:5px 0px 5px 0px;
                 width: 100%;
             }
-
             .tableHeadervs div {
                 text-align:center;
             }
-
             .rowvs {
                 border-bottom: 1px solid #ccc;
                 padding: 10px 0px 10px 0px;
-                cursor: pointer;
                 width: 100%;
             }
-
             .rowvs div {
                 text-align:center;
             }
         </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{balanceList}}" handleAs="json" method="get"
-                   contentType="json"></core-ajax>
+        <core-ajax id="ajax" auto url="{{url}}" response="{{balanceList}}" handleAs="json" method="get" contentType="json"></core-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div layout horizontal center center-justified class="tableHeadervs">
@@ -57,7 +52,7 @@
         Polymer('balance-list', {
             ready: function() {},
             formatAmount: function(amount) {
-                if(amount) return amount.toFixed(2)
+                if(typeof amount == 'number') return amount.toFixed(2)
             }
         });
     </script>

@@ -17,8 +17,7 @@ class BalanceController {
             UserVS.withTransaction { uservs = UserVS.findWhere(id:params.long('userId')) }
             if(!uservs) {
                 response.status = ResponseVS.SC_NOT_FOUND
-                Map resultMap = [status:ResponseVS.SC_NOT_FOUND, message:message(code:'userVSNotFoundById', args:[params.userId])]
-                render resultMap as JSON
+                render(text: message(code:'userVSNotFoundById', args:[params.userId]), encoding: "UTF-8")
             } else {
                 DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(Calendar.getInstance().getTime())
                 Map resultMap = balanceService.genBalance(uservs, timePeriod)
