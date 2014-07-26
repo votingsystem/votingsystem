@@ -34,7 +34,7 @@
 
             <div class="form-group" style="margin:15px 0px 0px 0px;">
                 <label><g:message code="pemCertLbl"/></label>
-                <textarea id="pemCert" class="form-control" rows="8" required=""></textarea>
+                <textarea id="pemCert" rows="8" required=""></textarea>
             </div>
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
@@ -98,3 +98,4 @@
     });
 
 </asset:script>
+<asset:deferredScripts/>

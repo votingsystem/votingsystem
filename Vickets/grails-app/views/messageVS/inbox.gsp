@@ -14,7 +14,7 @@
 
     <div layout horizontal center center-justified>
         <select id="messagevsStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                class="form-control" onchange="messagevsStateSelect(this)">
+                onchange="messagevsStateSelect(this)">
             <option value="PENDING"> - <g:message code="selectPendingMessaVSLbl"/> - </option>
             <option value="CONSUMED"> - <g:message code="selectConsumedMessaVSLbl"/> - </option>
         </select>

@@ -2,6 +2,7 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.util.CertUtil
@@ -31,6 +32,7 @@ class ServerInfoController {
         X509Certificate serverCert = signatureVSService.getServerCert()
         byte[] serverCertPEMBytes = CertUtil.getPEMEncoded (serverCert)
         serverInfo.certChainPEM = new String(serverCertPEMBytes)
+        serverInfo.certChainURL = "${createLink(controller: 'serverInfo', action:'certChain', absolute:true)}"
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.VICKETS.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
@@ -44,6 +46,17 @@ class ServerInfoController {
 		if (params.callback) render "${params.callback}(${serverInfo as JSON})"
         else render serverInfo as JSON
 	}
+
+    /**
+     * @httpMethod [GET]
+     * @return La cadena de certificación en formato PEM del servidor
+     */
+    def certChain () {
+        X509Certificate serverCert = signatureVSService.getServerCert()
+        byte[] serverCertPEMBytes = CertUtil.getPEMEncoded (serverCert)
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT,
+                messageBytes:serverCertPEMBytes)]
+    }
 
     /**
      * @httpMethod [GET]

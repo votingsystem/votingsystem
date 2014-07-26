@@ -20,15 +20,14 @@
         <asset:stylesheet src="vickets_groupvs.css"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
-        <core-signals on-core-signal-uservs-details-closed="{{closeUserDetails}}"
-                      on-core-signal-groupvs-details-closed="{{closeGroupDetails}}"></core-signals>
+        <core-signals on-core-signal-groupvs-details-closed="{{closeGroupDetails}}"></core-signals>
         <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
             <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>
                         <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                                class="form-control" on-change="{{groupvsTypeSelect}}">
+                                on-change="{{groupvsTypeSelect}}">
                             <option value="ACTIVE"  style="color:#59b;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
                             <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
                             <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>
@@ -66,10 +65,6 @@
                 this.groupvsData = {}
                 this.page = 0;
                 this.subpage = 0;
-            },
-            closeUserDetails:function(e, detail, sender) {
-                this.subpage = 0;
-                this.page = 1;
             },
             closeGroupDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeGroupDetails")

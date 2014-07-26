@@ -17,7 +17,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
-
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
@@ -26,7 +26,8 @@
 <body id="voting_system_page" style="margin:0px auto 0px auto;background-color: #f9f9f9;">
 <polymer-element name="nav-bar" attributes="url loading">
     <template>
-        <core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}"></core-ajax>
+        <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
+        <core-xhr id="ajax" ></core-xhr>
         <!-- put core signals names in lower case !!!-->
         <core-signals on-core-signal-innerpage="{{innerPageSignal}}"></core-signals>
         <votingsystem-navbar id="_navbar" style="display: none;">
@@ -95,6 +96,7 @@
         Polymer('nav-bar', {
             appTitle:"<g:message code="appTitle"/>",
             url:'',
+            ajaxOptions:{method:'get', responseType:'document'},
             ready: function() {
                 this.$._navbar.searchVisible(false)
                 this.$._navbar.style.display = 'block';
@@ -116,8 +118,11 @@
                 this.loading= true;
                 history.pushState(null, null, this.url);
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
-                if(this.$.ajax.url == newURL)  this.$.ajax.go()
-                else this.$.ajax.url = newURL
+                this.ajaxOptions.url = newURL
+                this.ajaxOptions.callback = this.ajaxResponse.bind(this)
+                this.$.ajax.request(this.ajaxOptions)
+                /*if(this.$.ajax.url == newURL)  this.$.ajax.go()
+                else this.$.ajax.url = newURL*/
             },
             drawerItemSelected: function(e) {
                 if(e.detail.isSelected) {
@@ -136,16 +141,18 @@
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
             },
-            ajaxResponse: function(e) {
-                console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
-                var innerPage = document.implementation.createHTMLDocument('');
-                innerPage.open();
-                innerPage.write(e.detail.xhr.responseText);
-                innerPage.close();
-                this.asyncFire('ajax-response', innerPage)
+            ajaxResponse: function(xhrResponse, xhr) {
+                //console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
+                console.log(this.tagName + " - ajax-response - newURL: "  + this.ajaxOptions.url + " - status: " + xhr.status)
+                //this.asyncFire('ajax-response', this.$.ajax.response)
+                if(200 == xhr.status) this.asyncFire('ajax-response', xhrResponse)
+                else {
+                    this.loading = false
+                    showMessageVS(xhrResponse.body.innerHTML, '<g:message code="errorLbl"/>')
+                }
             },
             ajaxError: function(e) {
-                console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
+                console.log(this.tagName + " - ajaxError")
                 if(ResponseVS.SC_PRECONDITION_FAILED == e.detail.xhr.status) {
                     this.loading = false
                     var response = e.detail.xhr.responseText
@@ -167,10 +174,10 @@
     <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
 </div>
 <core-signals id="coreSignals"></core-signals>
+<votingsystem-socket id="socketvs" url="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
 </body>
 </html>
 <asset:script>
-
     document.addEventListener('votingsystem-signal-innerPage', function(e) {
         console.log('main.gsp -votingsystem-signal-innerPage - newURL: ' + e.detail)
         document.querySelector('#navBar').url = e.detail
@@ -187,6 +194,21 @@
         document.querySelector('#navBar').style.display = 'block';
         document.querySelector('#loadingDiv').style.display = 'none';
     });
+
+    document.querySelector('#socketvs').addEventListener('on-message', function(e) {
+        console.log("main.gsp - socketvs - message: " + e.detail)
+        var socketMessage = e.detail
+        if(200 != socketMessage.status) {
+            console.log("main.gsp - socketvs - error")
+            showMessageVS(socketMessage.message, 'ERROR')
+        }
+    });
+
+    function sendSocketVSMessage(dataJSON) {
+        console.log ("sendSocketVSMessage")
+        dataJSON.locale = navigator.language
+        document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
+    }
 
     document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
         var ajaxDocument = e.detail
@@ -228,6 +250,5 @@
             } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)
         }
     }
-
 </asset:script>
 <asset:deferredScripts/>

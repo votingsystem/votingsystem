@@ -2,8 +2,12 @@ package org.votingsystem.timestamp.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.signature.util.CertUtil
+
+import java.security.cert.X509Certificate
 
 /**
  * @infoController Información de la aplicación
@@ -24,6 +28,7 @@ class ServerInfoController {
 	def index() {
         HashMap serverInfo = new HashMap()
         serverInfo.certChainPEM = new String(timeStampService.getSigningCertChainPEMBytes())
+        serverInfo.certChainURL = "${createLink(controller: 'serverInfo', action:'certChain', absolute:true)}"
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.TIMESTAMP_SERVER.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
@@ -34,6 +39,16 @@ class ServerInfoController {
 	}
 
     /**
+     * @httpMethod [GET]
+     * @return La cadena de certificación en formato PEM del servidor
+     */
+    def certChain () {
+        byte[] serverCertPEMBytes = timeStampService.getSigningCertChainPEMBytes()
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT,
+                messageBytes:serverCertPEMBytes)]
+    }
+
+    /**
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.
      */
     def exceptionHandler(final Exception exception) {
@@ -42,4 +57,5 @@ class ServerInfoController {
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
                 metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
+
 }

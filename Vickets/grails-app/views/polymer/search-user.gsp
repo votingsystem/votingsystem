@@ -1,6 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/uservs-data.gsp']"/>">
 
 <polymer-element name="search-user" attributes="url">
     <template>
@@ -23,12 +24,12 @@
             .rowvs {
                 border-bottom: 1px solid #ccc;
                 padding: 10px 0px 10px 0px;
-                cursor: pointer;
                 width: 100%;
             }
 
             .rowvs div {
                 text-align:center;
+                cursor: pointer;
             }
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
@@ -41,7 +42,7 @@
                 </div>
                 <div>
                     <template repeat="{{uservs in userVSList}}">
-                        <div layout horizontal center center justified on-click="{{showUserDetails}}">
+                        <div class="rowvs" layout horizontal center center justified on-click="{{showUserDetails}}">
                             <div flex>{{uservs.nif}}</div>
                             <div flex>{{uservs.name}}</div>
                         </div>
@@ -54,6 +55,7 @@
                 <g:message code="emptyUserSearchResultMsg"/>
             </div>
         </div>
+        <uservs-data id="userData" uservs="${uservsMap as grails.converters.JSON}"></uservs-data>
     </template>
     <script>
         Polymer('search-user', {
@@ -63,7 +65,9 @@
             },
             urlChanged:function(e) {},
             showUserDetails:function(e) {
-                this.fire('core-signal', {name: "user-clicked", data: e.target.templateInstance.model.uservs});
+                console.log("====== showUserDetails")
+                this.$.userData.uservs = e.target.templateInstance.model.uservs
+                this.$.userData.opened = true
             },
             reset: function() {
                 this.userVSList = []

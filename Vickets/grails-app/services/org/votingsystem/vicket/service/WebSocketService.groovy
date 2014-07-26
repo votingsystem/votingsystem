@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.service
 
+import grails.converters.JSON
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.votingsystem.model.MessageSMIME
@@ -73,7 +74,7 @@ class WebSocketService {
             try { socketOperation = TypeVS.valueOf(messageJSON.operation) }
             catch(Exception ex) {
                 messageJSON.status = ResponseVS.SC_ERROR
-                messageJSON.message = "Invalid operation '${messageJSON.operation}'"
+                messageJSON.message = "Invalid operation '${messageJSON.operation}'".toString()
                 processResponse(messageJSON)
                 return;
             }
@@ -145,7 +146,7 @@ class WebSocketService {
     }
 
     public void processResponse(JSONObject messageJSON) {
-        log.debug("processResponse - messageJSON: ${messageJSON}")
+        log.debug("processResponse - messageJSON: ${messageJSON.message}")
         SessionVSHelper.getInstance().sendMessage(messageJSON.sessionId, messageJSON.toString());
     }
 

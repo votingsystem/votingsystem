@@ -1,52 +1,52 @@
-<polymer-element name="send-message-dialog">
-    <template>
-        <style>
-        .card {
-            position: relative;
-            display: inline-block;
-            vertical-align: top;
-            background-color: #f9f9f9;
-            box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-            border: 1px solid #ccc;
-        }
-        paper-button.button {
-            background-color: #f9f9f9;
-            color: #6c0404;
-            border: 1px solid #ccc;
-            margin:10px;
-            vertical-align: middle;
-            line-height: 24px;
-            height: 35px;
-        }
-        </style>
-        <div class="card" style="width:400px; display: {{isVisible?'block':'none'}}">
-            <div layout horizontal center center-justified style="background: #6c0404;">
-                <div flex style="font-size: 1.3em; margin:0px 0px 0px 30px;font-weight: bold; color:#f9f9f9;display:{{messageToUser? 'block':'none'}}">
-                    <g:message code="sendMessageVSDialogCaption"/>
-                </div>
-                <div>
-                    <core-icon-button on-click="{{accept}}" icon="close" style="fill:#f9f9f9;"></core-icon-button>
-                </div>
-            </div>
-            <div style="font-size: 1.3em; color:#6c0404; font-weight: bold; text-align: center; padding:30px 20px 30px 20px;">
-                <p style="text-align: center;  font-size: 1.2em;display:{{messageToUser == null?'none':'block'}}">{{messageToUser}}</p>
-                <label class="control-label" ><g:message code="sendMessageVSMsg"/></label>
-                <textarea id="messageVSContent" class="form-control" rows="4"></textarea>
-            </div>
+<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 
-            <div layout horizontal>
-                <div flex></div>
-                <div class="button raised accept" on-click="{{sendMessage}}"
-                     style="border: 1px solid #ccc; margin:0px 10px 10px 5px;">
-                    <div ><g:message code="acceptLbl" /></div>
-                    <paper-ripple fit></paper-ripple>
+<polymer-element name="send-message-dialog" attributes="opened">
+    <template>
+        <votingsystem-dialog id="xDialog" class="sendMsgDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+            <!-- place all overlay styles inside the overlay target -->
+            <style>
+                .sendMsgDialog {
+                    box-sizing: border-box;
+                    -moz-box-sizing: border-box;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 13px;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    overflow: auto;
+                    background: white;
+                    padding:0px 0px 0px 0px;
+                    outline: 1px solid rgba(0,0,0,0.2);
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                    width: 500px;
+                }
+            </style>
+            <div layout vertical style=" min-height:300px;">
+                <div layout horizontal center center-justified style="background: #6c0404;">
+                    <div flex style="font-size: 1.3em; margin:0px 0px 0px 30px;font-weight: bold; color:#f9f9f9;display:{{messageToUser? 'block':'none'}}">
+                        <g:message code="sendMessageVSDialogCaption"/>
+                    </div>
+                    <div>
+                        <core-icon-button on-click="{{close}}" icon="close" style="color:#f9f9f9;"></core-icon-button>
+                    </div>
+                </div>
+                <div flex layout vertical style="padding: 10px 10px 10px 10px; height: 100%;">
+                    <div flex style="font-size: 1.3em; color:#6c0404; font-weight: bold; text-align: center; padding:0px 20px 0px 20px;">
+                        <paper-input floatingLabel id="messageVSContent" multiline rows="4" label="{{messageToUser}}" required></paper-input>
+                    </div>
+
+                    <div layout horizontal style="padding:20px 20px 20px 20px;">
+                        <div flex></div>
+                        <votingsystem-button on-click="{{sendMessage}}"><g:message code="acceptLbl" />
+                            <i class="fa fa-check"></i></votingsystem-button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </votingsystem-dialog>
     </template>
     <script>
         Polymer('send-message-dialog', {
-            isVisible:false,
             toUserNIF:'',
             certificateList:[],
 
@@ -54,15 +54,22 @@
                 this.objectId = Math.random().toString(36).substring(7)
                 window[this.objectId] = this
             },
-
+            onCoreOverlayOpen:function(e) {
+                this.opened = this.$.xDialog.opened
+            },
+            openedChanged:function() {
+                this.async(function() { this.$.xDialog.opened = this.opened});
+            },
             show: function (toNIF, message, certificateList) {
                 this.toUserNIF = toNIF
                 this.$.messageVSContent.value = ""
                 this.messageToUser = message
                 this.certificateList = certificateList
-                this.isVisible = true
+                this.opened = true
             },
-
+            close:function() {
+               this.opened = false
+            },
             sendMessage: function () {
                 console.log("sendMessageVS")
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS)
@@ -79,7 +86,7 @@
                 webAppMessage.callerCallback = this.objectId
                 webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-                this.isVisible = false
+                this.opened = false
             },
 
             /*This method is called from JavaFX client. So we put referencens on global window */

@@ -1,5 +1,6 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-list.gsp']"/>">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-transaction-table', file: 'votingsystem-transaction-table.html')}">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-table.gsp']"/>">
+
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/user-list.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
@@ -36,10 +37,10 @@
                 <balance-list id="balanceList"></balance-list>
             </div>
             <div id="transactionsTo" class="tabContent" style="display:{{selectedTab == 'transactionsTo'?'block':'none'}}">
-                <votingsystem-transaction-table id="transactionToTable"></votingsystem-transaction-table>
+                <vicket-transactionvs-table id="transactionToTable"></vicket-transactionvs-table>
             </div>
             <div id="transactionsFrom" class="tabContent" style="display:{{selectedTab == 'transactionsFrom'?'block':'none'}}">
-                <votingsystem-transaction-table id="transactionFromTable"></votingsystem-transaction-table>
+                <vicket-transactionvs-table id="transactionFromTable"></vicket-transactionvs-table>
             </div>
             <div id="userList" class="tabContent" style="display:{{selectedTab == 'userList'?'block':'none'}}">
                 <user-list id="userList" menuType="${params.menu}"></user-list>

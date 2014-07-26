@@ -94,22 +94,20 @@ class UserVSController {
 
     def index() {
         if (params.long('id')) {
-            def result
+            UserVS uservs
             Map resultMap
-            UserVS.withTransaction {
-                result = UserVS.get(params.long('id'))
-            }
+            UserVS.withTransaction { uservs = UserVS.get(params.long('id'))  }
             String view = null
-            if(result) {
-                if(result instanceof GroupVS) {
-                    resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(result)]
+            if(uservs) {
+                if(uservs instanceof GroupVS) {
+                    resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
                     view = '/groupVS/group'
-                } else if(result instanceof VicketSource) {
-                    resultMap = [uservsMap:userVSService.getVicketSourceDataMap(result)]
-                    view = 'vicketSource'
+                } else if(uservs instanceof VicketSource) {
+                    resultMap = [uservsMap:userVSService.getVicketSourceDataMap(uservs)]
+                    view = 'uservs'
                 } else {
-                    resultMap = [uservsMap:userVSService.getUserVSDataMap(result)]
-                    view = 'user'
+                    resultMap = [uservsMap:userVSService.getUserVSDataMap(uservs)]
+                    view = 'uservs'
                 }
             }
             else {

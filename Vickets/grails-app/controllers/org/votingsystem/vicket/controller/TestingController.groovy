@@ -62,7 +62,7 @@ class TestingController {
     def socketvs() {}
 
     def broadcast() {
-        SessionVSHelper.getInstance().broadcast(new JSONObject([status:200, message:"Hello"]))
+        SessionVSHelper.getInstance().broadcast(new JSONObject([status:200, message:"Hello", coreSignal:"transactionvs-new"]))
         render "OK"
         return false
     }
@@ -87,7 +87,6 @@ class TestingController {
         Random randomGenerator = new Random();
 
         TransactionVS.Type[] transactionTypes = TransactionVS.Type.values()
-
 
         int numVotes = 1000
         for (int idx = 1; idx <= numVotes; ++idx){
@@ -136,6 +135,11 @@ class TestingController {
         calendar.set(Calendar.MONTH, 0)
         def result = userVSService.getUserVS(calendar.getTime())
         render result as JSON
+    }
+
+    def jsonDocs() {
+
+
     }
 
 }

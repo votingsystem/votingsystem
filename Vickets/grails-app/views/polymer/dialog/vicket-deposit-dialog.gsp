@@ -96,7 +96,7 @@
 
                     <div id="receptorPanelDiv">
                         <div layout horizontal center center-justified id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
-                            <input id="userSearchInput" type="text" class="form-control" style="width:200px;"
+                            <input id="userSearchInput" type="text" style="width:200px;"
                                    placeholder="<g:message code="enterReceptorDataMsg"/>">
                             <votingsystem-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
                                 <g:message code="userSearchLbl"/> <i class="fa fa-search"></i>
@@ -143,7 +143,7 @@
             })
 
             this.$.tagDialog.addEventListener('tag-selected', function (e) {
-                console.log("==== tag-selected: " + JSON.stringify(e.detail))
+                console.log("tag-selected: " + JSON.stringify(e.detail))
                 depositDialog.selectedTags = e.detail
             })
 

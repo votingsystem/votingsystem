@@ -16,7 +16,7 @@
 
         <div layout horizontal center center-justified>
             <select id="vicketSourceStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                    class="form-control" onchange="vicketSourceState(this)">
+                     onchange="vicketSourceState(this)">
                 <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveVicketSourceLbl"/> - </option>
             </select>
         </div>
@@ -83,3 +83,4 @@
         document.querySelector("#vicketSourceList").url = targetURL
     }
 </asset:script>
+<asset:deferredScripts/>

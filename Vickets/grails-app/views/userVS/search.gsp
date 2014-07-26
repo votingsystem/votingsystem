@@ -15,7 +15,7 @@
 
     <div layout vertical center>
         <div id="searchPanel" class="" style="background:#ba0011; padding:10px 10px 10px 10px; width: 300px; margin:0px auto 0px auto;">
-            <input id="userSearchInput" type="text" class="form-control" placeholder="<g:message code="userSearchLbl" />"
+            <input id="userSearchInput" type="text" placeholder="<g:message code="userSearchLbl" />"
                    style="width:220px; border-color: #f9f9f9;display:inline; vertical-align: middle;" onKeyPress="searchInputKeyPress(event)">
             <i onclick="processUserSearch()" class="fa fa-search text-right navBar-vicket-icon"
                style="margin:0px 0px 0px 15px; display:inline;vertical-align: middle;"></i>

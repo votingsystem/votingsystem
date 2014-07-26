@@ -32,7 +32,7 @@
             <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>
-                        <select id="certTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" class="form-control" on-change="{{certTypeSelect}}">
+                        <select id="certTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" on-change="{{certTypeSelect}}">
                             <option value="&type=USER&state=OK"> - <g:message code="certUserStateOKLbl"/> - </option>
                             <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - <g:message code="certAuthorityStateOKLbl"/> - </option>
                             <option value="&type=USER&state=CANCELLED"> - <g:message code="certUserStateCancelledLbl"/> - </option>

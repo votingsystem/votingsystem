@@ -21,7 +21,9 @@
   "dependencies":{
       "chai": "~1.9.1",
       "mocha": "~1.19.0",
-      "votingsystem-socket":"votingsystem-socket#~0.0.1",
+      "votingsystem-socket":"votingsystem-socket#~0.0.2",
+
+      "jsoneditor":"jsoneditor#~3.0.0",
 
       "google-chart":"google-chart#~0.0.1",
       "font-awesome":"font-awesome#~4.1.0",

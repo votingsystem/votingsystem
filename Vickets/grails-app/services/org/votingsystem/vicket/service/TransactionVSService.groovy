@@ -5,6 +5,7 @@ import grails.orm.PagedResultList
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.votingsystem.model.*
+import org.votingsystem.vicket.model.CoreSignal
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
@@ -13,8 +14,8 @@ import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.util.MetaInfMsg
-
 import java.math.RoundingMode
+import org.votingsystem.vicket.model.CoreSignal
 
 /**
 * @author jgzornoza
@@ -76,6 +77,7 @@ class TransactionVSService {
     public void notifyListeners(TransactionVS transactionVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         Map messageMap = getTransactionMap(transactionVS)
+        messageMap.coreSignal = CoreSignal.NEW_TRANSACTIONVS;
         if(!listenerSet.isEmpty()) { //notify websocket clients listening transactions
             ResponseVS broadcastResult = webSocketService.broadcastList(messageMap, listenerSet);
             if(ResponseVS.SC_OK != broadcastResult.statusCode) {

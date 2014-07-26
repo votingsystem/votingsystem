@@ -6,7 +6,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs.gsp']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/groupvs-user.gsp']"/>">
 
 <%
@@ -21,7 +20,7 @@
         </style>
         <g:include view="/include/styles.gsp"/>
         <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
-              on-core-signal-uservs-selected="{{showUserDetails}}" on-core-signal-transactionvs-selected="{{showTransaction}}"></core-signals>
+              on-core-signal-uservs-selected="{{showUserDetails}}" ></core-signals>
 
         <div class="pageContenDiv" style="max-width: 1000px; margin:0px auto 0px auto;"  cross-fade>
             <div layout horizontal center center-justified>
@@ -122,7 +121,6 @@
         </div>
 
         <groupvs-user id="userDescription"></groupvs-user>
-        <vicket-transactionvs id="transactionViewer"></vicket-transactionvs>
 
         <div layout horizontal center center-justified style="position:absolute; top:80px; width: 100%; max-width: 1200px; margin: 0px auto 0px auto;">
             <div>
@@ -140,12 +138,6 @@
             ready :  function() {
                 console.log(this.tagName + " - ready - subpage: " + this.subpage)
                 this.isClientToolConnected = window['isClientToolConnected']
-            },
-            showTransaction:function(e, detail, sender) {
-                var transactionURL = "${createLink(controller: 'transaction', action:'get', absolute:true)}/" + detail
-                console.log(this.tagName + " - showTransaction - transactionURL: " + transactionURL)
-                this.$.transactionViewer.url = transactionURL
-                this.$.transactionViewer.opened = true
             },
             messagedialog:function(e, detail, sender) {
                 console.log("messagedialog signal - cancelgroup: " + detail)

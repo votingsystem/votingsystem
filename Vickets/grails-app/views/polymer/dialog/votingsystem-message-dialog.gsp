@@ -5,7 +5,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 
 
-
 <polymer-element name="votingsystem-message-dialog" attributes="opened">
     <template>
         <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">

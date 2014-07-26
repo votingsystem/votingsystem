@@ -4,7 +4,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-transaction-table', file: 'votingsystem-transaction-table.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-table.gsp']"/>">
 </head>
 <body>
 <div class="pageContenDiv">
@@ -15,7 +15,7 @@
 
     <div layout horizontal center center-justified>
         <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                class="form-control" onchange="transactionvsTypeSelect(this)">
+                 onchange="transactionvsTypeSelect(this)">
             <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
 
             <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
@@ -27,7 +27,7 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <votingsystem-transaction-table id="recordList" url="${createLink(controller: 'reports', action: 'transactionvs')}"></votingsystem-transaction-table>
+    <vicket-transactionvs-table id="recordList" url="${createLink(controller: 'reports', action: 'transactionvs')}"></vicket-transactionvs-table>
 
 </div>
 </body>
@@ -56,3 +56,4 @@
         document.querySelector("#recordList").url = "${createLink(controller: 'transaction', action: 'index')}"
     }
 </asset:script>
+<asset:deferredScripts/>
