@@ -230,6 +230,8 @@ class GroupVSService {
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
 
+        resultMap.balanceResult = transactionVSService.balanceResult(resultMap.balancesTo, resultMap.balancesFrom)
+
         return resultMap
     }
 

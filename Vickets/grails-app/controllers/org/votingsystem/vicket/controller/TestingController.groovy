@@ -36,7 +36,11 @@ class TestingController {
     def systemService
 
     def index() {
+        balanceService.initWeekPeriod()
+        render "OK"
+    }
 
+    def index1() {
         DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(Calendar.getInstance().getTime())
         balanceService.calculatePeriod(timePeriod);
         render "OK"
@@ -50,24 +54,11 @@ class TestingController {
         return false
     }
 
-    def webViewJSTest() {
-        String jsCommand = "serverMessage('message to server webkit')"
-        WebViewWrapper webViewTest = WebViewWrapper.getInstance().executeScript(jsCommand);
-        render "webViewJSTest - OK"
-        return false
-    }
-
-    def testSocket() {}
-
-    def socketvs() {}
-
     def broadcast() {
         SessionVSHelper.getInstance().broadcast(new JSONObject([status:200, message:"Hello", coreSignal:"transactionvs-new"]))
         render "OK"
         return false
     }
-
-    def validator() { }
 
     def tagAcccount() {
         UserVSAccount groupAccount
@@ -82,14 +73,12 @@ class TestingController {
         return false
     }
 
-    def index1() {
+    def logTransactions() {
         Long init = System.currentTimeMillis()
         Random randomGenerator = new Random();
-
         TransactionVS.Type[] transactionTypes = TransactionVS.Type.values()
-
-        int numVotes = 1000
-        for (int idx = 1; idx <= numVotes; ++idx){
+        int numTransactions = 1000
+        for (int idx = 1; idx <= numTransactions; ++idx){
             int randomInt = randomGenerator.nextInt(100);
             int transactionvsItemId = new Random().nextInt(transactionTypes.length);
             TransactionVS.Type transactionType = transactionTypes[transactionvsItemId]
@@ -100,10 +89,8 @@ class TestingController {
         Long finish = System.currentTimeMillis()
         Long duration = finish - init;
         String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
-        render " --- Done numVotes : ${numVotes} - duration in millis: ${duration} - duration: ${durationStr}"
+        render " --- Done numTransactions : ${numTransactions} - duration in millis: ${duration} - duration: ${durationStr}"
     }
-
-    def accounts() {}
 
     def checkVicket() {
         auditingService.checkVicketRequest(Calendar.getInstance().getTime())
@@ -137,9 +124,18 @@ class TestingController {
         render result as JSON
     }
 
-    def jsonDocs() {
-
-
+    def webViewJSTest() {
+        String jsCommand = "serverMessage('message to server webkit')"
+        WebViewWrapper webViewTest = WebViewWrapper.getInstance().executeScript(jsCommand);
+        render "webViewJSTest - OK"
+        return false
     }
 
+    def accounts() { }
+
+    def jsonDocs() { }
+
+    def testSocket() { }
+
+    def socketvs() { }
 }

@@ -1,12 +1,17 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.hibernate.ScrollableResults
 import org.votingsystem.model.GroupVS
+import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketSource
+import org.votingsystem.model.VicketTagVS
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 
 //@Transactional
@@ -22,17 +27,108 @@ class BalanceService {
     def vicketSourceService
     def filesService
     def signatureVSService
+    Map<String, VicketTagVS> tagMap = [:]
+
+    public VicketTagVS getTag(String tagName) throws Exception{
+        if(!tagMap[tagName]) {
+            VicketTagVS tag = VicketTagVS.findWhere(name:tagName)
+            if(!tag) throw new Exception("VicketTagVS with name '${tagName}' not found")
+            tagMap[(tagName)] = tag
+        } else return tagMap[tagName]
+    }
+
+    public initWeekPeriod() {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long beginCalc = System.currentTimeMillis()
+        Locale defaultLocale = new Locale(grailsApplication.config.VotingSystem.defaultLocale)
+        //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
+        //we know this is launch every Monday at 00:00 so we just make sure to select a day from last week to select the period
+        Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
+        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
+        Calendar cal = Calendar.getInstance();
+        int week = cal.get(Calendar.WEEK_OF_YEAR);
+        String subject =  messageSource.getMessage('initWeekMsg', [week].toArray(), defaultLocale)
+
+        Map globalDataMap = [:]
+        int numTotalUsers = UserVS.countByDateCancelledIsNullOrDateCancelledGreaterThanEquals(timePeriod.getDateFrom())
+
+        Map<String, File> weekReportFiles
+        ScrollableResults scrollableResults = UserVS.createCriteria().scroll {//init week only with active users
+            eq("state", UserVS.State.ACTIVE)
+            not {
+                eq("type", UserVS.Type.SYSTEM)
+                eq("type", UserVS.Type.VICKET_SOURCE)
+            }
+        }
+
+        while (scrollableResults.next()) {
+            UserVS userVS = (UserVS) scrollableResults.get(0);
+            Map balanceMap
+            String userSubPath
+            if(userVS instanceof GroupVS) {
+                balanceMap = genBalanceForGroupVS(userVS, timePeriod)
+                userSubPath = "GroupVS_${userVS.id}"
+            } else if (userVS instanceof UserVS) {
+                balanceMap = genBalanceForUserVS(userVS, timePeriod)
+                userSubPath = StringUtils.getUserDirPath(userVS.getNif());
+            }
+            else throw new Exception("User type not valid for operation ${methodName} - UserVS id ${userVS.id}")
+
+            weekReportFiles = filesService.getWeekReportFiles(timePeriod, userSubPath)
+            //[baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json"), systemReceipt:receiptFile]
+
+            Map<String, Map> balanceResult = balanceMap.balanceResult
+            Set<Map.Entry<String, Map>> mapEntries = balanceResult.entrySet()
+            mapEntries.each { currency ->
+                Map<String, BigDecimal> currencyMap = currency.getValue()
+                Set<Map.Entry<String, BigDecimal>> currencyEntries = currencyMap.entrySet()
+                currencyEntries.each {
+                    String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg', [it.getKey()].toArray(), defaultLocale)
+                    Map transactionData = [amount:it.getValue(), tag:it.getKey(), toUserVS: userVS.name,
+                               toUserNIF:userVS.nif, toUserId:userVS.id, toUserIBAN:userVS.IBAN, UUID:UUID.randomUUID()]
+                    ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
+                            userVS.getNif(), new JSONObject(transactionData).toString(), "${subject} - ${signedMessageSubject}")
+
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new Exception(
+                            "${methodName} - error signing system transaction - ${responseVS.getMessage()}")
+
+                    MessageSMIME messageSMIME = new MessageSMIME(userVS:systemService.getSystemUser(),
+                            smimeMessage:responseVS.getSmimeMessage(), type:TypeVS.VICKET_INIT_PERIOD,
+                            content:responseVS.getSmimeMessage().getBytes(),
+                            base64ContentDigest:responseVS.getSmimeMessage().getContentDigestStr())
+                    messageSMIME.save()
+
+                    TransactionVS transactionVS = new TransactionVS(amount: it.getValue(), fromUserVS:systemService.getSystemUser(),
+                            messageSMIME:messageSMIME, toUserVS: userVS, state:TransactionVS.State.OK, subject:subject,
+                            type:TransactionVS.Type.INIT_PERIOD, currencyCode: currency, tag:getTag(it.getKey())).save()
+                    File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${it.getKey()}.p7s")
+                    responseVS.getSmimeMessage().writeTo(new FileOutputStream(tagReceiptFile))
+                }
+            }
+
+            if((scrollableResults.getRowNumber() % 100) == 0) {
+                String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                        System.currentTimeMillis() - beginCalc)
+                log.debug("${methodName} - ${scrollableResults.getRowNumber()} of ${numTotalUsers} - ${elapsedTimeStr}");
+                sessionFactory.currentSession.flush()
+                sessionFactory.currentSession.clear()
+            }
+            if(((scrollableResults.getRowNumber() + 1) % 2000) == 0) {
+                //accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
+                //new File(accessRequestBaseDir).mkdirs()
+            }
+        }
+        calculatePeriod(timePeriod)
+    }
 
     //@Transactional
     public ResponseVS calculatePeriod(DateUtils.TimePeriod timePeriod) {
         log.debug("calculatePeriod - timePeriod: ${timePeriod.toString()}")
-        //we know this is launch every Monday at 00:00 so we just make sure to select a day from last week
-        long begin = System.currentTimeMillis()
 
-
+        long beginCalc = System.currentTimeMillis()
         int numTotalUsers = UserVS.countByDateCancelledIsNullOrDateCancelledGreaterThanEquals(timePeriod.getDateFrom())
 
-        Map<String, File> weekReportFiles = filesService.getWeekReportFiles(timePeriod)
+        Map<String, File> weekReportFiles = filesService.getWeekReportFiles(timePeriod, null)
         File reportsFile = weekReportFiles.reportsFile
 
         List groupBalanceList = []
@@ -57,7 +153,7 @@ class BalanceService {
 
             if((scrollableResults.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
-                        System.currentTimeMillis() - begin)
+                        System.currentTimeMillis() - beginCalc)
                 log.debug("userVS ${scrollableResults.getRowNumber()} of ${numTotalUsers} - ${elapsedTimeStr}");
                 sessionFactory.currentSession.flush()
                 sessionFactory.currentSession.clear()
@@ -67,11 +163,9 @@ class BalanceService {
                 //new File(accessRequestBaseDir).mkdirs()
             }
 
-
         }
 
         Map systemBalance = genBalanceForSystem(systemService.getSystemUser(), timePeriod)
-
         Map userBalances = [systemBalance:systemBalance, groupBalanceList:groupBalanceList,
                         userBalanceList:userBalanceList, vicketSourceBalanceList:vicketSourceBalanceList]
         Map resultMap = [userBalances:userBalances]
@@ -85,6 +179,9 @@ class BalanceService {
         ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
                 "", userBalancesJSON.toString(),subject)
         responseVS.getSmimeMessage().writeTo(new FileOutputStream(weekReportFiles.systemReceipt))
+        String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                System.currentTimeMillis() - beginCalc)
+        log.debug("calculatePeriod - numTotalUsers: '${numTotalUsers}' - finished in '${elapsedTimeStr}'")
         return responseVS
     }
 
@@ -94,7 +191,6 @@ class BalanceService {
         else if (uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
         else return genBalanceForUserVS(uservs, timePeriod)
     }
-
 
     private Map genBalanceForVicketSource(VicketSource vicketSource, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();

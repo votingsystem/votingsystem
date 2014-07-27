@@ -126,6 +126,7 @@ class  SignatureVSService {
         return issuedCert
     }
 
+    @Transactional
 	private void initCertAuthorities() {
         File directory = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certAuthoritiesDirPath).getFile()
@@ -143,7 +144,7 @@ class  SignatureVSService {
         for(X509Certificate x509Certificate:fileSystemCerts) {
             long serialNumber = x509Certificate.getSerialNumber().longValue()
             CertificateVS certificate = null
-            CertificateVS.withTransaction { certificate = CertificateVS.findBySerialNumber(serialNumber)}
+            certificate = CertificateVS.findBySerialNumber(serialNumber)
             if(!certificate) {
                 boolean isRoot = CertUtil.isSelfSigned(x509Certificate)
                 certificate = new CertificateVS(isRoot:isRoot, type:CertificateVS.Type.CERTIFICATE_AUTHORITY,
@@ -232,13 +233,11 @@ class  SignatureVSService {
 		SMIMEMessageWrapper multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
 		return multiSignedMessage
 	}
-		
+
+    @Transactional
 	public ResponseVS validateSMIME(SMIMEMessageWrapper messageWrapper, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-		MessageSMIME messageSMIME = null
-        MessageSMIME.withTransaction {
-            messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
-        }
+		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
 		if(messageSMIME) {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
@@ -370,6 +369,7 @@ class  SignatureVSService {
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[messageVS:messageVS, messageSMIMEReq:messageSMIMEReq])
     }
 
+    @Transactional
     private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType, Locale locale) {
         if (smimeMessageReq?.isValidSignature()) {
             log.debug "processSMIMERequest - isValidSignature"
@@ -387,7 +387,7 @@ class  SignatureVSService {
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
                 messageSMIME = new MessageSMIME(reason:certValidationResponse.message, type:TypeVS.SIGNATURE_ERROR,
                         metaInf:certValidationResponse.metaInf ,content:smimeMessageReq.getBytes())
-                MessageSMIME.withTransaction { messageSMIME.save() }
+                messageSMIME.save()
                 log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
                         " - message: ${certValidationResponse.message}"
                 return certValidationResponse
@@ -397,7 +397,7 @@ class  SignatureVSService {
                         userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
                         eventVS:certValidationResponse.eventVS, type:typeVS,
                         content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr())
-                MessageSMIME.withTransaction {messageSMIME.save()}
+                messageSMIME.save()
             }
             return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
         } else if(smimeMessageReq) {

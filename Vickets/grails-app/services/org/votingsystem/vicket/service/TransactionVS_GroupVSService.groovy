@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils

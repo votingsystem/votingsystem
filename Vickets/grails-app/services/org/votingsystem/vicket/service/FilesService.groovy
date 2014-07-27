@@ -28,11 +28,12 @@ class FilesService {
         }
 	}
 
-    public Map<String, File> getWeekReportFiles(DateUtils.TimePeriod timePeriod){
+    public Map<String, File> getWeekReportFiles(DateUtils.TimePeriod timePeriod, String subPath){
         DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         String dateFromPathPart = formatter.format(timePeriod.getDateFrom())
         String dateToPathPart = formatter.format(timePeriod.getDateTo())
         String baseDirPath ="${grailsApplication.config.VotingSystem.backupCopyPath}/weekReports/${dateFromPathPart}_${dateToPathPart}/"
+        if(subPath) baseDirPath = "${baseDirPath}${subPath}"
         File baseDir = new File(baseDirPath)
         baseDir.mkdirs()
         File receiptFile = new File("${baseDirPath}/receipt.p7s")

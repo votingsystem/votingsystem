@@ -198,9 +198,8 @@ public class DateUtils {
             return dateTo;
         }
 
-        @Override
-        public String toString() {
-            return "Period from [" + dateFrom.toString() + " - " + dateTo.toString() + "]";
+        @Override public String toString() {
+            return "Period from [" + getStringFromDate(dateFrom) + " - " + getStringFromDate(dateTo) + "]";
         }
     }
 }

@@ -100,30 +100,34 @@ class TransactionVSService {
     public void updateBalances(TransactionVS transactionVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(transactionVS.state == TransactionVS.State.OK) {
-            if(transactionVS.transactionParent == null) {//Triggering transaction, to system before share out among receptors
-                if(transactionVS.type != TransactionVS.Type.VICKET_SOURCE_INPUT) {
-                    transactionVS.accountFromMovements.each { userAccountFrom, amount->
-                        userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
-                        userAccountFrom.save()
-                    }
-                }
-                systemService.updateTagBalance(transactionVS.amount,transactionVS.currencyCode, transactionVS.tag)
+            if(transactionVS.type == TransactionVS.Type.INIT_PERIOD) {
+
             } else {
-                UserVSAccount accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
-                        currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
-                if(!accountTo) {//new user account for tag
-                    accountTo = new UserVSAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
-                            currencyCode:transactionVS.currencyCode, tag:transactionVS.tag, userVS:transactionVS.toUserVS).save()
-                    log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
-                            "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")
+                if(transactionVS.transactionParent == null) {//Triggering transaction, to system before share out among receptors
+                    if(transactionVS.type != TransactionVS.Type.VICKET_SOURCE_INPUT) {
+                        transactionVS.accountFromMovements.each { userAccountFrom, amount->
+                            userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
+                            userAccountFrom.save()
+                        }
+                    }
+                    systemService.updateTagBalance(transactionVS.amount,transactionVS.currencyCode, transactionVS.tag)
                 } else {
-                    accountTo.balance = accountTo.balance.add(transactionVS.amount)
-                    accountTo.save()
+                    UserVSAccount accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
+                            currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
+                    if(!accountTo) {//new user account for tag
+                        accountTo = new UserVSAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
+                                currencyCode:transactionVS.currencyCode, tag:transactionVS.tag, userVS:transactionVS.toUserVS).save()
+                        log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
+                                "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")
+                    } else {
+                        accountTo.balance = accountTo.balance.add(transactionVS.amount)
+                        accountTo.save()
+                    }
+                    systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
+                    notifyListeners(transactionVS)
+                    log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionVS.amount} ${transactionVS.currencyCode} " +
+                            " - fromIBAN '${transactionVS.fromUserIBAN}' toIBAN '${accountTo?.IBAN}' - tag '${transactionVS.tag?.name}'")
                 }
-                systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
-                notifyListeners(transactionVS)
-                log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionVS.amount} ${transactionVS.currencyCode} " +
-                        " - fromIBAN '${transactionVS.fromUserIBAN}' toIBAN '${accountTo?.IBAN}' - tag '${transactionVS.tag?.name}'")
             }
         } else log.error("TransactionVS '${transactionVS.id}' with state ${transactionVS.state}")
     }
@@ -196,6 +200,30 @@ class TransactionVSService {
             transactionToList.add(getTransactionMap(transaction))
         }
         return [transactionToList:transactionToList, balancesTo:balancesMap]
+    }
+
+    public Map<String, BigDecimal> balanceResult(Map<String, BigDecimal> balancesTo, Map<String, BigDecimal> balancesFrom) {
+        Map<String, Map> balanceResult = balancesTo.clone()
+        Set<Map.Entry<String, Map>> mapEntries = balancesFrom.entrySet()
+        mapEntries.each { currency ->
+            Map<String, BigDecimal> currencyBalanceMap = currency.getValue()
+            if(balanceResult [currency.getKey()]) {
+                Set<Map.Entry<String, BigDecimal>> currencyEntriesFrom = currency.getValue()
+                Set<Map.Entry<String, BigDecimal>> currencyEntriesTo = balanceResult[currency.getKey()]
+                currencyEntriesFrom.each { currEntry ->
+                    if(currencyEntriesTo[currEntry.getKey()]) {
+                        currencyEntriesTo[currEntry.getKey()] = ((BigDecimal) currencyEntriesTo[currEntry.getKey()]).subtract(currEntry.getValue())
+                    } else currencyEntriesTo[(currEntry.getKey())] = currEntry.getValue().negate()
+                }
+            } else {
+                balanceResult[(currency.getKey())] = currency.getValue()
+                Set<Map.Entry<String, BigDecimal>> currencyEntries = balanceResult[(currency.getKey())].entrySet()
+                currencyEntries.each { currEntry ->
+                    currEntry.setValue(currEntry.getValue().negate())
+                }
+            }
+        }
+        return balanceResult
     }
 
     @Transactional

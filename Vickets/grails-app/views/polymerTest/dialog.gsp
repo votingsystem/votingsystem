@@ -8,24 +8,23 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-deposit-dialog.gsp']"/>">
 </head>
 <body>
 <div layout vertical style="width:1200px;height: 1200px;margin:0px auto; ">
     <div layout horizontal>
-        <button onclick="document.querySelector('#depositDialog').show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS)" style="margin:10px;">Deposit dialog</button>
-        <button onclick="document.querySelector('#tagDialog').show()"style="margin:10px;">Tag dialog</button>
-        <button onclick="document.querySelector('#getReasonDialog').toggle()" style="margin:10px;">Get reason dialog</button>
-        <button onclick="showMessageVS('msg msg msg ', 'caption', null, false)" style="margin:10px;">Message dialog</button>
+        <votingsystem-button onclick="document.querySelector('#depositDialog').show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS)" style="margin:10px;">Deposit dialog</votingsystem-button>
+        <votingsystem-button onclick="document.querySelector('#tagDialog').show()"style="margin:10px;">Tag dialog</votingsystem-button>
+        <votingsystem-button onclick="document.querySelector('#getReasonDialog').toggle()" style="margin:10px;">Get reason dialog</votingsystem-button>
+        <votingsystem-button onclick="showMessageVS('msg msg msg ', 'caption', null, false)" style="margin:10px;">
+            Message dialog        <i class="fa fa-pencil-square-o"></i></votingsystem-button>
     </div>
     <div layout vertical>
 
         <paper-input id="depositSubject" floatinglabel
                      label="<g:message code="subjectLbl"/>" required></paper-input>
 
-        <g:include view="/polymer/dialog/vicket-deposit-dialog.gsp"/>
-        <div layout horizontal center center-justified style="">
-            <vicket-deposit-dialog id="depositDialog" caption="Realizar ingreso"></vicket-deposit-dialog>
-        </div>
+        <vicket-deposit-dialog id="depositDialog" caption="Realizar ingreso"></vicket-deposit-dialog>
 
 
         <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
@@ -38,10 +37,6 @@
 
 
     </div>
-
-    <votingsystem-button>
-        Testing <i class="fa fa-pencil-square-o"></i>
-    </votingsystem-button>
 
 </div>
 </body>

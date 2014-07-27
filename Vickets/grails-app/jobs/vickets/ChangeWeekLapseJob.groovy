@@ -15,10 +15,7 @@ class ChangeWeekLapseJob {
 
     def execute() {
         checkCancelledVickets();
-        //we know this is launch every Monday at 00:00 so we just make sure to select a day from last week to select the period
-        Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
-        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
-        BalanceService.calculatePeriod(timePeriod)
+        BalanceService.initWeekPeriod()
     }
 
 

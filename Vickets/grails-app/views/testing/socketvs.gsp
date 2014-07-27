@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <votingsystem-socket id="wssocket" url="${grailsApplication.config.webSocketURL}">
+    <votingsystem-socket id="socketvs" url="${grailsApplication.config.webSocketURL}">
         <input id="messageBox" class="text" value="{locale:'es', operation:'LISTEN_TRANSACTIONS'}" name="text">
         <button onclick="sendMessage()">Send message</button>
     </votingsystem-socket>
@@ -16,16 +16,16 @@
 </body>
 </html>
 <asset:script>
-    document.querySelector("#wssocket").addEventListener('on-message', function (e) {
+    document.querySelector("#socketvs").addEventListener('on-message', function (e) {
         console.log("message: " + JSON.stringify(e.detail))
     })
 
     document.addEventListener('polymer-ready', function() {
-        document.querySelector("#wssocket").sendMessage("{locale:'es', operation:'LISTEN_TRANSACTIONS'}")
+        document.querySelector("#socketvs").sendMessage("{locale:'es', operation:'LISTEN_TRANSACTIONS'}")
     });
 
     function sendMessage() {
-        document.querySelector("#wssocket").sendMessage(document.querySelector("#messageBox").value)
+        document.querySelector("#socketvs").sendMessage(document.querySelector("#messageBox").value)
     }
 </asset:script>
 <asset:deferredScripts/>

@@ -76,7 +76,9 @@
                     </div>
 
                     <div layout horizontal center center-justified style="margin:5px 0px 5px 0px;">
-                        <div flex id="pageHeader" class="pageHeader text-center"><h3>{{groupvs.name}}</h3></div>
+                        <div flex id="pageHeader" class="pageHeader text-center">
+                            <h3 groupvsId-data="{{groupvs.id}}">{{groupvs.name}}</h3>
+                        </div>
                         <div id="tagsDiv" style="padding:7px 0px 0px 7px; display:{{groupvs.tags.length > 0?'block':'none'}}">
                             <div style="font-size: 0.9em; font-weight: bold;color:#888;"><g:message code='tagsLbl'/></div>
                             <div layout horizontal>
@@ -103,7 +105,7 @@
                 </div>
             </div>
 
-            <div style="border-top: 2px solid #ccc; display:block; padding-top: 15px;margin-top: 25px;">
+            <div style="border-top: 1px solid #ccc; display:block; padding-top: 15px;margin-top: 25px; min-height: 300px;">
                 <div class="text-center" style="font-size: 1.2em;font-weight: bold; color:#6c0404; padding: 0px 0 0 0; ">
                     <!--<g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>-->
                     <g:message code="weekMovementsLbl"/>
@@ -122,11 +124,8 @@
 
         <groupvs-user id="userDescription"></groupvs-user>
 
-        <div layout horizontal center center-justified style="position:absolute; top:80px; width: 100%; max-width: 1200px; margin: 0px auto 0px auto;">
-            <div>
-                <vicket-deposit-dialog id="depositDialog"></vicket-deposit-dialog>
-            </div>
-        </div>
+        <vicket-deposit-dialog id="depositDialog"></vicket-deposit-dialog>
+
     </template>
     <script>
         Polymer('groupvs-details', {

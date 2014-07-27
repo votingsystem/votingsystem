@@ -28,7 +28,8 @@
                 <li><g:message code="newGroupVSAdviceMsg2"/></li>
             </ul>
         </div>
-
+        <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
+                                        serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
         <form onsubmit="return submitForm();">
 
             <div layout vertical>
@@ -38,8 +39,8 @@
                                      validate="" error="<g:message code="requiredLbl"/>" style="" required>
                         </paper-input>
                     </div>
-                    <button type="button" onclick="showTagDialog()" class="btn btn-danger">
-                        <g:message code="addTagLbl" /></button>
+                    <votingsystem-button type="button" onclick="showTagDialog()">
+                        <g:message code="addTagLbl" /> <i class="fa fa-tag"></i></votingsystem-button>
                 </div>
                 <div id="tagsDiv" style="padding:5px 0px 5px 30px; display:none;">
                     <div layout horizontal center>
@@ -68,12 +69,6 @@
 
         </form>
 
-    </div>
-</div>
-<div style="position: absolute; width: 100%; top:0px;left:0px;">
-    <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
-        <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                    serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
     </div>
 </div>
 

@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>VotingSystem WebSocket Test</title>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
     <style type="text/css" media="screen">
         #console {
             border: 1px solid #CCCCCC;
@@ -19,7 +18,7 @@
 <div class="pageContenDiv">
     <div style="max-width: 1300px; margin: 20px auto 0px auto;">
         <div id="connect-container">
-            <div class="col-md-4">
+            <div>
                 <div>
                     <span>Connect to:</span>
                 </div>
@@ -31,7 +30,7 @@
                     <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
                 </div>
             </div>
-            <div class="col-md-4 form-inline">
+            <div class="">
                     <textarea id="message" style="width: 350px;">{locale:'es', operation:'LISTEN_TRANSACTIONS'}</textarea>
                     <button id="echo" onclick="sendMessage();" disabled="disabled">Send message</button>
             </div>

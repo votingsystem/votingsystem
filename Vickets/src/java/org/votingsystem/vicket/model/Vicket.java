@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,15 +24,7 @@ public class Vicket implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public String getCurrencyCode() {
-        return currencyCode;
-    }
-
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
-    }
-
-    public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
+    public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -48,7 +41,13 @@ public class Vicket implements Serializable  {
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
     @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="toUserVS") private UserVS userVS;
+
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="transactionParent") private TransactionVS transactionParent;
 
     @OneToOne private MessageSMIME cancelMessage;
     @OneToOne private MessageSMIME messageSMIME;
@@ -186,6 +185,30 @@ public class Vicket implements Serializable  {
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public TransactionVS getTransactionParent() {
+        return transactionParent;
+    }
+
+    public void setTransactionParent(TransactionVS transactionParent) {
+        this.transactionParent = transactionParent;
+    }
+
+    public UserVS getUserVS() {
+        return userVS;
+    }
+
+    public void setUserVS(UserVS userVS) {
+        this.userVS = userVS;
     }
 
     public static Map checkSubject(String subjectDN) {

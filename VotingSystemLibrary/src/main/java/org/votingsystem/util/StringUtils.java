@@ -77,7 +77,7 @@ public class StringUtils {
     }
 
     public static String getUserDirPath (String userNIF) {
-        int subPathLength = 3;
+        int subPathLength = 4;
         String basePath = "/";
         while (userNIF.length() > 0) {
             if(userNIF.length() <= subPathLength) subPathLength = userNIF.length();

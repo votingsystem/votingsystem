@@ -17,6 +17,7 @@
             margin: 10px;
         }
         </style>
+        <g:include view="/include/styles.gsp"/>
         <asset:stylesheet src="vickets_groupvs.css"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsData}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
@@ -27,7 +28,7 @@
                 <div cross-fade>
                     <div layout horizontal center center-justified>
                         <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                                on-change="{{groupvsTypeSelect}}">
+                                on-change="{{groupvsTypeSelect}}" class="form-control">
                             <option value="ACTIVE"  style="color:#59b;"> - <g:message code="selectActiveGroupvsLbl"/> - </option>
                             <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingGroupvsLbl"/> - </option>
                             <option value="CANCELLED" style="color:#cc1606;"> - <g:message code="selectClosedGroupvsLbl"/> - </option>

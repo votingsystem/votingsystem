@@ -6,7 +6,6 @@
         <g:else><g:message code="receiptPageLbl"/></g:else>
     </title>
     <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
     <asset:stylesheet src="vickets.css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
@@ -17,7 +16,7 @@
         <div id="nameDiv" style="font-size: 1.2em; color:#6c0404; font-weight: bold;"></div>
         <div id="contentDiv" style=""></div>
     </div>
-    <button id="saveReceiptButton" type="button" class="btn btn-accept-vs" onclick="saveReceipt();"
+    <button id="saveReceiptButton" type="button" class="btn btn-default" onclick="saveReceipt();"
             style="display:none; margin:10px 0px 0px 0px; float: right;"><g:message code="saveReceiptLbl"/>
     </button>
 

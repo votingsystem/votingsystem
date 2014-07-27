@@ -3,45 +3,33 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-user.gsp']"/>">
 
 
 <polymer-element name="vicket-deposit-dialog" attributes="caption opened serviceURL">
 <template>
+    <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <style no-shim>
-        .view { :host {position: relative;} }
-        .card {
-            position: relative;
-            display: inline-block;
-            vertical-align: top;
-            height: auto;
-            background-color: #fefefe;
-            box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-            border: 1px solid #ccc;
-        }
-        paper-button.button {
-            background-color: #f9f9f9;
-            color: #6c0404;
-            border: 1px solid #ccc;
-            margin:10px;
-            vertical-align: middle;
-            line-height: 24px;
-            height: 35px;
-        }
-        paper-button:hover {
-            background: #ba0011;
-            color: #f9f9f9;
-        }
-
-        paper-button::shadow #ripple {
-            color: white;
+        .dialog {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            overflow: auto;
+            background: #fefefe;
+            padding:10px 30px 30px 30px;
+            outline: 1px solid rgba(0,0,0,0.2);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            width: 650px;
         }
         .messageToUser {
             font-weight: bold;
             margin:10px auto 10px auto;
-            border: 1px solid #ccc;
             background: #f9f9f9;
             padding:10px 20px 10px 20px;
         }
@@ -50,7 +38,7 @@
             cols='[{"label": "Data", "type": "string"},{"label": "Value", "type": "number"}]'
             rows='[["Something", 1]]'>
     </google-chart>
-        <div id="container" class="card" style="width:600px; padding:0px 0px 15px 0px;">
+        <div id="container" style="width:600px; padding:0px 0px 15px 0px;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
                 <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
                 <div style="cursor:pointer; z-index:10;" on-click="{{close}}">
@@ -58,10 +46,14 @@
                 </div>
             </div>
 
-            <div class="messageToUser card" style="color: {{status == 200?'#388746':'#ba0011'}}; display:{{messageToUser == null?'none':'block'}};">
+            <div style="color: {{status == 200?'#388746':'#ba0011'}}; display:{{messageToUser == null?'none':'block'}};">
+                <div class="messageToUser">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div id="messageToUser">{{messageToUser}}</div>
-                    <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon></div>
+                    <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                </div>
+                <paper-shadow z="1"></paper-shadow>
+                </div>
             </div>
             <div layout vertical style="padding: 5px 20px 0px 20px;">
                 <paper-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
@@ -120,7 +112,7 @@
                 serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
         </div>
     </div>
-
+    </votingsystem-dialog>
 </template>
 <script>
     Polymer('vicket-deposit-dialog', {
@@ -135,7 +127,6 @@
 
         ready: function() {
             console.log(this.tagName + " - " + this.id)
-            this.style.display = 'none'
             this.isDepositToAll = false
             var depositDialog = this
             this.$.userSearchList.addEventListener('user-clicked', function (e) {
@@ -155,7 +146,13 @@
             }
             if(this.opened) show()
         },
-
+        onCoreOverlayOpen:function(e) {
+            this.opened = this.$.xDialog.opened
+        },
+        openedChanged:function() {
+            this.$.xDialog.opened = this.opened
+            if(this.opened == false) this.close()
+        },
         toggleTagDialog: function() {
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
         },
@@ -181,7 +178,7 @@
             this.$.userSearchList.reset()
             this.$.tagDialog.reset()
             this.$.tagDataDiv.style.display = 'none'
-            this.style.display = 'none'
+            this.opened = false
         },
 
         submitForm: function () {
@@ -292,7 +289,7 @@
                     break;
             }
             this.selectedTags = []
-            this.style.display = 'block'
+            this.opened = true
         }
     });
 </script>
