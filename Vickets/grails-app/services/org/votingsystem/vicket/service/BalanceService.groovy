@@ -45,6 +45,7 @@ class BalanceService {
         //we know this is launch every Monday at 00:00 so we just make sure to select a day from last week to select the period
         Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
         DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
+        DateUtils.TimePeriod currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
         Calendar cal = Calendar.getInstance();
         int week = cal.get(Calendar.WEEK_OF_YEAR);
         String subject =  messageSource.getMessage('initWeekMsg', [week].toArray(), defaultLocale)
@@ -98,9 +99,12 @@ class BalanceService {
                             base64ContentDigest:responseVS.getSmimeMessage().getContentDigestStr())
                     messageSMIME.save()
 
+                    log.debug("====== it: ${it}")
+
                     TransactionVS transactionVS = new TransactionVS(amount: it.getValue(), fromUserVS:systemService.getSystemUser(),
+                            fromUserIBAN: systemService.getSystemUser().IBAN, toUserIBAN: userVS.IBAN, validTo: currentWeekPeriod.dateTo,
                             messageSMIME:messageSMIME, toUserVS: userVS, state:TransactionVS.State.OK, subject:subject,
-                            type:TransactionVS.Type.INIT_PERIOD, currencyCode: currency, tag:getTag(it.getKey())).save()
+                            type:TransactionVS.Type.INIT_PERIOD, currencyCode: currency.getKey(), tag:getTag(it.getKey())).save()
                     File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${it.getKey()}.p7s")
                     responseVS.getSmimeMessage().writeTo(new FileOutputStream(tagReceiptFile))
                 }

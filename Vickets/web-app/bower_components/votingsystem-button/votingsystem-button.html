@@ -1,7 +1,7 @@
 <!-- To solve rendering problems of <paper-button> and <paper-fab> on JavaFX Webkit -->
 <polymer-element name="votingsystem-button" attributes="color isFab">
     <template>
-        <style>
+        <style shim-shadowdom>
             .view { :host {position: relative;} }
             .button {
                 display:inline-block;
@@ -31,15 +31,6 @@
                 color:#f9f9f9;
                 padding: 0px 15px 0px 15px;
                 height: 50px;
-            }
-
-            .button i {margin: 0px 0px 0px 3px; }
-
-            .fab i {
-                margin:0px 0px 0px 0px;
-                display: inline;
-                margin: 15px;
-                vertical-align: middle;
             }
 
             .button.raised {

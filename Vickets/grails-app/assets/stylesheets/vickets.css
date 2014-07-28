@@ -10,6 +10,8 @@ body {
 }
 .linkvs{}
 
+votingsystem-button i {padding: 0px 0px 0px 5px; }
+
 .navbar-vickets {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
@@ -178,6 +180,9 @@ paper-button.button {
     text-align:center;
 }
 
+.text-center {
+    text-align: center;
+}
 /*This is from bootstrap http://getbootstrap.com/css/*/
 .btn {
     display: inline-block;
@@ -274,7 +279,7 @@ fieldset[disabled] .btn-default.active {
     display: block;
     width: 100%;
     height: 34px;
-    padding: 6px 12px;
+    padding: 0 px 3px;
     font-size: 14px;
     line-height: 1.42857143;
     color: #555;

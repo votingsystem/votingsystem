@@ -34,10 +34,7 @@
             padding:10px 20px 10px 20px;
         }
         </style>
-    <google-chart
-            cols='[{"label": "Data", "type": "string"},{"label": "Value", "type": "number"}]'
-            rows='[["Something", 1]]'>
-    </google-chart>
+        <g:include view="/include/styles.gsp"/>
         <div id="container" style="width:600px; padding:0px 0px 15px 0px;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
                 <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
@@ -88,7 +85,7 @@
 
                     <div id="receptorPanelDiv">
                         <div layout horizontal center center-justified id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
-                            <input id="userSearchInput" type="text" style="width:200px;"
+                            <input id="userSearchInput" type="text" style="width:200px;" class="form-control"
                                    placeholder="<g:message code="enterReceptorDataMsg"/>">
                             <votingsystem-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
                                 <g:message code="userSearchLbl"/> <i class="fa fa-search"></i>

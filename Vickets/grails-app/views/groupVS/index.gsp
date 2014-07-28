@@ -22,6 +22,7 @@
 </body>
 </html>
 <asset:script>
+
     document.addEventListener('polymer-ready', function() {
         if(document.querySelector("#navBar") != null) document.querySelector("#navBar").searchVisible('false')
     });

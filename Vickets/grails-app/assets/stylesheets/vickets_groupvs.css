@@ -45,9 +45,8 @@
     position:relative;
     font-size: 0.9em;
     max-height:7.5em; /* exactly four lines */
-    padding: 10px;
     vertical-align:middle;
-    padding: 0px 5px 20px 5px;
+    padding: 0px 10px 20px 10px;
     line-height:1.5;
     text-overflow: ellipsis;
     overflow: hidden;
