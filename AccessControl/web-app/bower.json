@@ -22,7 +22,7 @@
 
       "votingsystem-texteditor":"votingsystem-texteditor#~0.2.0",
 
-      "font-awesome":"font-awesome#~4.1.0",
+      "font-awesome":"font-awesome#~4.2.0",
       "bootstrap":"bootstrap#~3.1.1",
       "bootstrapValidator":"bootstrapValidator#~0.4.5",
       "dynatable":"dynatable#~0.3.1",
