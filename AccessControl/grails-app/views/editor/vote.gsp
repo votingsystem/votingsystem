@@ -8,7 +8,7 @@
 </head>
 <body>
     <div id="contentDiv" style="padding: 0px 20px 0px 20px;">
-        <vote-editor id="voteEditor" controlCenters="${controlCenters as grails.converters.JSON}"></vote-editor>
+        <vote-editor id="voteEditor"></vote-editor>
     </div>
 </body>
 </html>

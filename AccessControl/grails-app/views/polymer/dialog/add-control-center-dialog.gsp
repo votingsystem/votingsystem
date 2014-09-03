@@ -30,7 +30,8 @@
                 padding:10px 20px 10px 20px;
             }
             </style>
-            <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" contentType="json" handleAs="json"></core-ajax>
+            <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" contentType="json"></core-ajax>
+            <core-xhr id="ajax1" ></core-xhr>
             <div>
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
@@ -79,6 +80,7 @@
     </template>
     <script>
         Polymer('add-control-center-dialog', {
+            ajaxOptions:{method:'get'},
             ready: function() {
                 this.$.controlCenterURL.onkeypress = function(event){
                     var chCode = ('charCode' in event) ? event.charCode : event.keyCode;
@@ -105,14 +107,23 @@
             },
             checkControlCenter:function() {
                 this.messageToUser = null
-                console.log("====== this.url: " + this.url + " - this.$.controlCenterURL.value: " + this.$.controlCenterURL.value)
                 if(!this.$.controlCenterURL.validity.valid){
                     this.messageToUser = "<g:message code="invalidURLMsg"/>"
                     return
                 }
                 this.checking = true
-                this.url = this.$.controlCenterURL.value
+                //<core-ajax> has problems in WebKit with CORS requests
+                //this.url = this.$.controlCenterURL.value
 
+                this.ajaxOptions.url = this.$.controlCenterURL.value
+                this.ajaxOptions.callback = this.ajaxResponse.bind(this)
+                this.$.ajax1.request(this.ajaxOptions)
+
+            },
+            ajaxResponse: function(xhrResponse, xhr) {
+                //console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
+                console.log(this.tagName + " - ajax-response - newURL: "  + this.ajaxOptions.url + " - status: " + xhr.status + " - xhrResponse: " + xhrResponse)
+                this.responseData = toJSON(xhrResponse)
             },
             responseDataChanged:function() {
                 console.log( "this.responseData: " + this.responseData)

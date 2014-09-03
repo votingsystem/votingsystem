@@ -62,7 +62,12 @@
 <script>
     Polymer('add-voting-option-dialog', {
         opened: false,
-        ready: function() { },
+        ready: function() {
+            this.$.optionContent.onkeypress = function(event){
+                var chCode = ('charCode' in event) ? event.charCode : event.keyCode;
+                if (chCode == 13) this.submitForm()
+            }.bind(this)
+        },
         openedChanged: function() {
             if(!this.opened) {
                 this.messageToUser = null

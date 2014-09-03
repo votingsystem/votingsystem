@@ -13,7 +13,9 @@
                 padding:10px 20px 10px 20px;
             }
         </style>
-        <div class="pageHeader"><h3><g:message code="publishVoteLbl"/></h3></div>
+        <div class="pageHeader"  layout horizontal center center-justified>
+            <h3><g:message code="publishVoteLbl"/></h3>
+        </div>
 
         <div style="display:{{messageToUser? 'block':'none'}}">
             <div class="messageToUser">
@@ -27,17 +29,15 @@
         <form id="mainForm" on-submit="{{submitForm}}">
 
             <div style="margin:0px 0px 20px 0px">
-                <div style="display: block;">
-                    <input type="text" name="subject" id="subject" style="width:600px" required
-                           title="<g:message code="subjectLbl"/>" class="form-control"
-                           placeholder="<g:message code="subjectLbl"/>"
-                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                           onchange="this.setCustomValidity('')" />
+                <div>
+                    <paper-input id="subject" floatinglabel style="width:600px;" label="<g:message code="subjectLbl"/>"
+                                 validate="" error="<g:message code="requiredLbl"/>" style="" required>
+                    </paper-input>
                 </div>
                 <div layout horizontal center id="dateRangeDiv" style="margin:10px 0px 0px 0px;">
                     <label>${message(code:'dateBeginLbl')}</label>
                     <div class="datePicker">
-                        <g:datePicker id="dateBegin" name="dateBegin" value="${new Date().plus(2)}" precision="day" relativeYears="[0..1]"/>
+                        <g:datePicker id="dateBegin" name="dateBegin" value="${new Date().plus(1)}" precision="day" relativeYears="[0..1]"/>
                     </div>
 
 
@@ -51,51 +51,38 @@
                 <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
 
-            <div>
-                <div layout horizontal center center-justified style="margin: 15px auto 30px auto;">
-                    <div id="controlCenterLink" on-click="{{showControlCenterDialog}}" style="font-size:1.1em; color:#02227a;
-                        cursor: pointer; cursor: hand;"> <g:message code="controlCenterLbl"/>  <i class="fa fa-info-circle"></i>
-                    </div>
-                    <div style="margin: 0px 0px 0px 30px;">
-                        <select id="controlCenterSelect" style="" on-change="{{selectControlCenter}}" class="form-control" required>
-                            <option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
-                            <template repeat="{{controlCenter in controlCenters}}">
-                                <option value="{{controlCenter}}">{{controlCenterVS.name}}</option>
-                            </template>
-                        </select>
-                    </div>
-                    <div flex></div>
-                    <div>
-                        <button id="addOptionButton" type="button" class="btn btn-default" style=""
-                                onclick="document.querySelector('#addVotingOptionDialog').show()"><g:message code="addOptionLbl"/> <i class="fa fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
 
-
-            <div id="fieldsDiv" class="fieldsBox" style="display:none;">
+            <div id="fieldsDiv" class="fieldsBox" style="display:{{pollOptionList.length == 0? 'none':'block'}}">
                 <fieldset id="fieldsBox">
                     <legend id="fieldsLegend" style="border: none;"><g:message code="pollFieldLegend"/></legend>
-                    <div id="fields" style="">
+                    <div layout vertical>
                         <template repeat="{{pollOption in pollOptionList}}">
-                            {{pollOption}}
+                            <div>
+                                <a class="btn btn-default" on-click="{{removePollOption}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                                    <g:message code="deleteLbl"/> <i class="fa fa-minus"></i></a>
+                                {{pollOption}}
+                            </div>
+
                         </template>
                     </div>
                 </fieldset>
             </div>
 
-            <div style="position:relative; margin:0px 10px 30px 30px;">
-                <button id="buttonAccept" type="submit" class="btn btn-default" style="position:absolute; right:10px; top:0px;">
-                    <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
-                </button>
+            <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
+                <div>
+                    <button id="addOptionButton" type="button" class="btn btn-default" style=""
+                            on-click={{showVotingOptionDialog}}"><g:message code="addOptionLbl"/> <i class="fa fa-plus"></i>
+                    </button>
+                </div>
+                <div flex></div>
+                <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                    <g:message code="publishLbl"/> <i class="fa fa-check"></i>
+                </votingsystem-button>
             </div>
-
         </form>
 
     </div>
 
-        <add-control-center-dialog id="addControlCenterDialog"></add-control-center-dialog>
         <add-voting-option-dialog id="addVotingOptionDialog"></add-voting-option-dialog>
     </template>
     <script>
@@ -108,21 +95,28 @@
                 this.$.addVotingOptionDialog.addEventListener('on-submit', function (e) {
                     console.log("========== e.detail: " + e.detail)
                     this.pollOptionList.push(e.detail)
-                })
+                }.bind(this))
             },
-            publish: {
-                controlCenters: {value: {}}
+            showVotingOptionDialog: function() {
+                this.$.addVotingOptionDialog.show()
             },
-            showControlCenterDialog: function() {
-                this.$.addControlCenterDialog.show()
+            removePollOption: function(e) {
+                var pollOption = e.target.templateInstance.model.pollOption
+                console.log("removePollOption")
+                for(optionIdx in this.pollOptionList) {
+
+                    console.log("option: " +  this.pollOptionList[optionIdx] + " - pollOption: " + pollOption)
+                    if(pollOption == this.pollOptionList[optionIdx]) {
+                        this.pollOptionList.splice(optionIdx, 1)
+                    }
+                }
             },
             submitForm: function() {
                 this.messageToUser = null
-                this.$.subject.removeClass("formFieldError");
-                this.$.controlCenterSelect.removeClass( "formFieldError" )
+                this.$.subject.classList.remove("formFieldError");
 
                 if(!this.$.subject.validity.valid) {
-                    this.$.subject.addClass("formFieldError");
+                    this.$.subject.classList.add("formFieldError");
                     this.messageToUser = '<g:message code="emptyFieldMsg"/>'
                     return
                 }
@@ -153,16 +147,10 @@
                     return
                 }
 
-                if(!this.$.controlCenterSelect.validity.valid) {
-                    this.$.controlCenterSelect.addClass( "formFieldError" );
-                    this.messageToUser = '<g:message code="selectControlCenterLbl"/>'
-                    return
-                }
-
 
                 if(this.pollOptionList.length < 2) { //two options at least
                     this.messageToUser = '<g:message code="optionsMissingERRORMsg"/>'
-                    this.$.addOptionButton.addClass( "formFieldError" );
+                    this.$.addOptionButton.classList.add( "formFieldError" );
                     return
                 }
 
@@ -171,7 +159,6 @@
                 eventVS.content = textEditor.getData();
                 eventVS.dateBegin = getDatePickerValue('dateBegin').format();
                 eventVS.dateFinish = getDatePickerValue('dateFinish').format();
-                eventVS.controlCenter = this.controlCenter
                 eventVS.fieldsEventVS = this.pollOptionList
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VOTING_PUBLISHING)
                 webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
@@ -207,13 +194,6 @@
 
 
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
-            },
-            selectControlCenter: function () {
-                this.controlCenter = this.$.controlCenterSelect.value
-                console.log("selectControlCenter: " + this.controlCenter)
-                if("" != optionSelected) {
-
-                }
             }
         });
     </script>
