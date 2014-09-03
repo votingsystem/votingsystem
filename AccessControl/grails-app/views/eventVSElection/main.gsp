@@ -1,9 +1,8 @@
 <html>
 <head>
-    <meta name="layout" content="main" />
-    <asset:stylesheet src="jquery.dynatable.css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:javascript src="jquery.stickytableheaders.js"/>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
 <div class="">

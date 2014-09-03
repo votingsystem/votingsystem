@@ -6,7 +6,7 @@
 <body>
 <div id="contentDiv" style="margin: 0px auto 0px auto; max-width: 1200px;">
     <div style="margin:0px 30px 0px 30px;">
-        <div class="row" style="">
+        <div style="">
             <ol class="breadcrumbVS pull-left">
                 <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
                 <li><a href="${createLink(controller: 'representative', action:'main')}"><g:message code="representativesPageLbl"/></a></li>
@@ -16,7 +16,7 @@
 
         <div class="pageHeader text-center"><h3><g:message code="newRepresentativePageTitle"/></h3></div>
 
-        <div class="text-left" style="margin:15px 0 0 0;">
+        <div style="margin:15px 0 0 0;">
             <ul>
                 <li><g:message code="newRepresentativeAdviceMsg2"/></li>
                 <li><g:message code="newRepresentativeAdviceMsg3"/></li>
@@ -41,10 +41,7 @@
                 </div>
             </div>
             <div id="selectedImagePath" style="margin:10px 10px 40px 10px;"></div>
-
         </form>
-        <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
-            <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
     </div>
 </div>
 </body>
@@ -83,7 +80,7 @@
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         });
 
-        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
+
       });
 
     function selectImage() {

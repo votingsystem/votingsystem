@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layout" content="main" />
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
 <div class="pageContentDiv">
-    <div class="row">
+    <div>
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li class="active"><g:message code="toolsPageTitle"/></li>
         </ol>
     </div>
-    <div class="row" style="margin:30px 0px 0px 0px;">
+    <div style="margin:30px 0px 0px 0px;">
         <g:if test="${request.getHeader("user-agent").toLowerCase().contains('android')}">
-            <div class="userAdvert text-left">
+            <div class="userAdvert">
                 <ul>
                     <li><g:message code="androidAppNeededMsg"/></li>
                     <li><g:message code="androidAppDownloadMsg"  args="${[grailsApplication.config.grails.serverURL + "/android/SistemaVotacion.apk"]}"/></li>

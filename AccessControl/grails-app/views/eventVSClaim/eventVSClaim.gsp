@@ -33,11 +33,11 @@
 		</div>
 	</g:if>
 
-    <div class="pageHeader text-center"><h3>${eventMap?.subject}</h3></div>
+    <div class="pageHeader"><h3>${eventMap?.subject}</h3></div>
 
-    <div style="" class="row">
+    <div style="">
         <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
-        <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
+        <div class="datetime" style="display:inline;margin:0px 10px 0px 60px; float:left;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
@@ -53,7 +53,7 @@
 			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
 		</div>
 
-        <div class="row">
+        <div>
 			<g:if test="${eventMap?.numSignatures > 0}">
                 <div style="float:left;margin:10px 0px 0px 40px;">
                     <button id="requestBackupButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0;">
@@ -104,9 +104,6 @@
 		</form>
 	</div>
 
-    <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
-        <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
-
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
 <g:include view="/include/dialog/requestEventBackupDialog.gsp"/>
 	
@@ -142,7 +139,6 @@
                 showRequestEventBackupDialog(requestBackupCallback, "<g:message code="backupOnlyForPublisherMsg"/>")
             </g:else>
         })
-        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
      });
 
     function sendSignature() {

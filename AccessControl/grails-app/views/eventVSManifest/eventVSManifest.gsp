@@ -25,9 +25,9 @@
 
         <div class="pageHeader text-center"><h3>${eventMap?.subject}</h3></div>
 
-        <div style="" class="row">
+        <div style="" >
             <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
-            <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
+            <div class="datetime" style="display:inline;margin:0px 10px 0px 60px; float:left;">
                 <b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
             </div>
         </div>
@@ -58,10 +58,6 @@
                 </button>
             </g:if>
         </div>
-
-        <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
-            <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
-
     </div>
 </div>
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
@@ -74,7 +70,7 @@
     var pageEvent = ${eventMap as JSON}
 
     $(function() {
-        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
+
         <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
             $(".pageHeader").css("color", "#388746")
             var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
@@ -98,7 +94,7 @@
             $("#messagePanel").text("<g:message code="eventFinishedLbl"/>")
                         $("#messagePanel").css("display", "visible")
         </g:elseif>
-        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
+
         else {
             $("#signManifestButton").addClass("disabled")
             //$("#requestBackupButton").addClass("disabled")

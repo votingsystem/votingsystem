@@ -26,7 +26,7 @@
     </div>
 </div>
 
-<div class="form-group has-error">
+<div class="form-group">
     <i style="color:#6c0404; font-size: 4em;" class="fa fa-cog fa-spin"></i>
 </div>
 </body>

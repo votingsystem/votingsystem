@@ -9,7 +9,7 @@
 
     <div class="pageHeader text-center"><h3>${eventMap?.subject}</h3></div>
 
-    <div style="" class="row">
+    <div>
         <div id="pendingTimeDiv" style="float:left; margin:0 0 0 60px; color: #388746; font-weight: bold;"></div>
         <div class="datetime text-left" style="display:inline;margin:0px 10px 0px 60px; float:left;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}

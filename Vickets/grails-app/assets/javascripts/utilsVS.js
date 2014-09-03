@@ -132,6 +132,28 @@ String.prototype.getDate = function() {
 	  return new Date(timeMillis)
 };
 
+
+function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function getDatePickerValue(datePickerId) {
+    var day = pad(document.querySelector('#' + datePickerId + '_day').value, 2)
+    var month = pad(document.querySelector('#' + datePickerId + '_month').value, 2)
+    var year = document.querySelector('#' + datePickerId + '_year').value
+    var hour = "00"
+    var minute = "00"
+    var second = "00"
+    if(document.querySelector('#' + datePickerId + '_minute') != null) minute =
+        document.querySelector('#' + datePickerId + '_minute').value
+    if(document.querySelector('#' + datePickerId + '_hour') != null) hour =
+        document.querySelector('#' + datePickerId + '_hour').value
+    var dateStr = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second
+    return DateUtils.parse(dateStr)
+}
+
 String.prototype.getElapsedTime = function() {
 	  return this.getDate().getElapsedTime()
 };

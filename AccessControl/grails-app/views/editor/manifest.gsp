@@ -8,39 +8,39 @@
 
 <div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
 
-	<div class="pageHeader text-center"><h3><g:message code="publishManifestLbl"/></h3></div>
-	
-	<form id="mainForm" onsubmit="return submitForm(this);">
-	<div class="form-inline">
-        <div style="margin:0px 0px 20px 0px" class="row">
-            <input type="text" name="subject" id="subject" style="width:400px"  required
-                   title="<g:message code="subjectLbl"/>" class="form-control"
-                   placeholder="<g:message code="subjectLbl"/>"
-                   oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                   onchange="this.setCustomValidity('')" />
-            <label style="margin:0 0 0 30px;">${message(code:'dateLbl')}</label>
-            <votingSystem:datePicker id="dateFinish" style="margin:0px 0px 0px 35px;"
-                                     title="${message(code:'dateLbl')}"
-                                     oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
-                                     onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+    <div class="pageHeader"><h3><g:message code="publishManifestLbl"/></h3></div>
+
+    <form id="mainForm" onsubmit="return submitForm(this);">
+        <div class="form-inline">
+            <div style="margin:0px 0px 20px 0px">
+                <input type="text" name="subject" id="subject" style="width:400px"  required
+                       title="<g:message code="subjectLbl"/>" class="form-control"
+                       placeholder="<g:message code="subjectLbl"/>"
+                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                       onchange="this.setCustomValidity('')" />
+                <label style="margin:0 0 0 30px;">${message(code:'dateLbl')}</label>
+                <votingSystem:datePicker id="dateFinish" style="margin:0px 0px 0px 35px;"
+                                         title="${message(code:'dateLbl')}"
+                                         oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+                                         onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+            </div>
         </div>
-	</div>
 
-    <div style="position:relative; width:100%;">
-        <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
-    </div>
-		
-	<div style='overflow:hidden;'>
-		<div style="float:right; margin:20px 10px 0px 0px;">
-            <button id="buttonAccept" type="submit" class="btn btn-default" style="margin:0px 20px 0px 0px;">
-                <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
-            </button>
-		</div>	
-	</div>	
+        <div style="position:relative; width:100%;">
+            <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+        </div>
 
-	</form>
+        <div style='overflow:hidden;'>
+            <div style="float:right; margin:20px 10px 0px 0px;">
+                <button id="buttonAccept" type="submit" class="btn btn-default" style="margin:0px 20px 0px 0px;">
+                    <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
+                </button>
+            </div>
+        </div>
 
-    <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+    </form>
+
+    <div id="clientToolMsg" class="" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
         <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 
 </div>
@@ -50,10 +50,6 @@
 <asset:script>
     var textEditor = document.querySelector('#textEditor')
 
-
-    $(function() {
-        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
-    });
 
     function submitForm(form) {
         var subject = $( "#subject" ),

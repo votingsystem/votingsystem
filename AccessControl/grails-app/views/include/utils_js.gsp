@@ -44,30 +44,6 @@
 
     };
 
-    var dynatableInputs = {
-        queries: null,
-        sorts: null,
-        multisort: ['ctrlKey', 'shiftKey', 'metaKey'],
-        page: null,
-        queryEvent: 'blur change',
-        recordCountTarget: null,
-        recordCountPlacement: 'after',
-        paginationLinkTarget: null,
-        paginationLinkPlacement: 'after',
-        paginationPrev: '«',
-        paginationNext: '»',
-        paginationGap: [1,2,2,1],
-        searchTarget: null,
-        searchPlacement: 'before',
-        perPageTarget: null,
-        perPagePlacement: 'before',
-        perPageText: '',
-        recordCountText: '',
-        pageText:'',
-        recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
-        recordCountTotalTemplate: '{recordsQueryCount}',
-        processingText: '<span class="dynatableLoading">"<g:message code="updatingLbl"/><i class="fa fa-refresh fa-spin"></i></span>'
-    }
     EventVS.State = {
         ACTIVE:"ACTIVE",
         TERMINATED:"TERMINATED",
@@ -204,4 +180,18 @@
         }
         return resultStr
     };
+
+
+    window._originalAlert = window.alert;
+    window.alert = function(text) {
+        if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
+                document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+            document.querySelector("#_votingsystemMessageDialog").setMessage(text,
+                    "<g:message code="messageLbl"/>")
+        }  else {
+            console.log('votingsystem-message-dialog not found');
+            window._originalAlert(text);
+        }
+    }
+
 </script>

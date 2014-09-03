@@ -7,14 +7,14 @@
 <div id="contentDiv" style="max-width: 1200px; ; margin: 0 auto 0 auto;">
     <div style="margin: 0 30px 0 30px;">
         <div class="text-center row" style="margin:20px auto 15px 15px;">
-            <div class="representativeNameHeader col-md-6">
+            <div class="representativeNameHeader">
                 <div>${representativeFullName}</div>
             </div>
-            <div  class="representativeNumRepHeader col-md-2" style="">
+            <div  class="representativeNumRepHeader" style="">
                 ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/>
             </div>
             <g:if test="${"user".equals(params.menu)}">
-                <div class="col-md-1" style="">
+                <div style="">
                     <button type="button" onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
                             class="btn btn-default">
                         <g:message code="saveAsRepresentativeLbl"/> <i class="fa fa-hand-o-right"></i>

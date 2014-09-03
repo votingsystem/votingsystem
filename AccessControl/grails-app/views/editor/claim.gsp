@@ -1,48 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="layout" content="main" />
+    <meta name="layout" content="main" />
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 </head>
 <body>
 
 <div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
 
-    <div class="pageHeader text-center"><h3><g:message code="publishClaimLbl"/></h3></div>
+    <div class="pageHeader"><h3><g:message code="publishClaimLbl"/></h3></div>
 
-	<form id="mainForm" onsubmit="return submitForm(this);">
+    <form id="mainForm" onsubmit="return submitForm(this);">
 
-    <div class="form-inline">
-        <div style="margin:0px 0px 20px 0px">
-            <input type="text" name="subject" id="subject" style="width:400px;margin:0px 40px 0px 0px" required
-                   title="<g:message code="subjectLbl"/>" class="form-control"
-                   placeholder="<g:message code="subjectLbl"/>"
-                   oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                   onchange="this.setCustomValidity('')" />
+        <div class="form-inline">
+            <div style="margin:0px 0px 20px 0px">
+                <input type="text" name="subject" id="subject" style="width:400px;margin:0px 40px 0px 0px" required
+                       title="<g:message code="subjectLbl"/>" class="form-control"
+                       placeholder="<g:message code="subjectLbl"/>"
+                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                       onchange="this.setCustomValidity('')" />
 
-            <label>${message(code:'dateLbl')}</label>
-            <votingSystem:datePicker id="dateFinish" title="${message(code:'dateLbl')}"
-                                     placeholder="${message(code:'dateLbl')}"
-                                     oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
-                                     onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+                <label>${message(code:'dateLbl')}</label>
+                <votingSystem:datePicker id="dateFinish" title="${message(code:'dateLbl')}"
+                                         placeholder="${message(code:'dateLbl')}"
+                                         oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+                                         onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+            </div>
         </div>
-    </div>
 
-    <div style="position:relative; width:100%;">
-        <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
-    </div>
-	
-	<div style="margin:0px 0px 30px 0px;">
-		<div class="text-left" style="font-size: 0.9em; margin:10px 0 0 20px; width:60%;display: inline-block;">
-			<input type="checkbox" id="multipleSignaturesCheckbox"><g:message code="multipleClaimsLbl"/><br>
-			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
-		</div>
-	    <div style="float:right; margin:10px 20px 0px 0px;">
-            <button id="addClaimFieldButton" type="button" class="btn btn-default" style="margin:0px 20px 0px 0px;"
-                    onclick='showAddClaimFieldDialog(addClaimField)'><g:message code="addClaimFieldLbl"/> <i class="fa fa-plus"></i>
-            </button>
-	    </div>
-	</div>
+        <div style="position:relative; width:100%;">
+            <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
+        </div>
+
+        <div style="margin:0px 0px 30px 0px;">
+            <div style="font-size: 0.9em; margin:10px 0 0 20px; width:60%;display: inline-block;">
+                <input type="checkbox" id="multipleSignaturesCheckbox"><g:message code="multipleClaimsLbl"/><br>
+                <input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
+            </div>
+            <div style="float:right; margin:10px 20px 0px 0px;">
+                <button id="addClaimFieldButton" type="button" class="btn btn-default" style="margin:0px 20px 0px 0px;"
+                        onclick='showAddClaimFieldDialog(addClaimField)'><g:message code="addClaimFieldLbl"/> <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
 
         <div id="fieldsDiv" class="fieldsBox" style="display:none;">
             <fieldset id="fieldsBox">
@@ -50,36 +50,40 @@
                 <div id="fields" style=""></div>
             </fieldset>
         </div>
-	
-	<div style='overflow:hidden;'>
-		<div style="float:right; margin:0px 10px 0px 0px;">
-            <button id="buttonAccept" type="submit" class="btn btn-default" style="margin:0px 20px 0px 0px;">
-                <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
-            </button>
-		</div>	
-	</div>
 
-	</form>
+        <div style='overflow:hidden;'>
+            <div style="float:right; margin:0px 10px 0px 0px;">
+                <button id="buttonAccept" type="submit" class="btn btn-default" style="margin:0px 20px 0px 0px;">
+                    <g:message code="publishDocumentLbl"/> <i class="fa fa fa-check"></i>
+                </button>
+            </div>
+        </div>
 
-    <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
+    </form>
+
+    <div id="clientToolMsg" class="" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
         <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
 
 </div>
 
-    <g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
+<g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
 
-	<div id="newFieldTemplate" style="display:none;">
-		<g:render template="/template/newField"/>
-	</div> 
+<div id="newFieldTemplate" style="display:none;">
+    <div style='margin: 10px 20px 5px 20px;display:table;'>
+        <div style='display:table-cell;'>
+            <button id="deleteFieldButton" type="button" class="btn btn-default btn-lg" style="margin:0px 20px 0px 0px;">
+                <g:message code="deleteOptionLbl"/> <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class='newFieldValueDiv' style='display:table-cell;font-size:1.2em;padding:0px 0 0 10px;vertical-align:middle;'>{0}</div>
+    </div>
+
+</div>
 </body>
 </html>
 <asset:script>
     var numClaimFields = 0
     var textEditor = document.querySelector('#textEditor')
-
-    $(function() {
-        if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
-     });
 
     function submitForm(form) {
         if(!validateForm()) return false;

@@ -74,7 +74,7 @@
 
     $('#advancedSearchDialog').on('hidden.bs.modal', function (e) { //reset form
         $("#searchErrorPanel").hide()
-        $("#advancedSearchDialogDiv").removeClass( "has-error" );
+
         document.getElementById("advancedSearchFrom").reset()
         document.getElementById("advancedSearchFromTime").reset()
         document.getElementById("advancedSearchTo").reset()

@@ -1,7 +1,9 @@
 <%@ page import="grails.converters.JSON; org.votingsystem.model.EventVS;" %>
 <html>
 <head>
-    <meta name="layout" content="main" /></head>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
 <body>
 <div class="pageContentDiv" style="max-width: 1000px;">
     <div style="margin:0 20px 0 20px;">
@@ -23,7 +25,7 @@
 
         <h3><div class="pageHeader text-center">${eventMap?.subject}</div></h3>
 
-        <div class="row" style="display:inline;">
+        <div style="display:inline;">
             <div class="" style="margin:0px 0px 0px 30px; display: inline;"><b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}</div>
             <div id="pendingTimeDiv" class="text-right" style="margin:0px 40px 0px 0px; color: #388746; display: inline; white-space:nowrap;"></div>
         </div>
@@ -59,8 +61,6 @@
                                 </div>
                             </g:each>
                         </g:if>
-                        <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;"><g:message code="clientToolNeededMsg"/>.
-                            <g:message code="clientToolDownloadMsg" args="${[createLink( controller:'app', action:'tools')]}"/></div>
                     </div>
                 </fieldset>
             </div>
@@ -109,7 +109,6 @@
 	  			console.log(" - selectedOption: " +  JSON.stringify(selectedOption))
 	  			$("#confirmOptionDialog").modal("show");
 	  		});
-            if(isClientToolLoaded()) $("#clientToolMsg").css("display", "none")
             else {
                 $(".voteOptionButton").each(function( index ) {
                     $(this).addClass("disabled")

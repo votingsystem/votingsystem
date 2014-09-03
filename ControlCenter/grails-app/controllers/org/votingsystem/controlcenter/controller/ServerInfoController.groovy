@@ -42,7 +42,9 @@ class ServerInfoController {
 		}
 
 		response.setHeader('Access-Control-Allow-Origin', "*")
-		
+
+        log.debug("====== params.callback: ${params.callback} - ${serverInfo as JSON}")
+
 		if (params.callback) render "${params.callback}(${serverInfo as JSON})"
         else render serverInfo as JSON
 	}

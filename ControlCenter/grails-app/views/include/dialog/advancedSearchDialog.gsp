@@ -74,7 +74,6 @@
 
     $('#advancedSearchDialog').on('hidden.bs.modal', function (e) { //reset form
         $("#searchErrorPanel").hide()
-        $("#advancedSearchDialogDiv").removeClass( "has-error" );
         document.getElementById("advancedSearchFrom").reset()
         document.getElementById("advancedSearchFromTime").reset()
         document.getElementById("advancedSearchTo").reset()
@@ -100,7 +99,6 @@
         var userSearch
         if(advancedSearchFromValue == null && advancedSearchToValue == null && advancedSearchTextValue == null) {
             errorMessage = '<g:message code="allSearchFieldsEmptydMsg"/>'
-            $("#advancedSearchDialogDiv").addClass( "has-error" );
         } else {
             var searchFrom
             if(advancedSearchFromValue != null) searchFrom = advancedSearchFromValue.format() + " " + advancedSearchFromTimeValue

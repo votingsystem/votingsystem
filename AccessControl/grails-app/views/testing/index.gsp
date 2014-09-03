@@ -2,11 +2,8 @@
 <html>
 <head>
   	<title>pruebaTemplate</title>
-    <g:javascript library="jquery" plugin="jquery"/>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
 
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
+    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
 
     <asset:stylesheet src="votingSystem.css"/>
     <asset:javascript src="utilsVS.js"/>
@@ -66,7 +63,6 @@
 
     $('#advancedSearchDialog').on('hidden.bs.modal', function (e) { //reset form
         $("#searchErrorPanel").hide()
-        $("#advancedSearchDialogDiv").removeClass( "has-error" );
         document.getElementById("advancedSearchFrom").reset()
         document.getElementById("advancedSearchFromTime").reset()
         document.getElementById("advancedSearchTo").reset()
