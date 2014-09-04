@@ -187,7 +187,7 @@ class VoteVSService {
 		}
 	}
 			
-	public Map getVotoMap(VoteVS voteVS) {
+	public Map getVoteVSMap(VoteVS voteVS) {
 		if(!voteVS) return [:]
 		HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 		String hashHex = hexConverter.marshal(voteVS.certificateVS?.hashCertVSBase64?.getBytes());
@@ -203,7 +203,7 @@ class VoteVSService {
 		return voteVSMap
 	}
  
-	public Map getAnuladorVotoMap(VoteVSCanceller anulador) {
+	public Map getVoteVSCancellerMap(VoteVSCanceller anulador) {
 		if(!anulador) return [:]
 		Map anuladorMap = [id:anulador.id,
             voteVSURL:"${grailsApplication.config.grails.serverURL}/voteVS/${anulador.getVoteVS.id}",

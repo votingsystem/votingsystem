@@ -136,7 +136,7 @@ class CertificateVSController {
      *         confía la aplicación.
      */
     def createKeystore() {
-        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+        if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                     message(code: "serviceDevelopmentModeMsg"))]
         }
@@ -157,6 +157,16 @@ class CertificateVSController {
             return false
 
         } else return [responseVS:responseVS]
+    }
+
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
 
 }

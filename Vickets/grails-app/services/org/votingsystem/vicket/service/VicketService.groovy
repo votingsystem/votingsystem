@@ -14,7 +14,7 @@ import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketBatchRequest
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 

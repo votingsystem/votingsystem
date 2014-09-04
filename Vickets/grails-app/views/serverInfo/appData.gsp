@@ -15,6 +15,7 @@
             <div style="margin:25px 0px 0px 0px; font-size: 0.8em;">
                 <h3 style="margin:15px 0px 0px 0px;"><g:message code="appLbl"/></h3>
                 <ul>
+                    <li><g:message code="environmentLbl"/>: ${grails.util.Environment.current}</li>
                     <li>${message(code: 'appVersionLabel', null)}: <g:meta name="app.version"/></li>
                     <li>${message(code: 'grailsVersionLabel', null)}: <g:meta name="app.grails.version"/></li>
                     <li>${message(code: 'groovyVersionLabel', null)}: ${GroovySystem.getVersion()}</li>

@@ -13,6 +13,7 @@ class BootStrap {
     def filesService
     def signatureVSService
     def timeStampService
+    def systemService
 
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) { return it?.format("yyyy/MM/dd' 'HH:mm:ss") }

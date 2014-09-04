@@ -7,7 +7,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 
 import java.math.RoundingMode
 

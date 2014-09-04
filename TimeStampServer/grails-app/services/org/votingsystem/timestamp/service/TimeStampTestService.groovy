@@ -52,21 +52,21 @@ class TimeStampTestService {
                 if(userVS.getTimeStampToken() != null) {
                     ResponseVS timestampValidationResp = timeStampService.validateToken(
                             userVS.getTimeStampToken(), locale)
-                    log.debug("validateSignersCertificate - timestampValidationResp - " +
+                    log.debug("validateMessage - timestampValidationResp - " +
                             "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
                     if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                        log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.message}")
+                        log.error("validateMessage - TIMESTAMP ERROR - ${timestampValidationResp.message}")
                         return timestampValidationResp
                     }
                 } else {
                     String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-                    log.error("ERROR - validateSignersCertificate - ${msg}")
+                    log.error("ERROR - validateMessage - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
                 ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
                 X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 
-                log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
+                log.debug("validateMessage - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
 
             } catch (CertPathValidatorException ex) {

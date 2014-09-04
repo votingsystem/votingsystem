@@ -54,7 +54,7 @@ class VoteVSController {
 		Map  voteVSMap
 		VoteVS.withTransaction {
 			voteVS = VoteVS.get(params.long('id'))
-			if(voteVS) voteVSMap = voteVSService.getVotoMap(voteVS)
+			if(voteVS) voteVSMap = voteVSService.getVoteVSMap(voteVS)
 		}
         if(!voteVS) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
                 message(code: 'voteNotFound', args:[params.id]))]
@@ -72,7 +72,7 @@ class VoteVSController {
 	 * @return Documento ZIP con los errores de una votación
 	 */
 	def errors() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
@@ -117,7 +117,7 @@ class VoteVSController {
 			def voteVSMap
 			VoteVS.withTransaction {
 				voteVS = VoteVS.findWhere(certificate:certificate)
-				voteVSMap = voteVSService.getVotoMap(voteVS)
+				voteVSMap = voteVSService.getVoteVSMap(voteVS)
 			}
 			if(!voteVS) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
@@ -179,5 +179,14 @@ class VoteVSController {
 			 return false
 		 }
 	 }*/
-	
+
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+    }
 }

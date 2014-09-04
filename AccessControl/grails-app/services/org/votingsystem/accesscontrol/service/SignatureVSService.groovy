@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
+import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
@@ -269,6 +270,23 @@ class SignatureVSService {
 		baos.close();
 		return baos.toByteArray();
 	}
+
+    public ResponseVS getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
+            Header... headers) {
+        log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+        if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+        if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+        SMIMEMessageWrapper smimeMessage = getSignedMailGenerator().genMimeMessage(
+                fromUser, toUser, textToSign, subject, headers)
+        MessageTimeStamper timeStamper = new MessageTimeStamper(
+                smimeMessage, "${grailsApplication.config.VotingSystem.urlTimeStampServer}/timeStamp")
+        ResponseVS responseVS = timeStamper.call();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+        smimeMessage = timeStamper.getSmimeMessage();
+        responseVS = new ResponseVS(ResponseVS.SC_OK)
+        responseVS.setSmimeMessage(smimeMessage)
+        return responseVS;
+    }
 		
 	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (
 		String fromUser, String toUser,	final SMIMEMessageWrapper smimeMessage, String subject) {
@@ -301,10 +319,10 @@ class SignatureVSService {
 			log.error("validateSMIME - ${message}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message)
 		}
-		return validateSignersCertificate(messageWrapper, locale)
+		return validateSignersCerts(messageWrapper, locale)
 	}
 		
-	public ResponseVS validateSignersCertificate(SMIMEMessageWrapper messageWrapper, Locale locale) {
+	public ResponseVS validateSignersCerts(SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<UserVS> signersVS = messageWrapper.getSigners();
 		if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 			messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
@@ -318,26 +336,26 @@ class SignatureVSService {
                 if(userVS.getTimeStampToken() != null) {
                     ResponseVS timestampValidationResp = timeStampService.validateToken(
                             userVS.getTimeStampToken(), locale)
-                    log.debug("validateSignersCertificate - timestampValidationResp - " +
+                    log.debug("validateSignersCerts - timestampValidationResp - " +
                             "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
                     if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                        log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.message}")
+                        log.error("validateSignersCerts - TIMESTAMP ERROR - ${timestampValidationResp.message}")
                         return timestampValidationResp
                     }
                 } else {
                     String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-                    log.error("ERROR - validateSignersCertificate - ${msg}")
+                    log.error("ERROR - validateSignersCerts - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
 				ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
 				X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 				userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
-				log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
+				log.debug("validateSignersCerts - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
                 extensionChecker = validationResponse.data.extensionChecker
                 ResponseVS responseVS = null
                 if(extensionChecker.isAnonymousSigner()) {
-                    log.debug("validateSignersCertificate - anonymous signer")
+                    log.debug("validateSignersCerts - anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
                     responseVS.setUserVS(anonymousSigner)

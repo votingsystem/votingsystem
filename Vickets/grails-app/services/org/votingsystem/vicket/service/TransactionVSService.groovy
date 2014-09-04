@@ -13,7 +13,7 @@ import org.votingsystem.vicket.model.AlertVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 import java.math.RoundingMode
 import org.votingsystem.vicket.model.CoreSignal
 

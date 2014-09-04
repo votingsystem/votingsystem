@@ -29,14 +29,16 @@ class AccessControlFilters {
         paramsCheck(controller:'*', action:'*') {
             before = {
                 if("assets".equals(params.controller) || params.isEmpty()) return
-                log.debug "###########################<${params.controller}> - before ################################"
-                log.debug "Method: " + request.method
-                log.debug "Params: " + params
-                log.debug "request.contentType: " + request.contentType
-                log.debug "getRemoteHost: " + request.getRemoteHost()
-                log.debug "Request: " + request.getRequestURI()  + " - RemoteAddr: " + request.getRemoteAddr()
-                log.debug "User agent: " + request.getHeader("User-Agent")
-                log.debug "-----------------------------------------------------------------------------------"
+                if(!"polymer".equals(params.controller)) {
+                    log.debug "###########################<${params.controller}> - before ################################"
+                    log.debug "Method: " + request.method
+                    log.debug "Params: " + params
+                    log.debug "request.contentType: " + request.contentType
+                    log.debug "getRemoteHost: " + request.getRemoteHost()
+                    log.debug "Request: " + request.getRequestURI()  + " - RemoteAddr: " + request.getRemoteAddr()
+                    log.debug "User agent: " + request.getHeader("User-Agent")
+                    log.debug "-----------------------------------------------------------------------------------"
+                }
                 if(!params.int("max")) params.max = 20
                 if(!params.int("offset")) params.offset = 0
                 if(!params.sort) params.sort = "dateCreated"
@@ -175,9 +177,10 @@ class AccessControlFilters {
                         messageSMIMEReq.getSmimeMessage().setMessageID(
                                 "${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIMEReq.id}")
                         messageSMIMEReq.content = messageSMIMEReq.getSmimeMessage().getBytes()
-                        messageSMIMEReq.eventVS = responseVS.eventVS
-                        messageSMIMEReq.metaInf = responseVS.message
+                        if(responseVS.eventVS) messageSMIMEReq.eventVS = responseVS.eventVS
                         if(responseVS.type) messageSMIMEReq.type = responseVS.type
+                        if(responseVS.reason) messageSMIMEReq.setReason(responseVS.getReason())
+                        if(responseVS.metaInf) messageSMIMEReq.setMetaInf(responseVS.getMetaInf())
                         messageSMIMEReq.save(flush:true)
                     }
                     log.debug "after - saved MessageSMIME - id '${messageSMIMEReq.id}' - type '${messageSMIMEReq.type}'"

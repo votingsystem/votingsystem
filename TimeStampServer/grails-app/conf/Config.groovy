@@ -218,5 +218,6 @@ VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
 VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 VotingSystem.requestTimeOut = 500
 VotingSystem.serverName='Voting System TimeStamp Server'
+VotingSystem.defaultLocale = 'en'
 //_ TODO _
 VotingSystem.adminsDNI=['07553172H']

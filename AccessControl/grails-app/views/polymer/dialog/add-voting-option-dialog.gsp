@@ -45,7 +45,7 @@
                 </div>
 
                 <div  layout horizontal center center-justified  style="margin:10px 0px 10px 0px;">
-                    <input type="text" class="form-control" id="optionContent" style="width:420px;" floatingLabel
+                    <input type="text" class="form-control" id="optionContent" style="width:420px;"
                            placeholder="<g:message code="pollOptionContentMsg"/>" required/>
                 </div>
 
@@ -64,8 +64,7 @@
         opened: false,
         ready: function() {
             this.$.optionContent.onkeypress = function(event){
-                var chCode = ('charCode' in event) ? event.charCode : event.keyCode;
-                if (chCode == 13) this.submitForm()
+                if (event.keyCode == 13) this.submitForm()
             }.bind(this)
         },
         openedChanged: function() {

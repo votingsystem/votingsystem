@@ -27,7 +27,7 @@ class ServerInfoController {
         serverInfo.controlCenters = []
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
-        serverInfo.state = ActorVS.State.RUNNING.toString()
+        serverInfo.state = ActorVS.State.OK.toString()
         serverInfo.serverType = ActorVS.Type.CONTROL_CENTER.toString();
         File certChain = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();

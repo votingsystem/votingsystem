@@ -8,7 +8,7 @@ import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.IbanVSUtil
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 

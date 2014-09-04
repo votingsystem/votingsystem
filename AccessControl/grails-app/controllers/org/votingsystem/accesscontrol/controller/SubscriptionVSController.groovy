@@ -42,7 +42,7 @@ class SubscriptionVSController {
 		if(!messageSMIME) {
             return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
-		ResponseVS responseVS = subscriptionVSService.matchControlCenter(messageSMIME, request.getLocale())
+		ResponseVS responseVS = subscriptionVSService.associateControlCenter(messageSMIME, request.getLocale())
 		if(ResponseVS.SC_OK == responseVS.statusCode) {
             responseVS.data = userVSService.getControlCenterMap(responseVS.data.controlCenterVS)
             responseVS.setContentType(ContentTypeVS.JSON)
@@ -256,5 +256,15 @@ class SubscriptionVSController {
 
     def feeds() {
         render(view:"feeds" , model:[selectedSubsystem:SubSystemVS.FEEDS.toString()])
+    }
+
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
     }
 }

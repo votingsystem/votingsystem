@@ -16,7 +16,7 @@ class EncryptorController {
 	def signatureVSService
 
     def index() { 
-		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		if(!params.requestBytes) {
@@ -49,7 +49,7 @@ class EncryptorController {
 	 * @return  Recibo que consiste en el documento recibido con la signatureVS añadida del servidor.
 	 */
 	def getMultiSignedMessage() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
@@ -77,7 +77,7 @@ class EncryptorController {
 	}
 	
 	def validateTimeStamp() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
@@ -102,5 +102,15 @@ class EncryptorController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR, msg)]
         } else return [responseVS:new ResponseVS(ResponseVS.SC_OK)]
 	}
+
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+    }
 
 }

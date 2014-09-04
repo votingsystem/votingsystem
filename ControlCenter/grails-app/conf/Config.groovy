@@ -86,13 +86,12 @@ grails.hibernate.cache.queries = false
 grails.hibernate.pass.readonly = false
 // configure passing read-only to OSIV session by default, requires "singleSession = false" OSIV mode
 grails.hibernate.osiv.readonly = false
-VotingSystemEnvironment="DEVELOPMENT"
 
 environments {
     development {
         grails.logging.jul.usebridge = true
         grails.resources.debug = true// -> rendering problems
-        grails.serverURL = "http://sistemavotacion.org/ControlCenter"
+        grails.serverURL = "http://www.sistemavotacion.org/ControlCenter"
     }
     production {
         grails.logging.jul.usebridge = false
@@ -213,5 +212,6 @@ VotingSystem.requestTimeOut = 500
 VotingSystem.serverName='Voting System Control Center'
 VotingSystem.blogURL ='http://www.sistemavotacion.org/blog.html'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
+VotingSystem.defaultLocale = 'en'
 //_ TODO _
 VotingSystem.adminsDNI=['07553172H']

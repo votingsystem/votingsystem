@@ -3,6 +3,8 @@ package org.votingsystem.accesscontrol.controller
 import grails.converters.JSON
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ControlCenterVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.util.ApplicationContextHolder
 
 /**
@@ -16,6 +18,7 @@ class ServerInfoController {
 
     def signatureVSService
 	def timeStampService
+    def systemService
     
 	/**
 	 * @httpMethod [GET]
@@ -24,20 +27,16 @@ class ServerInfoController {
 	 */
 	def index() { 
         HashMap serverInfo = new HashMap()
-        serverInfo.controlCenters = []
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.ACCESS_CONTROL.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
         serverInfo.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         serverInfo.urlBlog = grailsApplication.config.VotingSystem.blogURL
-		serverInfo.state = ActorVS.State.RUNNING.toString()
-		serverInfo.environmentMode = ApplicationContextHolder.getEnvironment().toString()
-        def controlCenters = ControlCenterVS.findAllWhere(state: ActorVS.State.RUNNING)
-        controlCenters?.each {controlCenter ->
-            def controlCenterMap = [id:controlCenter.id, name:controlCenter.name, serverURL:controlCenter.serverURL,
+		serverInfo.state = ActorVS.State.OK.toString()
+        serverInfo.environmentMode =  grails.util.Environment.current.toString()
+        def controlCenter = systemService.getControlCenter()
+        serverInfo.controlCenter = [id:controlCenter.id, name:controlCenter.name, serverURL:controlCenter.serverURL,
                 state:controlCenter.state?.toString(), dateCreated:controlCenter.dateCreated]
-            serverInfo.controlCenters.add(controlCenterMap)
-        }
 		serverInfo.certChainURL = "${createLink(controller: 'certificateVS', action:'certChain', absolute:true)}"
 		File certChain = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.certChainPath).getFile();
@@ -79,6 +78,15 @@ class ServerInfoController {
 	 * 		   de identificación.
 	 */
 	def certificationCenters () {  }
-	
-	def testing() {}
+
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+    }
+
 }

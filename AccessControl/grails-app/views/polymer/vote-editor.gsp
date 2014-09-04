@@ -30,20 +30,20 @@
 
             <div style="margin:0px 0px 20px 0px">
                 <div>
-                    <paper-input id="subject" floatinglabel style="width:600px;" label="<g:message code="subjectLbl"/>"
-                                 validate="" error="<g:message code="requiredLbl"/>" style="" required>
-                    </paper-input>
+                    <input type="text" id="subject" class="form-control" style="width:600px;"
+                           placeholder="<g:message code="subjectLbl"/>" error="<g:message code="requiredLbl"/>" required/>
                 </div>
                 <div layout horizontal center id="dateRangeDiv" style="margin:10px 0px 0px 0px;">
                     <label>${message(code:'dateBeginLbl')}</label>
-                    <div class="datePicker">
-                        <g:datePicker id="dateBegin" name="dateBegin" value="${new Date().plus(1)}" precision="day" relativeYears="[0..1]"/>
+                    <div id="dateBegin">
+                        <g:datePicker name="dateBegin" value="${new Date().plus(1)}" precision="day" relativeYears="[0..1]"/>
                     </div>
 
 
                     <label style="margin:0px 0px 0px 30px;">${message(code:'dateFinishLbl')}</label>
-                    <g:datePicker id="dateFinish" name="dateFinish" value="${new Date().plus(2)}" precision="day" relativeYears="[0..1]"/>
-
+                    <div id="dateFinish">
+                        <g:datePicker name="dateFinish" value="${new Date().plus(2)}" precision="day" relativeYears="[0..1]"/>
+                    </div>
                 </div>
             </div>
 
@@ -92,8 +92,8 @@
             controlCenter:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
+                //alert( CKEDITOR.basePath );
                 this.$.addVotingOptionDialog.addEventListener('on-submit', function (e) {
-                    console.log("========== e.detail: " + e.detail)
                     this.pollOptionList.push(e.detail)
                 }.bind(this))
             },
@@ -114,6 +114,8 @@
             submitForm: function() {
                 this.messageToUser = null
                 this.$.subject.classList.remove("formFieldError");
+                var dateBegin = getDatePickerValue('dateBegin', this.$.dateBegin)
+                var dateFinish = getDatePickerValue('dateFinish', this.$.dateFinish)
 
                 if(!this.$.subject.validity.valid) {
                     this.$.subject.classList.add("formFieldError");
@@ -141,7 +143,9 @@
                     return
                 }
 
-                if(textEditor.getData() == 0) {
+
+
+                if(this.$.textEditor.getData().length == 0) {
                     this.$.textEditor.classList.add("formFieldError");
                     this.messageToUser = '<g:message code="emptyDocumentERRORMsg"/>'
                     return
@@ -156,9 +160,9 @@
 
                 var eventVS = new EventVS();
                 eventVS.subject = this.$.subject.value;
-                eventVS.content = textEditor.getData();
-                eventVS.dateBegin = getDatePickerValue('dateBegin').format();
-                eventVS.dateFinish = getDatePickerValue('dateFinish').format();
+                eventVS.content = this.$.textEditor.getData();
+                eventVS.dateBegin = dateBegin.formatWithTime();
+                eventVS.dateFinish = dateFinish.formatWithTime();
                 eventVS.fieldsEventVS = this.pollOptionList
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VOTING_PUBLISHING)
                 webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
@@ -167,8 +171,6 @@
                 webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink(controller:'eventVSElection', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="publishVoteSubject"/>"
-
-
 
                 var objectId = Math.random().toString(36).substring(7)
                 webAppMessage.callerCallback = objectId

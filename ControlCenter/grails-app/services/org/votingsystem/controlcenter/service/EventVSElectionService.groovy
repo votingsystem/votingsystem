@@ -1,12 +1,15 @@
 package org.votingsystem.controlcenter.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
+import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.StringUtils
 
 import java.security.cert.X509Certificate
@@ -15,9 +18,8 @@ import java.security.cert.X509Certificate
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 * */
+@Transactional
 class EventVSElectionService {
-	
-    static transactional = false
 	
 	//static scope = "session"
     LinkGenerator grailsLinkGenerator
@@ -27,84 +29,76 @@ class EventVSElectionService {
 	def tagVSService
 	def signatureVSService
 	
-	List<String> systemAdmins
-	
 	ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
-        log.debug("- saveEvent")
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
 		ResponseVS responseVS
 		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		String msg
-		try {
-			AccessControlVS accessControl = subscriptionVSService.checkAccessControl(
-                    smimeMessageReq.getHeader("serverURL")[0])
-			if(!accessControl) {
-				msg = message(code:'accessControlNotFound', args:[serverURL])
-				log.debug("- saveEvent - ${msg}")
-				return new ResponseVS(type:TypeVS.VOTING_EVENT_ERROR,message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
-			}
-			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-			if(!messageJSON.certCAVotacion || !messageJSON.userVS || !messageJSON.id ||
-                    !messageJSON.fieldsEventVS || !messageJSON.URL || !messageJSON.controlCenter) {
-				msg = messageSource.getMessage('documentParamsErrorMsg', null, locale)
-				log.error("saveEvent - ERROR - ${msg} - document: ${messageJSON as JSON}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,type:TypeVS.VOTING_EVENT_ERROR)
-			}
-			String serverURL = grailsApplication.config.grails.serverURL
-            String requestServerURL = StringUtils.checkURL(messageJSON.controlCenter.serverURL)
-			if (!serverURL.equals(requestServerURL)) {
-				msg = messageSource.getMessage('localServerURLErrorMsg',[serverURL, requestServerURL].toArray(), locale)
-				log.error("saveEvent - ERROR - ${msg} - document: ${messageJSON as JSON}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,type:TypeVS.VOTING_EVENT_ERROR)
-			} else messageJSON.controlCenter.serverURL = requestServerURL
-			X509Certificate certCAVotacion = CertUtil.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
-			byte[] certChain = messageJSON.certChain?.getBytes()
-			X509Certificate userCert = CertUtil.fromPEMToX509Cert(messageJSON.userVS?.bytes)
-			UserVS user = UserVS.getUserVS(userCert);
-			//Publish request comes with Access Control cert
-			responseVS = subscriptionVSService.checkUser(user, locale)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				log.error("saveEvent - USER CHECK ERROR - ${responseVS.message}")
-				return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-					message:responseVS.message, type:TypeVS.VOTING_EVENT_ERROR)
-			} 
-			user = responseVS.userVS
-			def eventVS = new EventVSElection(accessControlEventVSId:messageJSON.id,
-				subject:messageJSON.subject, certChainAccessControl:certChain,
-				content:messageJSON.content, url:messageJSON.URL, accessControlVS:accessControl,
-				userVS:user, dateBegin:DateUtils.getDateFromString(messageJSON.dateBegin),
-				dateFinish:DateUtils.getDateFromString(messageJSON.dateFinish))
-			responseVS = setEventDatesState(eventVS, locale)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					message:responseVS.message, type:TypeVS.VOTING_EVENT_ERROR)
-			}
-			EventVS.withTransaction { eventVS.save() }
-			CertificateVS eventVSRootCertificate = new CertificateVS(actorVS:accessControl,
+        AccessControlVS accessControl = subscriptionVSService.checkAccessControl(
+                smimeMessageReq.getHeader("serverURL")[0])
+        if(!accessControl) {
+            msg = messageSource.getMessage('accessControlNotFound', [serverURL].toArray(), locale)
+            log.debug("$methodName - ${msg}")
+            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "accessControlNotFound"))
+        }
+        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        if(!messageJSON.certCAVotacion || !messageJSON.userVS || !messageJSON.id ||
+                !messageJSON.fieldsEventVS || !messageJSON.URL || !messageJSON.controlCenterURL) {
+            msg = messageSource.getMessage('documentParamsErrorMsg', null, locale)
+            log.error("$methodName - ERROR - ${msg} - document: ${messageJSON as JSON}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,type:TypeVS.ERROR,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "documentParamsError"))
+        }
+        String controlCenterURL = grailsApplication.config.grails.serverURL
+        String requestServerURL = StringUtils.checkURL(messageJSON.controlCenterURL)
+        if (!controlCenterURL.equals(requestServerURL)) {
+            log.debug("$methodName - WARNING - serverURL: ${controlCenterURL} - messageJSON.controlCenterURL: ${messageJSON.controlCenterURL}")
+        }
+        X509Certificate certCAVotacion = CertUtil.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
+        byte[] certChain = messageJSON.certChain?.getBytes()
+        X509Certificate userCert = CertUtil.fromPEMToX509Cert(messageJSON.userVS?.bytes)
+        UserVS user = UserVS.getUserVS(userCert);
+        //Publish request comes with Access Control cert
+        responseVS = subscriptionVSService.checkUser(user, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) {
+            log.error("$methodName - USER CHECK ERROR - ${responseVS.message}")
+            return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message, type:TypeVS.ERROR,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "checkAccesControlError"))
+        }
+        user = responseVS.userVS
+        def eventVS = new EventVSElection(accessControlEventVSId:messageJSON.id,
+                subject:messageJSON.subject, certChainAccessControl:certChain,
+                content:messageJSON.content, url:messageJSON.URL, accessControlVS:accessControl,
+                userVS:user, dateBegin:DateUtils.getDateFromString(messageJSON.dateBegin),
+                dateFinish:DateUtils.getDateFromString(messageJSON.dateFinish))
+        responseVS = setEventDatesState(eventVS, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) {
+            return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
+                    type:TypeVS.ERROR,  metaInf:MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
+        }
+        eventVS.save()
+        CertificateVS eventVSRootCertificate = new CertificateVS(actorVS:accessControl,
                 state:CertificateVS.State.OK, type:CertificateVS.Type.VOTEVS_ROOT, eventVSElection:eventVS,
-				content:certCAVotacion.getEncoded(), serialNumber:certCAVotacion.getSerialNumber().longValue(),
-				validFrom:certCAVotacion?.getNotBefore(), validTo:certCAVotacion?.getNotAfter())
-			CertificateVS.withTransaction {eventVSRootCertificate.save()}
-			saveFieldsEventVS(eventVS, messageJSON)
-			if (messageJSON.tags) {
-				Set<TagVS> tags = tagVSService.save(messageJSON.tags)
-				eventVS.setTagVSSet(tags)
-			}
-			eventVS.save()
-			log.debug("saveEvent - SAVED event - '${eventVS.id}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK,  eventVS:eventVS, type:TypeVS.VOTING_EVENT)
-		} catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: messageSource.getMessage(
-                    'saveDocumentoErrorMsg', null, locale), type:TypeVS.VOTING_EVENT_ERROR)
-		}
+                content:certCAVotacion.getEncoded(), serialNumber:certCAVotacion.getSerialNumber().longValue(),
+                validFrom:certCAVotacion?.getNotBefore(), validTo:certCAVotacion?.getNotAfter())
+        eventVSRootCertificate.save()
+        saveFieldsEventVS(eventVS, messageJSON.fieldsEventVS)
+        if (messageJSON.tags) {
+            Set<TagVS> tags = tagVSService.save(messageJSON.tags)
+            eventVS.setTagVSSet(tags)
+        }
+        eventVS.save()
+        log.debug("$methodName - SAVED event - '${eventVS.id}'")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK,  eventVS:eventVS, type:TypeVS.VOTING_EVENT)
 	}
 	
-    Set<FieldEventVS> saveFieldsEventVS(EventVS eventVS, JSONObject json) {
-        log.debug("saveFieldsEventVS - ")
-        def fieldsEventVSSet = json.fieldsEventVS.collect { opcionItem ->
-            def opcion = new FieldEventVS(eventVS:eventVS, content:opcionItem.content,
-                    accessControlFieldEventId:opcionItem.id)
-            return opcion.save();
+    Set<FieldEventVS> saveFieldsEventVS(EventVS eventVS, JSONArray fieldsEventVS) {
+        log.debug("saveFieldsEventVS")
+        def fieldsEventVSSet = fieldsEventVS.collect { opcionItem ->
+            return  new FieldEventVS(eventVS:eventVS, content:opcionItem.content,
+                    accessControlFieldEventId:opcionItem.id).save()
         }
         return fieldsEventVSSet
     }
@@ -179,72 +173,66 @@ class EventVSElectionService {
 		UserVS signer = messageSMIMEReq.userVS
 		EventVS eventVS
 		String msg
-		try {
-			log.debug("cancelEvent - message: ${smimeMessageReq.getSignedContent()}")
-			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-			ResponseVS responseVS = checkCancelEventJSONData(messageJSON, locale)
-			if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
-			byte[] certChainBytes
-			EventVS.withTransaction {
-				eventVS = EventVS.findWhere(accessControlEventVSId:Long.valueOf(messageJSON.eventId))
-				certChainBytes = eventVS?.certChainAccessControl
-			}
-			if(!eventVS) {
-				msg = messageSource.getMessage('eventVSNotFound', [messageJSON?.eventId].toArray(), locale)
-				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
-			}
-			if(eventVS.state != EventVS.State.ACTIVE) {
-				msg = messageSource.getMessage('eventAllreadyCancelledMsg', [messageJSON?.eventId].toArray(), locale)
-				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, type:TypeVS.ERROR, message:msg)
+        log.debug("cancelEvent - message: ${smimeMessageReq.getSignedContent()}")
+        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        ResponseVS responseVS = checkCancelEventJSONData(messageJSON, locale)
+        if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
+        byte[] certChainBytes
+        EventVS.withTransaction {
+            eventVS = EventVS.findWhere(accessControlEventVSId:Long.valueOf(messageJSON.eventId))
+            certChainBytes = eventVS?.certChainAccessControl
+        }
+        if(!eventVS) {
+            msg = messageSource.getMessage('eventVSNotFound', [messageJSON?.eventId].toArray(), locale)
+            log.error("cancelEvent - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
+        }
+        if(eventVS.state != EventVS.State.ACTIVE) {
+            msg = messageSource.getMessage('eventAllreadyCancelledMsg', [messageJSON?.eventId].toArray(), locale)
+            log.error("cancelEvent - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, type:TypeVS.ERROR, message:msg)
+        }
+        Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
+        X509Certificate accessControlCert = certColl.iterator().next()
+        if(!signatureVSService.isSignerCertificate(messageSMIMEReq.getSigners(), accessControlCert)) {
+            msg = messageSource.getMessage('eventCancelacionCertError', null, locale)
+            log.error("cancelEvent - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg,
+                    eventVS:eventVS)
+        }
+        //new state must be or CANCELLED or DELETED
+        EventVS.State newState = EventVS.State.valueOf(messageJSON.state)
+        if(!(newState == EventVS.State.DELETED_FROM_SYSTEM || newState == EventVS.State.CANCELLED)) {
+            msg = messageSource.getMessage('eventCancelacionStateError', [messageJSON.state].toArray(), locale)
+            log.error("cancelEvent new state error - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
+                    message:msg, eventVS:eventVS)
+        }
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = eventVS.accessControlVS.serverURL
+        String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
+        SMIMEMessageWrapper smimeMessageResp = signatureVSService.
+                getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
+        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
+                smimeParent:messageSMIMEReq, eventVS:eventVS, content:smimeMessageResp.getBytes())
+        if (!messageSMIMEResp.validate()) {
+            messageSMIMEResp.errors.each {log.debug("messageSMIMEResp - error: ${it}")}
+        }
+        MessageSMIME.withTransaction {
+            if (!messageSMIMEResp.save()) {
+                messageSMIMEResp.errors.each {log.error("cancel event error saving messageSMIMEResp - ${it}")}
             }
-			Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
-			X509Certificate accessControlCert = certColl.iterator().next()
-			if(!signatureVSService.isSignerCertificate(messageSMIMEReq.getSigners(), accessControlCert)) {
-				msg = messageSource.getMessage('eventCancelacionCertError', null, locale)
-				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg,
-                        eventVS:eventVS)
-			}
-			//new state must be or CANCELLED or DELETED
-			EventVS.State newState = EventVS.State.valueOf(messageJSON.state)
-			if(!(newState == EventVS.State.DELETED_FROM_SYSTEM || newState == EventVS.State.CANCELLED)) {
-				msg = messageSource.getMessage('eventCancelacionStateError', [messageJSON.state].toArray(), locale)
-				log.error("cancelEvent new state error - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR,
-                        message:msg, eventVS:eventVS)
-			}
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = eventVS.accessControlVS.serverURL
-			String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
-			SMIMEMessageWrapper smimeMessageResp = signatureVSService.
-					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
-			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
-				smimeParent:messageSMIMEReq, eventVS:eventVS, content:smimeMessageResp.getBytes())
-			if (!messageSMIMEResp.validate()) {
-                messageSMIMEResp.errors.each {log.debug("messageSMIMEResp - error: ${it}")}
-			}
-			MessageSMIME.withTransaction {
-				if (!messageSMIMEResp.save()) {
-					messageSMIMEResp.errors.each {log.error("cancel event error saving messageSMIMEResp - ${it}")}
-				}
-			}
-			eventVS.state = newState
-			eventVS.dateCanceled = Calendar.getInstance().getTime();
-			EventVS.withTransaction {
-				if (!eventVS.save()) {
-					eventVS.errors.each {log.error("cancel event error saving eventVS - ${it}")}
-				}
-			}
-			log.debug("cancelEvent - cancelled event with id: ${eventVS.id}")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK,message:msg, type:TypeVS.EVENT_CANCELLATION,
-                    data:messageSMIMEResp, eventVS:eventVS)
-		} catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			msg = messageSource.getMessage('eventCancellationDataError', null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,eventVS:eventVS,type:TypeVS.ERROR)
-		}
+        }
+        eventVS.state = newState
+        eventVS.dateCanceled = Calendar.getInstance().getTime();
+        EventVS.withTransaction {
+            if (!eventVS.save()) {
+                eventVS.errors.each {log.error("cancel event error saving eventVS - ${it}")}
+            }
+        }
+        log.debug("cancelEvent - cancelled event with id: ${eventVS.id}")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK,message:msg, type:TypeVS.EVENT_CANCELLATION,
+                data:messageSMIMEResp, eventVS:eventVS)
 	}
 
 	public Map getEventVSElectionMap(EventVSElection eventVS) {
@@ -273,14 +261,6 @@ class EventVSElectionService {
 		eventVSMap.fieldsEventVS = eventVS.fieldsEventVS?.collect {option ->
             return [id:option.id, content:option.content]}
 		return eventVSMap
-	}
-	
-	boolean isUserAdmin(String nif) {
-		log.debug("isUserAdmin - nif: ${nif}")
-		if(!systemAdmins) {
-			systemAdmins = grailsApplication.config.VotingSystem.adminsDNI
-		}
-		return systemAdmins.contains(nif)
 	}
 
 }

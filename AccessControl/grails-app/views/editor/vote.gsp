@@ -7,7 +7,7 @@
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vote-editor.gsp']"/>">
 </head>
 <body>
-    <div id="contentDiv" style="padding: 0px 20px 0px 20px;">
+    <div id="contentDiv" style="padding: 0px 20px 0px 20px; max-width: 1000px; margin:0px auto;">
         <vote-editor id="voteEditor"></vote-editor>
     </div>
 </body>

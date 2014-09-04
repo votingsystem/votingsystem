@@ -80,7 +80,7 @@ class VicketTagVSController {
      * @responseContentType [application/json]
      */
     def userVSAccountByBalanceTagVS () {
-        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+        if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                     message(code: "serviceDevelopmentModeMsg"))]
         }

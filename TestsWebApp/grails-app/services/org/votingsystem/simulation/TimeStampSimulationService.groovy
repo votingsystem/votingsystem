@@ -109,13 +109,13 @@ class TimeStampSimulationService {
         log.debug("initServer ### Enter status INIT_SERVER")
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()),ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+        /*if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
             ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next())
             String serviceURL = "${timeStampServer.getServerURL()}/timeStamp/addCertificateTestAuthority"
             byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
             responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA, serviceURL);
-        }
+        }*/
         responseVS.setStatus(Status.INIT_SERVER)
         changeSimulationStatus(responseVS)
     }

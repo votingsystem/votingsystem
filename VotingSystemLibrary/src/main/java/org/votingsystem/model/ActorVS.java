@@ -29,7 +29,7 @@ public class ActorVS implements Serializable {
 
     public enum Type {CONTROL_CENTER, ACCESS_CONTROL, VICKETS, TIMESTAMP_SERVER;}
 
-    public enum State { SUSPENDED, RUNNING, PAUSED;}
+    public enum State { SUSPENDED, OK, PAUSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;

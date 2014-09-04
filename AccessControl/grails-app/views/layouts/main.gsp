@@ -35,46 +35,70 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener', absolute: true)}">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="messageLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'groupVS', absolute: true)}">
-                            <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'userVS', action: 'search', absolute: true)}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
-                        </paper-item>
                         <g:if test="${"admin".equals(params.menu)}">
+                            {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                             <!--<template if="{{isClientToolConnected}}">-->
-                                <paper-item data-href="${createLink(controller: 'groupVS', action:'newGroup', absolute: true)}"">
-                                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="newGroupVSLbl"/>
+                                <paper-item data-href="${createLink(controller: 'eventVSElection', action:'main')}">
+                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
                                 </paper-item>
                                 <paper-item data-href="${createLink(controller: 'editor', action:'vote', absolute: true)}">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishVoteLbl"/>
                                 </paper-item>
 
+                                <!--<paper-item data-href="${createLink(controller: 'eventVSManifest', action:'main')}">
+                                    <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'editor', action:'manifest')}">
+                                    <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishManifestLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'main')}">
+                                    <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'editor', action:'claim')}">
+                                    <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishClaimLbl"/>
+                                </paper-item>-->
 
-
+                                <paper-item data-href="${createLink(controller: 'representative', action:'main')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'representative', action:'newRepresentative')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="newRepresentativeLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'representative', action:'edit')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="editRepresentativeLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'representative', action:'remove')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="removeRepresentativeLbl"/>
+                                </paper-item>
 
                             <!--</template>-->
-                            {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                         </g:if>
                         <g:else>
                             {{ "<g:message code="votingsystemPageLbl"/>" | setTitle}}
+                            <paper-item data-href="${createLink(controller: 'eventVSElection', action:'main')}">
+                                <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'representative', action:'main')}">
+                                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'app', action:'tools')}">
+                                <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> <g:message code="toolsLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'subscriptionVS', action:'feeds')}">
+                                <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> <g:message code="subscriptionLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'app', action:'contact')}">
+                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
+                            </paper-item>
 
-
-
-
-
-
+                            <!--<paper-item data-href="${createLink(controller: 'eventVSManifest', action:'main')}">
+                                <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'main')}">
+                                <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
+                            </paper-item>-->
 
                         </g:else>
-                        <paper-item data-href="${createLink(controller: 'reports', action:'index', absolute: true)}">
-                            <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> <g:message code="reportsPageTitle"/>
-                        </paper-item>
-                        <paper-item data-href="${createLink(controller: 'app', action: 'contact', absolute: true)}">
-                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
-                        </paper-item>
                     </core-selector>
                 </core-menu>
             </core-header-panel>
@@ -172,6 +196,28 @@
 </body>
 </html>
 <asset:script>
+    var selectedSubsystem = "${selectedSubsystem}"
+    console.log("selectedSubsystem : " + selectedSubsystem)
+    if(SubSystem.VOTES == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'eventVSElection', action: 'main')}"
+        selectedSubsystemText = "<g:message code="electionSystemLbl"/>"
+    } else if(SubSystem.CLAIMS == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'eventVSClaim', action: 'main')}"
+        selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
+    } else if(SubSystem.MANIFESTS == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'eventVSManifest', action: 'main')}"
+        selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
+    } else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'representative', action: 'main')}"
+        selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
+    } else if(SubSystem.FEEDS == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'subscriptionVS', action: 'feeds')}"
+        selectedSubsystemText = "<g:message code="subscriptionsPageLbl"/>"
+    } else {
+        console.log("### unknown subsytem -> " + selectedSubsystem)
+        selectedSubsystemText = "<g:message code="votingsystemPageLbl"/>"
+    }
+
     document.addEventListener('votingsystem-signal-innerPage', function(e) {
         console.log('main.gsp -votingsystem-signal-innerPage - newURL: ' + e.detail)
         document.querySelector('#navBar').url = e.detail

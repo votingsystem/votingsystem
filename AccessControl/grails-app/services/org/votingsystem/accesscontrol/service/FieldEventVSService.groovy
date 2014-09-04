@@ -14,10 +14,9 @@ class FieldEventVSService {
 
     Set<FieldEventVS> saveFieldsEventVS(EventVSElection eventVS, JSONArray fieldsEventVS) {
         log.debug("saveFieldsEventVS - eventVS: ${eventVS.id} - fieldsEventVS: ${fieldsEventVS}")
-        Set<FieldEventVS> fieldsEventVSSet = fieldsEventVS.collect { fieldEventItem ->
+        Set<FieldEventVS> fieldsEventVSSet = fieldsEventVS.collect {
 			eventVS.refresh()
-            FieldEventVS fieldEvent = new FieldEventVS(eventVS:eventVS, content:fieldEventItem?.content)
-            return fieldEvent.save();
+            return new FieldEventVS(eventVS:eventVS, content:it).save();
         }
         return fieldsEventVSSet
     }

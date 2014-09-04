@@ -7,8 +7,6 @@ import org.codehaus.groovy.grails.plugins.GrailsPluginManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
-import org.votingsystem.model.EnvironmentVS;
-
 import javax.servlet.ServletContext;
 import java.util.Locale;
 
@@ -21,7 +19,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     private static Logger logger = Logger.getLogger(ApplicationContextHolder.class);
 
     private ApplicationContext ctx;
-    private EnvironmentVS environment;
     private static ApplicationContextHolder instance;
     private static Locale locale = new Locale("es");
    
@@ -79,16 +76,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         return msg;
     }
 
-    public static EnvironmentVS getEnvironment() {
-        if(getInstance().environment == null) {
-            String environmentStr = (String) ((GrailsApplication)getBean("grailsApplication")).getConfig().
-                    getProperty("VotingSystemEnvironment");
-            if(environmentStr == null || environmentStr.trim().isEmpty()) {
-                getInstance().environment = EnvironmentVS.valueOf(grails.util.Environment.getCurrent().
-                        getName().toUpperCase());
-            } else getInstance().environment = EnvironmentVS.valueOf(environmentStr);
-        }
-        return getInstance().environment;
-    }
+    //String environmentStr = (String) ((GrailsApplication)getBean("grailsApplication")).getConfig().getProperty("VotingSystemEnvironment");
 
 }

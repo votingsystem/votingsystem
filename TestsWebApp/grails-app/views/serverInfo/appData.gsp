@@ -10,6 +10,7 @@
         <div id="status" class="col-md-4">
             <h3>Application Status</h3>
             <ul>
+                <li><g:message code="environmentLbl"/>: ${grails.util.Environment.current}</li>
                 <li>App version: <g:meta name="app.version"/></li>
                 <li>Grails version: <g:meta name="app.grails.version"/></li>
                 <li>Groovy version: ${GroovySystem.getVersion()}</li>

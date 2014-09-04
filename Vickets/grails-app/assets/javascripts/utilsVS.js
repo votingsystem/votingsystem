@@ -139,17 +139,20 @@ function pad(n, width, z) {
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
-function getDatePickerValue(datePickerId) {
-    var day = pad(document.querySelector('#' + datePickerId + '_day').value, 2)
-    var month = pad(document.querySelector('#' + datePickerId + '_month').value, 2)
-    var year = document.querySelector('#' + datePickerId + '_year').value
+function getDatePickerValue(datePickerId, htmlElement) {
+    if(!htmlElement) {
+        htmlElement = document
+    }
+    var day = pad(htmlElement.querySelector('#' + datePickerId + '_day').value, 2)
+    var month = pad(htmlElement.querySelector('#' + datePickerId + '_month').value, 2)
+    var year = htmlElement.querySelector('#' + datePickerId + '_year').value
     var hour = "00"
     var minute = "00"
     var second = "00"
-    if(document.querySelector('#' + datePickerId + '_minute') != null) minute =
-        document.querySelector('#' + datePickerId + '_minute').value
-    if(document.querySelector('#' + datePickerId + '_hour') != null) hour =
-        document.querySelector('#' + datePickerId + '_hour').value
+    if(htmlElement.querySelector('#' + datePickerId + '_minute') != null) minute =
+        htmlElement.querySelector('#' + datePickerId + '_minute').value
+    if(htmlElement.querySelector('#' + datePickerId + '_hour') != null) hour =
+        htmlElement.querySelector('#' + datePickerId + '_hour').value
     var dateStr = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second
     return DateUtils.parse(dateStr)
 }

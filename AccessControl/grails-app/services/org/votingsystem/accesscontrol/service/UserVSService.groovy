@@ -4,6 +4,7 @@ import org.votingsystem.model.ActorVS
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ControlCenterVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.util.NifUtils
 
 /**
 * @author jgzornoza
@@ -42,10 +43,10 @@ class UserVSService {
 	}
 
     boolean isUserAdmin(String nif) {
-        if(!systemAdmins) {
-            systemAdmins = grailsApplication.config.VotingSystem.adminsDNI
-        }
-        return systemAdmins.contains(nif)
+        nif = NifUtils.validate(nif);
+        boolean result = grailsApplication.config.VotingSystem.adminsDNI.contains(nif)
+        if(result) log.debug("isUserAdmin - nif: ${nif}")
+        return result
     }
 
 }

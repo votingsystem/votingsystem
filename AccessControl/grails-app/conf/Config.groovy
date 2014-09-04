@@ -87,8 +87,6 @@ grails.hibernate.pass.readonly = false
 // configure passing read-only to OSIV session by default, requires "singleSession = false" OSIV mode
 grails.hibernate.osiv.readonly = false
 
-VotingSystemEnvironment="DEVELOPMENT"
-
 environments {
     development {
         grails.logging.jul.usebridge = true
@@ -216,5 +214,6 @@ VotingSystem.requestTimeOut = 500
 VotingSystem.serverName='Voting System Access Control'
 VotingSystem.blogURL = 'http://www.sistemavotacion.org/blog.html'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
+VotingSystem.defaultLocale = 'en'
 //_ TODO _
 VotingSystem.adminsDNI=['07553172H']

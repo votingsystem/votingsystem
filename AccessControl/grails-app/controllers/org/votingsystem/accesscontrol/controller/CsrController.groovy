@@ -73,7 +73,7 @@ class CsrController {
 	 *         de la solicitud en la base de datos.
 	 */
 	def request() {
-        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+        if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
         }
 		String csrRequest = "${request.getInputStream()}"
@@ -101,7 +101,7 @@ class CsrController {
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
 	def validacion() {
-        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+        if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
         }
 		MessageSMIME messageSMIME = request.messageSMIMEReq
@@ -146,7 +146,7 @@ class CsrController {
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
 	def validate() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+		if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
@@ -180,5 +180,14 @@ class CsrController {
                     message(code: "csrRequestNotFound", args: [requestStr]))]
 		} else return [responseVS:csrService.signCertUserVS(csrRequest, request.getLocale())]
 	}
-	
+
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action"
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: exception.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:exception.getMessage())]
+    }
 }

@@ -18,7 +18,7 @@ import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.FileUtils
 import org.votingsystem.vicket.model.MessageVS
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
@@ -245,7 +245,7 @@ class  SignatureVSService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message,
                     metaInf: MetaInfMsg.getErrorMsg(methodName, "hashRepeated"))
 		}
-		return validateSignersCertificate(messageWrapper, locale)
+		return validateSignersCerts(messageWrapper, locale)
 	}
 
     public ResponseVS verifyUserCertificate(UserVS userVS) {
@@ -265,7 +265,7 @@ class  SignatureVSService {
         return validationResponse
     }
 
-	public ResponseVS validateSignersCertificate(SMIMEMessageWrapper messageWrapper, Locale locale) {
+	public ResponseVS validateSignersCerts(SMIMEMessageWrapper messageWrapper, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
 		Set<UserVS> signersVS = messageWrapper.getSigners();
 		if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
@@ -280,15 +280,15 @@ class  SignatureVSService {
                 if(userVS.getTimeStampToken() != null) {
                     ResponseVS timestampValidationResp = timeStampService.validateToken(
                             userVS.getTimeStampToken(), locale)
-                    log.debug("validateSignersCertificate - timestampValidationResp - " +
+                    log.debug("validateSignersCerts - timestampValidationResp - " +
                             "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
                     if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                        log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.message}")
+                        log.error("validateSignersCerts - TIMESTAMP ERROR - ${timestampValidationResp.message}")
                         return timestampValidationResp
                     }
                 } else {
                     String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-                    log.error("ERROR - validateSignersCertificate - ${msg}")
+                    log.error("ERROR - validateSignersCerts - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST, reason:msg,
                             metaInf: MetaInfMsg.getErrorMsg(methodName, "timestampMissing"))
                 }
@@ -296,7 +296,7 @@ class  SignatureVSService {
                 extensionChecker = validationResponse.data.extensionChecker
                 ResponseVS responseVS = null
                 if(extensionChecker.isAnonymousSigner()) {
-                    log.debug("validateSignersCertificate - is anonymous signer")
+                    log.debug("validateSignersCerts - is anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
                     responseVS.setUserVS(anonymousSigner)

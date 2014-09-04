@@ -41,14 +41,13 @@
                         [ 'FontSize', 'TextColor', 'BGColor' ]]}
                 }
                 this.editor =  CKEDITOR.appendTo( this.$.internalcontainer, this.editorConfig);
-                var textEditor = this
                 CKEDITOR.on('instanceReady',function( ev ) {
-                    textEditor.isEditorLoaded = true
-                    if(textEditor.data != null) {
-                        textEditor.editor.insertHtml(textEditor.data);
-                        textEditor.data = null;
+                    this.isEditorLoaded = true
+                    if(this.data != null) {
+                        this.editor.insertHtml(this.data);
+                        this.data = null;
                     }
-                });
+                }.bind(this));
             },
 
             dataJSONChanged: function() {

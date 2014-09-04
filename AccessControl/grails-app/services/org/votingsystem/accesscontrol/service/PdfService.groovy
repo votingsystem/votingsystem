@@ -67,15 +67,15 @@ class PdfService {
 			TimeStampToken timeStampToken = pk.getTimeStampToken();
             if(timeStampToken != null) {
                 ResponseVS timestampValidationResp = timeStampService.validateToken(timeStampToken, locale)
-                log.debug("validateSignersCertificate - timestampValidationResp - " +
+                log.debug("checkSignature - timestampValidationResp - " +
                         "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
                 if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                    log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.message}")
+                    log.error("checkSignature - TIMESTAMP ERROR - ${timestampValidationResp.message}")
                     return timestampValidationResp
                 }
             } else {
                 msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-                log.error("ERROR - validateSignersCertificate - ${msg}")
+                log.error("ERROR - checkSignature - ${msg}")
                 return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
             }
             Calendar signDate = Calendar.getInstance();

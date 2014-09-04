@@ -5,8 +5,7 @@ import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
-import org.votingsystem.vicket.util.MetaInfMsg
-
+import org.votingsystem.util.MetaInfMsg
 import java.security.cert.X509Certificate
 
 //@Transactional
@@ -95,7 +94,7 @@ class CertificateVSService {
         log.debug(methodName);
         UserVS userSigner = messageSMIMEReq.getUserVS()
         String msg
-        if(userVSService.isUserAdmin()) {
+        if(!userVSService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                          TypeVS.CERT_EDIT.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"

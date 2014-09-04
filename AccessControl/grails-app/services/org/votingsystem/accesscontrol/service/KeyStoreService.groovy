@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.service
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 
 import javax.security.auth.x500.X500PrivateCredential
@@ -19,7 +20,7 @@ class KeyStoreService {
 	
 	def grailsApplication
  
-    def generateElectionKeysStore(EventVSElection eventVS) {
+    def generateElectionKeysStore(EventVSElection eventVS) throws Exception {
 		ResponseVS responseVS
 		KeyStoreVS keyStoreVS = KeyStoreVS.findWhere(valid:Boolean.TRUE, eventVS:eventVS)
 		if (keyStoreVS) {
@@ -51,10 +52,11 @@ class KeyStoreService {
 
     def ResponseVS generateUserTestKeysStore(String givenName, String surname, String nif, String userPassword) {
         log.debug (" generateUserTestKeysStore - givenName: ${givenName} - surname: ${surname} - nif: ${nif}")
-        if(EnvironmentVS.DEVELOPMENT  !=  ApplicationContextHolder.getEnvironment()) {
+
+        if(grails.util.Environment.DEVELOPMENT !=  grails.util.Environment.current) {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
                     message:"ERROR Service available only for DEVELOPMENT environment- Application environment: " +
-                            "${ApplicationContextHolder.getEnvironment()}")
+                            "${grails.util.Environment.current}")
         } else {
             Date validFrom = Calendar.getInstance().getTime();
             Calendar today_plus_year = Calendar.getInstance();

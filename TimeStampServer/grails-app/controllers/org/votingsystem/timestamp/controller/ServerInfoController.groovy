@@ -32,7 +32,8 @@ class ServerInfoController {
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.TIMESTAMP_SERVER.toString()
         serverInfo.serverURL = "${grailsApplication.config.grails.serverURL}"
-		serverInfo.state = ActorVS.State.RUNNING.toString()
+		serverInfo.state = ActorVS.State.OK.toString()
+        serverInfo.environmentMode =  grails.util.Environment.current.toString()
 		response.setHeader('Access-Control-Allow-Origin', "*")
 		if (params.callback) render "${params.callback}(${serverInfo as JSON})"
         else render serverInfo as JSON

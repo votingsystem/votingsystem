@@ -6,8 +6,11 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import grails.transaction.Transactional
+import org.votingsystem.util.MetaInfMsg
+
 import javax.mail.Header
 import java.security.cert.X509Certificate
 import java.text.DecimalFormat
@@ -31,116 +34,81 @@ class EventVSElectionService {
 	def filesService
 	def timeStampService
 	def sessionFactory
+    def systemService
 
     ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
 		EventVSElection eventVS = null
 		UserVS userSigner = messageSMIMEReq.getUserVS()
 		log.debug("saveEvent - signer: ${userSigner?.nif}")
 		String msg = null
 		ResponseVS responseVS = null
-		try {		
-			String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
-			def messageJSON = JSON.parse(documentStr)
-			if (!messageJSON.controlCenter || !messageJSON.controlCenter.serverURL) {
-				msg = messageSource.getMessage('error.requestWithoutControlCenter', null, locale)
-				log.error "saveEvent - DATA ERROR - ${msg} - messageJSON: ${messageJSON}" 
-				return new ResponseVS(type:TypeVS.VOTING_EVENT_ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
-			}
-			eventVS = new EventVSElection(subject:messageJSON.subject, content:messageJSON.content, userVS:userSigner,
-					dateBegin: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin),
-					dateFinish: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish))
-			responseVS = subscriptionVSService.checkControlCenter(messageJSON.controlCenter.serverURL, locale)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				log.error "saveEvent - CHECKING CONTROL CENTER ERROR - ${responseVS.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
-                        type:TypeVS.VOTING_EVENT_ERROR)
-			}  
-			eventVS.controlCenterVS = responseVS.data.controlCenterVS
-            messageJSON.controlCenter.id = eventVS.controlCenterVS.id
-            eventVS.certChainControlCenter = responseVS.data.certificateVS.certChainPEM
-            ByteArrayInputStream bais = new ByteArrayInputStream(responseVS.data.certificateVS.content)
-			X509Certificate x509ControlCenterCert = CertUtil.loadCertificateFromStream (bais)
-			responseVS = eventVSService.setEventDatesState(eventVS,locale)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				log.error "saveEvent - EVENT DATES ERROR - ${responseVS.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
-                        type:TypeVS.VOTING_EVENT_ERROR)
-			}
-			eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
-			messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
-				name:grailsApplication.config.VotingSystem.serverName] as JSONObject
-			if (messageJSON.tags) {
-				Set<TagVS> tagSet = tagVSService.save(messageJSON.tags)
-				if(tagSet) eventVS.setTagVSSet(tagSet)
-			}
-            eventVS.save()
-			if (messageJSON.fieldsEventVS) {
-				Set<FieldEventVS> fieldsEventVS = fieldEventVSService.saveFieldsEventVS(eventVS, messageJSON.fieldsEventVS)
-				JSONArray arrayFieldsEventVS = new JSONArray()
-				fieldsEventVS.each { opcion ->
-						arrayFieldsEventVS.add([id:opcion.id, content:opcion.content] as JSONObject  )
-				}
-				messageJSON.fieldsEventVS = arrayFieldsEventVS
-			}
-			log.debug(" ------ Saved voting event '${eventVS.id}'")
-			messageJSON.id = eventVS.id
-			messageJSON.URL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVS.id}"
-			messageJSON.dateCreated = DateUtils.getStringFromDate(eventVS.dateCreated)
-			messageJSON.type = TypeVS.VOTING_EVENT
-			responseVS = keyStoreService.generateElectionKeysStore(eventVS)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				log.error "saveEvent - ERROR GENERATING EVENT KEYSTRORE- ${responseVS.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
-                        type:TypeVS.VOTING_EVENT_ERROR, eventVS:eventVS)
-			} 
-			messageJSON.certCAVotacion = new String(CertUtil.getPEMEncoded (responseVS.data))
-			File certChain = grailsApplication.mainContext.getResource(
-				grailsApplication.config.VotingSystem.certChainPath).getFile();
-			messageJSON.certChain = new String(certChain.getBytes())
-			
-			X509Certificate certUsuX509 = userSigner.getCertificate()
-			messageJSON.userVS = new String(CertUtil.getPEMEncoded (certUsuX509))
-			String controlCenterEventsURL = "${eventVS.controlCenterVS.serverURL}/eventVSElection"
+        String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
+        def messageJSON = JSON.parse(documentStr)
 
-			Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = eventVS.controlCenterVS.getName()
-			String subject = messageSource.getMessage('mime.subject.votingEventValidated', null, locale)
-			byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(
-				fromUser, toUser, messageJSON.toString(), subject, header)
-			ResponseVS encryptResponse = signatureVSService.encryptSMIMEMessage(smimeMessageRespBytes,
-                    x509ControlCenterCert, locale)
-			if(ResponseVS.SC_OK != encryptResponse.statusCode) {
-				eventVS.state = EventVS.State.ERROR
-                eventVS.metaInf = encryptResponse.message
-                eventVS.save()
-				log.error "saveEvent - ERROR ENCRYPTING MSG - ${encryptResponse.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:encryptResponse.message,
-                        eventVS:eventVS, type:TypeVS.VOTING_EVENT_ERROR)
-			}
-			responseVS = HttpHelper.getInstance().sendData(encryptResponse.messageBytes,
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED, controlCenterEventsURL)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				eventVS.state = EventVS.State.ERROR
-                eventVS.metaInf = responseVS.message
-                eventVS.save()
-				msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',
-                        [responseVS.message].toArray(),locale)
-				log.error "saveEvent - ERROR NOTIFYING CONTROL CENTER - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					message:msg, type:TypeVS.VOTING_EVENT_ERROR, eventVS:eventVS)
-			}
-			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
-				smimeParent:messageSMIMEReq, eventVS:eventVS,  content:smimeMessageRespBytes)
-            messageSMIMEResp.save()
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
-                    data:messageSMIMEResp)
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			msg = messageSource.getMessage('publishVotingErrorMessage', null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-				message:msg, type:TypeVS.VOTING_EVENT_ERROR, eventVS:eventVS)
-		}
+        eventVS = new EventVSElection(subject:messageJSON.subject, content:messageJSON.content, userVS:userSigner,
+                controlCenterVS:systemService.getControlCenter(),
+                dateBegin: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin),
+                dateFinish: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish))
+
+        responseVS = eventVSService.setEventDatesState(eventVS, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) {
+            log.error "$methodName - EVENT DATES ERROR - ${responseVS.message}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
+                    type:TypeVS.ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
+        }
+        eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
+        messageJSON.controlCenterURL = systemService.getControlCenter().serverURL
+        messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
+                                     name:grailsApplication.config.VotingSystem.serverName] as JSONObject
+        if (messageJSON.tags) {
+            Set<TagVS> tagSet = tagVSService.save(messageJSON.tags)
+            if(tagSet) eventVS.setTagVSSet(tagSet)
+        }
+        eventVS.save()
+        if (messageJSON.fieldsEventVS) {
+            Set<FieldEventVS> fieldsEventVS = fieldEventVSService.saveFieldsEventVS(eventVS, messageJSON.fieldsEventVS)
+            JSONArray arrayFieldsEventVS = new JSONArray()
+            fieldsEventVS.each {  arrayFieldsEventVS.add([id:it.id, content:it.content] as JSONObject  ) }
+            messageJSON.fieldsEventVS = arrayFieldsEventVS
+        }
+        log.debug("$methodName - Saved voting event '${eventVS.id}'")
+        messageJSON.id = eventVS.id
+        messageJSON.URL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVS.id}"
+        messageJSON.dateCreated = DateUtils.getStringFromDate(eventVS.dateCreated)
+        messageJSON.type = TypeVS.VOTING_EVENT
+        responseVS = keyStoreService.generateElectionKeysStore(eventVS)
+        if(ResponseVS.SC_OK != responseVS.statusCode) {
+            log.error "$methodName - ERROR GENERATING EVENT KEYSTRORE- ${responseVS.message}"
+            throw new ExceptionVS(responseVS.message)
+        }
+        messageJSON.certCAVotacion = new String(CertUtil.getPEMEncoded (responseVS.data))
+        File certChain = grailsApplication.mainContext.getResource(
+                grailsApplication.config.VotingSystem.certChainPath).getFile();
+        messageJSON.certChain = new String(certChain.getBytes())
+        X509Certificate certUsuX509 = userSigner.getCertificate()
+        messageJSON.userVS = new String(CertUtil.getPEMEncoded (certUsuX509))
+
+        Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = eventVS.controlCenterVS.getName()
+        String subject = messageSource.getMessage('mime.subject.votingEventValidated', null, locale)
+        responseVS = signatureVSService.getTimestampedSignedMimeMessage(
+                fromUser, toUser, messageJSON.toString(), subject, header)
+        byte[] signedMessageBytes = responseVS.getSmimeMessage().getBytes()
+        if(ResponseVS.SC_OK != responseVS.statusCode) throw new Exception(responseVS.getMessage())
+        responseVS = HttpHelper.getInstance().sendData(signedMessageBytes,
+                ContentTypeVS.SIGNED, "${eventVS.controlCenterVS.serverURL}/eventVSElection")
+        if(ResponseVS.SC_OK != responseVS.statusCode) {
+            throw new ExceptionVS(messageSource.getMessage('controlCenterCommunicationErrorMsg',
+                    [responseVS.message].toArray(),locale))
+        }
+        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
+                smimeParent:messageSMIMEReq, eventVS:eventVS,  content:signedMessageBytes)
+        messageSMIMEResp.save()
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
+                data:messageSMIMEResp)
     }
 
     @Transactional

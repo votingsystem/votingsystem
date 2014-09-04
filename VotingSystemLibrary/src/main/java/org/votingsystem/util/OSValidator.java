@@ -133,7 +133,7 @@ public class OSValidator {
 
     
     public static String getPKCS11LibPath() {
-        String[] systemLibraryList = { "/usr/lib/opensc-pkcs11.so",
+        String[] systemLibraryList = { "/usr/lib/opensc-pkcs11.so", "/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so",
                 "/usr/local/lib/opensc-pkcs11.so",
                 "/lib/opensc-pkcs11.so", "C:\\WINDOWS\\system32\\UsrPkcs11.dll",
                 "C:\\Windows\\SysWOW64\\UsrPkcs11.dll"};

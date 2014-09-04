@@ -7,7 +7,7 @@ import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.IbanVSUtil
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 
 /**
 * @author jgzornoza

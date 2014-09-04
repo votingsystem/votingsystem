@@ -5,7 +5,7 @@ import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketBatchRequest

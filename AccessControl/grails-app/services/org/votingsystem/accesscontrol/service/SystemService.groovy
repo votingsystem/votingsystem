@@ -1,0 +1,43 @@
+package org.votingsystem.accesscontrol.service
+
+import grails.transaction.Transactional
+import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ControlCenterVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.util.ExceptionVS
+
+@Transactional
+class SystemService {
+
+    def grailsApplication
+    private ControlCenterVS controlCenter
+    private Locale defaultLocale
+    def subscriptionVSService
+
+    public ControlCenterVS getControlCenter() throws Exception {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
+        if(!controlCenter) {
+            def controlCenters = ControlCenterVS.createCriteria().list (offset: 0, order:'desc') {
+                eq("state", ActorVS.State.OK)
+            }
+            controlCenter = controlCenters.iterator().next()
+            ResponseVS responseVS = subscriptionVSService.checkControlCenter(controlCenter.serverURL, getLocale())
+            if(ResponseVS.SC_OK == responseVS.statusCode) {
+                log.debug("There are '${controlCenters.getTotalCount()}' with state 'OK' - fetching Control Center " +
+                        "with url: '${controlCenter.serverURL}' ")
+            } else {
+                log.error("$methodName - ${responseVS.getMessage()}")
+                controlCenter = null
+                throw new ExceptionVS(responseVS.getMessage())
+            }
+        }
+        return controlCenter;
+    }
+
+    public Locale getLocale() {
+        if(!defaultLocale) defaultLocale = new Locale(grailsApplication.config.VotingSystem.defaultLocale)
+        return defaultLocale
+    }
+
+}

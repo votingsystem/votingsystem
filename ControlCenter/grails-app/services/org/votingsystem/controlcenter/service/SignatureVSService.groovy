@@ -3,6 +3,7 @@ package org.votingsystem.controlcenter.service
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
+import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ApplicationContextHolder
@@ -15,6 +16,7 @@ import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.cert.CertPathValidatorException
+import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
 class SignatureVSService {
@@ -32,6 +34,7 @@ class SignatureVSService {
 
 	private SignedMailGenerator signedMailGenerator;
 	private static Set<X509Certificate> trustedCerts;
+    private static Set<TrustAnchor> trustAnchors;
 	private static HashMap<Long, CertificateVS> trustedCertsHashMap;
 	private static HashMap<Long, Set<X509Certificate>> eventTrustedCertsHashMap = 
 			new HashMap<Long, Set<X509Certificate>>();
@@ -309,43 +312,63 @@ class SignatureVSService {
 		}
 		return validateSignersCerts(smimeMessageReq, locale)
 	}
-		
-	public ResponseVS validateSignersCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
-		Set<UserVS> signersVS = smimeMessageReq.getSigners();
-		if(signersVS.isEmpty()) return new ResponseVS( statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-			messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
-		Set<UserVS> checkedSigners = new HashSet<UserVS>()
+
+    public ResponseVS validateSignersCerts(SMIMEMessageWrapper messageWrapper, Locale locale) {
+        Set<UserVS> signersVS = messageWrapper.getSigners();
+        if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
+                messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
+        Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
-        String signerNIF = smimeMessageReq.getSigner().getNif()
-		for(UserVS userVS: signersVS) {
-			try {
-				ResponseVS validationResponse = CertUtil.verifyCertificate(
-					userVS.getCertificate(), getTrustedCerts(), false)
+        UserVS anonymousSigner = null
+        CertExtensionCheckerVS extensionChecker
+        String signerNIF = messageWrapper.getSigner().getNif()
+        for(UserVS userVS: signersVS) {
+            try {
+                if(userVS.getTimeStampToken() != null) {
+                    ResponseVS timestampValidationResp = timeStampService.validateToken(
+                            userVS.getTimeStampToken(), locale)
+                    log.debug("validateSignersCerts - timestampValidationResp - " +
+                            "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
+                    if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
+                        log.error("validateSignersCerts - TIMESTAMP ERROR - ${timestampValidationResp.message}")
+                        return timestampValidationResp
+                    }
+                } else {
+                    String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
+                    log.error("ERROR - validateSignersCerts - ${msg}")
+                    return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
+                }
+                ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
                 X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
-				userVS.certificateCA = trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue())
-				log.debug("Certificate from: " + certCaResult?.getSubjectDN()?.toString() +
-						"- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
-				ResponseVS responseVS = subscriptionVSService.checkUser(userVS, locale)
-				if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-				else {
-					UserVS userVSDB = responseVS.userVS
-					userVSDB.setCertificate(userVS.getCertificate())
-					checkedSigners.add(userVSDB)
+                userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
+                log.debug("validateSignersCerts - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
+                        " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
+                extensionChecker = validationResponse.data.extensionChecker
+                ResponseVS responseVS = null
+                if(extensionChecker.isAnonymousSigner()) {
+                    log.debug("validateSignersCerts - anonymous signer")
+                    anonymousSigner = userVS
+                    responseVS = new ResponseVS(ResponseVS.SC_OK)
+                    responseVS.setUserVS(anonymousSigner)
+                } else {
+                    responseVS = subscriptionVSService.checkUser(userVS, locale)
+                    if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
                     if(userVS.getNif().equals(signerNIF)) checkedSigner = responseVS.userVS;
-				}
-			} catch (CertPathValidatorException ex) {
-				log.error(ex.getMessage(), ex)
-				log.error(" --- Error with certificate: ${userVS.getCertificate().getSubjectDN()}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					message:messageSource.getMessage('unknownCAErrorMsg', null, locale))
-			} catch (Exception ex) {
-				log.error(ex.getMessage(), ex)
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
-			}
-		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessageReq,
-                data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner])
-	}
+                }
+                checkedSigners.add(responseVS.userVS)
+            } catch (CertPathValidatorException ex) {
+                log.error(ex.getMessage(), ex)
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
+                        messageSource.getMessage('unknownCAErrorMsg', null, locale))
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex)
+                return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR)
+            }
+        }
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:messageWrapper,
+                data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
+                      extensionChecker:extensionChecker])
+    }
 		
 	public File getSignedFile (String fromUser, String toUser,
 		String textToSign, String subject, Header header) {
@@ -441,6 +464,18 @@ class SignatureVSService {
 		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = init().trustedCerts
 		return trustedCerts;
 	}
+
+    public Set<TrustAnchor> getTrustAnchors() {
+        if(!trustAnchors) {
+            Set<X509Certificate> trustedCerts = getTrustedCerts()
+            trustAnchors = new HashSet<TrustAnchor>();
+            for(X509Certificate certificate: trustedCerts) {
+                TrustAnchor anchor = new TrustAnchor(certificate, null);
+                trustAnchors.add(anchor);
+            }
+        }
+        return trustAnchors;
+    }
 
     public X509Certificate getServerCert() {
         if(serverCert == null) serverCert = init().serverCert

@@ -1,5 +1,4 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-button', file: 'paper-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
@@ -21,32 +20,15 @@
                 padding:10px 30px 30px 30px;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 400px;
-            }
-            paper-button.button {
-                background-color: #f9f9f9;
-                color: #6c0404;
-                border: 1px solid #ccc;
-                margin:10px;
-                vertical-align: middle;
-                line-height: 24px;
-                height: 35px;
-            }
-            paper-button:hover {
-                background: #;
-                color: #f9f9f9;
-            }
-
-            paper-button::shadow #ripple {
-                color: green;
+                width: 500px;
             }
             </style>
             <div>
                 <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
+                    <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;display:{{caption? 'block':'none'}}">{{caption}}</div>
                     </div>
-                    <div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
                         <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
                     </div>
                 </div>

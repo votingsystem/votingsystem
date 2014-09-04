@@ -7,7 +7,7 @@ import org.votingsystem.model.*
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.util.IbanVSUtil
-import org.votingsystem.vicket.util.MetaInfMsg
+import org.votingsystem.util.MetaInfMsg
 
 import java.security.cert.X509Certificate
 
