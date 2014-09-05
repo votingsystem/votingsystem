@@ -45,13 +45,13 @@
         }
     }
 
-    function processUserSearch(textToSearch) {
+    function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = "block"
         document.querySelector("#recordList").url = "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
     }
 
-    function processUserSearchJSON(jsonData) {
+    function processSearchJSON(jsonData) {
         document.querySelector("#recordList").params = jsonData
         document.querySelector("#recordList").url = "${createLink(controller: 'transaction', action: 'index')}"
     }

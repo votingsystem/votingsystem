@@ -56,6 +56,7 @@ class EventVSClaimController {
                         message(code: 'eventVSNotFound', args:[params.id]))]
 			} else {
                 EventVSClaim eventVS = resultList.iterator().next()
+                eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
 				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 					return [responseVS: new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                             data:eventVSService.getEventVSMap(eventVS))]
@@ -93,6 +94,7 @@ class EventVSClaimController {
             }
             eventsVSMap.offset = params.long('offset')
             resultList.each {eventVSItem ->
+                eventVSItem = eventVSService.checkEventVSDates(eventVSItem, request.locale).eventVS
                 eventsVSMap.eventVS.add(eventVSService.getEventVSClaimMap(eventVSItem))
             }
             render eventsVSMap as JSON

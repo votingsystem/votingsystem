@@ -1,9 +1,10 @@
 <html>
 <head>
-    <meta name="layout" content="main" />
-    <asset:javascript src="jquery.stickytableheaders.js"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/dynatable', file: 'jquery.dynatable.js')}"></script>
-    <asset:stylesheet src="jquery.dynatable.css"/>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog', file: 'votingsystem-advanced-search-dialog.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-info.gsp']"/>">
 </head>
 <body>
 <div class="">
@@ -18,15 +19,11 @@
         </div>
     </div>
 
-    <g:render template="/template/eventsSearchInfo"/>
 
     <div id="mainPageEventList" class="pageContentDiv row"><ul></ul></div>
 
-    <div id="eventTemplate" style="display:none;">
-        <g:render template="/template/event" model="[isTemplate:'true']"/>
-    </div>
 </div>
-<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
+<votingsystem-advanced-search-dialog id="advancedSearchDialog"></votingsystem-advanced-search-dialog>
 </body>
 </html>
 <asset:script>
@@ -97,8 +94,8 @@
         return eventVS.getElement()
     }
 
-    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
-        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
+    function processSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        document.querySelector("#searchInfo").show(textToSearch, dateBeginFrom, dateBeginTo)
         dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVSElection')}?searchText=" +
             textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo
         dynatable.process();

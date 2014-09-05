@@ -27,7 +27,7 @@
         if(document.querySelector("#navBar") != null) document.querySelector("#navBar").searchVisible('false')
     });
 
-    function processUserSearch(textToSearch) {
+    function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = 'block'
         document.querySelector("#groupvsList").url = "${createLink(controller: 'search', action: 'groupVS')}?searchText=" + textToSearch

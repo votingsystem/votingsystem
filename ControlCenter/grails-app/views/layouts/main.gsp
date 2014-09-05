@@ -88,7 +88,6 @@
 </body>
 
 <g:include view="/include/dialog/resultDialog.gsp"/>
-<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 <g:include view="/include/dialog/windowAlertModal.gsp"/>
 
 </html>

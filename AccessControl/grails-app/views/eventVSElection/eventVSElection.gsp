@@ -11,7 +11,6 @@
         </div>
 
         <g:if test="${"admin".equals(params.menu)}">
-            <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
             <div class="text-center" style="">
                 <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
                         EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
@@ -39,7 +38,7 @@
                 <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
             </div>
 
-            <div class="eventOptionsDiv row text-center" style="">
+            <div>
                 <fieldset id="fieldsBox" class="fieldsBox" style="margin:30px auto 0 auto;">
                     <legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
                     <div id="fields" class="" style="width:100%;">

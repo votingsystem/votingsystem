@@ -52,8 +52,8 @@
             </div>
 
 
-            <div id="fieldsDiv" class="fieldsBox" style="display:{{pollOptionList.length == 0? 'none':'block'}}">
-                <fieldset id="fieldsBox">
+            <div id="fieldsDiv" style="display:{{pollOptionList.length == 0? 'none':'block'}}">
+                <fieldset id="fieldsBox" class="fieldsBox">
                     <legend id="fieldsLegend" style="border: none;"><g:message code="pollFieldLegend"/></legend>
                     <div layout vertical>
                         <template repeat="{{pollOption in pollOptionList}}">
@@ -142,8 +142,6 @@
                     this.messageToUser = '<g:message code="dateRangeERRORMsg"/>'
                     return
                 }
-
-
 
                 if(this.$.textEditor.getData().length == 0) {
                     this.$.textEditor.classList.add("formFieldError");

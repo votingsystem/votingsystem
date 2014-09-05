@@ -11,7 +11,6 @@
         </div>
 
         <g:if test="${"admin".equals(params.menu)}">
-            <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
             <div class="text-center" style="">
                 <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
                         EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
@@ -60,7 +59,6 @@
         </div>
     </div>
 </div>
-<g:include view="/include/dialog/adminDocumentDialog.gsp"/>
 <g:include view="/include/dialog/requestEventBackupDialog.gsp"/>
 </body>
 </html>

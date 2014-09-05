@@ -3,110 +3,32 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog', file: 'votingsystem-advanced-search-dialog.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-info.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/eventvs-list']"/>">
 </head>
 <body>
-<div class="">
-    <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-        <div style="display:table-cell;margin:auto;">
-            <select id="eventsStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;" class="form-control">
-                <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-                <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-                <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
-                <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-            </select>
-        </div>
+    <div class="pageContenDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
+        <ol class="breadcrumbVS">
+            <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+            <li class="active"><g:message code="electionSystemLbl"/></li>
+        </ol>
+        <search-info id="searchInfo"></search-info>
+        <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
+            background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
+        <eventvs-list id="eventvsList" url="${createLink(controller: 'eventVSElection', action: 'index')}?menu=${params.menu}"
+                      eventvstype="election"></eventvs-list>
     </div>
-
-    <g:render template="/template/eventsSearchInfo"/>
-
-    <div id="mainPageEventList" class="pageContentDiv row"><ul></ul></div>
-
-    <div id="eventTemplate" style="display:none;">
-        <g:render template="/template/event" model="[isTemplate:'true']"/>
-    </div>
-</div>
-<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
+    <votingsystem-advanced-search-dialog id="advancedSearchDialog"></votingsystem-advanced-search-dialog>
 </body>
 </html>
 <asset:script>
-    var dynatable
-
-    $(function() {
-        $("#navBarSearchInput").css( "visibility", "visible" );
-        $("#advancedSearchButton").css("visibility", "visible")
-        $('#mainPageEventList').dynatable({
-            features: dynatableFeatures,
-            inputs: dynatableInputs,
-            params: dynatableParams,
-            table: {
-                bodyRowSelector: 'li'
-            },
-            dataset: {
-                ajax: true,
-                ajaxUrl: "${createLink(controller: 'eventVSElection', action: 'index')}",
-                ajaxOnLoad: false,
-                perPageDefault: 50,
-                records: []
-            },
-            writers: {
-                _rowWriter: eventVSWriter
-            }
-        });
-
-        dynatable = $('#mainPageEventList').data('dynatable');
-        dynatable.settings.params.records = 'eventVS'
-        dynatable.settings.params.queryRecordCount = 'totalEventVS'
-
-
-        $('#eventsStateSelect').on('change', function (e) {
-            var eventState = $(this).val()
-            var optionSelected = $("option:selected", this);
-            console.log(" - eventState: " + eventState)
-            if(!isFirefox()) {
-                if($('#eventsStateSelect')[0].selectedIndex == 0) {
-                    $('#eventsStateSelect').css({'color': '#434343', 'border-color': '#cccccc'})
-                } else {
-                    $('#eventsStateSelect').css({'color': $( "#eventsStateSelect option:selected" ).css('color'),
-                         'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
-                }
-            }
-            hideEventsSearchInfoMsg()
-            var targetURL = "${createLink( controller:'eventVSElection')}";
-            if("" != eventState) {
-                history.pushState(null, null, targetURL);
-                targetURL = targetURL + "?eventVSState=" + eventState
-            }
-            dynatable.settings.dataset.ajaxUrl= targetURL
-            dynatable.paginationPage.set(1);
-            dynatable.process();
-        });
-    });
-
-    $('#mainPageEventList').bind('dynatable:afterUpdate',  function() {
-        updateMenuLinks()
-        $('.eventDiv').click(function() {
-            window.location.href = $(this).attr('data-href')
-        }
-    )})
-
-    var eventTemplate = $('#eventTemplate').html()
-
-    function eventVSWriter(rowIndex, jsonAjaxData, columns, cellWriter) {
-        var eventVS = new EventVS(jsonAjaxData, eventTemplate, "VOTES")
-        return eventVS.getElement()
-    }
-
-    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
-        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}?searchText=" +
+    function processSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        var ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}?searchText=" +
             textToSearch + "&dateBeginFrom=" + dateBeginFrom + "&dateBeginTo=" + dateBeginTo + "&eventvsType=ELECTION"
-        dynatable.process();
     }
 
-    function processUserSearchJSON(jsonData) {
-        dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}"
-        dynatable.settings.dataset.ajaxData = jsonData
-        dynatable.paginationPage.set(1);
-        dynatable.process();
+    function processSearchJSON(jsonData) {
+        var ajaxUrl= "${createLink(controller: 'search', action: 'eventVS')}";
     }
 </asset:script>

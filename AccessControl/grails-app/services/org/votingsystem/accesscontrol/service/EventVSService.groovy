@@ -22,10 +22,8 @@ class EventVSService {
 	def grailsApplication
 	def signatureVSService
 	def filesService
-
 	
-	ResponseVS checkDatesEventVS (EventVS eventVS, Locale locale) {
-		log.debug("checkDatesEventVS")
+	ResponseVS checkEventVSDates (EventVS eventVS, Locale locale) {
 		if(eventVS.state && eventVS.state == EventVS.State.CANCELLED) {
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
 		}
@@ -33,26 +31,20 @@ class EventVSService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
 		}
-		Date fecha = Calendar.getInstance().getTime()
-		if (fecha.after(eventVS.dateFinish) &&
+		Date currentDate = Calendar.getInstance().getTime()
+		if (currentDate.after(eventVS.dateFinish) &&
 			eventVS.state != EventVS.State.TERMINATED) {
-			EventVSElection.withTransaction {
-				eventVS.state = EventVS.State.TERMINATED
-				eventVS.save()
-			}
-		} else if(eventVS.dateBegin.after(fecha) &&
+            eventVS.state = EventVS.State.TERMINATED
+            eventVS.save()
+		} else if(eventVS.dateBegin.after(currentDate) &&
 			eventVS.state != EventVS.State.AWAITING) {
-			EventVSElection.withTransaction {
-				eventVS.state = EventVS.State.AWAITING
-				eventVS.save()
-			}
-		} else if(eventVS.dateBegin.before(fecha) &&
-			eventVS.dateFinish.after(fecha) &&
+            eventVS.state = EventVS.State.AWAITING
+            eventVS.save()
+		} else if(eventVS.dateBegin.before(currentDate) &&
+			eventVS.dateFinish.after(currentDate) &&
 			eventVS.state != EventVS.State.ACTIVE) {
-			EventVSElection.withTransaction {
-				eventVS.state = EventVS.State.ACTIVE
-				eventVS.save()
-			}
+            eventVS.state = EventVS.State.ACTIVE
+            eventVS.save()
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, message:eventVS?.state?.toString())
 	}

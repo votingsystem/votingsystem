@@ -69,6 +69,7 @@ class EventVSElectionController {
 
             } else {
                 EventVSElection eventVS = resultList.iterator().next()
+                eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
                 if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                     render eventVSService.getEventVSMap(eventVS) as JSON
                 } else {
@@ -105,6 +106,7 @@ class EventVSElectionController {
             eventsVSMap.totalEventVS = resultList?.totalCount
             eventsVSMap.offset = params.long('offset')
             resultList.each {eventVSItem ->
+                eventVSItem = eventVSService.checkEventVSDates(eventVSItem, request.locale).eventVS
                 eventsVSMap.eventVS.add(eventVSService.getEventVSElectionMap(eventVSItem))
             }
             render eventsVSMap as JSON

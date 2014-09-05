@@ -32,7 +32,7 @@
 
     })
 
-    function processUserSearch(textToSearch) {
+    function processSearch(textToSearch) {
         $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
         $('#pageInfoPanel').css("display", "block")
         document.querySelector("#userList").url = targetURL + "?searchText=" + textToSearch

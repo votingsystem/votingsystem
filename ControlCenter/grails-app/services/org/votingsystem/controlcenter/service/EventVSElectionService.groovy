@@ -115,36 +115,32 @@ class EventVSElectionService {
 		log.debug("setEventDatesState - state ${eventVS.state.toString()}")
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
-	
-	ResponseVS checkDatesEventVS (EventVS eventVS, Locale locale) {
-		log.debug("checkDatesEventVS")
-		if(eventVS.state && eventVS.state == EventVS.State.CANCELLED) {
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
-		}
-		if(eventVS.dateBegin.after(eventVS.dateFinish)) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-				message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
-		}
-		Date fecha = Calendar.getInstance().getTime()
-		if (fecha.after(eventVS.dateFinish) && eventVS.state != EventVS.State.TERMINATED) {
-			EventVS.withTransaction {
-				eventVS.state = EventVS.State.TERMINATED
-				eventVS.save()
-			}
-		} else if(eventVS.dateBegin.after(fecha) && eventVS.state != EventVS.State.AWAITING) {
-			EventVS.withTransaction {
-				eventVS.state = EventVS.State.AWAITING
-				eventVS.save()
-			}
-		} else if(eventVS.dateBegin.before(fecha) && eventVS.dateFinish.after(fecha) &&
+
+    ResponseVS checkEventVSDates (EventVS eventVS, Locale locale) {
+        if(eventVS.state && eventVS.state == EventVS.State.CANCELLED) {
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
+        }
+        if(eventVS.dateBegin.after(eventVS.dateFinish)) {
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
+        }
+        Date currentDate = Calendar.getInstance().getTime()
+        if (currentDate.after(eventVS.dateFinish) &&
+                eventVS.state != EventVS.State.TERMINATED) {
+            eventVS.state = EventVS.State.TERMINATED
+            eventVS.save()
+        } else if(eventVS.dateBegin.after(currentDate) &&
+                eventVS.state != EventVS.State.AWAITING) {
+            eventVS.state = EventVS.State.AWAITING
+            eventVS.save()
+        } else if(eventVS.dateBegin.before(currentDate) &&
+                eventVS.dateFinish.after(currentDate) &&
                 eventVS.state != EventVS.State.ACTIVE) {
-			EventVS.withTransaction {
-				eventVS.state = EventVS.State.ACTIVE
-				eventVS.save()
-			}
-		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, message:eventVS?.state)
-	}
+            eventVS.state = EventVS.State.ACTIVE
+            eventVS.save()
+        }
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, message:eventVS?.state?.toString())
+    }
 	
 	//{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","state":"CANCELLED","UUID":"..."}
 	private ResponseVS checkCancelEventJSONData(JSONObject cancelDataJSON, Locale locale) {

@@ -17,7 +17,7 @@
         <div id="searchPanel" class="" style="background:#ba0011; padding:10px 10px 10px 10px; width: 320px; margin:0px auto 0px auto;border-radius: 5px;">
             <input id="userSearchInput" type="text" placeholder="<g:message code="userSearchLbl" />" class="form-control"
                    style="width:220px; border-color: #f9f9f9;display:inline; vertical-align: middle;" onKeyPress="searchInputKeyPress(event)">
-            <i onclick="processUserSearch()" class="fa fa-search text-right navBar-vicket-icon"
+            <i onclick="processSearch()" class="fa fa-search text-right navBar-vicket-icon"
                style="margin:0px 0px 0px 15px; display:inline;vertical-align: middle;"></i>
         </div>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
@@ -40,11 +40,11 @@
     function searchInputKeyPress(e){
         var chCode = ('charCode' in e) ? e.charCode : e.keyCode;
         if (chCode == 13) {
-            processUserSearch()
+            processSearch()
         }
     }
 
-    function processUserSearch() {
+    function processSearch() {
         var textToSearch = document.querySelector("#userSearchInput").value
         if(textToSearch.trim() == "") return
         document.querySelector("#uservsTable").url = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch

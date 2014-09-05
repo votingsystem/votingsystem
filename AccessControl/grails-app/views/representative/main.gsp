@@ -1,10 +1,15 @@
 <html>
 <head>
-    <meta name="layout" content="main" />
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-info.gsp']"/>">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog', file: 'votingsystem-advanced-search-dialog.html')}">
 </head>
 <body>
 <div style="margin: 15px 0 0 0;">
-    <g:render template="/template/eventsSearchInfo"/>
+    <search-info id="searchInfo"></search-info>
+
     <div class="" style="display: table; margin: auto; width: 100%;">
         <ul id="representativeList" style="display: block; width: 100%; position: relative;margin: auto;" ></ul>
     </div>
@@ -13,7 +18,7 @@
 <template id="representativeTemplate" style="display:none;">
     <g:render template="/template/representative"/>
 </template>
-<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
+<votingsystem-advanced-search-dialog id="advancedSearchDialog"></votingsystem-advanced-search-dialog>
 </body>
 </html>
 <asset:script>
@@ -65,8 +70,8 @@
             window.location.href = $(this).attr('data-href')
     })})
 
-    function processUserSearch(textToSearch, dateBeginFrom, dateBeginTo) {
-        showEventsSearchInfoMsg(textToSearch, dateBeginFrom, dateBeginTo)
+    function processSearch(textToSearch, dateBeginFrom, dateBeginTo) {
+        document.querySelector("#searchInfo").show(textToSearch, dateBeginFrom, dateBeginTo)
         dynatable.settings.dataset.ajaxUrl= "${createLink(controller: 'search', action: 'representative')}?searchText=" + textToSearch
         dynatable.process();
     }

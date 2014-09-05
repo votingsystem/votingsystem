@@ -68,7 +68,7 @@
 		
 		<form id="submitClaimForm">
 		<g:if test="${eventMap?.fieldsEventVS.size() > 0}">
-			<div class="eventOptionsDiv">
+			<div>
 				<fieldset id="fieldsBox" style="">
 					<legend id="fieldsLegend"><g:message code="claimsFieldLegend"/></legend>
 					<div id="fields" style="width:100%;">

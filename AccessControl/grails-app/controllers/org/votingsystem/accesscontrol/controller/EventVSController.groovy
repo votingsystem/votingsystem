@@ -140,7 +140,7 @@ class EventVSController {
 	   }
 	   if(!eventVS) return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                message(code: 'eventVSNotFound', args:[params.id]))]
-	   else return [responseVS:eventVSService.checkDatesEventVS(eventVS, request.getLocale())]
+	   else return [responseVS:eventVSService.checkEventVSDates(eventVS, request.getLocale())]
    }
 
     /**

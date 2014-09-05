@@ -48,7 +48,7 @@
                     <div id="searchPanel" class="form-group form-inline text-center"
                          style="margin:15px auto 0px auto;display: inline-block; width: 100%;">
                         <input id="userSearchInput" type="text" class="form-control" style="width:220px; display: inline;">
-                        <button type="button" onclick="processUserSearch()" class="btn btn-danger" style="display: inline;">
+                        <button type="button" onclick="processSearch()" class="btn btn-danger" style="display: inline;">
                             <g:message code="userSearchLbl" /></button>
                     </div>
 

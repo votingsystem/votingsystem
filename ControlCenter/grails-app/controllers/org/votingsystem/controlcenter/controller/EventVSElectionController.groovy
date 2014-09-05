@@ -244,7 +244,7 @@ class EventVSElectionController {
             return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFoundErrorMsg', args:[params.id]))]
 		}
-        return [responseVS : eventVSElectionService.checkDatesEventVS(eventVSElection, request.getLocale())]
+        return [responseVS : eventVSElectionService.checkEventVSDates(eventVSElection, request.getLocale())]
 	}
 	
 	/**

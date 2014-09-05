@@ -1,4 +1,6 @@
 <script>
+    window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
+
     var SocketService = function () {
 
         this.socket = null;

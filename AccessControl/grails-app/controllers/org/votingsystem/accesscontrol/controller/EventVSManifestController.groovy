@@ -53,6 +53,7 @@ class EventVSManifestController {
                 }
                 if(!resultList.isEmpty()) eventVS = resultList.iterator().next()
                 if(eventVS) {
+                    eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
                     if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                         return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                                 data:eventVSService.getEventVSMap(eventVS))]
@@ -239,6 +240,7 @@ class EventVSManifestController {
                         message(code: 'eventVSNotFound', args: [params.id]))]
             } else {
                 EventVSManifest eventVS = resultList.iterator().next()
+                eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
                 render eventVSService.getEventVSMap(eventVS) as JSON
             }
         } else {
@@ -274,7 +276,9 @@ class EventVSManifestController {
                     eventsVSMap.offset = params.long('offset')
                 }
             }
-            resultList.each { eventVSItem -> eventsVSMap.eventVS.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
+            resultList.each { eventVSItem ->
+                eventVSItem = eventVSService.checkEventVSDates(eventVSItem, request.locale).eventVS
+                eventsVSMap.eventVS.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
             render eventsVSMap as JSON
         }
     }

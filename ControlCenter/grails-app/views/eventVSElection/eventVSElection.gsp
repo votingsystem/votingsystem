@@ -29,7 +29,7 @@
             <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
         </div>
 
-        <div class="eventOptionsDiv row text-center" style="">
+        <div>
             <fieldset id="fieldsBox" class="fieldsBox" style="margin:30px auto 0 auto;">
 				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
 				<div id="fields" style="width:100%;">
