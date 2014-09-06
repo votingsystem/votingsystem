@@ -53,9 +53,11 @@
                                 </template>
                             </template>
                             <template if="{{'ACTIVE' != eventvs.state}}">
-                                <div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
-                                    - {{optionvs.content}}
-                                </div>
+                                <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
+                                    <div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
+                                        - {{optionvs.content}}
+                                    </div>
+                                </template>
                             </template>
                         </div>
                     </fieldset>

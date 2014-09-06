@@ -2,7 +2,7 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-control-center-dialog.gsp']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-voting-option-dialog.gsp']"/>">
 
-<polymer-element name="vote-editor" attributes="opened">
+<polymer-element name="claim-editor" attributes="opened">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -14,7 +14,7 @@
             }
         </style>
         <div class="pageHeader"  layout horizontal center center-justified>
-            <h3><g:message code="publishVoteLbl"/></h3>
+            <h3><g:message code="publishClaimLbl"/></h3>
         </div>
 
         <div style="display:{{messageToUser? 'block':'none'}}">
@@ -34,12 +34,6 @@
                            placeholder="<g:message code="subjectLbl"/>" error="<g:message code="requiredLbl"/>" required/>
                 </div>
                 <div layout horizontal center id="dateRangeDiv" style="margin:10px 0px 0px 0px;">
-                    <label>${message(code:'dateBeginLbl')}</label>
-                    <div id="dateBegin">
-                        <g:datePicker name="dateBegin" value="${new Date().plus(1)}" precision="day" relativeYears="[0..1]"/>
-                    </div>
-
-
                     <label style="margin:0px 0px 0px 30px;">${message(code:'dateFinishLbl')}</label>
                     <div id="dateFinish">
                         <g:datePicker name="dateFinish" value="${new Date().plus(2)}" precision="day" relativeYears="[0..1]"/>
@@ -51,16 +45,22 @@
                 <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
 
+            <div style="margin:0px 0px 30px 0px;">
+                <div style="font-size: 0.9em; margin:10px 0 0 20px; width:60%;display: inline-block;">
+                    <input type="checkbox" id="multipleSignaturesCheckbox"><g:message code="multipleClaimsLbl"/><br>
+                    <input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
+                </div>
+            </div>
 
-            <div id="fieldsDiv" style="display:{{pollOptionList.length == 0? 'none':'block'}}">
+            <div id="fieldsDiv" style="display:{{claimOptionList.length == 0? 'none':'block'}}">
                 <fieldset id="fieldsBox" class="fieldsBox">
-                    <legend id="fieldsLegend" style="border: none;"><g:message code="pollFieldLegend"/></legend>
+                    <legend id="fieldsLegend" style="border: none;"><g:message code="claimFieldLegend"/></legend>
                     <div layout vertical>
-                        <template repeat="{{pollOption in pollOptionList}}">
+                        <template repeat="{{claimOption in claimOptionList}}">
                             <div>
                                 <a class="btn btn-default" on-click="{{removePollOption}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
                                     <g:message code="deleteLbl"/> <i class="fa fa-minus"></i></a>
-                                {{pollOption}}
+                                {{claimOption}}
                             </div>
 
                         </template>
@@ -71,7 +71,7 @@
             <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                 <div>
                     <button id="addOptionButton" type="button" class="btn btn-default" style=""
-                            on-click={{showVotingOptionDialog}}"><g:message code="addOptionLbl"/> <i class="fa fa-plus"></i>
+                            on-click={{showVotingOptionDialog}}"><g:message code="addClaimFieldLbl"/> <i class="fa fa-plus"></i>
                     </button>
                 </div>
                 <div flex></div>
@@ -86,44 +86,38 @@
         <add-voting-option-dialog id="addVotingOptionDialog"></add-voting-option-dialog>
     </template>
     <script>
-        Polymer('vote-editor', {
+        Polymer('claim-editor', {
             opened: false,
-            pollOptionList : [],
+            claimOptionList : [],
             controlCenter:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 //alert( CKEDITOR.basePath );
                 this.$.addVotingOptionDialog.addEventListener('on-submit', function (e) {
-                    this.pollOptionList.push(e.detail)
+                    this.claimOptionList.push(e.detail)
                 }.bind(this))
             },
             showVotingOptionDialog: function() {
                 this.$.addVotingOptionDialog.show()
             },
             removePollOption: function(e) {
-                var pollOption = e.target.templateInstance.model.pollOption
+                var claimOption = e.target.templateInstance.model.claimOption
                 console.log("removePollOption")
-                for(optionIdx in this.pollOptionList) {
+                for(optionIdx in this.claimOptionList) {
 
-                    console.log("option: " +  this.pollOptionList[optionIdx] + " - pollOption: " + pollOption)
-                    if(pollOption == this.pollOptionList[optionIdx]) {
-                        this.pollOptionList.splice(optionIdx, 1)
+                    console.log("option: " +  this.claimOptionList[optionIdx] + " - claimOption: " + claimOption)
+                    if(claimOption == this.claimOptionList[optionIdx]) {
+                        this.claimOptionList.splice(optionIdx, 1)
                     }
                 }
             },
             submitForm: function() {
                 this.messageToUser = null
                 this.$.subject.classList.remove("formFieldError");
-                var dateBegin = getDatePickerValue('dateBegin', this.$.dateBegin)
                 var dateFinish = getDatePickerValue('dateFinish', this.$.dateFinish)
 
                 if(!this.$.subject.validity.valid) {
                     this.$.subject.classList.add("formFieldError");
-                    this.messageToUser = '<g:message code="emptyFieldMsg"/>'
-                    return
-                }
-
-                if(dateBegin == null) {
                     this.messageToUser = '<g:message code="emptyFieldMsg"/>'
                     return
                 }
@@ -138,37 +132,30 @@
                     return
                 }
 
-                if(dateBegin > dateFinish) {
-                    this.messageToUser = '<g:message code="dateRangeERRORMsg"/>'
-                    return
-                }
-
                 if(this.$.textEditor.getData().length == 0) {
                     this.$.textEditor.classList.add("formFieldError");
                     this.messageToUser = '<g:message code="emptyDocumentERRORMsg"/>'
                     return
                 }
 
-
-                if(this.pollOptionList.length < 2) { //two options at least
-                    this.messageToUser = '<g:message code="optionsMissingERRORMsg"/>'
-                    this.$.addOptionButton.classList.add( "formFieldError" );
-                    return
-                }
-
                 var eventVS = {};
                 eventVS.subject = this.$.subject.value;
                 eventVS.content = this.$.textEditor.getData();
-                eventVS.dateBegin = dateBegin.formatWithTime();
                 eventVS.dateFinish = dateFinish.formatWithTime();
-                eventVS.fieldsEventVS = this.pollOptionList
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VOTING_PUBLISHING)
+                eventVS.fieldsEventVS = this.claimOptionList
+
+                if(this.$.multipleSignaturesCheckbox.checked) eventVS.cardinality = "MULTIPLE"
+                else eventVS.cardinality = "EXCLUSIVE"
+                eventVS.backupAvailable = this.$.allowBackupRequestCheckbox.checked
+
+
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CLAIM_PUBLISHING)
                 webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
                 webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.signedContent = eventVS
                 webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-                webAppMessage.serviceURL = "${createLink(controller:'eventVSElection', absolute:true)}"
-                webAppMessage.signedMessageSubject = "<g:message code="publishVoteSubject"/>"
+                webAppMessage.serviceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
+                webAppMessage.signedMessageSubject = "<g:message code="publishClaimSubject"/>"
 
                 var objectId = Math.random().toString(36).substring(7)
                 webAppMessage.callerCallback = objectId

@@ -18,15 +18,6 @@ class EventVSElectionController {
     def eventVSElectionService
     def eventVSService
 
-
-    /**
-     * @httpMethod [GET]
-     * @return La página principal de la aplicación web de votación.
-     */
-    def main() {
-        render(view:"main" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
-    }
-
     /**
      * @httpMethod [GET]
      * @return La página principal de la aplicación web de votación.
@@ -50,8 +41,8 @@ class EventVSElectionController {
 	 * @return documento JSON con las votaciones que cumplen con el criterio de búsqueda.
 	 */
 	def index() {
-        def resultList
         if (params.long('id')) {
+            def resultList
             EventVSElection.withTransaction {
                 resultList = EventVSElection.createCriteria().list {
                     or {
@@ -77,7 +68,8 @@ class EventVSElectionController {
                             eventMap: eventVSService.getEventVSMap(eventVS)])
                 }
             }
-        } else {
+        } else if(request.contentType?.contains("json")) {
+            def resultList
             def eventsVSMap = new HashMap()
             eventsVSMap.eventVS = []
             params.sort = "dateBegin"
@@ -110,7 +102,7 @@ class EventVSElectionController {
                 eventsVSMap.eventVS.add(eventVSService.getEventVSElectionMap(eventVSItem))
             }
             render eventsVSMap as JSON
-        }
+        } else render(view:"index" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
 	}
 	
 	/**

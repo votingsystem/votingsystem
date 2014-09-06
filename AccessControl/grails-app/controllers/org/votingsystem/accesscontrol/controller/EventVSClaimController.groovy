@@ -16,15 +16,7 @@ class EventVSClaimController {
 	def eventVSClaimSignatureCollectorService
     def eventVSService
 	def signatureVSService
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return La página principal de la aplicación web de reclamaciones.
-	 */
-	def main() {
-		render(view:"main" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
-	}
-	
+
 	/**
 	 * @httpMethod [GET]
 	 * @param [id] Opcional. El identificador de la reclamación en la base de datos. Si no se pasa ningún 
@@ -38,8 +30,8 @@ class EventVSClaimController {
 	 * @return documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
     def index () {
-        def resultList
         if (params.long('id')) {
+            def resultList
             EventVSClaim.withTransaction {
                 resultList = EventVSClaim.createCriteria().list {
                     or {
@@ -65,7 +57,8 @@ class EventVSClaimController {
 						eventMap: eventVSService.getEventVSMap(eventVS)])
 				}
 			}
-        } else {
+        } else if(request.contentType?.contains("json")){
+            def resultList
             def eventsVSMap = new HashMap()
             eventsVSMap.eventVS = []
             params.sort = "dateBegin"
@@ -98,7 +91,7 @@ class EventVSClaimController {
                 eventsVSMap.eventVS.add(eventVSService.getEventVSClaimMap(eventVSItem))
             }
             render eventsVSMap as JSON
-        }
+        } else render(view:"main" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
     }
     
 	/**

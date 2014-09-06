@@ -6,7 +6,6 @@
 
 /web-app/tools
 /web-app/android
-/web-app/bower_components
 
 /build
 /logs

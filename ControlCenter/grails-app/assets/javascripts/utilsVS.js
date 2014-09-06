@@ -206,20 +206,6 @@ function checkInputType(inputType) {
     return isSuppported
 }
 
-var dynatableParams = {
-    dynatable: 'dynatable',
-    queries: 'queries',
-    sorts: 'sorts',
-    page: 'page',
-    perPage: 'max',
-    offset: 'offset',
-    record: null
-  }
-
-var dynatableFeatures =  {
-    search: false
-}
-
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
 function getInternetExplorerVersion() {
 // Returns the version of Windows Internet Explorer or a -1

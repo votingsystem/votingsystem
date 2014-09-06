@@ -46,6 +46,8 @@
 
     };
 
+    function EventVS() {}
+
     EventVS.State = {
         ACTIVE:"ACTIVE",
         TERMINATED:"TERMINATED",
@@ -54,91 +56,6 @@
         PENDING_SIGNATURE:"PENDING_SIGNATURE",
         DELETED_FROM_SYSTEM:"DELETED_FROM_SYSTEM"
     }
-
-    function EventVS(eventJSON, eventTemplate, subSystem) {
-
-        if(eventJSON != null) {
-            this.id = eventJSON.id
-            this.dateFinish = eventJSON.dateFinish
-            this.dateBegin = eventJSON.dateBegin
-            this.userVS = eventJSON.userVS
-            this.state = eventJSON.state
-            this.subject = eventJSON.subject
-            this.checkDateURL ="${createLink( controller:'eventVS')}/checkDates?id=" + this.id
-            this.isActive = DateUtils.checkDate(this.dateBegin.getDate(), this.dateFinish.getDate())
-            if(EventVS.State.ACTIVE == this.state) {
-                if(!this.isActive) httpGet(this.checkDateURL)
-            } else if(EventVS.State.AWAITING == this.state) {
-                if(this.isActive) httpGet(this.checkDateURL)
-            }
-        }
-        this.subSystem = subSystem
-        this.dateCreated
-        this.backupAvailable
-        this.type
-        this.operation
-        this.hashAccessRequestBase64
-        this.hashSolicitudAccesoHex
-        this.hashCertVSBase64
-        this.hashCertVoteHex
-        this.cardinality
-        this.accessControl
-        this.controlCenterVS
-        this.fieldsEventVS
-        this.optionSelected
-        this.duracion
-        this.urlPDF
-        this.URL
-        this.numSignatures
-        this.content
-        this.fieldsEventVS
-        if(eventTemplate != null) {
-            var subjectStr = this.subject.substring(0,50) +  ((this.subject.length > 50)? "...":"");
-            this.eventHTML = eventTemplate.format(subjectStr, this.userVS, this.dateBegin,
-                    this.dateFinish.getElapsedTime(), this.getMessage());
-        }
-
-
-    }
-
-    EventVS.prototype.getURL = function() {
-        var result
-        if(this.subSystem == SubSystem.VOTES) result = "${createLink( controller:'eventVSElection')}/" + this.id
-        if(this.subSystem == SubSystem.CLAIMS) result = "${createLink( controller:'eventVSClaim')}/" + this.id
-        if(this.subSystem == SubSystem.MANIFESTS) result = "${createLink( controller:'eventVSManifest')}/" + this.id
-        return result;
-    }
-
-    EventVS.prototype.getMessage = function () {
-        var result =  "";
-        if(EventVS.State.ACTIVE == this.state) {
-            result = "<g:message code='openLbl'/>";
-        } else if(EventVS.State.AWAITING == this.state) {
-            result =  "<g:message code='pendingLbl'/>";
-        } else if(EventVS.State.TERMINATED == this.state) {
-            result =  "<g:message code='closedLbl'/>";
-        } else if(EventVS.State.CANCELLED == this.state) {
-            result =  "<g:message code='cancelledLbl'/>";
-        }
-        return result;
-    }
-
-    EventVS.prototype.getElement = function() {
-        var $newEvent = $(this.eventHTML)
-        var $li = $newEvent.find("li");
-
-        if(EventVS.State.AWAITING == this.state) $li.addClass("eventVSAwaiting");
-        if(EventVS.State.ACTIVE == this.state) $li.addClass("eventVSActive");
-        if(EventVS.State.TERMINATED == this.state) $li.addClass("eventVSFinished");
-        if(EventVS.State.CANCELLED == this.state) {
-            $li.addClass("eventVSFinished");
-            $li.find(".cancelMessage").fadeIn(100)
-        }
-
-        $li.attr('data-href', this.getURL())
-        return $newEvent.html();
-    }
-
 
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {

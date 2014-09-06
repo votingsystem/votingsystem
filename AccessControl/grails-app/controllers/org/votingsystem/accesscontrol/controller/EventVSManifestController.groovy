@@ -18,15 +18,6 @@ class EventVSManifestController {
 	def eventVSService
 	def htmlService
 	
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return La página principal de la aplicación web de manifiestos.
-	 */
-	def main() {
-		render(view:"main" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
-	}
-	
 	/**
 	 * @httpMethod [GET]
      * @serviceURL [/eventVSManifest/$id]
@@ -222,8 +213,8 @@ class EventVSManifestController {
 	 * @return PDFDocumentVS JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
 	def getManifests () {
-        def resultList
         if (params.long('id')) {
+            def resultList
             EventVSManifest.withTransaction {
                 resultList = EventVSManifest.createCriteria().list {
                     or {
@@ -243,7 +234,8 @@ class EventVSManifestController {
                 eventVS = eventVSService.checkEventVSDates(eventVS, request.locale).eventVS
                 render eventVSService.getEventVSMap(eventVS) as JSON
             }
-        } else {
+        } else if(request.contentType?.contains("json")) {
+            def resultList
             def eventsVSMap = new HashMap()
             eventsVSMap.eventVS = []
             params.sort = "dateBegin"
@@ -280,7 +272,7 @@ class EventVSManifestController {
                 eventVSItem = eventVSService.checkEventVSDates(eventVSItem, request.locale).eventVS
                 eventsVSMap.eventVS.add(eventVSService.getEventVSManifestMap(eventVSItem)) }
             render eventsVSMap as JSON
-        }
+        } else render(view:"index" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
     }
 	
 	

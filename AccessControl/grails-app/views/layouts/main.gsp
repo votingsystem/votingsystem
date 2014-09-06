@@ -38,27 +38,27 @@
                         <g:if test="${"admin".equals(params.menu)}">
                             {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                             <!--<template if="{{isClientToolConnected}}">-->
-                                <paper-item data-href="${createLink(controller: 'eventVSElection', action:'main')}">
+                                <paper-item data-href="${createLink(controller: 'eventVSElection')}">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
                                 </paper-item>
                                 <paper-item data-href="${createLink(controller: 'editor', action:'vote', absolute: true)}">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishVoteLbl"/>
                                 </paper-item>
 
-                                <!--<paper-item data-href="${createLink(controller: 'eventVSManifest', action:'main')}">
+                                <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
                                     <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
                                 </paper-item>
                                 <paper-item data-href="${createLink(controller: 'editor', action:'manifest')}">
                                     <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishManifestLbl"/>
                                 </paper-item>
-                                <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'main')}">
+                                <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
                                     <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
                                 </paper-item>
-                                <paper-item data-href="${createLink(controller: 'editor', action:'claim')}">
+                                <paper-item data-href="${createLink(controller: 'editor')}">
                                     <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishClaimLbl"/>
                                 </paper-item>-->
 
-                                <paper-item data-href="${createLink(controller: 'representative', action:'main')}">
+                                <paper-item data-href="${createLink(controller: 'representative')}">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
                                 </paper-item>
                                 <paper-item data-href="${createLink(controller: 'representative', action:'newRepresentative')}">
@@ -75,10 +75,10 @@
                         </g:if>
                         <g:else>
                             {{ "<g:message code="votingsystemPageLbl"/>" | setTitle}}
-                            <paper-item data-href="${createLink(controller: 'eventVSElection', action:'main')}">
+                            <paper-item data-href="${createLink(controller: 'eventVSElection')}">
                                 <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'representative', action:'main')}">
+                            <paper-item data-href="${createLink(controller: 'representative')}">
                                 <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'app', action:'tools')}">
@@ -91,10 +91,10 @@
                                 <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
                             </paper-item>
 
-                            <!--<paper-item data-href="${createLink(controller: 'eventVSManifest', action:'main')}">
+                            <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
                                 <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
                             </paper-item>
-                            <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'main')}">
+                            <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
                                 <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
                             </paper-item>-->
 
@@ -199,16 +199,16 @@
     var selectedSubsystem = "${selectedSubsystem}"
     console.log("selectedSubsystem : " + selectedSubsystem)
     if(SubSystem.VOTES == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'eventVSElection', action: 'main')}"
+        selectedSubsystemLink = "${createLink(controller: 'eventVSElection')}"
         selectedSubsystemText = "<g:message code="electionSystemLbl"/>"
     } else if(SubSystem.CLAIMS == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'eventVSClaim', action: 'main')}"
+        selectedSubsystemLink = "${createLink(controller: 'eventVSClaim')}"
         selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
     } else if(SubSystem.MANIFESTS == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'eventVSManifest', action: 'main')}"
+        selectedSubsystemLink = "${createLink(controller: 'eventVSManifest')}"
         selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
     } else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
-        selectedSubsystemLink = "${createLink(controller: 'representative', action: 'main')}"
+        selectedSubsystemLink = "${createLink(controller: 'representative')}"
         selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
     } else if(SubSystem.FEEDS == selectedSubsystem) {
         selectedSubsystemLink = "${createLink(controller: 'subscriptionVS', action: 'feeds')}"

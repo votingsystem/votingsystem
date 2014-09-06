@@ -16,16 +16,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 class EventVSElectionController {
 
     def eventVSElectionService
-	def subscriptionVSService
 	def grailsApplication
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return La página principal de la aplicación web de votación.
-	 */
-	def main() {
-		render(view:"main" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
-	}
 
 	/**
 	 * Servicio de consulta de las votaciones publicadas.
@@ -41,9 +32,6 @@ class EventVSElectionController {
 	 * @return Documento JSON con las votaciones que cumplen el criterio de búsqueda.
 	 */
 	def index() {
-		List eventVSList = []
-		def responseMap = new HashMap()
-		responseMap.eventsVSElection = []
 		if (params.long('id')) {
             EventVSElection eventVS = null
             EventVSElection.withTransaction { eventVS = EventVSElection.get(params.long('id')) }
@@ -54,41 +42,45 @@ class EventVSElectionController {
 				Map eventMap = eventVSElectionService.getEventVSElectionMap(eventVS)
 				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 					render eventMap as JSON
-					return
-				} else {
-					render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
+				} else render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
                             eventMap: eventMap])
-					return
-				}
 			}
-		} else {
+		} else if(request.contentType?.contains("json")) {
+            def resultList
+            List eventVSList = []
+            def responseMap = new HashMap()
+            responseMap.eventsVSElection = []
 			params.sort = "dateBegin"
 			EventVS.State eventVSState
             try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
             EventVSElection.withTransaction {
-				if(eventVSState) {
-					if(eventVSState == EventVS.State.TERMINATED) {
-						eventVSList =  EventVSElection.findAllByStateOrState(
-							EventVS.State.CANCELLED, EventVS.State.TERMINATED, params)
-                        responseMap.numEventsVSElectionInSystem = EventVSElection.countByStateOrState(
-                                EventVS.State.CANCELLED, EventVS.State.TERMINATED)
-					} else {
-						eventVSList =  EventVS.findAllByState(eventVSState, params)
-					}
-				} else {
-					eventVSList =  EventVSElection.findAllByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-						   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING, params)
-                    responseMap.numEventsVSElectionInSystem = EventVSElection.countByStateOrStateOrStateOrState(
-                            EventVS.State.ACTIVE, EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
-				}
-			}
+                resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
+                        sort:params.sort, order:params.order) {
+                    if(eventVSState == EventVS.State.TERMINATED) {
+                        or{
+                            eq("state", EventVS.State.TERMINATED)
+                            eq("state", EventVS.State.CANCELLED)
+                        }
+                    } else if(eventVSState) {
+                        eq("state", eventVSState)
+                    } else {
+                        or{
+                            eq("state", EventVS.State.ACTIVE)
+                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.TERMINATED)
+                            eq("state", EventVS.State.CANCELLED)
+                        }
+                    }
+                }
+            }
 			responseMap.offset = params.long('offset')
-		}
-		responseMap.numEventsVSElection = eventVSList.size()
-		eventVSList.each {eventVSItem ->
-				responseMap.eventsVSElection.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
-		}
-		render responseMap as JSON
+            responseMap.numEventsVSElection = resultList?.totalCount
+            eventVSList.each {eventVSItem ->
+                eventVSItem = eventVSElectionService.checkEventVSDates(eventVSItem, request.locale).eventVS
+                responseMap.eventsVSElection.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
+            }
+            render responseMap as JSON
+		} else render(view:"index" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
 	}
 	
 	
