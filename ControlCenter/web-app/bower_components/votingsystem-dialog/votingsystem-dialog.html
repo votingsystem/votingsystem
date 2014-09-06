@@ -1,0 +1,34 @@
+<link rel="import" href="../core-overlay/core-overlay.html">
+<link rel="import" href="../core-transition/core-transition-css.html">
+
+<polymer-element name="votingsystem-dialog" attributes="opened autoCloseDisabled">
+    <template>
+        <style>
+            :host {
+                box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 13px;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                overflow: hidden;
+                background: white;
+                outline: 1px solid rgba(0,0,0,0.2);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            }
+        </style>
+        <core-overlay id="overlay" layered backdrop opened="{{opened}}" autoCloseDisabled="{{autoCloseDisabled}}" transition="core-transition-center"></core-overlay>
+        <content></content>
+    </template>
+    <script>
+        Polymer('votingsystem-dialog', {
+            ready: function() {
+                this.$.overlay.target = this;
+            },
+            toggle: function() {
+                this.$.overlay.toggle();
+                this.fire('core-signal', {name: "balance-details-closed", data: this.callerId});
+            }
+        });
+    </script>
+</polymer-element>
