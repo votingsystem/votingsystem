@@ -46,7 +46,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
                 eventState = EventVS.State.ACTIVE;
                 break;
             case PENDING:
-                eventState = EventVS.State.AWAITING;
+                eventState = EventVS.State.PENDING;
                 break;
             case CLOSED:
                 eventState = EventVS.State.TERMINATED;
@@ -72,7 +72,7 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
         switch(eventListFragment.getState()) {
             case ACTIVE: position = 0;
                 break;
-            case AWAITING: position = 1;
+            case PENDING: position = 1;
                 break;
             case TERMINATED: position = 2;
                 break;

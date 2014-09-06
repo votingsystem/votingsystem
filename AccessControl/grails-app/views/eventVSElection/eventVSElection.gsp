@@ -1,153 +1,22 @@
-<%@ page import="grails.converters.JSON; org.votingsystem.model.EventVS;" %>
 <html>
 <head>
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/eventvs-election.gsp']"/>">
+</head>
 <body>
-<div class="pageContentDiv" style="max-width: 1000px;">
-    <div style="margin:0 20px 0 20px;">
-        <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
-        </div>
+<div class="pageContenDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
+    <ol class="breadcrumbVS">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li><a href="${createLink(controller: 'eventVSElection')}"><g:message code="electionSystemLbl"/></a></li>
+        <li class="active"><g:message code="pollLbl"/></li>
+    </ol>
 
-        <g:if test="${"admin".equals(params.menu)}">
-            <div class="text-center" style="">
-                <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
-                        EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-                    <button type="submit" class="btn btn-warning" onclick="showAdminDocumentDialog();"
-                            style="margin:15px 20px 15px 0px;">
-                        <g:message code="adminDocumentLinkLbl"/> <i class="fa fa fa-check"></i>
-                    </button>
-                </g:if>
-            </div>
-        </g:if>
-
-        <h3><div class="pageHeader text-center">${eventMap?.subject}</div></h3>
-
-        <div style="display:inline;">
-            <div class="" style="margin:0px 0px 0px 30px; display: inline;"><b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}</div>
-            <div id="pendingTimeDiv" class="text-right" style="margin:0px 40px 0px 0px; color: #388746; display: inline; white-space:nowrap;"></div>
-        </div>
-
-        <div class="eventPageContentDiv">
-            <div style="width:100%;position:relative;">
-                <div class="eventContentDiv">${raw(eventMap?.content)}</div>
-            </div>
-
-            <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;">
-                <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
-            </div>
-
-            <div>
-                <fieldset id="fieldsBox" class="fieldsBox" style="margin:30px auto 0 auto;">
-                    <legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
-                    <div id="fields" class="" style="width:100%;">
-                        <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
-                            <g:each in="${eventMap?.fieldsEventVS}">
-                                <div class="btn btn-default btn-lg voteOptionButton"
-                                     style="width: 90%;margin: 10px auto 30px auto;"
-                                     optionId = "${it.id}" optionContent="${it.content}"  onclick="return false;">
-                                    ${it.content}
-                                </div>
-                            </g:each>
-                        </g:if>
-                        <g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state) ||
-                                EventVS.State.TERMINATED.toString().equals(eventMap?.state) ||
-                                EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-                            <g:each in="${eventMap?.fieldsEventVS}">
-                                <div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
-                                    - ${it.content}
-                                </div>
-                            </g:each>
-                        </g:if>
-                    </div>
-                </fieldset>
-            </div>
-        </div>
-    </div>
-
-    <g:include view="/include/dialog/confirmOptionDialog.gsp"/>
-
+    <eventvs-election id="electionVS" eventvs="${eventMap as grails.converters.JSON}"></eventvs-election>
 </div>
+
 </body>
 </html>
 <asset:script>
-    <g:applyCodec encodeAs="none">
-        var votingEvent = ${eventMap as JSON}
-        var selectedOption
-        var elapsedTime = votingEvent.dateFinish.getElapsedTime()
-        $(function() {
-            <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
-                $(".pageHeader").css("color", "#388746")
-                var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
-                if(undefined != elapsedTime) $("#pendingTimeDiv").append(pendingMsgTemplate.format(elapsedTime))
-            </g:if>
-            <g:if test="${EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-                $(".pageHeader").css("color", "#388746")
-                $("#messagePanel").addClass("eventPendingBox");
-                $("#messagePanel").text("<g:message code="eventPendingLbl"/>")
-            </g:if>
-            <g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state)}">
-                $(".pageHeader").css("color", "#fba131")
-                $("#messagePanel").addClass("eventCancelledBox");
-                $("#messagePanel").text("<g:message code="eventCancelledLbl"/>")
-                $("#messagePanel").css("display", "visible")
-
-            </g:if>
-            <g:if test="${EventVS.State.TERMINATED.toString().equals(eventMap?.state)}">
-                $(".pageHeader").css("color", "#6c0404")
-                $("#messagePanel").addClass("eventFinishedBox");
-                $("#messagePanel").text("<g:message code="eventFinishedLbl"/>")
-                $("#messagePanel").css("display", "visible")
-            </g:if>
-
-	  		$(".voteOptionButton").click(function () {
-	  			$("#optionSelectedDialogMsg").text($(this).attr("optionContent"))
-	  			selectedOption = {id:Number($(this).attr("optionId")),
-	   			content:$(this).attr("optionContent")}
-	  			console.log(" - selectedOption: " +  JSON.stringify(selectedOption))
-	  			$("#confirmOptionDialog").modal("show");
-	  		});
-            else {
-                $(".voteOptionButton").each(function( index ) {
-                    $(this).addClass("disabled")
-                });
-            }
-
-		 });
-		         
-		function sendVote() {
-			console.log("sendVote")
-			var voteVS = {optionSelected:selectedOption, eventId:votingEvent.id, eventURL:votingEvent.URL}
-		   	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SEND_SMIME_VOTE)
-		   	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-			webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-			votingEvent.voteVS = voteVS
-			webAppMessage.eventVS = votingEvent
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.signedMessageSubject = '<g:message code="sendVoteMsgSubject"/>'
-			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-            webAppMessage.callerCallback = 'sendVoteCallback'
-			VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-		}
-
-		function sendVoteCallback(appMessage) {
-			console.log("sendVoteCallback - message from native client: " + appMessage);
-			var appMessageJSON = toJSON(appMessage)
-			if(appMessageJSON != null) {
-				var caption = '<g:message code="voteERRORCaption"/>'
-				var msgTemplate = "<g:message code='voteResultMsg'/>"
-				var msg
-				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-					caption = "<g:message code='voteOKCaption'/>"
-					msg = msgTemplate.format('<g:message code="voteResultOKMsg"/>',appMessageJSON.message);
-				} else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
-					msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>"
-					msg = msgTemplate.format(votingEvent.subject, appMessageJSON.message);
-				} else msg = appMessageJSON.message
-				showResultDialog(caption, msg)
-			}
-		}
-
-    </g:applyCodec>
 </asset:script>

@@ -60,7 +60,7 @@ class AccessRequestVSService {
 			}
 			if (eventVSElection) {
 				if (!eventVSElection.isActive(Calendar.getInstance().getTime())) {
-                    if(EventVS.State.AWAITING == eventVSElection.state)
+                    if(EventVS.State.PENDING == eventVSElection.state)
                         msg = messageSource.getMessage('eventVSPendingMsg', null, locale)
                     else msg = messageSource.getMessage('eventVSClosedMsg', null, locale)
 					log.error("saveRequest - EventVS NOT ACTIVE - ${msg}")

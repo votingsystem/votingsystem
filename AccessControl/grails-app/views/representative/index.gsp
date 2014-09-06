@@ -1,7 +1,9 @@
 <% def representativeFullName = representative?.firstName + " " + representative?.lastName %>
 <html>
 <head>
-	<meta name="layout" content="main" />
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
 <div id="contentDiv" style="max-width: 1200px; ; margin: 0 auto 0 auto;">
@@ -70,7 +72,6 @@
 </div>
 
 <g:include view="/include/dialog/anonymousReceiptDialog.gsp"/>
-<g:include view="/include/dialog/clientToolAdvertDialog.gsp"/>
 <g:include view="/include/dialog/selectRepresentativeDialog.gsp" model="${[representativeName:representativeFullName]}" />
 <g:include view="/include/dialog/anonymousRepresentativeDateRangeDialog.gsp"/>
 <g:include view="/include/dialog/representativeImageDialog.gsp"/>

@@ -200,21 +200,21 @@ public class EventVSContentProvider extends ContentProvider {
             case MANIFEST_EVENT:
                 switch(evenState) {
                     case ACTIVE: return numTotalManifestsActive;
-                    case AWAITING: return numTotalManifestsPending;
+                    case PENDING: return numTotalManifestsPending;
                     case TERMINATED: return numTotalManifestsTerminated;
                     default: return -1L;
                 }
             case CLAIM_EVENT:
                 switch(evenState) {
                     case ACTIVE: return numTotalClaimsActive;
-                    case AWAITING: return numTotalClaimsPending;
+                    case PENDING: return numTotalClaimsPending;
                     case TERMINATED: return numTotalClaimsTerminated;
                     default: return -1L;
                 }
             case VOTING_EVENT:
                 switch(evenState) {
                     case ACTIVE: return numTotalElectionsActive;
-                    case AWAITING: return numTotalElectionsPending;
+                    case PENDING: return numTotalElectionsPending;
                     case TERMINATED: return numTotalElectionsTerminated;
                     default: return -1L;
                 }

@@ -4,7 +4,7 @@
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
-  "description": "Moneda electrónica",
+    "description": "Voting System WebApp Tests",
   "keywords": [
     "vickets",
     "voting-system"
@@ -19,16 +19,41 @@
     "tests"
   ],
   "dependencies":{
-
-      "votingsystem-texteditor":"votingsystem-texteditor#~0.2.0",
-
+      "votingsystem-socket":"votingsystem-socket#~0.0.3",
+      "votingsystem-texteditor":"votingsystem-texteditor#~0.3.1",
+      "jsoneditor":"jsoneditor#~3.1.2",
       "font-awesome":"font-awesome#~4.2.0",
-      "bootstrap":"bootstrap#~3.1.1",
-      "bootstrapValidator":"bootstrapValidator#~0.4.5",
-      "dynatable":"dynatable#~0.3.1",
-      "ckeditor":"ckeditor#~4.3.5",
-      "jquery-ui":"jquery-ui#~1.11.0",
-      "multilevelpushmenu":"multilevelpushmenu#~2.1.4"
+      "polymer": "Polymer/polymer",
+      "core-ajax":"Polymer/core-ajax",
+      "core-animation":"Polymer/core-animation",
+      "core-animated-pages":"Polymer/core-animated-pages",
+      "core-doc-viewer":"Polymer/core-doc-viewer",
+      "core-docs":"Polymer/core-docs",
+      "core-drag-drop":"Polymer/core-drag-drop",
+      "paper-elements":"Polymer/paper-elements",
+      "paper-fab":"Polymer/paper-fab",
+      "paper-item":"Polymer/paper-item",
+      "core-field":"Polymer/core-field",
+      "core-layout":"Polymer/core-layout",
+      "core-layout-grid":"Polymer/core-layout-grid",
+      "core-layout-trbl":"Polymer/core-layout-trbl",
+      "core-localstorage":"Polymer/core-localstorage",
+      "core-list":"Polymer/core-list",
+      "core-menu-button":"Polymer/core-menu-button",
+      "observe-js":"Polymer/observe-js",
+      "core-pages":"Polymer/core-pages",
+      "core-range":"Polymer/core-range",
+      "core-scaffold":"Polymer/core-scaffold",
+      "core-scroll-header-panel":"Polymer/core-scroll-header-panel",
+      "core-shared-lib":"Polymer/core-shared-lib",
+      "core-splitter":"Polymer/core-splitter",
+      "core-style":"Polymer/core-style",
+      "core-tooltip":"Polymer/core-tooltip",
+      "core-tests":"Polymer/core-tests",
+      "core-signals":"Polymer/core-signals",
+
+      "polymer-layout":"Polymer/polymer-layout",
+      "polymer-flex-layout":"Polymer/polymer-flex-layout"
   }
 
 }

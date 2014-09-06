@@ -5,153 +5,290 @@
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-bar-chart-o.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="serverNameLbl"/></title>
-    <g:javascript library="jquery" plugin="jquery"/>
-    <asset:stylesheet src="jquery-ui-1.10.4.custom.min.css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/jquery-ui', file: 'jquery-ui.min.js')}"></script>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-    <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
-
-    <script type="text/javascript" src="${resource(dir: 'bower_components/multilevelpushmenu', file: 'jquery.multilevelpushmenu.min.js')}"></script>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/multilevelpushmenu', file: 'jquery.multilevelpushmenu.css')}" type="text/css"/>
-
     <asset:stylesheet src="votingSystem.css"/>
+    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
+    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-navbar', file: 'votingsystem-navbar.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
 
-	<g:layoutHead/>
+    <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
+    <g:layoutHead/>
 </head>
-<body id="voting_system_page">
-<div>
-    <div id="navBarMainMenu">
-        <nav>
-            <h2><i class="fa fa-reorder"></i>
-                <span style="text-decoration: underline; font-size: 1.2em;">
-                    <div style="margin: 60px 0px 0px 0px;"><g:message code="sectionsLbl"/></div></span>
-            </h2>
-            <ul>
-                <li>
-                    <a href="${createLink(controller: 'eventVSElection', action: 'main')}">
-                        <g:message code="electionSystemLbl"/><i class="fa fa-envelope"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="${createLink(controller: 'subscriptionVS', action: 'feeds')}">
-                        <g:message code="subscriptionLbl"/><i class="fa fa-rss"></i>
-                    </a>
-                </li>
-                <li>
-                    <a  href="${createLink(controller: 'app', action: 'contact')}"
-                        style="color:#f9f9f9; font-weight: bold;"><g:message code="contactLbl"/> <i class="fa fa-phone"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="navbar navbar-vickets" style="display:table; margin: 0px 0px 0px 0px; width:100%;">
-        <div style="display:table-cell;width: 200px; margin:0px; padding:0px;">
-            <i id="expandMenuIcon" class="fa fa-bars navbar-text navBar-vicket-icon navbar-left" style="margin: 5px 10px 0 15px;"></i>
-        </div>
-        <div style="display:table-cell; width: 70%; vertical-align: middle;">
-            <a id="selectedSubsystemLink" class=""
-               style="font-size:2em; ;margin: 0 0px 0px 30px; color: #f9f9f9; font-weight: bold; white-space:nowrap;">
-                <g:message code="serverNameLbl"/>
-            </a>
-        </div>
-        <div style="display:table-cell;width: 200px; margin:0 20px 0 0; padding:0px;text-align: right;vertical-align: middle;">
-            <div id="navBarSearchInput" class="navbar-right input-group" style="width:15px;visibility: hidden;">
-                <div class="input-group-btn">
-                    <button id="searchButton" type="button" class="btn navBar-vicket-button" style="border-color: #f9f9f9;">
-                        <i class="fa fa-search navBar-vicket-icon" style="margin:0 0 0 0px;font-size: 1.2em; "></i></button>
-                    <button id="advancedSearchButton" type="button" class="btn btn-default" data-container="body" data-toggle="popover"
-                            data-placement="bottom" data-html="true" data-content="<div onclick='showAdvancedSearch()' style='cursor: pointer;'>
-                                <g:message code="advancedSearchLbl"/>"
-                            style="background-color: #ba0011; border-color: #f9f9f9; color:#f9f9f9; margin:0px 15px 0px 0px;">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="searchPanel" class="" style="position: absolute;left: 40%; background:#ba0011; padding:10px 10px 10px 10px;display:none; z-index: 10;">
-        <input id="searchInput" type="text" class="form-control" placeholder="<g:message code="searchLbl" />"
-               style="width:140px; border-color: #f9f9f9;display:inline; vertical-align: middle;">
-        <i id="searchPanelCloseIcon" onclick="toggleSearchPanel()" class="fa fa-times text-right navBar-vicket-icon"
-           style="margin:0px 0px 0px 15px; display:inline;vertical-align: middle;"></i>
-    </div>
-    <div id="" style="min-height: 600px; margin-top: 10px; max-width: 1300px; margin:0 auto;"><g:layoutBody/></div>
+<body id="voting_system_page" style="margin:0px auto 0px auto;">
+<polymer-element name="nav-bar" attributes="url loading">
+    <template>
+        <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
+        <core-xhr id="ajax" ></core-xhr>
+        <!-- put core signals names in lower case !!!-->
+        <core-signals on-core-signal-innerpage="{{innerPageSignal}}"></core-signals>
+        <votingsystem-navbar id="_navbar" style="display: none;">
+            <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="navbar-vickets">
+                <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
+                </core-toolbar>
+                <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
+                    <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
+                        <g:if test="${"admin".equals(params.menu)}">
+                            {{ "<g:message code="adminPageTitle"/>" | setTitle}}
+                            <!--<template if="{{isClientToolConnected}}">-->
+                                <paper-item data-href="${createLink(controller: 'eventVSElection')}">
+                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'eventVSElection', action:'editor', absolute: true)}">
+                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishVoteLbl"/>
+                                </paper-item>
 
+                                <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
+                                    <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'eventVSManifest', action:'editor')}">
+                                    <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishManifestLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
+                                    <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'editor')}">
+                                    <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishClaimLbl"/>
+                                </paper-item>-->
+
+                                <paper-item data-href="${createLink(controller: 'representative')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'representative', action:'newRepresentative')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="newRepresentativeLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'representative', action:'edit')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="editRepresentativeLbl"/>
+                                </paper-item>
+                                <paper-item data-href="${createLink(controller: 'representative', action:'remove')}">
+                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="removeRepresentativeLbl"/>
+                                </paper-item>
+
+                            <!--</template>-->
+                        </g:if>
+                        <g:else>
+                            {{ "<g:message code="votingsystemPageLbl"/>" | setTitle}}
+                            <paper-item data-href="${createLink(controller: 'eventVSElection')}">
+                                <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'representative')}">
+                                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'app', action:'tools')}">
+                                <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> <g:message code="toolsLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'subscriptionVS', action:'feeds')}">
+                                <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> <g:message code="subscriptionLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'app', action:'contact')}">
+                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
+                            </paper-item>
+
+                            <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
+                                <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
+                            </paper-item>
+                            <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
+                                <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
+                            </paper-item>-->
+
+                        </g:else>
+                    </core-selector>
+                </core-menu>
+            </core-header-panel>
+            <div id="appTitle" style="width: 100%;" tool>{{appTitle}}</div>
+            <content id="content"></content>
+        </votingsystem-navbar>
+        <div style="width: 30px;margin: 100px auto 0px auto;display:{{loading?'block':'none'}}">
+            <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+        </div>
+        <content id="content"></content>
+    </template>
+    <script>
+        Polymer('nav-bar', {
+            appTitle:"<g:message code="appTitle"/>",
+            url:'',
+            ajaxOptions:{method:'get', responseType:'document'},
+            ready: function() {
+                this.$._navbar.searchVisible(false)
+                this.$._navbar.style.display = 'block';
+                this.fire('nav-bar-ready');
+                var navBar = this
+                window.addEventListener('popstate', function(event) {
+                    navBar.url = document.location.href
+                });
+                this.isClientToolConnected = window['isClientToolConnected']
+                console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
+            },
+            innerPageSignal:function(e, detail, sender) {
+                this.url = detail;
+            },
+            urlChanged: function() {
+                this.loadURL(this.url)
+            },
+            loadURL: function(urlToLoad) {
+                this.loading= true;
+                history.pushState(null, null, this.url);
+                var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
+                this.ajaxOptions.url = newURL
+                this.ajaxOptions.callback = this.ajaxResponse.bind(this)
+                this.$.ajax.request(this.ajaxOptions)
+                /*if(this.$.ajax.url == newURL)  this.$.ajax.go()
+                else this.$.ajax.url = newURL*/
+            },
+            drawerItemSelected: function(e) {
+                if(e.detail.isSelected) {
+                    this.fire('item-selected', this.coreSelectorValue)
+                    if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
+                        window.location.href = window.location.href.replace("menu=superadmin", "menu=admin");
+                    } else {
+                        this.loadURL(this.coreSelectorValue)
+                    }
+                    this.coreSelectorValue = null
+                }
+            },
+            searchVisible: function(isVisible) {
+                this.$._navbar.searchVisible(isVisible)
+            },
+            setTitle: function(appTitle) {
+                this.appTitle = appTitle
+            },
+            ajaxResponse: function(xhrResponse, xhr) {
+                //console.log(this.tagName + " - ajax-response - newURL: " + this.$.ajax.url + " - status: " + e.detail.xhr.status)
+                console.log(this.tagName + " - ajax-response - newURL: "  + this.ajaxOptions.url + " - status: " + xhr.status)
+                //this.asyncFire('ajax-response', this.$.ajax.response)
+                if(200 == xhr.status) this.asyncFire('ajax-response', xhrResponse)
+                else {
+                    this.loading = false
+                    showMessageVS(xhrResponse.body.innerHTML, '<g:message code="errorLbl"/>')
+                }
+            },
+            ajaxError: function(e) {
+                console.log(this.tagName + " - ajaxError")
+                if(ResponseVS.SC_PRECONDITION_FAILED == e.detail.xhr.status) {
+                    this.loading = false
+                    var response = e.detail.xhr.responseText
+                    showMessageVS(response, '<g:message code="errorLbl"/>')
+                }
+            }
+        });
+    </script>
+</polymer-element>
+
+<nav-bar id="navBar" style="display:none;" class="">
+    <g:layoutBody/>
+</nav-bar>
+<div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto;z-index: 10;">
+    <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
 </div>
 
+<div layout horizontal center center-justified style="padding:100px 0px 0px 0px;">
+    <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+</div>
+<core-signals id="coreSignals"></core-signals>
+<votingsystem-socket id="socketvs" url="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
 </body>
-
-<g:include view="/include/dialog/resultDialog.gsp"/>
-<g:include view="/include/dialog/windowAlertModal.gsp"/>
-
 </html>
 <asset:script>
-    var isMenuVisible = false
-    var isSearchInputVisible = false
-	        
-	$(function() {
-        $('#advancedSearchButton').popover()
-        $( '#navBarMainMenu' ).multilevelpushmenu({
-                menuWidth: 250,
-                onItemClick: function() {
-                    var event = arguments[0], // First argument is original event object
-                    $menuLevelHolder = arguments[1], // Second argument is menu level object containing clicked item (<div> element)
-                    $item = arguments[2], // Third argument is clicked item (<li> element)
-                    options = arguments[3]; // Fourth argument is instance settings/options object
-                    var itemHref = $item.find( 'a:first' ).attr( 'href' );
-                    location.href = itemHref;
-                },
-                onCollapseMenuEnd: function() {
-                    isMenuVisible = false
-                },
-                onExpandMenuEnd: function() {
-                    isMenuVisible = true
-                },
-                collapsed: true,
-                fullCollapse: true
-            });
-
-
-
-        $("#expandMenuIcon").click(function () {
-            $('#navBarMainMenu').css("visibility", "visible")
-            if(isMenuVisible) $('#navBarMainMenu').multilevelpushmenu( 'collapse' );
-            else $('#navBarMainMenu').multilevelpushmenu( 'expand' );
-
-        })
-
-		 $('#searchForm').submit(function(event){
-		 	console.log("searchForm")
-		 	event.preventDefault();
-		 	var searchQuery = {textQuery:$("#searchText").val()}
-		 	getSearchResult(searchQuery)
-		 });
-	})
-
-    $("#searchButton").click(function () {
-        toggleSearchPanel()
-    })
-
-    var isSearchPanelVisible = false
-    function toggleSearchPanel() {
-        //$("#searchPanel").hide('slide',{direction:'right'},1000);
-        if(!isSearchPanelVisible) {
-            $("#searchPanel").slideDown("");
-            $("#searchInput").val("")
-        } else $("#searchPanel").slideUp("");
-        isSearchPanelVisible = !isSearchPanelVisible
+    var selectedSubsystem = "${selectedSubsystem}"
+    console.log("selectedSubsystem : " + selectedSubsystem)
+    if(SubSystem.VOTES == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'eventVSElection')}"
+        selectedSubsystemText = "<g:message code="electionSystemLbl"/>"
+    } else if(SubSystem.CLAIMS == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'eventVSClaim')}"
+        selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
+    } else if(SubSystem.MANIFESTS == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'eventVSManifest')}"
+        selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
+    } else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'representative')}"
+        selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
+    } else if(SubSystem.FEEDS == selectedSubsystem) {
+        selectedSubsystemLink = "${createLink(controller: 'subscriptionVS', action: 'feeds')}"
+        selectedSubsystemText = "<g:message code="subscriptionsPageLbl"/>"
+    } else {
+        console.log("### unknown subsytem -> " + selectedSubsystem)
+        selectedSubsystemText = "<g:message code="votingsystemPageLbl"/>"
     }
 
-    function showAdvancedSearch() {
-        $('#advancedSearchDialog').modal()
-        $('#advancedSearchButton').popover('hide')
+    document.addEventListener('votingsystem-signal-innerPage', function(e) {
+        console.log('main.gsp -votingsystem-signal-innerPage - newURL: ' + e.detail)
+        document.querySelector('#navBar').url = e.detail
+    });
+
+    window.addEventListener('WebComponentsReady', function(e) {  });
+
+    document.addEventListener('polymer-ready', function() {
+        console.log("main.gsp - polymer-ready")
+        update_a_elements(document.getElementsByTagName('a'))
+    });
+
+    document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {
+        document.querySelector('#navBar').style.display = 'block';
+        document.querySelector('#loadingDiv').style.display = 'none';
+    });
+
+    document.querySelector('#socketvs').addEventListener('on-message', function(e) {
+        console.log("main.gsp - socketvs - message: " + e.detail)
+        var socketMessage = e.detail
+        if(200 != socketMessage.status) {
+            console.log("main.gsp - socketvs - error")
+            showMessageVS(socketMessage.message, 'ERROR')
+        }
+    });
+
+    function sendSocketVSMessage(dataJSON) {
+        console.log ("sendSocketVSMessage")
+        dataJSON.locale = navigator.language
+        document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
     }
-			 
+
+    document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
+        var ajaxDocument = e.detail
+        var links = ajaxDocument.querySelectorAll('link')
+        var numImports = 0
+        for (var i = 0; i < links.length; i++) {
+            console.log("links[i].innerHTML: " + links[i].href + " - rel: " + links[i].rel)
+            if('import' == links[i].rel) {
+                ++numImports
+                if(i == (links.length - 1)) {
+                    links[i].onload = function() {
+                      document.querySelector('#navBar').loading = false;
+                    };
+                }
+                document.head.appendChild(links[i]);
+            }
+        }
+        if(numImports == 0) document.querySelector('#navBar').loading = false;
+
+        for (var i = 0; i < ajaxDocument.scripts.length; i++) {
+            var script = document.createElement("script");
+            script.innerHTML = ajaxDocument.scripts[i].innerHTML;
+            console.log("script.src: " + script.src)
+            document.head.appendChild(script);
+        }
+        document.querySelector("#navBar").innerHTML = ajaxDocument.body.innerHTML
+
+        update_a_elements(document.querySelectorAll("#navBar a"))
+    });
+
+    function update_a_elements(elementsArray) {
+         for (var i = 0; i < elementsArray.length; i++) {
+            //console.log("elementsArray[i].href: " + elementsArray[i].href)
+            if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
+                elementsArray[i].addEventListener('click', function(e) {
+                    document.querySelector('#navBar').loadURL(e.target.href)
+                    e.preventDefault()
+                });
+            } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)
+        }
+    }
 </asset:script>
 <asset:deferredScripts/>

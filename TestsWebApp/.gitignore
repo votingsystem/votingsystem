@@ -1,7 +1,5 @@
 /web-app/WEB-INF/cms/
 
-/web-app/bower_components
-
 /build
 /logs
 /target

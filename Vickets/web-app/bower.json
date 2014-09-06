@@ -19,10 +19,8 @@
     "tests"
   ],
   "dependencies":{
-      "chai": "~1.9.1",
-      "mocha": "~1.19.0",
-      "votingsystem-socket":"votingsystem-socket#~0.0.2",
-      "votingsystem-texteditor":"votingsystem-texteditor#~0.3.0",
+      "votingsystem-socket":"votingsystem-socket#~0.0.3",
+      "votingsystem-texteditor":"votingsystem-texteditor#~0.3.1",
       "jsoneditor":"jsoneditor#~3.1.2",
       "google-chart":"google-chart#~0.0.1",
       "font-awesome":"font-awesome#~4.2.0",
@@ -55,11 +53,8 @@
       "core-tests":"Polymer/core-tests",
       "core-signals":"Polymer/core-signals",
 
-
       "polymer-layout":"Polymer/polymer-layout",
       "polymer-flex-layout":"Polymer/polymer-flex-layout"
-
-
 
   }
 

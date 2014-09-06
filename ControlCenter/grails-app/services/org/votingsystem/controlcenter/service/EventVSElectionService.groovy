@@ -111,7 +111,7 @@ class EventVSElectionService {
 		Date fecha = Calendar.getInstance().getTime()
 		if (fecha.after(eventVS.dateFinish)) eventVS.setState(EventVS.State.TERMINATED)
 		if (fecha.after(eventVS.dateBegin) && fecha.before(eventVS.dateFinish)) eventVS.setState(EventVS.State.ACTIVE)
-		if (fecha.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.AWAITING)
+		if (fecha.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.PENDING)
 		log.debug("setEventDatesState - state ${eventVS.state.toString()}")
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
@@ -130,8 +130,8 @@ class EventVSElectionService {
             eventVS.state = EventVS.State.TERMINATED
             eventVS.save()
         } else if(eventVS.dateBegin.after(currentDate) &&
-                eventVS.state != EventVS.State.AWAITING) {
-            eventVS.state = EventVS.State.AWAITING
+                eventVS.state != EventVS.State.PENDING) {
+            eventVS.state = EventVS.State.PENDING
             eventVS.save()
         } else if(eventVS.dateBegin.before(currentDate) &&
                 eventVS.dateFinish.after(currentDate) &&

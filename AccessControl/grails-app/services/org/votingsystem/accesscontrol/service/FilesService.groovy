@@ -17,6 +17,10 @@ class FilesService {
 	public void init() {
         new File("${grailsApplication.config.VotingSystem.errorsBaseDir}").mkdirs()
         new File("${grailsApplication.config.VotingSystem.backupCopyPath}").mkdirs()
+        File polymerPlatform = grailsApplication.mainContext.getResource("bower_components/polymer/polymer.js").getFile()
+        if(!polymerPlatform.exists()) {
+            log.error "Have you executed 'bower install' from web-app dir ???"
+        }
 	}
 
  	public Map<String, File> getBackupFiles(EventVS event, TypeVS type, Locale locale){

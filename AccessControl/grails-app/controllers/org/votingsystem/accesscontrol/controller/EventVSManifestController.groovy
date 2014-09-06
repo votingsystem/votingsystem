@@ -35,7 +35,7 @@ class EventVSManifestController {
                     resultList = EventVSManifest.createCriteria().list {
                         or {
                             eq("state", EventVS.State.ACTIVE)
-                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.PENDING)
                             eq("state", EventVS.State.CANCELLED)
                             eq("state", EventVS.State.TERMINATED)
                         }
@@ -59,7 +59,11 @@ class EventVSManifestController {
             } else getManifests()
         }
 	}
-	
+
+    def editor() {
+        render(view:"editor" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
+    }
+
 	/**
 	 * Servicio que devuelve el PDF que se tienen que firmar para publicar un 
 	 * manifiesto.
@@ -204,7 +208,7 @@ class EventVSManifestController {
      * @serviceURL [/eventVSManifest]
 	 * @param [max] Opcional (por defecto 20). Número máximo de documentos que 
 	 * 		  devuelve la consulta (tamaño de la página).
-	 * @param [eventVSState] Opcional, posibles valores 'ACTIVE','CANCELLED', 'TERMINATED', 'AWAITING'.
+	 * @param [eventVSState] Opcional, posibles valores 'ACTIVE','CANCELLED', 'TERMINATED', 'PENDING'.
 	 * 		               El estado de los eventos que se desea consultar.
 	 * @param [offset] Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @param [order] Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
@@ -219,7 +223,7 @@ class EventVSManifestController {
                 resultList = EventVSManifest.createCriteria().list {
                     or {
                         eq("state", EventVS.State.ACTIVE)
-                        eq("state", EventVS.State.AWAITING)
+                        eq("state", EventVS.State.PENDING)
                         eq("state", EventVS.State.CANCELLED)
                         eq("state", EventVS.State.TERMINATED)
                     }
@@ -258,7 +262,7 @@ class EventVSManifestController {
                         } else {
                             or {
                                 eq("state", EventVS.State.ACTIVE)
-                                eq("state", EventVS.State.AWAITING)
+                                eq("state", EventVS.State.PENDING)
                                 eq("state", EventVS.State.TERMINATED)
                                 eq("state", EventVS.State.CANCELLED)
                             }

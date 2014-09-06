@@ -439,7 +439,7 @@ public class EventVSGridFragment extends Fragment
                                     getString(R.string.remain_lbl, DateUtils.
                                             getElapsedTimeStr(eventVS.getDateFinish()))  +"</b>";
                             break;
-                        case AWAITING:
+                        case PENDING:
                             imgView.setImageResource(R.drawable.pending);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.init_lbl) + "</b>: " +

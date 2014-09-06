@@ -45,7 +45,7 @@ public class EventVSService extends IntentService {
                     public void run() {HttpHelper.getData(checkURL, null);}
                 };
             }
-        } else if(eventVS.getState() == EventVS.State.AWAITING) {
+        } else if(eventVS.getState() == EventVS.State.PENDING) {
             if(todayDate.after(eventVS.getDateBegin())){
                 runnable = new Runnable() {
                     public void run() {HttpHelper.getData(checkURL, null);}
@@ -79,7 +79,7 @@ public class EventVSService extends IntentService {
                                 EventVSContentProvider.setNumTotalClaimsActive(
                                         Long.valueOf(response.getNumEventsVSClaimInSystem()));
                                 break;
-                            case AWAITING:
+                            case PENDING:
                                 EventVSContentProvider.setNumTotalClaimsPending(
                                         Long.valueOf(response.getNumEventsVSClaimInSystem()));
                                 break;
@@ -94,7 +94,7 @@ public class EventVSService extends IntentService {
                                 EventVSContentProvider.setNumTotalElectionsActive(
                                         Long.valueOf(response.getNumEventsVSElectionInSystem()));
                                 break;
-                            case AWAITING:
+                            case PENDING:
                                 EventVSContentProvider.setNumTotalElectionsPending(
                                         Long.valueOf(response.getNumEventsVSElectionInSystem()));
                                 break;
@@ -109,7 +109,7 @@ public class EventVSService extends IntentService {
                                 EventVSContentProvider.setNumTotalManifestsActive(
                                         Long.valueOf(response.getNumEventsVSManifestInSystem()));
                                 break;
-                            case AWAITING:
+                            case PENDING:
                                 EventVSContentProvider.setNumTotalManifestsPending(
                                         Long.valueOf(response.getNumEventsVSManifestInSystem()));
                                 break;

@@ -4,7 +4,7 @@
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
-  "description": "Moneda electrónica",
+  "description": "Voting System Access Control",
   "keywords": [
     "vickets",
     "voting-system"
@@ -19,7 +19,7 @@
     "tests"
   ],
   "dependencies":{
-      "votingsystem-texteditor":"votingsystem-texteditor#~0.3.0",
+      "votingsystem-texteditor":"votingsystem-texteditor#~0.3.1",
       "jsoneditor":"jsoneditor#~3.1.2",
       "font-awesome":"font-awesome#~4.2.0",
       "polymer": "Polymer/polymer",
@@ -50,7 +50,6 @@
       "core-tooltip":"Polymer/core-tooltip",
       "core-tests":"Polymer/core-tests",
       "core-signals":"Polymer/core-signals",
-
 
       "polymer-layout":"Polymer/polymer-layout",
       "polymer-flex-layout":"Polymer/polymer-flex-layout"

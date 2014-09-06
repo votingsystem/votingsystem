@@ -37,8 +37,6 @@ class AppController {
         }
 	}
 
-    def admin() {}
-
     def contact() {}
 
     def tools() {}

@@ -91,17 +91,15 @@
             </div>
         </div>
 
-        <div style="margin: 5px 0 15px 0;">
-            <div class="eventContentDiv" style="">
-                <votingsystem-html-echo html="{{groupvs.description}}"></votingsystem-html-echo>
+        <div class="eventContentDiv" style="">
+            <votingsystem-html-echo html="{{groupvs.description}}"></votingsystem-html-echo>
+        </div>
+        <div layout horizontal style="width:1000px;">
+            <div id="" style="margin:0px 40px 0px 0px; font-size: 0.75em; float:right; color:#888;">
+                <b><g:message code="groupRepresentativeLbl"/>: </b>{{groupvs.representative.firstName}} {{groupvs.representative.lastName}}
             </div>
-            <div layout horizontal style="width:1000px;">
-                <div id="" style="margin:0px 40px 0px 0px; font-size: 0.75em; float:right; color:#888;">
-                    <b><g:message code="groupRepresentativeLbl"/>: </b>{{groupvs.representative.firstName}} {{groupvs.representative.lastName}}
-                </div>
-                <div id="" style="margin:0px 30px 0px 10px; font-size: 0.75em; color:#888;">
-                    <b><g:message code="IBANLbl"/>: </b>{{groupvs.IBAN}}
-                </div>
+            <div id="" style="margin:0px 30px 0px 10px; font-size: 0.75em; color:#888;">
+                <b><g:message code="IBANLbl"/>: </b>{{groupvs.IBAN}}
             </div>
         </div>
 

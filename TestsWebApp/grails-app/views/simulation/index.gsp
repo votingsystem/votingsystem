@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layout" content="main"/>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
     <title><g:message code="simulationWebAppCaption"/></title>
 </head>
 <body>
@@ -56,14 +58,8 @@
         </a>
     </div>
 </div>
-<div style="display:none;">
-    <g:include view="/include/simulationRunningDialog.gsp" style="display:none;"/>
-    <g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
-</div>
 </body>
 <asset:script>
-
-    $(function() { });
 
     function openWindow(targetURL) {
         var width = 1000

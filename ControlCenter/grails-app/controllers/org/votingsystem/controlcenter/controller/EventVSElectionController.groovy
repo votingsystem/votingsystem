@@ -66,7 +66,7 @@ class EventVSElectionController {
                     } else {
                         or{
                             eq("state", EventVS.State.ACTIVE)
-                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.PENDING)
                             eq("state", EventVS.State.TERMINATED)
                             eq("state", EventVS.State.CANCELLED)
                         }

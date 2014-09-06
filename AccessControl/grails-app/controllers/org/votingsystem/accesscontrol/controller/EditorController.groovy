@@ -19,7 +19,7 @@ class EditorController {
 	def messageSource
 
 	def manifest() {
-		render(view:"manifest" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
+		render(view:"/eventVSManifest/manifest" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
 	}
         
     def vote() { 
@@ -30,11 +30,11 @@ class EditorController {
                 serverURL:controlCenter.serverURL, dateCreated:controlCenter.dateCreated]
             controlCenterList.add(controlCenterMap)
         }
-		render(view:"vote" , model:[controlCenters: controlCenterList, selectedSubsystem:SubSystemVS.VOTES.toString()])
+		render(view:"/eventVSElection/editor" , model:[controlCenters: controlCenterList, selectedSubsystem:SubSystemVS.VOTES.toString()])
 	}
         
     def claim() { 
-		render(view:"claim" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
+		render(view:"/eventVSClaim/claim" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
 	}
 
     /**

@@ -50,19 +50,19 @@ class EventVSController {
         } else {
 			EventVS.withTransaction {
 				eventVSList =  EventVS.findAllByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING, params)
+				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.PENDING, params)
 			}
             eventsVSMap.offset = params.long('offset')
         }
 		log.debug "index - params: ${params}"
         eventsVSMap.numEventVSInSystem = EventVS.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
+				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.PENDING)
         eventsVSMap.numEventsVSManifestInSystem = EventVSManifest.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
+				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.PENDING)
         eventsVSMap.numEventsVSClaimInSystem = EventVSClaim.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
+				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.PENDING)
         eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
+				   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.PENDING)
         eventsVSMap.numEventVSInRequest = eventVSList.size()
         eventVSList.each {eventVSItem ->
                 if (eventVSItem instanceof EventVSElection) {

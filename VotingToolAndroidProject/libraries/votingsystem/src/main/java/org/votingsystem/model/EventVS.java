@@ -26,7 +26,7 @@ public class EventVS implements Serializable {
 
     public static final String TAG = "EventVS";
 
-    public enum State {ACTIVE, TERMINATED, CANCELLED, AWAITING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM}
+    public enum State {ACTIVE, TERMINATED, CANCELLED, PENDING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM}
 
     public enum Cardinality { MULTIPLE, EXCLUSIVE}
 

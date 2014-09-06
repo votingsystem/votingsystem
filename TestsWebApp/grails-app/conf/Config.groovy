@@ -1,3 +1,5 @@
+import grails.util.Metadata
+
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
 // in the classpath in ConfigSlurper format
@@ -10,9 +12,6 @@
 // if (System.properties["${appName}.config.location"]) {
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
-
-
-grails.views.javascript.library="jquery"
 
 grails.converters.default.pretty.print=true
 grails.gorm.failOnError=true
@@ -95,13 +94,17 @@ grails.hibernate.osiv.readonly = false
 
 environments {
     development {
-        //grails.logging.jul.usebridge = true
-        grails.resources.debug = true
-        grails.serverURL = "http://testwebapp:8084/${appName}"
+        if(Metadata.current.isWarDeployed()) {
+            grails.logging.jul.usebridge = false
+            grails.serverURL = "http://www.sistemavotacion.org/TestWebApp"
+        } else {
+            grails.resources.debug = true
+            grails.serverURL = "http://testwebapp:8084/${appName}"
+        }
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://testwebapp:8084/${appName}"
+        grails.serverURL = "http://www.sistemavotacion.org/TestWebApp"
     }
 }
 

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-money.png')}" type="image/x-icon">
+    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="appTitle"/></title>
     <asset:stylesheet src="votingSystem.css"/>
@@ -41,20 +41,20 @@
                                 <paper-item data-href="${createLink(controller: 'eventVSElection')}">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
                                 </paper-item>
-                                <paper-item data-href="${createLink(controller: 'editor', action:'vote', absolute: true)}">
+                                <paper-item data-href="${createLink(controller: 'eventVSElection', action:'editor', absolute: true)}">
                                     <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishVoteLbl"/>
                                 </paper-item>
 
                                 <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
                                     <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
                                 </paper-item>
-                                <paper-item data-href="${createLink(controller: 'editor', action:'manifest')}">
+                                <paper-item data-href="${createLink(controller: 'eventVSManifest', action:'editor')}">
                                     <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishManifestLbl"/>
                                 </paper-item>
                                 <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
                                     <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
                                 </paper-item>
-                                <paper-item data-href="${createLink(controller: 'editor')}">
+                                <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'editor')}">
                                     <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishClaimLbl"/>
                                 </paper-item>-->
 

@@ -1,23 +1,58 @@
-var WebAppMessage = function (statusCode, operation) {
+function WebAppMessage(statusCode, operation) {
 	this.statusCode = statusCode
 	this.operation = operation
 	this.subject ;
+	this.filePath;
 	this.signedContent;
 	this.serviceURL;
 	this.documentURL;
 	this.receiverName;
 	this.serverURL;
 	this.eventVS;
-	this.redirectURL;
+	this.message;
+	this.caption;
 	this.callerCallback;
 }
 
-var DateUtils = {
+var Operation = {
+    SAVE_RECEIPT: "SAVE_RECEIPT",
+    SAVE_RECEIPT_ANONYMOUS_DELEGATION:"SAVE_RECEIPT_ANONYMOUS_DELEGATION",
+    OPEN_RECEIPT: "OPEN_RECEIPT",
+    CONTROL_CENTER_ASSOCIATION : "CONTROL_CENTER_ASSOCIATION",
+    CONTROL_CENTER_STATE_CHANGE_SMIME: "CONTROL_CENTER_STATE_CHANGE_SMIME",
+    BACKUP_REQUEST: "BACKUP_REQUEST",
+    MANIFEST_PUBLISHING: "MANIFEST_PUBLISHING",
+    MANIFEST_SIGN: "MANIFEST_SIGN",
+    CLAIM_PUBLISHING: "CLAIM_PUBLISHING",
+    SMIME_CLAIM_SIGNATURE: "SMIME_CLAIM_SIGNATURE",
+    VOTING_PUBLISHING: "VOTING_PUBLISHING",
+    SEND_SMIME_VOTE: "SEND_SMIME_VOTE",
+    SELECT_IMAGE:"SELECT_IMAGE",
+    TERMINATED: "TERMINATED",
+    ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION",
+    EVENT_CANCELLATION: "EVENT_CANCELLATION",
+    NEW_REPRESENTATIVE:"NEW_REPRESENTATIVE",
+    REPRESENTATIVE_SELECTION:"REPRESENTATIVE_SELECTION",
+    ANONYMOUS_REPRESENTATIVE_SELECTION:"ANONYMOUS_REPRESENTATIVE_SELECTION",
+    REPRESENTATIVE_VOTING_HISTORY_REQUEST: "REPRESENTATIVE_VOTING_HISTORY_REQUEST",
+    REPRESENTATIVE_ACCREDITATIONS_REQUEST: "REPRESENTATIVE_ACCREDITATIONS_REQUEST",
+    REPRESENTATIVE_REVOKE: "REPRESENTATIVE_REVOKE",
+    REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA"
+}
 
-	//parse dates with format "2010-08-30 01:02:03" 	
-	parse: function (dateStr) {
+function httpGet(theUrl){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
+
+function DateUtils(){}
+
+//parse dates with format "2010-08-30 01:02:03"
+DateUtils.parse = function (dateStr) {
 		var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
-		var dateArray = reggie.exec(dateStr); 
+		var dateArray = reggie.exec(dateStr);
 		var dateObject = new Date(
 		    (+dateArray[1]),
 		    (+dateArray[2])-1, //Months are zero based
@@ -27,14 +62,7 @@ var DateUtils = {
 		    (+dateArray[6])
 		);
 		return dateObject
-	},
-	
-	checkDate: function (dateInit, dateFinish) {
-		var todayDate = new Date();
-		if(todayDate > dateInit && todayDate < dateFinish) return true;
-		else return false;
 	}
-}
 
 //parse dates with format "yyyy-mm-dd"
 DateUtils.parseInputType = function (dateStr) {
@@ -48,13 +76,67 @@ DateUtils.parseInputType = function (dateStr) {
 		return dateObject
 	}
 
-Date.prototype.format = function() {
-	var curr_date = this.getDate();
+DateUtils.checkDate = function (dateInit, dateFinish) {
+		var todayDate = new Date();
+		if(todayDate > dateInit && todayDate < dateFinish) return true;
+		else return false;
+	}
+
+Date.prototype.formatWithTime = function() {
+    var curr_date = this.getDate();
     var curr_month = this.getMonth() + 1; //Months are zero based
     var curr_year = this.getFullYear();
-    return curr_year + "/" + curr_month + "/" + curr_date + " 00:00:00"
+    return curr_year + "/" + curr_month + "/" + curr_date + " " + ('0' + this.getHours()).slice(-2)  + ":" +
+        ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
 };
 
+Date.prototype.format = function() {
+    var curr_date = this.getDate();
+    var curr_month = this.getMonth() + 1; //Months are zero based
+    var curr_year = this.getFullYear();
+    return curr_year + "/" + curr_month + "/" + curr_date
+};
+
+function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function getDatePickerValue(datePickerId, htmlElement) {
+    if(!htmlElement) {
+        htmlElement = document
+    }
+    var day = pad(htmlElement.querySelector('#' + datePickerId + '_day').value, 2)
+    var month = pad(htmlElement.querySelector('#' + datePickerId + '_month').value, 2)
+    var year = htmlElement.querySelector('#' + datePickerId + '_year').value
+    var hour = "00"
+    var minute = "00"
+    var second = "00"
+    if(htmlElement.querySelector('#' + datePickerId + '_minute') != null) minute =
+        htmlElement.querySelector('#' + datePickerId + '_minute').value
+    if(htmlElement.querySelector('#' + datePickerId + '_hour') != null) hour =
+        htmlElement.querySelector('#' + datePickerId + '_hour').value
+    var dateStr = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second
+    return DateUtils.parse(dateStr)
+}
+
+function showMessageVS(message, caption, callerId, isConfirmMessage) {
+    if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
+        document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+        document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption, callerId, isConfirmMessage)
+    }  else {
+        console.log('votingsystem-message-dialog not found');
+        window._originalAlert(message);
+    }
+}
+
+function FormUtils(){}
+
+FormUtils.checkIfEmpty = function (param) {
+    if((param == undefined) || (param == null) || '' == param.trim()) return true;
+    else return false
+}
 
 String.prototype.format = function() {
 	  var args = arguments;
@@ -94,46 +176,17 @@ var ResponseVS = {
 		SC_ERROR_REQUEST_REPEATED : 409,
 		SC_ERROR : 500,
 		SC_PROCESSING : 700,
-		SC_TERMINATED :710,
 		SC_CANCELLED : 0,
 		SC_INITIALIZED : 1,
 		SC_PAUSED:10
 }
 
-var Status = {
-    INIT_SIMULATION:"INIT_SIMULATION",
-    FINISH_SIMULATION:"FINISH_SIMULATION"
-}
-
-var TypeVS = {
-		CONTROL_CENTER_ASSOCIATION : "CONTROL_CENTER_ASSOCIATION",
-		CONTROL_CENTER_STATE_CHANGE_SMIME: "CONTROL_CENTER_STATE_CHANGE_SMIME",
-		BACKUP_REQUEST: "BACKUP_REQUEST", 
-		MANIFEST_PUBLISHING: "MANIFEST_PUBLISHING", 
-		MANIFEST_SIGN: "MANIFEST_SIGN", 
-		CLAIM_PUBLISHING: "CLAIM_PUBLISHING",
-		SMIME_CLAIM_SIGNATURE: "SMIME_CLAIM_SIGNATURE",
-		VOTING_PUBLISHING: "VOTING_PUBLISHING", 
-		SEND_SMIME_VOTE: "SEND_SMIME_VOTE",
-		TERMINATED: "TERMINATED",
-		SAVE_RECEIPT: "SAVE_RECEIPT",
-		ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION", 
-		EVENT_CANCELLATION: "EVENT_CANCELLATION",
-		NEW_REPRESENTATIVE:"NEW_REPRESENTATIVE",
-		REPRESENTATIVE_SELECTION:"REPRESENTATIVE_SELECTION", 
-		REPRESENTATIVE_VOTING_HISTORY_REQUEST: "REPRESENTATIVE_VOTING_HISTORY_REQUEST",
-		REPRESENTATIVE_ACCREDITATIONS_REQUEST: "REPRESENTATIVE_ACCREDITATIONS_REQUEST", 
-		REPRESENTATIVE_REVOKE: "REPRESENTATIVE_REVOKE",
-		REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA"
-}
-
-
 var SubSystem = {
 		VOTES : "VOTES",
 		CLAIMS: "CLAIMS",
 		MANIFESTS: "MANIFESTS",
-		REPRESENTATIVES:"REPRESENTATIVES"
-			
+		REPRESENTATIVES:"REPRESENTATIVES",
+		FEEDS:"FEEDS"
 }
 
 
@@ -177,6 +230,7 @@ function validateNIF(nif) {
 }
 
 function checkInputType(inputType) {
+    if(navigator.userAgent.toLowerCase().indexOf("javafx") > -1) return false;
     if(null == inputType || '' == inputType.trim()) return false
     var isSuppported = true
     var elem = document.createElement("input");
@@ -190,6 +244,7 @@ function checkInputType(inputType) {
     }
     return isSuppported
 }
+
 
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
 function getInternetExplorerVersion() {
@@ -206,30 +261,16 @@ function getInternetExplorerVersion() {
    return rv;
 }
 
-var timerID = null
-var timerRunning = false
+function openWindow(targetURL) {
+    var width = 1000
+    var height = 800
+    var left = (screen.width/2) - (width/2);
+    var top = (screen.height/2) - (height/2);
+    var title = ''
 
-function stopclock(){
-    if(timerRunning) clearTimeout(timerID)
-    timerRunning = false
-}
-
-function startclock(){
-    stopclock()
-    showtime()
-}
-
-function showtime(){
-    var now = new Date()
-    var hours = now.getHours()
-    var minutes = now.getMinutes()
-    var seconds = now.getSeconds()
-    var timeValue = "" + ((hours < 12) ? "0" + hours : hours)
-    timeValue  += ((minutes < 10) ? ":0" : ":") + minutes
-    timeValue  += ((seconds < 10) ? ":0" : ":") + seconds
-    $("#appClock").html(timeValue)
-    timerID = setTimeout("showtime()",1000)
-    timerRunning = true
+    var newWindow =  window.open(targetURL, title, 'toolbar=no, scrollbars=yes, resizable=yes, '  +
+        'width='+ width +
+        ', height='+ height  +', top='+ top +', left='+ left + '');
 }
 
 function isChrome () {
@@ -244,9 +285,97 @@ function isFirefox () {
 	return (navigator.userAgent.toLowerCase().indexOf("firefox") > - 1);
 }
 
+function isJavaFX () {
+	return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
+}
 
 function getFnName(fn) {
 	  var f = typeof fn == 'function';
 	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
+
+var menuType = 'user'
+
+if(getParameterByName('menu') != null) menuType = getParameterByName('menu')
+
+function updateMenuLinks() {
+    var elem = 'a'
+    var attr = 'href'
+    var elems = document.getElementsByTagName(elem);
+    var arrayElements = Array.prototype.slice.call(elems);
+    var groupElements = document.getElementsByClassName('linkvs');
+    arrayElements.concat(Array.prototype.slice.call(groupElements))
+    for (var i = 0; i < elems.length; i++) {
+        if(elems[i][attr].indexOf("mailto:") > -1) continue
+        if(elems[i][attr].indexOf("menu=" + menuType) < 0) {
+            if(elems[i][attr].indexOf("?") < 0) {
+                elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
+            } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
+        }
+    }
+    for (var j = 0; j < groupElements.length; j++) {
+        var attrValue = groupElements[j].getAttribute("data-href")
+        if(attrValue == null) continue
+        if(attrValue.indexOf("menu=" + menuType) < 0) {
+            if(attrValue.indexOf("?") < 0) {
+                groupElements[j].setAttribute("data-href", attrValue + "?menu=" + menuType )
+            } else groupElements[j].setAttribute("data-href", attrValue + "&menu=" + menuType );
+        }
+    }
+}
+
+function updateMenuLink(urlToUpdate, param) {
+    if(urlToUpdate == null) return
+    var result = urlToUpdate
+    if(result.indexOf("menu=") < 0) {
+        if(result.indexOf("?") < 0) result = result + "?menu=" + menuType
+        else result = result + "&menu=" + menuType
+    }
+    if(param != null) result = result + "&" + param
+    return result
+}
+
+//http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function VotingSystemClient () { }
+
+VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
+    try {
+        console.log("setJSONMessageToSignatureClient - clientTool: " + clientTool)
+    } catch(e) {
+        console.log(e)
+        window.alert(e)
+        return
+    }
+    var messageToSignatureClient = JSON.stringify(messageJSON)
+    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
+    clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
+}
+
+window['isClientToolConnected'] = false
+
+var clientToolListeners = []
+function addClientToolListener(listener) {
+    clientToolListeners.push(listener)
+}
+
+function notifiyClientToolConnection() {
+    window['isClientToolConnected'] = true
+    for(var i = 0; i < clientToolListeners.length; i++) {
+        clientToolListeners[i]()
+    }
+}
+
+//Message -> base64 encoded JSON
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
+    function setClientToolMessage(callerId, message) {
+        var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
+        window[callerId].setClientToolMessage(b64_to_utf8)
+    }

@@ -36,7 +36,7 @@ class EventVSClaimController {
                 resultList = EventVSClaim.createCriteria().list {
                     or {
                         eq("state", EventVS.State.ACTIVE)
-                        eq("state", EventVS.State.AWAITING)
+                        eq("state", EventVS.State.PENDING)
                         eq("state", EventVS.State.CANCELLED)
                         eq("state", EventVS.State.TERMINATED)
                     }
@@ -77,7 +77,7 @@ class EventVSClaimController {
                     } else {
                         or{
                             eq("state", EventVS.State.ACTIVE)
-                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.PENDING)
                             eq("state", EventVS.State.TERMINATED)
                             eq("state", EventVS.State.CANCELLED)
                         }
@@ -92,6 +92,10 @@ class EventVSClaimController {
             }
             render eventsVSMap as JSON
         } else render(view:"main" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
+    }
+
+    def editor() {
+        render(view:"editor" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
     }
     
 	/**

@@ -1,3 +1,5 @@
+import grails.util.Metadata
+
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
 // in the classpath in ConfigSlurper format
@@ -89,9 +91,14 @@ grails.hibernate.osiv.readonly = false
 
 environments {
     development {
-        grails.logging.jul.usebridge = true
-        grails.resources.debug = true// -> rendering problems
-        grails.serverURL = "http://sistemavotacion.org/AccessControl"
+        if(Metadata.current.isWarDeployed()) {
+            grails.logging.jul.usebridge = false
+            grails.serverURL = "http://www.sistemavotacion.org/AccessControl"
+        } else {
+            grails.logging.jul.usebridge = true
+            grails.resources.debug = true// -> rendering problems
+            grails.serverURL = "http://sistemavotacion.org/AccessControl"
+        }
     }
     production {
         grails.logging.jul.usebridge = false

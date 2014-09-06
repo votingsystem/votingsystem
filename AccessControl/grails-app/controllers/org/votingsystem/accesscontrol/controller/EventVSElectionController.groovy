@@ -26,6 +26,9 @@ class EventVSElectionController {
         render(view:"elections" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
     }
 
+    def editor() {
+        render(view:"editor" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+    }
 
     /**
 	 * @httpMethod [GET]
@@ -47,7 +50,7 @@ class EventVSElectionController {
                 resultList = EventVSElection.createCriteria().list {
                     or {
                         eq("state", EventVS.State.ACTIVE)
-                        eq("state", EventVS.State.AWAITING)
+                        eq("state", EventVS.State.PENDING)
                         eq("state", EventVS.State.CANCELLED)
                         eq("state", EventVS.State.TERMINATED)
                     }
@@ -88,7 +91,7 @@ class EventVSElectionController {
                     } else {
                         or{
                             eq("state", EventVS.State.ACTIVE)
-                            eq("state", EventVS.State.AWAITING)
+                            eq("state", EventVS.State.PENDING)
                             eq("state", EventVS.State.TERMINATED)
                             eq("state", EventVS.State.CANCELLED)
                         }

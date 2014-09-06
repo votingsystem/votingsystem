@@ -1,18 +1,22 @@
-var WebAppMessage = function (statusCode, operation) {
-	this.statusCode = statusCode
-	this.operation = operation
-	this.subject ;
-	this.signedContent;
-	this.serviceURL;
-	this.documentURL;
-	this.receiverName;
-	this.serverURL;
-	this.eventVS;
-	this.callerCallback;
+function WebAppMessage(statusCode, operation) {
+    this.statusCode = statusCode
+    this.operation = operation
+    this.subject ;
+    this.filePath;
+    this.signedContent;
+    this.serviceURL;
+    this.documentURL;
+    this.receiverName;
+    this.serverURL;
+    this.eventVS;
+    this.message;
+    this.caption;
+    this.callerCallback;
 }
 
 var Operation = {
     SAVE_RECEIPT: "SAVE_RECEIPT",
+    SAVE_RECEIPT_ANONYMOUS_DELEGATION:"SAVE_RECEIPT_ANONYMOUS_DELEGATION",
     OPEN_RECEIPT: "OPEN_RECEIPT",
     CONTROL_CENTER_ASSOCIATION : "CONTROL_CENTER_ASSOCIATION",
     CONTROL_CENTER_STATE_CHANGE_SMIME: "CONTROL_CENTER_STATE_CHANGE_SMIME",
@@ -23,6 +27,7 @@ var Operation = {
     SMIME_CLAIM_SIGNATURE: "SMIME_CLAIM_SIGNATURE",
     VOTING_PUBLISHING: "VOTING_PUBLISHING",
     SEND_SMIME_VOTE: "SEND_SMIME_VOTE",
+    SELECT_IMAGE:"SELECT_IMAGE",
     TERMINATED: "TERMINATED",
     ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION",
     EVENT_CANCELLATION: "EVENT_CANCELLATION",
@@ -42,133 +47,166 @@ function httpGet(theUrl){
     return xmlHttp.responseText;
 }
 
-//https://github.com/sairam/bootstrap-prompts/blob/master/bootstrap-prompts-alert.js
-window._originalAlert = window.alert;
-window.alert = function(text) {
-    var bootStrapAlert = function() {
-        if(! $.fn.modal.Constructor) return false;
-        if($('#windowAlertModal').length == 1) return true;
-    }
-    if ( bootStrapAlert() ){
-        $('#windowAlertModal .modal-body p').text(text);
-        $('#windowAlertModal').modal('show');
-    }  else {
-        console.log('bootstrap was not found');
-        window._originalAlert(text);
-    }
-}
-
 function DateUtils(){}
 
 //parse dates with format "2010-08-30 01:02:03"
 DateUtils.parse = function (dateStr) {
-		var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
-		var dateArray = reggie.exec(dateStr);
-		var dateObject = new Date(
-		    (+dateArray[1]),
-		    (+dateArray[2])-1, //Months are zero based
-		    (+dateArray[3]),
-		    (+dateArray[4]),
-		    (+dateArray[5]),
-		    (+dateArray[6])
-		);
-		return dateObject
-	}
+    var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+    var dateArray = reggie.exec(dateStr);
+    var dateObject = new Date(
+        (+dateArray[1]),
+            (+dateArray[2])-1, //Months are zero based
+        (+dateArray[3]),
+        (+dateArray[4]),
+        (+dateArray[5]),
+        (+dateArray[6])
+    );
+    return dateObject
+}
 
 //parse dates with format "yyyy-mm-dd"
 DateUtils.parseInputType = function (dateStr) {
-		var reggie = /(\d{4})-(\d{2})-(\d{2})/;
-		var dateArray = reggie.exec(dateStr);
-		var dateObject = new Date(
-		    (+dateArray[1]),
-		    (+dateArray[2])-1, //Months are zero based
-		    (+dateArray[3])
-		);
-		return dateObject
-	}
+    var reggie = /(\d{4})-(\d{2})-(\d{2})/;
+    var dateArray = reggie.exec(dateStr);
+    var dateObject = new Date(
+        (+dateArray[1]),
+            (+dateArray[2])-1, //Months are zero based
+        (+dateArray[3])
+    );
+    return dateObject
+}
 
 DateUtils.checkDate = function (dateInit, dateFinish) {
-		var todayDate = new Date();
-		if(todayDate > dateInit && todayDate < dateFinish) return true;
-		else return false;
-	}
+    var todayDate = new Date();
+    if(todayDate > dateInit && todayDate < dateFinish) return true;
+    else return false;
+}
 
-
-Date.prototype.format = function() {
-	var curr_date = this.getDate();
+Date.prototype.formatWithTime = function() {
+    var curr_date = this.getDate();
     var curr_month = this.getMonth() + 1; //Months are zero based
     var curr_year = this.getFullYear();
-    return curr_year + "/" + curr_month + "/" + curr_date + " 00:00:00"
+    return curr_year + "/" + curr_month + "/" + curr_date + " " + ('0' + this.getHours()).slice(-2)  + ":" +
+        ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
 };
 
-String.prototype.format = function() {
-	  var args = arguments;
-	  var str =  this.replace(/''/g, "'")
-	  return str.replace(/{(\d+)}/g, function(match, number) {
-	    return typeof args[number] != 'undefined'
-	      ? args[number]
-	      : match
-	    ;
-	  });
-	};
+Date.prototype.format = function() {
+    var curr_date = this.getDate();
+    var curr_month = this.getMonth() + 1; //Months are zero based
+    var curr_year = this.getFullYear();
+    return curr_year + "/" + curr_month + "/" + curr_date
+};
 
-	
+function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function getDatePickerValue(datePickerId, htmlElement) {
+    if(!htmlElement) {
+        htmlElement = document
+    }
+    var day = pad(htmlElement.querySelector('#' + datePickerId + '_day').value, 2)
+    var month = pad(htmlElement.querySelector('#' + datePickerId + '_month').value, 2)
+    var year = htmlElement.querySelector('#' + datePickerId + '_year').value
+    var hour = "00"
+    var minute = "00"
+    var second = "00"
+    if(htmlElement.querySelector('#' + datePickerId + '_minute') != null) minute =
+        htmlElement.querySelector('#' + datePickerId + '_minute').value
+    if(htmlElement.querySelector('#' + datePickerId + '_hour') != null) hour =
+        htmlElement.querySelector('#' + datePickerId + '_hour').value
+    var dateStr = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second
+    return DateUtils.parse(dateStr)
+}
+
+function showMessageVS(message, caption, callerId, isConfirmMessage) {
+    if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
+        document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+        document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption, callerId, isConfirmMessage)
+    }  else {
+        console.log('votingsystem-message-dialog not found');
+        window._originalAlert(message);
+    }
+}
+
+function FormUtils(){}
+
+FormUtils.checkIfEmpty = function (param) {
+    if((param == undefined) || (param == null) || '' == param.trim()) return true;
+    else return false
+}
+
+String.prototype.format = function() {
+    var args = arguments;
+    var str =  this.replace(/''/g, "'")
+    return str.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined'
+            ? args[number]
+            : match
+            ;
+    });
+};
+
+
 String.prototype.getDate = function() {
-	  var timeMillis = Date.parse(this)
-	  return new Date(timeMillis)
+    var timeMillis = Date.parse(this)
+    return new Date(timeMillis)
 };
 
 String.prototype.getElapsedTime = function() {
-	  return this.getDate().getElapsedTime()
+    return this.getDate().getElapsedTime()
 };
 
 
 function toJSON(message){
-	if(message != null) {
-		if( Object.prototype.toString.call(message) == '[object String]' ) {
-			return JSON.parse(message);
-		} else {
-			return message
-		} 
-	}
+    if(message != null) {
+        if( Object.prototype.toString.call(message) == '[object String]' ) {
+            return JSON.parse(message);
+        } else {
+            return message
+        }
+    }
 }
 
 var ResponseVS = {
-		SC_OK : 200,
-		SC_ERROR_REQUEST : 400,
-		SC_ERROR_REQUEST_REPEATED : 409,
-		SC_ERROR : 500,
-		SC_PROCESSING : 700,
-		SC_CANCELLED : 0,
-		SC_INITIALIZED : 1,
-		SC_PAUSED:10
+    SC_OK : 200,
+    SC_ERROR_REQUEST : 400,
+    SC_ERROR_REQUEST_REPEATED : 409,
+    SC_ERROR : 500,
+    SC_PROCESSING : 700,
+    SC_CANCELLED : 0,
+    SC_INITIALIZED : 1,
+    SC_PAUSED:10
 }
 
 var SubSystem = {
-		VOTES : "VOTES",
-		CLAIMS: "CLAIMS",
-		MANIFESTS: "MANIFESTS",
-		REPRESENTATIVES:"REPRESENTATIVES"
+    VOTES : "VOTES",
+    CLAIMS: "CLAIMS",
+    MANIFESTS: "MANIFESTS",
+    REPRESENTATIVES:"REPRESENTATIVES",
+    FEEDS:"FEEDS"
 }
 
 
 function getUrlParam(paramName, staticURL, decode){
-   var currLocation = (staticURL.length)? staticURL : window.location.search,
-       parArr = currLocation.split("?")[1].split("&");
-   
-   for(var i = 0; i < parArr.length; i++){
+    var currLocation = (staticURL.length)? staticURL : window.location.search,
+        parArr = currLocation.split("?")[1].split("&");
+
+    for(var i = 0; i < parArr.length; i++){
         parr = parArr[i].split("=");
         if(parr[0] == paramName){
             return (decode) ? decodeURIComponent(parr[1]) : parr[1];
         }
-   }
+    }
 }
 
 function loadjsfile(filename){
-	var fileref=document.createElement('script')
-	fileref.setAttribute("type","text/javascript")
- 	fileref.setAttribute("src", filename)
- }
+    var fileref=document.createElement('script')
+    fileref.setAttribute("type","text/javascript")
+    fileref.setAttribute("src", filename)
+}
 
 function calculateNIFLetter(dni) {
     var  nifLetters = "TRWAGMYFPDXBNJZSQVHLCKET";
@@ -177,21 +215,22 @@ function calculateNIFLetter(dni) {
 }
 
 function validateNIF(nif) {
-	if(nif == null) return false;
-	nif  = nif.toUpperCase();
-	if(nif.length < 9) {
+    if(nif == null) return false;
+    nif  = nif.toUpperCase();
+    if(nif.length < 9) {
         var numZeros = 9 - nif.length;
-		for(var i = 0; i < numZeros ; i++) {
-			nif = "0" + nif;
-		}
-	}
-	var number = nif.substring(0, 8);
+        for(var i = 0; i < numZeros ; i++) {
+            nif = "0" + nif;
+        }
+    }
+    var number = nif.substring(0, 8);
     var letter = nif.substring(8, 9);
     if(letter != calculateNIFLetter(number)) return null;
     else return nif;
 }
 
 function checkInputType(inputType) {
+    if(navigator.userAgent.toLowerCase().indexOf("javafx") > -1) return false;
     if(null == inputType || '' == inputType.trim()) return false
     var isSuppported = true
     var elem = document.createElement("input");
@@ -206,53 +245,61 @@ function checkInputType(inputType) {
     return isSuppported
 }
 
+
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
 function getInternetExplorerVersion() {
 // Returns the version of Windows Internet Explorer or a -1
 // (indicating the use of another browser).
-   var rv = -1; // Return value assumes failure.
-   if (navigator.appName == 'Microsoft Internet Explorer')
-   {
-      var ua = navigator.userAgent;
-      var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
-      if (re.exec(ua) != null)
-         rv = parseFloat( RegExp.$1 );
-   }
-   return rv;
+    var rv = -1; // Return value assumes failure.
+    if (navigator.appName == 'Microsoft Internet Explorer')
+    {
+        var ua = navigator.userAgent;
+        var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+        if (re.exec(ua) != null)
+            rv = parseFloat( RegExp.$1 );
+    }
+    return rv;
+}
+
+function openWindow(targetURL) {
+    var width = 1000
+    var height = 800
+    var left = (screen.width/2) - (width/2);
+    var top = (screen.height/2) - (height/2);
+    var title = ''
+
+    var newWindow =  window.open(targetURL, title, 'toolbar=no, scrollbars=yes, resizable=yes, '  +
+        'width='+ width +
+        ', height='+ height  +', top='+ top +', left='+ left + '');
 }
 
 function isChrome () {
-	return (navigator.userAgent.toLowerCase().indexOf("chrome") > - 1);
+    return (navigator.userAgent.toLowerCase().indexOf("chrome") > - 1);
 }
 
 function isAndroid () {
-	return (navigator.userAgent.toLowerCase().indexOf("android") > - 1);
+    return (navigator.userAgent.toLowerCase().indexOf("android") > - 1);
 }
 
 function isFirefox () {
-	return (navigator.userAgent.toLowerCase().indexOf("firefox") > - 1);
+    return (navigator.userAgent.toLowerCase().indexOf("firefox") > - 1);
 }
 
 function isJavaFX () {
-	return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
+    return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
 }
 
 function getFnName(fn) {
-	  var f = typeof fn == 'function';
-	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
-	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
+    var f = typeof fn == 'function';
+    var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
+    return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
-
 
 var menuType = 'user'
 
+if(getParameterByName('menu') != null) menuType = getParameterByName('menu')
+
 function updateMenuLinks() {
-    var selectedMenuType = getParameterByName('menu')
-    if("" == selectedMenuType.trim()) {
-        return
-    }
-    console.log("updateMenuLinks")
-    menuType = selectedMenuType
     var elem = 'a'
     var attr = 'href'
     var elems = document.getElementsByTagName(elem);
@@ -261,7 +308,7 @@ function updateMenuLinks() {
     arrayElements.concat(Array.prototype.slice.call(groupElements))
     for (var i = 0; i < elems.length; i++) {
         if(elems[i][attr].indexOf("mailto:") > -1) continue
-        if(elems[i][attr].indexOf("menu=" + selectedMenuType) < 0) {
+        if(elems[i][attr].indexOf("menu=" + menuType) < 0) {
             if(elems[i][attr].indexOf("?") < 0) {
                 elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
             } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
@@ -270,12 +317,23 @@ function updateMenuLinks() {
     for (var j = 0; j < groupElements.length; j++) {
         var attrValue = groupElements[j].getAttribute("data-href")
         if(attrValue == null) continue
-        if(attrValue.indexOf("menu=" + selectedMenuType) < 0) {
+        if(attrValue.indexOf("menu=" + menuType) < 0) {
             if(attrValue.indexOf("?") < 0) {
                 groupElements[j].setAttribute("data-href", attrValue + "?menu=" + menuType )
             } else groupElements[j].setAttribute("data-href", attrValue + "&menu=" + menuType );
         }
     }
+}
+
+function updateMenuLink(urlToUpdate, param) {
+    if(urlToUpdate == null) return
+    var result = urlToUpdate
+    if(result.indexOf("menu=") < 0) {
+        if(result.indexOf("?") < 0) result = result + "?menu=" + menuType
+        else result = result + "&menu=" + menuType
+    }
+    if(param != null) result = result + "&" + param
+    return result
 }
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
@@ -286,27 +344,38 @@ function getParameterByName(name) {
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-function FormUtils(){}
-
-FormUtils.checkIfEmpty = function (param) {
-    if((param == undefined) || (param == null) || '' == param.trim()) return true;
-    else return false
-}
-
-var clientTool = null
-
 function VotingSystemClient () { }
-
 
 VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
     try {
         console.log("setJSONMessageToSignatureClient - clientTool: " + clientTool)
     } catch(e) {
         console.log(e)
-        alert(e)
+        window.alert(e)
         return
     }
     var messageToSignatureClient = JSON.stringify(messageJSON)
-    console.log("setJSONMessageToSignatureClient - messageToSignatureClient: " + messageToSignatureClient);
+    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
     clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
 }
+
+window['isClientToolConnected'] = false
+
+var clientToolListeners = []
+function addClientToolListener(listener) {
+    clientToolListeners.push(listener)
+}
+
+function notifiyClientToolConnection() {
+    window['isClientToolConnected'] = true
+    for(var i = 0; i < clientToolListeners.length; i++) {
+        clientToolListeners[i]()
+    }
+}
+
+//Message -> base64 encoded JSON
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
+    function setClientToolMessage(callerId, message) {
+        var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
+        window[callerId].setClientToolMessage(b64_to_utf8)
+    }

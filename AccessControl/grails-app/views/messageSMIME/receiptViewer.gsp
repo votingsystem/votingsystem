@@ -5,11 +5,9 @@
         <g:if test="${receiptPageTitle != null}">${receiptPageTitle}</g:if>
         <g:else><g:message code="receiptPageLbl"/></g:else>
     </title>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-
-    <asset:stylesheet src="votingSystem.css"/>
-    <asset:javascript src="utilsVS.js"/>
-    <g:include view="/include/utils_js.gsp"/>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
 </head>
 
 <body style="max-width: 600px; margin:30px auto 0px auto;">
@@ -32,32 +30,27 @@
 <asset:script>
     var signedContent = toJSON('${raw(signedContent)}')
 
-    $(function() {
-        if(signedContent.operation) {
-            if('SEND_SMIME_VOTE' == signedContent.operation) {
-                $("#voteReceiptContentDiv").css("display" , "visible")
-                $("#pollPage").attr("href", signedContent.eventURL)
-                $("#optionSlected").html(signedContent.optionSelected.content)
-            }
-            if(isJavaFX()) {
-                $("#saveReceiptButton").css("display" , "visible")
-            }
+    if(signedContent.operation) {
+        if('SEND_SMIME_VOTE' == signedContent.operation) {
+            document.querySelector('#voteReceiptContentDiv').style.display = "block"
+            document.querySelector('#pollPage').href = signedContent.eventURL
+            document.querySelector('#optionSlected').innerHTML = signedContent.optionSelected.content
         }
-
-    })
+        if(window['isClientToolConnected']) {
+            document.querySelector('#voteReceiptContentDiv').style.display = "block"
+            $("#saveReceiptButton").css("display" , "visible")
+        }
+    }
 
     function saveReceipt() {
         console.log("saveReceipt")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SAVE_RECEIPT)
         webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
-        webAppMessage.callerCallback = 'saveReceiptCallback'
+
+        var objectId = Math.random().toString(36).substring(7)
+        window[objectId] = {setClientToolMessage: function(appMessage) {
+            console.log("saveReceiptCallback - message: " + appMessage);}}
+        webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
-
-    function saveReceiptCallback(appMessage) {
-        console.log("saveReceiptCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-                console.log("saveReceiptCallback - message from native client: " + appMessage);
-    }
-
 </asset:script>

@@ -1,60 +1,86 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <g:javascript library="jquery" plugin="jquery"/>
-        <asset:stylesheet src="jquery-ui-1.10.4.custom.min.css"/>
-        <script type="text/javascript" src="${resource(dir: 'bower_components/jquery-ui', file: 'jquery-ui.min.js')}"></script>
-        <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
+    <link rel="import" href="${resource(dir: '/bower_components/font-roboto', file: 'roboto.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
+    <style>
+    html,body {
+        height: 100%;
+        margin: 0;
+        font-family: 'RobotoDraft', sans-serif;
+    }
+    .headerTitle {
+        font-size: 26px;
+        font-weight:bold;
+        line-height: 1;
+        display:block;
+        margin: 10px auto 0px auto;
+        color:#ba0011;
+        text-decoration: none;
+    }
+    </style>
+</head>
+<body >
+<h3 style="text-align: center;">
+    <a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'appTitle', null)}</a>
+</h3>
+<polymer-element name="info-page-tabs">
+    <template>
+        <style shim-shadowdom>
+        .tabContent {
+            padding: 10px 20px 10px 20px;
+            margin:0px auto 0px auto;
+            width:auto;
+        }
+        paper-tabs.transparent-teal {
+            background-color: transparent;
+            color:#ba0011;
+            box-shadow: none;
+            cursor: pointer;
+        }
 
-        <link rel="stylesheet" href="${resource(dir: 'bower_components/bootstrap/dist/css', file: 'bootstrap.min.css')}" type="text/css"/>
-        <script type="text/javascript" src="${resource(dir: 'bower_components/bootstrap/dist/js', file: 'bootstrap.min.js')}"></script>
+        paper-tabs.transparent-teal::shadow #selectionBar {
+            background-color: #ba0011;
+        }
 
-        <asset:stylesheet src="votingSystem.css"/>
-        <asset:javascript src="utilsVS.js"/>
-        <g:include view="/include/utils_js.gsp"/>
-        <style type="text/css" media="screen">
-        	#content a{margin: 0px 100px 0px 0px;}
+        paper-tabs.transparent-teal paper-tab::shadow #ink {
+            color: #ba0011;
+        }
         </style>
-    </head>
-    <body>
-		<div class="container">
-        	<a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'serverNameLbl', null)}</a>
-			<div id="tabs" style="min-height: 700px;">
-			  <ul>
-			    <li><a href="#tabs-1" style="font-size: 0.8em;"><span><g:message code="infoLabel"/></span></a></li>
-			    <li><a href="serviceList" style="font-size: 0.8em;"><span><g:message code="serviceURLSMsg"/></span></a></li>
-			    <li><a href="appData" style="font-size: 0.8em;"><span><g:message code="appDataLabel"/></span></a></li>
-			  </ul>
-			  <div id="tabs-1">
-			  	<div class="container"  style="height:100%;">
-			  		<div id="content" class="content">
-			           <div class="mainLinkContainer">
-				           <div class="mainLink"><a href="${grailsApplication.config.grails.serverURL}/">${message(code: 'mainPageLabel', null)}</a></div>
-				           <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/tree/master/AccessControl">${message(code: 'sourceCodeLabel', null)}</a></div>
-				           <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/wiki/Control-de-Acceso">${message(code: 'wikiLabel', null)}</a></div>
-			           </div>
-			           <p id="contentText" style="margin: 40px 0px 0px 0px;">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
-   			           <p>
-                           <i class="fa fa-gears" style="color:#388746;"></i>
-                           <a id="clientToolLink" class="appLink" style="color: #09287e; font-size: 0.9em;"
-                              href="${grailsApplication.config.grails.serverURL}/app/ClientTool.zip">
-                               <g:message code="clientToolLinkText"/>
-                           </a>
-			           </p>
-					</div>
-			  	</div>
-			  </div>
-			</div>
-			<div class="infoFooter" style="margin: 0px auto 20px 0;width:100%;font-size: 0.7em; position:relative;">
-				<p style="text-align: center;">
-					<a  class="appLink" href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}">
-						${message(code: 'emailLabel', null)}</a>
-				</p>	
-		   	</div>	
-		<div>
-	</body>
+        <div  style="width: 1000px; margin:0px auto 0px auto;">
+            <paper-tabs  style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
+                         selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+                <paper-tab name="info" style="width: 400px"><g:message code="infoLbl"/></paper-tab>
+                <paper-tab name="serviceList"><g:message code="serviceListLbl"/></paper-tab>
+                <paper-tab name="appData"><g:message code="appDataLabel"/></paper-tab>
+            </paper-tabs>
+            <div id="infoDiv" class="tabContent" style="display:{{selectedTab == 'info'?'block':'none'}}">
+                <div class="mainLink"><a href="http://www.sistemavotacion.org"><g:message code="webSiteLbl"/></a></div>
+                <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/tree/master/ControlCenter">
+                    <g:message code="sourceCodeLbl"/></a>
+                </div>
+                <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/wiki/Centro-de-Control">${message(code: 'wikiLabel', null)}</a></div>
+            </div>
+
+            <div id="serviceList" class="tabContent" style="display:{{selectedTab == 'serviceList'?'block':'none'}}">
+                <g:include controller="serverInfo" action="serviceList" />
+            </div>
+
+            <div id="appData" class="tabContent" style="display:{{selectedTab == 'appData'?'block':'none'}}">
+                <g:include controller="serverInfo" action="appData" />
+            </div>
+        </div>
+    </template>
+
+    <script>
+        Polymer('info-page-tabs', {
+            selectedTab:'info'
+        });
+    </script>
+</polymer-element>
+<info-page-tabs style="width: 1000px;"></info-page-tabs>
+</body>
 </html>
-<asset:script>
-    $(function() {
-        $( "#tabs" ).tabs()
-    });
-</asset:script>

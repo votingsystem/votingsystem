@@ -31,7 +31,7 @@
                                     on-change="{{eventVSStateSelect}}" class="form-control">
                                 <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
                                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-                                <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+                                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
                                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
                             </select>
                         </template>
@@ -39,7 +39,7 @@
                             <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
                                 <option value="" style="color:black;"> - <g:message code="selectClaimsLbl"/> - </option>
                                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
-                                <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
+                                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
                                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
                             </select>
                         </template>
@@ -47,7 +47,7 @@
                             <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
                                 <option value="" style="color:black;"> - <g:message code="selectManifestsLbl"/> - </option>
                                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenManifestsLbl"/> - </option>
-                                <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingManifestsLbl"/> - </option>
+                                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingManifestsLbl"/> - </option>
                                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedManifestsLbl"/> - </option>
                             </select>
                         </template>
@@ -116,7 +116,7 @@
             getMessage : function (eventVSState) {
                 switch (eventVSState) {
                     case EventVS.State.ACTIVE: return "<g:message code='openLbl'/>"
-                    case EventVS.State.AWAITING: return "<g:message code='pendingLbl'/>"
+                    case EventVS.State.PENDING: return "<g:message code='pendingLbl'/>"
                     case EventVS.State.TERMINATED: return "<g:message code='closedLbl'/>"
                     case EventVS.State.CANCELLED: return "<g:message code='cancelledLbl'/>"
                 }
@@ -127,7 +127,7 @@
             getEventVSClass:function(eventVSState) {
                 switch (eventVSState) {
                     case EventVS.State.ACTIVE: return "eventVSActive"
-                    case EventVS.State.AWAITING: return "eventVSAwaiting"
+                    case EventVS.State.PENDING: return "eventVSPending"
                     case EventVS.State.TERMINATED: return "eventVSFinished"
                     case EventVS.State.CANCELLED: return "eventVSFinished"
                 }

@@ -1,73 +1,5 @@
 <script>
-    var SocketService = function () {
-
-        this.socket = null;
-
-        this.connect = function () {
-            var host = "${grailsApplication.config.grails.serverURL}/websocket/service".replace('http', 'ws')
-            if ('WebSocket' in window) {
-                this.socket = new WebSocket(host);
-            } else if ('MozWebSocket' in window) {
-                this.socket = new MozWebSocket(host);
-            } else {
-                console.log('browserWithoutWebsocketSupport');
-                return
-            }
-            this.socket.onopen = function () {
-                console.log('Info: WebSocket connection opened');
-            };
-
-            this.socket.onclose = function (event) {
-                console.log('Info: WebSocket connection closed, Code: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
-
-            };
-        }
-
-        this.sendMessage = function(message) {
-            var messageStr = JSON.stringify(message);
-            console.log("sendMessage to simulation service: " + messageStr)
-            if(this.socket == null || 3 == this.socket.readyState) {
-                console.log("missing message - socket closed")
-            } else if(messageStr != ''){
-                this.socket.send(messageStr);
-            }
-        }
-
-        this.close = function() {
-            //states: CONNECTING	0, OPEN	1, CLOSING	2, CLOSED	3
-            if(this.socket == null || 3 == this.socket.readyState) {
-                console.log("socket already closed")
-                return
-            } else console.log(" closing socket connection")
-            this.socket.close()
-        }
-
-    };
-
-    var dynatableInputs = {
-        queries: null,
-        sorts: null,
-        multisort: ['ctrlKey', 'shiftKey', 'metaKey'],
-        page: null,
-        queryEvent: 'blur change',
-        recordCountTarget: null,
-        recordCountPlacement: 'after',
-        paginationLinkTarget: null,
-        paginationLinkPlacement: 'after',
-        paginationPrev: '«',
-        paginationNext: '»',
-        paginationGap: [1,2,2,1],
-        searchTarget: null,
-        searchPlacement: 'before',
-        perPageTarget: null,
-        perPagePlacement: 'before',
-        perPageText: '',
-        recordCountText: '',
-        pageText:'',
-        recordCountPageBoundTemplate: '{pageLowerBound} a {pageUpperBound} de',
-        recordCountTotalTemplate: '{recordsQueryCount}',
-        processingText: '<span class="dynatableLoading">"<g:message code="updatingLbl"/><i class="fa fa-refresh fa-spin"></i></span>'
-    }
+    window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
 
     function EventVS() {}
 
@@ -75,7 +7,7 @@
         ACTIVE:"ACTIVE",
         TERMINATED:"TERMINATED",
         CANCELLED:"CANCELLED",
-        AWAITING:"AWAITING",
+        PENDING:"PENDING",
         PENDING_SIGNATURE:"PENDING_SIGNATURE",
         DELETED_FROM_SYSTEM:"DELETED_FROM_SYSTEM"
     }
@@ -122,4 +54,18 @@
         }
         return resultStr
     };
+
+
+    window._originalAlert = window.alert;
+    window.alert = function(text) {
+        if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
+                document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+            document.querySelector("#_votingsystemMessageDialog").setMessage(text,
+                    "<g:message code="messageLbl"/>")
+        }  else {
+            console.log('votingsystem-message-dialog not found');
+            window._originalAlert(text);
+        }
+    }
+
 </script>

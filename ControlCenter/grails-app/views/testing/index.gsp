@@ -1,17 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  	<title>pruebaTemplate</title>
+  	<title>testing</title>
     <style>
 	  	textarea { }
 	  	input[id="subject"] { }
   	</style>
   	<asset:script>
-	  	$(document).ready(function(){
-	  		$('#testForm').submit(function(event){event.preventDefault();});
-	
-		  	$("#submitButton").click(function(){});
-	  	});
   	</asset:script>
 </head>
 <body>

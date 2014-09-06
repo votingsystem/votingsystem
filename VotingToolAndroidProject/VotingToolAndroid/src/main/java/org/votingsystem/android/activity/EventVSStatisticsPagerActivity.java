@@ -89,7 +89,7 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
                         subtTitle = getString(R.string.manifest_open_lbl,
                                 DateUtils.getElapsedTimeStr(event.getDateFinish()));
                         break;
-                    case AWAITING:
+                    case PENDING:
                         subtTitle = getString(R.string.manifest_pendind_lbl) + " - "+
                                 getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDate_Es(event.getDateBegin()) + " - " +
@@ -124,7 +124,7 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
                         subtTitle = getString(R.string.claim_open_lbl,
                                 DateUtils.getElapsedTimeStr(event.getDateFinish()));
                         break;
-                    case AWAITING:
+                    case PENDING:
                         subtTitle = getString(R.string.claim_pending_lbl) +
                                 getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDate_Es(event.getDateBegin()) + " - " +
@@ -158,7 +158,7 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
                         subtTitle = getString(R.string.voting_open_lbl,
                                 DateUtils.getElapsedTimeStr(event.getDateFinish()));
                         break;
-                    case AWAITING:
+                    case PENDING:
                         subtTitle = getString(R.string.voting_pending_lbl) + " - " +
                                 getString(R.string.init_lbl) + ": " +
                                 DateUtils.getDate_Es(event.getDateBegin()) + " - " +

@@ -1,6 +1,8 @@
 <%@ page import="org.votingsystem.model.EventVS; grails.converters.JSON" %>
 <html>
-<head><meta name="layout" content="main" /></head>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
 <body>
 <div class="pageContentDiv" style="max-width: 1000px;">
     <div style="margin:0 20px 0 20px;">
@@ -16,7 +18,7 @@
 		</div>
 	</div>
 
-	<div class="eventPageContentDiv">
+	<div>
 		<div style="width:100%;position:relative;">
 			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
 		</div>
@@ -59,7 +61,7 @@
                 var pendingMsgTemplate = '<g:message code='pendingMsgTemplate'/>'
                         if(undefined != elapsedTime) $("#pendingTimeDiv").append(pendingMsgTemplate.format(elapsedTime))
             </g:if>
-            <g:if test="${EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
+            <g:if test="${EventVS.State.PENDING.toString().equals(eventMap?.state)}">
                 $(".pageHeader").css("color", "#388746")
                 $("#messagePanel").addClass("eventPendingBox");
                 $("#messagePanel").text("<g:message code="eventPendingLbl"/>")

@@ -1,3 +1,5 @@
+import grails.util.Metadata
+
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
 // in the classpath in ConfigSlurper format
@@ -94,9 +96,15 @@ grails.hibernate.osiv.readonly = false
 environments {
 
     development {
-        grails.logging.jul.usebridge = true
-        grails.serverURL = "http://vickets:8086/Vickets"
-        webSocketURL="ws://vickets:8086/Vickets/websocket/service"
+        if(Metadata.current.isWarDeployed()) {
+            grails.logging.jul.usebridge = false
+            grails.serverURL = "https://www.sistemavotacion.org/Vickets"
+            webSocketURL="wss://vickets:8443/Vickets/websocket/service"
+        } else {
+            grails.resources.debug = true
+            grails.serverURL = "http://vickets:8086/Vickets"
+            webSocketURL="ws://vickets:8086/Vickets/websocket/service"
+        }
     }
 
     production {

@@ -29,25 +29,23 @@
 <asset:script>
     var signedContent = toJSON('${raw(signedContent)}')
 
-    $(function() {
-        if(signedContent.operation) {
-            //$("#receiptContentDiv").text(JSON.stringify(signedContent))
-            $("#operationTypeDiv").text(signedContent.operation)
-
-
+    if(signedContent.operation) {
+        if('SEND_SMIME_VOTE' == signedContent.operation) {
+            document.querySelector('#operationTypeDiv').innerHTML = signedContent.operation
             if('VICKET_GROUP_NEW' == signedContent.operation) {
-                $("#nameDiv").text(signedContent.groupvsName)
-                $("#contentDiv").html(signedContent.groupvsInfo)
-
-                //$("#pollPage").attr("href", signedContent.eventURL)
+                document.querySelector('#nameDiv').innerHTML = signedContent.groupvsName
+                document.querySelector('#contentDiv').innerHTML = signedContent.groupvsInfo
             } else {
 
             }
-            $("#saveReceiptButton").css("display" , "visible")
-            $("#receiptContentDiv").css("display" , "visible")
+            document.querySelector('#receiptContentDiv').style.display = "block"
             console.log(signedContent)
         }
-    })
+        if(window['isClientToolConnected']) {
+            document.querySelector('#saveReceiptButton').style.display = "block"
+
+        }
+    }
 
     function saveReceipt() {
         console.log("saveReceipt")
@@ -56,9 +54,7 @@
 
         var objectId = Math.random().toString(36).substring(7)
         window[objectId] = {setClientToolMessage: function(appMessage) {
-            console.log("saveReceiptCallback - message: " + appMessage);
-            var appMessageJSON = toJSON(appMessage)
-            console.log("saveReceiptCallback - message: " + appMessage); }}
+            console.log("saveReceiptCallback - message: " + appMessage);}}
         webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }

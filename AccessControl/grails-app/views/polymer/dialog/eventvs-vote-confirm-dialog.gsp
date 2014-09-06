@@ -5,17 +5,8 @@
 <polymer-element name="eventvs-vote-confirm-dialog" attributes="opened">
     <template>
         <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
-            <style no-shim>
-                .card {
-                    position: relative;
-                    display: inline-block;
-                    vertical-align: top;
-                    background-color: #f9f9f9;
-                    box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-                    border: 1px solid #ccc;
-                }
-            </style>
-            <div id="container" layout vertical class="card" style="overflow-y: auto; width:450px; padding:10px;">
+            <style no-shim> </style>
+            <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;"><g:message code="confirmOptionDialogCaption"/></div>

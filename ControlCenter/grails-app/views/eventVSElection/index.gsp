@@ -13,7 +13,7 @@
             <select id="eventsStateSelect" style="margin:0px auto 0px auto;color:black; width: 300px;" class="form-control">
                 <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-                <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+                <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
             </select>
         </div>

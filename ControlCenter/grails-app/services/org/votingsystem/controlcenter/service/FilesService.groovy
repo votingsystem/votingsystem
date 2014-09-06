@@ -16,6 +16,10 @@ class FilesService {
 	public void init() {
 		new File("${grailsApplication.config.VotingSystem.eventsMetaInfBaseDir}").mkdirs()
 		new File("${grailsApplication.config.VotingSystem.errorsBaseDir}").mkdirs()
+        File polymerPlatform = grailsApplication.mainContext.getResource("bower_components/polymer/polymer.js").getFile()
+        if(!polymerPlatform.exists()) {
+            log.error "Have you executed 'bower install' from web-app dir ???"
+        }
 	}	 
 
 	 public File getEventMetaInf(EventVS event) {

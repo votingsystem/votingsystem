@@ -13,7 +13,6 @@ import org.votingsystem.model.TypeVS
 class AppController {
 
 	def grailsApplication
-	def hibernateProperties
 	
 	/**
 	 * @httpMethod [GET]
@@ -36,8 +35,6 @@ class AppController {
 		redirect(uri:uri)
 		return
 	}
-
-    def admin() {}
 
     def contact() {}
 

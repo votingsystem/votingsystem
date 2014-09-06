@@ -37,8 +37,8 @@ class EventVSService {
             eventVS.state = EventVS.State.TERMINATED
             eventVS.save()
 		} else if(eventVS.dateBegin.after(currentDate) &&
-			eventVS.state != EventVS.State.AWAITING) {
-            eventVS.state = EventVS.State.AWAITING
+			eventVS.state != EventVS.State.PENDING) {
+            eventVS.state = EventVS.State.PENDING
             eventVS.save()
 		} else if(eventVS.dateBegin.before(currentDate) &&
 			eventVS.dateFinish.after(currentDate) &&
@@ -59,7 +59,7 @@ class EventVSService {
 		if (todayDate.after(eventVS.dateFinish)) eventVS.setState(EventVS.State.TERMINATED)
 		if (todayDate.after(eventVS.dateBegin) && todayDate.before(eventVS.dateFinish))
 			eventVS.setState(EventVS.State.ACTIVE)
-		if (todayDate.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.AWAITING)
+		if (todayDate.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.PENDING)
 		log.debug("setEventDatesState - state ${eventVS.state.toString()}")
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
 	}
