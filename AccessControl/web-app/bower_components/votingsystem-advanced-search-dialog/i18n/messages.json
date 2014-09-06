@@ -1,0 +1,28 @@
+{
+    "es": {
+        "caption":"Búsqueda avanzada",
+        "fromDate":"Fecha desde (dd/mm/aa)",
+        "toDate":"Fecha hasta (dd/mm/aa)",
+        "searchInputMessage":"Cadena de búsqueda",
+        "accept":"Aceptar",
+        "dateLbl":"Fecha",
+        "hourLbl": "Hora (hh:mm)",
+        "invalidSearchLbl":"Introduzca una consulta válida",
+        "invalidDateLbl":"No es una fecha válida!",
+        "invalidHourLbl":"No es una hora válida!"
+    },
+    "en": {
+        "caption":"Avanced search",
+        "fromDate":"From date (dd/mm/aa)",
+        "toDate":"To date (dd/mm/aa)",
+        "searchInputMessage":"Enter search text",
+        "accept":"Accept",
+        "dateLbl":"Date",
+        "hourLbl": "Hour (hh:mm)",
+        "invalidSearchLbl":"Enter a valid search",
+        "invalidDateLbl":"Invalid date!",
+        "invalidHourLbl":"Invalid hour!"
+    }
+}
+
+
