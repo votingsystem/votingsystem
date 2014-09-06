@@ -22,13 +22,10 @@
       "chai": "~1.9.1",
       "mocha": "~1.19.0",
       "votingsystem-socket":"votingsystem-socket#~0.0.2",
-
-      "jsoneditor":"jsoneditor#~3.1.1",
-
+      "votingsystem-texteditor":"votingsystem-texteditor#~0.3.0",
+      "jsoneditor":"jsoneditor#~3.1.2",
       "google-chart":"google-chart#~0.0.1",
       "font-awesome":"font-awesome#~4.2.0",
-      "ckeditor":"ckeditor#~4.3.5",
-
 	  "polymer": "Polymer/polymer",
       "core-ajax":"Polymer/core-ajax",
       "core-animation":"Polymer/core-animation",
