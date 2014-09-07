@@ -15,7 +15,7 @@
             </ol>
         </div>
         <div id="contentDiv" style="position:relative; height:700px;">
-            <div class="row"></div>
+            <div></div>
         </div>
     </div>
 </div>

@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="layout" content="main"/>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
     <title><g:message code="simulationWebAppCaption"/></title>
 </head>
 <body>
 <div class="pageContenDiv">
     <div style="padding: 0px 30px 0px 30px;">
-        <div class="row" style="">
+        <div  style="">
             <ol class="breadcrumbVS pull-left">
                 <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
                 <li class="active"><g:message code="vicketsOperationsLbl"/></li>

@@ -36,7 +36,7 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <div class="row" style="max-width: 1300px; margin: 20px auto 0px auto;">
+    <div  style="max-width: 1300px; margin: 20px auto 0px auto;">
         <div id="connect-container">
             <div>
                 <span>Connect to:</span>

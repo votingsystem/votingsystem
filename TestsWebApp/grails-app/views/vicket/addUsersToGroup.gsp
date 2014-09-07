@@ -8,7 +8,7 @@
 </head>
 <body style="">
     <div class="pageContenDiv" style="padding: 0px 30px 0px 30px;">
-        <div class="row" style="">
+        <div  style="">
             <ol class="breadcrumbVS pull-left">
                 <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
                 <li><a href="${createLink(controller: 'simulation', action:'vickets', absolute:true)}">
@@ -29,7 +29,7 @@
                     <h4 id="pageTitle" class="pageHeader text-center">
                         <g:message code="addUsersToGroupButton"/>
                     </h4>
-                    <div class="row">
+                    <div >
                         <div class="form-group" style="display: inline-block;">
                             <label class="" style="width:190px;"><g:message code="groupIdMsg"/></label>
                             <input type="number" id="groupId" name="groupId" class="form-control"
@@ -37,21 +37,21 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div >
                         <div class="form-group" style="display: inline-block;">
                             <label class="" style="width:190px;"><g:message code="numUsersLbl"/></label>
                             <input type="number" id="numUsers" name="numUsers" min="0" value="1" class="form-control"
                                    style="width:220px;margin:0px 0px 0px 0px; padding: 0px 0px 0px 10px; display: inline;"/>
                         </div>
                     </div>
-                    <div class="row">
+                    <div >
                         <div class="form-group" style="display: inline-block;">
                             <label class="" style="width:190px;"><g:message code="userIndexLbl"/></label>
                             <input type="number" id="userIndex" name="userIndex" min="0" value="1" class="form-control"
                                    style="width:220px;margin:0px 0px 0px 0px; padding: 0px 0px 0px 10px; display: inline;"/>
                         </div>
                     </div>
-                    <div class="row">
+                    <div >
                         <div class="form-group" style="display: inline-block;">
                             <label class="" style="width:190px;"><g:message code="vicketServerLbl"/></label>
                             <input type="url" id="vicketServerURL"  class="form-control" style="width:220px;margin:0px 0px 0px 0px;display: inline;"

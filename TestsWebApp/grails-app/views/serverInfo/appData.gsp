@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <div class="row" style="padding: 0px 30px 0px 30px;">
+    <div  style="padding: 0px 30px 0px 30px;">
         <div id="status" class="col-md-4">
             <h3>Application Status</h3>
             <ul>

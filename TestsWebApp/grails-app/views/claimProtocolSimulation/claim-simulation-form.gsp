@@ -163,6 +163,9 @@
         Polymer('claim-simulation-form', {
             eventvsOptionList : [],
             ready: function() {
+                if(isChrome()) {
+                    alert('<g:message code="editorChromeErrorMsg"/>')
+                }
                 console.log(this.tagName + " - ready")
                 this.$.requestBackup.addEventListener('click', function() {
                     if(this.$.requestBackup.checked) this.$.emailDiv.style.display = 'block'

@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <div class="row">
+    <div >
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">

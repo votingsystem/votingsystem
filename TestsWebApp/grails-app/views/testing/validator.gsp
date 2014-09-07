@@ -14,7 +14,7 @@
     <div style="max-width: 800px;">
         <form id="depositDialogForm"  method="post"  class="">
             <div class="modal-body">
-                <div class="row">
+                <div >
                     <div class="col-md-8">
                         <div class="form-group" style="display: inline-block;">
                             <label style="display: inline;"><g:message code="amountLbl"/>: </label>

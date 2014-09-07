@@ -7,7 +7,7 @@
 <body style="">
 <div class="pageContenDiv">
     <div style="padding: 0px 30px 0px 30px;">
-        <div class="row" style="">
+        <div  style="">
             <ol class="breadcrumbVS pull-left">
                 <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
                 <li><a href="${createLink(controller: 'simulation', action:'vickets', absolute:true)}">
@@ -15,7 +15,7 @@
                 <li class="active"><g:message code="initUserBaseDataButton"/></li>
             </ol>
         </div>
-        <div id="vicketUserBaseDataSimulationDataDialog"  class="row"
+        <div id="vicketUserBaseDataSimulationDataDialog"
              style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
             <div class="errorMsgWrapper" style="display:none;"></div>
             <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
