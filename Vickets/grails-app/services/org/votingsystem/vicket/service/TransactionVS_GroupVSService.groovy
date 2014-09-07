@@ -152,7 +152,7 @@ class TransactionVS_GroupVSService {
             messageJSON.toUser = it.userVS.getNif()
             messageJSON.numUsers = subscriptionList.totalCount
             messageJSON.toUserAmount = userPart.toString()
-            SMIMEMessageWrapper receipt = signatureVSService.getSignedMimeMessage(systemService.getSystemUser().getNif(),
+            SMIMEMessageWrapper receipt = signatureVSService.getSMIMEMessage(systemService.getSystemUser().getNif(),
                     it.userVS.getNif(),
                     messageJSON.toString(), TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS.toString(), null)
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:messageSMIMEReq,

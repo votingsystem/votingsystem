@@ -6,7 +6,7 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-eventvs-option-dialog.gsp']"/>">
 
 
-<polymer-element name="claim-simulation-form">
+<polymer-element name="election-simulation-form">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -24,7 +24,7 @@
                 <div class="pageContentDiv" style="width:100%; padding:0px 20px 0px 20px;">
 
                     <div layout horizontal center center-justified style="margin: 15px 0px 15px 0px; width: 100%;">
-                        <div id="pageTitle" class="pageHeader"><h3><g:message code="initClaimProtocolSimulationMsg"/></h3></div>
+                        <div id="pageTitle" class="pageHeader"><h3><g:message code="initElectionProtocolSimulationMsg"/></h3></div>
                         <div  id="testButtonDiv" >
                             <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
                                 <g:message code="goToResultViewMsg"/>
@@ -33,8 +33,8 @@
                     </div>
 
                     <div style="display:{{messageToUser? 'block':'none'}}">
-                        <div class="messageToUser">
-                            <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                        <div>
+                            <div class="messageToUser"  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                                 <div id="messageToUser">{{messageToUser}}</div>
                             </div>
                             <paper-shadow z="1"></paper-shadow>
@@ -42,7 +42,82 @@
                     </div>
 
                     <div id="formDataDiv">
-                        <form id="claimProtocolSimulationDataForm" on-submit="{{submitForm}}">
+                        <form id="electionProtocolSimulationDataForm" on-submit="{{submitForm}}">
+
+                            <fieldset id="userBaseData">
+                                <legend style="font-size: 1.2em"><g:message code="userBaseDataCaption"/></legend>
+                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                    <label><g:message code="firstUserIndexMsg"/></label>
+                                    <input type="number" id="firstUserIndex" min="1" value="1" readonly required
+                                           class="userBaseDataInputNumber"
+                                           style="width:120px;margin:10px 20px 0px 7px;"
+                                           title="<g:message code="firstUserIndexMsg"/>"
+                                           placeholder="<g:message code="firstUserIndexMsg"/>"
+                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                           onchange="this.setCustomValidity('')">
+
+                                </div>
+                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                    <label><g:message code="numUsersWithoutRepresentativeMsg"/></label>
+                                    <input type="number" id="numUsersWithoutRepresentative" min="0" value="1" required
+                                           class="userBaseDataInputNumber"
+                                           style="width:120px;margin:10px 20px 0px 7px;"
+                                           title="<g:message code="numRepresentativesMsg"/>"
+                                           placeholder="<g:message code="numRepresentativesMsg"/>"
+                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                           onchange="this.setCustomValidity('')">
+
+
+                                    <label><g:message code="numUsersWithoutRepresentativeWithVoteMsg"/></label>
+                                    <input type="number" id="numUsersWithoutRepresentativeWithVote" min="0" value="1" required
+                                           class="userBaseDataInputNumber"
+                                           style="width:120px;margin:10px 20px 0px 7px;"
+                                           title="<g:message code="numRepresentativesWithVoteMsg"/>"
+                                           placeholder="<g:message code="numRepresentativesWithVoteMsg"/>"
+                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                           onchange="this.setCustomValidity('')">
+                                </div>
+                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                    <label><g:message code="numRepresentativesMsg"/></label>
+                                    <input type="number" id="numRepresentatives" min="0" value="1" required
+                                           class="userBaseDataInputNumber"
+                                           style="width:120px;margin:10px 20px 0px 7px;"
+                                           title="<g:message code="numRepresentativesMsg"/>"
+                                           placeholder="<g:message code="numRepresentativesMsg"/>"
+                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                           onchange="this.setCustomValidity('')">
+
+
+                                    <label><g:message code="numRepresentativesWithVoteMsg"/></label>
+                                    <input type="number" id="numRepresentativesWithVote" min="0" value="1" required
+                                           class="userBaseDataInputNumber"
+                                           style="width:120px;margin:10px 20px 0px 7px;"
+                                           title="<g:message code="numRepresentativesWithVoteMsg"/>"
+                                           placeholder="<g:message code="numRepresentativesWithVoteMsg"/>"
+                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                           onchange="this.setCustomValidity('')">
+                                </div>
+
+                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                    <label><g:message code="numUsersWithRepresentativeMsg"/></label>
+                                    <input type="number" id="numUsersWithRepresentative" min="0" value="1" required
+                                           class="userBaseDataInputNumber"
+                                           style="width:120px;margin:10px 20px 0px 7px;"
+                                           title="<g:message code="numUsersWithRepresentativeMsg"/>"
+                                           placeholder="<g:message code="numUsersWithRepresentativeMsg"/>"
+                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                           onchange="this.setCustomValidity('')">
+
+                                    <label><g:message code="numUsersWithRepresentativeWithVoteMsg"/></label>
+                                    <input type="number" id="numUsersWithRepresentativeWithVote" min="0" value="1" required
+                                           class="userBaseDataInputNumber"
+                                           style="width:120px;margin:10px 20px 0px 7px;"
+                                           title="<g:message code="numUsersWithRepresentativeWithVoteMsg"/>"
+                                           placeholder="<g:message code="numUsersWithRepresentativeWithVoteMsg"/>"
+                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
+                                           onchange="this.setCustomValidity('')">
+                                </div>
+                            </fieldset>
 
                             <div>
                                 <label><g:message code="numRequestsProjectedLbl"/></label>
@@ -108,14 +183,6 @@
                                 </div>
                             </div>
 
-                            <div layout horizontal>
-                                <div flex></div>
-                                <button id="addClaimFieldButton" type="button" class="btn btn-default"
-                                        style="margin:15px 20px 20px 0px;" on-click="{{addClaimField}}">
-                                    <g:message code="addClaimFieldLbl"/>
-                                </button>
-                            </div>
-
                             <div id="fieldsDiv" class="fieldsBox" style="display:{{eventvsOptionList.length == 0? 'none':'block'}}">
                                 <fieldset id="fieldsBox">
                                     <legend id="fieldsLegend" style="border: none;"><g:message code="eventvsFieldsLegend"/></legend>
@@ -131,11 +198,20 @@
                                 </fieldset>
                             </div>
 
+
+                            <div layout horizontal>
+                                <div flex></div>
+                                <button id="addElectionFieldButton" type="button" class="btn btn-default"
+                                        style="margin:15px 20px 20px 0px;" on-click="{{addElectionField}}">
+                                    <g:message code="addElectionFieldLbl"/>
+                                </button>
+                            </div>
+
                             <div layout horizontal>
                                 <div flex></div>
                                 <div>
                                     <button id="submitButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:450px;">
-                                        <g:message code="initClaimProtocolSimulationButton"/>
+                                        <g:message code="initElectionProtocolSimulationButton"/>
                                     </button>
                                 </div>
                             </div>
@@ -146,15 +222,16 @@
             <section id="page2">
                 <div cross-fade>
                     <simulation-listener id="simulationListener" page="{{subpage}}"
-                                 pagetitle="<g:message code='claimSimulationListenerTitle'/>" subpage vertical layout></simulation-listener>
+                                 pagetitle="<g:message code='electionSimulationListenerTitle'/>" subpage vertical layout></simulation-listener>
                 </div>
             </section>
         </core-animated-pages>
         <add-eventvs-option-dialog id="eventvsOptionDialog"></add-eventvs-option-dialog>
     </template>
     <script>
-        Polymer('claim-simulation-form', {
+        Polymer('election-simulation-form', {
             eventvsOptionList : [],
+            messageToUser:null,
             ready: function() {
                 if(isChrome()) {
                     alert('<g:message code="editorChromeErrorMsg"/>')
@@ -167,6 +244,30 @@
                 this.$.eventvsOptionDialog.addEventListener('on-submit', function(e) {
                     this.eventvsOptionList.push(e.detail)
                 }.bind(this));
+                this.$.numRepresentativesWithVote.addEventListener('change', this.checkRangeRepresentatives.bind(this), false);
+                this.$.numRepresentatives.addEventListener('change', this.checkRangeRepresentatives.bind(this), false);
+                this.$.numUsersWithRepresentative.addEventListener('change', this.checkRangeUsersWithRepresentative.bind(this), false);
+                this.$.numUsersWithRepresentativeWithVote.addEventListener('change', this.checkRangeUsersWithRepresentative.bind(this), false);
+            },
+            checkRangeRepresentatives: function() {
+                console.log("checkRangeRepresentatives")
+                var representativeWithVote = Number(document.getElementById('numRepresentativesWithVote').value)
+                var representatives = Number(document.getElementById('numRepresentatives').value)
+                if (representativeWithVote > representatives) {
+                    this.messageToUser = "<g:message code='representativeRangeErrorMsg'/>"
+                    return false
+                } else {
+                    this.messageToUser = null
+                    return true
+                }
+            },
+            checkRangeUsersWithRepresentative: function() {
+                console.log("checkRangeUsersWithRepresentative")
+                var usersWithRepresentative = Number(document.getElementById('numUsersWithRepresentative').value)
+                var usersWithRepresentativeWithVote = Number(document.getElementById('numUsersWithRepresentativeWithVote').value)
+                if (usersWithRepresentativeWithVote > usersWithRepresentative) {
+                    this.messageToUser = "<g:message code='usersWithRepresentativeRangeErrorMsg'/>"
+                } else this.messageToUser = null
             },
             closeSimulationListener:function(e, detail, sender) {
                 console.log(this.tagName + " - closeSimulationListener")
@@ -192,7 +293,7 @@
                 var dateFinishStr = getDatePickerValue('dateFinish', this.$.dateFinish).formatWithTime()
                 var event = {subject:this.$.subject.value, content:this.$.textEditor.getData(),
                     dateBegin:dateBeginStr, dateFinish:dateFinishStr, fieldsEventVS:this.eventvsOptionList}
-                var simulationData = {service:"claimSimulationService", status:Status.INIT_SIMULATION,
+                var simulationData = {service:"electionSimulationService", status:Status.INIT_SIMULATION,
                     accessControlURL:this.$.accessControlURL.value,
                     maxPendingResponses: this.$.maxPendingResponses.value,
                     numRequestsProjected: this.$.numRequestsProjected.value,
@@ -206,7 +307,7 @@
                 this.page = 1;
             },
 
-            addClaimField: function(e) {
+            addElectionField: function(e) {
                 this.$.eventvsOptionDialog.show()
             },
 
@@ -232,10 +333,15 @@
 
                 if(this.$.textEditor.getData() == 0) {
                     this.messageToUser = '<g:message code="eventContentEmptyERRORMsg"/>'
-
                     this.$.textEditorDiv.classList.add("formFieldError");
                     return false
                 }
+                if(this.eventvsOptionList.length < 2) {
+                    this.messageToUser = '<g:message code="missingOptionsERRORMsg"/>'
+                    this.$.addElectionFieldButton.classList.add("formFieldError");
+                    return false
+                }
+                if(!this.checkRangeRepresentatives()) return false
                 return true
             }
         });

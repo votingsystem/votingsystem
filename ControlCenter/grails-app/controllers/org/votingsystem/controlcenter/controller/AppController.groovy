@@ -38,6 +38,8 @@ class AppController {
 
     def contact() {}
 
+    def admin() {}
+
     /**
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.
      */

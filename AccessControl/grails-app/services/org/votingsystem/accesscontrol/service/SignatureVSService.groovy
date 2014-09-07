@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.service
 
+import grails.transaction.Transactional
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.votingsystem.callable.MessageTimeStamper
@@ -30,6 +31,7 @@ class SignatureVSService {
     private static Set<TrustAnchor> trustAnchors;
 	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, CertificateVS> trustedCertsHashMap;
+    private java.security.cert.Certificate[] localServerCertChain
 	private X509Certificate localServerCertSigner;
     private PrivateKey serverPrivateKey;
     private Encryptor encryptor;
@@ -52,18 +54,16 @@ class SignatureVSService {
 			aliasClaves, password.toCharArray(), ContextVS.SIGN_MECHANISM);
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
-		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
+		localServerCertChain = keyStore.getCertificateChain(aliasClaves);
 		byte[] pemCertsArray
 		trustedCerts = new HashSet<X509Certificate>()
-		for (int i = 0; i < chain.length; i++) {
-			log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
-			trustedCerts.add(chain[i])
-			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
-			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
+		for (int i = 0; i < localServerCertChain.length; i++) {
+			log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${localServerCertChain[i].getSubjectDN()}'"
+			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (localServerCertChain[i])
+			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (localServerCertChain[i]))
 		}
 		localServerCertSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
         serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
-		trustedCerts.add(localServerCertSigner)
 		File certChainFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();
 		certChainFile.createNewFile()
@@ -94,23 +94,6 @@ class SignatureVSService {
 		}
 		return result
 	}
-	
-	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = init().trustedCerts
-		return trustedCerts;
-	}
-
-    public Set<TrustAnchor> getTrustAnchors() {
-        if(!trustAnchors) {
-            Set<X509Certificate> trustedCerts = getTrustedCerts()
-            trustAnchors = new HashSet<TrustAnchor>();
-            for(X509Certificate certificate: trustedCerts) {
-                TrustAnchor anchor = new TrustAnchor(certificate, null);
-                trustAnchors.add(anchor);
-            }
-        }
-        return trustAnchors;
-    }
 
 	public ResponseVS getEventTrustedCerts(EventVS event, Locale locale) {
 		log.debug("getEventTrustedCerts")
@@ -166,8 +149,7 @@ class SignatureVSService {
 	}
 	
 	public KeyStore getTrustedCertsKeyStore() {
-		if(!trustedCertsKeyStore ||
-			trustedCertsKeyStore.size() != trustedCerts.size()) {
+		if(!trustedCertsKeyStore || trustedCertsKeyStore.size() != trustedCerts.size()) {
 			trustedCertsKeyStore = KeyStore.getInstance("JKS");
 			trustedCertsKeyStore.load(null, null);
 			Set<X509Certificate> trustedCertsSet = getTrustedCerts()
@@ -190,7 +172,7 @@ class SignatureVSService {
 					return fileName.startsWith("AC_") && fileName.endsWith(".pem");
 				}
 			  });
-		   Set<X509Certificate> fileSystemCerts = new HashSet<X509Certificate>()
+		    Set<X509Certificate> fileSystemCerts = new HashSet<X509Certificate>()
 			for(File caFile:acFiles) {
 				fileSystemCerts.addAll(CertUtil.fromPEMToX509CertCollection(FileUtils.getBytesFromFile(caFile)));
 			}
@@ -213,27 +195,50 @@ class SignatureVSService {
 					}
 				}
 			}
-			CertificateVS.withTransaction {
-				def criteria = CertificateVS.createCriteria()
-				def trustedCertsDB = criteria.list {
-					eq("state", CertificateVS.State.OK)
-                    eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
-				}
-				trustedCertsDB.each { certificate ->
-					ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
-					X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-					trustedCerts.add(certX509)
-					trustedCertsHashMap.put(certX509?.getSerialNumber()?.longValue(), certificate)
-				}
-			}
-			log.debug("trustedCerts.size(): ${trustedCerts?.size()}")
+            loadCertAuthorities()
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"CA Authorities initialized")
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 	}
-	
+
+    @Transactional public synchronized Map loadCertAuthorities() {
+        trustedCertsHashMap = new HashMap<Long, CertificateVS>();
+        trustedCerts = new HashSet<X509Certificate>();
+        trustAnchors = new HashSet<TrustAnchor>();
+        List<CertificateVS> trustedCertsList = CertificateVS.createCriteria().list(offset: 0) {
+            eq("state", CertificateVS.State.OK)
+            eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
+        }
+        for (CertificateVS certificate : trustedCertsList) {
+            X509Certificate x509Cert = certificate.getX509Cert()
+            trustedCerts.add(x509Cert)
+            trustedCertsHashMap.put(x509Cert.getSerialNumber()?.longValue(), certificate)
+            trustAnchors.add(new TrustAnchor(x509Cert, null));
+        }
+
+        for (java.security.cert.Certificate certificate : localServerCertChain) {
+            X509Certificate x509Cert = (X509Certificate)certificate
+            trustedCerts.add(x509Cert)
+            trustAnchors.add(new TrustAnchor(x509Cert, null));
+        }
+
+        log.debug("loadCertAuthorities - loaded '${trustedCertsHashMap?.keySet().size()}' authorities")
+        return [trustedCertsHashMap: trustedCertsHashMap, trustedCerts:trustedCerts, trustAnchors:trustAnchors]
+    }
+
+
+    public Set<X509Certificate> getTrustedCerts() {
+        if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = loadCertAuthorities().trustedCerts
+        return trustedCerts;
+    }
+
+    public Set<TrustAnchor> getTrustAnchors() {
+        if(!trustAnchors || trustAnchors.isEmpty()) trustAnchors = loadCertAuthorities().trustAnchors
+        return trustAnchors;
+    }
+
 	private void cancelCert(long numSerieCert) {
 		log.debug "cancelCert - numSerieCert: ${numSerieCert}"
 		CertificateVS.withTransaction {
@@ -260,15 +265,12 @@ class SignatureVSService {
 		return resultFile
 	}
 		
-	public byte[] getSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
-		log.debug "getSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+	public SMIMEMessageWrapper getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
+		log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		mimeMessage.writeTo(baos);
-		baos.close();
-		return baos.toByteArray();
+        SMIMEMessageWrapper mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
+		return mimeMessage;
 	}
 
     public ResponseVS getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,

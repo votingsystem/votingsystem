@@ -135,7 +135,7 @@ class GroupVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getSignedMimeMessage(fromUser, toUser,
+        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getSMIMEMessage(fromUser, toUser,
                 messageSMIMEReq.getSmimeMessage()?.getSignedContent(), subject, null)
         log.debug("${metaInf}")
         new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf, smimeParent:messageSMIMEReq, content:smimeMessageResp.getBytes()).save()

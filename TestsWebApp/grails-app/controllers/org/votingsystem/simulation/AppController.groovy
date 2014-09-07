@@ -16,6 +16,8 @@ class AppController {
 
     def contact() {}
 
+    def jsonDocs() { }
+
     /**
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.
      */

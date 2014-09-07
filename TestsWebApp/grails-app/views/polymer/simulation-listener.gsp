@@ -4,7 +4,12 @@
 <polymer-element name="simulation-listener" attributes="subpage pagetitle">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <style> </style>
+        <style>
+        @font-face {
+            font-family: 'digi';
+            src: url('./fonts/DS-DIGII.TTF');
+        }
+        </style>
         <div layout vertical center>
 
             <div layout horizontal center center-justified style="width:100%;">
@@ -13,9 +18,6 @@
                         <i class="fa fa-arrow-left"></i></votingsystem-button>
                 </template>
                 <div flex id="pageTitle" class="pageHeader" style="text-align: center;"><h3>{{pagetitle}}</h3></div>
-                <votingsystem-socket id="socketvs" socketservice="${grailsApplication.config.grails.socketServiceURL}">
-                    <button onclick="{{listenClaimSimulationService}}">listenClaimSimulationService</button>
-                </votingsystem-socket>
             </div>
 
             <div id="progressDiv" style="width:100%;height:100%;display:{{isProcessing? 'block':'none'}}">
@@ -25,13 +27,13 @@
             <div id="messageFromService" class="messageFromServiceBox" style="display:{{message != null? 'block':'none'}}"">
 
                 <div style="margin: 0 0 20px 0;">
-                    <div>
+                    <div layout horizontal>
                         <label style="font-weight: bold;"><g:message code="statusCodelLbl"/>:</label>
-                        <div style="margin: 0 20px 0 0;font-size: 2em;font-weight: bold;" id="statusCode">{{message.statusCode}}</div>
+                        <div flex style="margin: 0 20px 0 0;font-size: 2em;font-weight: bold;" id="statusCode">{{message.statusCode}}</div>
                     </div>
-                    <div style="margin: 0 20px 0 0;">
+                    <div layout horizontal style="margin: 0 20px 0 0;">
                         <label style="font-weight: bold;"><g:message code="timDurationLbl"/>:</label>
-                        <div style="font-family:digi;font-size: 2em;">{{message.simulationData.timeDuration}}</div>
+                        <div flex style="font-family:digi;font-size: 2em;">{{message.simulationData.timeDuration}}</div>
                     </div>
                 </div>
                 <div id="messageDiv" style="margin: 0 0 15px 0;">
@@ -56,6 +58,8 @@
 
             </div>
         </div>
+        <votingsystem-socket id="socketvs"  socketservice="${grailsApplication.config.grails.socketServiceURL}">
+        </votingsystem-socket>
     </template>
     <script>
         Polymer('simulation-listener', {
@@ -65,6 +69,7 @@
             subpage:false,
             isProcessing:false,
             simulationDataChanged: function() {
+                console.log(this.tagName + " - simulationDataChanged")
                 this.$.socketvs.sendMessage(JSON.stringify(this.simulationData))
             },
             ready: function() {
@@ -86,11 +91,7 @@
                 if(this.message.statusCode == ResponseVS.SC_PROCESSING) {
                     this.isProcessing = true
                 }  else this.isProcessing = false
-            },
-            listenClaimSimulationService:function(){
-                this.$.socketvs.sendMessage(JSON.stringify({service:"claimSimulationService", operation:"LISTEN"}))
             }
-
         });
     </script>
 </polymer-element>

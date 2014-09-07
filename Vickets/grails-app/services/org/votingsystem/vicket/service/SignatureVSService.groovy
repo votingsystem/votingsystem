@@ -164,26 +164,23 @@ class  SignatureVSService {
 
     @Transactional public Map loadCertAuthorities() {
         trustedCertsHashMap = new HashMap<Long, CertificateVS>();
-        Set<X509Certificate> trustedCertsSet = new HashSet<X509Certificate>();
+        trustedCerts = new HashSet<X509Certificate>();
+        trustAnchors = new HashSet<TrustAnchor>();
         List<CertificateVS> trustedCertsList = CertificateVS.createCriteria().list(offset: 0) {
             eq("state", CertificateVS.State.OK)
             eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
         }
-        trustedCertsList.each { certificate ->
+        for (CertificateVS certificate : trustedCertsList) {
             X509Certificate x509Cert = certificate.getX509Cert()
-            trustedCertsSet.add(x509Cert)
+            trustedCerts.add(x509Cert)
             trustedCertsHashMap.put(x509Cert.getSerialNumber()?.longValue(), certificate)
-        }
-        trustedCerts = new HashSet<X509Certificate>(trustedCertsSet);
-        trustAnchors = new HashSet<TrustAnchor>();
-        for(X509Certificate certificate: trustedCerts) {
-            TrustAnchor anchor = new TrustAnchor(certificate, null);
+            TrustAnchor anchor = new TrustAnchor(x509Cert, null);
             trustAnchors.add(anchor);
         }
+
         log.debug("loadCertAuthorities - loaded '${trustedCertsHashMap?.keySet().size()}' authorities")
         return [trustedCertsHashMap: trustedCertsHashMap, trustedCerts:trustedCerts, trustAnchors:trustAnchors]
     }
-
 
     public Set<TrustAnchor> getTrustAnchors() {
         if(!trustAnchors) trustAnchors = loadCertAuthorities().trustAnchors
@@ -195,8 +192,8 @@ class  SignatureVSService {
         return trustedCerts;
     }
 
-	public SMIMEMessageWrapper getSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
-		log.debug "getSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+	public SMIMEMessageWrapper getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
+		log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		return getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header);

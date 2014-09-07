@@ -12,14 +12,10 @@ import org.votingsystem.model.CertificateVS
  * */
 class TestingController {
 
+    def signatureVSService
+
     def index() {
-        def certVS
-        CertificateVS.withTransaction {
-            certVS = CertificateVS.createCriteria().list (offset: 0) {
-                eq("tipo", Tipo.REPRESENTATIVE_DATA)
-                le("dateCreated", selectedDate)
-            }
-        }
+        signatureVSService.loadCertAuthorities()
     }
 
 }

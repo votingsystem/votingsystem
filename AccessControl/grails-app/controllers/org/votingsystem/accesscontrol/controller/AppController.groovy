@@ -39,6 +39,8 @@ class AppController {
 
     def contact() {}
 
+    def admin() {}
+
     def tools() {}
 
     def jsonDocs() { }

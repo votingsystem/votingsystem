@@ -28,15 +28,16 @@ public class VoteSender implements Callable<ResponseVS> {
    
     private VoteVS voteVS;
     private UserVS userVS;
+    private KeyStore mockDnie;
         
-    public VoteSender(VoteVS voteVS, UserVS userVS) throws Exception {
+    public VoteSender(VoteVS voteVS, UserVS userVS, KeyStore mockDnie) throws Exception {
         this.voteVS = voteVS;
         this.userVS = userVS;
+        this.mockDnie = mockDnie;
     }
     
     @Override public ResponseVS call() {
         try {
-            KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(userVS.getNif());
             String msgSubject = ApplicationContextHolder.getInstance().getMessage("accessRequestMsgSubject",
                     voteVS.getEventVS().getId().toString());
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, END_ENTITY_ALIAS,

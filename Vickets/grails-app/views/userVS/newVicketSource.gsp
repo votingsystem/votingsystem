@@ -38,7 +38,7 @@
                 <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
             </div>
 
-            <div class="form-group" style="margin:15px 0px 0px 0px;">
+            <div style="margin:15px 0px 0px 0px;">
                 <label><g:message code="pemCertLbl"/></label>
                 <textarea id="pemCert" rows="8" required=""></textarea>
             </div>

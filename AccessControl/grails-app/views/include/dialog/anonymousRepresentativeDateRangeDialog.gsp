@@ -8,7 +8,7 @@
             <div class="errorMsgWrapper" style="display:none;"></div>
             <div class="modal-body">
                 <form id="representativeDateRangeForm">
-                    <div class="form-group">
+                    <div>
                         <label><g:message code="numWeeksAnonymousDelegationMsg"/></label>
                         <input type="number" id="numWeeksAnonymousDelegation" min="1" value="" max="52" required
                                style="width:120px;margin:10px 20px 0px 7px;" class="form-control"

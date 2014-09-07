@@ -71,12 +71,9 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     break;
 
             }
-            responseVS = addCertificateAuthority(actorVS);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                if(actorVS instanceof AccessControlVS) ContextVS.getInstance().setAccessControl(actorVS);
-                if(actorVS instanceof ControlCenterVS) ContextVS.getInstance().setControlCenter(actorVS);
-                responseVS.setData(actorVS)
-            }
+            if(actorVS instanceof AccessControlVS) ContextVS.getInstance().setAccessControl(actorVS);
+            if(actorVS instanceof ControlCenterVS) ContextVS.getInstance().setControlCenter(actorVS);
+            responseVS.setData(actorVS)
         }
         return responseVS;
     }

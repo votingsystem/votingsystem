@@ -2,6 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 
+
 <polymer-element name="get-reason-dialog" attributes="caption opened isForAdmins messageToUser">
     <template>
         <style></style>

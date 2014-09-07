@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class ElectionSimulationService implements SimulatorListener<UserBaseSimulationData> {
 
-    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INIT_ACCESS_CONTROL, INIT_CONTROL_CENTER,
+    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INIT_ACCESS_CONTROL,
         PUBLISH_EVENT, CREATE_USER_BASE_DATA, SEND_VOTES, CHANGE_EVENT_STATE, REQUEST_BACKUP ,FINISH_SIMULATION, LISTEN}
 
     private Long broadcastMessageInterval = 10000;
@@ -39,6 +39,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 	def messageSource
 	def grailsApplication
     def userBaseDataSimulationService
+    def signatureVSService
 	private String simulationStarter
     private List<String> synchronizedElectorList
 	private List<String> errorList;
@@ -54,7 +55,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 
 	
 	public void processRequest(JSONObject messageJSON) {
-		log.debug("--- processRequest - status: '${messageJSON?.status}'")
+		log.debug("processRequest - status: '${messageJSON?.status}'")
         try {
             Status status = Status.valueOf(messageJSON?.status);
             switch(status) {
@@ -119,8 +120,10 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         public void run() {
             if(!synchronizedElectorList.isEmpty()) {
                 int randomElector = new Random().nextInt(synchronizedElectorList.size());
+                UserVS userVS = new UserVS(synchronizedElectorList.remove(randomElector))
+                KeyStore userMockDNIe = signatureVSService.generateKeyStore(userVS.getNif())
                 responseService.submit(new VoteSender(VoteVS.genRandomVote(ContextVS.VOTING_DATA_DIGEST, eventVS),
-                        new UserVS(synchronizedElectorList.remove(randomElector))));
+                        userVS, userMockDNIe));
             } else simulationTimer.stop();
         }
     }
@@ -167,15 +170,6 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         changeSimulationStatus(responseVS)
     }
 
-    private void initControlCenter() throws Exception {
-        log.debug("initControlCenter ### Enter status INIT_CONTROl_CENTER");
-        ServerInitializer serverInitializer = new ServerInitializer(simulationData.getControlCenterURL(),
-                ActorVS.Type.CONTROL_CENTER);
-        ResponseVS responseVS = serverInitializer.call();
-        responseVS.setStatus(Status.INIT_CONTROL_CENTER)
-        changeSimulationStatus(responseVS)
-    }
-
 	private void publishEvent(EventVS eventVS) throws Exception {
 		log.debug("publishElection ### Enter status PUBLISH_EVENT");
 		DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -184,29 +178,29 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 		String subject = "Simulation Event -> " + eventVS.getSubject() + " -> " + dateStr;
         eventVS.setSubject(subject);
         eventVS.setType(EventVS.Type.ELECTION)
-        eventVS.setControlCenterVS(ContextVS.getInstance().getControlCenter());
 		this.eventVS = eventVS;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
         String urlPublishElection = ContextVS.getInstance().getAccessControl().getPublishElectionURL()
 		String msgSubject = messageSource.getMessage("publishElectionMsgSubject", null, locale);
-		KeyStore keyStore = ContextVS.getInstance().getUserTest().getKeyStore()
+		/*KeyStore keyStore = ContextVS.getInstance().getUserTest().getKeyStore()
 		PrivateKey privateKey = (PrivateKey)keyStore.getKey(
 			ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
 		Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
 		signedMailGenerator = new SignedMailGenerator(privateKey, chain, ContextVS.DNIe_SIGN_MECHANISM);
-		SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
+		SMIMEMessageWrapper smimeDocument1 = signedMailGenerator.genMimeMessage(
 				ContextVS.getInstance().getUserTest().getEmail(),
 				ContextVS.getInstance().getAccessControl().getNameNormalized(),
-				eventStr, msgSubject,  null);
-		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishElection,
+				eventStr, msgSubject,  null);*/
+        SMIMEMessageWrapper smimeDocument = signatureVSService.getSMIMEMessage(grailsApplication.config.VotingSystem.systemMail,
+                ContextVS.getInstance().getAccessControl().getNameNormalized(), eventStr, msgSubject)
+        SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishElection,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);
 		ResponseVS responseVS = signedSender.call();
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] responseBytes = responseVS.getMessageBytes();
             ContextVS.getInstance().copyFile(responseBytes,"/electionSimulation", "ElectionPublishedReceipt")
-            SMIMEMessageWrapper smimeDocumentReceipt = new SMIMEMessageWrapper(
-                    new ByteArrayInputStream(responseBytes));
+            SMIMEMessageWrapper smimeDocumentReceipt = new SMIMEMessageWrapper(new ByteArrayInputStream(responseBytes));
             this.eventVS = EventVSElection.populate(new JSONObject(smimeDocumentReceipt.getSignedContent()))
             //smimeDocumentReceipt.verify(ContextVS.getInstance().getSessionPKIXParameters());
 		}
@@ -410,11 +404,6 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                     } else finishSimulation(statusFromResponse);
                     break;
                 case Status.INIT_ACCESS_CONTROL:
-                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
-                        initControlCenter();
-                    } else finishSimulation(statusFromResponse);
-                    break;
-                case Status.INIT_CONTROL_CENTER:
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
                         publishEvent(simulationData.getEventVS());
                     } else finishSimulation(statusFromResponse);

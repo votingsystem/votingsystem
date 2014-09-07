@@ -380,16 +380,13 @@ class SignatureVSService {
 		return resultFile
 	}
 		
-	public byte[] getSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,Header header) {
-		log.debug "getSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+	public SMIMEMessageWrapper getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject,Header header) {
+		log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		mimeMessage.writeTo(baos);
-		baos.close();
-		return baos.toByteArray();
+        SMIMEMessageWrapper mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, header)
+		return mimeMessage;
 	}
 
 		
