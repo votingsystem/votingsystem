@@ -78,9 +78,6 @@
             </div>
         </div>
 
-        <div id="simulationListenerDiv" style="display: none;">
-            <g:include view="/include/listenSimulation.gsp"/>
-        </div>
     </div>
 </div>
 </body>

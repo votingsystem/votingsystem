@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="pageContenDiv">
-    <votingsystem-socket id="socketvs" url="${grailsApplication.config.webSocketURL}">
+    <votingsystem-socket id="socketvs" socketservice="${grailsApplication.config.webSocketURL}">
         <input id="messageBox" class="text" value="{locale:'es', operation:'LISTEN_TRANSACTIONS'}" name="text">
         <button onclick="sendMessage()">Send message</button>
     </votingsystem-socket>

@@ -41,21 +41,10 @@
                class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
                 <g:message code="initEncryptionProtocolSimulationButton"/>
             </a>
-            <a id="simulationRunningButton" href="#" onclick="showSimulationRunningDialog('Mensaje de la página principal');"
-               class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
-                TEST
-            </a>
         </div>
     </div>
-</div>
-<div style="display:none;">
-    <g:include view="/include/simulationRunningDialog.gsp" style="display:none;"/>
-    <g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
 </div>
 </body>
 </html>
 <asset:script>
-
-    $(function() { });
-
 </asset:script>

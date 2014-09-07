@@ -173,7 +173,7 @@
     <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
 </div>
 <core-signals id="coreSignals"></core-signals>
-<votingsystem-socket id="socketvs" url="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
+<votingsystem-socket id="socketvs" socketservice="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
 </body>
 </html>
 <asset:script>

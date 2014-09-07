@@ -28,21 +28,10 @@
            class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
             <g:message code="addUsersToGroupButton"/>
         </a>
-        <a id="simulationRunningButton" href="#" onclick="showSimulationRunningDialog('Mensaje de la página principal');"
-           class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:400px;">
-            TEST
-        </a>
     </div>
-</div>
-<div style="display:none;">
-    <g:include view="/include/simulationRunningDialog.gsp" style="display:none;"/>
-    <g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
 </div>
 </body>
 <asset:script>
-
-    $(function() { });
-
     function openWindow(targetURL) {
         var width = 1000
         var height = 800
@@ -54,6 +43,5 @@
                 'width='+ width +
                 ', height='+ height  +', top='+ top +', left='+ left + '');
     }
-
 </asset:script>
 </html>

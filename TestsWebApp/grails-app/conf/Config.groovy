@@ -96,15 +96,17 @@ environments {
     development {
         if(Metadata.current.isWarDeployed()) {
             grails.logging.jul.usebridge = false
-            grails.serverURL = "http://www.sistemavotacion.org/TestWebApp"
+            grails.serverURL = "http://www.sistemavotacion.org/${appName}"
         } else {
             grails.resources.debug = true
             grails.serverURL = "http://testwebapp:8084/${appName}"
         }
+        grails.socketServiceURL = "ws://testwebapp:8084/${appName}/websocket/service"
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://www.sistemavotacion.org/TestWebApp"
+        grails.serverURL = "http://www.sistemavotacion.org/${appName}"
+        grails.socketServiceURL = "ws://www.sistemavotacion.org/${appName}/websocket/service"
     }
 }
 

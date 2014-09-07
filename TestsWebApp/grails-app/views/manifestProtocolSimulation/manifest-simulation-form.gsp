@@ -23,9 +23,9 @@
             <section id="page1">
                 <div class="pageContentDiv" style="width:100%; padding:0px 20px 0px 20px;">
 
-                    <div layout horizontal center center-justified style="margin: 15px 0px 15px 0px; width: 100%;">
-                        <div id="pageTitle" class="pageHeader"><h3><g:message code="initClaimProtocolSimulationMsg"/></h3></div>
-                        <div  id="testButtonDiv" >
+                    <div lauyout center center-justified style="margin: 15px 0px 15px 0px;width: 100%;">
+                        <div id="pageTitle" class="pageHeader"><h3><g:message code="initManifestProtocolSimulationMsg"/></h3></div>
+                        <div  id="testButtonDiv">
                             <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
                                 <g:message code="goToResultViewMsg"/>
                             </button>

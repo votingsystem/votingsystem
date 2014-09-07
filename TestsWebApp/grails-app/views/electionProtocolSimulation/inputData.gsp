@@ -194,10 +194,6 @@
     </div>
 </div>
 
-<div id="simulationListenerDiv" style="display: none;">
-    <g:include view="/include/listenSimulation.gsp"/>
-</div>
-
 <g:include view="/include/dialog/addVoteOptionDialog.gsp"/>
 <template id="emailTemplate" style="display:none;">
     <input type="email" id="emailRequestBackup" style="width:300px;" required
@@ -215,7 +211,7 @@
 <asset:script>
 var textEditor = document.querySelector('#textEditor')
 
-$(function() {$('#backupDiv').hide()})
+
 
 $('#eventStateOnFinishSelect').on('change', function (e) {
     var eventState = $(this).val()

@@ -140,7 +140,6 @@
     <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
 </div>
 <core-signals id="coreSignals"></core-signals>
-<votingsystem-socket id="socketvs" url="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
 </body>
 </html>
 <asset:script>
@@ -160,21 +159,6 @@
         document.querySelector('#navBar').style.display = 'block';
         document.querySelector('#loadingDiv').style.display = 'none';
     });
-
-    document.querySelector('#socketvs').addEventListener('on-message', function(e) {
-        console.log("main.gsp - socketvs - message: " + e.detail)
-        var socketMessage = e.detail
-        if(200 != socketMessage.status) {
-            console.log("main.gsp - socketvs - error")
-            showMessageVS(socketMessage.message, 'ERROR')
-        }
-    });
-
-    function sendSocketVSMessage(dataJSON) {
-        console.log ("sendSocketVSMessage")
-        dataJSON.locale = navigator.language
-        document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
-    }
 
     document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
         var ajaxDocument = e.detail

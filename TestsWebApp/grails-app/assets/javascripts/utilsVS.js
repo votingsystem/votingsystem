@@ -40,6 +40,11 @@ var Operation = {
     REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA"
 }
 
+var Status = {
+    INIT_SIMULATION:"INIT_SIMULATION",
+    FINISH_SIMULATION:"FINISH_SIMULATION"
+}
+
 function httpGet(theUrl){
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false );

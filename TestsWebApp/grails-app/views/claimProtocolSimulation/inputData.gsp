@@ -10,7 +10,7 @@
 <body>
 <div class="pageContenDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
     <div>
-        <ol class="breadcrumbVS pull-left">
+        <ol class="breadcrumbVS">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li><a href="${createLink(controller: 'simulation', action:'votingSystem', absolute:true)}">
                 <g:message code="votingSystemOperationsLbl"/></a></li>

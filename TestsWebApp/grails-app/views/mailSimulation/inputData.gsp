@@ -133,10 +133,6 @@
         </div>
     </div>
 
-    <div id="simulationListenerDiv" style="display: none;">
-        <g:include view="/include/listenSimulation.gsp"/>
-    </div>
-
     <template id="timerTemplate" style="display:none;">
         <input type="time" id="timerData" style="" required
                title="<g:message code="simulationTimerDataMsg"/>"

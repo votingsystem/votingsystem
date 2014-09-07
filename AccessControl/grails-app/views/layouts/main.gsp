@@ -16,7 +16,6 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
@@ -192,7 +191,6 @@
     <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
 </div>
 <core-signals id="coreSignals"></core-signals>
-<votingsystem-socket id="socketvs" url="${grailsApplication.config.webSocketURL}"></votingsystem-socket>
 </body>
 </html>
 <asset:script>
@@ -234,21 +232,6 @@
         document.querySelector('#navBar').style.display = 'block';
         document.querySelector('#loadingDiv').style.display = 'none';
     });
-
-    document.querySelector('#socketvs').addEventListener('on-message', function(e) {
-        console.log("main.gsp - socketvs - message: " + e.detail)
-        var socketMessage = e.detail
-        if(200 != socketMessage.status) {
-            console.log("main.gsp - socketvs - error")
-            showMessageVS(socketMessage.message, 'ERROR')
-        }
-    });
-
-    function sendSocketVSMessage(dataJSON) {
-        console.log ("sendSocketVSMessage")
-        dataJSON.locale = navigator.language
-        document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
-    }
 
     document.querySelector('#navBar').addEventListener('ajax-response', function(e) {
         var ajaxDocument = e.detail
