@@ -69,8 +69,8 @@
 
             <template if="{{eventvs.fieldsEventVS.size() > 0}}">
                 <div id="claimFields">
-                    <fieldset id="fieldsBox" style="">
-                        <legend id="fieldsLegend"><g:message code="claimsFieldLegend"/></legend>
+                    <fieldset>
+                        <legend><g:message code="claimsFieldLegend"/></legend>
                         <div id="fields" style="width:100%;">
                             <template if="{{'ACTIVE' == eventvs.state}}">
                                 <template repeat="{{claimField in eventvs.fieldsEventVS}}">
@@ -171,7 +171,7 @@
                         } else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
                             caption = "<g:message code='operationCANCELLEDLbl'/>"
                         }
-                        showMessageVS(caption, appMessageJSON.message)
+                        showMessageVS(appMessageJSON.message, caption)
                     }}.bind(this)}
 
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

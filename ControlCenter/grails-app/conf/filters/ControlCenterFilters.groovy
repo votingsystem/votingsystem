@@ -56,11 +56,10 @@ class ControlCenterFilters {
                     log.debug("before - contentType: ${contentTypeVS}")
                     if(!contentTypeVS?.isPKCS7()) return;
                     byte[] requestBytes = getBytesFromInputStream(request.getInputStream())
-                    //log.debug "---- pkcs7DocumentsFilter - before  - consulta: ${new String(requestBytes)}"
+                    //log.debug "before  - requestBytes: ${new String(requestBytes)}"
                     if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                     switch(contentTypeVS) {
-                        case ContentTypeVS.VOTE:
                         case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
@@ -74,6 +73,7 @@ class ControlCenterFilters {
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 params.requestBytes = responseVS.messageBytes
                             break;
+                        case ContentTypeVS.VOTE:
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessageWrapper(
@@ -116,7 +116,6 @@ class ControlCenterFilters {
                 }
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
-                    case ContentTypeVS.VOTE:
                     case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
@@ -129,6 +128,7 @@ class ControlCenterFilters {
                             messageSMIME.save()
                             return printOutput(response, encryptResponse)
                         }
+                    case ContentTypeVS.VOTE:
                     case ContentTypeVS.JSON_SIGNED:
                     case ContentTypeVS.SIGNED:
                         if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)

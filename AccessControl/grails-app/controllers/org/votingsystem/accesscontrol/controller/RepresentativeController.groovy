@@ -249,6 +249,7 @@ class RepresentativeController {
     def processFileMap() { 
 		byte[] imageBytes = params[ContextVS.IMAGE_FILE_NAME]
 		MessageSMIME messageSMIMEReq = params[ContextVS.REPRESENTATIVE_DATA_FILE_NAME]
+        request.messageSMIMEReq = messageSMIMEReq
 		if(!messageSMIMEReq || !imageBytes) {
 			String msg
 			if(!imageBytes) msg = message(code: 'imageMissingErrorMsg')

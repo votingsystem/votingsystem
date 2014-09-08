@@ -12,10 +12,11 @@ body {
 
 .linkvs{}
 
-.pageContenDiv {
+.pageContentDiv {
     margin:0px auto 0px auto;
     padding:0px 30px 0px 30px;
-    max-width: 1400px;
+    max-width: 1200px;
+    width: 100%;
 }
 
 
@@ -365,7 +366,7 @@ hr {
     border: 1px solid #ccc;
 }
 
-#fieldsBox legend {
+.fieldsBox legend {
     font-size: 1.2em;
     font-weight: bold;
     color:#6c0404;

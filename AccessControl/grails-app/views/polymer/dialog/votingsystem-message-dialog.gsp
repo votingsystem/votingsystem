@@ -67,9 +67,8 @@
             },
 
             accept: function() {
-                var callerId = this.callerId
                 this.close()
-                this.fire('core-signal', {name: "messagedialog-accept", data: callerId});
+                this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
             },
 
             close: function() {

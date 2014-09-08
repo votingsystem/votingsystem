@@ -3,13 +3,11 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-admin-dialog.gsp']"/>">
 
 
-<polymer-element name="eventvs-election">
+<polymer-element name="eventvs-election" attributes="subpage">
     <template>
         <g:include view="/include/styles.gsp"/>
-        <style>
-
-        </style>
-        <div class="pageContentDiv" style="width:100%;max-width: 1000px; padding:0px 20px 0px 20px;">
+        <style></style>
+        <div class="pageContentDiv">
             <template if="{{'admin' == menuType}}">
                 <div class="text-center" style="">
                     <template if="{{'ACTIVE' == eventvs.state || 'PENDING' == eventvs.state}}">
@@ -21,16 +19,33 @@
                 </div>
             </template>
 
-            <h3><div class="pageHeader text-center">{{eventvs.subject}}</div></h3>
+            <div layout horizontal center center-justified style="width:100%;">
+                <template if="{{subpage}}">
+                    <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
+                        <i class="fa fa-arrow-left"></i></votingsystem-button>
+                </template>
+                <div flex id="pageTitle" class="pageHeader text-center"><h3>{{eventvs.subject}}</h3></div>
+            </div>
 
-            <div style="display:inline;">
-                <div class="" style="margin:0px 0px 0px 30px; display: inline;"><b><g:message code="dateLimitLbl"/>: </b>
+            <div layout horizontal style="width: 100%;">
+                <div flex>
+                    <template if="{{'PENDING' == eventvs.state}}">
+                        <div style="font-size: 1.2em; font-weight:bold;color:#fba131;"><g:message code="eventVSPendingMsg"/></div>
+                    </template>
+                    <template if="{{'TERMINATED' == eventvs.state || 'CANCELLED' == eventvs.state}}">
+                        <div style="font-size: 1.2em; font-weight:bold;color:#cc1606;"><g:message code="eventVSFinishedLbl"/></div>
+                    </template>
+                </div>
+                <template if="{{'PENDING' == eventvs.state}}">
+                    <div><b><g:message code="dateBeginLbl"/>: </b>
+                        {{eventvs.dateBeginStr}}</div>
+                </template>
+                <div style="margin:0px 30px 0px 30px;"><b><g:message code="dateLimitLbl"/>: </b>
                     {{eventvs.dateFinishStr}}</div>
-                <div id="pendingTimeDiv" class="text-right" style="margin:0px 40px 0px 0px; color: #388746; display: inline; white-space:nowrap;"></div>
             </div>
 
             <div>
-                <div class="eventContentDiv" style="width:100%;">
+                <div class="eventContentDiv" style="">
                     <votingsystem-html-echo html="{{eventvs.content}}"></votingsystem-html-echo>
                 </div>
 
@@ -39,13 +54,13 @@
                 </div>
 
                 <div class="fieldsBox" style="">
-                    <fieldset id="fieldsBox">
-                        <legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
-                        <div id="fields" class="" style="width:100%;">
+                    <fieldset>
+                        <legend><g:message code="pollFieldLegend"/></legend>
+                        <div>
                             <template if="{{'ACTIVE' == eventvs.state}}">
                                 <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
-                                    <div class="btn btn-default btn-lg voteOptionButton"
-                                         style="width: 90%;margin: 10px auto 30px auto;" on-click="{{showConfirmDialog}}">
+                                    <div class="btn btn-default btn-lg" on-click="{{showConfirmDialog}}"
+                                         style="width: 90%;margin: 10px auto 30px auto; border: 2px solid #6c0404; padding: 10px; font-size: 1.2em;" >
                                         {{optionvs.content}}
                                     </div>
                                 </template>
@@ -71,12 +86,13 @@
             publish: {
                 eventvs: {value: {}}
             },
+            subpage:false,
             optionVSSelected:null,
             eventvsChanged:function() {
                 this.optionVSSelected = null
             },
             ready: function() {
-                console.log(this.tagName + "- menuType:  " + this.menuType)
+                console.log(this.tagName + "- subpage:  " + this.subpage)
                 this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
                     this.submitVote()
                 }.bind(this))
@@ -84,7 +100,11 @@
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.opened = true
             },
+            back:function() {
+                this.fire('core-signal', {name: "eventvs-election-closed", data: null});
+            },
             showConfirmDialog: function(e) {
+                console.log(this.tagName + " showConfirmDialog")
                 this.optionVSSelected = e.target.templateInstance.model.optionvs
                 this.$.confirmOptionDialog.show(this.optionVSSelected.content)
             },
@@ -94,7 +114,7 @@
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SEND_SMIME_VOTE)
                 webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
                 webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-                votingEvent.voteVS = voteVS
+                this.eventvs.voteVS = voteVS
                 webAppMessage.eventVS = this.eventvs
                 webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.signedMessageSubject = '<g:message code="sendVoteMsgSubject"/>'
@@ -114,9 +134,9 @@
                             msg = msgTemplate.format('<g:message code="voteResultOKMsg"/>',appMessageJSON.message);
                         } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
                             msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>"
-                            msg = msgTemplate.format(votingEvent.subject, appMessageJSON.message);
+                            msg = msgTemplate.format(webAppMessage.eventVS.subject, appMessageJSON.message);
                         } else msg = appMessageJSON.message
-                        showMessageVS(caption, msg)
+                        showMessageVS(msg, caption)
                     }}.bind(this)}
 
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

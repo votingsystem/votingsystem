@@ -12,6 +12,7 @@
                 padding:10px 20px 10px 20px;
             }
         </style>
+        <core-signals on-core-signal-messagedialog-closed="{{messagedialog}}"></core-signals>
         <div class="pageHeader"  layout horizontal center center-justified>
             <h3><g:message code="publishVoteLbl"/></h3>
         </div>
@@ -52,19 +53,21 @@
 
 
             <div id="fieldsDiv" style="display:{{pollOptionList.length == 0? 'none':'block'}}">
-                <fieldset id="fieldsBox" class="fieldsBox">
-                    <legend id="fieldsLegend" style="border: none;"><g:message code="pollFieldLegend"/></legend>
-                    <div layout vertical>
-                        <template repeat="{{pollOption in pollOptionList}}">
-                            <div>
-                                <a class="btn btn-default" on-click="{{removePollOption}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                                    <g:message code="deleteLbl"/> <i class="fa fa-minus"></i></a>
-                                {{pollOption}}
-                            </div>
+                <div class="fieldsBox">
+                    <fieldset>
+                        <legend><g:message code="pollFieldLegend"/></legend>
+                        <div layout vertical>
+                            <template repeat="{{pollOption in pollOptionList}}">
+                                <div>
+                                    <a class="btn btn-default" on-click="{{removePollOption}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                                        <g:message code="deleteLbl"/> <i class="fa fa-minus"></i></a>
+                                    {{pollOption}}
+                                </div>
 
-                        </template>
-                    </div>
-                </fieldset>
+                            </template>
+                        </div>
+                    </fieldset>
+                </div>
             </div>
 
             <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
@@ -86,6 +89,7 @@
     </template>
     <script>
         Polymer('eventvs-vote-editor', {
+            appMessageJSON:null,
             pollOptionList : [],
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -101,7 +105,6 @@
                 var pollOption = e.target.templateInstance.model.pollOption
                 console.log("removePollOption")
                 for(optionIdx in this.pollOptionList) {
-
                     console.log("option: " +  this.pollOptionList[optionIdx] + " - pollOption: " + pollOption)
                     if(pollOption == this.pollOptionList[optionIdx]) {
                         this.pollOptionList.splice(optionIdx, 1)
@@ -153,12 +156,18 @@
                     return
                 }
 
+                var pollOptions = []
+                for(optionIdx in this.pollOptionList) {
+                    var option = {content:this.pollOptionList[optionIdx]}
+                    pollOptions.push(option)
+                }
+
                 var eventVS = {};
                 eventVS.subject = this.$.subject.value;
                 eventVS.content = this.$.textEditor.getData();
                 eventVS.dateBegin = dateBegin.formatWithTime();
                 eventVS.dateFinish = dateFinish.formatWithTime();
-                eventVS.fieldsEventVS = this.pollOptionList
+                eventVS.fieldsEventVS = pollOptions
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VOTING_PUBLISHING)
                 webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
                 webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
@@ -170,27 +179,28 @@
                 var objectId = Math.random().toString(36).substring(7)
                 webAppMessage.callerCallback = objectId
 
+                this.appMessageJSON = null
                 window[objectId] = {setClientToolMessage: function(appMessage) {
                     console.log("publishDocumentCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
+                    this.appMessageJSON = toJSON(appMessage)
                     electionDocumentURL = null
-                    if(appMessageJSON != null) {
+                    if(this.appMessageJSON != null) {
                         var caption = '<g:message code="publishERRORCaption"/>'
-                        var msg = appMessageJSON.message
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        var msg = this.appMessageJSON.message
+                        if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                             caption = '<g:message code="publishOKCaption"/>'
                             var msgTemplate = "<g:message code='documentLinkMsg'/>";
-                            msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
-                            window.location.href = appMessageJSON.message
+                            msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(this.appMessageJSON.message);
                         }
                         showMessageVS(msg, caption)
                     }
                     }.bind(this)}
 
-
-
-
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
+            },
+            messagedialog:function() {
+                if(this.appMessageJSON != null && this.appMessageJSON.message != null)
+                    window.location.href = this.appMessageJSON.message
             }
         });
     </script>

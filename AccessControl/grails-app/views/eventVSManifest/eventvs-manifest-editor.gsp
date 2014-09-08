@@ -1,4 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 
 <polymer-element name="eventvs-manifest-editor" attributes="opened">
     <template>
@@ -11,6 +12,7 @@
                 padding:10px 20px 10px 20px;
             }
         </style>
+        <core-signals on-core-signal-messagedialog-closed="{{messagedialog}}"></core-signals>
         <div class="pageHeader"  layout horizontal center center-justified>
             <h3><g:message code="publishManifestLbl"/></h3>
         </div>
@@ -57,6 +59,7 @@
     </template>
     <script>
         Polymer('eventvs-manifest-editor', {
+            appMessageJSON:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 //alert( CKEDITOR.basePath );
@@ -103,24 +106,28 @@
                 var objectId = Math.random().toString(36).substring(7)
                 webAppMessage.callerCallback = objectId
 
+                this.appMessageJSON = null
                 window[objectId] = {setClientToolMessage: function(appMessage) {
                     console.log("publishDocumentCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
+                    this.appMessageJSON = toJSON(appMessage)
                     electionDocumentURL = null
-                    if(appMessageJSON != null) {
+                    if(this.appMessageJSON != null) {
                         var caption = '<g:message code="publishERRORCaption"/>'
-                        var msg = appMessageJSON.message
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        var msg = this.appMessageJSON.message
+                        if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                             caption = '<g:message code="publishOKCaption"/>'
                             var msgTemplate = "<g:message code='documentLinkMsg'/>";
-                            msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
-                            window.location.href = appMessageJSON.message
+                            msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(this.appMessageJSON.message);
                         }
                         showMessageVS(msg, caption)
                     }
                     }.bind(this)}
 
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
+            },
+            messagedialog:function() {
+                if(this.appMessageJSON != null && this.appMessageJSON.message != null)
+                    window.location.href = this.appMessageJSON.message
             }
         });
     </script>

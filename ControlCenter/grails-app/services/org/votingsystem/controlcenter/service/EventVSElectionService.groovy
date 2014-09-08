@@ -9,6 +9,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.StringUtils
 
@@ -57,8 +58,9 @@ class EventVSElectionService {
             log.debug("$methodName - WARNING - serverURL: ${controlCenterURL} - messageJSON.controlCenterURL: ${messageJSON.controlCenterURL}")
         }
         X509Certificate certCAVotacion = CertUtil.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
-        byte[] certChain = messageJSON.certChain?.getBytes()
+
         X509Certificate userCert = CertUtil.fromPEMToX509Cert(messageJSON.userVS?.bytes)
+
         UserVS user = UserVS.getUserVS(userCert);
         //Publish request comes with Access Control cert
         responseVS = subscriptionVSService.checkUser(user, locale)
@@ -68,8 +70,7 @@ class EventVSElectionService {
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "checkAccesControlError"))
         }
         user = responseVS.userVS
-        def eventVS = new EventVSElection(accessControlEventVSId:messageJSON.id,
-                subject:messageJSON.subject, certChainAccessControl:certChain,
+        def eventVS = new EventVSElection(accessControlEventVSId:messageJSON.id, subject:messageJSON.subject,
                 content:messageJSON.content, url:messageJSON.URL, accessControlVS:accessControl,
                 userVS:user, dateBegin:DateUtils.getDateFromString(messageJSON.dateBegin),
                 dateFinish:DateUtils.getDateFromString(messageJSON.dateFinish))
@@ -77,20 +78,39 @@ class EventVSElectionService {
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
                     type:TypeVS.ERROR,  metaInf:MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
-        }
+        } else eventVS.setState(null)
         eventVS.save()
+
+        X509Certificate controlCenterX509Cert = signatureVSService.getServerCert()
+        CertificateVS eventVSControlCenterCertificate = new CertificateVS(
+                state:CertificateVS.State.OK, type:CertificateVS.Type.ACTOR_VS, eventVSElection:eventVS,
+                content:controlCenterX509Cert.getEncoded(), serialNumber:controlCenterX509Cert.getSerialNumber().longValue(),
+                validFrom:controlCenterX509Cert?.getNotBefore(), validTo:controlCenterX509Cert?.getNotAfter()).save()
+
+        Collection<X509Certificate> accessControlCerts = CertUtil.fromPEMToX509CertCollection (messageJSON.certChain?.getBytes())
+        X509Certificate accessControlX509Cert = accessControlCerts.iterator().next()
+        CertificateVS eventVSAccessControlCertificate = new CertificateVS(actorVS:accessControl,
+                state:CertificateVS.State.OK, type:CertificateVS.Type.ACTOR_VS, eventVSElection:eventVS,
+                content:accessControlX509Cert.getEncoded(), serialNumber:accessControlX509Cert.getSerialNumber().longValue(),
+                validFrom:accessControlX509Cert?.getNotBefore(), validTo:accessControlX509Cert?.getNotAfter()).save()
+
         CertificateVS eventVSRootCertificate = new CertificateVS(actorVS:accessControl,
                 state:CertificateVS.State.OK, type:CertificateVS.Type.VOTEVS_ROOT, eventVSElection:eventVS,
                 content:certCAVotacion.getEncoded(), serialNumber:certCAVotacion.getSerialNumber().longValue(),
                 validFrom:certCAVotacion?.getNotBefore(), validTo:certCAVotacion?.getNotAfter())
         eventVSRootCertificate.save()
+
+        log.debug("$methodName - eventVSAccessControlCertificate.id: '${eventVSAccessControlCertificate.id}' " +
+                " - eventVSRootCertificate: '${eventVSRootCertificate.id}'")
+
         saveFieldsEventVS(eventVS, messageJSON.fieldsEventVS)
         if (messageJSON.tags) {
             Set<TagVS> tags = tagVSService.save(messageJSON.tags)
             eventVS.setTagVSSet(tags)
         }
+        eventVS.setState(EventVS.State.ACTIVE)
         eventVS.save()
-        log.debug("$methodName - SAVED event - '${eventVS.id}'")
+        log.debug("$methodName - ACTIVATED event - '${eventVS.id}'")
         return new ResponseVS(statusCode:ResponseVS.SC_OK,  eventVS:eventVS, type:TypeVS.VOTING_EVENT)
 	}
 	
@@ -173,10 +193,8 @@ class EventVSElectionService {
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
         ResponseVS responseVS = checkCancelEventJSONData(messageJSON, locale)
         if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
-        byte[] certChainBytes
-        EventVS.withTransaction {
-            eventVS = EventVS.findWhere(accessControlEventVSId:Long.valueOf(messageJSON.eventId))
-            certChainBytes = eventVS?.certChainAccessControl
+        EventVSElection.withTransaction {
+            eventVS = EventVSElection.findWhere(accessControlEventVSId:Long.valueOf(messageJSON.eventId))
         }
         if(!eventVS) {
             msg = messageSource.getMessage('eventVSNotFound', [messageJSON?.eventId].toArray(), locale)
@@ -188,9 +206,11 @@ class EventVSElectionService {
             log.error("cancelEvent - msg: ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, type:TypeVS.ERROR, message:msg)
         }
-        Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
-        X509Certificate accessControlCert = certColl.iterator().next()
-        if(!signatureVSService.isSignerCertificate(messageSMIMEReq.getSigners(), accessControlCert)) {
+        CertificateVS accessControlCert = CertificateVS.findWhere(eventVSElection:eventVS, type:CertificateVS.Type.ACTOR_VS,
+                actorVS:eventVS.accessControlVS)
+        if(!accessControlCert) throw new ExceptionVS("missing Access Control Cert")
+
+        if(!signatureVSService.isSignerCertificate(messageSMIMEReq.getSigners(), accessControlCert.getX509Cert())) {
             msg = messageSource.getMessage('eventCancelacionCertError', null, locale)
             log.error("cancelEvent - msg: ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg,

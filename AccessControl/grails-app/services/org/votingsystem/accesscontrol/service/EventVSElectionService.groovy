@@ -36,12 +36,12 @@ class EventVSElectionService {
 	def sessionFactory
     def systemService
 
-    ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
+    @Transactional ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		EventVSElection eventVS = null
 		UserVS userSigner = messageSMIMEReq.getUserVS()
-		log.debug("saveEvent - signer: ${userSigner?.nif}")
+		log.debug("saveEvent --- signer: ${userSigner?.nif}")
 		String msg = null
 		ResponseVS responseVS = null
         String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
@@ -57,7 +57,7 @@ class EventVSElectionService {
             log.error "$methodName - EVENT DATES ERROR - ${responseVS.message}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:responseVS.message,
                     type:TypeVS.ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "setEventDatesState"))
-        }
+        } else eventVS.setState(null)
         eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
         messageJSON.controlCenterURL = systemService.getControlCenter().serverURL
         messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
@@ -67,12 +67,15 @@ class EventVSElectionService {
             if(tagSet) eventVS.setTagVSSet(tagSet)
         }
         eventVS.save()
+        Set<FieldEventVS> fieldsEventVS
         if (messageJSON.fieldsEventVS) {
-            Set<FieldEventVS> fieldsEventVS = fieldEventVSService.saveFieldsEventVS(eventVS, messageJSON.fieldsEventVS)
+            fieldsEventVS = fieldEventVSService.saveFieldsEventVS(eventVS, messageJSON.fieldsEventVS)
             JSONArray arrayFieldsEventVS = new JSONArray()
             fieldsEventVS.each {  arrayFieldsEventVS.add([id:it.id, content:it.content] as JSONObject  ) }
             messageJSON.fieldsEventVS = arrayFieldsEventVS
         }
+        if(!fieldsEventVS || fieldsEventVS.size() < 2)
+            throw new ExceptionVS(messageSource.getMessage('pollingMissignFieldsErrorMsg', null, locale))
         log.debug("$methodName - Saved voting event '${eventVS.id}'")
         messageJSON.id = eventVS.id
         messageJSON.URL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVS.id}"
@@ -104,9 +107,26 @@ class EventVSElectionService {
             throw new ExceptionVS(messageSource.getMessage('controlCenterCommunicationErrorMsg',
                     [responseVS.message].toArray(),locale))
         }
+
+        CertificateVS controlCenterCert = CertificateVS.findWhere(type:CertificateVS.Type.ACTOR_VS,
+                actorVS:systemService.getControlCenter(), state:CertificateVS.State.OK)
+        X509Certificate controlCenterX509Cert = controlCenterCert.getX509Cert()
+        CertificateVS eventVSControlCenterCertificate = new CertificateVS(actorVS:systemService.getControlCenter(),
+                state:CertificateVS.State.OK, type:CertificateVS.Type.ACTOR_VS, eventVSElection:eventVS,
+                content:controlCenterX509Cert.getEncoded(), serialNumber:controlCenterX509Cert.getSerialNumber().longValue(),
+                validFrom:controlCenterX509Cert?.getNotBefore(), validTo:controlCenterX509Cert?.getNotAfter()).save()
+
+        X509Certificate accessControlX509Cert = signatureVSService.getServerCert()
+        CertificateVS eventVSAccessControlCertificate = new CertificateVS(
+                state:CertificateVS.State.OK, type:CertificateVS.Type.ACTOR_VS, eventVSElection:eventVS,
+                content:accessControlX509Cert.getEncoded(), serialNumber:accessControlX509Cert.getSerialNumber().longValue(),
+                validFrom:accessControlX509Cert?.getNotBefore(), validTo:accessControlX509Cert?.getNotAfter()).save()
+
         MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
                 smimeParent:messageSMIMEReq, eventVS:eventVS,  content:signedMessageBytes)
         messageSMIMEResp.save()
+        eventVS.setState(EventVS.State.ACTIVE)
+        eventVS.save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
                 data:messageSMIMEResp)
     }

@@ -142,12 +142,11 @@ public class SignatureService extends Service<ResponseVS> {
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
             JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
             SMIMEMessageWrapper smimeMessage = ContentSignerHelper.genMimeMessage(fromUser, toUser, jsonObject.toString(),
-                    password.toCharArray(), operationVS.getSignedMessageSubject(), null);
+                    password.toCharArray(), msgSubject, null);
             //No se hace la comprobación antes porque no hay usuario en contexto
             //hasta que no se firma al menos una vez
             eventVS.setUserVS(ContextVS.getInstance().getSessionUser());
-            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(
-                    smimeMessage, eventVS.getVoteVS());
+            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, eventVS.getVoteVS());
             ResponseVS responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 return responseVS;

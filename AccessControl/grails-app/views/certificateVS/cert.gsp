@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <ol class="breadcrumbVS">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li><a href="${createLink(controller: 'certificateVS', action: 'certs')}"><g:message code="certsPageTitle"/></a></li>

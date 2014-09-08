@@ -26,7 +26,7 @@ class MessageSMIMEController {
 			messageSMIME = MessageSMIME.get(params.long('id'))
 		}
         if (messageSMIME) {
-            if(request.getHeader("User-Agent").toLowerCase().contains("javafx")) {
+            if(request.getHeader("User-Agent").toLowerCase().contains("webkit")) {
                 String receiptPageTitle = null;
                 String receipt = new String(messageSMIME.content, "UTF-8")
                 String signedContent = messageSMIME.getSmimeMessage()?.getSignedContent()

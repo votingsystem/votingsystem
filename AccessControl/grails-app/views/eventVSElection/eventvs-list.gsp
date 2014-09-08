@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/eventvs-election.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/eventVSElection/eventvs-election.gsp']"/>">
 
 <polymer-element name="eventvs-list" attributes="url eventvstype">
     <template>
@@ -20,19 +20,20 @@
         <asset:stylesheet src="votingSystem.css"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{eventVSData}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
-        <core-signals on-core-signal-groupvs-details-closed="{{closeGroupDetails}}"></core-signals>
+        <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
         <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
             <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>
                         <template if="{{(eventvstype == 'election')}}">
-                            <select id="eventsStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
+                            <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
                                     on-change="{{eventVSStateSelect}}" class="form-control">
-                                <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+
                                 <option value="ACTIVE" style="color:#388746;"> - <g:message code="selectOpenPollsLbl"/> - </option>
                                 <option value="PENDING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
                                 <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
+                                <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
                             </select>
                         </template>
                         <template if="{{eventvstype == 'claim'}}">
@@ -98,8 +99,8 @@
                 this.page = 0;
                 this.subpage = 0;
             },
-            closeGroupDetails:function(e, detail, sender) {
-                console.log(this.tagName + " - closeGroupDetails")
+            closeEventVSDetails:function(e, detail, sender) {
+                console.log(this.tagName + " - closeEventVSDetails")
                 this.page = 0;
             },
             showEventVSDetails :  function(e) {
@@ -134,12 +135,10 @@
             },
             eventVSStateSelect: function() {
                 var optionSelected = this.$.eventVSStateSelect.value
-                console.log("eventVSStateSelect: " + optionSelected + " - menuType: " + menuType)
-                if("" != optionSelected) {
-                    targetURL = "${createLink(controller: 'eventVSElection')}?menu=" + menuType + "&eventVSState=" + optionSelected
-                    history.pushState(null, null, targetURL);
-                    this.$.ajax.url = targetURL
-                }
+                console.log("eventVSStateSelect: " + optionSelected)
+                targetURL = "${createLink(controller: 'eventVSElection')}?menu=" + menuType + "&eventVSState=" + optionSelected
+                history.pushState(null, null, targetURL);
+                this.$.ajax.url = targetURL
             },
             ajaxComplete:function() {
                 this.loading = false

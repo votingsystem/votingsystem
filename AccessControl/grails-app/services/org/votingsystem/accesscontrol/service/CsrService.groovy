@@ -11,6 +11,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.StringUtils
 
@@ -67,11 +68,12 @@ class CsrService {
 	}
 
     private ResponseVS validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS, Locale locale) {
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-        if(!csr) {
-            String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-            log.error("validateCSRVote - msg: ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
+        PKCS10CertificationRequest csr
+        try {
+            csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        } catch(ex) {
+            log.error(ex.getMessage(), ex)
+            throw new ExceptionVS(messageSource.getMessage('csrRequestErrorMsg', null, locale))
         }
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
         Enumeration csrAttributes = info.getAttributes().getObjects()

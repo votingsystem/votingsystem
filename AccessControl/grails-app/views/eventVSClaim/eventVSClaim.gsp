@@ -6,7 +6,7 @@
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/eventVSClaim/eventvs-claim.gsp']"/>">
 </head>
 <body>
-<div class="pageContenDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
+<div class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
     <ol class="breadcrumbVS">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li><a href="${createLink(controller: 'eventVSClaim')}"><g:message code="claimSystemLbl"/></a></li>

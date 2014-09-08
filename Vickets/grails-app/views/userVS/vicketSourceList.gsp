@@ -6,7 +6,7 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-<div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
+<div class="pageContentDiv" style="max-width: 1300px; margin: 0px auto 0px auto;">
     <div style="margin:0px 30px 0px 30px;">
         <ol class="breadcrumbVS">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>

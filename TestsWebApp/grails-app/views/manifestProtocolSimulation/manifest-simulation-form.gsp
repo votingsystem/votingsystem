@@ -109,7 +109,7 @@
                             <div layout horizontal>
                                 <div flex></div>
                                 <div>
-                                    <button id="submitButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:450px;">
+                                    <button id="submitButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:300px;">
                                         <g:message code="initManifestProtocolSimulationButton"/>
                                     </button>
                                 </div>

@@ -9,7 +9,7 @@
     <asset:stylesheet src="vickets.css"/>
 </head>
 <body>
-<div class="pageContenDiv" style="max-width: 1000px; padding: 20px 30px 0px 30px;">
+<div class="pageContentDiv" style="max-width: 1000px; padding: 20px 30px 0px 30px;">
 
     <div layout horizontal center center-justified>
         <select id="messagevsStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"

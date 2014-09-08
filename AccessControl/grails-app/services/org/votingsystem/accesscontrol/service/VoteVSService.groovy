@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -11,6 +12,7 @@ import org.votingsystem.util.HttpHelper
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
 
+@Transactional
 class VoteVSService {
 	
 	def messageSource
@@ -18,7 +20,8 @@ class VoteVSService {
 	def signatureVSService
 	
     synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq, Locale locale) {
-		log.debug ("validateVote - ")
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
 		EventVSElection eventVS = messageSMIMEReq.eventVS
 		String localServerURL = grailsApplication.config.grails.serverURL
 		String msg
@@ -29,7 +32,7 @@ class VoteVSService {
 			if (!optionSelected) {
 				msg = messageSource.getMessage('voteOptionNotFoundErrorMsg',
 					[smimeMessageReq.getVoteVS().getOptionSelected().getId()].toArray(), locale)
-				log.error ("validateVote - ERROR OPTION -> '${msg}'")
+				log.error ("$methodName - ERROR OPTION -> '${msg}'")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                         message:msg, type:TypeVS.VOTE_ERROR, eventVS:eventVS)
 			}
@@ -47,14 +50,9 @@ class VoteVSService {
 			VoteVS voteVS = new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
                     certificateVS:voteVSCertificate, messageSMIME:messageSMIMEResp)
 			VoteVS.withTransaction { voteVS.save() }
-			//X509Certificate controlCenterCert = smimeMessageReq.getVoteVS()?.getServerCerts()?.iterator()?.next()
-            X509Certificate controlCenterCert = CertUtil.fromPEMToX509CertCollection(
-                    eventVS.certChainControlCenter)?.iterator()?.next()
-
             ResponseVS modelResponseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.VOTE,
                     type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, data:messageSMIMEResp, eventVS:eventVS)
-            Map model = [receiverCert:controlCenterCert, responseVS:modelResponseVS]
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:model)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[responseVS:modelResponseVS])
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR, eventVS:eventVS,
@@ -165,11 +163,8 @@ class VoteVSService {
 				String controlCenterURL = eventVSElection.controlCenterVS.serverURL
 				String eventURL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSElection.id}"
 				String voteCancellerURL = "${controlCenterURL}/voteVSCanceller?url=${eventURL}"
-				ResponseVS encryptResponse = signatureVSService.encryptSMIMEMessage(
-					smimeMessageResp.getBytes(), eventVSElection.getControlCenterCert(), locale)
-				if (ResponseVS.SC_OK != encryptResponse.statusCode) return encryptResponse
-				ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(encryptResponse.messageBytes,
-                        ContentTypeVS.SIGNED_AND_ENCRYPTED, voteCancellerURL)
+				ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
+                        ContentTypeVS.JSON_SIGNED, voteCancellerURL)
 				if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
 					responseVSControlCenter = signatureVSService.decryptSMIMEMessage(
 							responseVSControlCenter.message.getBytes(), locale)

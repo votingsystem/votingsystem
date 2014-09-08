@@ -6,7 +6,7 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-    <div class="pageContenDiv" style="max-width: 1300px; margin: 0px auto 0px auto; padding: 0px 30px 0px 30px;">
+    <div class="pageContentDiv" style="max-width: 1300px; margin: 0px auto 0px auto; padding: 0px 30px 0px 30px;">
         <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
             <h3 class="page-header">Vickets, moneda electrónica basada en arquitecturas de clave pública.</h3>
             <ul>

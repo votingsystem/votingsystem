@@ -8,7 +8,7 @@
     <style type="text/css" media="screen"></style>
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <ol class="breadcrumbVS">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li class="active"><g:message code="certsPageTitle"/></li>

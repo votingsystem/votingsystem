@@ -116,9 +116,9 @@
                                 </button>
                             </div>
 
-                            <div id="fieldsDiv" class="fieldsBox" style="display:{{eventvsOptionList.length == 0? 'none':'block'}}">
-                                <fieldset id="fieldsBox">
-                                    <legend id="fieldsLegend" style="border: none;"><g:message code="eventvsFieldsLegend"/></legend>
+                            <div class="fieldsBox" style="display:{{eventvsOptionList.length == 0? 'none':'block'}}">
+                                <fieldset>
+                                    <legend><g:message code="eventvsFieldsLegend"/></legend>
                                     <div layout vertical>
                                         <template repeat="{{eventvsOption in eventvsOptionList}}">
                                             <div>
@@ -134,7 +134,7 @@
                             <div layout horizontal>
                                 <div flex></div>
                                 <div>
-                                    <button id="submitButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:450px;">
+                                    <button id="submitButton" type="submit" class="btn btn-default" style="margin:15px 20px 20px 0px; width:300px;">
                                         <g:message code="initClaimProtocolSimulationButton"/>
                                     </button>
                                 </div>

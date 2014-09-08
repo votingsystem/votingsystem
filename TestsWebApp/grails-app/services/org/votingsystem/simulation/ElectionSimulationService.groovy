@@ -96,6 +96,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                 "simulation_" + simulationCounter.getAndIncrement());
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
 		simulationData = VotingSimulationData.parse(simulationDataJSON)
+
         errorList = Collections.synchronizedList(new ArrayList<String>());
         simulationStarter = simulationDataJSON.userId
         synchronizedListenerSet.add(simulationStarter)
@@ -180,6 +181,10 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         eventVS.setType(EventVS.Type.ELECTION)
 		this.eventVS = eventVS;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
+
+        log.debug("========= eventStr: $eventStr")
+
+
         String urlPublishElection = ContextVS.getInstance().getAccessControl().getPublishElectionURL()
 		String msgSubject = messageSource.getMessage("publishElectionMsgSubject", null, locale);
 		/*KeyStore keyStore = ContextVS.getInstance().getUserTest().getKeyStore()

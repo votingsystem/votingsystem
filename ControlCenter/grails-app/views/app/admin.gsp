@@ -6,7 +6,7 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-<div class="pageContenDiv" style="max-width: 1300px;">
+<div class="pageContentDiv" style="max-width: 1300px;">
 <a href="#" onclick=""></a>
 </div>
 </body>

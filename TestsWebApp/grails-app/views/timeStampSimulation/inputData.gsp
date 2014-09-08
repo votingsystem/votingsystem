@@ -4,7 +4,7 @@
     <title><g:message code="initTimeStampProtocolSimulationButton"/></title>
     <meta name="layout" content="main" />
 </head>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <div style="padding: 0px 30px 0px 30px;">
         <div >
             <ol class="breadcrumbVS pull-left">

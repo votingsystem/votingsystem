@@ -7,7 +7,7 @@
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-editor']"/>">
 </head>
 <body>
-    <div id="contentDiv" class="pageContenDiv" style="min-height: 1000px; margin:0px auto 0px auto; padding:0px 30px 0px 30px;">
+    <div id="contentDiv" class="pageContentDiv" style="min-height: 1000px; margin:0px auto 0px auto; padding:0px 30px 0px 30px;">
         <ol class="breadcrumbVS">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li><a href="${createLink(controller: 'groupVS', action: 'index')}"><g:message code="groupvsLbl"/></a></li>

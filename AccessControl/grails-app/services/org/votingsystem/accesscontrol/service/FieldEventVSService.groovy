@@ -16,7 +16,7 @@ class FieldEventVSService {
         log.debug("saveFieldsEventVS - eventVS: ${eventVS.id} - fieldsEventVS: ${fieldsEventVS}")
         Set<FieldEventVS> fieldsEventVSSet = fieldsEventVS.collect {
 			eventVS.refresh()
-            return new FieldEventVS(eventVS:eventVS, content:it).save();
+            return new FieldEventVS(eventVS:eventVS, content:it.content).save();
         }
         return fieldsEventVSSet
     }

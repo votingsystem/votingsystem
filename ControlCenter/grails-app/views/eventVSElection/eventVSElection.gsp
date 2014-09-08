@@ -31,9 +31,9 @@
             <b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
         </div>
 
-        <div>
-            <fieldset id="fieldsBox" class="fieldsBox" style="margin:30px auto 0 auto;">
-				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
+        <div class="fieldsBox">
+            <fieldset style="margin:30px auto 0 auto;">
+				<legend><g:message code="pollFieldLegend"/></legend>
 				<div id="fields" style="width:100%;">
                     <g:each in="${eventMap?.fieldsEventVS}">
                         <div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">

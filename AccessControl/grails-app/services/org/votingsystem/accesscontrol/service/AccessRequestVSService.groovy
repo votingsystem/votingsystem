@@ -1,139 +1,87 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.util.ExceptionVS
+import org.votingsystem.util.MetaInfMsg
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class AccessRequestVSService {
 	
 	//static scope = "request"
 
-    static transactional = true
-	
 	def messageSource
     def signatureVSService
     def grailsApplication
 	
-	//{"operation":"ACCESS_REQUEST","hashAccessRequestBase64":"...",
-	// "eventId":"..","eventURL":"...","UUID":"..."}
-	private ResponseVS checkAccessRequestJSONData(JSONObject accessDataJSON, Locale locale) {
-		int status = ResponseVS.SC_ERROR_REQUEST
-		TypeVS typeRespuesta = TypeVS.ACCESS_REQUEST_ERROR
-		org.bouncycastle.tsp.TimeStampToken tms;
-		String msg
-		try {
-			TypeVS operationType = TypeVS.valueOf(accessDataJSON.operation)
-			if (accessDataJSON.eventId && accessDataJSON.eventURL &&
-				accessDataJSON.hashAccessRequestBase64 &&
-				(TypeVS.ACCESS_REQUEST == operationType)) {
-				status = ResponseVS.SC_OK
-			} else msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
-		} catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
-		}
-		if(ResponseVS.SC_OK == status) typeRespuesta = TypeVS.ACCESS_REQUEST
-		else log.error("checkAccessRequestJSONData - msg: ${msg} - data:${accessDataJSON.toString()}")
-		return new ResponseVS(statusCode:status, message:msg, type:typeRespuesta)
-	}
-	
     ResponseVS saveRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
 		UserVS signerVS = messageSMIMEReq.getUserVS()
-		log.debug("saveRequest - signerVS: ${signerVS.nif}")
 		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		String msg
-        try {
-			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-			ResponseVS responseVS = checkAccessRequestJSONData(messageJSON, locale)
-			if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
-			def hashAccessRequestBase64
-			def typeRespuesta
-			def accessRequestVS
-            EventVSElection eventVSElection
-			EventVSElection.withTransaction {
-				eventVSElection = EventVSElection.findById(Long.valueOf(messageJSON.eventId))
-			}
-			if (eventVSElection) {
-				if (!eventVSElection.isActive(Calendar.getInstance().getTime())) {
-                    if(EventVS.State.PENDING == eventVSElection.state)
-                        msg = messageSource.getMessage('eventVSPendingMsg', null, locale)
-                    else msg = messageSource.getMessage('eventVSClosedMsg', null, locale)
-					log.error("saveRequest - EventVS NOT ACTIVE - ${msg}")
-					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-						type:TypeVS.ACCESS_REQUEST_ERROR, message:msg)
-				}
-				AccessRequestVS.withTransaction {
-					accessRequestVS = AccessRequestVS.findWhere(userVS:signerVS, eventVSElection:eventVSElection,
-                            state:TypeVS.OK)
-				}
-				if (accessRequestVS){//Has previous vote???
-						msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
-						log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
-						return new ResponseVS(data:accessRequestVS, type:TypeVS.ACCESS_REQUEST_ERROR, message:msg,
-                                eventVS:eventVSElection, statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED)
-				} else {
-					//TimeStamp comes cert validated from filters. Check date
-                    Date signatureTime = signerVS.getTimeStampToken()?.getTimeStampInfo().getGenTime()
-                    if(!eventVSElection.isActive(signatureTime)) {
-                        msg = messageSource.getMessage("checkedDateRangeErrorMsg", [signatureTime,
-                                eventVSElection.getDateBegin(), eventVSElection.getDateFinish()].toArray(), locale)
-                        log.error(msg)
-                        return new ResponseVS(statusCode:ResponseVS.SC_ERROR, data:accessRequestVS,
-                                type:TypeVS.ACCESS_REQUEST_ERROR, message:msg, eventVS:eventVSElection)
-                    }
-					//es el hash unique?
-					hashAccessRequestBase64 = messageJSON.hashAccessRequestBase64
-					boolean hashSolicitudAccesoRepetido = (AccessRequestVS.findWhere(
-							hashAccessRequestBase64:hashAccessRequestBase64) != null)
-					if (hashSolicitudAccesoRepetido) {
-						msg = messageSource.getMessage('hashRepeatedError', null, locale)
-						log.error("saveRequest -ERROR ACCESS REQUEST HAS REPEATED -> ${hashAccessRequestBase64} - ${msg}")
-						return new ResponseVS(type:TypeVS.ACCESS_REQUEST_ERROR, message:msg,
-								statusCode:ResponseVS.SC_ERROR_REQUEST, eventVS:eventVSElection)
-					} else {//Todo OK
-					
-					VoteProcessEvent votingEvent = null
-					if(UserVS.Type.REPRESENTATIVE == signerVS.type) {
-						votingEvent = VoteProcessEvent.ACCESS_REQUEST_REPRESENTATIVE.setData(
-							signerVS, eventVSElection)
-					} else if(signerVS.representative) {
-						votingEvent = VoteProcessEvent.ACCESS_REQUEST_USER_WITH_REPRESENTATIVE.setData(
-							signerVS, eventVSElection)
-					} else {
-						votingEvent = VoteProcessEvent.ACCESS_REQUEST.setData(
-							signerVS, eventVSElection)
-					}
-					
-					accessRequestVS = new AccessRequestVS(userVS:signerVS,
-						messageSMIME:messageSMIMEReq,
-						state: AccessRequestVS.State.OK,
-						hashAccessRequestBase64:hashAccessRequestBase64,
-						eventVSElection:eventVSElection)
-					AccessRequestVS.withTransaction {
-						if (!accessRequestVS.save()) {
-							accessRequestVS.errors.each { log.error("- saveRequest - ERROR - ${it}")}
-						}
-					}
-					return new ResponseVS(type:TypeVS.ACCESS_REQUEST, statusCode:ResponseVS.SC_OK,
-                            eventVS:eventVSElection, data:accessRequestVS)
-					}
-				}
-			} else {
-				msg = messageSource.getMessage( 'eventVSNotFound',[messageJSON.eventId].toArray(), locale)
-				log.error("saveRequest - Event Id not found - > ${messageJSON.eventId} - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-						type:TypeVS.ACCESS_REQUEST_ERROR, message:msg)
-			}
-		}catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.ACCESS_REQUEST_ERROR,
-					message:messageSource.getMessage('requestWithErrorsMsg', null, locale))
-		}
+        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        if (!messageJSON.eventId || !messageJSON.eventURL && !messageJSON.hashAccessRequestBase64 &&
+                (TypeVS.ACCESS_REQUEST != TypeVS.valueOf(messageJSON.operation))) {
+            throw new ExceptionVS(messageSource.getMessage('requestWithErrorsMsg', null, locale))
+        }
+        def hashAccessRequestBase64
+        def accessRequestVS
+        EventVSElection eventVSElection = EventVSElection.get(Long.valueOf(messageJSON.eventId))
+        if(!eventVSElection) {
+            msg = messageSource.getMessage( 'eventVSNotFound',[messageJSON.eventId].toArray(), locale)
+            log.error("saveRequest - Event Id not found - > ${messageJSON.eventId} - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    type:TypeVS.ACCESS_REQUEST_ERROR, message:msg)
+        }
+        if (!eventVSElection.isActive(Calendar.getInstance().getTime())) {
+            if(EventVS.State.PENDING == eventVSElection.state)
+                msg = messageSource.getMessage('eventVSPendingMsg', null, locale)
+            else msg = messageSource.getMessage('eventVSClosedMsg', null, locale)
+            log.error("$methodName - EventVS NOT ACTIVE - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+                    type:TypeVS.ACCESS_REQUEST_ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "eventVSState"))
+        }
+        accessRequestVS = AccessRequestVS.findWhere(userVS:signerVS, eventVSElection:eventVSElection, state:TypeVS.OK)
+        if (accessRequestVS){
+            msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
+            log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
+            return new ResponseVS(data:accessRequestVS, type:TypeVS.ACCESS_REQUEST_ERROR, message:msg,
+                    eventVS:eventVSElection, statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "requestRepeated"))
+        } else {
+            Date signatureTime = signerVS.getTimeStampToken()?.getTimeStampInfo().getGenTime()
+            if(!eventVSElection.isActive(signatureTime)) {
+                msg = messageSource.getMessage("checkedDateRangeErrorMsg", [signatureTime,
+                    eventVSElection.getDateBegin(), eventVSElection.getDateFinish()].toArray(), locale)
+                log.error(msg)
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR, data:accessRequestVS,
+                        type:TypeVS.ACCESS_REQUEST_ERROR, message:msg, eventVS:eventVSElection,
+                        metaInf:MetaInfMsg.getErrorMsg(methodName, "timeStampError"))
+            }
+            accessRequestVS = AccessRequestVS.findWhere(hashAccessRequestBase64:messageJSON.hashAccessRequestBase64)
+            if (accessRequestVS) {
+                msg = messageSource.getMessage('hashRepeatedError', null, locale)
+                log.error("$methodName - $msg - hashRepeated: '${messageJSON.hashAccessRequestBase64}'")
+                return new ResponseVS(type:TypeVS.ACCESS_REQUEST_ERROR, message:msg,
+                        statusCode:ResponseVS.SC_ERROR_REQUEST, eventVS:eventVSElection,
+                        metaInf:MetaInfMsg.getErrorMsg(methodName, "hashRepeated"))
+            } else {
+                accessRequestVS = new AccessRequestVS(userVS:signerVS, messageSMIME:messageSMIMEReq,
+                        state: AccessRequestVS.State.OK, hashAccessRequestBase64:hashAccessRequestBase64,
+                        eventVSElection:eventVSElection)
+                if (!accessRequestVS.save()) { accessRequestVS.errors.each { log.error("$methodName - ERROR - ${it}")}}
+                return new ResponseVS(type:TypeVS.ACCESS_REQUEST, statusCode:ResponseVS.SC_OK,
+                        eventVS:eventVSElection, data:accessRequestVS)
+            }
+        }
     }
 
 }

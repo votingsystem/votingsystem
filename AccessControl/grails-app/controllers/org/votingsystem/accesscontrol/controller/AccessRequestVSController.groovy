@@ -49,6 +49,7 @@ class AccessRequestVSController {
 	 */
     def processFileMap () {
 		MessageSMIME messageSMIMEReq = params[ContextVS.ACCESS_REQUEST_FILE_NAME]
+        request.messageSMIMEReq = messageSMIMEReq
 		if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
 		}
@@ -63,15 +64,15 @@ class AccessRequestVSController {
 			if(accessRequestVS.userVS.type == UserVS.Type.REPRESENTATIVE) {
 				representative = accessRequestVS.userVS
 			}
-			//log.debug("======== csrRequest: ${new String(csrRequest)}")
 			ResponseVS csrValidationResponseVS = csrService.signCertVoteVS(csrRequest, responseVS.eventVS,
                     representative, request.getLocale())
 			if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
 				responseVS.type = TypeVS.ACCESS_REQUEST;
                 responseVS.message = "EventVS_${eventVS.id}"
                 responseVS.messageBytes = csrValidationResponseVS.data.issuedCert
-                responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
-				return [responseVS:responseVS, receiverPublicKey:csrValidationResponseVS.data.requestPublicKey]
+                responseVS.setContentType(ContentTypeVS.TEXT_STREAM)
+				//return [responseVS:responseVS, receiverPublicKey:csrValidationResponseVS.data.requestPublicKey]
+                return [responseVS:responseVS]
 			} else {
 				csrValidationResponseVS.type = TypeVS.ACCESS_REQUEST_ERROR;
 				if (accessRequestVS) {

@@ -22,17 +22,15 @@
 
             <h3><div class="pageHeader text-center">{{eventvs.subject}}</div></h3>
 
-            <div style="display:inline;">
-                <div class="" style="margin:0px 0px 0px 30px; display: inline;"><b><g:message code="dateLimitLbl"/>: </b>
-                    {{eventvs.dateFinishStr}}</div>
-                <div id="pendingTimeDiv" class="text-right" style="margin:0px 40px 0px 0px; color: #388746; display: inline; white-space:nowrap;"></div>
+            <div>
+                <div class="" style="margin:0px 0px 0px 30px;><b><g:message code="dateLimitLbl"/>: </b>
+                {{eventvs.dateFinishStr}}</div>
             </div>
 
             <div>
                 <div class="eventContentDiv" style="width:100%;">
                     <votingsystem-html-echo html="{{eventvs.content}}"></votingsystem-html-echo>
                 </div>
-
 
                 <div>
                     <template if="{{eventvs.numSignatures > 0}}">
@@ -107,7 +105,7 @@
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "<g:message code='operationOKCaption'/>"
                         }
-                        showMessageVS(caption, appMessageJSON.message)
+                        showMessageVS(appMessageJSON.message, caption)
                     }}.bind(this)}
 
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

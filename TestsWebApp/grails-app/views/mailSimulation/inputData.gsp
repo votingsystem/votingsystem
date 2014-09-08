@@ -21,7 +21,7 @@
     }
 </style>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <div id="mailProtocolSimulationDataDialog" title="<g:message code="initMailProtocolSimulationButton"/>"
          style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
         <div class="errorMsgWrapper" style="display:none;"></div>

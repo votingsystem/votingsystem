@@ -53,7 +53,7 @@ public enum ContentTypeVS {
     PKCS10("application/pkcs10", "p10"),//.csr
     PEM("application/pem-file", "pem"),
 
-    VOTE("application/vote;application/pkcs7-signature;application/pkcs7-mime", "vote"),
+    VOTE("application/vote;application/pkcs7-signature;", "vote"),
 
     VICKET("application/model;application/pkcs7-signature;application/pkcs7-mime", "model"),
 

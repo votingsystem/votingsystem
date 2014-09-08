@@ -7,6 +7,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
+import java.io.ByteArrayInputStream;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
@@ -60,6 +61,9 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 byte[] decryptedBytes = Encryptor.decryptMessage(
                         responseVS.getMessageBytes(), keypair.getPublic(), keypair.getPrivate());
                 responseVS.setMessageBytes(decryptedBytes);
+            } else if(responseContentType != null && ResponseVS.SC_OK == responseVS.getStatusCode() &&
+                    (responseContentType == ContentTypeVS.VOTE || responseContentType == ContentTypeVS.JSON_SIGNED)) {
+                responseVS.setSmimeMessage(new SMIMEMessageWrapper(new ByteArrayInputStream(responseVS.getMessageBytes())));
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);

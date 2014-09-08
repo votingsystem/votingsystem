@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<div id="contentDiv" class="pageContenDiv" style="min-height: 1000px;">
+<div id="contentDiv" class="pageContentDiv" style="min-height: 1000px;">
     <div style="margin:0px 30px 0px 30px;">
         <ol class="breadcrumbVS">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>

@@ -5,6 +5,7 @@
 <polymer-element name="eventvs-vote-confirm-dialog" attributes="opened">
     <template>
         <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+            <g:include view="/include/styles.gsp"/>
             <style no-shim> </style>
             <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
                 <div layout horizontal center center-justified>
@@ -17,11 +18,11 @@
                 </div>
                 <p style="text-align: center;">
                     <g:message code="confirmOptionDialogMsg"/>:<br>
-                    <b>{{optionSelected}}</b>
+                    <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
                 </p>
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
-                    <div style="margin:10px 0px 10px 0px;display:{{isConfirmMessage?'block':'none'}};">
+                    <div>
                         <votingsystem-button on-click="{{optionConfirmed}}" style="margin: 0px 0px 0px 5px;">
                             <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
                         </votingsystem-button>
@@ -47,6 +48,7 @@
             },
             show: function(optionSelected) {
                 this.optionSelected = optionSelected
+                this.opened = true
             },
             optionConfirmed: function() {
                 this.fire('optionconfirmed', this.optionSelected);

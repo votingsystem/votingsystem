@@ -5,7 +5,7 @@
     <meta name="layout" content="main" />
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <div >
         <ol class="breadcrumbVS pull-left">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>

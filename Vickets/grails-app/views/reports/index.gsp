@@ -11,7 +11,7 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-    <div class="pageContenDiv" style="max-width:1000px; margin: 0px auto 0px auto;padding:20px 30px 0px 30px;">
+    <div class="pageContentDiv" style="max-width:1000px; margin: 0px auto 0px auto;padding:20px 30px 0px 30px;">
 
         <g:each in="${periods}">
             <div>

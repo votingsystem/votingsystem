@@ -7,7 +7,7 @@
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-user.gsp']"/>">
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <ol class="breadcrumbVS">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li class="active"><g:message code="userSearchPageTitle"/></li>

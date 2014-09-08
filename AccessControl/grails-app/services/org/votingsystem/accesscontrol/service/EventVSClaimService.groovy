@@ -30,63 +30,54 @@ class EventVSClaimService {
 
     ResponseVS saveEvent(MessageSMIME messageSMIMEReq, Locale locale) {
 		EventVSClaim eventVS
-		try {
-			UserVS signerVS = messageSMIMEReq.getUserVS()
-			String documentStr = messageSMIMEReq.getSmimeMessage().getSignedContent()
-			log.debug("saveEvent - signerVS: ${signerVS.nif}")
-			def messageJSON = JSON.parse(documentStr)
-			Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish)
-			if(dateFinish.before(Calendar.getInstance().getTime())) {
-				String msg = messageSource.getMessage(
-					'publishDocumentDateErrorMsg', 
-					[DateUtils.getStringFromDate(dateFinish)].toArray(), locale)
-				log.error("DATE ERROR - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-					message:msg, type:TypeVS.CLAIM_EVENT_ERROR, eventVS:eventVS)
-			}
-			eventVS = new EventVSClaim(userVS:signerVS, subject:messageJSON.subject, content:messageJSON.content,
-					backupAvailable:messageJSON.backupAvailable, dateFinish:dateFinish)
-			if(messageJSON.cardinality) eventVS.cardinality =
-				EventVS.Cardinality.valueOf(messageJSON.cardinality)
-			else eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
-			if(messageJSON.dateBegin) eventVS.dateBegin = new Date().parse(
-                    "yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin)
-			ResponseVS responseVS = eventVSService.setEventDatesState(eventVS, locale)
-			if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-			eventVS = responseVS.eventVS.save()
-			if (messageJSON.tags) {
-				Set<TagVS> tagSet = tagVSService.save(messageJSON.tags)
-				eventVS.setTagVSSet(tagSet)
-			}
-			messageJSON.id = eventVS.id
-			messageJSON.dateCreated = DateUtils.getStringFromDate(eventVS.dateCreated)
-			messageJSON.type = TypeVS.CLAIM_EVENT
-			JSONArray fieldsArray = new JSONArray()
-			messageJSON.fieldsEventVS?.each { campoItem ->
-				def campo = new FieldEventVS(eventVS:eventVS, content:campoItem.content)
-				campo.save();
-				fieldsArray.add(new JSONObject([id:campo.id, content:campo.content]))
-			}
-			messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
-				name:grailsApplication.config.VotingSystem.serverName]  as JSONObject
-			messageJSON.fieldsEventVS = fieldsArray
-			
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = signerVS.getNif()
-			String subject = messageSource.getMessage(
-					'mime.subject.claimEventValidated', null, locale)
-            SMIMEMessageWrapper smimeMessage = signatureVSService.getSMIMEMessage(
-				fromUser, toUser,  messageJSON.toString(), subject, null)
-			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                    eventVS:eventVS, content:smimeMessage.getBytes())
-			MessageSMIME.withTransaction { messageSMIMEResp.save() }
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, data:messageSMIMEResp,
-                    type:TypeVS.CLAIM_EVENT)
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.CLAIM_EVENT_ERROR, eventVS:eventVS,
-				message:messageSource.getMessage('publishClaimErrorMessage', null, locale))
-		}
+        UserVS signerVS = messageSMIMEReq.getUserVS()
+        String documentStr = messageSMIMEReq.getSmimeMessage().getSignedContent()
+        log.debug("saveEvent - signerVS: ${signerVS.nif}")
+        def messageJSON = JSON.parse(documentStr)
+        Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish)
+        if(dateFinish.before(Calendar.getInstance().getTime())) {
+            String msg = messageSource.getMessage('publishDocumentDateErrorMsg',
+                    [DateUtils.getStringFromDate(dateFinish)].toArray(), locale)
+            log.error("DATE ERROR - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                    message:msg, type:TypeVS.CLAIM_EVENT_ERROR, eventVS:eventVS)
+        }
+        eventVS = new EventVSClaim(userVS:signerVS, subject:messageJSON.subject, content:messageJSON.content,
+                backupAvailable:messageJSON.backupAvailable, dateFinish:dateFinish)
+        if(messageJSON.cardinality) eventVS.cardinality = EventVS.Cardinality.valueOf(messageJSON.cardinality)
+        else eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
+        if(messageJSON.dateBegin) eventVS.dateBegin = new Date().parse(
+                "yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin)
+        ResponseVS responseVS = eventVSService.setEventDatesState(eventVS, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        eventVS = responseVS.eventVS.save()
+        if (messageJSON.tags) {
+            Set<TagVS> tagSet = tagVSService.save(messageJSON.tags)
+            eventVS.setTagVSSet(tagSet)
+        }
+        messageJSON.id = eventVS.id
+        messageJSON.dateCreated = DateUtils.getStringFromDate(eventVS.dateCreated)
+        messageJSON.type = TypeVS.CLAIM_EVENT
+        JSONArray fieldsArray = new JSONArray()
+        messageJSON.fieldsEventVS?.each { fieldEventVSItem ->
+            def fieldEventVS = new FieldEventVS(eventVS:eventVS, content:fieldEventVSItem.content)
+            fieldEventVS.save();
+            fieldsArray.add(new JSONObject([id:fieldEventVS.id, content:fieldEventVS.content]))
+        }
+        messageJSON.accessControl = [serverURL:grailsApplication.config.grails.serverURL,
+                                     name:grailsApplication.config.VotingSystem.serverName]  as JSONObject
+        messageJSON.fieldsEventVS = fieldsArray
+
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = signerVS.getNif()
+        String subject = messageSource.getMessage('mime.subject.claimEventValidated', null, locale)
+        SMIMEMessageWrapper smimeMessage = signatureVSService.getSMIMEMessage(
+                fromUser, toUser,  messageJSON.toString(), subject, null)
+        MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
+                eventVS:eventVS, content:smimeMessage.getBytes())
+        MessageSMIME.withTransaction { messageSMIMEResp.save() }
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, data:messageSMIMEResp,
+                type:TypeVS.CLAIM_EVENT)
     }
 
     public synchronized ResponseVS generateBackup (EventVSClaim event, Locale locale) {

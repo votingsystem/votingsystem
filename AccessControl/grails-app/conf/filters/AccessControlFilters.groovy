@@ -80,7 +80,9 @@ class AccessControlFilters {
                             case ContentTypeVS.ENCRYPTED:
                                 responseVS = signatureVSService.decryptMessage(
                                         fileMap.get(key)?.getBytes(), request.getLocale())
-                                if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.messageBytes
+                                if(ResponseVS.SC_OK == responseVS.statusCode) {
+                                    params[fileName] = responseVS.messageBytes
+                                }
                                 break;
                             case ContentTypeVS.SIGNED:
                                 try {
@@ -91,6 +93,12 @@ class AccessControlFilters {
                                     return printOutputStream(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                                             messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
                                 }
+                                break;
+                            case ContentTypeVS.JSON_SIGNED:
+                                smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(fileMap.get(key).getBytes()));
+                                break;
+                            case ContentTypeVS.TEXT:
+                                params[fileName] = fileMap.get(key).getBytes()
                                 break;
                         }
                         if(smimeMessageReq) {
@@ -137,7 +145,6 @@ class AccessControlFilters {
                         case ContentTypeVS.PDF:
                             params.plainPDFDocument = requestBytes
                             break;
-                        case ContentTypeVS.VOTE:
                         case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
@@ -151,6 +158,7 @@ class AccessControlFilters {
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 params.requestBytes = responseVS.messageBytes
                             break;
+                        case ContentTypeVS.VOTE:
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessageWrapper(
@@ -193,7 +201,6 @@ class AccessControlFilters {
                 }
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
-                    case ContentTypeVS.VOTE:
                     case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
@@ -207,6 +214,8 @@ class AccessControlFilters {
                             messageSMIME.save()
                             return printOutput(response, encryptResponse)
                         }
+                    case ContentTypeVS.VOTE:
+                    case ContentTypeVS.TEXT_STREAM:
                     case ContentTypeVS.JSON_SIGNED:
                     case ContentTypeVS.SIGNED:
                         if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)

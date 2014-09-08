@@ -11,6 +11,7 @@ import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.StringUtils
 
@@ -24,6 +25,7 @@ import java.security.cert.CertPathValidatorException
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
+@Transactional
 class SignatureVSService {
 	
 	private SignedMailGenerator signedMailGenerator;
@@ -35,9 +37,7 @@ class SignatureVSService {
 	private X509Certificate localServerCertSigner;
     private PrivateKey serverPrivateKey;
     private Encryptor encryptor;
-	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsHashMap =  new HashMap<Long, Set<TrustAnchor>>();
-	private static HashMap<Long, Set<TrustAnchor>> controlCenterTrustedAnchorsHashMap =
-            new HashMap<Long, Set<TrustAnchor>>();
+	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsMap =  new HashMap<Long, Set<TrustAnchor>>();
 	def grailsApplication;
 	def messageSource
 	def subscriptionVSService
@@ -123,29 +123,18 @@ class SignatureVSService {
         return issuedCert
     }
 
-	public ResponseVS getEventTrustedAnchors(EventVS event, Locale locale) {
-		if(!event) return new ResponseVS(ResponseVS.SC_ERROR)
-		Set<TrustAnchor> eventTrustAnchors = eventTrustedAnchorsHashMap.get(event.id)
-		ResponseVS responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, data:eventTrustAnchors)
-		if(!eventTrustAnchors) {
-			CertificateVS eventVSCertificateVS = CertificateVS.findWhere(
-				eventVSElection:event, state:CertificateVS.State.OK,
-				type:CertificateVS.Type.VOTEVS_ROOT)
-			if(!eventVSCertificateVS) {
-				String msg = messageSource.getMessage('eventWithoutCAErrorMsg', [event.id].toArray(), locale)
-				log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					message:msg, type:TypeVS.VOTE_ERROR, eventVS:event)
-			}
-			X509Certificate certCAEventVS = CertUtil.loadCertificateFromStream (
-				new ByteArrayInputStream(eventVSCertificateVS.content))
-			TrustAnchor anchor = new TrustAnchor(certCAEventVS, null);
-			eventTrustAnchors = new HashSet<TrustAnchor>()
-			eventTrustAnchors.add(anchor)
-			eventTrustedAnchorsHashMap.put(event.id, eventTrustAnchors)
-			responseVS.data = eventTrustAnchors
-		}
-		return responseVS
+	public Set<TrustAnchor> getEventTrustedAnchors(EventVS eventVS, Locale locale) {
+        Set<TrustAnchor> eventTrustedAnchors = eventTrustedAnchorsMap.get(eventVS.id)
+        if(!eventTrustedAnchors) {
+            CertificateVS eventCACert = CertificateVS.findWhere(eventVSElection:eventVS, state:CertificateVS.State.OK,
+                    type:CertificateVS.Type.VOTEVS_ROOT)
+            X509Certificate certCAEventVS = eventCACert.getX509Cert()
+            eventTrustedAnchors = new HashSet<TrustAnchor>()
+            eventTrustedAnchors.add(new TrustAnchor(certCAEventVS, null))
+            eventTrustedAnchors.addAll(getTrustAnchors())
+            eventTrustedAnchorsMap.put(eventVS.id, eventTrustedAnchors)
+        }
+        return eventTrustedAnchors
 	}
 	
 	public KeyStore getTrustedCertsKeyStore() {
@@ -381,123 +370,103 @@ class SignatureVSService {
                 extensionChecker:extensionChecker])
 	}
 
-	public ResponseVS validateSMIMEVote(
-		SMIMEMessageWrapper messageWrapper, Locale locale) {
-		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+	public ResponseVS validateSMIMEVote(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
+		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessageReq.getContentDigestStr())
 		if(messageSMIME) {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
-				[messageWrapper.getContentDigestStr()].toArray(), locale)
+				[smimeMessageReq.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIMEVote - ${msg}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
-		return validateVoteCerts(messageWrapper, locale)
-	}
-		
-	public ResponseVS validateVoteCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
-		Set<UserVS> signersVS = smimeMessageReq.getSigners();
-		String msg
-		ResponseVS responseVS
-		EventVSElection eventVS
-		if(signersVS.isEmpty()) {
-			msg = messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale)
-			log.error ("validateVoteCerts - ERROR SIGNERS - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VOTE_ERROR)
-		}
-		VoteVS voteVS = smimeMessageReq.voteVS
-		String localServerURL = grailsApplication.config.grails.serverURL
-		String voteAccessControlURL = StringUtils.checkURL(voteVS.accessControlURL)
-		if (!localServerURL.equals(voteAccessControlURL)) {
-			msg = messageSource.getMessage('certVoteValidationErrorMsg',
+        Set<UserVS> signersVS = smimeMessageReq.getSigners();
+        String msg
+        ResponseVS responseVS
+        EventVSElection eventVS
+        if(signersVS.isEmpty()) {
+            msg = messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale)
+            log.error ("$methodName - ERROR SIGNERS - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VOTE_ERROR)
+        }
+        VoteVS voteVS = smimeMessageReq.voteVS
+        String localServerURL = grailsApplication.config.grails.serverURL
+        String voteAccessControlURL = StringUtils.checkURL(voteVS.accessControlURL)
+        if (!localServerURL.equals(voteAccessControlURL)) {
+            msg = messageSource.getMessage('certVoteValidationErrorMsg',
                     [voteAccessControlURL, localServerURL].toArray(), locale)
-			log.error ("validateVoteCerts - ERROR SERVER URL - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,type:TypeVS.VOTE_ERROR)
-		}
-		eventVS = EventVSElection.get(Long.valueOf(voteVS.getEventVS().getId()))
-		if (!eventVS)  {
-			msg = messageSource.getMessage('electionNotFound', [voteVS.getEventVS().getId()].toArray(), locale)
-			log.error ("validateVoteCerts - ERROR EVENT NOT FOUND - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VOTE_ERROR)
-		}
-		if(eventVS.state != EventVS.State.ACTIVE) {
-			msg = messageSource.getMessage('electionClosed', [eventVS.subject].toArray(), locale)
-			log.error ("validateVoteCerts - ERROR EVENT '${eventVS.id}' STATE -> ${eventVS.state}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+            log.error ("$methodName - ERROR SERVER URL - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,type:TypeVS.VOTE_ERROR)
+        }
+        eventVS = EventVSElection.get(Long.valueOf(voteVS.getEventVS().getId()))
+        if (!eventVS)  {
+            msg = messageSource.getMessage('electionNotFound', [voteVS.getEventVS().getId()].toArray(), locale)
+            log.error ("$methodName - ERROR EVENT NOT FOUND - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VOTE_ERROR)
+        }
+        if(eventVS.state != EventVS.State.ACTIVE) {
+            msg = messageSource.getMessage('electionClosed', [eventVS.subject].toArray(), locale)
+            log.error ("$methodName - ERROR EVENT '${eventVS.id}' STATE -> ${eventVS.state}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
                     type:TypeVS.VOTE_ERROR, eventVS:eventVS)
-		}
-		CertificateVS certificate = CertificateVS.findWhere(hashCertVSBase64:voteVS.hashCertVSBase64,
-			    state:CertificateVS.State.OK)
-		if (!certificate) {
-			msg = messageSource.getMessage('hashVoteValidationErrorMsg', [voteVS.hashCertVSBase64].toArray(), locale)
-			log.error ("validateVoteCerts - ERROR CERT '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+        }
+        CertificateVS certificate = CertificateVS.findWhere(hashCertVSBase64:voteVS.hashCertVSBase64,
+                state:CertificateVS.State.OK)
+        if (!certificate) {
+            msg = messageSource.getMessage('hashVoteValidationErrorMsg', [voteVS.hashCertVSBase64].toArray(), locale)
+            log.error ("$methodName - ERROR CERT '${msg}'")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
                     type:TypeVS.VOTE_ERROR, eventVS:eventVS)
-		}
-		smimeMessageReq.voteVS.setCertificateVS(certificate)
-		responseVS = getEventTrustedAnchors(eventVS, locale)
-		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-		Set<TrustAnchor> trustedAnchors = (Set<TrustAnchor>) responseVS.data
-		//Vote validation
+        }
+        smimeMessageReq.voteVS.setCertificateVS(certificate)
+        Set<TrustAnchor> trustedAnchors = getEventTrustedAnchors(eventVS, locale)
         ResponseVS validationResponse;
-		X509Certificate certCaResult;
-		X509Certificate checkedCert = voteVS.getX509Certificate()
-		try {
+        X509Certificate certCaResult;
+        X509Certificate checkedCert = voteVS.getX509Certificate()
+        try {
             validationResponse = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
-			certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
-			log.debug("validateVoteCerts - vote cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString()+
-					"- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex)
-			msg = messageSource.getMessage('certValidationErrorMsg',
-					[checkedCert.getSubjectDN()?.toString()].toArray(), locale)
-			log.error ("validateVoteCerts - ERROR VOTE CERT VALIDATION -> '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+            certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+            log.debug("$methodName - vote cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString()+
+                    "- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex)
+            msg = messageSource.getMessage('certValidationErrorMsg',
+                    [checkedCert.getSubjectDN()?.toString()].toArray(), locale)
+            log.error ("$methodName - ERROR VOTE CERT VALIDATION -> '${msg}'")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
                     message:msg, type:TypeVS.VOTE_ERROR, eventVS:eventVS)
-		}
+        }
         Date signatureTime = voteVS.getTimeStampToken()?.getTimeStampInfo().getGenTime()
         if(!eventVS.isActive(signatureTime)) {
             msg = messageSource.getMessage("checkedDateRangeErrorMsg", [signatureTime,
-                    eventVS.getDateBegin(), eventVS.getDateFinish()].toArray(), locale)
+                        eventVS.getDateBegin(), eventVS.getDateFinish()].toArray(), locale)
             log.error(msg)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.VOTE_ERROR,
                     message:msg, eventVS:eventVS)
         }
-		//Control Center cert validation
-		trustedAnchors = controlCenterTrustedAnchorsHashMap.get(eventVS?.id)
-		if(!trustedAnchors) {
-			trustedAnchors = new HashSet<TrustAnchor>()
-			Collection<X509Certificate> controlCenterCerts = CertUtil.
-                    fromPEMToX509CertCollection (eventVS.certChainControlCenter)
-			for(X509Certificate controlCenterCert : controlCenterCerts)	{
-				TrustAnchor anchor = new TrustAnchor(controlCenterCert, null);
-				trustedAnchors.add(anchor);
-			}
-			controlCenterTrustedAnchorsHashMap.put(eventVS.id, trustedAnchors)
-		}
-		//check control center certificate
-		if(voteVS.getServerCerts().isEmpty()) {
-			msg = messageSource.getMessage('controlCenterMissingSignatureErrorMsg', null, locale)
-			log.error(" ERROR - MISSING CONTROL CENTER SIGNATURE - msg: ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+        if(voteVS.getServerCerts().isEmpty()) {//check control center certificate
+            msg = messageSource.getMessage('controlCenterMissingSignatureErrorMsg', null, locale)
+            log.error(" ERROR - MISSING CONTROL CENTER SIGNATURE - msg: ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
                     type:TypeVS.VOTE_ERROR, eventVS:eventVS)
-		}
-		checkedCert = voteVS.getServerCerts()?.iterator()?.next()
-		try {
+        }
+        checkedCert = voteVS.getServerCerts()?.iterator()?.next()
+        try {
             validationResponse = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
-			certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
-			log.debug("validateVoteCerts - Control Center cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString() +
-					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex)
-			msg = messageSource.getMessage('certValidationErrorMsg',
-					[checkedCert.getSubjectDN()?.toString()].toArray(), locale)
-			log.error ("validateVoteCerts - ERROR CONTROL CENTER CERT VALIDATION -> '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-				message:msg, type:TypeVS.VOTE_ERROR, eventVS:eventVS)
-		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-			smimeMessage:smimeMessageReq, type:TypeVS.CONTROL_CENTER_VALIDATED_VOTE)
+            certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+            log.debug("$methodName - Control Center cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString() +
+                    "- numserie: " + certCaResult?.getSerialNumber()?.longValue());
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex)
+            msg = messageSource.getMessage('certValidationErrorMsg',
+                    [checkedCert.getSubjectDN()?.toString()].toArray(), locale)
+            log.error ("$methodName - ERROR CONTROL CENTER CERT VALIDATION -> '${msg}'")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    message:msg, type:TypeVS.VOTE_ERROR, eventVS:eventVS)
+        }
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
+                smimeMessage:smimeMessageReq, type:TypeVS.CONTROL_CENTER_VALIDATED_VOTE)
 	}
-
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
         log.debug("encryptToCMS ${new String(dataToEncrypt)}")

@@ -5,7 +5,7 @@
     <title><g:message code="simulationWebAppCaption"/></title>
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <div  style="padding: 0px 30px 0px 30px;">
         <div id="status" class="col-md-4">
             <h3>Application Status</h3>

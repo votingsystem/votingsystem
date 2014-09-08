@@ -5,7 +5,7 @@
     <meta name="layout" content="main" />
 </head>
 <body style="">
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <div style="padding: 0px 30px 0px 30px;">
         <div  style="">
             <ol class="breadcrumbVS pull-left">

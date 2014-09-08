@@ -35,7 +35,7 @@ class ServerInfoController {
 		serverInfo.state = ActorVS.State.OK.toString()
         serverInfo.environmentMode =  grails.util.Environment.current.toString()
         def controlCenter = systemService.getControlCenter()
-        serverInfo.controlCenter = [id:controlCenter.id, name:controlCenter.name, serverURL:controlCenter.serverURL,
+        if(controlCenter) serverInfo.controlCenter = [id:controlCenter.id, name:controlCenter.name, serverURL:controlCenter.serverURL,
                 state:controlCenter.state?.toString(), dateCreated:controlCenter.dateCreated]
 		serverInfo.certChainURL = "${createLink(controller: 'certificateVS', action:'certChain', absolute:true)}"
 		File certChain = grailsApplication.mainContext.getResource(

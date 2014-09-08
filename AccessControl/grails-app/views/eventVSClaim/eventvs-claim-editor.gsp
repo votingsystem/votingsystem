@@ -12,6 +12,7 @@
                 padding:10px 20px 10px 20px;
             }
         </style>
+        <core-signals on-core-signal-messagedialog-closed="{{messagedialog}}"></core-signals>
         <div class="pageHeader"  layout horizontal center center-justified>
             <h3><g:message code="publishClaimLbl"/></h3>
         </div>
@@ -52,19 +53,21 @@
             </div>
 
             <div id="fieldsDiv" style="display:{{claimOptionList.length == 0? 'none':'block'}}">
-                <fieldset id="fieldsBox" class="fieldsBox">
-                    <legend id="fieldsLegend" style="border: none;"><g:message code="claimFieldLegend"/></legend>
-                    <div layout vertical>
-                        <template repeat="{{claimOption in claimOptionList}}">
-                            <div>
-                                <a class="btn btn-default" on-click="{{removePollOption}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                                    <g:message code="deleteLbl"/> <i class="fa fa-minus"></i></a>
-                                {{claimOption}}
-                            </div>
+                <div class="fieldsBox">
+                    <fieldset>
+                        <legend><g:message code="claimFieldLegend"/></legend>
+                        <div layout vertical>
+                            <template repeat="{{claimOption in claimOptionList}}">
+                                <div>
+                                    <a class="btn btn-default" on-click="{{removePollOption}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                                        <g:message code="deleteLbl"/> <i class="fa fa-minus"></i></a>
+                                    {{claimOption}}
+                                </div>
 
-                        </template>
-                    </div>
-                </fieldset>
+                            </template>
+                        </div>
+                    </fieldset>
+                </div>
             </div>
 
             <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
@@ -86,6 +89,7 @@
     </template>
     <script>
         Polymer('eventvs-claim-editor', {
+            appMessageJSON:null,
             claimOptionList : [],
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -154,6 +158,7 @@
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="publishClaimSubject"/>"
 
+                this.appMessageJSON = null
                 var objectId = Math.random().toString(36).substring(7)
                 webAppMessage.callerCallback = objectId
 
@@ -168,7 +173,6 @@
                             caption = '<g:message code="publishOKCaption"/>'
                             var msgTemplate = "<g:message code='documentLinkMsg'/>";
                             msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
-                            window.location.href = appMessageJSON.message
                         }
                         showMessageVS(msg, caption)
                     }
@@ -178,6 +182,10 @@
 
 
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
+            },
+            messagedialog:function() {
+                if(this.appMessageJSON != null && this.appMessageJSON.message != null)
+                    window.location.href = this.appMessageJSON.message
             }
         });
     </script>

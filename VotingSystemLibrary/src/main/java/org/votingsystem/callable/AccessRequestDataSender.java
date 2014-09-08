@@ -54,21 +54,20 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
             smimeMessage.setTimeStampToken(timeStampToken);
-            byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
-            byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
-            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
-            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
+            //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
+            //byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
+            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.TEXT.getName();
+            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
-            mapToSend.put(csrFileName, encryptedCSRBytes);
-            mapToSend.put(accessRequestFileName, accessRequestEncryptedBytes);
+            mapToSend.put(csrFileName, certificationRequest.getCsrPEM());
+            mapToSend.put(accessRequestFileName, smimeMessage.getBytes());
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ContextVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                byte[] encryptedData = responseVS.getMessageBytes();
+                /*byte[] encryptedData = responseVS.getMessageBytes();
                 byte[] decryptedData = Encryptor.decryptFile(encryptedData, certificationRequest.getPublicKey(),
-                        certificationRequest.getPrivateKey());
-                certificationRequest.initSigner(decryptedData);
+                        certificationRequest.getPrivateKey());*/
+                certificationRequest.initSigner(responseVS.getMessageBytes());
                 responseVS.setData(certificationRequest);
             } else {
                 responseVS.setStatus(new StatusVS() {});

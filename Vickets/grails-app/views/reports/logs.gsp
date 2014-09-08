@@ -6,7 +6,7 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-<div class="pageContenDiv">
+<div class="pageContentDiv">
     <ol class="breadcrumbVS">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li class="active"><g:message code="reportsPageTitle"/></li>

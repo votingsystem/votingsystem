@@ -9,7 +9,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/google-chart', file: 'google-chart.html')}">
 </head>
 <body>
-    <div class="pageContenDiv" style="max-width:1000px; margin: 20px auto 0px auto;">
+    <div class="pageContentDiv" style="max-width:1000px; margin: 20px auto 0px auto;">
         <week-reports url="${createLink(controller: 'reports', action: 'forWeek')}?date=${date}"></week-reports>
     </div>
 </body>
