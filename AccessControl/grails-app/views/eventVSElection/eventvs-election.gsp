@@ -1,6 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-vote-confirm-dialog.gsp']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-admin-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votevs-result-dialog.gsp']"/>">
+
 
 
 <polymer-element name="eventvs-election" attributes="subpage">
@@ -79,6 +81,7 @@
         </div>
         <eventvs-vote-confirm-dialog id="confirmOptionDialog"></eventvs-vote-confirm-dialog>
         <eventvs-admin-dialog id="eventVSAdminDialog"></eventvs-admin-dialog>
+        <votevs-result-dialog id="votevsResultDialog"></votevs-result-dialog>
     </template>
     <script>
         Polymer('eventvs-election', {
@@ -125,19 +128,10 @@
                 window[objectId] = {setClientToolMessage: function(appMessage) {
                     console.log(this.tagName + " - vote callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
-                    if(appMessageJSON != null) {
-                        var caption = '<g:message code="voteERRORCaption"/>'
-                        var msgTemplate = "<g:message code='voteResultMsg'/>"
-                        var msg
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = "<g:message code='voteOKCaption'/>"
-                            msg = msgTemplate.format('<g:message code="voteResultOKMsg"/>',appMessageJSON.message);
-                        } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
-                            msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>"
-                            msg = msgTemplate.format(webAppMessage.eventVS.subject, appMessageJSON.message);
-                        } else msg = appMessageJSON.message
-                        showMessageVS(msg, caption)
-                    }}.bind(this)}
+                    appMessageJSON.eventVS = this.eventvs
+                    appMessageJSON.optionSelected = this.optionVSSelected.content
+                    this.$.votevsResultDialog.show(appMessageJSON)
+                    }.bind(this)}
 
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

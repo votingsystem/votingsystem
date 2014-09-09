@@ -58,7 +58,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
 	private UserVS signerVS;
 	private VoteVS voteVS;
 	private boolean isValidSignature = false;
-	
+    private TimeStampToken timeStampToken = null;
+
     public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
         logger.debug("SMIMEMessageWrapper(Session session)");
@@ -180,6 +181,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
         }
     }
 
+    public TimeStampToken getTimeStampToken () {return timeStampToken;}
+
     public boolean isValidSignature()  {
     	return isValidSignature;
     }
@@ -215,6 +218,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                     firstSignature = timeStampDate;
                     this.signerVS = userVS;
                 }
+                this.timeStampToken = timeStampToken;
             }
             signers.add(userVS);
             if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {

@@ -522,8 +522,7 @@ public class ContextVS {
             icon = new ImageIcon(baseObject.getClass().getResource(iconPath));
         } catch(Exception ex) {
             logger.error(" ### iconPath: " + iconPath + " not found");
-            icon = new ImageIcon(baseObject.getClass().getResource(
-                    "/resources/icon_32/button_default.png"));
+            icon = new ImageIcon(baseObject.getClass().getResource("/resources/icon_32/button_default.png"));
         }
         return icon;
     }
@@ -545,6 +544,7 @@ public class ContextVS {
     }
 
     public void setDefaultServer(ActorVS server) {
+        logger.debug("setDefaultServer - serverURL: " + server.getServerURL());
         this.defaultServer = server;
     }
 

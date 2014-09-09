@@ -333,7 +333,7 @@ class SignatureVSService {
                         log.error("validateSignersCerts - TIMESTAMP ERROR - ${timestampValidationResp.message}")
                         return timestampValidationResp
                     }
-                } else {
+                } else if(messageWrapper.getTimeStampToken() == null) {
                     String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
                     log.error("ERROR - validateSignersCerts - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)

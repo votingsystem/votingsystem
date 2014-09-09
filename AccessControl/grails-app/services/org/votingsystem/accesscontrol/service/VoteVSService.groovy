@@ -7,7 +7,9 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
+import org.votingsystem.util.MetaInfMsg
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
@@ -60,12 +62,13 @@ class VoteVSService {
 		}
     }
 	
-	private ResponseVS checkCancelJSONData(JSONObject cancelDataJSON) {
+	private ResponseVS checkCancelJSONData(JSONObject cancelDataJSON, Locale locale) {
 		def originHashCertVote = cancelDataJSON.originHashCertVote
 		def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
 		def originHashAccessRequest = cancelDataJSON.originHashAccessRequest
 		def hashAccessRequestBase64 = cancelDataJSON.hashAccessRequestBase64
-		if(!originHashCertVote || !hashCertVSBase64 || !originHashAccessRequest || !hashAccessRequestBase64) {
+		if(!originHashCertVote || !hashCertVSBase64 || !originHashAccessRequest || !hashAccessRequestBase64 ||
+                (TypeVS.CANCEL_VOTE != TypeVS.valueOf(cancelDataJSON.operation))) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,
 				message:messageSource.getMessage('voteCancellationDataError', null, locale))
 		}
@@ -79,182 +82,90 @@ class VoteVSService {
 					'voteCancellationHashCertificateError', null, locale), type:TypeVS.CANCEL_VOTE_ERROR)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
-	
-	private ResponseVS checkCancelResponseJSONData(JSONObject requestDataJSON,
-           JSONObject responseDataJSON, Locale locale) {
-		ResponseVS responseVS = checkCancelJSONData(responseDataJSON)
-		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-		if(!(requestDataJSON.hashCertVSBase64.equals(responseDataJSON.hashCertVSBase64)) ||
-			!(requestDataJSON.hashAccessRequestBase64.equals(responseDataJSON.hashAccessRequestBase64))){
-			String msg = messageSource.getMessage('cancelDataWithErrorsMsg', null, locale)
-			log.error("checkCancelResponseJSONData - requestDataJSON: '${requestDataJSON}'" + 
-				" - responseDataJSON: '${responseDataJSON}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
-		} else return new ResponseVS(statusCode:ResponseVS.SC_OK)
-	}
-	
+
 	public synchronized ResponseVS processCancel (MessageSMIME messageSMIME, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
 		UserVS signer = messageSMIME.getUserVS();
 		SMIMEMessageWrapper smimeMessage = messageSMIME.getSmimeMessage();
-		log.debug ("processCancel - ${smimeMessage.getSignedContent()}")
+		log.debug ("$methodName")
 		MessageSMIME messageSMIMEResp;
 		EventVSElection eventVSElection;
-		try {
-			def cancelDataJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
-			ResponseVS responseVS = checkCancelJSONData(cancelDataJSON)
-			if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-			def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
-			def hashAccessRequestBase64 = cancelDataJSON.hashAccessRequestBase64
-
-			String msg
-			def accessRequestVS = AccessRequestVS.findWhere(hashAccessRequestBase64:hashAccessRequestBase64)
-			if (!accessRequestVS) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-				message:messageSource.getMessage('voteCancellationAccessRequestNotFoundError', null, locale),
-				type:TypeVS.CANCEL_VOTE_ERROR)
-			if(accessRequestVS.state.equals(AccessRequestVS.State.CANCELLED)) {
-				msg = messageSource.getMessage(
-					'voteCancellationAlreadyCancelledError', null, locale)
-				log.error("processCancel - ERROR ACCESS REQUEST ALREADY CANCELLED - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED,
-					message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
-			}
-			CertificateVS certificateVS = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64)
-			if (!certificateVS){
-				msg = messageSource.getMessage(
-					'voteCancellationCsrRequestNotFoundError', null, locale)
-				log.error("processCancel - ERROR CSR NOT FOUND - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-					message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
-			} 
-			else eventVSElection = certificateVS.eventVSElection
-			def voteVS = VoteVS.findWhere(certificateVS:certificateVS)
-			VoteVSCanceller voteCanceller = VoteVSCanceller.findWhere(hashCertVSBase64:hashCertVSBase64)
-			if(voteCanceller) {
-				String voteURL = "${grailsApplication.config.grails.serverURL}/voteVS/${voteCanceller.voteVS.id}"
-				msg = messageSource.getMessage('voteAlreadyCancelled',[voteURL].toArray(), locale)
-				log.error("processCancel - REAPEATED CANCEL REQUEST - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED,
-					data:voteCanceller.messageSMIME, type:TypeVS.CANCEL_VOTE_ERROR,
-					message:msg, eventVS:eventVSElection)
-			}
-			Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().genTime
-			if(!eventVSElection.isActive(timeStampDate)) {
-				msg = messageSource.getMessage('timestampDateErrorMsg', 
-					[timeStampDate, eventVSElection.dateBegin, eventVSElection.getDateFinish()].toArray(), locale)
-				log.error("processCancel - DATE ERROR - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
-			}
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = eventVSElection.controlCenterVS.serverURL
-			String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
-			smimeMessage.setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIME.id}")
-			SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-				fromUser, toUser, smimeMessage, subject)
-			messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIME, eventVS:eventVSElection)
-			VoteVSCanceller.State cancellerState
-			if(!voteVS){//Access request without vote
-				msg = messageSource.getMessage('voteCancellationVoteNotFoundError', null, locale)
-				log.debug ("processCancel - VOTE NOT FOUND - ${msg}")
-				messageSMIMEResp.content = smimeMessageResp.getBytes()
-				cancellerState = VoteVSCanceller.State.CANCELLATION_WITHOUT_VOTE//Access request without vote
-			} else {//Notify Control Center
-				def cancelDataJSONResp
-				String msgArg
-				String controlCenterURL = eventVSElection.controlCenterVS.serverURL
-				String eventURL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSElection.id}"
-				String voteCancellerURL = "${controlCenterURL}/voteVSCanceller?url=${eventURL}"
-				ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
-                        ContentTypeVS.JSON_SIGNED, voteCancellerURL)
-				if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
-					responseVSControlCenter = signatureVSService.decryptSMIMEMessage(
-							responseVSControlCenter.message.getBytes(), locale)
-					if(ResponseVS.SC_OK != responseVSControlCenter.statusCode) {
-						msgArg = messageSource.getMessage('encryptedMessageErrorMsg', null, locale)
-						msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',[msgArg].toArray(), locale)
-						log.debug ("processCancel --- Problem with response encryption - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-								message:msg, eventVS:eventVSElection, type:TypeVS.CANCEL_VOTE_ERROR)
-					}
-					smimeMessageResp = responseVSControlCenter.smimeMessage;//already decrypted
-					//check message content
-					cancelDataJSONResp = JSON.parse(smimeMessageResp.getSignedContent())
-					responseVS = checkCancelResponseJSONData(cancelDataJSON, cancelDataJSONResp, locale)
-					if(ResponseVS.SC_OK != responseVS.statusCode) {
-						msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',
-							[responseVS.message].toArray(), locale)
-						log.debug ("processCancel - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-								message:msg, eventVS:eventVSElection, type:TypeVS.CANCEL_VOTE_ERROR)
-					}
-					messageSMIMEResp.content = smimeMessageResp.getBytes()
-					cancellerState = VoteVSCanceller.State.CANCELLATION_OK
-				} else if(ResponseVS.SC_ERROR_REQUEST_REPEATED) {
-					responseVSControlCenter =  signatureVSService.decryptSMIMEMessage(
-						responseVSControlCenter.message.getBytes(), locale)
-					if(ResponseVS.SC_OK != responseVSControlCenter.statusCode) {
-						msgArg = messageSource.getMessage(
-							'encryptedMessageErrorMsg', null, locale) 
-						msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',
-							[msgArg].toArray(), locale)
-						log.debug ("processCancel *** Problem with response encryption - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-								message:msg, eventVS:eventVSElection, type:TypeVS.CANCEL_VOTE_ERROR)
-					}
-					smimeMessageResp = responseVSControlCenter.smimeMessage
-					ResponseVS validationResponseVS = signatureVSService.validateSignersCerts(smimeMessageResp, locale)
-					if(!signatureVSService.isSystemSignedMessage((Set<UserVS>)validationResponseVS.data)) {
-						msgArg = messageSource.getMessage('unknownReceipt', null, locale)
-						msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',
-							[msgArg].toArray(), locale)
-						log.error("processCancel - Not local receipt - ${msg}")
-						messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT_ERROR,
-                                content:smimeMessageResp.getBytes(), eventVS:eventVSElection, metaInf:msg)
-						MessageSMIME.withTransaction {
-							messageSMIMEResp.save()
-						}
-						return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
-							message:msg, eventVS:eventVSElection, type:TypeVS.CANCEL_VOTE_ERROR)
-					}
-					cancelDataJSONResp = JSON.parse(smimeMessageResp.getSignedContent())
-					responseVS = checkCancelResponseJSONData(cancelDataJSON, cancelDataJSONResp)
-					if(ResponseVS.SC_OK != responseVS.statusCode) {
-						msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',
-							[responseVS.message].toArray(), locale)
-						log.error("processCancel - response data with errors - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-							message:msg, eventVS:eventVSElection, type:TypeVS.CANCEL_VOTE_ERROR)
-					}		
-					messageSMIMEResp.content = smimeMessageResp.getBytes()
-					cancellerState = VoteVSCanceller.State.CANCELLATION_OK
-				} else {
-					responseVSControlCenter.eventVS = eventVSElection
-					return responseVSControlCenter
-				}
-			}
-			MessageSMIME.withTransaction { messageSMIMEResp.save()}
-			voteCanceller = new VoteVSCanceller(messageSMIME:messageSMIMEResp, state:cancellerState,
-				accessRequestVS:accessRequestVS,
+        def cancelDataJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
+        ResponseVS responseVS = checkCancelJSONData(cancelDataJSON, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
+        def hashAccessRequestBase64 = cancelDataJSON.hashAccessRequestBase64
+        String msg
+        def accessRequestVS = AccessRequestVS.findWhere(hashAccessRequestBase64:hashAccessRequestBase64,
+                state:AccessRequestVS.State.OK)
+        if (!accessRequestVS) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                message:messageSource.getMessage('voteCancellationAccessRequestNotFoundError', null, locale),
+                type:TypeVS.CANCEL_VOTE_ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "accessRequestVSNotFound"))
+        CertificateVS certificateVS = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64, state:CertificateVS.State.USED)
+        if (!certificateVS){
+            msg = messageSource.getMessage('voteCancellationCsrRequestNotFoundError', null, locale)
+            log.error("$methodName - ERROR CSR NOT FOUND - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.CANCEL_VOTE_ERROR,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "voteVSCancellationCertificateVSMissing"))
+        }
+        else eventVSElection = certificateVS.eventVSElection
+        def voteVS = VoteVS.findWhere(certificateVS:certificateVS, state:VoteVS.State.OK)
+        if(!voteVS) throw new ExceptionVS("VoteVS not found")
+        Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().genTime
+        if(!eventVSElection.isActive(timeStampDate)) {
+            msg = messageSource.getMessage('timestampDateErrorMsg',
+                    [timeStampDate, eventVSElection.dateBegin, eventVSElection.getDateFinish()].toArray(), locale)
+            log.error("$methodName - DATE ERROR - ${msg}")
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg, type:TypeVS.CANCEL_VOTE_ERROR,
+                    metaInf:MetaInfMsg.getErrorMsg(methodName, "voteVSCancellationOutOfDate"))
+        }
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = eventVSElection.controlCenterVS.serverURL
+        String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
+        smimeMessage.setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIME.id}")
+        SMIMEMessageWrapper smimeMessageReq = signatureVSService.getMultiSignedMimeMessage(
+                fromUser, toUser, smimeMessage, subject)
+        messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIME, eventVS:eventVSElection)
+        String controlCenterURL = eventVSElection.controlCenterVS.serverURL
+        String eventURL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSElection.id}"
+        String voteCancellerURL = "${controlCenterURL}/voteVSCanceller?url=${eventURL}"
+        ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageReq.getBytes(),
+                ContentTypeVS.JSON_SIGNED, voteCancellerURL)
+        if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
+            SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(new ByteArrayInputStream(
+                    responseVSControlCenter.message.getBytes()))
+            if(!smimeMessageReq.contentDigestStr.equals(smimeMessageResp.contentDigestStr)) {
+                msg = messageSource.getMessage('controlCenterCommunicationErrorMsg', [responseVS.message].toArray(), locale)
+                log.debug ("$methodName - ${msg}")
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, eventVS:eventVSElection,
+                        type:TypeVS.CANCEL_VOTE_ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "smimeContentMismatchError"))
+            }
+            signatureVSService.validateSignersCerts(smimeMessageResp, locale)
+            messageSMIMEResp.content = smimeMessageResp.getBytes()
+            messageSMIMEResp.save()
+        } else {
+            responseVSControlCenter.eventVS = eventVSElection
+            responseVSControlCenter.metaInf = MetaInfMsg.getErrorMsg(methodName, "voteVSCancellationControlCenterCancellationError")
+            return responseVSControlCenter
+        }
+        VoteVSCanceller voteCanceller = new VoteVSCanceller(messageSMIME:messageSMIMEResp, accessRequestVS:accessRequestVS,
+                state:VoteVSCanceller.State.CANCELLATION_OK,
                 originHashAccessRequestBase64:cancelDataJSON.originHashAccessRequest,
-				originHashCertVSBase64:cancelDataJSON.originHashCertVote,
-				hashAccessRequestBase64:hashAccessRequestBase64,
-				hashCertVSBase64:hashCertVSBase64,
-				eventVSElection:eventVSElection, voteVS:voteVS)
-			if (!voteCanceller.save()) {voteCanceller.errors.each { log.error("processCancel - error - ${it}")}}
-			if(voteVS) {
-				voteVS.state = VoteVS.State.CANCELLED
-				voteVS.save()
-			}
-			accessRequestVS.state = AccessRequestVS.State.CANCELLED
-			accessRequestVS.save()
-            certificateVS.state = CertificateVS.State.CANCELLED
-            certificateVS.save()
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CANCEL_VOTE, data:messageSMIMEResp,
-                    contentType:ContentTypeVS.SIGNED_AND_ENCRYPTED, eventVS:eventVSElection)
-		}catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, eventVS:eventVSElection,
-                    type:TypeVS.CANCEL_VOTE_ERROR)
-		}
+                originHashCertVSBase64:cancelDataJSON.originHashCertVote,
+                hashAccessRequestBase64:hashAccessRequestBase64,
+                hashCertVSBase64:hashCertVSBase64,
+                eventVSElection:eventVSElection, voteVS:voteVS).save()
+        if (!voteCanceller) {voteCanceller.errors.each { log.error("$methodName - error - ${it}")}}
+        voteVS.state = VoteVS.State.CANCELLED
+        voteVS.save()
+        accessRequestVS.state = AccessRequestVS.State.CANCELLED
+        accessRequestVS.save()
+        certificateVS.state = CertificateVS.State.CANCELLED
+        certificateVS.save()
+        log.error("$methodName - saved voteVSCanceller.id: '${voteCanceller.id}'")
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CANCEL_VOTE, data:messageSMIMEResp,
+                contentType:ContentTypeVS.JSON_SIGNED, eventVS:eventVSElection)
 	}
 	
 	public Map getVoteVSMap(VoteVS voteVS) {
@@ -273,12 +184,11 @@ class VoteVSService {
 		return voteVSMap
 	}
 	
-	public Map getVoteVSCancellerMap(VoteVSCanceller anulador) {
-		if(!anulador) return [:]
-		Map anuladorMap = [id:anulador.id,
-			voteVSURL:"${grailsApplication.config.grails.serverURL}/voteVS/${anulador.voteVS.id}",
-			anuladorSMIMEURL:"${grailsApplication.config.grails.serverURL}/messageSMIME/${anulador.messageSMIME.id}"]
-		return anuladorMap
+	public Map getVoteVSCancellerMap(VoteVSCanceller canceller) {
+		if(!canceller) throw new ExceptionVS("VoteVSCanceller null")
+		Map cancellerMap = [id:canceller.id, voteVSURL:"${grailsApplication.config.grails.serverURL}/voteVS/${canceller.voteVS.id}",
+			anuladorSMIMEURL:"${grailsApplication.config.grails.serverURL}/messageSMIME/${canceller.messageSMIME.id}"]
+		return cancellerMap
 	}
 	
 }

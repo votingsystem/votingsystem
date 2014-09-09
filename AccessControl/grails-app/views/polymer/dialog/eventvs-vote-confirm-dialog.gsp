@@ -24,7 +24,7 @@
                     <div flex></div>
                     <div>
                         <votingsystem-button on-click="{{optionConfirmed}}" style="margin: 0px 0px 0px 5px;">
-                            <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
+                            <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
                         </votingsystem-button>
                     </div>
                 </div>

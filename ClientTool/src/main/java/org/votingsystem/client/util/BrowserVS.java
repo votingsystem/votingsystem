@@ -14,7 +14,6 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -24,7 +23,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.web.*;
+import javafx.scene.web.PopupFeatures;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebHistory;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -34,7 +36,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
-import java.util.Base64;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.model.ContentTypeVS;
@@ -42,19 +43,15 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author jgzornoza

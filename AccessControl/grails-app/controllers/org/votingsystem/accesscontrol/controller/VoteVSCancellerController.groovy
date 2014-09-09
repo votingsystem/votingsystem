@@ -27,8 +27,7 @@ class VoteVSCancellerController {
 	def index () {
 		if(params.hashHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-			String hashCertVSBase64 = new String(
-				hexConverter.unmarshal(params.hashHex))
+			String hashCertVSBase64 = new String(hexConverter.unmarshal(params.hashHex))
 			log.debug "hashCertVSBase64: '${hashCertVSBase64}'"
 			VoteVSCanceller voteCanceller = null
 			VoteVSCanceller.withTransaction{
@@ -37,8 +36,8 @@ class VoteVSCancellerController {
 			if(!voteCanceller) return [responseVS : new ResponseVS(ResponseVS.SC_OK,
                     message(code: 'voteNotFound', args:[params.id]))]
 			else {
-				Map anuladorvoteVSMap = voteVSService.getVoteVSCancellerMap(voteCanceller)
-				render anuladorvoteVSMap as JSON
+				Map voteVSCancellerMap = voteVSService.getVoteVSCancellerMap(voteCanceller)
+				render voteVSCancellerMap as JSON
 			}
 		} else return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',

@@ -23,7 +23,6 @@ import org.votingsystem.model.ContextVS;
 
 import java.io.File;
 
-
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -144,26 +143,29 @@ public class SignedFilePane extends GridPane {
                 @Override
                 public void changed(ObservableValue<? extends Worker.State> ov, Worker.State oldState,
                                     Worker.State newState) {
-                    //logger.debug("newState: " + newState);
+                    logger.debug("newState: " + newState);
                     if (newState == Worker.State.SUCCEEDED) {
                         signatureContentWebView.getEngine().executeScript(jsCommand);
                     }
                 }
             };
         }
-        logger.debug("changeContentFormat: " + contentFormattedCheckBox.isSelected());
+        logger.debug("changeContentFormat - contentFormattedCheckBox.isSelected: " + contentFormattedCheckBox.isSelected());
         if (contentFormattedCheckBox.isSelected()) {
             try {
-                String formattedText = Formatter.format(signedFile.getSMIMEMessageWraper().getSignedContent());
-                signatureContentWebView.getEngine().loadContent(formattedText);
+                //String formattedText = Formatter.format(signedFile.getSMIMEMessageWraper().getSignedContent());
+                signatureContentWebView.getEngine().loadContent(signedFile.getSMIMEMessageWraper().getSignedContent());
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
             signatureContentWebView.getEngine().getLoadWorker().stateProperty().removeListener(changeListener);
         } else {
             signatureContentWebView.getEngine().getLoadWorker().stateProperty().addListener(changeListener);
-            signatureContentWebView.getEngine().load(ContextVS.getInstance().getDefaultServer().getReceiptViewerURL() +
-                    "?operation=" + signedContentJSON.getString("operation"));
+            String receiptViewerURL = ContextVS.getInstance().getDefaultServer().getReceiptViewerURL() +
+                    "?operation=" + signedContentJSON.getString("operation");
+            logger.debug("changeContentFormat - receiptViewerURL: " + receiptViewerURL);
+            signatureContentWebView.getEngine().load(receiptViewerURL);
         }
     }
+
 }

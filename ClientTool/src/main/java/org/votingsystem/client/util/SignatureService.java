@@ -7,6 +7,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.*;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -88,6 +89,9 @@ public class SignatureService extends Service<ResponseVS> {
                         case SEND_SMIME_VOTE:
                             responseVS = sendVote(operationVS);
                             break;
+                        case CANCEL_VOTE:
+                            responseVS = cancelVote(operationVS.getTargetServer(), operationVS);
+                            break;
                         case NEW_REPRESENTATIVE:
                             responseVS = processNewRepresentative(operationVS);
                             break;
@@ -141,9 +145,7 @@ public class SignatureService extends Service<ResponseVS> {
             eventVS.setUserVS(ContextVS.getInstance().getSessionUser());
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, eventVS.getVoteVS());
             ResponseVS responseVS = accessRequestDataSender.call();
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                return responseVS;
-            }
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             updateProgress(60, 100);
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
             jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getVoteDataMap());
@@ -164,14 +166,39 @@ public class SignatureService extends Service<ResponseVS> {
                 SMIMEMessageWrapper validatedVote = responseVS.getSmimeMessage();
                 Map validatedVoteDataMap = (JSONObject) JSONSerializer.toJSON(validatedVote.getSignedContent());
                 eventVS.getVoteVS().setReceipt(validatedVote);
-                ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK);
+                ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK, ContentTypeVS.VOTE);
                 voteResponse.setType(TypeVS.VOTEVS);
                 voteResponse.setData(eventVS.getVoteVS());
                 ContextVS.getInstance().addHashCertVSData(eventVS.getVoteVS().getHashCertVSBase64(), voteResponse);
                 //voteURL header
-                responseVS.setMessage(((List<String>)responseVS.getData()).iterator().next());
+                JSONObject responseJSON = new JSONObject();
+                responseJSON.put("statusCode", ResponseVS.SC_OK);
+                responseJSON.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
+                responseJSON.put("hashCertVSBase64", eventVS.getVoteVS().getHashCertVSBase64());
+                responseJSON.put("hashCertVSHex", new String(Hex.encode(eventVS.getVoteVS().getHashCertVSBase64().getBytes())));
+                responseJSON.put("voteVSReceipt", new String(validatedVote.getBytes(), "UTF-8"));
+                //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+                //String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));
+                responseVS.setContentType(ContentTypeVS.JSON);
+                responseVS.setMessageJSON(responseJSON);
             }
             return responseVS;
+        }
+
+        //we know this is done in a background thread
+        private ResponseVS cancelVote(ActorVS targetServer, OperationVS operationVS) throws Exception {
+            logger.debug("cancelVote");
+            Map documentToSignMap = new HashMap<String, String>();
+            documentToSignMap.put("operation", TypeVS.CANCEL_VOTE.toString());
+            ResponseVS voteResponse = ContextVS.getInstance().getHashCertVSData(operationVS.getMessage());
+            VoteVS voteVS = (VoteVS) voteResponse.getData();
+            documentToSignMap.put("originHashAccessRequest", voteVS.getOriginHashAccessRequest());
+            documentToSignMap.put("hashAccessRequestBase64", voteVS.getAccessRequestHashBase64());
+            documentToSignMap.put("originHashCertVote", voteVS.getOriginHashCertVote());
+            documentToSignMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
+            documentToSignMap.put("UUID", UUID.randomUUID().toString());
+            operationVS.setDocumentToSignMap(documentToSignMap);
+            return sendSMIME(targetServer, operationVS);
         }
 
         //we know this is done in a background thread

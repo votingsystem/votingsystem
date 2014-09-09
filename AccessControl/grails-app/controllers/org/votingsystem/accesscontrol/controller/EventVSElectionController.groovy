@@ -288,9 +288,9 @@ class EventVSElectionController {
 				accessRequestVSURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" +
 					"/get?id=${solicitud?.messageSMIME?.id}"]
 				if(AccessRequestVS.State.CANCELLED.equals(solicitud.state)) {
-					VoteVSCanceller anuladorVoto = VoteVSCanceller.findWhere(accessRequestVS:solicitud)
+					VoteVSCanceller votevsCanceller = VoteVSCanceller.findWhere(accessRequestVS:solicitud)
 					solicitudMap.cancellerURL="${grailsApplication.config.grails.serverURL}" +
-						"/messageSMIME/${anuladorVoto?.messageSMIME?.id}"
+						"/messageSMIME/${votevsCanceller?.messageSMIME?.id}"
 				}
 				voteVSInfoMap.accessRequest.add(solicitudMap)
 			}
@@ -312,9 +312,9 @@ class EventVSElectionController {
 					voteVSURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" +
 						"/${voteVS.messageSMIME.id}"]
 				if(VoteVS.State.CANCELLED.equals(voteVS.state)) {
-					VoteVSCanceller anuladorVoto = VoteVSCanceller.findWhere(voteVS:voteVS)
+					VoteVSCanceller votevsCanceller = VoteVSCanceller.findWhere(voteVS:voteVS)
 					voteVSMap.cancellerURL="${grailsApplication.config.grails.serverURL}" +
-						"/messageSMIME/${anuladorVoto?.messageSMIME?.id}"
+						"/messageSMIME/${votevsCanceller?.messageSMIME?.id}"
 				}
 				voteVSInfoMap.votesVS.add(voteVSMap)
 			}

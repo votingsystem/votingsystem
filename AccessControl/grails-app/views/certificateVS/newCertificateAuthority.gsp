@@ -41,7 +41,7 @@
             <div style="margin:10px 10px 60px 0px;height:20px;">
                 <div style="float:right;">
                     <votingsystem-button onclick="submitForm()">
-                        <g:message code="addCALbl"/> <i class="fa fa-check"></i>
+                        <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="addCALbl"/>
                     </votingsystem-button>
                 </div>
             </div>

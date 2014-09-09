@@ -29,7 +29,6 @@ import org.votingsystem.client.util.*;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.HttpHelper;
-import sun.net.www.protocol.jar.JarURLConnection;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -43,7 +42,8 @@ import java.net.URLStreamHandlerFactory;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -155,7 +155,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 ResponseVS responseVS = null;
                 try {
                     responseVS = SignatureService.checkServer(accessControlServerURL);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) setVotingSystemAvailable(true);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        setVotingSystemAvailable(true);
+                        ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
+                    }
                 }
                 catch(Exception ex) {logger.error(ex.getMessage(), ex);}
                 try {

@@ -71,6 +71,8 @@ class SignatureVSService {
 	}
 
     private synchronized ResponseVS initCertAuthorities() {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName);
 		try {
 			trustedCertsHashMap = new HashMap<Long, CertificateVS>();
 			File directory=  grailsApplication.mainContext.getResource(
@@ -96,12 +98,8 @@ class SignatureVSService {
 			}
 			
 			for(X509Certificate x509Certificate:trustedCerts) {
-				log.debug "initCertAuthorities - SubjectDN: ${x509Certificate?.getSubjectDN()} - " +
-                        " - numSerie:${x509Certificate?.getSerialNumber()?.longValue()}"
-				CertificateVS certificate
-				CertificateVS.withTransaction {
-					certificate = CertificateVS.findBySerialNumber(x509Certificate.getSerialNumber().longValue())
-				}
+                String certData = "${x509Certificate?.getSubjectDN()} - numSerie:${x509Certificate?.getSerialNumber()?.longValue()}"
+				CertificateVS certificate = CertificateVS.findBySerialNumber(x509Certificate.getSerialNumber().longValue())
 				if(!certificate) {
 					certificate = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509Certificate),
 						type:CertificateVS.Type.CERTIFICATE_AUTHORITY, state:CertificateVS.State.OK,
@@ -110,9 +108,8 @@ class SignatureVSService {
 					CertificateVS.withTransaction {
 						certificate.save()
 					}
-                    log.debug "initCertAuthorities - ADDED NEW CA CERT certificateVS.id:'${certificate?.id}'"
-				} else log.debug "initCertAuthorities -- CA: ${certificate.getSerialNumber().longValue()} --- " +
-                        " - database id: ${certificate?.id}"
+                    log.debug "$methodName - ADDED NEW CA CERT - $certData - certificateVS.id:'${certificate?.id}'"
+				} else log.debug "$methodName - $certData - certificateVS.id: '${certificate?.id}'"
 				trustedCertsHashMap.put(x509Certificate?.getSerialNumber()?.longValue(), certificate)
 			}			
 			log.debug("Número de Autoridades Certificadoras en sistema: ${trustedCerts?.size()}")
@@ -267,6 +264,7 @@ class SignatureVSService {
         UserVS anonymousSigner = null
         CertExtensionCheckerVS extensionChecker
         String signerNIF = messageWrapper.getSigner().getNif()
+        messageWrapper.get
         for(UserVS userVS: signersVS) {
             try {
                 if(userVS.getTimeStampToken() != null) {
@@ -278,10 +276,10 @@ class SignatureVSService {
                         log.error("validateSignersCerts - TIMESTAMP ERROR - ${timestampValidationResp.message}")
                         return timestampValidationResp
                     }
-                } else {
+                } else if(messageWrapper.getTimeStampToken() == null) {
                     String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
                     log.error("ERROR - validateSignersCerts - ${msg}")
-                    return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
+                    return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
                 ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
                 X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();

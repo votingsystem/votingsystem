@@ -53,7 +53,8 @@ class ControlCenterFilters {
                 ResponseVS responseVS = null
                 try {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
-                    log.debug("before - contentType: ${contentTypeVS}")
+                    request.contentTypeVS = contentTypeVS
+                    log.debug("before - request.contentTypeVS: ${request.contentTypeVS}")
                     if(!contentTypeVS?.isPKCS7()) return;
                     byte[] requestBytes = getBytesFromInputStream(request.getInputStream())
                     //log.debug "before  - requestBytes: ${new String(requestBytes)}"

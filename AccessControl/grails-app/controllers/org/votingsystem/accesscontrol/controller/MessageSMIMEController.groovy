@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.controller
 
+import grails.converters.JSON
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
@@ -26,7 +27,7 @@ class MessageSMIMEController {
 			messageSMIME = MessageSMIME.get(params.long('id'))
 		}
         if (messageSMIME) {
-            if(request.getHeader("User-Agent").toLowerCase().contains("webkit")) {
+            if(ContentTypeVS.TEXT != request.contentTypeVS) {
                 String receiptPageTitle = null;
                 String receipt = new String(messageSMIME.content, "UTF-8")
                 String signedContent = messageSMIME.getSmimeMessage()?.getSignedContent()

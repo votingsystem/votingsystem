@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<head>
-    <link rel="stylesheet" href="${resource(dir: 'bower_components/font-awesome/css', file: 'font-awesome.min.css')}" type="text/css"/>
-    <asset:javascript src="utilsVS.js"/>
-    <g:include view="/include/utils_js.gsp"/>
-    <asset:stylesheet src="vickets.css"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><g:message code="signedDocumentLbl"/></title>
+    <g:include view="/include/styles.gsp"/>
 </head>
 <body>
     <div id="pageContent" class="" style="max-width:1000px; margin: 0px auto 0px auto; padding:10px 30px 0px 30px;">
@@ -41,9 +41,11 @@
 </body>
 </html>
 <asset:script>
-    var contentStr = '{"operation":"VICKET_DEPOSIT_FROM_VICKET_SOURCE","fromUser":"Implantación proyecto Vickets",
-        "fromUserIBAN":"ES5378788989451111111111","toUserIBAN":"ES8978788989450000000004","amount":"101010.10",
-        "validTo":"2014/06/16 00:00:00","subject":"Ingreso de fuente externa","currency":"EUR","UUID":"21489925-7a50-4453-af8a-cb6b579b1602"}'
+    var contentStr = '{"operation":"VICKET_DEPOSIT_FROM_VICKET_SOURCE","fromUser":"Implantación proyecto Vickets","fromUserIBAN":"ES5378788989451111111111","toUserIBAN":"ES8978788989450000000004","amount":"101010.10","validTo":"2014/06/16 00:00:00","subject":"Ingreso de fuente externa","currency":"EUR","UUID":"21489925-7a50-4453-af8a-cb6b579b1602"}'
+    $(function() {
+        showContent(contentStr)
+
+    })
 
     function showContent(contentStr) {
         var contentJSON = toJSON(contentStr)

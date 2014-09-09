@@ -32,8 +32,6 @@ class AccessRequestVSService {
                 (TypeVS.ACCESS_REQUEST != TypeVS.valueOf(messageJSON.operation))) {
             throw new ExceptionVS(messageSource.getMessage('requestWithErrorsMsg', null, locale))
         }
-        def hashAccessRequestBase64
-        def accessRequestVS
         EventVSElection eventVSElection = EventVSElection.get(Long.valueOf(messageJSON.eventId))
         if(!eventVSElection) {
             msg = messageSource.getMessage( 'eventVSNotFound',[messageJSON.eventId].toArray(), locale)
@@ -49,7 +47,8 @@ class AccessRequestVSService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
                     type:TypeVS.ACCESS_REQUEST_ERROR, metaInf:MetaInfMsg.getErrorMsg(methodName, "eventVSState"))
         }
-        accessRequestVS = AccessRequestVS.findWhere(userVS:signerVS, eventVSElection:eventVSElection, state:TypeVS.OK)
+        AccessRequestVS accessRequestVS = AccessRequestVS.findWhere(
+                userVS:signerVS, eventVSElection:eventVSElection, state:TypeVS.OK)
         if (accessRequestVS){
             msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
             log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
@@ -75,7 +74,7 @@ class AccessRequestVSService {
                         metaInf:MetaInfMsg.getErrorMsg(methodName, "hashRepeated"))
             } else {
                 accessRequestVS = new AccessRequestVS(userVS:signerVS, messageSMIME:messageSMIMEReq,
-                        state: AccessRequestVS.State.OK, hashAccessRequestBase64:hashAccessRequestBase64,
+                        state: AccessRequestVS.State.OK, hashAccessRequestBase64:messageJSON.hashAccessRequestBase64,
                         eventVSElection:eventVSElection)
                 if (!accessRequestVS.save()) { accessRequestVS.errors.each { log.error("$methodName - ERROR - ${it}")}}
                 return new ResponseVS(type:TypeVS.ACCESS_REQUEST, statusCode:ResponseVS.SC_OK,

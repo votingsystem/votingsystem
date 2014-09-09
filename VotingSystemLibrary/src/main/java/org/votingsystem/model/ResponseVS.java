@@ -62,7 +62,12 @@ public class ResponseVS<T> implements Serializable {
     public ResponseVS (int statusCode) {
         this.statusCode = statusCode;    
     }
-    
+
+    public ResponseVS (int statusCode, ContentTypeVS contentType) {
+        this.statusCode = statusCode;
+        this.contentType = contentType;
+    }
+
     public ResponseVS (int statusCode, String msg) {
         this.statusCode = statusCode; 
         this.message = msg;

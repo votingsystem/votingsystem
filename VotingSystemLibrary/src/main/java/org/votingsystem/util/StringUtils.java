@@ -1,13 +1,17 @@
 package org.votingsystem.util;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.List;
@@ -111,6 +115,16 @@ public class StringUtils {
         salida.close();
         entrada.close();
         return new String(salida.toByteArray(), "UTF-8");
+    }
+
+    public String getStringFromDocument(Document doc) throws TransformerException {
+        DOMSource domSource = new DOMSource(doc);
+        StringWriter writer = new StringWriter();
+        StreamResult result = new StreamResult(writer);
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer = tf.newTransformer();
+        transformer.transform(domSource, result);
+        return writer.toString();
     }
     
     public static String getNormalized (String cadena) {

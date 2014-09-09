@@ -46,12 +46,10 @@ class EventVSElectionService {
 		ResponseVS responseVS = null
         String documentStr = messageSMIMEReq.getSmimeMessage()?.getSignedContent()
         def messageJSON = JSON.parse(documentStr)
-
         eventVS = new EventVSElection(subject:messageJSON.subject, content:messageJSON.content, userVS:userSigner,
                 controlCenterVS:systemService.getControlCenter(),
                 dateBegin: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin),
                 dateFinish: new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish))
-
         responseVS = eventVSService.setEventDatesState(eventVS, locale)
         if(ResponseVS.SC_OK != responseVS.statusCode) {
             log.error "$methodName - EVENT DATES ERROR - ${responseVS.message}"
@@ -291,7 +289,7 @@ class EventVSElectionService {
         
     public Map getStatisticsMap (EventVSElection eventVS, Locale locale) {
         log.debug("getStatisticsMap - eventId: ${eventVS?.id}")
-        if(!eventVS) return null
+        if(!eventVS) throw new ExceptionVS("EventVSElection null")
         def statisticsMap = new HashMap()
         statisticsMap.fieldsEventVS = []
         statisticsMap.id = eventVS.id
