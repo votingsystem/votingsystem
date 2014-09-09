@@ -43,7 +43,7 @@ public class BrowserVSPane extends StackPane {
     private OperationVS operationVS;
 
     public BrowserVSPane() {
-        this.signatureService = SignatureService.getInstance();
+        this.signatureService = new SignatureService();
         Region progressRegion = new Region();
         progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
         progressRegion.setPrefSize(240, 160);
@@ -143,6 +143,10 @@ public class BrowserVSPane extends StackPane {
         passwordVBox.autosize();
         setPasswordDialogVisible(false);
         getChildren().addAll(progressRegion, progressBox, passwordRegion, passwordVBox);
+    }
+
+    public SignatureService getSignatureService() {
+        return this.signatureService;
     }
 
     public void processOperationVS(OperationVS operationVS) {

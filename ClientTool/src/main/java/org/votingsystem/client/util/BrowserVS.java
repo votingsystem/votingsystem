@@ -68,43 +68,42 @@ public class BrowserVS extends Region {
     private HBox toolBar;
     private MessageDialog messageDialog;
     private WebView webView;
-    private WebView smallView;
     private VBox mainVBox;
-    private BrowserVSPane browserHelper;
+    private final BrowserVSPane browserHelper;
     private String caption;
-    private AtomicInteger offset = new AtomicInteger(0);
 
     public BrowserVS() {
         this(new WebView());
     }
 
     private BrowserVS(WebView webView) {
+        browserHelper = new BrowserVSPane();
         this.webView = webView;
         this.webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         Platform.setImplicitExit(false);
-        SignatureService.getInstance().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+        browserHelper.getSignatureService().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 logger.debug("signatureService - OnSucceeded");
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
-                        ResponseVS responseVS = SignatureService.getInstance().getValue();
+                        ResponseVS responseVS = browserHelper.getSignatureService().getValue();
                         if(ContentTypeVS.JSON == responseVS.getContentType()) {
                             sendMessageToBrowserApp(responseVS.getMessageJSON(),
-                                    SignatureService.getInstance().getOperationVS().getCallerCallback());
+                                    browserHelper.getSignatureService().getOperationVS().getCallerCallback());
                         } else sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
-                                SignatureService.getInstance().getOperationVS().getCallerCallback());
+                                browserHelper.getSignatureService().getOperationVS().getCallerCallback());
                     }
                 });
             }
         });
 
-        SignatureService.getInstance().setOnRunning(new EventHandler<WorkerStateEvent>() {
+        browserHelper.getSignatureService().setOnRunning(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 logger.debug("signatureService - OnRunning");
             }
         });
 
-        SignatureService.getInstance().setOnFailed(new EventHandler<WorkerStateEvent>() {
+        browserHelper.getSignatureService().setOnFailed(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
                 logger.debug("signatureService - OnFailed");
             }
@@ -119,7 +118,6 @@ public class BrowserVS extends Region {
 
     private void initComponents() {
         final WebHistory history = webView.getEngine().getHistory();
-        smallView = new WebView();
         browserStage = new Stage();
         browserStage.initModality(Modality.WINDOW_MODAL);
         browserStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
@@ -208,12 +206,14 @@ public class BrowserVS extends Region {
                 new Callback<PopupFeatures, WebEngine>() {
                     @Override
                     public WebEngine call(PopupFeatures config) {
+                        WebView smallView = new WebView();
                         //smallView.setFontScale(0.8);
                         new BrowserVS(smallView).show(700, 700, false);
                         return smallView.getEngine();
                     }
                 }
         );
+
 
         history.getEntries().addListener(new ListChangeListener<WebHistory.Entry>(){
             @Override
@@ -251,7 +251,6 @@ public class BrowserVS extends Region {
                 }
         );
         mainVBox.getChildren().addAll(toolBar, webView);
-        browserHelper = new BrowserVSPane();
         browserHelper.getChildren().add(0, mainVBox);
 
         Scene scene = new Scene(browserHelper, Color.web("#666970"));

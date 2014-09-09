@@ -33,9 +33,6 @@ public class SignatureService extends Service<ResponseVS> {
 
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
 
-
-    private static final SignatureService instance = new SignatureService();
-
     private OperationVS operationVS = null;
     private String password = null;
 
@@ -47,10 +44,6 @@ public class SignatureService extends Service<ResponseVS> {
         this.operationVS = operationVS;
         this.password = password;
         restart();
-    }
-
-    public static SignatureService getInstance() {
-        return instance;
     }
 
     public OperationVS getOperationVS() {

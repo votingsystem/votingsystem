@@ -113,11 +113,11 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     @Transient public String getVotingPageURL() {
-        return getServerURL() + "/eventVSElection/main?menu=user";
+        return getServerURL() + "/eventVSElection/index?menu=user";
     }
 
     @Transient public String getSelectRepresentativePageURL() {
-        return getServerURL() + "/representative/main?menu=user";
+        return getServerURL() + "/representative/index?menu=user";
     }
 
 }
