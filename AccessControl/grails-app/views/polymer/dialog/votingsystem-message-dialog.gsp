@@ -50,6 +50,7 @@
         Polymer('votingsystem-message-dialog', {
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
+                console.log(this.tagName + " - ready")
             },
             onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {

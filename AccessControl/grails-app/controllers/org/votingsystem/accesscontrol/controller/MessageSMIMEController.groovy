@@ -31,8 +31,11 @@ class MessageSMIMEController {
                 String receiptPageTitle = null;
                 String receipt = new String(messageSMIME.content, "UTF-8")
                 String signedContent = messageSMIME.getSmimeMessage()?.getSignedContent()
-                render(view:"receiptViewer" , model:[receiptPageTitle:receiptPageTitle, receipt:receipt,
-                                                     signedContent:signedContent])
+
+                params.messageSMIME = messageSMIME
+                forward(controller:"receipt")
+
+                //render(view:"receiptViewer" , model:[receiptPageTitle:receiptPageTitle, receipt:receipt, signedContent:signedContent])
             } else {
                 return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
                         messageBytes:messageSMIME.content)]

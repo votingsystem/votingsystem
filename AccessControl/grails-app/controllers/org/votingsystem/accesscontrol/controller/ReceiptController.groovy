@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.controller
 
+import grails.converters.JSON
 import org.votingsystem.model.TypeVS
 
 /**
@@ -14,6 +15,13 @@ class ReceiptController {
 
     def contentViewer() {
         String viewerType = 'contentViewer'
+        String smimeMessage
+        def signedContentJSON
+        if(params.messageSMIME) {
+            smimeMessage = new String(params.messageSMIME.content, "UTF-8")
+            signedContentJSON = JSON.parse(params.messageSMIME.getSmimeMessage()?.getSignedContent())
+            params.operation = signedContentJSON.operation
+        }
         if(params.operation) {
             try {
                 TypeVS operationType = TypeVS.valueOf(params.operation.toUpperCase())
@@ -22,10 +30,14 @@ class ReceiptController {
                     case TypeVS.SEND_SMIME_VOTE:
                         viewerType = 'voteVSViewer'
                         break;
+                    case TypeVS.CANCEL_VOTE:
+                        viewerType = 'voteVSCancellerViewer'
+                        break;
                 }
             } catch(Exception ex) { log.error(ex.getMessage(), ex)}
         }
-        render(view:viewerType, model:[operation:params.operation])
+        render(view:viewerType, model:[operation:params.operation, smimeMessage:smimeMessage,
+                                       signedContentMap:signedContentJSON])
     }
 
 }

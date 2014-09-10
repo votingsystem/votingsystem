@@ -143,7 +143,6 @@ public class SignedFilePane extends GridPane {
                 @Override
                 public void changed(ObservableValue<? extends Worker.State> ov, Worker.State oldState,
                                     Worker.State newState) {
-                    logger.debug("newState: " + newState);
                     if (newState == Worker.State.SUCCEEDED) {
                         signatureContentWebView.getEngine().executeScript(jsCommand);
                     }

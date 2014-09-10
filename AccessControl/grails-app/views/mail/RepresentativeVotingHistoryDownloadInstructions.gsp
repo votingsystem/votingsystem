@@ -8,6 +8,6 @@
     </head>
     <body>
 		<g:message code="representativeVotingHistoryMailBody"
-                   args="${[fromUser, requestURL, representative, dateFromStr, dateToStr, urlDescarga]}"/>
+                   args="${[fromUser, requestURL, representative, dateFromStr, dateToStr, downloadURL]}"/>
     </body>
 </html>

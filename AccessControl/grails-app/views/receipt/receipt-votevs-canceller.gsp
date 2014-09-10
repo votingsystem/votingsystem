@@ -1,24 +1,36 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
+<asset:javascript src="utilsVS.js"/>
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="receipt-votevs" attributes="receipt smimeMessage isClientToolConnected">
+<polymer-element name="receipt-votevs-canceller" attributes="receipt smimeMessage isClientToolConnected">
     <template>
-        <style></style>
+        <g:include view="/include/styles.gsp"/>
+        <style>
+            .messageToUser {
+                font-weight: bold;
+                margin:10px auto 10px auto;
+                background: #f9f9f9;
+                padding:10px 20px 10px 20px;
+            }
+        </style>
         <div layout vertical style="margin: 10px auto; max-width:1000px;">
             <div class="pageHeader"  layout horizontal center center-justified>
-                <h3><g:message code="voteVSReceipt"/></h3>
+                <h3><g:message code="voteVSCancellerReceipt"/></h3>
             </div>
-            <div style="display:{{messageToUser? 'block':'none'}}">
+            <template if="{{messageToUser}}">
                 <div  layout horizontal center center-justified  class="messageToUser">
                     <div>
                         <div id="messageToUser">{{messageToUser}}</div>
                     </div>
                     <paper-shadow z="1"></paper-shadow>
                 </div>
-            </div>
-            <div><b><g:message code="eventVSLbl"/>: </b><a href="{{receipt.eventURL}}">{{receipt.eventURL}}</a></div>
-            <div><b><g:message code="optionSelectedLbl"/>: </b>{{receipt.optionSelected.content}}</div>
+            </template>
+            <div><b><g:message code="hashAccessRequestLbl"/>: </b>{{receipt.hashAccessRequestBase64}}</div>
+            <div><b><g:message code="originHashAccessRequestLbl"/>: </b>{{receipt.originHashAccessRequest}}</div>
+            <div><b><g:message code="hashCertVSLbl"/>: </b>{{receipt.hashCertVSBase64}}</div>
+            <div><b><g:message code="originHashCertVote"/>: </b>{{receipt.originHashCertVote}}</div>
 
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
@@ -33,14 +45,14 @@
         </div>
     </template>
     <script>
-        Polymer('receipt-votevs', {
+        Polymer('receipt-votevs-canceller', {
             publish: {
                 receipt: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
             ready: function() {
-                console.log(this.tagName + " - ready")
+                console.log(this.tagName + " - ready - " + document.querySelector("#voting_system_page"))
             },
             attached: function () {
                 console.log(this.tagName + " - attached")
@@ -48,7 +60,7 @@
             },
             receiptChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.SEND_SMIME_VOTE.toString()}' != this.receipt.operation )
+                if('${TypeVS.CANCEL_VOTE.toString()}' != this.receipt.operation )
                     this.messageToUser = '<g:message code="receiptTypeErrorMsg"/>' + " - " + this.receipt.operation
             },
             checkReceipt: function() {

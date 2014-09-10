@@ -369,8 +369,15 @@ function addClientToolListener(listener) {
 
 function notifiyClientToolConnection() {
     window['isClientToolConnected'] = true
+    console.log(" ========= notifiyClientToolConnection")
     for(var i = 0; i < clientToolListeners.length; i++) {
         clientToolListeners[i]()
+    }
+    if(document.querySelector("#voting_system_page")) {
+        console.log("voting_system_page votingsystem-jslib-loaded event dispatched")
+        var event = document.createEvent("HTMLEvents");
+        event.initEvent("votingsystem-clienttoolconnected", true, true);
+        document.querySelector("#voting_system_page").dispatchEvent(event);
     }
 }
 
