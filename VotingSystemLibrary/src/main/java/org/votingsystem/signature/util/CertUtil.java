@@ -20,6 +20,8 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import net.sf.json.JSONObject;
+import org.votingsystem.util.ExceptionVS;
+
 import javax.security.auth.x500.X500Principal;
 import java.io.*;
 import java.math.BigInteger;
@@ -325,26 +327,33 @@ public class CertUtil {
      */
     public static ResponseVS verifyCertificate(Set<TrustAnchor> anchors,
              boolean checkCRL, List<X509Certificate> certs) throws Exception {
-        PKIXParameters pkixParameters = new PKIXParameters(anchors);
-        CertExtensionCheckerVS checker = new CertExtensionCheckerVS();
-        pkixParameters.addCertPathChecker(checker);
-        pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
-        CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
-        CertificateFactory certFact = CertificateFactory.getInstance("X.509");
-        CertPath certPath = certFact.generateCertPath(certs);
-        CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);
-        // Get the CA used to validate this path
-        //PKIXCertPathValidatorResult pkixResult = (PKIXCertPathValidatorResult)result;
-        //TrustAnchor ta = pkixResult.getTrustAnchor();
-        //X509Certificate certCaResult = ta.getTrustedCert();
-        //logger.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
-        //        "- serialNumber: " + certCaResult.getSerialNumber().longValue());
-        Map resultMap = new HashMap();
-        resultMap.put("extensionChecker", checker);
-        resultMap.put("pkixResult", (PKIXCertPathValidatorResult)result);
-        ResponseVS response = new ResponseVS(ResponseVS.SC_OK);
-        response.setData(resultMap);
-        return response;
+        try {
+            PKIXParameters pkixParameters = new PKIXParameters(anchors);
+            CertExtensionCheckerVS checker = new CertExtensionCheckerVS();
+            pkixParameters.addCertPathChecker(checker);
+            pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
+            CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
+            CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+            CertPath certPath = certFact.generateCertPath(certs);
+            CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);
+            // Get the CA used to validate this path
+            //PKIXCertPathValidatorResult pkixResult = (PKIXCertPathValidatorResult)result;
+            //TrustAnchor ta = pkixResult.getTrustAnchor();
+            //X509Certificate certCaResult = ta.getTrustedCert();
+            //logger.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
+            //        "- serialNumber: " + certCaResult.getSerialNumber().longValue());
+            Map resultMap = new HashMap();
+            resultMap.put("extensionChecker", checker);
+            resultMap.put("pkixResult", (PKIXCertPathValidatorResult)result);
+            ResponseVS response = new ResponseVS(ResponseVS.SC_OK);
+            response.setData(resultMap);
+            return response;
+        } catch(Exception ex) {
+            String msg = "Null cert list";
+            if(certs != null && !certs.isEmpty()) msg = "Certificate validation failed with cert: " +
+                    certs.iterator().next().getSubjectDN();
+            throw new ExceptionVS(msg, ex);
+        }
     }
     
 	/**

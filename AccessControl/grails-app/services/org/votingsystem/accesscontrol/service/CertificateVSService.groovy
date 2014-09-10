@@ -82,7 +82,7 @@ class CertificateVSService {
             }
         }
         log.debug "addCertificateAuthority - new CA - id:'${certificateVS?.id}'"
-        signatureVSService.loadCertAuthorities() //load changes
+        signatureVSService.initCertAuthorities() //load changes
         String certURL = "${grailsLinkGenerator.link(controller:"certificateVS", action:"cert", absolute:true)}/${x509NewCACert.getSerialNumber().toString()}"
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CERT_CA_NEW,contentType: ContentTypeVS.JSON,
                 data:[message:msg, URL:certURL, statusCode:ResponseVS.SC_OK],
@@ -123,7 +123,7 @@ class CertificateVSService {
         certificateVS.state = changeCertToState
         certificateVS.description = (certificateVS.description)? "${certificateVS.description}<br/>${messageJSON.reason}":messageJSON.reason
         certificateVS.save()
-        signatureVSService.loadCertAuthorities() //load changes
+        signatureVSService.initCertAuthorities() //load changes
         return new ResponseVS(type:TypeVS.CERT_EDIT, statusCode:ResponseVS.SC_OK,
                 metaInf:MetaInfMsg.getOKMsg(methodName, "certificateVS_${certificateVS.id}"))
     }

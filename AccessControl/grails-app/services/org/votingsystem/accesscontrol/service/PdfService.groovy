@@ -31,13 +31,13 @@ class PdfService {
 		log.debug "init - init - init"
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
-		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
+		String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
 		String password = grailsApplication.config.VotingSystem.signKeysPassword
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
 			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
-		key = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
-		chain = keyStore.getCertificateChain(aliasClaves);
-		log.debug "aliasClaves: ${aliasClaves} - chain.length:${chain.length}"
+		key = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
+		chain = keyStore.getCertificateChain(keyAlias);
+		log.debug "keyAlias: ${keyAlias} - chain.length:${chain.length}"
 	}
 	
 	public ResponseVS checkSignature (byte[] signedPDF, Locale locale) {

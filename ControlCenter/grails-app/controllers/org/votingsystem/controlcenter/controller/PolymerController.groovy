@@ -3,15 +3,10 @@ package org.votingsystem.controlcenter.controller
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 
-class TestingController {
-
-    def signatureVSService
-    def grailsApplication
+class PolymerController {
 
     def index() {
-
-        signatureVSService.initCertAuthorities()
-        render "OK"
+        render (view:params.element)
     }
 
     /**

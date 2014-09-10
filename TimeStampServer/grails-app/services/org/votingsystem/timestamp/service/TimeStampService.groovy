@@ -77,18 +77,18 @@ class TimeStampService {
         try {
             File keyStoreFile = grailsApplication.mainContext.getResource(
                     grailsApplication.config.VotingSystem.keyStorePath).getFile()
-            String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
+            String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
             String password = grailsApplication.config.VotingSystem.signKeysPassword
             KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
                     FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
-            PrivateKey signingKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
-            signingCert = keyStore.getCertificate(aliasClaves)
+            PrivateKey signingKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
+            signingCert = keyStore.getCertificate(keyAlias)
             signingCertPEMBytes = CertUtil.getPEMEncoded (signingCert)
             timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                     ContextVS.PROVIDER).build(signingCert);
             X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
             TSPUtil.validateCertificate(certHolder);
-            Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
+            Certificate[] chain = keyStore.getCertificateChain(keyAlias);
             signingCertChainPEMBytes = CertUtil.getPEMEncoded (Arrays.asList(chain))
             Store certs = new JcaCertStore(Arrays.asList(chain));
             JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(

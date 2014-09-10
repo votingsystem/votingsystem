@@ -16,7 +16,6 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->

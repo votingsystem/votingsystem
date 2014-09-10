@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.apache.http.HttpResponse
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
+import org.votingsystem.util.MetaInfMsg
 
 import javax.servlet.http.HttpServletResponse
 
@@ -307,8 +308,9 @@ class AccessControlFilters {
             }
             MessageSMIME messageSMIME
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
-                messageSMIME = new MessageSMIME(metaInf:certValidationResponse.message, type:TypeVS.ERROR,
-                        content:smimeMessageReq.getBytes())
+                messageSMIME = new MessageSMIME(reason:certValidationResponse.message, content:smimeMessageReq.getBytes(),
+                        metaInf:MetaInfMsg.getErrorMsg("processSMIMERequest", "${params.controller}Controller_${params.action}Action"),
+                        smimeMessage:smimeMessageReq)
                 MessageSMIME.withTransaction { messageSMIME.save() }
                 log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
                         " - message: ${certValidationResponse.message}"

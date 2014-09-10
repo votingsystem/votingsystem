@@ -16,6 +16,7 @@ import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.util.MetaInfMsg
@@ -53,32 +54,22 @@ class  SignatureVSService {
 		log.debug("init")
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
-		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
+		String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
 		String password = grailsApplication.config.VotingSystem.signKeysPassword
 		signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStoreFile), 
-			aliasClaves, password.toCharArray(), ContextVS.SIGN_MECHANISM);
+			keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
-		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
+		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
 		byte[] pemCertsArray
-        localServerCertSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
+        localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
 		for (int i = 0; i < chain.length; i++) {
-            X509Certificate x509ChainCert = chain[i]
-            CertificateVS chainCertVS = CertificateVS.findWhere(serialNumber:x509ChainCert.getSerialNumber().longValue());
-            if(!chainCertVS) {
-                chainCertVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509ChainCert),
-                        type:CertificateVS.Type.CERTIFICATE_AUTHORITY, state:CertificateVS.State.OK,
-                        content:x509ChainCert.getEncoded(), serialNumber:x509ChainCert.getSerialNumber().longValue(),
-                        validFrom:x509ChainCert.getNotBefore(), validTo:x509ChainCert.getNotAfter()).save()
-                log.debug "Adding local server cert to database  - serverCertificateVS: '${chainCertVS.id}'"
-            } else log.debug "CA '${chain[i].getSubjectDN()}' - id: '${chainCertVS.id}'"
-            if(localServerCertSigner.getSerialNumber().longValue() == chainCertVS.serialNumber) {
-                serverCertificateVS = chainCertVS
-            }
-			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (x509ChainCert)
-			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (x509ChainCert))
+            checkAuthorityCertDB(chain[i])
+			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
+			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
 		}
-        serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
+        serverCertificateVS = CertificateVS.findBySerialNumber(localServerCertSigner.getSerialNumber().longValue())
+        serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
 		File certChainFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();
 		certChainFile.createNewFile()
@@ -89,6 +80,33 @@ class  SignatureVSService {
                 serverCertificateVS:serverCertificateVS, localServerCertSigner:localServerCertSigner,
                 serverPrivateKey:serverPrivateKey];
 	}
+
+    @Transactional
+    private CertificateVS checkAuthorityCertDB(X509Certificate x509AuthorityCert) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        String certData = "${x509AuthorityCert?.getSubjectDN()} - numSerie:${x509AuthorityCert?.getSerialNumber()?.longValue()}"
+        CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
+                type:CertificateVS.Type.CERTIFICATE_AUTHORITY)
+        if(!certificateVS) {
+            certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509AuthorityCert),
+                    type:CertificateVS.Type.CERTIFICATE_AUTHORITY, state:CertificateVS.State.OK,
+                    content:x509AuthorityCert.getEncoded(),
+                    serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
+                    validFrom:x509AuthorityCert.getNotBefore(),
+                    validTo:x509AuthorityCert.getNotAfter()).save()
+            log.debug "$methodName - ADDED NEW FILE SYSTEM CA CERT - $certData - certificateVS.id:'${certificateVS?.id}'"
+        } else if (CertificateVS.State.OK != certificateVS.state) {
+            throw new ExceptionVS("File system athority cert '${x509AuthorityCert?.getSubjectDN()}' " +
+                    " - certificateVS.id:'${certificateVS?.id}' state: '${certificateVS.state}'")
+        } else if(certificateVS.type != CertificateVS.Type.CERTIFICATE_AUTHORITY) {
+            String msg = "Updated from type '${certificateVS.type}'  to type 'CERTIFICATE_AUTHORITY'"
+            certificateVS.description = "${certificateVS.description} #### $msg"
+            certificateVS.type = CertificateVS.Type.CERTIFICATE_AUTHORITY
+            certificateVS.save()
+            log.debug "$methodName - $certData - $msg"
+        }
+        return certificateVS
+    }
 
     public X509Certificate getServerCert() {
         if(localServerCertSigner == null) localServerCertSigner = init().localServerCertSigner
@@ -103,6 +121,11 @@ class  SignatureVSService {
     private PrivateKey getServerPrivateKey() {
         if(serverPrivateKey == null) serverPrivateKey = init().serverPrivateKey
         return serverPrivateKey
+    }
+
+    private HashMap<Long, CertificateVS> getTrustedCertsHashMap() {
+        if(!trustedCertsHashMap) initCertAuthorities().trustedCertsHashMap
+        return trustedCertsHashMap
     }
 
 	public boolean isSystemSignedMessage(Set<UserVS> signers) {
@@ -127,7 +150,8 @@ class  SignatureVSService {
     }
 
     @Transactional
-	private void initCertAuthorities() {
+	public Map initCertAuthorities() {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         File directory = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certAuthoritiesDirPath).getFile()
 
@@ -136,59 +160,36 @@ class  SignatureVSService {
                 return fileName.startsWith("AC_") && fileName.endsWith(".pem");
             }
         });
-        Set<X509Certificate> fileSystemCerts = new HashSet<X509Certificate>()
         for(File caFile:acFiles) {
-            Collection<X509Certificate> certCollection = CertUtil.fromPEMToX509CertCollection(FileUtils.getBytesFromFile(caFile))
-            fileSystemCerts.add(certCollection.iterator().next());
+            X509Certificate fileSystemX509TrustedCert = CertUtil.fromPEMToX509Cert(FileUtils.getBytesFromFile(caFile))
+            checkAuthorityCertDB(fileSystemX509TrustedCert)
         }
-        for(X509Certificate x509Certificate:fileSystemCerts) {
-            long serialNumber = x509Certificate.getSerialNumber().longValue()
-            CertificateVS certificate = null
-            certificate = CertificateVS.findBySerialNumber(serialNumber)
-            if(!certificate) {
-                boolean isRoot = CertUtil.isSelfSigned(x509Certificate)
-                certificate = new CertificateVS(isRoot:isRoot, type:CertificateVS.Type.CERTIFICATE_AUTHORITY,
-                        state:CertificateVS.State.OK, content:x509Certificate.getEncoded(), serialNumber:serialNumber,
-                        validFrom:x509Certificate.getNotBefore(), validTo:x509Certificate.getNotAfter())
-                certificate.save()
-                log.debug "initCertAuthorities - ADDED NEW CA CERT '${x509Certificate?.getSubjectDN()}' - certificateVS.id:'${certificate?.id}'"
-            } else {
-                if(CertificateVS.State.OK != certificate.state) {
-                    log.error "File system athority cert '${x509Certificate?.getSubjectDN()}' " +
-                            " with certificateVS.id:'${certificate?.id}' state is '${certificate.state}'"
-                } else log.debug "initCertAuthorities CERT OK - ${x509Certificate?.getSubjectDN()} --- serialNumber:${serialNumber}"
-            }
-        }
-        loadCertAuthorities()
-	}
-
-    @Transactional public Map loadCertAuthorities() {
-        trustedCertsHashMap = new HashMap<Long, CertificateVS>();
-        trustedCerts = new HashSet<X509Certificate>();
-        trustAnchors = new HashSet<TrustAnchor>();
-        List<CertificateVS> trustedCertsList = CertificateVS.createCriteria().list(offset: 0) {
+        List<CertificateVS>  trustedCertsList = CertificateVS.createCriteria().list(offset: 0) {
             eq("state", CertificateVS.State.OK)
             eq("type",	CertificateVS.Type.CERTIFICATE_AUTHORITY)
         }
-        for (CertificateVS certificate : trustedCertsList) {
-            X509Certificate x509Cert = certificate.getX509Cert()
+        trustedCertsHashMap = new HashMap<Long, CertificateVS>();
+        trustedCerts = new HashSet<X509Certificate>();
+        trustAnchors = new HashSet<TrustAnchor>();
+        for (CertificateVS certificateVS : trustedCertsList) {
+            X509Certificate x509Cert = certificateVS.getX509Cert()
             trustedCerts.add(x509Cert)
-            trustedCertsHashMap.put(x509Cert.getSerialNumber()?.longValue(), certificate)
-            TrustAnchor anchor = new TrustAnchor(x509Cert, null);
-            trustAnchors.add(anchor);
+            trustedCertsHashMap.put(x509Cert.getSerialNumber()?.longValue(), certificateVS)
+            trustAnchors.add(new TrustAnchor(x509Cert, null));
+            String certData = "${x509Cert?.getSubjectDN()} - numSerie:${x509Cert?.getSerialNumber()?.longValue()}"
+            log.debug "$methodName - certificateVS.id: '${certificateVS?.id}' - $certData"
         }
-
-        log.debug("loadCertAuthorities - loaded '${trustedCertsHashMap?.keySet().size()}' authorities")
+        log.debug("$methodName - loaded '${trustedCertsHashMap?.keySet().size()}' authorities")
         return [trustedCertsHashMap: trustedCertsHashMap, trustedCerts:trustedCerts, trustAnchors:trustAnchors]
-    }
+	}
 
     public Set<TrustAnchor> getTrustAnchors() {
-        if(!trustAnchors) trustAnchors = loadCertAuthorities().trustAnchors
+        if(!trustAnchors) trustAnchors = initCertAuthorities().trustAnchors
         return trustAnchors;
     }
 
     private Set<X509Certificate> getTrustedCerts() {
-        if(!trustedCerts)  trustedCerts = loadCertAuthorities().trustedCerts
+        if(!trustedCerts)  trustedCerts = initCertAuthorities().trustedCerts
         return trustedCerts;
     }
 
@@ -248,7 +249,7 @@ class  SignatureVSService {
     public ResponseVS verifyUserCertificate(UserVS userVS) {
         ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
         X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
-        userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
+        userVS.setCertificateCA(getTrustedCertsHashMap().get(certCaResult?.getSerialNumber()?.longValue()))
         log.debug("verifyCertificate - user '${userVS.nif}' cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                 " - CA certificateVS.id : " + userVS.getCertificateCA().getId());
         return validationResponse

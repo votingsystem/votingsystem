@@ -164,8 +164,7 @@ public class MessageSMIME implements Serializable {
 
     @Transient public SMIMEMessageWrapper getSmimeMessage() throws Exception {
 		if(smimeMessage == null && content != null) {
-			smimeMessage = new SMIMEMessageWrapper(
-				new ByteArrayInputStream(content));
+			smimeMessage = new SMIMEMessageWrapper(new ByteArrayInputStream(content));
 		}
 		return smimeMessage;
 	}

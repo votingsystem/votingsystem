@@ -422,6 +422,7 @@ public class BrowserVS extends Region {
                         browserHelper.processOperationVS(operationVS);
                 }
             } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
                 showMessage( ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
             }
         }

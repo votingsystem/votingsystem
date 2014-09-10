@@ -31,7 +31,8 @@ class TimeStampService {
     private byte[] signingCertPEMBytes
 
     public synchronized Map init() {
-        log.debug(" - init - init - init");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug("$methodName");
         try {
             String serverURL = StringUtils.checkURL(grailsApplication.config.VotingSystem.urlTimeStampServer)
             ActorVS timeStampServer = ActorVS.findWhere(serverURL:serverURL)
@@ -45,7 +46,7 @@ class TimeStampService {
                     Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
                     x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
                     signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
-                    log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
+                    log.debug("$methodName - Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
                 }
             } else {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,

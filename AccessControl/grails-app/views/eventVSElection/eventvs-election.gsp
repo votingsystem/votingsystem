@@ -21,6 +21,7 @@
                 </div>
             </template>
 
+            <div style="margin: 0px 30px;">
             <div layout horizontal center center-justified style="width:100%;">
                 <template if="{{subpage}}">
                     <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
@@ -47,7 +48,7 @@
             </div>
 
             <div>
-                <div class="eventContentDiv" style="">
+                <div class="eventContentDiv">
                     <votingsystem-html-echo html="{{eventvs.content}}"></votingsystem-html-echo>
                 </div>
 
@@ -77,6 +78,7 @@
                         </div>
                     </fieldset>
                 </div>
+            </div>
             </div>
         </div>
         <eventvs-vote-confirm-dialog id="confirmOptionDialog"></eventvs-vote-confirm-dialog>

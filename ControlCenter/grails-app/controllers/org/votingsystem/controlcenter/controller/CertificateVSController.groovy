@@ -17,6 +17,7 @@ import java.security.cert.X509Certificate
 class CertificateVSController {
 
 	def signatureVSService
+    def certificateVSService
 
 	/**
 	 * @httpMethod [GET]
@@ -122,6 +123,34 @@ class CertificateVSController {
 		render  message(code: 'eventVSNotFoundByURL', args:[params.eventAccessControlURL])
 		return false
 	}
+
+    /**
+     * (Disponible sólo para administradores de sistema)
+     *
+     * Servicio que añade Autoridades de Confianza.<br/>
+     *
+     * @httpMethod [POST]
+     * @param pemCertificate certificado en formato PEM de la Autoridad de Confianza que se desea añadir.
+     * @return Si todo va bien devuelve un código de estado HTTP 200.
+     */
+    def addCertificateAuthority () {
+        /*if(!grails.util.Environment.current == grails.util.Environment.DEVELOPMENT) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "serviceDevelopmentModeMsg"))]
+        }
+        log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+        return [responseVS:signatureVSService.addCertificateAuthority(
+            "${request.getInputStream()}".getBytes(), request.getLocale())]*/
+        if("POST".equals(request.method)) {
+            MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+            if(!messageSMIMEReq) {
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+            }
+            ResponseVS responseVS = certificateVSService.addCertificateAuthority(messageSMIMEReq, request.getLocale())
+            return [responseVS:responseVS]
+        }
+        render(view:'newCertificateAuthority')
+    }
 
     /**
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.

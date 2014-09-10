@@ -25,7 +25,8 @@
                 width: 500px;
             }
             </style>
-            <core-signals on-core-signal-messagedialog-accept="{{cancellationConfirmed}}"></core-signals>
+            <core-signals on-core-signal-messagedialog-accept="{{cancellationConfirmed}}"
+                          on-core-signal-messagedialog-closed="{{confirmDialogClosed}}"></core-signals>
             <div>
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
@@ -74,6 +75,8 @@
             hashCertVSBase64:null,
             statusCode:null,
             messageType:null,
+            appMessageJSON:null,
+            callerCallback:null,
             ready: function() {},
             onCoreOverlayOpen:function(e) {
                 this.opened = this.$.xDialog.opened
@@ -83,6 +86,7 @@
                 if(this.opened == false) this.close()
             },
             show: function(appMessageJSON) {
+                this.appMessageJSON = appMessageJSON
                 this.statusCode = appMessageJSON.statusCode
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     this.caption = "<g:message code='voteOKCaption'/>"
@@ -106,7 +110,13 @@
                 this.opened = true
             },
             cancelVote: function() {
-                showMessageVS('<g:message code="cancelVoteConfirmMsg"/>', '<g:message code="cancelVoteLbl"/>', null, true)
+                this.callerCallback = Math.random().toString(36).substring(7)
+                showMessageVS('<g:message code="cancelVoteConfirmMsg"/>', '<g:message code="cancelVoteLbl"/>', this.callerCallback, true)
+                this.opened = false
+            },
+            confirmDialogClosed: function(e) {
+                console.log("confirmDialogClosed - detail: " + e.detail)
+                if(e.detail == this.callerCallback) this.show(this.appMessageJSON)
             },
             close: function() {
                 this.opened = false
@@ -135,7 +145,7 @@
                 webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink(controller:'voteVSCanceller', absolute:true)}"
-                webAppMessage.signedMessageSubject = "<g:message code="publishVoteSubject"/>"
+                webAppMessage.signedMessageSubject = "<g:message code="cancelVoteLbl"/>"
 
                 var objectId = Math.random().toString(36).substring(7)
                 window[objectId] = {setClientToolMessage: function(appMessage) {

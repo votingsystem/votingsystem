@@ -9,4 +9,9 @@ public class ExceptionVS extends Exception {
     public ExceptionVS(String message) {
         super(message);
     }
+
+    public ExceptionVS(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

@@ -1,4 +1,4 @@
-package org.votingsystem.vicket.service
+package org.votingsystem.controlcenter.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
@@ -6,6 +6,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
+
 import java.security.cert.X509Certificate
 
 //@Transactional
@@ -55,7 +56,7 @@ class CertificateVSService {
                     reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         X509Certificate x509NewCACert = certX509CertCollection.iterator()?.next()
-        CertificateVS certificateVS = CertificateVS.findBySerialNumber(x509NewCACert?.getSerialNumber()?.longValue())
+        CertificateVS certificateVS = CertificateVS.findWhere(x509NewCACert?.getSerialNumber()?.longValue())
         if(!certificateVS) {
             certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509NewCACert),
                     type:CertificateVS.Type.CERTIFICATE_AUTHORITY,
@@ -80,7 +81,7 @@ class CertificateVSService {
                         reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
             }
         }
-        log.debug "addCertificateAuthority - new CA - id:'${certificateVS?.id}'"
+        log.debug "$methodName - new CA - id:'${certificateVS?.id}'"
         signatureVSService.initCertAuthorities() //load changes
         String certURL = "${grailsLinkGenerator.link(controller:"certificateVS", action:"cert", absolute:true)}/${x509NewCACert.getSerialNumber().toString()}"
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CERT_CA_NEW,contentType: ContentTypeVS.JSON,

@@ -37,21 +37,21 @@ class SignatureVSService {
 		log.debug("init")
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
-		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
+		String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
 		String password = grailsApplication.config.VotingSystem.signKeysPassword
 		signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStoreFile), 
-			aliasClaves, password.toCharArray(), ContextVS.SIGN_MECHANISM);
+			keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
-		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
+		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
 		byte[] pemCertsArray
 		for (int i = 0; i < chain.length; i++) {
 			log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
 			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
 		}
-		localServerCertSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
-        serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
+		localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
+        serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
         rootCAPrivateCredential = new X500PrivateCredential(localServerCertSigner, serverPrivateKey,  ContextVS.ROOT_ALIAS);
 
 		File certChainFile = grailsApplication.mainContext.getResource(
