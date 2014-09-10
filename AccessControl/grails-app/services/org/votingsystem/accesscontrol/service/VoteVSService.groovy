@@ -46,14 +46,12 @@ class VoteVSService {
 				fromUser,toUser, smimeMessageReq, subject)
 			messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTE
 			messageSMIMEReq.content = smimeMessageResp.getBytes()
-			MessageSMIME messageSMIMEResp = messageSMIMEReq
-			MessageSMIME.withTransaction { messageSMIMEResp.save() }
+            messageSMIMEReq.save()
 			voteVSCertificate.state = CertificateVS.State.USED;
 			VoteVS voteVS = new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
-                    certificateVS:voteVSCertificate, messageSMIME:messageSMIMEResp)
-			VoteVS.withTransaction { voteVS.save() }
+                    certificateVS:voteVSCertificate, messageSMIME:messageSMIMEReq).save()
             ResponseVS modelResponseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.VOTE,
-                    type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, data:messageSMIMEResp, eventVS:eventVS)
+                    type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, data:messageSMIMEReq, eventVS:eventVS)
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:[responseVS:modelResponseVS])
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
@@ -143,6 +141,7 @@ class VoteVSService {
             }
             signatureVSService.validateSignersCerts(smimeMessageResp, locale)
             messageSMIMEResp.content = smimeMessageResp.getBytes()
+            messageSMIMEResp.smimeMessage = smimeMessageResp
             messageSMIMEResp.save()
         } else {
             responseVSControlCenter.eventVS = eventVSElection

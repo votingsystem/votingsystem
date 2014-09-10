@@ -13,22 +13,14 @@ import org.votingsystem.util.NifUtils
 class UserVSService {
 	
 	static transactional = true
-	
-	List<String> systemAdmins
+
 	def grailsApplication
 
 	public Map getUserVS(Date fromDate){
-		def usersVS
-		UserVS.withTransaction {
-			def criteria = UserVS.createCriteria()
-			usersVS = criteria.list {
-				gt("dateCreated", fromDate)
-			}
-		}
-		int numUsu = UserVS.countByDateCreatedGreaterThan(fromDate)
-
-		Map datosRespuesta = [totalNumUsu:numUsu]
-		return datosRespuesta
+        List<UserVS> userVSList = UserVS.createCriteria().list(offset:0) {
+            gt("dateCreated", fromDate)
+        }
+		return [totalNumUsu:userVSList.totalCount]
 	}
 	
 	public Map getControlCenterMap(ControlCenterVS controlCenter) {
@@ -44,9 +36,7 @@ class UserVSService {
 
     boolean isUserAdmin(String nif) {
         nif = NifUtils.validate(nif);
-        boolean result = grailsApplication.config.VotingSystem.adminsDNI.contains(nif)
-        if(result) log.debug("isUserAdmin - nif: ${nif}")
-        return result
+        return grailsApplication.config.VotingSystem.adminsDNI.contains(nif)
     }
 
 }

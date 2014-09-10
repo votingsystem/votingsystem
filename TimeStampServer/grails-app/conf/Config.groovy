@@ -1,3 +1,4 @@
+import grails.util.Metadata
 import org.apache.log4j.Level
 
 // locations to search for config files that get merged into the main config;
@@ -93,8 +94,14 @@ grails.hibernate.osiv.readonly = false
 environments {
 
     development {
-        grails.logging.jul.usebridge = true
-        grails.serverURL = "http://sistemavotacion.org/TimeStampServer"
+        if(Metadata.current.isWarDeployed()) {
+            grails.logging.jul.usebridge = false
+            grails.serverURL = "http://www.sistemavotacion.org/TimeStampServer"
+        } else {
+            grails.logging.jul.usebridge = true
+            grails.resources.debug = true
+            grails.serverURL = "http://sistemavotacion.org/TimeStampServer"
+        }
     }
 
     production {

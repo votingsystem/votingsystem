@@ -44,25 +44,33 @@
                         <g:message code="confirmOptionDialogMsg"/>:<br>
                         <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
                     </p>
+                    <template if="{{statusCode == 200}}">
+                        <div layout horizontal style="margin:0px 20px 0px 0px;">
+                            <div style="margin:10px 0px 10px 0px;">
+                                <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                    <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkReceiptLbl"/>
+                                </votingsystem-button>
+                            </div>
+                            <div flex></div>
+                            <div style="margin:10px 0px 10px 0px;">
+                                <votingsystem-button on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
+                                    <i class="fa fa-times" style="margin:0 10px 0 0;"></i> <g:message code="cancelVoteLbl"/>
+                                </votingsystem-button>
+                            </div>
+                        </div>
+                    </template>
                 </template>
                 <template if="{{messageType == 'VOTE_CANCELLATION_RESULT'}}">
-                    <p style="text-align: center;">{{message}}</p>
-                </template>
-
-                <template if="{{statusCode == 200}}">
-                    <div layout horizontal style="margin:0px 20px 0px 0px;">
-                        <div style="margin:10px 0px 10px 0px;">
-                            <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkReceiptLbl"/>
-                            </votingsystem-button>
+                    <template if="{{statusCode == 200}}">
+                        <div layout horizontal style="margin:0px 20px 0px 0px;">
+                            <div style="margin:10px 0px 10px 0px;">
+                                <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                    <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkReceiptLbl"/>
+                                </votingsystem-button>
+                            </div>
+                            <div flex></div>
                         </div>
-                        <div flex></div>
-                        <div style="margin:10px 0px 10px 0px;">
-                            <votingsystem-button on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-times" style="margin:0 10px 0 0;"></i> <g:message code="cancelVoteLbl"/>
-                            </votingsystem-button>
-                        </div>
-                    </div>
+                    </template>
                 </template>
             </div>
         </votingsystem-dialog>
@@ -77,6 +85,7 @@
             messageType:null,
             appMessageJSON:null,
             callerCallback:null,
+            voteVSCancellationReceipt:null,
             ready: function() {},
             onCoreOverlayOpen:function(e) {
                 this.opened = this.$.xDialog.opened
@@ -129,7 +138,8 @@
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
-                webAppMessage.message = this.votevsReceipt
+                if(this.messageType == 'VOTE_RESULT') webAppMessage.message = this.votevsReceipt
+                else if(this.messageType == 'VOTE_CANCELLATION_RESULT') webAppMessage.message = this.voteVSCancellationReceipt
 
                 var objectId = Math.random().toString(36).substring(7)
                 window[objectId] = {setClientToolMessage: function(appMessage) {
@@ -151,9 +161,14 @@
                 window[objectId] = {setClientToolMessage: function(appMessage) {
                     console.log("vote cancellation callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
-                    this.messageType = "VOTE_CANCELLATION_RESULT"
-                    this.message = appMessageJSON.message
-                }}
+                    this.statusCode = appMessageJSON.statusCode
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        this.messageType = "VOTE_CANCELLATION_RESULT"
+                        this.voteVSCancellationReceipt = appMessageJSON.message
+                        this.message = "<g:message code="voteVSCancellationOKMsg"/>"
+                        this.caption =  "<g:message code="voteVSCancellationCaption"/>"
+                    } else  showMessageVS(appMessageJSON.message, '<g:message code="voteVSCancellationErrorCaption"/>')
+                }.bind(this)}
                 webAppMessage.callerCallback = objectId
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }
