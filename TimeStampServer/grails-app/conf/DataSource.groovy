@@ -1,3 +1,5 @@
+import grails.util.Metadata
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -22,9 +24,16 @@ hibernate {
 // environment specific settings
 environments {
     development {
+
         dataSource {
-            dbCreate = "update" // one of 'create', 'create-drop','update'
-            url="jdbc:postgresql://localhost:5432/TimeStampServer"
+            if(Metadata.current.isWarDeployed()) {
+                pooled = true
+                dbCreate = "update"
+                jndiName = "java:comp/env/jdbc/TimeStampServer"
+            } else {
+                dbCreate = "update" // one of 'create', 'create-drop','update'
+                url="jdbc:postgresql://localhost:5432/TimeStampServer"
+            }
         }
     }
     test {
@@ -58,10 +67,5 @@ environments {
             jndiName = "java:comp/env/jdbc/TimeStampServer"
         }
     }
-    /*production {
-        dataSource {
-            dbCreate = "update" // one of 'create', 'create-drop','update'
-            url="jdbc:postgresql://localhost:5432/TimeStampServer"
-        }
-    }*/
+
 }

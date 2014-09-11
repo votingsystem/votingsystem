@@ -9,6 +9,7 @@ import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.callable.RepresentativeDelegatorDataSender
 import org.votingsystem.simulation.callable.RepresentativeTestDataSender
 import org.votingsystem.simulation.model.UserBaseSimulationData
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -28,6 +29,7 @@ class UserBaseDataSimulationService {
             REPRESENTATIVES, DELEGATIONS, FINISH_SIMULATION}
 
     def grailsApplication
+    def signatureVSService
 
     private ExecutorService requestExecutor;
     private static CompletionService<ResponseVS> requestCompletionService;
@@ -98,7 +100,7 @@ class UserBaseDataSimulationService {
             int userIndex = new Long(simulationData.getAndIncrementUserIndex()).intValue();
             try {
                 String userNif = NifUtils.getNif(userIndex);
-                KeyStore keyStore = ContextVS.getInstance().generateKeyStore(userNif);
+                KeyStore keyStore = signatureVSService.generateKeyStore(userNif)
                 userWithoutRepresentativeList.add(userNif);
                 Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
                 X509Certificate usertCert = (X509Certificate) chain[0];

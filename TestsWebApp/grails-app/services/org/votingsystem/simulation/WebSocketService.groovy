@@ -70,7 +70,7 @@ class WebSocketService {
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex)
                     try {
-                        connectionsMap.remove(messageJSON.userId)
+                        connectionsMap.remove(it)
                         session.close();
                     } catch (IOException e1) {// Ignore
                     }

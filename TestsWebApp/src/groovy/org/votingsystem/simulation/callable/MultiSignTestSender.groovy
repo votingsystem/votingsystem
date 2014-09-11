@@ -8,7 +8,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-
+import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 
 import java.security.KeyStore
@@ -31,7 +31,8 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
     }
     
     @Override public ResponseVS call() throws Exception {
-        KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(requestNIF);
+        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+        KeyStore mockDnie = signatureVSService.generateKeyStore(requestNIF)
         String msgSubject = "Message from MultiSignTestSender";
         
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,

@@ -232,6 +232,9 @@
         Polymer('election-simulation-form', {
             eventvsOptionList : [],
             messageToUser:null,
+            testPage: function() {
+                this.page = 1;
+            },
             ready: function() {
                 if(isChrome()) {
                     alert('<g:message code="editorChromeErrorMsg"/>')
@@ -298,7 +301,18 @@
 
                 var event = {subject:this.$.subject.value, content:this.$.textEditor.getData(),
                     dateBegin:dateBeginStr, dateFinish:dateFinishStr, fieldsEventVS:eventVSOptions}
+
+                var userBaseData = {userIndex:this.$.firstUserIndex.value,
+                    numUsersWithoutRepresentative: this.$.numUsersWithoutRepresentative.value,
+                    numUsersWithoutRepresentativeWithVote: this.$.numUsersWithoutRepresentativeWithVote.value,
+                    numRepresentatives: this.$.numRepresentatives.value,
+                    numRepresentativesWithVote: this.$.numRepresentativesWithVote.value,
+                    numUsersWithRepresentative: this.$.numUsersWithRepresentative.value,
+                    numUsersWithRepresentativeWithVote: this.$.numUsersWithRepresentativeWithVote.value
+                }
+
                 var simulationData = {service:"electionSimulationService", status:Status.INIT_SIMULATION,
+                    userBaseData:userBaseData,
                     accessControlURL:this.$.accessControlURL.value,
                     maxPendingResponses: this.$.maxPendingResponses.value,
                     numRequestsProjected: this.$.numRequestsProjected.value,

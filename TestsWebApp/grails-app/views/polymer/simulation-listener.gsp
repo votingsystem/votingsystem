@@ -16,12 +16,16 @@
                 <div flex id="pageTitle" class="pageHeader" style="text-align: center;"><h3>{{pagetitle}}</h3></div>
             </div>
 
-            <div layout horizontal center center-justified id="progressDiv"
-                 style="width:100%;height:100%;display:{{isProcessing? 'block':'none'}}">
-                <progress></progress>
+            <div style="width:100%;">
+                <div layout horizontal center center-justified id="progressDiv"
+                     style="width:100%; margin:20px auto; height:100%;display:{{isProcessing? 'block':'none'}}">
+                    <progress></progress>
+                </div>
             </div>
 
-            <div id="messageFromService" class="messageFromServiceBox" style="display:{{message != null? 'block':'none'}}"">
+
+            <template if="{{message}}">
+                <div id="messageFromService" class="messageFromServiceBox" style="display:{{message != null? 'block':'none'}}"">
 
                 <div style="margin: 0 0 20px 0;">
                     <div layout horizontal center center-justified>
@@ -51,7 +55,9 @@
                     <div>{{message.simulationData.errorList}}</div>
                 </div>
 
-            </div>
+        </div>
+            </template>
+
         </div>
         <votingsystem-socket id="socketvs"  socketservice="${grailsApplication.config.grails.socketServiceURL}">
         </votingsystem-socket>
@@ -80,6 +86,7 @@
             },
             back:function() {
                 this.fire('core-signal', {name: "simulation-listener-closed", data: null});
+                this.message = null
             },
             submitClaim:function() {
                 console.log("submitClaim")

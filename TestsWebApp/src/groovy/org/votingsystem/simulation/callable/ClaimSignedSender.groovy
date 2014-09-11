@@ -10,6 +10,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
+import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
@@ -38,7 +39,8 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
     
     @Override public ResponseVS call() throws Exception {
         try {
-            KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(nif);
+            SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+            KeyStore mockDnie = signatureVSService.generateKeyStore(nif)
             ActorVS accessControl = ContextVS.getInstance().getAccessControl();
             String toUser = accessControl.getNameNormalized();
             String claimDataStr = getClaimDataStr(eventId);

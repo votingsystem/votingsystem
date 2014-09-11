@@ -22,10 +22,6 @@ class TestingController {
     def signatureVSService
     def grailsApplication
 
-    def index() {
-
-        signatureVSService.initCertAuthorities()
-        render "OK"
-    }
+    def index() {  }
 
 }

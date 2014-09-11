@@ -181,10 +181,6 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         eventVS.setType(EventVS.Type.ELECTION)
 		this.eventVS = eventVS;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
-
-        log.debug("========= eventStr: $eventStr")
-
-
         String urlPublishElection = ContextVS.getInstance().getAccessControl().getPublishElectionURL()
 		String msgSubject = messageSource.getMessage("publishElectionMsgSubject", null, locale);
 		/*KeyStore keyStore = ContextVS.getInstance().getUserTest().getKeyStore()
@@ -265,8 +261,10 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
             while(!synchronizedElectorList.isEmpty()) {
                 if(!simulationData.waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
+                    String electorNif = synchronizedElectorList.remove(randomElector)
+                    KeyStore mockDnie = signatureVSService.generateKeyStore(electorNif)
                     responseService.submit(new VoteSender(VoteVS.genRandomVote(ContextVS.VOTING_DATA_DIGEST,
-                            eventVS), new UserVS(synchronizedElectorList.remove(randomElector))));
+                            eventVS), new UserVS(electorNif), mockDnie));
                 } else Thread.sleep(500);
             }
         }

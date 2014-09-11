@@ -11,6 +11,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.Encryptor
+import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
@@ -42,7 +43,8 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
     }
     
     @Override  public ResponseVS call() throws Exception {
-        KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(representativeNIF);
+        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+        KeyStore mockDnie = signatureVSService.generateKeyStore(representativeNIF)
         MessageDigest messageDigest = MessageDigest.getInstance(VOTING_DATA_DIGEST);
         byte[] resultDigest =  messageDigest.digest(FileUtils.getBytesFromFile(imageFile));
         String base64ResultDigestStr = new String(Base64.encode(resultDigest));

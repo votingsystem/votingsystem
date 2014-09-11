@@ -7,8 +7,10 @@
     <g:else><meta name="layout" content="main" /></g:else>
 </head>
 <body>
-    <div id="dialog" title="Basic dialog">
-    </div>
+<div layout horizontal center center-justified id="progressDiv"
+     style="width:100%;height:100%;display:{{isProcessing? 'block':'none'}}">
+    <progress></progress>
+</div>
 </body>
 </html>
 <asset:script>

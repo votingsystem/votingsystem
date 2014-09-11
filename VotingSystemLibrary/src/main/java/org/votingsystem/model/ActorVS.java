@@ -313,18 +313,17 @@ public class ActorVS implements Serializable {
                 break;
             case ACCESS_CONTROL:
                 actorVS =  new AccessControlVS();
-                if (actorVSMap.get("controlCenters") != null) {
+                if (actorVSMap.get("controlCenter") != null) {
+                    Map controlCenterMap = (Map) actorVSMap.get("controlCenter");
                     List<ControlCenterVS> controlCenters = new ArrayList<ControlCenterVS>();
-                    for (Map controlCenterMap : (List<Map>) actorVSMap.get("controlCenters")) {
-                        ControlCenterVS controlCenter = new ControlCenterVS();
-                        controlCenter.setName((String) controlCenterMap.get("name"));
-                        controlCenter.setServerURL((String) controlCenterMap.get("serverURL"));
-                        controlCenter.setId(((Integer) controlCenterMap.get("id")).longValue());
-                        if (controlCenterMap.get("state") != null) {
-                            controlCenter.setState(State.valueOf((String) controlCenterMap.get("state")));
-                        }
-                        controlCenters.add(controlCenter);
+                    ControlCenterVS controlCenter = new ControlCenterVS();
+                    controlCenter.setName((String) controlCenterMap.get("name"));
+                    controlCenter.setServerURL((String) controlCenterMap.get("serverURL"));
+                    controlCenter.setId(((Integer) controlCenterMap.get("id")).longValue());
+                    if (controlCenterMap.get("state") != null) {
+                        controlCenter.setState(State.valueOf((String) controlCenterMap.get("state")));
                     }
+                    controlCenters.add(controlCenter);
                     actorVS.setControlCenters(controlCenters);
                 }
                 break;

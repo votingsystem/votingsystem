@@ -9,7 +9,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-
+import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.StringUtils
 
@@ -33,7 +33,8 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     }
         
     @Override public ResponseVS call() throws Exception {
-        KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(requestNIF);
+        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+        KeyStore mockDnie = signatureVSService.generateKeyStore(requestNIF)
         ActorVS accessControl = ContextVS.getInstance().getAccessControl();
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(),

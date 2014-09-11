@@ -11,15 +11,6 @@ class RepresentativeController {
 	def signatureVSService
 	def grailsApplication
     def csrService
-
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return La página principal de la aplicación web de representantes.
-	 */
-	def main() {
-		render(view:"main" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
-	}
 	
 	/**
 	 * @httpMethod [GET]
@@ -90,15 +81,15 @@ class RepresentativeController {
 			}
 			if (representative) {
 				representativeMap = representativeService.getRepresentativeDetailedMap(representative)
-				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+				if(request.contentType?.contains('json')) {
 					render representativeMap as JSON
 				} else {
-					render(view:"index", model: [selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString(),
-						representative:representativeMap])
+					render(view:"representative", model: [selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString(),
+                                  representativeMap:representativeMap])
 				}
 			} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR,
                         message(code:'representativeIdErrorMsg', args:[params.id]))]
-		} else {
+		} else if(request.contentType?.contains("json")) {
             representativeMap = new HashMap()
             representativeMap.representatives = []
 			UserVS.withTransaction {
@@ -111,10 +102,10 @@ class RepresentativeController {
             representativeMap.numTotalRepresentatives = representativeList.totalCount
             representativeMap.numRepresentatives = representativeList.totalCount
             representativeList.each {representative ->
-                representativeMap.representatives.add(representativeService.getRepresentativeMap(representative))
+                representativeMap.representatives.add(representativeService.getRepresentativeDetailedMap(representative))
             }
             render representativeMap as JSON
-		}
+		} else render(view:"index" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
 	}
 	
 	/**
@@ -374,8 +365,8 @@ class RepresentativeController {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
             ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest, request.getLocale())
             if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
-                csrValidationResponse.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
-                return [responseVS:csrValidationResponse, receiverPublicKey:csrValidationResponse.data.requestPublicKey]
+                csrValidationResponse.setContentType(ContentTypeVS.TEXT_STREAM)
+                return [responseVS:csrValidationResponse]
             } else return [responseVS:csrValidationResponse]
         } else return [responseVS:responseVS]
     }

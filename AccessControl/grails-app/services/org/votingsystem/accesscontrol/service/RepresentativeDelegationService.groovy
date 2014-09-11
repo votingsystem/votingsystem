@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.NifUtils
 
 import java.security.cert.X509Certificate
@@ -124,11 +125,12 @@ class RepresentativeDelegationService {
                     anonymousDelegation.getDateTo().format("dd/MMM/yyyy' 'HH:mm")].toArray(), locale)
             userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${anonymousDelegation.delegationSMIME.id}"
         }
-        Map responseDataMap = [message:msg, URL:userDelegationURL]
+        Map responseDataMap = [message:msg, URL:userDelegationURL, statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED]
         return new ResponseVS(statusCode:statusCode,data:responseDataMap, message: msg, contentType:ContentTypeVS.JSON);
     }
 
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
@@ -137,8 +139,8 @@ class RepresentativeDelegationService {
             ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
             if(ResponseVS.SC_OK != responseVS.statusCode) {
                 log.error("validateAnonymousRequest - ${responseVS.message}")
-                messageSMIMEReq.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST_ERROR);
-                messageSMIMEReq.setReason(responseVS.message)
+                responseVS.metaInf = MetaInfMsg.getErrorMsg(methodName, "delegationStatusError")
+                responseVS.reason = responseVS.message
                 return responseVS
             }
             def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())

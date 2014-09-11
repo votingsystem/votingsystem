@@ -1,3 +1,5 @@
+import grails.util.Metadata
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -23,8 +25,14 @@ hibernate {
 environments {
     development {
         dataSource {
-            dbCreate = "update" // one of 'create', 'create-drop','update'
-            url="jdbc:postgresql://localhost:5432/ControlCenter"
+            if(Metadata.current.isWarDeployed()) {
+                pooled = true
+                dbCreate = "update"
+                jndiName = "java:comp/env/jdbc/controlcenter"
+            } else {
+                dbCreate = "update" // one of 'create', 'create-drop','update'
+                url="jdbc:postgresql://localhost:5432/ControlCenter"
+            }
         }
     }
     test {

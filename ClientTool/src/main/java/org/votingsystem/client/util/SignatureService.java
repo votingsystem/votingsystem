@@ -421,11 +421,7 @@ public class SignatureService extends Service<ResponseVS> {
                 ResponseVS responseVS = anonymousDelegatorDataSender.call();
                 CertificationRequestVS certificationRequest = null;
                 updateProgress(60, 100);
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                    jsonObject = (JSONObject) JSONSerializer.toJSON(responseVS.getMessage());
-                    responseVS.setMessage(jsonObject.getString("message"));
-                    return responseVS;
-                }
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 else certificationRequest = (CertificationRequestVS) responseVS.getData();
 
                 jsonObject = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
@@ -434,11 +430,11 @@ public class SignatureService extends Service<ResponseVS> {
                 toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
                 smimeMessage = certificationRequest.genMimeMessage(fromUser, toUser, textToSign,
                         operationVS.getSignedMessageSubject(), null);
-                String anonymousDelegationService = ContextVS.getInstance().getAccessControl().
+                String anonymousDelegationURL = ContextVS.getInstance().getAccessControl().
                         getAnonymousDelegationServiceURL();
-                SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, anonymousDelegationService,
+                SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, anonymousDelegationURL,
                         ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                        ContentTypeVS.SIGNED_AND_ENCRYPTED, certificationRequest.getKeyPair(),
+                        ContentTypeVS.JSON_SIGNED, certificationRequest.getKeyPair(),
                         ContextVS.getInstance().getAccessControl().getX509Certificate());
                 responseVS = signedSender.call();
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

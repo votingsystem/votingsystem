@@ -319,7 +319,7 @@ public class HttpHelper {
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             logger.debug("----------------------------------------");
-            logger.debug(response.getStatusLine().toString());
+            logger.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
             logger.debug("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);

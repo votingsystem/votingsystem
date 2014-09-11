@@ -214,6 +214,7 @@ public class ContextVS {
                 votingSystemSSLTrustAnchors.add(anchor);
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             logger.error("localizatedMessagesFileName: " + localizatedMessagesFileName);
             logger.error(ex.getMessage(), ex);
         }
@@ -478,7 +479,10 @@ public class ContextVS {
 
     public AccessControlVS getAccessControl() { return accessControl; }
 
-    public void setAccessControl(AccessControlVS accessControl) { this.accessControl = accessControl; }
+    public void setAccessControl(AccessControlVS accessControl) {
+        this.accessControl = accessControl;
+        this.controlCenter = accessControl.getControlCenters().iterator().next();
+    }
 
     public PKIXParameters getSessionPKIXParameters() throws InvalidAlgorithmParameterException, Exception {
         logger.debug("getSessionPKIXParameters");

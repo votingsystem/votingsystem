@@ -9,6 +9,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.callable.ServerInitializer
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -30,6 +31,7 @@ class VicketDepositSimulationService {
 
     def grailsApplication
     def webSocketService
+    def signatureVSService
     private Locale locale = new Locale("es")
     def messageSource
 
@@ -124,7 +126,7 @@ class VicketDepositSimulationService {
         ResponseVS responseVS = null;
         try {
             String userNif = NifUtils.getNif(8888888);
-            KeyStore keyStore = ContextVS.getInstance().generateKeyStore(userNif);
+            KeyStore keyStore = signatureVSService.generateKeyStore(userNif)
             Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
             PrivateKey privateKey = (PrivateKey)keyStore.getKey(
                     ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());

@@ -296,6 +296,16 @@ function getFnName(fn) {
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
 
+function getRadioValue(radioName) {
+    var radios = document.getElementsByName(radioName);
+    for (var i = 0, length = radios.length; i < length; i++) {
+        if (radios[i].checked) {
+            return radios[i].value;
+            break;
+        }
+    }
+}
+
 var menuType = 'user'
 
 if(getParameterByName('menu') != null) menuType = getParameterByName('menu')

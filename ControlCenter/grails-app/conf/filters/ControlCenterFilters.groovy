@@ -51,7 +51,7 @@ class ControlCenterFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
-                if("assets".equals(params.controller) || params.isEmpty()) return
+                if("assets".equals(params.controller) || params.isEmpty() || "polymer".equals(params.controller)) return
                 ResponseVS responseVS = null
                 try {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)

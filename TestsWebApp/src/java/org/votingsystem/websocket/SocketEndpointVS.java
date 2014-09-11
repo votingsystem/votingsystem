@@ -8,12 +8,7 @@ import org.votingsystem.simulation.WebSocketService;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import javax.websocket.CloseReason;
-import javax.websocket.OnMessage;
-import javax.websocket.OnClose;
-import javax.websocket.OnOpen;
-import javax.websocket.PongMessage;
-import javax.websocket.Session;
+import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
 @ServerEndpoint("/websocket/service")
@@ -63,6 +58,11 @@ public class SocketEndpointVS {
     @OnClose public void onClose(Session session, CloseReason closeReason) {
         //logger.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
         webSocketService.onClose(session, closeReason);
+    }
+
+    @OnError
+    public void onError(Throwable t) {
+        logger.error(t.getMessage(), t);
     }
 
     /**

@@ -7,7 +7,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.smime.ValidationResult
-
+import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.simulation.model.AccessRequestBackup
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
@@ -31,7 +31,8 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
     }
 
     @Override  public ResponseVS call() throws Exception {
-        KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(request.getUserVS().getNif());
+        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+        KeyStore mockDnie = signatureVSService.generateKeyStore(request.getUserVS().getNif())
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                 ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
         String subject = ApplicationContextHolder.getInstance().getMessage("cancelAccessRequestMsgSubject") + request.getEventVSId();

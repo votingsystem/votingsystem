@@ -5,6 +5,7 @@
 
 <polymer-element name="eventvs-list" attributes="url eventvstype">
     <template>
+        <g:include view="/include/styles.gsp"/>
         <style no-shim>
         .card {
             position: relative;
@@ -16,8 +17,6 @@
             margin: 10px;
         }
         </style>
-        <g:include view="/include/styles.gsp"/>
-        <asset:stylesheet src="votingSystem.css"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{eventVSData}}" handleAs="json"
                    contentType="json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>

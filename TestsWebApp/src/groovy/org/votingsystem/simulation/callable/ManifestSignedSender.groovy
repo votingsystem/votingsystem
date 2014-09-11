@@ -5,7 +5,8 @@ import org.apache.log4j.Logger
 import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
-
+import org.votingsystem.simulation.SignatureVSService
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
 import java.security.KeyStore
@@ -38,7 +39,8 @@ public class ManifestSignedSender implements Callable<ResponseVS> {
     }
     
     @Override public ResponseVS call() throws Exception {
-        KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(nif);
+        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+        KeyStore mockDnie = signatureVSService.generateKeyStore(nif)
         PrivateKey privateKey =(PrivateKey)mockDnie.getKey(ContextVS.END_ENTITY_ALIAS,ContextVS.PASSWORD.toCharArray());
         Certificate[] signerCertChain = mockDnie.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
         X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();

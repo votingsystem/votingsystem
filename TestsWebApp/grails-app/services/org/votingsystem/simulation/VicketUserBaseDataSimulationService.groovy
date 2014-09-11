@@ -7,6 +7,7 @@ import org.vickets.simulation.model.UserBaseSimulationData
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.callable.ServerInitializer
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -30,6 +31,7 @@ class VicketUserBaseDataSimulationService {
     def webSocketService
     private Locale locale = new Locale("es")
     def messageSource
+    def signatureVSService
 
     private ExecutorService requestExecutor;
 
@@ -117,7 +119,8 @@ class VicketUserBaseDataSimulationService {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             try {
                 String userNif = NifUtils.getNif(userIndex);
-                KeyStore keyStore = ContextVS.getInstance().generateKeyStore(userNif);
+                KeyStore keyStore = signatureVSService.generateKeyStore(userNif)
+
                 userList.add(userNif);
                 Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
                 X509Certificate usertCert = (X509Certificate) chain[0];
