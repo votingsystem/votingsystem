@@ -4,21 +4,18 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <!-- Si no se pone un target SDK post 3.0 sale el 'menu botón', API Level: 8 -> Froyo -->
-    <uses-sdk android:minSdkVersion="18"/>
-
    	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-	
+
     <application android:name=".AppContextVS"
         android:icon="@drawable/mail_mark_unread_32" android:label="@string/app_name">
 
      	<!-- <activity android:label="@string/app_name" android:noHistory="true"
             android:name=".MainActivity" android:screenOrientation="portrait">-->
- 
- 
+
+
      	<activity android:label="@string/app_name" android:noHistory="true"
             android:name=".activity.MainActivity"
             android:theme="@style/Theme.AppCompat.Light">
@@ -26,19 +23,19 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-           	<intent-filter>    
+           	<intent-filter>
 		       	<data android:scheme="http" android:host="controlcenter.org"/>
 	       	    <data android:path="/ControlCenter/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
-		        <category android:name="android.intent.category.DEFAULT"/>  
+		        <category android:name="android.intent.category.DEFAULT"/>
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
 
-       		<intent-filter>    
+       		<intent-filter>
 		       	<data android:scheme="http" android:host="sistemavotacion.org"/>
 	       	    <data android:path="/AccessControl/app/androidClient"/>
 		        <action android:name="android.intent.action.VIEW" />
-		        <category android:name="android.intent.category.DEFAULT"/>  
+		        <category android:name="android.intent.category.DEFAULT"/>
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
 
@@ -81,7 +78,7 @@
 
         <activity android:name=".activity.CertRequestActivity" android:noHistory="true"
             android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
-        
+
         <activity android:name=".activity.UserCertResponseActivity" android:noHistory="true"
             android:theme="@style/Theme.AppCompat.Light"/>
 
@@ -123,7 +120,7 @@
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->
-        
+
         <provider android:name="org.votingsystem.util.SearchSuggestionProvider"
                   android:authorities="org.votingsystem.util.SuggestionProvider" />
 

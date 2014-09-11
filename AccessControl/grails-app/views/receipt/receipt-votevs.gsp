@@ -17,7 +17,7 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            <div><b><g:message code="eventVSLbl"/>: </b><a href="{{receipt.eventURL}}">{{receipt.eventURL}}</a></div>
+            <div><b><g:message code="eventVSLbl"/>: </b><a href="{{receipt.eventURL}}?mode=simplePage">{{receipt.eventURL}}</a></div>
             <div><b><g:message code="optionSelectedLbl"/>: </b>{{receipt.optionSelected.content}}</div>
 
             <template if="{{isClientToolConnected}}">

@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
     }
 }
 
@@ -21,12 +21,17 @@ android {
         abortOnError false
     }
 
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
 
     defaultConfig {
+        applicationId "org.votingsystem.android.itext"
         minSdkVersion 18
+        targetSdkVersion 20
+        versionCode 1
+        versionName "1.0"
     }
+
 }
 
 sourceSets {
