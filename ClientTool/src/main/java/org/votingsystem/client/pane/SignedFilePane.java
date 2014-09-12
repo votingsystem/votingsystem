@@ -20,6 +20,7 @@ import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.DateUtils;
 
 import java.io.File;
 
@@ -138,11 +139,17 @@ public class SignedFilePane extends GridPane {
             signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
         }
         if(changeListener == null) {
-            final String jsCommand = ("showContent('" + signedFile.getSMIMEMessageWraper().getSignedContent() + "')");
+            String timeStampDateStr = "";
+            if(signedFile.getSMIMEMessageWraper().getTimeStampToken() != null) {
+                timeStampDateStr = DateUtils.getLongDate_Es(signedFile.getSMIMEMessageWraper().
+                        getTimeStampToken().getTimeStampInfo().getGenTime());
+            }
+            final String jsCommand = ("showContent('" + signedFile.getSMIMEMessageWraper().getSignedContent() + "', '" +
+                    timeStampDateStr + "')");
             changeListener = new ChangeListener<Worker.State>() {
                 @Override
                 public void changed(ObservableValue<? extends Worker.State> ov, Worker.State oldState,
-                                    Worker.State newState) {
+                                Worker.State newState) {
                     if (newState == Worker.State.SUCCEEDED) {
                         signatureContentWebView.getEngine().executeScript(jsCommand);
                     }

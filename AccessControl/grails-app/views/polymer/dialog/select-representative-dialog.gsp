@@ -23,12 +23,12 @@
                 width: 500px;
             }
             </style>
-            <div>
+            <div id="container" style="overflow: auto;">
                 <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
+                    <div flex style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;"><g:message code="saveAsRepresentativeLbl"/></div>
                     </div>
-                    <div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
                         <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                 </div>
-                <div style="display:{{step == 'confirm'?'block':'none'}}"}}">
+                <div style="padding:15px 0 0 0;display:{{step == 'confirm'?'block':'none'}}"}}">
                     <votingsystem-html-echo id="delegationMsg"></votingsystem-html-echo>
                     <template if="{{isAnonymousDelegation == true}}">
                         <div style="margin:25px 0 25px 0;">

@@ -38,8 +38,8 @@
         <div id="container" style="width:600px; padding:0px 0px 15px 0px;">
             <div layout horizontal style="padding: 0px 10px 0px 20px;" >
                 <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
-                <div style="cursor:pointer; z-index:10;" on-click="{{close}}">
-                    <core-icon-button icon="close" style="fill:#6c0404;"></core-icon-button>
+                <div style="position: absolute; top: 0px; right: 0px;">
+                    <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
                 </div>
             </div>
 

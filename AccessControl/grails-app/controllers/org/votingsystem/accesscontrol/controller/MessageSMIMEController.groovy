@@ -30,6 +30,7 @@ class MessageSMIMEController {
             if(ContentTypeVS.TEXT != request.contentTypeVS) {
                 params.messageSMIME = messageSMIME
                 forward(controller:"receipt")
+                return false
             } else {
                 return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
                         messageBytes:messageSMIME.content)]

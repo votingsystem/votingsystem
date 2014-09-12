@@ -22,7 +22,7 @@
                     <div flex style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;"><g:message code="cancelEventCaption"/></div>
                     </div>
-                    <div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
                         <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
                     </div>
                 </div>
