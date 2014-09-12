@@ -118,9 +118,15 @@
                     <p style="text-align: center; font-size: 1.2em;">
                         <g:message code="anonymousDelegationReceiptMsg"/>
                     </p>
-                    <button type="button" class="btn btn-default" on-click="{{saveAnonymousDelegation}}">
-                        <g:message code="saveReceiptLbl"/>
-                    </button>
+                    <div>
+                        <div flex></div>
+                        <div>
+                            <votingsystem-button on-click="{{saveAnonymousDelegation}}">
+                                <g:message code="saveReceiptLbl"/>
+                            </votingsystem-button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </votingsystem-dialog>
@@ -133,7 +139,7 @@
             anonymousDelegationMsg:null,
             representative:null,
             anonymousLbl:"<g:message code='anonymousLbl'/>",
-            hashReceiptAnonymousDelegation:null,
+            hashCertVSBase64:null,
             anonymousDelegationResponseMsg:null,
             representativeFullName:null,
             publicLbl:"<g:message code='publicLbl'/>",
@@ -157,9 +163,9 @@
                 console.log(this.tagName + " - step: " + this.step)
             },
             saveAnonymousDelegation: function() {
-                console.log(this.tagName + " - saveAnonymousDelegation - hashReceiptAnonymousDelegation: " + this.hashReceiptAnonymousDelegation)
+                console.log(this.tagName + " - saveAnonymousDelegation - hashCertVSBase64: " + this.hashCertVSBase64)
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT_ANONYMOUS_DELEGATION)
-                webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
+                webAppMessage.message = this.hashCertVSBase64
                 //webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
                 var objectId = Math.random().toString(36).substring(7)
                 window[objectId] = {setClientToolMessage: function(appMessage) { }.bind(this)}
@@ -202,7 +208,7 @@
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             if(this.isAnonymousDelegation) {
                                 this.step = 'anonymousDelegationResponse'
-                                this.hashReceiptAnonymousDelegation = appMessageJSON.message
+                                this.hashCertVSBase64 = appMessageJSON.message
                                 this.anonymousDelegationResponseMsg = "<g:message code='selectedRepresentativeMsg'/>".format(this.representativeFullName)
                                 return
                             } else {

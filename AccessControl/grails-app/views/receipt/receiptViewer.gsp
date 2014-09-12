@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><g:message code="signedDocumentLbl"/></title>
     <g:include view="/include/styles.gsp"/>
+
 </head>
 <body>
 <div class="pageContentDiv" id="voting_system_page">
@@ -22,8 +23,6 @@
 </body>
 </html>
 <asset:script>
-    var viewerLoaded = false
-    var clientToolConnected = false
     var timeStampDate = "${timeStampDate}"
 
     <g:applyCodec encodeAs="none">var receiptJSON = ${signedContentMap as grails.converters.JSON}</g:applyCodec>
@@ -34,23 +33,16 @@
         viewer.receipt = receiptJSON
         viewer.timeStampDate = timeStampDate
         viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
-
         document.querySelector("#voting_system_page").appendChild(viewer)
     });
-
-    document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttoolconnected', function() {
-        clientToolConnected = true
-    })
 
     function showContent(contentStr, timeStampDateStr) {
         receiptJSON = JSON.parse(contentStr)
         timeStampDate = timeStampDateStr
-        if(viewerLoaded) {
-            document.querySelector("#receiptViewer").receipt = receiptJSON
-            document.querySelector("#receiptViewer").timeStampDate = timeStampDate
-            receiptJSON = null
-            timeStampDate = null
-        }
+        document.querySelector("#receiptViewer").receipt = receiptJSON
+        document.querySelector("#receiptViewer").timeStampDate = timeStampDate
+        receiptJSON = null
+        timeStampDate = null
     }
 </asset:script>
 <asset:deferredScripts/>

@@ -3,8 +3,6 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-admin-dialog.gsp']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votevs-result-dialog.gsp']"/>">
 
-
-
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
         <g:include view="/include/styles.gsp"/>

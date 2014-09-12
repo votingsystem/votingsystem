@@ -9,6 +9,7 @@ import java.security.cert.PKIXCertPathChecker;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -17,7 +18,7 @@ import java.util.Set;
  */
 public class CertExtensionCheckerVS extends PKIXCertPathChecker {
 
-    private boolean isAnonymousSigner = false;
+    private AtomicBoolean isAnonymousSigner = new AtomicBoolean(false);
 
     public enum ExtensionVS {VOTE(ContextVS.VOTE_OID), REPRESENTATIVE_VOTE(ContextVS.REPRESENTATIVE_VOTE_OID),
         ANONYMOUS_REPRESENTATIVE_DELEGATION(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID),
@@ -69,11 +70,11 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
 
     private void addExtensionVS(ExtensionVS extensionVS) {
         extensionsVS.add(extensionVS);
-        if(ExtensionVS.DEVICEVS != extensionVS) isAnonymousSigner = true;
+        if(ExtensionVS.DEVICEVS != extensionVS) isAnonymousSigner.set(true);
     }
 
     public boolean isAnonymousSigner() {
-        return isAnonymousSigner;
+        return isAnonymousSigner.get();
     }
 
     public Set getSupportedExtensions()	{

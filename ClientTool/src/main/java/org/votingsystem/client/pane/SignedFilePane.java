@@ -1,5 +1,6 @@
 package org.votingsystem.client.pane;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
@@ -11,18 +12,27 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.model.SignedFile;
+import org.votingsystem.client.util.BrowserVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.events.Event;
+import org.w3c.dom.events.EventListener;
+import org.w3c.dom.events.EventTarget;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -134,6 +144,7 @@ public class SignedFilePane extends GridPane {
     private ChangeListener changeListener = null;
     private JSONObject signedContentJSON = null;
 
+
     public void changeContentFormat() {
         if(signedContentJSON == null && signedFile.isSMIME()) {
             signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
@@ -146,12 +157,24 @@ public class SignedFilePane extends GridPane {
             }
             final String jsCommand = ("showContent('" + signedFile.getSMIMEMessageWraper().getSignedContent() + "', '" +
                     timeStampDateStr + "')");
+            final AtomicBoolean viewerLoaded = new AtomicBoolean(false);
             changeListener = new ChangeListener<Worker.State>() {
                 @Override
                 public void changed(ObservableValue<? extends Worker.State> ov, Worker.State oldState,
                                 Worker.State newState) {
                     if (newState == Worker.State.SUCCEEDED) {
                         signatureContentWebView.getEngine().executeScript(jsCommand);
+                        viewerLoaded.set(true);
+                    }
+                    WebEngine webEngine = signatureContentWebView.getEngine();
+                    if(viewerLoaded.get() && newState == Worker.State.SCHEDULED) {
+                        Platform.runLater(new Runnable() {
+                            @Override public void run() {
+                                logger.debug("BrowserPane.ChangeListener cancelling " + webEngine.getLocation());
+                                webEngine.getLoadWorker().cancel();
+                                new BrowserVS().loadURL(webEngine.getLocation(), null);
+                            }
+                        });
                     }
                 }
             };

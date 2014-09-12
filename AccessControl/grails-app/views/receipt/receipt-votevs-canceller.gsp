@@ -60,10 +60,9 @@
             timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready - " + document.querySelector("#voting_system_page"))
-            },
-            attached: function () {
-                console.log(this.tagName + " - attached")
-                this.fire('attached', null);
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttoolconnected', function() {
+                    this.isClientToolConnected = true
+                }.bind(this))
             },
             receiptChanged:function() {
                 this.messageToUser = null

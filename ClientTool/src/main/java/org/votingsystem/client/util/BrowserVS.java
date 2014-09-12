@@ -405,6 +405,7 @@ public class BrowserVS extends Region {
                         saveReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
                         break;
                     case SAVE_RECEIPT_ANONYMOUS_DELEGATION:
+                        saveReceiptAnonymousDelegation(operationVS.getMessage(), operationVS.getCallerCallback());
                         break;
                     case MESSAGEVS_GET:
                         JSONObject documentJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocument());
@@ -429,14 +430,14 @@ public class BrowserVS extends Region {
 
     }
 
-    private void saveReceiptAnonymousDelegation(String messageToSignatureClient, String callbackFunction) throws Exception{
-        logger.debug("saveReceiptAnonymousDelegation");
-        ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(messageToSignatureClient);
+    private void saveReceiptAnonymousDelegation(String hashCertVSBase64, String callbackId) throws Exception{
+        logger.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + hashCertVSBase64 + " - callbackId: " + callbackId);
+        ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(hashCertVSBase64);
         if(responseVS == null) {
-            logger.error("Missing receipt data for hash: " + messageToSignatureClient);
-            sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
+            logger.error("Missing receipt data for hash: " + hashCertVSBase64);
+            sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackId);
         } else {
-            File fileToSave = Utils.getAnonymousRepresentativeSelectCancellationFile(responseVS);
+            File fileToSave = Utils.getReceiptBundle(responseVS);
             FileChooser fileChooser = new FileChooser();
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",
                     "*" + ContentTypeVS.ZIP.getExtension());
@@ -446,12 +447,12 @@ public class BrowserVS extends Region {
             File file = fileChooser.showSaveDialog(browserStage);
             if(file != null){
                 FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
-                sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackFunction);
-            } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
+                sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackId);
+            } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackId);
         }
     }
 
-    private void saveReceipt(String messageToSignatureClient, String callbackFunction) throws Exception{
+    private void saveReceipt(String receiptStr, String callbackId) throws Exception{
         logger.debug("saveReceipt");
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
@@ -461,14 +462,14 @@ public class BrowserVS extends Region {
         fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
         File file = fileChooser.showSaveDialog(browserStage);
         if(file != null){
-            Utils.saveFile(messageToSignatureClient, file);
-            sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackFunction);
-        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackFunction);
+            FileUtils.copyStringToFile(receiptStr, file);
+            sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackId);
+        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackId);
     }
 
-    private void openReceipt(String messageToSignatureClient, String callbackFunction) throws Exception{
+    private void openReceipt(String receiptStr, String callbackId) throws Exception{
         logger.debug("openReceipt");
-        SignedDocumentsBrowser.showDialog(messageToSignatureClient);
+        SignedDocumentsBrowser.showDialog(receiptStr);
     }
 
     private void selectImage(final OperationVS operationVS) throws Exception {

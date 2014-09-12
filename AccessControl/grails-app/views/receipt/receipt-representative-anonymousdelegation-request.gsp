@@ -1,5 +1,5 @@
 <%@ page import="org.votingsystem.model.TypeVS" %>
-<asset:javascript src="utilsVS.js"/>
+
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
@@ -8,6 +8,7 @@
                  attributes="receipt smimeMessage isClientToolConnected timeStampDate">
     <template>
         <g:include view="/include/styles.gsp"/>
+
         <style>
             .messageToUser {
                 font-weight: bold;
@@ -36,7 +37,6 @@
                 </div>
             </template>
             <div><b><g:message code="weeksAnonymousDelegation"/>: </b>{{receipt.weeksOperationActive}}</div>
-
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div style="margin:10px 0px 10px 0px;">
@@ -59,6 +59,9 @@
             timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready - " + document.querySelector("#voting_system_page"))
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttoolconnected', function() {
+                    this.isClientToolConnected = true
+                }.bind(this))
             },
             attached: function () {
                 console.log(this.tagName + " - attached")

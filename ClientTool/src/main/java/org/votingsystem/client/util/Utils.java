@@ -46,14 +46,7 @@ public class Utils {
         return image;
     }
 
-    public static void saveFile(String content, File file) throws IOException {
-        FileWriter fileWriter = null;
-        fileWriter = new FileWriter(file);
-        fileWriter.write(content);
-        fileWriter.close();
-    }
-
-    public static File getAnonymousRepresentativeSelectCancellationFile(ResponseVS responseVS) throws Exception {
+    public static File getReceiptBundle(ResponseVS responseVS) throws Exception {
         Map delegationDataMap = (Map) responseVS.getData();
         JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
         java.util.List<File> fileList = new ArrayList<File>();

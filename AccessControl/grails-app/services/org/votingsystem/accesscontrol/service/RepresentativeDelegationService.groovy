@@ -1,15 +1,18 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.NifUtils
 
 import java.security.cert.X509Certificate
 
+@Transactional
 class RepresentativeDelegationService {
 	
 	enum State {WITHOUT_ACCESS_REQUEST, WITH_ACCESS_REQUEST, WITH_VOTE}
@@ -34,77 +37,49 @@ class RepresentativeDelegationService {
 		RepresentationDocumentVS representationDocument = null
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		String msg = null
-		try {
-            ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
-			if(ResponseVS.SC_OK != responseVS.statusCode) {
-                log.error(responseVS.message)
-                responseVS.type = TypeVS.REPRESENTATIVE_SELECTION_ERROR
-				return responseVS
-			}
-			def messageJSON = JSON.parse(smimeMessage.getSignedContent())
-			String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-			if(userVS.nif == requestValidatedNIF) {
-				msg = messageSource.getMessage('representativeSameUserNifErrorMsg',
-					[requestValidatedNIF].toArray(), locale)
-				log.error("saveDelegation - ERROR SAME USER SELECTION - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-			}
-			if(!requestValidatedNIF || !messageJSON.operation || !messageJSON.representativeNif ||
-				(TypeVS.REPRESENTATIVE_SELECTION != TypeVS.valueOf(messageJSON.operation))) {
-				msg = messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale)
-				log.error("saveDelegation - ERROR DATA - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-			}
-			UserVS representative = UserVS.findWhere(nif:requestValidatedNIF, type:UserVS.Type.REPRESENTATIVE)
-			if(!representative) {
-				msg = messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale)
-				log.error "saveDelegation - ERROR NIF REPRESENTATIVE - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
-                        type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-			}
-			userVS.representative = representative
-			RepresentationDocumentVS.withTransaction {
-				representationDocument = RepresentationDocumentVS.findWhere(
-                        userVS:userVS, state:RepresentationDocumentVS.State.OK)
-				if(representationDocument) {
-					representationDocument.state = RepresentationDocumentVS.State.CANCELLED
-					representationDocument.cancellationSMIME = messageSMIMEReq
-					representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
-					representationDocument.save(flush:true)
-					log.debug("saveDelegation - cancelled representationDocument ${representationDocument.id} " +
-                            "by user '${userVS.nif}'")
-				} else log.debug("saveDelegation - user '${userVS.nif}' firs public delegation")
-				representationDocument = new RepresentationDocumentVS(activationSMIME:messageSMIMEReq,
-                        userVS:userVS, representative:representative, state:RepresentationDocumentVS.State.OK);
-				representationDocument.save()
-			}
-						
-			msg = messageSource.getMessage('representativeAssociatedMsg',
-				[messageJSON.representativeName, userVS.nif].toArray(), locale)
-			log.debug "saveDelegation - ${msg}"
-			
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = userVS.getNif()
-			String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-			SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-				fromUser, toUser, smimeMessage, subject)
-			MessageSMIME messageSMIMEResp = new MessageSMIME( smimeMessage:smimeMessageResp,
-					type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes())
-			MessageSMIME.withTransaction { messageSMIMEResp.save(); }
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEResp,
-                    type:TypeVS.REPRESENTATIVE_SELECTION)
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:messageSource.getMessage(
-                    'representativeSelectErrorMsg', null, locale),type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-		}
-	}
+        ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
+        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
+        if(userVS.nif == requestValidatedNIF) throw new ExceptionVS(messageSource.getMessage('representativeSameUserNifErrorMsg',
+                [requestValidatedNIF].toArray(), locale))
+        if(!requestValidatedNIF || !messageJSON.operation || !messageJSON.representativeNif ||
+                (TypeVS.REPRESENTATIVE_SELECTION != TypeVS.valueOf(messageJSON.operation))) {
+            throw new ExceptionVS(messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale))
+        }
+        UserVS representative = UserVS.findWhere(nif:requestValidatedNIF, type:UserVS.Type.REPRESENTATIVE)
+        if(!representative)  throw new ExceptionVS(
+                messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale))
+        userVS.representative = representative
+        RepresentationDocumentVS.withTransaction {
+            representationDocument = RepresentationDocumentVS.findWhere(
+                    userVS:userVS, state:RepresentationDocumentVS.State.OK)
+            if(representationDocument) {
+                representationDocument.state = RepresentationDocumentVS.State.CANCELLED
+                representationDocument.cancellationSMIME = messageSMIMEReq
+                representationDocument.dateCanceled = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
+                representationDocument.save(flush:true)
+                log.debug("saveDelegation - cancelled representationDocument ${representationDocument.id} " +
+                        "by user '${userVS.nif}'")
+            } else log.debug("saveDelegation - user '${userVS.nif}' firs public delegation")
+            representationDocument = new RepresentationDocumentVS(activationSMIME:messageSMIMEReq,
+                    userVS:userVS, representative:representative, state:RepresentationDocumentVS.State.OK).save()
+        }
 
-    RepresentativeDelegationService() {
-        super()
-    }
+        msg = messageSource.getMessage('representativeAssociatedMsg',
+                [messageJSON.representativeName, userVS.nif].toArray(), locale)
+        log.debug "saveDelegation - ${msg}"
+
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = userVS.getNif()
+        String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
+        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+                fromUser, toUser, smimeMessage, subject)
+        MessageSMIME messageSMIMEResp = new MessageSMIME( smimeMessage:smimeMessageResp,
+                type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes()).save();
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEResp,
+                type:TypeVS.REPRESENTATIVE_SELECTION)
+	}
 
     private ResponseVS checkUserDelegationStatus(UserVS userVS, Locale locale) {
         String msg = null
@@ -168,58 +143,44 @@ class RepresentativeDelegationService {
                 userVS:userVS)
     }
 
+    @Transactional
     public ResponseVS saveAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
-        log.debug("saveAnonymousDelegation")
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug(methodName)
         MessageSMIME messageSMIME = null
         SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
         X509Certificate x509UserCert =  messageSMIMEReq.getAnonymousSigner().getCertificate()
         String msg = null
-        try {
-            CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
-                    type: CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION, state: CertificateVS.State.OK)
-            if(!certificateVS) {
-                msg = messageSource.getMessage('certificateVSUnknownErrorMsg' , null, locale)
-                log.error("saveAnonymousDelegation - msg: ${msg} - MessageSMIME: '${messageSMIMEReq.id}'")
-                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, message: msg, type: TypeVS.ERROR)
-            }
-            def messageJSON = JSON.parse(smimeMessage.getSignedContent())
-            String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-            if(!requestValidatedNIF || !messageJSON.operation || !messageJSON.representativeNif ||
-                    (TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != TypeVS.valueOf(messageJSON.operation))) {
-                msg = messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale)
-                log.error("saveAnonymousDelegation - msg: ${msg} - messageJSON: ${messageJSON}")
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg, type:TypeVS.ERROR)
-            }
-            UserVS representative = UserVS.findWhere(nif:requestValidatedNIF, type:UserVS.Type.REPRESENTATIVE)
-            if(!representative) {
-                msg = messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale)
-                log.error "saveAnonymousDelegation - msg: ${msg}"
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
-            }
-            String fromUser = grailsApplication.config.VotingSystem.serverName
-            String toUser = certificateVS.hashCertVSBase64
-            String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-            SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-                    fromUser, toUser, smimeMessage, subject)
-            MessageSMIME messageSMIMEResp = new MessageSMIME(smimeMessage:smimeMessageResp,
-                    type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes())
-            MessageSMIME.withTransaction { messageSMIMEResp.save(); }
-            certificateVS.state = CertificateVS.State.USED
-            certificateVS.messageSMIME = messageSMIMEResp
-            certificateVS.save()
-            RepresentationDocumentVS representationDocument =new RepresentationDocumentVS(representative:representative,
-                    activationSMIME:messageSMIMEResp, state:RepresentationDocumentVS.State.OK);
-            representationDocument.save()
-            msg = messageSource.getMessage('anonymousRepresentativeAssociatedMsg',
-                    [messageJSON.representativeName].toArray(), locale)
-            log.debug "saveAnonymousDelegation - representationDocument: ${representationDocument.id}"
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEResp,
-                    type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION)
-        } catch(Exception ex) {
-            log.error (ex.getMessage(), ex)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:messageSource.getMessage(
-                    'representativeSelectErrorMsg', null, locale),type:TypeVS.ERROR)
+        CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
+                type: CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION, state: CertificateVS.State.OK)
+        if(!certificateVS) throw new ExceptionVS(messageSource.getMessage('certificateVSUnknownErrorMsg' , null, locale))
+        def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
+        if(!requestValidatedNIF || !messageJSON.operation || !messageJSON.representativeNif ||
+                (TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != TypeVS.valueOf(messageJSON.operation))) {
+            throw new ExceptionVS(messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale))
         }
+        UserVS representative = UserVS.findWhere(nif:requestValidatedNIF, type:UserVS.Type.REPRESENTATIVE)
+        if(!representative) throw new ExceptionVS(
+                messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale))
+
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = certificateVS.hashCertVSBase64
+        String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
+        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+                fromUser, toUser, smimeMessage, subject)
+        MessageSMIME messageSMIMEResp = new MessageSMIME(smimeMessage:smimeMessageResp,
+                type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes()).save()
+        certificateVS.state = CertificateVS.State.USED
+        certificateVS.messageSMIME = messageSMIMEResp
+        certificateVS.save()
+        RepresentationDocumentVS representationDocument =new RepresentationDocumentVS(representative:representative,
+                activationSMIME:messageSMIMEResp, state:RepresentationDocumentVS.State.OK).save();
+        msg = messageSource.getMessage('anonymousRepresentativeAssociatedMsg',
+                [messageJSON.representativeName].toArray(), locale)
+        log.debug "$methodName - representationDocument: ${representationDocument.id}"
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIMEResp,
+                type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION, contentType: ContentTypeVS.JSON_SIGNED)
     }
 
     public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -234,6 +195,7 @@ class RepresentativeDelegationService {
                     [userVS.nif].toArray(), locale))
         }
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
+        throw new ExceptionVS(" === TODO ====")
     }
 
 	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {

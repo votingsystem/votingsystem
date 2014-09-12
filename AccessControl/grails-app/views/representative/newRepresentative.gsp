@@ -3,116 +3,20 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-editor']"/>">
 </head>
 <body>
-<div id="contentDiv" style="margin: 0px auto 0px auto; max-width: 1200px;">
-    <div style="margin:0px 30px 0px 30px;">
-        <div style="">
-            <ol class="breadcrumbVS pull-left">
-                <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
-                <li><a href="${createLink(controller: 'representative', action:'main')}"><g:message code="representativesPageLbl"/></a></li>
-                <li class="active"><g:message code="newRepresentativeLbl"/></li>
-            </ol>
-        </div>
+<div layout vertical class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">
+    <ol class="breadcrumbVS pull-left">
+        <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
+        <li><a href="${createLink(controller: 'representative')}"><g:message code="representativesPageLbl"/></a></li>
+        <li class="active"><g:message code="newRepresentativeLbl"/></li>
+    </ol>
 
-        <div class="pageHeader text-center"><h3><g:message code="newRepresentativePageTitle"/></h3></div>
+    <representative-editor id="representativeEditor"></representative-editor>
 
-        <div style="margin:15px 0 0 0;">
-            <ul>
-                <li><g:message code="newRepresentativeAdviceMsg2"/></li>
-                <li><g:message code="newRepresentativeAdviceMsg3"/></li>
-                <li><g:message code="newRepresentativeAdviceMsg4"/></li>
-            </ul>
-        </div>
-        <form id="mainForm">
-            <div style="position:relative; width:100%;">
-                <votingsystem-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></votingsystem-texteditor>
-            </div>
-
-            <div class="" style="margin:10px 10px 10px 10px;">
-                <div class="" style="display: inline">
-                    <a href="#" id="selectImageButton" type="button" class="btn btn-default" onclick="selectImage()">
-                        <g:message code="selectImageLbl"/> <i class="fa fa-file-image-o"></i>
-                    </a>
-                </div>
-                <div class="" style="display: inline; float:right;">
-                    <button type="submit" class="btn btn-default">
-                        <g:message code="newRepresentativeLbl"/> <i class="fa fa fa-check"></i>
-                    </button>
-                </div>
-            </div>
-            <div id="selectedImagePath" style="margin:10px 10px 40px 10px;"></div>
-        </form>
-    </div>
 </div>
 </body>
 </html>
 <asset:script>
-
-    var selectedImagePath = null
-    var textEditor = document.querySelector('#textEditor')
-
-    $(function() {
-
-        $('#mainForm').submit(function(event){
-            event.preventDefault();
-
-            if(textEditor.getData().length == 0) {
-                textEditor.classList.add("formFieldError");
-                showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                    '<g:message code="emptyDocumentERRORMsg"/>')
-                return
-            } else textEditor.classList.removeClass( "formFieldError" );
-            if(selectedImagePath == null) {
-                $("#selectImageButton").addClass("btn-danger");
-                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="missingImageERRORMsg"/>')
-                return
-            }
-            $("#selectImageButton").removeClass("btn-danger");
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.filePath = selectedImagePath
-            webAppMessage.signedContent = {representativeInfo:textEditor.getData(), operation:Operation.REPRESENTATIVE_DATA}
-            webAppMessage.serviceURL = "${createLink( controller:'representative', absolute:true)}"
-            webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            webAppMessage.callerCallback = getFnName(newRepresentativeCallback)
-            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-        });
-
-
-      });
-
-    function selectImage() {
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SELECT_IMAGE)
-        webAppMessage.callerCallback = getFnName(selectImageCallback)
-        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-    }
-
-    function selectImageCallback(appMessage) {
-        console.log("selectImageCallback - appMessage: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        console.log("selectImageCallback - appMessageJSON: " + appMessageJSON);
-         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-            selectedImagePath = appMessageJSON.message
-            $("#selectedImagePath").html('<b><g:message code="selectedImageLbl"/>: </b>' + selectedImagePath)
-         } else if(appMessageJSON.message){
-            showResultDialog('<g:message code='errorLbl'/>', appMessageJSON.message)
-         }
-    }
-
-    function newRepresentativeCallback(appMessage) {
-        console.log("newRepresentativeCallback - message from native client: " + appMessage);
-        var appMessageJSON = toJSON(appMessage)
-        if(appMessageJSON != null) {
-            var caption = '<g:message code="newRepresentativeERRORCaption"/>'
-            var msg = appMessageJSON.message
-            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '<g:message code="newRepresentativeOKCaption"/>';
-            }
-            showResultDialog(caption, msg)
-        }
-    }
 </asset:script>

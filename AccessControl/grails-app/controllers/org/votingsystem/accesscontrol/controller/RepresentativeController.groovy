@@ -338,10 +338,8 @@ class RepresentativeController {
         }
         ResponseVS responseVS = representativeDelegationService.saveAnonymousDelegation(
                 messageSMIMEReq, request.getLocale())
-        if (ResponseVS.SC_OK == responseVS.statusCode){
-            responseVS.setContentType(ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
-        }
-        return [responseVS : responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+        //return [responseVS : responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+        return [responseVS : responseVS]
     }
 
     /**

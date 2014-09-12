@@ -193,6 +193,13 @@ public class FileUtils {
         }
     }
 
+    public static void copyStringToFile(String stringToCopy, File file) throws IOException {
+        FileWriter fileWriter = null;
+        fileWriter = new FileWriter(file);
+        fileWriter.write(stringToCopy);
+        fileWriter.close();
+    }
+
     public static List<File> findRecursively( File baseDir, final String textToFind) throws IOException {
         List<File> result = new ArrayList<File>();
         if(baseDir.isDirectory()){

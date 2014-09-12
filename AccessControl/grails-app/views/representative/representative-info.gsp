@@ -52,12 +52,12 @@
 
                     </paper-tabs>
                     <div class="tabContent" style="display:{{selectedTab == 'profile'?'block':'none'}}">
-                        <div style=">
-                            <div style="">
+                        <div layout horizontal>
+                            <div>
                                 <img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
                                      style="text-align:center; width: 100px;margin-right: 20px;"></img>
                             </div>
-                            <div style="margin:0px auto 15px auto;">
+                            <div style="margin:auto auto">
                                 <votingsystem-html-echo html="{{representative.description}}"></votingsystem-html-echo>
                             </div>
                         </div>
