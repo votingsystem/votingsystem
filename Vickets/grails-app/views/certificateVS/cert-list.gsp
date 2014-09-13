@@ -1,7 +1,7 @@
 <%@ page import="org.votingsystem.model.CertificateVS" %>
 
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/votingsystem-cert.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/certificateVS/votingsystem-cert.gsp']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 

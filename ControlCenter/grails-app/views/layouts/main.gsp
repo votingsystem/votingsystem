@@ -16,7 +16,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog']"/>">
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
@@ -34,70 +34,17 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <g:if test="${"admin".equals(params.menu)}">
-                            {{ "<g:message code="adminPageTitle"/>" | setTitle}}
-                            <!--<template if="{{isClientToolConnected}}">-->
-                                <paper-item data-href="${createLink(controller: 'eventVSElection')}">
-                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
-                                </paper-item>
-                                <paper-item data-href="${createLink(controller: 'eventVSElection', action:'editor', absolute: true)}">
-                                    <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishVoteLbl"/>
-                                </paper-item>
+                        {{ "<g:message code="serverNameLbl"/>" | setTitle}}
+                        <paper-item data-href="${createLink(controller: 'eventVSElection')}">
+                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
+                        </paper-item>
+                        <paper-item data-href="${createLink(controller: 'subscriptionVS', action:'feeds')}">
+                            <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> <g:message code="subscriptionLbl"/>
+                        </paper-item>
+                        <paper-item data-href="${createLink(controller: 'app', action:'contact')}">
+                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
+                        </paper-item>
 
-                                <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
-                                    <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
-                                </paper-item>
-                                <paper-item data-href="${createLink(controller: 'eventVSManifest', action:'editor')}">
-                                    <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishManifestLbl"/>
-                                </paper-item>
-                                <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
-                                    <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
-                                </paper-item>
-                                <paper-item data-href="${createLink(controller: 'eventVSClaim', action:'editor')}">
-                                    <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="publishClaimLbl"/>
-                                </paper-item>-->
-
-                                <paper-item data-href="${createLink(controller: 'representative')}">
-                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
-                                </paper-item>
-                                <paper-item data-href="${createLink(controller: 'representative', action:'newRepresentative')}">
-                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="newRepresentativeLbl"/>
-                                </paper-item>
-                                <paper-item data-href="${createLink(controller: 'representative', action:'edit')}">
-                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="editRepresentativeLbl"/>
-                                </paper-item>
-                                <paper-item data-href="${createLink(controller: 'representative', action:'remove')}">
-                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="removeRepresentativeLbl"/>
-                                </paper-item>
-
-                            <!--</template>-->
-                        </g:if>
-                        <g:else>
-                            {{ "<g:message code="votingsystemPageLbl"/>" | setTitle}}
-                            <paper-item data-href="${createLink(controller: 'eventVSElection')}">
-                                <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> <g:message code="electionSystemLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'representative')}">
-                                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="representativesPageLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'app', action:'tools')}">
-                                <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> <g:message code="toolsLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'subscriptionVS', action:'feeds')}">
-                                <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> <g:message code="subscriptionLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'app', action:'contact')}">
-                                <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> <g:message code="contactLbl"/>
-                            </paper-item>
-
-                            <!--<paper-item data-href="${createLink(controller: 'eventVSManifest')}">
-                                <i class="fa fa-file-text" style="margin:0px 10px 0px 0px;"></i> <g:message code="manifestSystemLbl"/>
-                            </paper-item>
-                            <paper-item data-href="${createLink(controller: 'eventVSClaim')}">
-                                <i class="fa fa-exclamation-triangle" style="margin:0px 10px 0px 0px;"></i> <g:message code="claimSystemLbl"/>
-                            </paper-item>-->
-
-                        </g:else>
                     </core-selector>
                 </core-menu>
             </core-header-panel>

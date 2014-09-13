@@ -18,6 +18,7 @@ body {
     max-width: 1200px;
 }
 
+
 .navbar-vickets {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
@@ -78,21 +79,21 @@ input:focus:valid {
 }
 
 select, textarea, text, input {
-	background-color: #fcfcfc;
-	border: 1px solid #cccccc;
-	font-size: 1em;
-	padding: 1px 2px 1px 2px;
+    background-color: #fcfcfc;
+    border: 1px solid #cccccc;
+    font-size: 1em;
+    padding: 1px 2px 1px 2px;
 }
 
 .clearing{clear:both;}
 
 .controller {
-	font-size: 0.8em;
-	line-height: 1.5em;
+    font-size: 0.8em;
+    line-height: 1.5em;
 }
 
 hr {
-	border: 1px solid #cccccc;
+    border: 1px solid #cccccc;
 }
 
 

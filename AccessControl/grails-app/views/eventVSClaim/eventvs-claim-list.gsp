@@ -3,7 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/eventVSElection/eventvs-election.gsp']"/>">
 
-<polymer-element name="eventvs-list" attributes="url eventvstype">
+<polymer-element name="eventvs-election-list" attributes="url eventvstype">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style no-shim>
@@ -90,7 +90,7 @@
 
     </template>
     <script>
-        Polymer('eventvs-list', {
+        Polymer('eventvs-election-list', {
             ready :  function(e) {
                 console.log(this.tagName + " - ready")
                 this.loading = true

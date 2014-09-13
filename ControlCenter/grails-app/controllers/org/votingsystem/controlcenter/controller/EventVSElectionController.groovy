@@ -32,26 +32,39 @@ class EventVSElectionController {
 	 * @return Documento JSON con las votaciones que cumplen el criterio de búsqueda.
 	 */
 	def index() {
-		if (params.long('id')) {
-            EventVSElection eventVS = null
-            EventVSElection.withTransaction { eventVS = EventVSElection.get(params.long('id')) }
-			if(!eventVS) {
-                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFoundErrorMsg', args:[params.id]))]
-			} else {
-				Map eventMap = eventVSElectionService.getEventVSElectionMap(eventVS)
-				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-					render eventMap as JSON
-				} else render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
-                            eventMap: eventMap])
-			}
-		} else if(request.contentType?.contains("json")) {
+        if (params.long('id')) {
             def resultList
-            List eventVSList = []
-            def responseMap = new HashMap()
-            responseMap.eventsVSElection = []
-			params.sort = "dateBegin"
-			EventVS.State eventVSState
+            EventVSElection.withTransaction {
+                resultList = EventVSElection.createCriteria().list {
+                    or {
+                        eq("state", EventVS.State.ACTIVE)
+                        eq("state", EventVS.State.PENDING)
+                        eq("state", EventVS.State.CANCELLED)
+                        eq("state", EventVS.State.TERMINATED)
+                    }
+                    and { eq("id", params.long('id'))}
+                }
+            }
+            if(resultList.isEmpty()) {
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))]
+
+            } else {
+                EventVSElection eventVS = resultList.iterator().next()
+                eventVS = eventVSElectionService.checkEventVSDates(eventVS, request.locale).eventVS
+                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+                    render eventVSElectionService.getEventVSMap(eventVS) as JSON
+                } else {
+                    render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
+                                                           eventMap: eventVSElectionService.getEventVSMap(eventVS)])
+                }
+            }
+        } else if(request.contentType?.contains("json")) {
+            def resultList
+            def eventsVSMap = new HashMap()
+            eventsVSMap.eventVS = []
+            params.sort = "dateBegin"
+            EventVS.State eventVSState
             try {eventVSState = EventVS.State.valueOf(params.eventVSState)} catch(Exception ex) {}
             EventVSElection.withTransaction {
                 resultList = EventVSElection.createCriteria().list(max: params.max, offset: params.offset,
@@ -73,14 +86,14 @@ class EventVSElectionController {
                     }
                 }
             }
-			responseMap.offset = params.long('offset')
-            responseMap.numEventsVSElection = resultList?.totalCount
-            eventVSList.each {eventVSItem ->
+            eventsVSMap.totalEventVS = resultList?.totalCount
+            eventsVSMap.offset = params.long('offset')
+            resultList.each {eventVSItem ->
                 eventVSItem = eventVSElectionService.checkEventVSDates(eventVSItem, request.locale).eventVS
-                responseMap.eventsVSElection.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
+                eventsVSMap.eventVS.add(eventVSElectionService.getEventVSElectionMap(eventVSItem))
             }
-            render responseMap as JSON
-		} else render(view:"index" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+            render eventsVSMap as JSON
+        } else render(view:"index" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
 	}
 	
 	
