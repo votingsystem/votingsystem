@@ -38,10 +38,5 @@
 </body>
 </html>
 <asset:script>
-
-    $(function() {
-
-    })
-
 </asset:script>
 

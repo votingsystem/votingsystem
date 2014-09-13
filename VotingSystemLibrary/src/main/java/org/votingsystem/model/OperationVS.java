@@ -226,7 +226,10 @@ public class OperationVS {
             operationVS.setServiceURL((String)dataMap.get("serviceURL"));
         if (dataMap.containsKey("documentURL")) operationVS.setDocumentURL((String)dataMap.get("documentURL"));
         if (dataMap.containsKey("urlTimeStampServer")) operationVS.setUrlTimeStampServer((String)dataMap.get("urlTimeStampServer"));
-        if (dataMap.containsKey("serverURL")) operationVS.setUrlServer((String)dataMap.get("serverURL"));
+        if (dataMap.containsKey("serverURL")) {
+            String serverURL = StringUtils.checkURL((String)dataMap.get("serverURL"));
+            operationVS.setUrlServer(serverURL);
+        }
         if (dataMap.containsKey("callerCallback")) operationVS.setCallerCallback((String)dataMap.get("callerCallback"));
         if (dataMap.containsKey("eventVS")) {
             EventVS eventVS = EventVS.populate((Map) dataMap.get("eventVS"));

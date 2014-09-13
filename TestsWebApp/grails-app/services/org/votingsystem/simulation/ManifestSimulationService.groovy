@@ -95,7 +95,7 @@ class ManifestSimulationService {
 		log.debug("initSimulation - numRequestsProjected: " + simulationData.numRequestsProjected)
 		ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
 		simulationData.init(System.currentTimeMillis());
-        startBroadcatsTimer();
+        startBroadcastTimer();
         changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
 	}
 
@@ -120,8 +120,8 @@ class ManifestSimulationService {
         }
     }
 
-    public void startBroadcatsTimer() throws Exception {
-        log.debug("startBroadcatsTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
+    public void startBroadcastTimer() throws Exception {
+        log.debug("startBroadcastTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
         if(broadcastTimer != null) broadcastTimer.cancel();
         broadcastTimer = new Timer();
         broadcastTimer.schedule(new BroadcastTimerTask(simulationData, broadcastTimer), 0, broadcastMessageInterval);

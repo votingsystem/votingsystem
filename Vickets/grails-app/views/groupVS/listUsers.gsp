@@ -25,17 +25,4 @@
 </body>
 </html>
 <asset:script>
-
-    $(function() {
-        $("#navBarSearchInput").css( "visibility", "visible" );
-        $("#advancedSearchButton").css( "display", "none" );
-
-    })
-
-    function processSearch(textToSearch) {
-        $("#pageInfoPanel").text("<g:message code="searchResultLbl"/> '" + textToSearch + "'")
-        $('#pageInfoPanel').css("display", "block")
-        document.querySelector("#userList").url = targetURL + "?searchText=" + textToSearch
-    }
-
 </asset:script>

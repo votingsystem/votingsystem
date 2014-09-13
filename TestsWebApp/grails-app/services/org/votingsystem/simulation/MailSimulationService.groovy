@@ -99,13 +99,13 @@ class MailSimulationService {
 
         ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
         simulationData.init(System.currentTimeMillis());
-        startBroadcatsTimer();
+        startBroadcastTimer();
         errorList = new ArrayList<String>();
         changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
     }
 
-    public void startBroadcatsTimer() throws Exception {
-        log.debug("startBroadcatsTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
+    public void startBroadcastTimer() throws Exception {
+        log.debug("startBroadcastTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
         broadcastTimer = new Timer();
         broadcastTimer.schedule(new BroadcastTimerTask(simulationData, broadcastTimer), 0, broadcastMessageInterval);
     }

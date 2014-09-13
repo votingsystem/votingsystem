@@ -50,7 +50,6 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     }
         
     public String getRequestDataJSON() {
-        logger.debug("getRepresentativeDataJSOn - ");
         Map map = new HashMap();
         map.put("operation", "TIMESTAMP_TEST");
         map.put("UUID", UUID.randomUUID().toString());

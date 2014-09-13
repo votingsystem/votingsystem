@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/simulation-listener.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/simulation-listener']"/>">
 
 
 <polymer-element name="manifest-simulation-form">
@@ -48,16 +48,12 @@
                                 <input type="number" id="numRequestsProjected" min="1" value="1" required
                                        style="width:130px;margin:0px 20px 0px 3px;"
                                        title="<g:message code="numRequestsProjectedLbl"/>"
-                                       placeholder="<g:message code="numRequestsProjectedLbl"/>"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')">
+                                       placeholder="<g:message code="numRequestsProjectedLbl"/>"/>
                                 <label><g:message code="maxPendingResponsesLbl"/></label>
                                 <input type="number" id="maxPendingResponses" min="1" value="10" required
                                        style="width:130px;margin:10px 20px 0px 3px;"
                                        title="<g:message code="maxPendingResponsesLbl"/>"
-                                       placeholder="<g:message code="maxPendingResponsesLbl"/>"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')">
+                                       placeholder="<g:message code="maxPendingResponsesLbl"/>"/>
                             </div>
 
                             <div layout horizontal center center-justified>
@@ -84,9 +80,7 @@
                                 <input type="url" id="accessControlURL" style="width:300px; margin:0px 0px 0px 20px;" required
                                        value="http://sistemavotacion.org/AccessControl"
                                        title="<g:message code="accessControlURLMsg"/>"
-                                       placeholder="<g:message code="accessControlURLMsg"/>"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')"/>
+                                       placeholder="<g:message code="accessControlURLMsg"/>"/>
                             </div>
 
                             <div id="textEditorDiv" style="padding:2px;">
@@ -100,9 +94,7 @@
                                 <div id="emailDiv"style="display:none;">
                                     <input type="email" id="emailRequestBackup" style="width:300px;"
                                            title="<g:message code="emailRequestBackupMsg"/>"
-                                           placeholder="<g:message code="emailLbl"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="emailLbl"/>"/>
                                 </div>
                             </div>
 

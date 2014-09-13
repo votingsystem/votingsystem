@@ -6,7 +6,7 @@
         <g:include view="/include/styles.gsp"/>
         <style>
         </style>
-        <div class="pageContentDiv">
+        <div class="pageContentDiv" style="width: 1000px;">
 
             <div layout horizontal center center-justified style="width:100%;">
                 <template if="{{subpage}}">
@@ -25,21 +25,23 @@
 
 
             <template if="{{message}}">
-                <div id="messageFromService" class="messageFromServiceBox" style="display:{{message != null? 'block':'none'}}"">
+                <div id="messageFromService" class="messageFromServiceBox">
 
-                <div style="margin: 0 0 20px 0;">
+                <div layout horizontal style="margin: 0 0 20px 0;">
                     <div layout horizontal center center-justified>
                         <label style="font-weight: bold;"><g:message code="statusCodelLbl"/>:</label>
                         <div flex style="margin: 0 20px 0 0;font-size: 2em;font-weight: bold;" id="statusCode">{{message.statusCode}}</div>
                     </div>
-                    <div layout horizontal center center-justified style="margin: 0 20px 0 0;">
+                    <div layout horizontal center center-justified style="margin: 0 20px 0 50px;">
                         <label style="font-weight: bold;"><g:message code="timDurationLbl"/>:</label>
                         <div flex style="font-family:digi;font-size: 2em;">{{message.simulationData.timeDuration}}</div>
                     </div>
                 </div>
-                <div layout horizontal center-justified id="messageDiv" style="margin: 0 0 15px 0;">
-                    <label style="font-weight: bold;"><g:message code="messageLbl"/>:</label>
-                    <div id="message">{{message.message}}</div>
+                <div style="display:{{message.message?'block':'none'}}">
+                    <div layout horizontal>
+                        <div style="font-weight: bold;margin: 0 7px 20px 0;"><g:message code="messageLbl"/>:</div>
+                        <div id="message">{{message.message}}</div>
+                    </div>
                 </div>
                 <div id="numRequestsDiv" style="margin: 0 0 15px 0;">
                     <label style="font-weight: bold;"><g:message code="numRequestsLbl"/>:</label><label>{{message.simulationData.numRequestsProjected}}</label>
@@ -50,7 +52,7 @@
                 <div id="numRequestsERRORDiv" style="width: 700px; margin: 0 0 15px 0;">
                     <label style="font-weight: bold;"><g:message code="numRequestsERRORLbl"/>:</label><label>{{message.simulationData.numRequestsERROR}}</label>
                 </div>
-                <div id="errorsDiv">
+                <div id="errorsDiv" style="display: {{message.simulationData.errorList.length >0 ?'block':'none'}}">
                     <label style="font-weight: bold;"><g:message code="errorsListLbl"/>:</label>
                     <div>{{message.simulationData.errorList}}</div>
                 </div>

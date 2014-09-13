@@ -12,10 +12,7 @@ import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.NifUtils;
-import org.votingsystem.util.OSValidator;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.*;
 
 import javax.mail.Session;
 import javax.security.auth.x500.X500PrivateCredential;
@@ -444,10 +441,12 @@ public class ContextVS {
 
     public void setAppHost(AppHostVS appHost) { this.appHost = appHost;  }
 
-    public X509Certificate getTimeStampServerCert() {
+    public X509Certificate getTimeStampServerCert() throws ExceptionVS {
         if(timeStampCACert != null) return timeStampCACert;
-        if(accessControl == null) return null;
-        return accessControl.getTimeStampCert();
+        if(defaultServer != null) {
+            logger.debug("Fetching TimeStampServerCert from default server");
+            return defaultServer.getTimeStampCert();
+        } else throw new ExceptionVS("TimeStampServerCert not initialized");
     }
 
     public void setTimeStampServerCert(X509Certificate timeStampCACert) {

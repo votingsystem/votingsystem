@@ -36,7 +36,7 @@ class MultiSignSimulationService {
 	private EventVS eventVS;
 	
 	public void processRequest(JSONObject messageJSON) {
-		log.debug("--- processRequest - status: '${messageJSON?.status}'")
+		log.debug("processRequest - status: '${messageJSON?.status}'")
         try {
             Status status = Status.valueOf(messageJSON?.status);
             switch(status) {
@@ -76,13 +76,13 @@ class MultiSignSimulationService {
 		log.debug("initSimulation - numRequestsProjected: " + simulationData.numRequestsProjected)
 		ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
 		simulationData.init(System.currentTimeMillis());
-        startBroadcatsTimer();
+        startBroadcastTimer();
         errorList = new ArrayList<String>();
         changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
 	}
 
-    public void startBroadcatsTimer() throws Exception {
-        log.debug("startBroadcatsTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
+    public void startBroadcastTimer() throws Exception {
+        log.debug("startBroadcastTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
         broadcastTimer = new Timer();
         broadcastTimer.schedule(new BroadcastTimerTask(simulationData, broadcastTimer), 0, broadcastMessageInterval);
     }
@@ -127,7 +127,7 @@ class MultiSignSimulationService {
 			log.debug("WITHOUT NumberOfRequestsProjected");
 			return;
 		}
-        log.debug("--------------- launchRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
+        log.debug("launchRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
                 " - eventId: " + simulationData.getEventId());
 
         simulatorExecutor = Executors.newFixedThreadPool(100);
@@ -146,7 +146,7 @@ class MultiSignSimulationService {
 	}
 
 	public void sendSignatureRequests (ActorVS actorVS) throws Exception {
-		log.debug(" ----------- sendSignatureRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+		log.debug("sendSignatureRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
 
         while(simulationData.getNumRequests() < simulationData.getNumRequestsProjected()) {
             if((simulationData.getNumRequests() - simulationData.
@@ -159,7 +159,7 @@ class MultiSignSimulationService {
 
 	
 	private void waitForSignatureResponses() throws Exception {
-		log.debug(" -------------- waitForSignatureResponses - NumRequestsProjected: " +
+		log.debug("waitForSignatureResponses - NumRequestsProjected: " +
 				simulationData.getNumRequestsProjected());
 		while (simulationData.getNumRequestsProjected() > simulationData.getNumRequestsColected()) {
 			try {
@@ -188,7 +188,7 @@ class MultiSignSimulationService {
 	}
 
 	private void finishSimulation(ResponseVS responseVS) {
-        log.debug(" --- finishSimulation Enter status FINISH_SIMULATION - status: ${responseVS.statusCode}")
+        log.debug("finishSimulation Enter status FINISH_SIMULATION - status: ${responseVS.statusCode}")
 
 		simulationData.finish(responseVS.getStatusCode(), System.currentTimeMillis());
 		if(broadcastTimer != null) broadcastTimer.cancel();
@@ -197,7 +197,7 @@ class MultiSignSimulationService {
 
         log.info("Begin: " + DateUtils.getStringFromDate( simulationData.getBeginDate())  + " - Duration: " +
 				simulationData.getDurationStr());
-        log.info("------- SIMULATION RESULT for EventVS: " + eventVS?.getId());
+        log.info("SIMULATION RESULT for EventVS: " + eventVS?.getId());
 		log.info("Number of projected requests: " + simulationData.getNumRequestsProjected());
 		log.info("Number of completed requests: " + simulationData.getNumRequests());
 		log.info("Number of signatures OK: " + simulationData.getNumRequestsOK());

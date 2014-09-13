@@ -80,7 +80,7 @@ class VicketAddUsersToGroupSimulationService {
                 case Status.LISTEN: synchronizedListenerSet.add(messageJSON.userId)
                     break;
                 default:
-                    log.error(" --- UNKNOWN STATUS ${status.toString()}")
+                    log.error("UNKNOWN STATUS ${status.toString()}")
             }
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex)

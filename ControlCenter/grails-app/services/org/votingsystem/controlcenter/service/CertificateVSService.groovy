@@ -56,7 +56,8 @@ class CertificateVSService {
                     reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
         X509Certificate x509NewCACert = certX509CertCollection.iterator()?.next()
-        CertificateVS certificateVS = CertificateVS.findWhere(x509NewCACert?.getSerialNumber()?.longValue())
+        CertificateVS certificateVS = CertificateVS.findWhere(state: CertificateVS.State.OK,
+                serialNumber:x509NewCACert?.getSerialNumber()?.longValue())
         if(!certificateVS) {
             certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509NewCACert),
                     type:CertificateVS.Type.CERTIFICATE_AUTHORITY,

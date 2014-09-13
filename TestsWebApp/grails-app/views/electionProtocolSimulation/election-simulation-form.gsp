@@ -3,7 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/simulation-listener.gsp']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-eventvs-option-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-eventvs-option-dialog']"/>">
 
 
 <polymer-element name="election-simulation-form">
@@ -46,26 +46,22 @@
 
                             <fieldset id="userBaseData">
                                 <legend style="font-size: 1.2em"><g:message code="userBaseDataCaption"/></legend>
-                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                <div style="margin: 0px 0px 5px 0px;">
                                     <label><g:message code="firstUserIndexMsg"/></label>
                                     <input type="number" id="firstUserIndex" min="1" value="1" readonly required
                                            class="userBaseDataInputNumber"
                                            style="width:120px;margin:10px 20px 0px 7px;"
                                            title="<g:message code="firstUserIndexMsg"/>"
-                                           placeholder="<g:message code="firstUserIndexMsg"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="firstUserIndexMsg"/>"/>
 
                                 </div>
-                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                <div style="margin: 0px 0px 5px 0px;">
                                     <label><g:message code="numUsersWithoutRepresentativeMsg"/></label>
                                     <input type="number" id="numUsersWithoutRepresentative" min="0" value="1" required
                                            class="userBaseDataInputNumber"
                                            style="width:120px;margin:10px 20px 0px 7px;"
                                            title="<g:message code="numRepresentativesMsg"/>"
-                                           placeholder="<g:message code="numRepresentativesMsg"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="numRepresentativesMsg"/>"/>
 
 
                                     <label><g:message code="numUsersWithoutRepresentativeWithVoteMsg"/></label>
@@ -73,19 +69,15 @@
                                            class="userBaseDataInputNumber"
                                            style="width:120px;margin:10px 20px 0px 7px;"
                                            title="<g:message code="numRepresentativesWithVoteMsg"/>"
-                                           placeholder="<g:message code="numRepresentativesWithVoteMsg"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="numRepresentativesWithVoteMsg"/>"/>
                                 </div>
-                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                <div style="margin: 0px 0px 5px 0px;">
                                     <label><g:message code="numRepresentativesMsg"/></label>
                                     <input type="number" id="numRepresentatives" min="0" value="1" required
                                            class="userBaseDataInputNumber"
                                            style="width:120px;margin:10px 20px 0px 7px;"
                                            title="<g:message code="numRepresentativesMsg"/>"
-                                           placeholder="<g:message code="numRepresentativesMsg"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="numRepresentativesMsg"/>"/>
 
 
                                     <label><g:message code="numRepresentativesWithVoteMsg"/></label>
@@ -93,29 +85,22 @@
                                            class="userBaseDataInputNumber"
                                            style="width:120px;margin:10px 20px 0px 7px;"
                                            title="<g:message code="numRepresentativesWithVoteMsg"/>"
-                                           placeholder="<g:message code="numRepresentativesWithVoteMsg"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="numRepresentativesWithVoteMsg"/>"/>
                                 </div>
 
-                                <div style="display: block; margin: 0px 0px 5px 0px;">
+                                <div style="margin: 0px 0px 5px 0px;">
                                     <label><g:message code="numUsersWithRepresentativeMsg"/></label>
                                     <input type="number" id="numUsersWithRepresentative" min="0" value="1" required
                                            class="userBaseDataInputNumber"
                                            style="width:120px;margin:10px 20px 0px 7px;"
                                            title="<g:message code="numUsersWithRepresentativeMsg"/>"
-                                           placeholder="<g:message code="numUsersWithRepresentativeMsg"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="numUsersWithRepresentativeMsg"/>"/>
 
                                     <label><g:message code="numUsersWithRepresentativeWithVoteMsg"/></label>
                                     <input type="number" id="numUsersWithRepresentativeWithVote" min="0" value="1" required
                                            class="userBaseDataInputNumber"
                                            style="width:120px;margin:10px 20px 0px 7px;"
-                                           title="<g:message code="numUsersWithRepresentativeWithVoteMsg"/>"
-                                           placeholder="<g:message code="numUsersWithRepresentativeWithVoteMsg"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="numberFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           title="<g:message code="numUsersWithRepresentativeWithVoteMsg"/>"/>
                                 </div>
                             </fieldset>
 
@@ -124,16 +109,12 @@
                                 <input type="number" id="numRequestsProjected" min="1" value="1" required
                                        style="width:130px;margin:0px 20px 0px 3px;"
                                        title="<g:message code="numRequestsProjectedLbl"/>"
-                                       placeholder="<g:message code="numRequestsProjectedLbl"/>"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')">
+                                       placeholder="<g:message code="numRequestsProjectedLbl"/>"/>
                                 <label><g:message code="maxPendingResponsesLbl"/></label>
                                 <input type="number" id="maxPendingResponses" min="1" value="10" required
                                        style="width:130px;margin:10px 20px 0px 3px;"
                                        title="<g:message code="maxPendingResponsesLbl"/>"
-                                       placeholder="<g:message code="maxPendingResponsesLbl"/>"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')">
+                                       placeholder="<g:message code="maxPendingResponsesLbl"/>"/>
                             </div>
 
                             <div layout horizontal center center-justified>
@@ -160,9 +141,7 @@
                                 <input type="url" id="accessControlURL" style="width:300px; margin:0px 0px 0px 20px;" required
                                        value="http://sistemavotacion.org/AccessControl"
                                        title="<g:message code="accessControlURLMsg"/>"
-                                       placeholder="<g:message code="accessControlURLMsg"/>"
-                                       oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                       onchange="this.setCustomValidity('')"/>
+                                       placeholder="<g:message code="accessControlURLMsg"/>"/>
                             </div>
 
                             <div id="textEditorDiv" style="padding:2px;">
@@ -177,9 +156,7 @@
                                 <div id="emailDiv"style="display:none;">
                                     <input type="email" id="emailRequestBackup" style="width:300px;"
                                            title="<g:message code="emailRequestBackupMsg"/>"
-                                           placeholder="<g:message code="emailLbl"/>"
-                                           oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-                                           onchange="this.setCustomValidity('')">
+                                           placeholder="<g:message code="emailLbl"/>"/>
                                 </div>
                             </div>
 

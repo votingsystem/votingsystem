@@ -101,7 +101,7 @@ public class DocumentVSValidator {
         } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
                 getMessage("jsonErrorMsg") + " - " + ContextVS.getInstance().
                 getMessage("missingEventURLErrorMsg", signedFile.getName()));
-        return new ResponseVS(ResponseVS.SC_OK, signedFileOptionSelectedId);
+        return new ResponseVS(ResponseVS.SC_OK, null, signedFileOptionSelectedId);
     }
 
     //{"representativeNif":"00000002W","operation":"REPRESENTATIVE_SELECTION","UUID":"dcfacb17-a323-4853-b446-8e28d8f2d0a4"}

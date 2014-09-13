@@ -1,5 +1,6 @@
 package org.votingsystem.simulation
 
+import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
@@ -10,6 +11,7 @@ import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
 
+import java.security.cert.X509Certificate
 import java.util.concurrent.*
 
 class TimeStampSimulationService {
@@ -24,6 +26,7 @@ class TimeStampSimulationService {
 
 	def messageSource
     def grailsApplication
+    def signatureVSService
 	private String simulationStarter
 
 	private List<String> errorList = new ArrayList<String>();
@@ -76,13 +79,13 @@ class TimeStampSimulationService {
 		log.debug("initSimulation - numRequestsProjected: " + simulationData.numRequestsProjected)
 		ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
 		simulationData.init(System.currentTimeMillis());
-        startBroadcatsTimer();
+        startBroadcastTimer();
         errorList = new ArrayList<String>();
         changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
 	}
 
-    public void startBroadcatsTimer() throws Exception {
-        log.debug("startBroadcatsTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
+    public void startBroadcastTimer() throws Exception {
+        log.debug("startBroadcastTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
         if(broadcastTimer != null) broadcastTimer.cancel();
         broadcastTimer = new Timer();
         broadcastTimer.schedule(new BroadcastTimerTask(), 0, broadcastMessageInterval);
@@ -109,13 +112,15 @@ class TimeStampSimulationService {
         log.debug("initServer ### Enter status INIT_SERVER")
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()),ContentTypeVS.JSON);
-        /*if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
-            ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next())
-            String serviceURL = "${timeStampServer.getServerURL()}/timeStamp/addCertificateTestAuthority"
-            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
-            responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA, serviceURL);
-        }*/
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            String serviceURL = "${simulationData.getServerURL()}/certificateVS/addCertificateAuthority"
+            X509Certificate serverCert = signatureVSService.getServerCert()
+            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (serverCert);
+            Map requestMap = [operation: TypeVS.CERT_CA_NEW.toString(), certChainPEM: new String(rootCACertPEMBytes, "UTF-8"),
+                              info: "Autority from Test Web App '${Calendar.getInstance().getTime()}'"]
+            String requestStr = "${requestMap as JSON}".toString();
+            responseVS = HttpHelper.getInstance().sendData(requestStr.getBytes(), ContentTypeVS.JSON, serviceURL)
+        }
         responseVS.setStatus(Status.INIT_SERVER)
         changeSimulationStatus(responseVS)
     }
@@ -126,7 +131,7 @@ class TimeStampSimulationService {
 			log.debug("WITHOUT NumberOfRequestsProjected");
 			return;
 		}
-        log.debug("--------------- launchRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
+        log.debug("launchRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
                 " - eventId: " + simulationData.getEventId());
 
         simulatorExecutor = Executors.newFixedThreadPool(100);
@@ -145,20 +150,20 @@ class TimeStampSimulationService {
 	}
 
 	public void sendSignatureRequests () throws Exception {
-		log.debug(" ----------- sendSignatureRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+		log.debug("sendSignatureRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
 
         while(simulationData.getNumRequests() < simulationData.getNumRequestsProjected()) {
             if((simulationData.getNumRequests() - simulationData.
                     getNumRequestsColected()) <= simulationData.getMaxPendingResponses()) {
                 String nifFrom = NifUtils.getNif(simulationData.getAndIncrementNumRequests().intValue());
-                signCompletionService.submit(new TimeStamperTestSender(nifFrom, simulationData.getAccessControlURL()));
+                signCompletionService.submit(new TimeStamperTestSender(nifFrom, simulationData.getServerURL()));
             } else Thread.sleep(300);
         }
 	}
 
 	
 	private void waitForSignatureResponses() throws Exception {
-		log.debug(" -------------- waitForSignatureResponses - NumRequestsProjected: " +
+		log.debug("waitForSignatureResponses - NumRequestsProjected: " +
 				simulationData.getNumRequestsProjected());
 		while (simulationData.getNumRequestsProjected() > simulationData.getNumRequestsColected()) {
 			try {
@@ -187,7 +192,7 @@ class TimeStampSimulationService {
 	}
 
 	private void finishSimulation(ResponseVS responseVS) {
-        log.debug(" --- finishSimulation Enter status FINISH_SIMULATION - status: ${responseVS.statusCode}")
+        log.debug("finishSimulation Enter status FINISH_SIMULATION - status: ${responseVS.statusCode}")
 
 		simulationData.finish(responseVS.getStatusCode(), System.currentTimeMillis());
 		if(broadcastTimer != null) broadcastTimer.cancel();
@@ -196,7 +201,7 @@ class TimeStampSimulationService {
 
         log.info("Begin: " + DateUtils.getStringFromDate( simulationData.getBeginDate())  + " - Duration: " +
 				simulationData.getDurationStr());
-        log.info("------- SIMULATION RESULT for EventVS: " + eventVS?.getId());
+        log.info("SIMULATION RESULT for EventVS: " + eventVS?.getId());
 		log.info("Number of projected requests: " + simulationData.getNumRequestsProjected());
 		log.info("Number of completed requests: " + simulationData.getNumRequests());
 		log.info("Number of signatures OK: " + simulationData.getNumRequestsOK());

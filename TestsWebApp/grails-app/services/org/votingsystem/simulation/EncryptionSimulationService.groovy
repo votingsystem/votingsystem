@@ -76,13 +76,13 @@ class EncryptionSimulationService {
         log.debug("initSimulation - numRequestsProjected: " + simulationData.numRequestsProjected)
         ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
         simulationData.init(System.currentTimeMillis());
-        startBroadcatsTimer();
+        startBroadcastTimer();
         errorList = new ArrayList<String>();
         changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
     }
 
-    public void startBroadcatsTimer() throws Exception {
-        log.debug("startBroadcatsTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
+    public void startBroadcastTimer() throws Exception {
+        log.debug("startBroadcastTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
         broadcastTimer = new Timer();
         broadcastTimer.schedule(new BroadcastTimerTask(simulationData, broadcastTimer), 0, broadcastMessageInterval);
     }
@@ -128,8 +128,8 @@ class EncryptionSimulationService {
             log.debug("WITHOUT NumberOfRequestsProjected");
             return;
         }
-        log.debug("--------------- launchRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
-                " - simulationData.getServerURL(): " + simulationData.getServerURL());
+        log.debug("sendRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected() +
+                " -serverURL" + simulationData.getServerURL());
 
         final String serviceURL = simulationData.getServerURL() + "/encryptor";
         simulatorExecutor = Executors.newFixedThreadPool(100);
@@ -148,7 +148,7 @@ class EncryptionSimulationService {
     }
 
     public void sendHttpRequest (String serviceURL) throws Exception {
-        log.debug(" ----------- sendRequests - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+        log.debug("sendHttpRequest - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
         while(simulationData.getNumRequests() < simulationData.getNumRequestsProjected()) {
             if((simulationData.getNumRequests() - simulationData.
                     getNumRequestsColected()) <= simulationData.getMaxPendingResponses()) {

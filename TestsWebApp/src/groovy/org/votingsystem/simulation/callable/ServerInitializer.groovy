@@ -17,6 +17,7 @@ import org.votingsystem.util.ApplicationContextHolder as ACH
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import java.util.concurrent.Callable
 /**
 * @author jgzornoza
@@ -100,12 +101,15 @@ public class ServerInitializer implements Callable<ResponseVS> {
 
     private ResponseVS addCertificateAuthority(ActorVS actorVS) {
         logger.debug("addCertificateAuthority");
-        byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
+        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+        X509Certificate serverCert = signatureVSService.getServerCert()
+        byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (serverCert);
+        //byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
         Map requestMap = [operation: TypeVS.CERT_CA_NEW.toString(), certChainPEM: new String(rootCACertPEMBytes, "UTF-8"),
                           info: "Autority from Test Web App '${Calendar.getInstance().getTime()}'"]
         String requestStr = "${requestMap as JSON}".toString();
         String msgSubject = ApplicationContextHolder.getMessage("newCertificateAuthorityMsgSubject")
-        SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
+
         String serverName = ApplicationContextHolder.getGrailsApplication().config.VotingSystem.serverName
         ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage(serverName,
                 actorVS.getNameNormalized(), requestStr, msgSubject)

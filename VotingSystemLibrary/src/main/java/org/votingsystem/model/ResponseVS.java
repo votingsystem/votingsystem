@@ -69,8 +69,14 @@ public class ResponseVS<T> implements Serializable {
     }
 
     public ResponseVS (int statusCode, String msg) {
+        this.statusCode = statusCode;
+        this.message = msg;
+    }
+
+    public ResponseVS (int statusCode, String msg, T data) {
         this.statusCode = statusCode; 
         this.message = msg;
+        this.data = data;
     }
 
     public ResponseVS (int statusCode, String msg, ContentTypeVS contentType) {
@@ -90,9 +96,9 @@ public class ResponseVS<T> implements Serializable {
         this.status = status;
     }
 
-    public ResponseVS (int statusCode, T data) {
+    public ResponseVS (int statusCode, byte[] messageBytes) {
         this.statusCode = statusCode;
-        this.data = data;
+        this.messageBytes = messageBytes;
     }
         
     public ResponseVS (int statusCode, byte[] messageBytes, ContentTypeVS contentType) {

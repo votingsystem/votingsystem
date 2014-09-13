@@ -17,13 +17,13 @@
         </div>
         <div id="vicketDepositSimulationDataDialog" style="padding:0px 20px 20px 20px; margin:0px 0px 0px 0px;">
             <div class="errorMsgWrapper" style="display:none;"></div>
-            <div style="margin: 0px 0px 30px 0px;display: table; width: 100%;">
+            <div style="margin: 0px 0px 30px 0px; width: 100%;">
                 <h3>
                     <div id="pageTitle" class="pageHeader text-center">
                         <g:message code="initVicketDepositSimulationMsg"/>
                     </div>
                 </h3>
-                <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
+                <div id="testButtonDiv" style=" text-align:center;vertical-align: middle;">
                     <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
                         <g:message code="goToResultViewMsg"/>
                     </button>

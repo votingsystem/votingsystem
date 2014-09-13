@@ -24,16 +24,14 @@ class EncryptorController {
 
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		byte[] solicitud = params.requestBytes
-		//log.debug("Solicitud" + new String(solicitud))
-		def messageJSON = JSON.parse(new String(solicitud))
+		def messageJSON = JSON.parse(new String(params.requestBytes, "UTF-8"))
 		if(!messageJSON.publicKey) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'publicKeyMissingErrorMsg'))]
 		}
 	    byte[] decodedPK = Base64.decode(messageJSON.publicKey);
 	    PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
 	    //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
-		messageJSON.message="Hello '${messageJSON.from}' from server"
+		messageJSON.message="Hello '${messageJSON.from}' from '${grailsApplication.config.grails.serverURL}'"
         return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK,
                 contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: messageJSON.toString().getBytes())]
 	}

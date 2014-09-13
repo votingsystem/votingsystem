@@ -20,6 +20,13 @@ class TimeStampTestService {
     def messageSource
     def timeStampService
 
+    public void addTrustedCert(X509Certificate trustedCert) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        getTrustedCerts().add(trustedCert)
+        this.trustAnchors = null
+        log.debug("$methodName added cert ${trustedCert.getSubjectDN()}");
+    }
+
     private Set<X509Certificate> getTrustedCerts() {
         if(trustedCerts == null) trustedCerts = new HashSet<X509Certificate>()
         return trustedCerts;
@@ -30,8 +37,7 @@ class TimeStampTestService {
             Set<X509Certificate> trustedCerts = getTrustedCerts()
             trustAnchors = new HashSet<TrustAnchor>();
             for(X509Certificate certificate: trustedCerts) {
-                TrustAnchor anchor = new TrustAnchor(certificate, null);
-                trustAnchors.add(anchor);
+                trustAnchors.add(new TrustAnchor(certificate, null));
             }
         }
         return trustAnchors;
