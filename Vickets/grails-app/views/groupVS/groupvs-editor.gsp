@@ -59,16 +59,14 @@
                 window[objectId] = {setClientToolMessage: function(appMessage) {
                     console.log("editGroupVSCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
-                    if(appMessageJSON != null) {
-                        var caption = '<g:message code="editGroupERRORCaption"/>'
-                        var msg = appMessageJSON.message
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = '<g:message code="editGroupOKCaption"/>'
-                            var msgTemplate = '<g:message code='accessLinkMsg'/>';
-                            msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
-                        }
-                        showMessageVS(msg, caption)
+                    var caption = '<g:message code="editGroupERRORCaption"/>'
+                    var msg = appMessageJSON.message
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = '<g:message code="editGroupOKCaption"/>'
+                        var msgTemplate = '<g:message code='accessLinkMsg'/>';
+                        msg = msg + '</br></br>' + msgTemplate.format(appMessageJSON.URL + "?menu=admin")
                     }
+                    showMessageVS(msg, caption)
                     window.scrollTo(0,0);
                 }}
                 webAppMessage.callerCallback = objectId

@@ -160,14 +160,12 @@
         },
         sendMessageDialogResponse:function(e) {
             var appMessageJSON = JSON.parse(e.detail)
-            if(appMessageJSON != null) {
-                var caption = '<g:message code="sendMessageERRORCaption"/>'
-                var msg = appMessageJSON.message
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    caption = '<g:message code="sendMessageOKCaption"/>'
-                }
-                showMessageVS(msg, caption)
+            var caption = '<g:message code="sendMessageERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="sendMessageOKCaption"/>'
             }
+            showMessageVS(msg, caption)
         }
     });
 

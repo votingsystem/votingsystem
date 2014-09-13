@@ -86,16 +86,14 @@
         window[objectId] = {setClientToolMessage: function(appMessage) {
                 console.log("newVicketSourceCallback - message: " + appMessage);
                 appMessageJSON = toJSON(appMessage)
-                if(appMessageJSON != null) {
-                    var caption = '<g:message code="newVicketSourceERRORCaption"/>'
-                    var msg = appMessageJSON.message
-                    statusCode = appMessageJSON.statusCode
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = '<g:message code="newVicketSourceOKCaption"/>'
-                        var msgTemplate = '<g:message code='accessLinkMsg'/>';
-                    }
-                    showMessageVS(msg, caption)
+                var caption = '<g:message code="newVicketSourceERRORCaption"/>'
+                var msg = appMessageJSON.message
+                statusCode = appMessageJSON.statusCode
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = '<g:message code="newVicketSourceOKCaption"/>'
+                    var msgTemplate = '<g:message code='accessLinkMsg'/>';
                 }
+                showMessageVS(msg, caption)
                 window.scrollTo(0,0);
             }}
         webAppMessage.callerCallback = objectId

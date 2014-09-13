@@ -51,10 +51,6 @@ class RepresentativeController {
         } else render(view:"editRepresentative" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
 	}
 
-    def remove() {
-        render(view:"removeRepresentative", model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
-    }
-	
 	/**
 	 * @httpMethod [GET]
 	 * @return Página de la sección de administración PARA representantes.

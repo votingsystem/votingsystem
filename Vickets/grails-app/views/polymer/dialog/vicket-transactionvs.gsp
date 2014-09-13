@@ -162,7 +162,7 @@
                 webAppMessage.message = this.transactionvs.receipt
                 var objectId = Math.random().toString(36).substring(7)
                 window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("saveReceiptCallback - message from native client: " + appMessage);
+                    console.log("saveReceiptCallback - message: " + appMessage);
                     var appMessageJSON = JSON.parse(appMessage)
                     }}
                 webAppMessage.callerCallback = objectId

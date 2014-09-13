@@ -224,14 +224,12 @@
             var objectId = Math.random().toString(36).substring(7)
             window[objectId] = {setClientToolMessage: function(appMessage) {
                 var appMessageJSON = JSON.parse(appMessage)
-                if(appMessageJSON != null) {
-                    var caption
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "<g:message code='depositOKLbl'/>"
-                        this.close()
-                    } else caption = '<g:message code="depositERRORLbl"/>'
-                    showMessageVS(appMessageJSON.message, caption)
-                }
+                var caption
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "<g:message code='depositOKLbl'/>"
+                    this.close()
+                } else caption = '<g:message code="depositERRORLbl"/>'
+                showMessageVS(appMessageJSON.message, caption)
             }.bind(this)}
             console.log(this.tagName + " - window[objectId] - objectId: " + objectId)
             webAppMessage.callerCallback = objectId

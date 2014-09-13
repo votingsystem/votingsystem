@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-voting-option-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-addoption-dialog.gsp']"/>">
 
 <polymer-element name="eventvs-claim-editor">
     <template>
@@ -163,10 +163,9 @@
                 webAppMessage.callerCallback = objectId
 
                 window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("publishDocumentCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    electionDocumentURL = null
-                    if(appMessageJSON != null) {
+                        console.log("publishDocumentCallback - message: " + appMessage);
+                        var appMessageJSON = toJSON(appMessage)
+                        electionDocumentURL = null
                         var caption = '<g:message code="publishERRORCaption"/>'
                         var msg = appMessageJSON.message
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -175,7 +174,6 @@
                             msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
                         }
                         showMessageVS(msg, caption)
-                    }
                     }.bind(this)}
 
 

@@ -1,6 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/image-viewer-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/select-representative-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-select-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-request-accreditations-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-request-votinghistory-dialog']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
 
 <polymer-element name="representative-info" attributes="subpage">
@@ -67,16 +69,16 @@
                         <template if="{{'admin' == menuType}}">
                             <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
                                 <div style="display:table-cell;">
-                                    <button id="votingHistoryButton" type="button" class="btn btn-default"
-                                            style="margin:0px 20px 0px 0px; width:300px;">
+                                    <votingsystem-button id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                             on-click="{{requestVotingHistory}}">
                                         <g:message code="requestVotingHistoryLbl"/>
-                                    </button>
+                                    </votingsystem-button>
                                 </div>
                                 <div style="display:table-cell;">
-                                    <button type="button" id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                            class="btn btn-default">
+                                    <votingsystem-button id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                            on-click="{{requestAccreditations}}">
                                         <g:message code="requestRepresentativeAcreditationsLbl"/>
-                                    </button>
+                                    </votingsystem-button>
                                 </div>
                             </div>
                         </template>
@@ -85,7 +87,9 @@
             </div>
         </div>
         <image-viewer-dialog id="representativeImage" url="{{representative.imageURL}}" description="{{representativeFullName}}"></image-viewer-dialog>
-        <select-representative-dialog id="selectRepresentativeDialog"></select-representative-dialog>
+        <representative-select-dialog id="selectRepresentativeDialog"></representative-select-dialog>
+        <representative-request-accreditations-dialog id="accreditationsDialog"></representative-request-accreditations-dialog>
+        <representative-request-votinghistory-dialog id="votingHistoryDialog"></representative-request-votinghistory-dialog>
     </template>
     <script>
         Polymer('representative-info', {
@@ -94,6 +98,12 @@
             subpage:false,
             publish: {
                 representative: {value: {}}
+            },
+            requestAccreditations:function(){
+                this.$.accreditationsDialog.show(this.representative)
+            },
+            requestVotingHistory:function() {
+                this.$.votingHistoryDialog.show(this.representative)
             },
             selectRepresentative:function() {
                 console.log("selectRepresentative")

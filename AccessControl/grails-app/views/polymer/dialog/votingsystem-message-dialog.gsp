@@ -6,9 +6,9 @@
 
 <polymer-element name="votingsystem-message-dialog">
     <template>
-        <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <votingsystem-dialog id="xDialog" class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
-            .dialog {
+            .votingsystemMessageDialog {
                 box-sizing: border-box;
                 -moz-box-sizing: border-box;
                 font-family: Arial, Helvetica, sans-serif;
@@ -36,7 +36,9 @@
                     <votingsystem-html-echo html="{{message}}"></votingsystem-html-echo>
                 </div>
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
-                    <div flex></div>
+                    <div flex>
+                        <input type="text" id="keyEnterListener" style="width: 0px;background-color:white; border: none;" autofocus/>
+                    </div>
                     <div style="margin:10px 0px 10px 0px;display:{{isConfirmMessage?'block':'none'}};">
                         <votingsystem-button on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
@@ -51,6 +53,9 @@
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
                 console.log(this.tagName + " - ready")
+                this.$.keyEnterListener.onkeypress = function(event){
+                    if (event.keyCode == 13) this.close()
+                }.bind(this)
             },
             onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {

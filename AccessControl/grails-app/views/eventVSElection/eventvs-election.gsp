@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-vote-confirm-dialog.gsp']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-admin-dialog.gsp']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votevs-result-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/eventVSElection/eventvs-election-voteconfirm-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-admin-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votevs-result-dialog']"/>">
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>

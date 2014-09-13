@@ -3,7 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 
-<polymer-element name="select-representative-dialog">
+<polymer-element name="representative-select-dialog">
     <template>
         <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <g:include view="/include/styles.gsp"/>
@@ -132,7 +132,7 @@
         </votingsystem-dialog>
     </template>
     <script>
-        Polymer('select-representative-dialog', {
+        Polymer('representative-select-dialog', {
             step:'main',
             showingDetails:false,
             isAnonymousDelegation:false,
@@ -166,7 +166,6 @@
                 console.log(this.tagName + " - saveAnonymousDelegation - hashCertVSBase64: " + this.hashCertVSBase64)
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT_ANONYMOUS_DELEGATION)
                 webAppMessage.message = this.hashCertVSBase64
-                //webAppMessage.message = document.getElementById("receipt").innerHTML.trim()
                 var objectId = Math.random().toString(36).substring(7)
                 window[objectId] = {setClientToolMessage: function(appMessage) { }.bind(this)}
                 webAppMessage.callerCallback = objectId

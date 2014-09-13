@@ -155,9 +155,8 @@
                 webAppMessage.callerCallback = objectId
 
                 window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("activateUserCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    if(appMessageJSON != null) {
+                        console.log("activateUserCallback - message: " + appMessage);
+                        var appMessageJSON = toJSON(appMessage)
                         var caption = '<g:message code="operationERRORCaption"/>'
                         var msg = appMessageJSON.message
                         if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
@@ -166,7 +165,7 @@
                         }
                         showMessageVS(msg, caption)
                         this.checking = false
-                    }}.bind(this)}
+                    }.bind(this)}
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
             }
         });

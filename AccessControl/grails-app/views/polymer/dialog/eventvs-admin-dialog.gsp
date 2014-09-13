@@ -111,19 +111,17 @@
                     window[objectId] = {setClientToolMessage: function(appMessage) {
                         console.log("eventvs-admin-dialog callback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
-                        if(appMessageJSON != null) {
-                            var caption
-                            var msg
-                            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                                caption = "<g:message code='operationOKCaption'/>"
-                                msg = "<g:message code='documentCancellationOKMsg'/>".format(this.eventvs.subject);
-                                window.location.href = "${createLink(controller:'eventVSElection')}/" + votingEvent.id
-                            } else {
-                                caption = "<g:message code='operationERRORCaption'/>"
-                                msg = appMessageJSON.message
-                            }
-                            showMessageVS(msg, caption)
+                        var caption
+                        var msg
+                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                            caption = "<g:message code='operationOKCaption'/>"
+                            msg = "<g:message code='documentCancellationOKMsg'/>".format(this.eventvs.subject);
+                            window.location.href = "${createLink(controller:'eventVSElection')}/" + votingEvent.id
+                        } else {
+                            caption = "<g:message code='operationERRORCaption'/>"
+                            msg = appMessageJSON.message
                         }
+                        showMessageVS(msg, caption)
                         }.bind(this)}
                     VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 }

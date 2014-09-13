@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-voting-option-dialog.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-addoption-dialog.gsp']"/>">
 
 <polymer-element name="eventvs-vote-editor">
     <template>

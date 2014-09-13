@@ -63,7 +63,6 @@
                 console.log(this.tagName + " - ready")
             },
             editorDataChanged:function() {
-                console.log("editorDataChanged: " + this.editorData)
                 this.$.textEditor.setData(this.editorData)
             },
             selectImage: function() {
@@ -110,16 +109,14 @@
                 webAppMessage.callerCallback = objectId
 
                 window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("newRepresentativeCallback - message from native client: " + appMessage);
+                    console.log("newRepresentativeCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
-                    if(appMessageJSON != null) {
-                        var caption = '<g:message code="newRepresentativeERRORCaption"/>'
-                        var msg = appMessageJSON.message
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = '<g:message code="newRepresentativeOKCaption"/>';
-                        }
-                        showMessageVS(msg, caption)
+                    var caption = '<g:message code="newRepresentativeERRORCaption"/>'
+                    var msg = appMessageJSON.message
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = '<g:message code="newRepresentativeOKCaption"/>';
                     }
+                    showMessageVS(msg, caption)
                 }.bind(this)}
 
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

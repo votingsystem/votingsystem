@@ -162,9 +162,8 @@
                 webAppMessage.callerCallback = objectId
 
                 window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log(this.tagName + "eventvs-claim callback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    if(appMessageJSON != null) {
+                        console.log(this.tagName + "eventvs-claim callback - message: " + appMessage);
+                        var appMessageJSON = toJSON(appMessage)
                         var caption = '<g:message code="operationERRORCaption"/>'
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "<g:message code='operationOKCaption'/>"
@@ -172,7 +171,7 @@
                             caption = "<g:message code='operationCANCELLEDLbl'/>"
                         }
                         showMessageVS(appMessageJSON.message, caption)
-                    }}.bind(this)}
+                    }.bind(this)}
 
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

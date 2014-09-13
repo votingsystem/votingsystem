@@ -77,16 +77,14 @@
         window[objectId] = {setClientToolMessage: function(appMessage) {
             console.log("newUserCertCallback - message: " + appMessage);
             appMessageJSON = toJSON(appMessage)
-            if(appMessageJSON != null) {
-                var caption = '<g:message code="newUserCertERRORCaption"/>'
-                var msg = appMessageJSON.message
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    caption = '<g:message code="newUserCertOKCaption"/>'
-                    var msgTemplate = '<g:message code='accessLinkMsg'/>';
-                }
-                newCertURL = updateMenuLink(appMessageJSON.URL)
-                showMessageVS(msg, caption)
+            var caption = '<g:message code="newUserCertERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="newUserCertOKCaption"/>'
+                var msgTemplate = '<g:message code='accessLinkMsg'/>';
             }
+            newCertURL = updateMenuLink(appMessageJSON.URL)
+            showMessageVS(msg, caption)
             window.scrollTo(0,0); }}
         webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

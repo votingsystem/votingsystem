@@ -84,7 +84,6 @@
     var callbackListener = {setClientToolMessage: function(appMessage) {
         console.log("newCertifiateAuthorityCallback - message: " + appMessage);
         appMessageJSON = toJSON(appMessage)
-        if(appMessageJSON != null) {
             var caption = '<g:message code="newCACertERRORCaption"/>'
             var msg = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -92,7 +91,6 @@
                 var msgTemplate = '<g:message code='accessLinkMsg'/>';
             }
             showMessageVS(msg, caption)
-        }
         window.scrollTo(0,0);
     }}
 

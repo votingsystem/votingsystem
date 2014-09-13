@@ -1,5 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-editor']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-cancel-dialog']"/>">
 
 <polymer-element name="representative-edit-form">
     <template>
@@ -13,6 +14,19 @@
             }
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="json"></core-ajax>
+
+        <div style="display:{{step == 'operationSelection'?'block':'none'}}">
+            <div layout horizontal center center-justified>
+                <votingsystem-button type="button" on-click="{{representativeCancel}}"
+                        style="margin:15px 20px 15px 0px;">
+                    <i class="fa fa-times" style="margin:0 7px 0 3px;"></i> <g:message code="removeRepresentativeLbl"/>
+                </votingsystem-button>
+                <votingsystem-button type="button" on-click="{{representativeEdit}}"
+                        style="margin:15px 20px 15px 0px;">
+                    <i class="fa fa-hand-o-right" style="margin:0 7px 0 3px;"></i> <g:message code="editRepresentativeLbl"/>
+                </votingsystem-button>
+            </div>
+        </div>
 
         <div style="display:{{step == 'requestrepresentativeNIF' && !isLoading?'block':'none'}}">
             <div class="pageHeader"  layout horizontal center center-justified>
@@ -41,11 +55,12 @@
         </div>
 
     </div>
+    <representative-cancel-dialog id="representativeCancelDialog"></representative-cancel-dialog>
     </template>
     <script>
         Polymer('representative-edit-form', {
             selectedImagePath:null,
-            step:'requestrepresentativeNIF',
+            step:'operationSelection',
             isLoading:false,
             responseData:null,
             ready: function() {
@@ -53,6 +68,12 @@
                 this.$.representativeNif.onkeypress = function(event){
                     if (event.keyCode == 13) this.checkRepresentativeNIF()
                 }.bind(this)
+            },
+            representativeEdit: function() {
+                this.step = 'requestrepresentativeNIF'
+            },
+            representativeCancel: function() {
+                this.$.representativeCancelDialog.show()
             },
             checkRepresentativeNIF: function() {
                 console.log(this.tagName + " - ready")
@@ -68,6 +89,8 @@
                 this.isLoading = false
                 this.url = ""
                 this.step = 'editData'
+                this.fire('representative-selected')
+                console.log("====== representative-selected event dispatched")
                 this.$.representativeEditor.pageHeader = "<g:message code="editingRepresentativeMsgTitle"/>".format(this.responseData.fullName)
                 this.$.representativeEditor.editorData = this.responseData.info
             }

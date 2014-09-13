@@ -4,11 +4,11 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 
 
-<polymer-element name="votingsystem-message-dialog" attributes="opened">
+<polymer-element name="votingsystem-message-dialog">
     <template>
-        <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <votingsystem-dialog id="xDialog" class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
             <style no-shim>
-            .dialog {
+            .votingsystemMessageDialog {
                 box-sizing: border-box;
                 -moz-box-sizing: border-box;
                 font-family: Arial, Helvetica, sans-serif;
@@ -36,10 +36,12 @@
                     <votingsystem-html-echo html="{{message}}"></votingsystem-html-echo>
                 </div>
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
-                    <div flex></div>
+                    <div flex>
+                        <input type="text" id="keyEnterListener" style="width: 0px;background-color:white; border: none;" autofocus/>
+                    </div>
                     <div style="margin:10px 0px 10px 0px;display:{{isConfirmMessage?'block':'none'}};">
                         <votingsystem-button on-click="{{accept}}" style="margin: 0px 0px 0px 5px;">
-                            <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
+                            <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
                         </votingsystem-button>
                     </div>
                 </div>
@@ -50,30 +52,27 @@
         Polymer('votingsystem-message-dialog', {
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
+                console.log(this.tagName + " - ready")
+                this.$.keyEnterListener.onkeypress = function(event){
+                    if (event.keyCode == 13) this.close()
+                }.bind(this)
             },
-            onCoreOverlayOpen:function(e) {
-                this.opened = this.$.xDialog.opened
-            },
-            openedChanged:function() {
-                this.$.xDialog.opened = this.opened
-                if(this.opened == false) this.close()
-            },
+            onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {
                 this.message = message
                 this.caption = caption
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
-                this.opened = true
+                this.$.xDialog.opened = true
             },
 
             accept: function() {
-                var callerId = this.callerId
                 this.close()
-                this.fire('core-signal', {name: "messagedialog-accept", data: callerId});
+                this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
             },
 
             close: function() {
-                this.opened = false
+                this.$.xDialog.opened = false
                 this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});
                 this.message = null
                 this.callerId = null

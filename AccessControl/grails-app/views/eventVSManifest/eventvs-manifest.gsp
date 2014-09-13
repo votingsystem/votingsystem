@@ -100,13 +100,12 @@
                 window[objectId] = {setClientToolMessage: function(appMessage) {
                     console.log(this.tagName + " - vote callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
-                    if(appMessageJSON != null) {
-                        var caption = '<g:message code="operationERRORCaption"/>'
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = "<g:message code='operationOKCaption'/>"
-                        }
-                        showMessageVS(appMessageJSON.message, caption)
-                    }}.bind(this)}
+                    var caption = '<g:message code="operationERRORCaption"/>'
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = "<g:message code='operationOKCaption'/>"
+                    }
+                    showMessageVS(appMessageJSON.message, caption)
+                    }.bind(this)}
 
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

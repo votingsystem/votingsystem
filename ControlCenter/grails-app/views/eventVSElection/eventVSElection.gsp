@@ -101,9 +101,8 @@
 		}
 
 		function sendVoteCallback(appMessage) {
-			console.log("sendVoteCallback - message from native client: " + appMessage);
+			console.log("sendVoteCallback - message: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
-			if(appMessageJSON != null) {
 				caption = '<g:message code="voteERRORCaption"/>'
 				var msgTemplate = "<g:message code='voteResultMsg'/>"
 				var msg
@@ -113,28 +112,25 @@
 							'<g:message code="voteResultOKMsg"/>',
 							appMessageJSON.message);
 				} else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
-					msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>" 
+					msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>"
 					msg = msgTemplate.format(
 						msgTemplate1.format('${eventMap?.subject}'),
 						appMessageJSON.message);
 				} else msg = appMessageJSON.message
 				showResultDialog(caption, msg)
-			}
 		}
 
 		function adminDocumentCallback(appMessage) {
-			console.log("adminDocumentCallback - message from native client: " + appMessage);
+			console.log("adminDocumentCallback - message: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
 				var callBack
-				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-					caption = "<g:message code='operationOKCaption'/>"
-					msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
-					msg = msgTemplate.format('${eventMap?.subject}');
-					callBack = function() {
-						window.location.href = "${createLink(controller:'eventVSClaim')}/" + claimEvent.id;
-					}
-				}
+                caption = "<g:message code='operationOKCaption'/>"
+                msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+                msg = msgTemplate.format('${eventMap?.subject}');
+                callBack = function() {
+                    window.location.href = "${createLink(controller:'eventVSClaim')}/" + claimEvent.id;
+                }
 				showResultDialog(caption, msg, callBack)
 			}
 		}

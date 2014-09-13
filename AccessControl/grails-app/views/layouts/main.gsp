@@ -66,9 +66,6 @@
                                 <paper-item data-href="${createLink(controller: 'representative', action:'edit')}">
                                     <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="editRepresentativeLbl"/>
                                 </paper-item>
-                                <paper-item data-href="${createLink(controller: 'representative', action:'remove')}">
-                                    <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> <g:message code="removeRepresentativeLbl"/>
-                                </paper-item>
 
                             <!--</template>-->
                         </g:if>
@@ -224,7 +221,7 @@
     window.addEventListener('WebComponentsReady', function(e) {  });
 
     document.addEventListener('polymer-ready', function() {
-        console.log("main.gsp - polymer-ready")
+        console.log("main - polymer-ready")
         update_a_elements(document.getElementsByTagName('a'))
     });
 

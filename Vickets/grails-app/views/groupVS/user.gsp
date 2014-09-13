@@ -57,13 +57,13 @@
             window[objectId] = {setClientToolMessage: function(appMessage) {
                 console.log("deActivateUserCallback - message: " + appMessage);
                 var appMessageJSON = toJSON(appMessage)
-                if(appMessageJSON != null) {
-                    var caption = '<g:message code="deActivateUserERRORLbl"/>'
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "<g:message code='deActivateUserOKLbl'/>"
-                    }
-                    var msg = appMessageJSON.message
-                    showMessageVS(msg, caption)   }}}
+                var caption = '<g:message code="deActivateUserERRORLbl"/>'
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "<g:message code='deActivateUserOKLbl'/>"
+                }
+                var msg = appMessageJSON.message
+                showMessageVS(msg, caption)
+                }}
             webAppMessage.callerCallback = objectId
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

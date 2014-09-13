@@ -187,13 +187,11 @@
             window[objectId] =  {setClientToolMessage: function(appMessage) {
                 console.log("subscribeToGroupCallback - message: " + appMessage);
                 var appMessageJSON = JSON.parse(appMessage)
-                if(appMessageJSON != null) {
-                    var caption
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) caption = "<g:message code='groupSubscriptionOKLbl'/>"
-                    else caption = '<g:message code="groupSubscriptionERRORLbl"/>'
-                    var msg = appMessageJSON.message
-                    showMessageVS(msg, caption)
-                }
+                var caption
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) caption = "<g:message code='groupSubscriptionOKLbl'/>"
+                else caption = '<g:message code="groupSubscriptionERRORLbl"/>'
+                var msg = appMessageJSON.message
+                showMessageVS(msg, caption)
             }}
             webAppMessage.callerCallback = objectId
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"

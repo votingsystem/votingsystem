@@ -146,14 +146,12 @@
             console.log("newGroupVSCallback - message: " + appMessage);
             appMessageJSON = toJSON(appMessage)
             var callBackResult = null
-            if(appMessageJSON != null) {
-                var caption = '<g:message code="newGroupERRORCaption"/>'
-                var msg = appMessageJSON.message
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    caption = '<g:message code="newGroupOKCaption"/>'
-                }
-                showMessageVS(msg, caption)
+            var caption = '<g:message code="newGroupERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="newGroupOKCaption"/>'
             }
+            showMessageVS(msg, caption)
             window.scrollTo(0,0); }}
         webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
