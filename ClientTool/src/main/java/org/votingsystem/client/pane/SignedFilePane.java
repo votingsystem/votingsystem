@@ -33,6 +33,8 @@ import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -46,6 +48,7 @@ public class SignedFilePane extends GridPane {
     private SignedFile signedFile;
     private WebView signatureContentWebView;
     private CheckBox contentFormattedCheckBox = null;
+    private String receiptViewerURL;
 
     public SignedFilePane(final SignedFile signedFile) {
         super();
@@ -158,8 +161,14 @@ public class SignedFilePane extends GridPane {
                 timeStampDateStr = DateUtils.getLongDate_Es(signedFile.getSMIMEMessageWraper().
                         getTimeStampToken().getTimeStampInfo().getGenTime());
             }
-            final String jsCommand = ("showContent('" + signedContentJSON.toString() + "', '" +
-                    timeStampDateStr + "')");
+
+            String messagebase64 = null;
+            try {
+                messagebase64 = new String(Base64.getEncoder().encode(signedContentJSON.toString().getBytes("UTF8")), "UTF8");
+            } catch (UnsupportedEncodingException ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            final String jsCommand = ("showContent('" + messagebase64 + "', '" + timeStampDateStr + "')");
             final AtomicBoolean viewerLoaded = new AtomicBoolean(false);
             changeListener = new ChangeListener<Worker.State>() {
                 @Override
@@ -169,31 +178,33 @@ public class SignedFilePane extends GridPane {
                         signatureContentWebView.getEngine().executeScript(jsCommand);
                         viewerLoaded.set(true);
                     }
-                    WebEngine webEngine = signatureContentWebView.getEngine();
-                    if(viewerLoaded.get() && newState == Worker.State.SCHEDULED) {
-                        Platform.runLater(new Runnable() {
-                            @Override public void run() {
-                                logger.debug("BrowserPane.ChangeListener cancelling " + webEngine.getLocation());
-                                webEngine.getLoadWorker().cancel();
-                                new BrowserVS().loadURL(webEngine.getLocation(), null);
-                            }
-                        });
+                    if(!receiptViewerURL.equals(signatureContentWebView.getEngine().getLocation())) {
+                        if(viewerLoaded.get() && newState == Worker.State.SCHEDULED) {
+                            Platform.runLater(new Runnable() {
+                                @Override public void run() {
+                                    logger.debug("SignedFilePane.ChangeListener cancelling " +
+                                            signatureContentWebView.getEngine().getLocation());
+                                    signatureContentWebView.getEngine().getLoadWorker().cancel();
+                                    new BrowserVS().loadURL(signatureContentWebView.getEngine().getLocation(), null);
+                                }
+                            });
+                        }
                     }
                 }
             };
         }
         logger.debug("changeContentFormat - contentFormattedCheckBox.isSelected: " + contentFormattedCheckBox.isSelected());
         if (contentFormattedCheckBox.isSelected()) {
+            signatureContentWebView.getEngine().getLoadWorker().stateProperty().removeListener(changeListener);
             try {
                 //String formattedText = Formatter.format(signedFile.getSMIMEMessageWraper().getSignedContent());
                 signatureContentWebView.getEngine().loadContent(signedFile.getSMIMEMessageWraper().getSignedContent());
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
-            signatureContentWebView.getEngine().getLoadWorker().stateProperty().removeListener(changeListener);
         } else {
             signatureContentWebView.getEngine().getLoadWorker().stateProperty().addListener(changeListener);
-            String receiptViewerURL = ContextVS.getInstance().getDefaultServer().getReceiptViewerURL() +
+            receiptViewerURL = ContextVS.getInstance().getDefaultServer().getReceiptViewerURL() +
                     "?operation=" + signedContentJSON.getString("operation");
             logger.debug("changeContentFormat - receiptViewerURL: " + receiptViewerURL);
             signatureContentWebView.getEngine().load(receiptViewerURL);

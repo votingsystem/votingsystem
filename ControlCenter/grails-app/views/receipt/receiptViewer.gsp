@@ -24,23 +24,29 @@
 </html>
 <asset:script>
     var timeStampDate = "${timeStampDate}"
+    var viewer = null
+    var receiptJSON
 
     <g:applyCodec encodeAs="none">var receiptJSON = ${signedContentMap as grails.converters.JSON}</g:applyCodec>
 
     document.addEventListener('polymer-ready', function() {
         console.log("receiptViewer - polymer-ready")
-        var viewer = document.createElement('${viewer}');
-        viewer.receipt = receiptJSON
-        viewer.timeStampDate = timeStampDate
-        viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
+        viewer = document.createElement('${viewer}');
         document.querySelector("#voting_system_page").appendChild(viewer)
+        loadContent()
     });
 
     function showContent(contentStr, timeStampDateStr) {
-        receiptJSON = JSON.parse(contentStr)
+        var b64_to_utf8 = decodeURIComponent(escape(window.atob(contentStr)))
+        receiptJSON = JSON.parse(b64_to_utf8)
         timeStampDate = timeStampDateStr
-        document.querySelector("#receiptViewer").receipt = receiptJSON
-        document.querySelector("#receiptViewer").timeStampDate = timeStampDate
+        if(viewer != null) loadContent()
+    }
+
+    function loadContent() {
+        viewer.receipt = receiptJSON
+        viewer.timeStampDate = timeStampDate
+        viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
         receiptJSON = null
         timeStampDate = null
     }
