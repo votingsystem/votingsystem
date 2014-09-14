@@ -26,7 +26,7 @@ public class ContentSignerHelper {
     public enum CryptoToken {DNIe, JKS_KEYSTORE}
 
     public static SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
-             char[] password, String subject, Header header) throws Exception {
+             char[] password, String subject, Header... headers) throws Exception {
         String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
         logger.debug("genMimeMessage - CryptoToken: " + cryptoTokenStr);
         CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
@@ -36,10 +36,10 @@ public class ContentSignerHelper {
                 java.security.cert.Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
                 SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyStore,
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password, ContextVS.DNIe_SIGN_MECHANISM);
-                return signedMailGenerator.genMimeMessage(fromUser, toUser, textToSign, subject, header);
+                return signedMailGenerator.genMimeMessage(fromUser, toUser, textToSign, subject, headers);
             case DNIe:
                 return DNIeContentSigner.genMimeMessage(fromUser,
-                        toUser, textToSign, password, subject, header);
+                        toUser, textToSign, password, subject, headers);
             default: return null;
         }
     }

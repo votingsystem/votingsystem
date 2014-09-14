@@ -231,7 +231,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         openSignedFileButton.setGraphic(new ImageView(Utils.getImage(this, "application-certificate")));
         openSignedFileButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                SignedDocumentsBrowser.showDialog(null);
+                SignedDocumentsBrowser.showDialog(null, null);
 
             }});
         openSignedFileButton.setPrefWidth(500);

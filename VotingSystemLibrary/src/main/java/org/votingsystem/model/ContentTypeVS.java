@@ -12,6 +12,8 @@ public enum ContentTypeVS {
 
     BACKUP("application/backup", "zip"),
     JAVASCRIPT("application/javascript", "js"),
+    ASCIIDOC("asciidoc", "asciidoc"),
+    ASCIIDOC_SIGNED("asciidoc;application/pkcs7-signature", "asciidoc"),
 
     JSON("application/json;charset=UTF-8", "json"),
     JSON_SIGNED("application/json;application/pkcs7-signature","p7s"),
@@ -104,6 +106,9 @@ public enum ContentTypeVS {
         if(contentTypeStr == null) return null;
 
         ContentTypeVS result = null;
+
+        if(contentTypeStr.contains(ASCIIDOC.getName())) result = ASCIIDOC;
+        if(contentTypeStr.contains(ASCIIDOC_SIGNED.getName())) result = ASCIIDOC_SIGNED;
 
         if(contentTypeStr.contains(MESSAGEVS.getName())) result = MESSAGEVS;
         if(contentTypeStr.contains(TEXT.getName())) result = TEXT;

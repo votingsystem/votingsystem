@@ -24,7 +24,7 @@
                     <div layout horizontal center center-justified style="margin: 15px 0px 15px 0px;width: 100%;">
                         <div id="pageTitle" class="pageHeader"><h3><g:message code="initEncryptionProtocolSimulationMsg"/></h3></div>
                         <div  id="testButtonDiv">
-                            <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                            <button type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
                                 <g:message code="goToResultViewMsg"/>
                             </button>
                         </div>
@@ -81,7 +81,7 @@
                             <div layout horizontal style="margin:15px 0 0 0;">
                                 <div flex></div>
                                 <div>
-                                    <button id="testButton" type="submit"  class="btn btn-default">
+                                    <button type="submit"  class="btn btn-default">
                                         <g:message code="initEncryptionProtocolSimulationButton"/>
                                     </button>
                                 </div>

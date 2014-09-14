@@ -22,6 +22,7 @@ import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.BrowserVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.w3c.dom.Document;
@@ -147,7 +148,9 @@ public class SignedFilePane extends GridPane {
 
     public void changeContentFormat() {
         if(signedContentJSON == null && signedFile.isSMIME()) {
-            signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
+            if(signedFile.getSMIMEMessageWraper().getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
+                signedContentJSON =  (JSONObject) JSONSerializer.toJSON(signedFile.getOperationDocument());
+            } else signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
         }
         if(changeListener == null) {
             String timeStampDateStr = "";
@@ -155,7 +158,7 @@ public class SignedFilePane extends GridPane {
                 timeStampDateStr = DateUtils.getLongDate_Es(signedFile.getSMIMEMessageWraper().
                         getTimeStampToken().getTimeStampInfo().getGenTime());
             }
-            final String jsCommand = ("showContent('" + signedFile.getSMIMEMessageWraper().getSignedContent() + "', '" +
+            final String jsCommand = ("showContent('" + signedContentJSON.toString() + "', '" +
                     timeStampDateStr + "')");
             final AtomicBoolean viewerLoaded = new AtomicBoolean(false);
             changeListener = new ChangeListener<Worker.State>() {

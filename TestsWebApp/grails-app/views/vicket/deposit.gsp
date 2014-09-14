@@ -24,7 +24,7 @@
                     </div>
                 </h3>
                 <div id="testButtonDiv" style=" text-align:center;vertical-align: middle;">
-                    <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
+                    <button type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
                         <g:message code="goToResultViewMsg"/>
                     </button>
                 </div>

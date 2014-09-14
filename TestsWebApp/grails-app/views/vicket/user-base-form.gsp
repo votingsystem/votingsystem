@@ -65,8 +65,8 @@
                                 </div>
                             </fieldset>
 
-                            <div style="position: relative; overflow:hidden; ">
-                                <button id="testButton" type="submit" class="btn btn-warning" style="margin:15px 20px 20px 0px; float:right;">
+                            <div>
+                                <button type="submit" class="btn btn-warning" style="margin:15px 20px 20px 0px; float:right;">
                                     <g:message code="initVicketuserBaseDataButton"/>
                                 </button>
                             </div>
@@ -77,7 +77,7 @@
             <section id="page2">
                 <div cross-fade class="pageContentDiv" style="width:100%; margin:30px 20px 0px 20px;">
                     <simulation-listener vertical layout subpage id="simulationListener" page="{{subpage}}"
-                                         pagetitle="<g:message code='listeningtVicketUserBaseDataSimulationMsg'/>">
+                             pagetitle="<g:message code='listeningtVicketUserBaseDataSimulationMsg'/>">
                     </simulation-listener>
                 </div>
             </section>

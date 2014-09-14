@@ -109,7 +109,7 @@
                             <div layout horizontal style="margin:15px 0 0 0;">
                                 <div flex></div>
                                 <div>
-                                    <button id="testButton" type="submit"  class="btn btn-default">
+                                    <button type="submit" class="btn btn-default">
                                         <g:message code="initMailProtocolSimulationButton"/>
                                     </button>
                                 </div>

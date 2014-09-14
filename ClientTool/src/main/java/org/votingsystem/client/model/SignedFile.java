@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
 * @author jgzornoza
@@ -27,13 +28,25 @@ public class SignedFile {
     
     private byte[] signedFileBytes = null;
     private String name = null;
+    private Map operationDocument = null;
     private TimeStampToken timeStampToken = null;
     private SMIMEMessageWrapper smimeMessageWraper = null;
     private boolean signatureVerified = false;
     private PdfPKCS7 pdfPKCS7 = null;
     private PDFDocumentVS pdfDocument = null;
-    
+
+
+    public SignedFile(File signedFile, Map operationDocument) throws Exception {
+        byte[] signedFileBytes = FileUtils.getBytesFromFile(signedFile);
+        init(signedFileBytes, signedFile.getName());
+        this.operationDocument = operationDocument;
+    }
+
     public SignedFile(byte[] signedFileBytes, String name) throws Exception {
+        init(signedFileBytes, name);
+    }
+
+    private void init(byte[] signedFileBytes, String name) throws Exception {
         this.name = name;
         this.signedFileBytes = signedFileBytes;
         if(name.toLowerCase().endsWith(".pdf")) {
@@ -173,6 +186,14 @@ public class SignedFile {
         if(smimeMessageWraper == null) return null;
         UserVS userVS = smimeMessageWraper.getSigner();
         return userVS.getCertificate().getSerialNumber().longValue();
+    }
+
+    public Map getOperationDocument() {
+        return operationDocument;
+    }
+
+    public void setOperationDocument(Map operationDocument) {
+        this.operationDocument = operationDocument;
     }
 
 }

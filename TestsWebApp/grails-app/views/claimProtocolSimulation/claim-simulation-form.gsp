@@ -25,11 +25,6 @@
 
                     <div layout horizontal center center-justified style="margin: 15px 0px 15px 0px; width: 100%;">
                         <div id="pageTitle" class="pageHeader"><h3><g:message code="initClaimProtocolSimulationMsg"/></h3></div>
-                        <div  id="testButtonDiv" >
-                            <button id="testButton" type="button" class="btn btn-default" style="margin:0px 0px 0px 30px;">
-                                <g:message code="goToResultViewMsg"/>
-                            </button>
-                        </div>
                     </div>
 
                     <div style="display:{{messageToUser? 'block':'none'}}">

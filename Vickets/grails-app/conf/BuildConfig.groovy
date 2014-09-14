@@ -56,7 +56,6 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
         // runtime 'mysql:mysql-connector-java:5.1.29'
-
         compile('org.votingsystem:votingsystemlibrary:0.2.0',
                 'org.apache.httpcomponents:httpmime:4.2.4',
                 'org.apache.httpcomponents:httpclient:4.2.4',
@@ -64,6 +63,7 @@ grails.project.dependency.resolution = {
                 'org.bouncycastle:bcmail-jdk16:1.46',
                 'org.bouncycastle:bcpg-jdk16:1.46',
                 'org.iban4j:iban4j:2.1.1',
+                'org.asciidoctor:asciidoctorj:1.5.0',
                 'javax.mail:mail:1.4.7',
                 'org.bouncycastle:bctsp-jdk16:1.46') {
             excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",

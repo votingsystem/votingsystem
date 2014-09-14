@@ -26,18 +26,17 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private X509Certificate destinationCert = null;
     private KeyPair keypair;
     private ContentTypeVS cotentType;
-    
-    String[] headers = null;
+    private String[] headers = null;
     
     public SMIMESignedSender(SMIMEMessageWrapper smimeMessage, String urlToSendDocument, String timeStampServerURL,
-            ContentTypeVS cotentType, KeyPair keypair, X509Certificate destinationCert, String... headerNames) {
-        headers = headerNames;
+            ContentTypeVS cotentType, KeyPair keypair, X509Certificate destinationCert, String... headers) {
         this.smimeMessage = smimeMessage;
         this.urlToSendDocument = urlToSendDocument;
         this.timeStampServerURL = timeStampServerURL;
         this.cotentType = cotentType;
         this.keypair = keypair;
         this.destinationCert = destinationCert;
+        this.headers = headers;
     }
 
     @Override public ResponseVS call() throws Exception {

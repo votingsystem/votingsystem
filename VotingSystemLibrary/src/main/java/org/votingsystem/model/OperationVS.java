@@ -29,6 +29,7 @@ public class OperationVS {
     private String serviceURL;
     private String receiverName;
     private String email;
+    private String asciiDoc;
     private ActorVS targetServer;
     private File file;
     private String signedMessageSubject;
@@ -242,6 +243,9 @@ public class OperationVS {
             documentToSignMap.put("UUID", UUID.randomUUID().toString());
             operationVS.setDocumentToSignMap(documentToSignMap);
         }
+        if (dataMap.containsKey("asciiDoc")) {
+            operationVS.setAsciiDoc((String) dataMap.get("asciiDoc"));
+        }
         if (dataMap.containsKey("documentToEncrypt")) {
             Map documentToEncrypt = (Map) dataMap.get("documentToEncrypt");
             operationVS.setDocumentToEncrypt(documentToEncrypt);
@@ -337,6 +341,14 @@ public class OperationVS {
 
     public void setDocument(Map document) {
         this.document = document;
+    }
+
+    public String getAsciiDoc() {
+        return asciiDoc;
+    }
+
+    public void setAsciiDoc(String asciiDoc) {
+        this.asciiDoc = asciiDoc;
     }
 }
 

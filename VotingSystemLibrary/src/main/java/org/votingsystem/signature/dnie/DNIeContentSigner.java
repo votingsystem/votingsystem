@@ -299,7 +299,7 @@ public class DNIeContentSigner implements ContentSigner {
     }
 
     public static SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
-                     char[] password, String subject, Header header) throws Exception {
+                     char[] password, String subject, Header... headers) throws Exception {
         if (subject == null) subject = "";
         if (textToSign == null) textToSign = "";
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
@@ -337,7 +337,11 @@ public class DNIeContentSigner implements ContentSigner {
         if(toUser != null) toUserAddress = new InternetAddress(toUser.replace(" ", ""));
 
         SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
-        if (header != null) body.setHeader(header.getName(), header.getValue());
+        if (headers != null) {
+            for(Header header : headers) {
+                if (header != null) body.setHeader(header.getName(), header.getValue());
+            }
+        }
         body.setHeader("Content-Type", "text/plain; charset=UTF-8");
         if(fromUserAddress != null) body.setFrom(fromUserAddress);
         if(toUserAddress != null) body.setRecipient(Message.RecipientType.TO, toUserAddress);

@@ -133,8 +133,6 @@ class TestingController {
 
     def accounts() { }
 
-    def jsonDocs() { }
-
     def testSocket() { }
 
     def socketvs() { }

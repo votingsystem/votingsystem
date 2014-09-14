@@ -36,6 +36,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author jgzornoza
@@ -156,7 +157,7 @@ public class SignedDocumentsBrowser extends StackPane{
         else progressMessageText.setText("");
     }
 
-    private void openFile (File file) {
+    private void openFile (File file, Map operationDocument) {
         logger.debug("openFile - file: " + file.getAbsolutePath());
         fileDir = file.getParent();
         try {
@@ -166,8 +167,7 @@ public class SignedDocumentsBrowser extends StackPane{
                 return;
             }
             fileList.add(file.getPath());
-            byte[] fileBytes = FileUtils.getBytesFromFile(file);
-            SignedFile signedFile = new SignedFile(fileBytes, file.getName());
+            SignedFile signedFile = new SignedFile(file, operationDocument);
             Tab newTab = new Tab();
             newTab.setText(file.getName());
             SignedFilePane signedFilePane = new SignedFilePane(signedFile);
@@ -189,7 +189,7 @@ public class SignedDocumentsBrowser extends StackPane{
         });
     }
 
-    public static void showDialog(final String signedDocumentStr) {
+    public static void showDialog(final String signedDocumentStr, Map operationDocument) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 SignedDocumentsBrowser signedDocumentsBrowser = new SignedDocumentsBrowser();
@@ -207,14 +207,9 @@ public class SignedDocumentsBrowser extends StackPane{
                     fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                     //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
                     file = fileChooser.showOpenDialog(primaryStage);
-                } else {
-                    file = FileUtils.getFileFromString(signedDocumentStr);
-                    File newFile = new File(file.getParent() + File.separator + ContextVS.getMessage("receiptLbl"));
-                    file.renameTo(newFile);
-                    file = newFile;
-                }
+                } else file = FileUtils.getFileFromString(signedDocumentStr);
                 if(file != null){
-                    signedDocumentsBrowser.openFile(file);
+                    signedDocumentsBrowser.openFile(file, operationDocument);
                     primaryStage.centerOnScreen();
                     primaryStage.show();
                 } else logger.debug("File null dialog will not be opened");

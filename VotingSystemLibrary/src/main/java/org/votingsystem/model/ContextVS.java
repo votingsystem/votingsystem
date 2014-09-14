@@ -181,8 +181,8 @@ public class ContextVS {
     }
 
     private ContextVS(AppHostVS appHost, String logPropertiesFile, String localizatedMessagesFileName, String locale) {
-        logger.debug("logPropertiesFile: " + logPropertiesFile + " - localizatedMessagesFileName: " +
-                localizatedMessagesFileName + " - locale: " + locale);
+        java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.INFO, "logPropertiesFile: " +
+                logPropertiesFile + " - localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
         this.appHost = appHost;
         try {
             initDirs(System.getProperty("user.home"));

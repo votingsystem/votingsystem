@@ -30,7 +30,7 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            {{receiptStr}}
+            <votingsystem-html-echo html="{{receiptStr}}"></votingsystem-html-echo>
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div style="margin:10px 0px 10px 0px;">

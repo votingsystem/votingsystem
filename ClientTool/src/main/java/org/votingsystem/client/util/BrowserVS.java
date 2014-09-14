@@ -399,13 +399,13 @@ public class BrowserVS extends Region {
                         selectImage(operationVS);
                         break;
                     case OPEN_RECEIPT:
-                        openReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
+                        openReceipt(operationVS);
                         break;
                     case SAVE_RECEIPT:
-                        saveReceipt(operationVS.getMessage(), operationVS.getCallerCallback());
+                        saveReceipt(operationVS);
                         break;
                     case SAVE_RECEIPT_ANONYMOUS_DELEGATION:
-                        saveReceiptAnonymousDelegation(operationVS.getMessage(), operationVS.getCallerCallback());
+                        saveReceiptAnonymousDelegation(operationVS);
                         break;
                     case MESSAGEVS_GET:
                         JSONObject documentJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocument());
@@ -430,12 +430,13 @@ public class BrowserVS extends Region {
 
     }
 
-    private void saveReceiptAnonymousDelegation(String hashCertVSBase64, String callbackId) throws Exception{
-        logger.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + hashCertVSBase64 + " - callbackId: " + callbackId);
-        ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(hashCertVSBase64);
+    private void saveReceiptAnonymousDelegation(OperationVS operation) throws Exception{
+        logger.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
+                " - callbackId: " + operation.getCallerCallback());
+        ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(operation.getMessage());
         if(responseVS == null) {
-            logger.error("Missing receipt data for hash: " + hashCertVSBase64);
-            sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackId);
+            logger.error("Missing receipt data for hash: " + operation.getMessage());
+            sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
         } else {
             File fileToSave = Utils.getReceiptBundle(responseVS);
             FileChooser fileChooser = new FileChooser();
@@ -447,12 +448,12 @@ public class BrowserVS extends Region {
             File file = fileChooser.showSaveDialog(browserStage);
             if(file != null){
                 FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
-                sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackId);
-            } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackId);
+                sendMessageToBrowserApp(ResponseVS.SC_OK, null, operation.getCallerCallback());
+            } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
         }
     }
 
-    private void saveReceipt(String receiptStr, String callbackId) throws Exception{
+    private void saveReceipt(OperationVS operation) throws Exception{
         logger.debug("saveReceipt");
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
@@ -462,14 +463,14 @@ public class BrowserVS extends Region {
         fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
         File file = fileChooser.showSaveDialog(browserStage);
         if(file != null){
-            FileUtils.copyStringToFile(receiptStr, file);
-            sendMessageToBrowserApp(ResponseVS.SC_OK, null, callbackId);
-        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, callbackId);
+            FileUtils.copyStringToFile(operation.getMessage(), file);
+            sendMessageToBrowserApp(ResponseVS.SC_OK, null, operation.getCallerCallback());
+        } else sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
     }
 
-    private void openReceipt(String receiptStr, String callbackId) throws Exception{
+    private void openReceipt(OperationVS operation) throws Exception{
         logger.debug("openReceipt");
-        SignedDocumentsBrowser.showDialog(receiptStr);
+        SignedDocumentsBrowser.showDialog(operation.getMessage(), operation.getDocument());
     }
 
     private void selectImage(final OperationVS operationVS) throws Exception {

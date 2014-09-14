@@ -461,10 +461,19 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS sendSMIME(ActorVS targetServer, OperationVS operationVS, String... header) throws Exception {
             logger.debug("sendSMIME");
-            JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
+            String documentToSignStr = null;
+            if(operationVS.getAsciiDoc() != null) {
+                documentToSignStr = operationVS.getAsciiDoc();
+            } else {
+                JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
+                documentToSignStr = documentToSignJSON.toString();
+            }
             SMIMEMessageWrapper smimeMessage = ContentSignerHelper.genMimeMessage(null,
-                    operationVS.getNormalizedReceiverName(), documentToSignJSON.toString(),
+                    operationVS.getNormalizedReceiverName(), documentToSignStr,
                     password.toCharArray(), operationVS.getSignedMessageSubject(), null);
+            if(operationVS.getAsciiDoc() != null) {
+                smimeMessage.setHeader(SMIMEMessageWrapper.CONTENT_TYPE_VS, ContentTypeVS.ASCIIDOC.getName());
+            }
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
                     targetServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null,
                     targetServer.getX509Certificate(), header);

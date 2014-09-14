@@ -63,12 +63,13 @@
             },
             receiptChanged:function() {
                 this.messageToUser = null
-                this.receiptStr = JSON.stringify(this.receipt)
+                if(this.receipt.asciiDoc) this.receiptStr = this.receipt.asciiDocHTML
+                else this.receiptStr = JSON.stringify(this.receipt)
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
                 webAppMessage.message = this.smimeMessage
-
+                webAppMessage.document = this.receipt
                 var objectId = Math.random().toString(36).substring(7)
                 window[objectId] = {setClientToolMessage: function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);}}

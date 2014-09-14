@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="receipt-votingsystem" attributes="receipt smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="receipt-deposit-from-vicketsource" attributes="receipt smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
         .messageToUser {
@@ -17,7 +17,7 @@
         </style>
         <div layout vertical style="margin: 10px 30px; max-width:1000px;">
             <div class="pageHeader"  layout horizontal center center-justified>
-                <h3>{{receipt.operation}}</h3>
+                <h3><g:message code="depositFromVicketSourceLbl"/></h3>
             </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
@@ -30,21 +30,40 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            <votingsystem-html-echo html="{{receiptStr}}"></votingsystem-html-echo>
-            <template if="{{isClientToolConnected}}">
-                <div layout horizontal style="margin:0px 20px 0px 0px;">
-                    <div style="margin:10px 0px 10px 0px;">
-                        <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkReceiptLbl"/>
-                        </votingsystem-button>
-                    </div>
-                    <div flex></div>
+
+            <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
+            <div style=""><b><g:message code="subjectLbl"/>: </b>{{receipt.subject}}</div>
+            <div style=""><b><g:message code="amountLbl"/>: </b>{{receipt.amount}} {{receipt.currency}}</div>
+            <div style=""><b><g:message code="validToLbl"/>: </b>{{receipt.validTo}}</div>
+
+            <div style="margin-left: 20px;">
+                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
+                    <g:message code="pagerLbl"/></div>
+                <div id="fromUserDiv">
+                    <div style=""><b><g:message code="nameLbl"/>: </b>{{receipt.fromUser}}</div>
+                    <div style=""><b><g:message code="IBANLbl"/>: </b>{{receipt.fromUserIBAN}}</div>
                 </div>
-            </template>
+            </div>
+            <div style="margin:20px 0px 0px 20px;">
+                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;"><g:message code="receptorLbl"/></div>
+                <div id="toUserDiv">
+                    <div style=""><b><g:message code="IBANLbl"/>: </b>{{receipt.toUserIBAN}}</div>
+                </div>
+            </div >
         </div>
+        <template if="{{isClientToolConnected}}">
+            <div layout horizontal style="margin:0px 20px 0px 0px;">
+                <div style="margin:10px 0px 10px 0px;">
+                    <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                        <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkReceiptLbl"/>
+                    </votingsystem-button>
+                </div>
+                <div flex></div>
+            </div>
+        </template>
     </template>
     <script>
-        Polymer('receipt-votingsystem', {
+        Polymer('receipt-deposit-from-vicketsource', {
             publish: {
                 receipt: {value: {}}
             },
