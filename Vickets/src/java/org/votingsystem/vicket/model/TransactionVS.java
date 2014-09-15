@@ -207,6 +207,26 @@ public class TransactionVS  implements Serializable {
         this.fromUser = fromUser;
     }
 
+    public static TransactionVS generateTriggeredTransaction(TransactionVS transactionParent, BigDecimal amount,
+             UserVS toUser, String toUserIBAN) {
+        TransactionVS result = new TransactionVS();
+        result.amount = amount;
+        result.messageSMIME = transactionParent.messageSMIME;
+        result.fromUserVS = transactionParent.fromUserVS;
+        result.fromUser = transactionParent.fromUser;
+        result.fromUserIBAN = transactionParent.fromUserIBAN;
+        result.state = transactionParent.state;
+        result.validTo = transactionParent.validTo;
+        result.subject = transactionParent.subject;
+        result.currencyCode = transactionParent.currencyCode;
+        result.type = transactionParent.type;
+        result.tag = transactionParent.tag;
+        result.transactionParent = transactionParent;
+        result.toUserVS = toUser;
+        result.toUserIBAN = toUserIBAN;
+        return result;
+    }
+
     public void afterInsert() {
         ((TransactionVSService)ApplicationContextHolder.getBean("transactionVSService")).updateBalances(this);
     }

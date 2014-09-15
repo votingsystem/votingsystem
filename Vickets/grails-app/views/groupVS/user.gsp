@@ -124,7 +124,7 @@
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_DEPOSIT)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-        webAppMessage.serviceURL = "${createLink(controller:'transaction', action:'deposit',absolute:true)}/" + subscriptionDataJSON.groupvs.id
+        webAppMessage.serviceURL = "${createLink(controller:'transactionVS', action:'deposit',absolute:true)}/" + subscriptionDataJSON.groupvs.id
         webAppMessage.signedMessageSubject = "<g:message code="makeUserGroupDepositMessageSubject"/>" + " '" + subscriptionDataJSON.groupvs.name + "'"
         webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEPOSIT,
                 groupvsName:subscriptionDataJSON.groupvs.name , id:subscriptionDataJSON.groupvs.id}

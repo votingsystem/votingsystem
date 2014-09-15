@@ -1,9 +1,9 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/uservs-data']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/uservs-data-dialog']"/>">
 
-<polymer-element name="search-user" attributes="url">
+<polymer-element name="uservs-search" attributes="url">
     <template>
         <style>
             /*Android browser doesn't fetch this properties from vickets.css*/
@@ -55,25 +55,23 @@
                 <g:message code="emptyUserSearchResultMsg"/>
             </div>
         </div>
-        <uservs-data id="userData" uservs="${uservsMap as grails.converters.JSON}"></uservs-data>
+        <uservs-data-dialog id="userDataDialog" uservs="${uservsMap as grails.converters.JSON}"></uservs-data-dialog>
     </template>
     <script>
-        Polymer('search-user', {
+        Polymer('uservs-search', {
             ready: function() {
                 this.url = this.url || '';
                 this.userVSList = []
             },
             urlChanged:function(e) {},
             showUserDetails:function(e) {
-                console.log("====== showUserDetails")
-                this.$.userData.uservs = e.target.templateInstance.model.uservs
-                this.$.userData.opened = true
+                this.$.userDataDialog.show(e.target.templateInstance.model.uservs)
             },
             reset: function() {
                 this.userVSList = []
             },
             responseDataReceived: function() {
-                console.log("search-user - responseDataReceived - num. users: " + this.responseData.userVSList.length)
+                console.log(this.tagName + " - responseDataReceived - num. users: " + this.responseData.userVSList.length)
                 this.userVSList = this.responseData.userVSList
             }
         });

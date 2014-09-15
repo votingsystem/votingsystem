@@ -6,7 +6,7 @@
     <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
 
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog']"/>">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/receipt/'+ viewer]"/>">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/messageSMIME/'+ viewer]"/>">
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">
@@ -26,9 +26,10 @@
 <asset:script>
     var timeStampDate = "${timeStampDate}"
     var viewer = null
-    var receiptJSON
 
-    <g:applyCodec encodeAs="none">var receiptJSON = ${signedContentMap as grails.converters.JSON}</g:applyCodec>
+    <g:applyCodec encodeAs="none">
+        var receiptJSON = ${signedContentMap as grails.converters.JSON}
+    </g:applyCodec>
 
     document.addEventListener('polymer-ready', function() {
         console.log("receiptViewer - polymer-ready")
@@ -45,7 +46,7 @@
     }
 
     function loadContent() {
-        viewer.receipt = receiptJSON
+        viewer.signedDocument = receiptJSON
         viewer.timeStampDate = timeStampDate
         viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
         receiptJSON = null

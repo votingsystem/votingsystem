@@ -7,7 +7,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/groupvs-user']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-user']"/>">
 
 <%
     def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
@@ -18,6 +18,12 @@
 <template>
     <style shim-shadowdom>
     .view { :host {position: relative;} }
+    .menuButton #menu{
+        overflow: auto;
+        background: white;
+        padding: 0px;
+        border: #6c0404;
+    }
     </style>
     <g:include view="/include/styles.gsp"/>
     <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
@@ -34,37 +40,41 @@
                 <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
                 </div>
                 <div layout horizontal center center-justified style="margin:10px 0px 0px 30px; display:{{isAdminView?'block':'none'}}">
+                    <div id="groupConfigOptionsViv">
+                        <paper-menu-button id="groupConfigOptions" class="menuButton" valign="bottom" style="width: 0px;padding:0px;">
+                            <core-selector target="{{$.groupOptions}}" id="groupOptionsSelector" valueattr="id" on-core-select="{{configGroup}}">
+                                <div id="groupOptions" style=" border: 1px solid #6c0404;">
+                                    <paper-item id="editGroup" label="<g:message code="editDataLbl"/>">
+                                        <div flex></div><i class="fa fa-pencil-square-o"></i></paper-item>
+                                    <paper-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>">
+                                        <div flex></div><i class="fa fa-trash-o"></i></paper-item>
+                                </div>
+                            </core-selector>
+                        </paper-menu-button>
+                        <template if="{{isClientToolConnected}}">
+                            <votingsystem-button on-click="{{openConfigGroupOptions}}">
+                                <g:message code="configGroupvsLbl"/> <i class="fa fa-cogs"></i>
+                            </votingsystem-button>
+                        </template>
+                    </div>
 
-                    <paper-menu-button id="groupConfigOptions" valign="bottom" style="width: 0px;padding:0px;">
-                        <core-selector target="{{$.groupOptions}}" id="groupOptionsSelector" valueattr="id" on-core-select="{{configGroup}}">
-                            <div id="groupOptions" style=" border: 1px solid #6c0404;">
-                                <paper-item id="editGroup" label="<g:message code="editDataLbl"/>">
-                                    <div flex></div><i class="fa fa-pencil-square-o"></i></paper-item>
-                                <paper-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>">
-                                    <div flex></div><i class="fa fa-trash-o"></i></paper-item>
-                            </div>
-                        </core-selector>
-                    </paper-menu-button>
 
-                    <template if="{{isClientToolConnected}}">
-                        <votingsystem-button on-click="{{openConfigGroupOptions}}">
-                            <g:message code="configGroupvsLbl"/> <i class="fa fa-cogs"></i>
+                    <div id="selectDepositOptionsViv">
+                        <paper-menu-button id="selectDepositOptions" class="menuButton" valign="bottom" style="width: 0px;padding:0px;">
+                            <core-selector target="{{$.depositOptions}}" id="coreSelector" valueattr="id" on-core-select="{{showDepositDialog}}">
+                                <div id="depositOptions" style=" border: 1px solid #6c0404;">
+                                    <paper-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></paper-item>
+                                    <paper-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></paper-item>
+                                    <paper-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"</paper-item>
+                                    <paper-item id="fromGroupToAllMember" label="dummy"></paper-item>
+                                </div>
+                            </core-selector>
+                        </paper-menu-button>
+                        <votingsystem-button on-click="{{openDepositDialogOptions}}">
+                            <g:message code="makeDepositFromGroupVSLbl"/> <i class="fa fa-money"></i>
                         </votingsystem-button>
-                    </template>
+                    </div>
 
-
-                    <paper-menu-button id="selectDepositOptions" valign="bottom" style="width: 0px;padding:0px;">
-                        <core-selector target="{{$.depositOptions}}" id="coreSelector" valueattr="id" on-core-select="{{showDepositDialog}}">
-                            <div id="depositOptions" style=" border: 1px solid #6c0404;">
-                                <paper-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></paper-item>
-                                <paper-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></paper-item>
-                                <paper-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"</paper-item>
-                            </div>
-                        </core-selector>
-                    </paper-menu-button>
-                    <votingsystem-button on-click="{{openDepositDialogOptions}}">
-                        <g:message code="makeDepositFromGroupVSLbl"/> <i class="fa fa-money"></i>
-                    </votingsystem-button>
                 </div>
 
                 <div layout horizontal center center-justified style="margin:10px 0px 0px 30px;display:{{isUserView?'block':'none'}}">
@@ -105,9 +115,9 @@
         </div>
 
         <div style="border-top: 1px solid #ccc; display:block; padding-top: 15px;margin-top: 25px; min-height: 300px;">
-            <div class="text-center" style="font-size: 1.2em;font-weight: bold; color:#6c0404; padding: 0px 0 0 0; ">
-                <!--<g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom, weekTo]}"/>-->
-                <g:message code="weekMovementsLbl"/>
+
+            <div  style="text-align:center; font-size: 1.2em;font-weight: bold; color: #888;">
+                <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom]}"/>
             </div>
 
             <group-page-tabs id="groupTabs" groupvs="{{groupvs}}" style=""></group-page-tabs>
@@ -136,6 +146,16 @@
         ready :  function() {
             console.log(this.tagName + " - ready - subpage: " + this.subpage)
             this.isClientToolConnected = window['isClientToolConnected']
+            window.onclick = function(event){
+                this.$.selectDepositOptions.opened = false
+                this.$.groupConfigOptions.opened = false
+            }.bind(this)
+            this.$.groupConfigOptionsViv.onclick = function(event){
+                event.stopPropagation();
+            }
+            this.$.selectDepositOptionsViv.onclick = function(event){
+                event.stopPropagation();
+            }
         },
         messagedialog:function(e, detail, sender) {
             console.log("messagedialog signal - cancelgroup: " + detail)
@@ -236,6 +256,7 @@
             }
         },
         showDepositDialog:function(e) {
+            console.log("======== showDepositDialog")
             if(e.detail.isSelected) {
                 if('fromGroupToMember' == e.detail.item.id) {
                     this.$.depositDialog.show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, this.groupvs.name, this.groupvs.IBAN,

@@ -103,7 +103,7 @@ class TransactionVSService {
             if(transactionVS.type == TransactionVS.Type.INIT_PERIOD) {
 
             } else {
-                if(transactionVS.transactionParent == null) {//Triggering transaction, to system before share out among receptors
+                if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
                     if(transactionVS.type != TransactionVS.Type.VICKET_SOURCE_INPUT) {
                         transactionVS.accountFromMovements.each { userAccountFrom, amount->
                             userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
@@ -259,13 +259,14 @@ class TransactionVSService {
             def childTransactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
                 eq('transactionParent', transaction)
             }
-            if(!childTransactionListDB.isEmpty()) {
+            /*if(!childTransactionListDB.isEmpty()) {
                 List childTransactionList = []
                 childTransactionListDB.each {childTransaction ->
                     childTransactionList.add(getTransactionMap(childTransaction))
                 }
                 transactionMap.childTransactions = childTransactionList
-            }
+            }*/
+            transactionMap.numChildTransactions = childTransactionListDB.totalCount
         }
 
         if(transaction.tag) {

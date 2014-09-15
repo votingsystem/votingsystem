@@ -35,7 +35,7 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${createLink(controller: 'transaction', action: 'listener', absolute: true)}">
+                        <paper-item data-href="${createLink(controller: 'transactionVS', absolute: true)}">
                             <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
                         </paper-item>
                         <paper-item data-href="${createLink(controller: 'groupVS', absolute: true)}">

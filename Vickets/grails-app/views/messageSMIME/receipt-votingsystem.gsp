@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="receipt-votingsystem" attributes="receipt smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="receipt-votingsystem" attributes="signedDocument smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
         .messageToUser {
@@ -17,7 +17,7 @@
         </style>
         <div layout vertical style="margin: 10px 30px; max-width:1000px;">
             <div class="pageHeader"  layout horizontal center center-justified>
-                <h3>{{receipt.operation}}</h3>
+                <h3>{{signedDocument.operation}}</h3>
             </div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
@@ -30,12 +30,12 @@
                     <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            <votingsystem-html-echo html="{{receiptStr}}"></votingsystem-html-echo>
+            <votingsystem-html-echo html="{{signedDocumentStr}}"></votingsystem-html-echo>
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div style="margin:10px 0px 10px 0px;">
-                        <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkReceiptLbl"/>
+                        <votingsystem-button on-click="{{checksignedDocument}}" style="margin: 0px 0px 0px 5px;">
+                            <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checksignedDocumentLbl"/>
                         </votingsystem-button>
                     </div>
                     <div flex></div>
@@ -46,7 +46,7 @@
     <script>
         Polymer('receipt-votingsystem', {
             publish: {
-                receipt: {value: {}}
+                signedDocument: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
@@ -61,18 +61,18 @@
                 console.log(this.tagName + " - attached")
                 this.fire('attached', null);
             },
-            receiptChanged:function() {
+            signedDocumentChanged:function() {
                 this.messageToUser = null
-                if(this.receipt.asciiDoc) this.receiptStr = this.receipt.asciiDocHTML
-                else this.receiptStr = JSON.stringify(this.receipt)
+                if(this.signedDocument.asciiDoc) this.signedDocumentStr = this.signedDocument.asciiDocHTML
+                else this.signedDocumentStr = JSON.stringify(this.signedDocument)
             },
-            checkReceipt: function() {
+            checksignedDocument: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
                 webAppMessage.message = this.smimeMessage
-                webAppMessage.document = this.receipt
+                webAppMessage.document = this.signedDocument
                 var objectId = Math.random().toString(36).substring(7)
                 window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("saveReceiptCallback - message: " + appMessage);}}
+                    console.log("savesignedDocumentCallback - message: " + appMessage);}}
                 webAppMessage.callerCallback = objectId
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }

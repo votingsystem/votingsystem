@@ -191,6 +191,19 @@ class UserVSService {
                 description:userVS.description, certificateList:certificateList]
     }
 
+    public Map getUserVSBasicDataMap(UserVS userVS){
+        String name = userVS.name
+        def certificateList = []
+        def certificates = CertificateVS.findAllWhere(userVS:userVS, state:CertificateVS.State.OK)
+        certificates.each {certItem ->
+            X509Certificate x509Cert = certItem.getX509Cert()
+            certificateList.add([serialNumber:"${certItem.serialNumber}",
+                                 pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
+        }
+
+        if(!userVS.name) name = "${userVS.firstName} ${userVS.lastName}"
+        return [nif:userVS?.nif, name:name]
+    }
 
     public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){
         Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,

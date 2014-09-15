@@ -32,10 +32,9 @@ class VicketTagVSController {
                 VicketTagVS tag
                 VicketTagVS.withTransaction { tag = VicketTagVS.findWhere(name:requestJSON.tag) }
                 if(!tag) {
-                    String tagName = requestJSON.tag.toUpperCase().replaceAll("Ñ", "_____")
+                    String tagName = requestJSON.tag
                     tagName = Normalizer.normalize(requestJSON.tag, Normalizer.Form.NFD).replaceAll(
                             "\\p{InCombiningDiacriticalMarks}+", "");
-                    tagName = tagName.replaceAll("_____", "Ñ")
                     tag = new VicketTagVS(name:tagName).save()
                     new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), balance:BigDecimal.ZERO,
                             userVS:systemService.getSystemUser(), IBAN:systemService.getSystemUser().getIBAN(), tag:tag).save()

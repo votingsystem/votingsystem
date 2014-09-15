@@ -1,18 +1,26 @@
 package org.votingsystem.vicket.controller
 
+import grails.converters.JSON
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.util.DateUtils
+import org.votingsystem.vicket.util.AsciiDocUtil
+
 /**
  * @infoController Mensajes firmados
  * @descController Servicios relacionados con los messages firmados manejados por la
  *                 aplicación.
- * 
+ *
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 class MessageSMIMEController {
+
+    def userVSService
 
     /**
      * @httpMethod [GET]
@@ -28,7 +36,7 @@ class MessageSMIMEController {
         if (messageSMIME) {
             if(ContentTypeVS.TEXT != request.contentTypeVS) {
                 params.messageSMIME = messageSMIME
-                forward(controller:"receipt")
+                forward(action:"contentViewer")
                 return false
             } else {
                 return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
@@ -66,6 +74,51 @@ class MessageSMIMEController {
         } else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
                 message(code: 'messageSMIMENotFound', args:[params.requestMessageId]))]
     }
+
+    def contentViewer() {
+        String viewer = "receipt-votingsystem"
+        String smimeMessageStr
+        String timeStampDate
+        boolean isAsciiDoc = false
+        def signedContentJSON
+        if(params.messageSMIME) {
+            smimeMessageStr = new String(params.messageSMIME.content, "UTF-8")
+            SMIMEMessageWrapper smimeMessage = params.messageSMIME.getSmimeMessage()
+            if(smimeMessage.getTimeStampToken() != null) {
+                timeStampDate = DateUtils.getLongDate_Es(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
+            }
+            if(smimeMessage.getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
+                signedContentJSON = JSON.parse(AsciiDocUtil.getMetaInfVS(
+                        params.messageSMIME.getSmimeMessage()?.getSignedContent()))
+                signedContentJSON.asciiDoc = params.messageSMIME.getSmimeMessage()?.getSignedContent()
+                signedContentJSON.asciiDocHTML = AsciiDocUtil.getHTML(params.messageSMIME.getSmimeMessage()?.getSignedContent())
+            } else {
+                signedContentJSON = JSON.parse(params.messageSMIME.getSmimeMessage()?.getSignedContent())
+            }
+            if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS = userVSService.getUserVSBasicDataMap(params.messageSMIME.userVS)
+            params.operation = signedContentJSON.operation
+        }
+        if(params.operation) {
+            try {
+                TypeVS operationType = TypeVS.valueOf(params.operation.toUpperCase())
+                operationType = TypeVS.valueOf(params.operation.toUpperCase())
+                switch(operationType) {
+                    case TypeVS.SEND_SMIME_VOTE:
+                        viewer = "receipt-votevs"
+                        break;
+                    case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
+                        viewer = "vicket-transactionvs"
+                        break;
+                }
+            } catch(Exception ex) { log.error(ex.getMessage(), ex)}
+        }
+        Map model = [operation:params.operation, smimeMessage:smimeMessageStr,
+               viewer:viewer, signedContentMap:signedContentJSON, timeStampDate:timeStampDate]
+        if(request.contentType?.contains("json")) {
+            render model as JSON
+        } else render(view:'contentViewer', model:model)
+    }
+
 
     /**
      * If any method in this controller invokes code that will throw a Exception then this method is invoked.

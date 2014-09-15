@@ -97,11 +97,8 @@ class TransactionVS_GroupVSService {
                     validTo: transactionValidTo, subject:messageJSON.subject, type:transactionVSType,
                     accountFromMovements: accountFromMovements, currencyCode: currency.getCurrencyCode(), tag:tag).save()
             receptorList.each { toUser ->
-                TransactionVS transaction = new TransactionVS(amount: userPart, messageSMIME:messageSMIMEReq,
-                        fromUserVS:groupVS, fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK,
-                        validTo:transactionValidTo, transactionParent: transactionParent, subject:messageJSON.subject,
-                        toUserVS: toUser, toUserIBAN:toUser.IBAN, currencyCode: currency.getCurrencyCode(),
-                        type:transactionVSType, tag:tag).save()
+                TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
+                        transactionParent, userPart,toUser, toUser.IBAN).save()
                 metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
                 log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
             }
@@ -158,11 +155,9 @@ class TransactionVS_GroupVSService {
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:messageSMIMEReq,
                     type:TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, content:receipt.getBytes()).save()
 
-            TransactionVS transaction = new TransactionVS(amount: userPart, messageSMIME:messageSMIMEReceipt,
-                    fromUserVS:groupVS, fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK,
-                    validTo:transactionValidTo, transactionParent: transactionParent, subject:messageJSON.subject,
-                    toUserVS: it.userVS, toUserIBAN:it.userVS.IBAN,currencyCode: currency.getCurrencyCode(),
-                    type:transactionVSType, tag:tag).save()
+            TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
+                    transactionParent, userPart, it.userVS, it.userVS.IBAN).save()
+
             metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
             log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${it.userVS.id}' ")
         }

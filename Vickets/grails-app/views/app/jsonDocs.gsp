@@ -41,8 +41,8 @@
         signedMessageSubject:"Deposit from Vicket Source",
         signedContent:{operation:"VICKET_DEPOSIT_FROM_VICKET_SOURCE", fromUser: "Implantación proyecto Vickets",
             fromUserIBAN:"ES1877777777450000000050", toUserIBAN:"ES8378788989450000000015",
-            amount:"30000", tags:[{name:"HIDROGENO"}], validTo:"2014/07/28 00:00:00", subject:"Ingreso viernes 25", currency:"EUR" },
-        serviceURL:"${createLink( controller:'transaction', action:"deposit", absolute:true)}",
+            amount:"30000", tags:[{name:"HIDROGENO"}], validTo:"2014/09/21 00:00:00", subject:"Ingreso viernes 25", currency:"EUR" },
+        serviceURL:"${createLink( controller:'transactionVS', action:"deposit", absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
         urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
         }
@@ -58,7 +58,8 @@
         var objectId = Math.random().toString(36).substring(7)
         window[objectId] = {setClientToolMessage: function(appMessage) {
             console.log("sendDepositFromVicketSource - message: " + appMessage);
-            showMessageVS(JSON.stringify(appMessage.message), "sendDepositFromVicketSource " + appMessage.statusCode)
+            appMessageJSON = JSON.parse(appMessage)
+            showMessageVS(JSON.stringify(appMessageJSON.message), "sendDepositFromVicketSource " + appMessageJSON.statusCode)
         }}
         webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

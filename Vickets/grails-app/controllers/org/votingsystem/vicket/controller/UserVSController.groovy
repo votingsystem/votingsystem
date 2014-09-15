@@ -104,10 +104,10 @@ class UserVSController {
                     view = '/groupVS/group'
                 } else if(uservs instanceof VicketSource) {
                     resultMap = [uservsMap:userVSService.getVicketSourceDataMap(uservs)]
-                    view = 'uservs'
+                    view = 'userVS'
                 } else {
                     resultMap = [uservsMap:userVSService.getUserVSDataMap(uservs)]
-                    view = 'uservs'
+                    view = 'userVS'
                 }
             }
             else {

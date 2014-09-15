@@ -4,7 +4,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-table']"/>">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-transactionvs-table']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
 </head>
 <body>
@@ -27,7 +27,8 @@
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-    <vicket-transactionvs-table id="vicketTransactionTable" url="${createLink(controller: 'transaction', action: 'index', absolute: true)}"></vicket-transactionvs-table>
+    <vicket-transactionvs-table id="vicketTransactionTable"
+                                url="${createLink(controller: 'transactionVS', action: 'index', absolute: true)}"></vicket-transactionvs-table>
 
 </div>
 </body>
@@ -46,7 +47,7 @@
     function transactionvsTypeSelect(selected) {
         var transactionvsType = selected.value
         console.log("transactionvsType: " + transactionvsType)
-        targetURL = "${createLink(controller: 'transaction', action: 'index')}";
+        targetURL = "${createLink(controller: 'transactionVS', action: 'index')}";
         if("" != transactionvsType) {
             targetURL = targetURL + "?transactionvsType=" + transactionvsType
         }
@@ -57,12 +58,12 @@
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = "block"
-        document.querySelector("#vicketTransactionTable").url = "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
+        document.querySelector("#vicketTransactionTable").url = "${createLink(controller: 'transactionVS', action: 'index')}?searchText=" + textToSearch
     }
 
     function processSearchJSON(jsonData) {
         document.querySelector("#vicketTransactionTable").params = jsonData
-        document.querySelector("#vicketTransactionTable").url = "${createLink(controller: 'transaction', action: 'index')}"
+        document.querySelector("#vicketTransactionTable").url = "${createLink(controller: 'transactionVS', action: 'index')}"
     }
 </asset:script>
 <asset:deferredScripts/>

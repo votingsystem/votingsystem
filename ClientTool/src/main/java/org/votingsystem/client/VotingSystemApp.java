@@ -436,7 +436,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
 
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                browserVS.loadURL(ContextVS.getInstance().getVicketServer().getAdminProceduresPageURL(),
+                new BrowserVS().loadURL(ContextVS.getInstance().getVicketServer().getAdminProceduresPageURL(),
                         ContextVS.getMessage("vicketAdminLbl"));
 
             }

@@ -39,8 +39,9 @@
 
                     <div layout horizontal style="padding:20px 20px 20px 20px;">
                         <div flex></div>
-                        <votingsystem-button on-click="{{sendMessage}}"><g:message code="acceptLbl" />
-                            <i class="fa fa-check"></i></votingsystem-button>
+                        <votingsystem-button on-click="{{sendMessage}}">
+                            <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl" />
+                        </votingsystem-button>
                     </div>
                 </div>
             </div>

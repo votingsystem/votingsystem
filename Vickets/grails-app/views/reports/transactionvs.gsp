@@ -4,7 +4,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-table']"/>">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-transactionvs-table']"/>">
 </head>
 <body>
 <div class="pageContentDiv">
@@ -48,12 +48,12 @@
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"
         document.querySelector("#pageInfoPanel").style.display = "block"
-        document.querySelector("#recordList").url = "${createLink(controller: 'transaction', action: 'index')}?searchText=" + textToSearch
+        document.querySelector("#recordList").url = "${createLink(controller: 'transactionVS', action: 'index')}?searchText=" + textToSearch
     }
 
     function processSearchJSON(jsonData) {
         document.querySelector("#recordList").params = jsonData
-        document.querySelector("#recordList").url = "${createLink(controller: 'transaction', action: 'index')}"
+        document.querySelector("#recordList").url = "${createLink(controller: 'transactionVS', action: 'index')}"
     }
 </asset:script>
 <asset:deferredScripts/>

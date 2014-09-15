@@ -26,7 +26,7 @@
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
-            <div layout horizontal>
+            <div layout horizontal style="margin:0 0 10px 0;">
                 <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">{{caption}}</div>
                 </div>
@@ -46,15 +46,20 @@
             </div>
             <template if="{{isClientToolConnected}}">
                 <div layout horizontal center center-justified>
+                    <votingsystem-button id="activateUserButton" type="button" on-click="{{groupVSUserLastOperations}}"
+                         style="margin:10px 0px 0px 0px;display:{{isActive?'none':'block'}}"><g:message code="groupVSUserLastOperationsLbl"/>
+                    </votingsystem-button>
                     <votingsystem-button id="activateUserButton" type="button" on-click="{{activateUser}}"
-                                         style="margin:10px 0px 0px 0px;display:{{isActive?'none':'block'}}"><g:message code="activateUserLbl"/> <i class="fa fa-thumbs-o-up"></i>
+                                         style="margin:10px 0px 0px 0px;display:{{isActive?'none':'block'}}">
+                        <i class="fa fa-thumbs-o-up" style="margin:0 7px 0 3px;"> <g:message code="activateUserLbl"/></i>
                     </votingsystem-button>
                     <votingsystem-button id="deActivateUserButton" on-click="{{initCancellation}}"
                                          style="margin:10px 0px 0px 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
-                        <g:message code="deActivateUserLbl"/> <i class="fa fa-thumbs-o-down"></i>
+                        <i class="fa fa-thumbs-o-down" style="margin:0 7px 0 3px;"></i> <g:message code="deActivateUserLbl"/>
                     </votingsystem-button>
                     <votingsystem-button id="makeDepositButton" on-click="{{makeDeposit}}"
-                                         style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} "><g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
+                                         style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
                     </votingsystem-button>
                 </div>
             </template>
@@ -118,6 +123,9 @@
             userIdChanged:function() {
                 this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId + "?mode=simplePage&menu=" + menuType
             },
+            groupVSUserLastOperations:function() {
+
+            },
             activateUser : function(e) {
                 console.log("activateUser")
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_ACTIVATE)
@@ -156,7 +164,7 @@
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_DEPOSIT)
                 webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
                 webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-                webAppMessage.serviceURL = "${createLink(controller:'transaction', action:'deposit',absolute:true)}/" + this.subscriptionData.groupvs.id
+                webAppMessage.serviceURL = "${createLink(controller:'transactionVS', action:'deposit',absolute:true)}/" + this.subscriptionData.groupvs.id
                 webAppMessage.signedMessageSubject = "<g:message code="makeUserGroupDepositMessageSubject"/>" + " '" + this.subscriptionData.groupvs.name + "'"
                 webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEPOSIT,
                     groupvsName:this.subscriptionData.groupvs.name , id:this.subscriptionData.groupvs.id}

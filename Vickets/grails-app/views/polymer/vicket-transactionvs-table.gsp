@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-dialog']"/>">
 
 <polymer-element name="vicket-transactionvs-table" attributes="url transactionList">
     <template>
@@ -45,14 +45,14 @@
                             <a> {{transaction.type| transactionDescription}}</a>
                         </div>
                         <div style="width:140px;">{{transaction.tags[0].name}}</div>
-                        <div style="width:110px;">{{transaction | amount}}</div>
+                        <div style="width:110px;">{{amount(transaction)}}</div>
                         <div style="width:140px;">{{transaction.dateCreated}}</div>
                         <div flex style="width:240px;">{{transaction.subject}}</div>
                     </div>
                 </template>
             </div>
         </div>
-        <vicket-transactionvs id="transactionViewer"></vicket-transactionvs>
+        <vicket-transactionvs-dialog id="transactionViewer"></vicket-transactionvs-dialog>
     </template>
     <script>
         Polymer('vicket-transactionvs-table', {
@@ -64,8 +64,7 @@
                 return getTransactionVSDescription(type)
             },
             showTransactionDetails: function(e) {
-                this.$.transactionViewer.transactionvs = e.target.templateInstance.model.transaction
-                this.$.transactionViewer.opened = true
+                this.$.transactionViewer.show(e.target.templateInstance.model.transaction.messageSMIMEURL)
             },
             newRecordChanged: function(e) {
                 console.log("newRecordChanged: " + this.newRecord)

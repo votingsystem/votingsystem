@@ -6,7 +6,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-user.gsp']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/uservs-search.gsp']"/>">
 
 
 <polymer-element name="vicket-deposit-dialog" attributes="caption opened serviceURL">
@@ -97,7 +97,7 @@
                                 <g:message code="userSearchLbl"/> <i class="fa fa-search"></i>
                             </votingsystem-button>
                         </div>
-                        <search-user id="userSearchList"></search-user>
+                        <uservs-search id="userSearchList"></uservs-search>
                     </div>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
@@ -222,7 +222,7 @@
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'transaction', action:"deposit", absolute:true)}"
+            webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.depositSubject.value,
                 toUserIBAN:this.toUserIBAN(), amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName,
