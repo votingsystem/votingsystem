@@ -1,8 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/user-balance.gsp']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-details.gsp']"/>">
-
-
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/user-balance']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-details']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 
 <polymer-element name="week-reports" attributes="url params-data">

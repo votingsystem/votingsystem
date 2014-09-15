@@ -1,3 +1,5 @@
+<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+
 <polymer-element name="user-balance" attributes="balance">
     <template>
         <g:include view="/include/styles.gsp"/>

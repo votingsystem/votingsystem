@@ -70,7 +70,6 @@
                 this.close()
                 this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
             },
-
             close: function() {
                 this.$.xDialog.opened = false
                 this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});

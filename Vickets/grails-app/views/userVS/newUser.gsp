@@ -69,7 +69,7 @@
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"save", absolute:true)}"
-        webAppMessage.signedMessageSubject = "<g:message code='newCertificateUserMsgSubject'/>"
+        webAppMessage.signedMessageSubject = "<g:message code='newUserCertLbl'/>"
         webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
                     operation:Operation.CERT_USER_NEW}
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"

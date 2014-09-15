@@ -7,15 +7,23 @@
     <link rel="import" href="${resource(dir: '/bower_components/core-overlay', file: 'core-overlay.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-transition', file: 'core-transition-css.html')}">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-details.gsp']"/>">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-details']"/>">
 </head>
 <body>
 
-    <button onclick="document.querySelector('#balanceDetails').tapHandler()"style="margin:10px;">Show balance</button>
+    <button onclick="document.querySelector('#balanceDetails').tapHandler()" style="margin:10px;">Show balance</button>
+    <button onclick="document.querySelector('#tagDialog').show()" style="margin:10px;">Tag dialog</button>
+
 
     <balance-details id="balanceDetails"></balance-details>
 
     <core-ajax auto url="http://vickets:8086/Vickets/reports/forWeek?date=20140721" handleAs="json" contentType="json"></core-ajax>
+
+
+<votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
+                                serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
+
     <!--<template id="test" repeat="{{userBalances.userBalanceList}}">
         <div>{{IBAN}}</div>
         <template repeat="{{transactionFromList}}">

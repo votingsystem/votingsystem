@@ -1,10 +1,9 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../core-ajax/core-ajax.html">
 <link rel="import" href="../core-icon/core-icon.html">
+<link rel="import" href="../votingsystem-i18n/votingsystem-i18n.html">
 
 <polymer-element name="votingsystem-user-box" attributes="boxCaption multiSelection">
     <template>
-        <core-ajax auto handleAs="json" url="{{urlLocales}}" response="{{locales}}"></core-ajax>
         <style>
             .receptorsBox {
                 margin: 10px auto 30px auto;
@@ -18,6 +17,7 @@
                 color:#6c0404;
             }
         </style>
+        <votingsystem-i18n id="i18nVS"></votingsystem-i18n>
         <div layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;display:{{ uservsList.length == 0?'none':'block'}}">
             <fieldset class="receptorsBox">
                 <legend style="margin:5px 0px 0px 0px;">{{boxCaption}}</legend>
@@ -34,15 +34,8 @@
     </template>
     <script>
         Polymer('votingsystem-user-box', {
-            localesChanged:function() {
-                var results = new RegExp("[\\?&]locale=([^&#]*)").exec(location.search);
-                var userLocale = ((results == null) ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))) || navigator.language
-                if(this.locales[userLocale]) this.messages = this.locales[userLocale]
-                else this.messages = this.locales['es']
-                console.log(this.tagName + " loaded locales for: " + userLocale)
-            },
             ready:function() {
-                this.urlLocales = window['serverURL'] + "/bower_components/" + this.tagName.toLowerCase() + "/i18n/messages.json"
+                this.messages = this.$.i18nVS.getMessages()
                 this.multiSelection = this.multiSelection || true
                 this.uservsList = []
             },

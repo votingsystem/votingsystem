@@ -1,3 +1,4 @@
+<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 
 <polymer-element name="vicket-transactionvs" attributes="url opened">

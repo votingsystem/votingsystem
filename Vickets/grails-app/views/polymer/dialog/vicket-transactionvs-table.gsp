@@ -1,4 +1,5 @@
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs.gsp']"/>">
+<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs']"/>">
 
 <polymer-element name="vicket-transactionvs-table" attributes="url transactionList">
     <template>

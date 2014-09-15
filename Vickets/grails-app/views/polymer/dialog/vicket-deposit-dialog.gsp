@@ -1,4 +1,4 @@
-<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
@@ -11,9 +11,10 @@
 
 <polymer-element name="vicket-deposit-dialog" attributes="caption opened serviceURL">
 <template>
-    <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+    <votingsystem-dialog id="xDialog" class="vicketDepositDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <g:include view="/include/styles.gsp"/>
         <style no-shim>
-        .dialog {
+        .vicketDepositDialog {
             box-sizing: border-box;
             -moz-box-sizing: border-box;
             font-family: Arial, Helvetica, sans-serif;
@@ -34,10 +35,13 @@
             padding:10px 20px 10px 20px;
         }
         </style>
-        <g:include view="/include/styles.gsp"/>
-        <div id="container" style="width:600px; padding:0px 0px 15px 0px;">
-            <div layout horizontal style="padding: 0px 10px 0px 20px;" >
-                <h3 id="caption" flex style="color: #6c0404; font-weight: bold;"></h3>
+        <div id="container">
+
+
+            <div layout horizontal center center-justified>
+                <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
+                    <votingsystem-html-echo html="{{caption}}"></votingsystem-html-echo>
+                </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
                     <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
                 </div>
@@ -53,11 +57,13 @@
                 </div>
             </div>
             <div layout vertical style="padding: 5px 20px 0px 20px;">
-                <paper-input id="amount" floatinglabel label="<g:message code="amountLbl"/> (EUR)"
-                            validate="^[0-9]*$" error="<g:message code="onlyNumbersErrorLbl"/>" style="" required>
-                </paper-input>
-                <paper-input id="depositSubject" floatinglabel error="<g:message code="requiredLbl"/>"
-                                    label="<g:message code="subjectLbl"/>" required></paper-input>
+                <input id="amount" class="form-control" pattern="^[0-9]*$" required
+                       title="<g:message code="amountLbl"/>"
+                       placeholder="<g:message code="amountLbl"/> (EUR)"/>
+                <input id="depositSubject" class="form-control" pattern="^[0-9]*$" required
+                       title="<g:message code="subjectLbl"/>"
+                       placeholder="<g:message code="subjectLbl"/> (EUR)"/>
+
 
 
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
@@ -95,7 +101,16 @@
                     </div>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
-                    <div flex></div>
+                    <div flex>
+
+
+
+                        <div style="">
+                            <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                        </div>
+
+
+                    </div>
                     <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
                         <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
                     </votingsystem-button>
@@ -103,7 +118,7 @@
             </div>
         </div>
 
-    <div style="position: absolute; width: 100%; top:0px;left:0px;">
+    <div>
         <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
             <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
                 serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
@@ -267,18 +282,18 @@
             this.groupId = targetGroupId
             switch(operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
-                    this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMember'/></div>"
+                    this.caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMember'/></div>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
                     this.$.receptorBox.multiSelection = false
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
-                    this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMemberGroup'/></div>"
+                    this.caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMemberGroup'/></div>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
                     this.$.receptorBox.multiSelection = true
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                     this.isDepositToAll = true
-                    this.$.caption.innerHTML = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
+                    this.caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
                     this.selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
                     this.$.tagDataDiv.style.display = 'block'
                     break;

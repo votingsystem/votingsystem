@@ -1,4 +1,5 @@
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/get-reason-dialog.gsp']"/>">
+<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/get-reason-dialog']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 
 
@@ -24,10 +25,15 @@
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
-        <div>
-            <section layout horizontal center center-justified style="width:100%;">
-                <div flex id="messageDiv" class="text-center" style="font-size: 1.4em; color:#6c0404; font-weight: bold;"></div>
-            </section>
+        <div layout vertical>
+            <div layout horizontal>
+                <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
+                    <div style="text-align: center;">{{caption}}</div>
+                </div>
+                <div style="position: absolute; top: 0px; right: 0px;">
+                    <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                </div>
+            </div>
             <div id="" style="border: 1px solid #6c0404; width: 450px;margin:auto; padding: 15px;">
                 <div layout horizontal>
                     <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
@@ -176,14 +182,17 @@
                 this.isCancelled = false
                 if('ACTIVE' == this.subscriptionData.state) {
                     this.isActive = true
-                    this.$.messageDiv.innerHTML = "<g:message code="userStateActiveLbl"/>"
+                    this.caption = "<g:message code="userStateActiveLbl"/>"
                 } else if('PENDING' == this.subscriptionData.state) {
                     this.isPending = true
-                    this.$.messageDiv.innerHTML = "<g:message code="userStatePendingLbl"/>"
+                    this.caption = "<g:message code="userStatePendingLbl"/>"
                 } else if('CANCELLED' == this.subscriptionData.state) {
                     this.isCancelled = true
-                    this.$.messageDiv.innerHTML = "<g:message code="userStateCancelledLbl"/>"
+                    this.caption = "<g:message code="userStateCancelledLbl"/>"
                 }
+            },
+            close: function() {
+                this.$.xDialog.opened = false
             }
         });
     </script>
