@@ -408,21 +408,6 @@ public class UserVS implements Serializable {
         return userVS;
     }
 
-    public static UserVS getUserVS (X509Certificate certificate, UserVS userVS) {
-        userVS.setCertificate(certificate);
-        String subjectDN = certificate.getSubjectDN().getName();
-        if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
-        if (subjectDN.contains("SERIALNUMBER=")) userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
-        if (subjectDN.contains("SURNAME=")) userVS.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
-        if (subjectDN.contains("GIVENNAME=")) {
-            String givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0];
-            userVS.setName(givenname);
-            userVS.setFirstName(givenname);
-        }
-        if (subjectDN.contains("CN=")) userVS.setCn(subjectDN.split("CN=")[1]);
-        return userVS;
-    }
-
     public static UserVS populate (Map userVSDataMap) {
         UserVS userVS = new UserVS();
         if(userVSDataMap.containsKey("id")) userVS.setId(((Integer) userVSDataMap.get("id")).longValue());

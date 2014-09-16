@@ -102,10 +102,36 @@ class TransactionVSController {
     }
 
     /**
+     * Servicio que devuelve las transacciones de un usuario
+     *
+     * @httpMethod [GET]
+     * @serviceURL [/userVS/$id/transacionVS/$timePeriod] with $timePeriod one from TimePeriod.Lapse ->
+     *              {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}
+     * @requestContentType [application/json]
+     * @responseContentType [application/json]
+     * @return
+     */
+    def userVS() {
+        if(params.long('id')) {
+            UserVS userVS = null
+            UserVS.withTransaction { userVS = UserVS.get(params.long('id')) }
+            if(!userVS) {
+                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+                        message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
+            }
+            DateUtils.TimePeriod.Lapse lapse =  DateUtils.TimePeriod.Lapse.valueOf(params.timePeriod.toUpperCase())
+            DateUtils.TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(request.locale).getTime(), lapse)
+            Map resultMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, request.locale)
+            render resultMap as JSON
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                message: message(code: 'requestWithErrors'))]
+    }
+
+    /**
      * Servicio que recibe una transacción compuesta por un lote de Vickets
      *
      * @httpMethod [POST]
-     * @serviceURL [/transaction/vicketBatch]
+     * @serviceURL [/transactionVS/vicketBatch]
      * @requestContentType Documento JSON con la extructura https://github.com/votingsystem/votingsystem/wiki/Lote-de-Vickets
      * @responseContentType [application/pkcs7-mime]. Documento JSON cifrado en el que figuran los recibos de los model recibidos.
      * @return
@@ -228,7 +254,7 @@ class TransactionVSController {
      * Servicio que recibe los asignaciones de los usuarios en documentos SMIME
      *
      * @httpMethod [POST]
-     * @serviceURL [/transaction/deposit]
+     * @serviceURL [/transactionVS/deposit]
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
      *                     documento SMIME firmado con un model emitido por el sistema.
      * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.

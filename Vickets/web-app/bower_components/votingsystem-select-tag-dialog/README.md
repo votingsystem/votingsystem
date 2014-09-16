@@ -1,5 +1,5 @@
-votingsystem-select-tag-dialog
+tagvs-select-dialog
 ================
 
-See the [component page](http://votingsystem.github.io/votingsystem-select-tag-dialog) for more information.
+See the [component page](http://votingsystem.github.io/tagvs-select-dialog) for more information.
 

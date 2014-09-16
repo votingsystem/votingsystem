@@ -4,7 +4,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/tagvs-select-dialog']"/>">
 </head>
 <body>
 
@@ -28,8 +28,8 @@
                 <li><g:message code="newGroupVSAdviceMsg2"/></li>
             </ul>
         </div>
-        <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                                        serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
+        <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
+                                        serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></tagvs-select-dialog>
         <form onsubmit="return submitForm();">
 
             <div layout vertical>

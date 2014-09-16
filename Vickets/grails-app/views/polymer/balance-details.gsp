@@ -6,13 +6,13 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/google-chart', file: 'google-chart.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-dialog']"/>">
 
 
 <!-- an element that uses the votingsystem-dialog element and core-overlay -->
 <polymer-element name="balance-details" attributes="opened url">
 <template>
-    <vicket-transactionvs id="transactionViewer"></vicket-transactionvs>
+    <vicket-transactionvs-dialog id="transactionViewer"></vicket-transactionvs-dialog>
     <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <!-- place all overlay styles inside the overlay target -->
         <style no-shim>

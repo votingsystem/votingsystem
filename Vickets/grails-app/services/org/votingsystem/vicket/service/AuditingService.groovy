@@ -107,7 +107,7 @@ class AuditingService {
             String userSubPath = StringUtils.getUserDirPath(userVS.nif);
             new File("${basePath}${userSubPath}").mkdirs()
             log.debug("UserVS id: ${userVS.id} - userSubPath: ${userSubPath}")
-            Map userTransactionMap = transactionVSService.getUserInfoMap(userVS, weekFromCalendar)
+            Map userTransactionMap = transactionVSService.getUserVSVicketTransactionVSMap(userVS, weekFromCalendar)
             File userTransactionsFile = new File("${basePath}${userSubPath}/transactions.json")
             userTransactionsFile.setBytes("${userTransactionMap as JSON}".getBytes("UTF-8"))
             Map euroDataMap = userTransactionMap?.get(lapsePath)?.get(Currency.getInstance("EUR").getCurrencyCode())

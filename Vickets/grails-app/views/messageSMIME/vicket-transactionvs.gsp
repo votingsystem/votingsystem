@@ -2,6 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
+
 <polymer-element name="vicket-transactionvs" attributes="signedDocument smimeMessage isClientToolConnected timeStampDate">
     <template>
         <g:include view="/include/styles.gsp"/>
@@ -13,7 +14,7 @@
             padding:10px 20px 10px 20px;
         }
         .timeStampMsg {
-            color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
+            color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;
         }
         </style>
         <div layout vertical style="margin: 0px 30px; max-width:1000px;">
@@ -46,7 +47,8 @@
             <div style="margin:20px 0px 0px 20px;">
                 <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;"><g:message code="receptorLbl"/></div>
                 <div id="toUserDiv">
-                    <div style=""><b><g:message code="IBANLbl"/>: </b>{{signedDocument.toUserIBAN}}</div>
+                    <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">
+                        <b><g:message code="IBANLbl"/>: </b>{{signedDocument.toUserIBAN}}</div>
                 </div>
             </div >
             <template if="{{signedDocument.tags.length > 0}}">
@@ -67,6 +69,7 @@
                 </div>
             </div>
         </template>
+        <uservs-data-dialog id="userVSDialog"></uservs-data-dialog>
     </template>
     <script>
         Polymer('vicket-transactionvs', {
@@ -98,8 +101,6 @@
                     default:
                         this.caption = signedDocument.operation
                 }
-
-
             },
             showToUserInfo:function(e) {
                 var groupURL = "${createLink(uri:'/groupVS')}/" + e.target.templateInstance.model.signedDocument.toUserVS.id
@@ -112,6 +113,10 @@
             showInfoIBAN:function(e) {
                 var fromUserIBANInfoURL = "${createLink(uri:'/IBAN')}/from/" + e.target.templateInstance.model.signedDocument.fromUserVS.payer.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
+            },
+            showToUserIBAN:function(e) {
+                console.log(this.tagName + " - showToUserIBAN")
+                this.$.userVSDialog.showByIBAN(e.target.templateInstance.model.signedDocument.toUserIBAN)
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)

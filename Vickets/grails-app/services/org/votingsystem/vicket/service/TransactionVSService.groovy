@@ -21,6 +21,7 @@ import org.votingsystem.vicket.model.CoreSignal
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class TransactionVSService {
 
     private final Set<String> listenerSet = Collections.synchronizedSet(new HashSet<String>());
@@ -137,10 +138,36 @@ class TransactionVSService {
     }
 
     @Transactional
+    public Map getUserVSTransactionVSMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale) {
+        PagedResultList userVSTransactions = TransactionVS.createCriteria().list(
+                sort:'dateCreated', order:'asc', offset:params?.offset, max:params?.max) {
+            or {
+                and{
+                    isNull('transactionParent')
+                    eq("fromUserVS", userVS)
+                }
+                eq("toUserVS", userVS)
+            }
+            and {
+                between('dateCreated', timePeriod.getDateFrom(), timePeriod.getDateTo())
+            }
+        }
+        List userTransactionVSList = []
+        userVSTransactions.each { it ->
+            userTransactionVSList.add(getTransactionMap(it, locale))
+        }
+        String name = userVS.name
+        if(!name) name = "${userVS.firstName} ${userVS.lastName}"
+        Map userVSMap = [nif:userVS?.nif, name:name]
+        return [offset: params.offset, queryRecordCount: userVSTransactions.size(),
+                numTotalRecords:userVSTransactions.totalCount,  userVS: userVSMap, transactionVSList:userTransactionVSList]
+    }
+
+    @Transactional
     public PagedResultList getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             eq('fromUserVS', fromUserVS)
-//            isNull("transactionParent")
+            isNull("transactionParent")
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
         return transactionList
@@ -306,19 +333,17 @@ class TransactionVSService {
         return typeDescription
     }
 
-    public Map getUserInfoMap(UserVS userVS, Calendar mondayLapse) {
-        Calendar weekToCalendar = mondayLapse.clone();
-        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
+    public Map getUserVSVicketTransactionVSMap(UserVS userVS, DateUtils.TimePeriod timePeriod) {
         def userInputTransactions = TransactionVS.createCriteria().scroll {
             eq("toUserVS", userVS)
             or {
                 eq("type", TransactionVS.Type.VICKET_CANCELLATION)
             }
-            ge("dateCreated", mondayLapse.getTime())
-            le("dateCreated", weekToCalendar.getTime())
+            ge("dateCreated", timePeriod.getDateFrom())
+            le("dateCreated", timePeriod.getDateTo())
         }
 
-        String dirPath = DateUtils.getDirPath(mondayLapse.getTime())
+        String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
         //int year =  calendar.get(Calendar.YEAR);
         //int month = calendar.get(Calendar.MONTH) + 1; // Note: zero based!
         //int day = calendar.get(Calendar.DAY_OF_MONTH);

@@ -157,16 +157,41 @@ public class DateUtils {
     }
 
     public static Calendar getMonday(Calendar calendar) {
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar;
+        Calendar result = (Calendar) calendar.clone();
+        result.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        result.set(Calendar.HOUR_OF_DAY, 0);
+        result.set(Calendar.MINUTE, 0);
+        result.set(Calendar.SECOND, 0);
+        result.set(Calendar.MILLISECOND, 0);
+        return result;
     }
 
     public static TimePeriod getCurrentWeekPeriod() {
         return getWeekPeriod(Calendar.getInstance());
+    }
+
+    public static DateUtils.TimePeriod getYearPeriod(Calendar selectedDate) {
+        Calendar dayFrom = (Calendar) selectedDate.clone();
+        dayFrom.set(Calendar.DAY_OF_YEAR, 1);
+        dayFrom.set(Calendar.HOUR_OF_DAY, 0);
+        dayFrom.set(Calendar.MINUTE, 0);
+        dayFrom.set(Calendar.SECOND, 0);
+        dayFrom.set(Calendar.MILLISECOND, 0);
+        Calendar dayTo = (Calendar) dayFrom.clone();
+        dayTo.add(Calendar.DAY_OF_YEAR, 365);
+        return new DateUtils.TimePeriod(dayFrom.getTime(), dayTo.getTime());
+    }
+
+    public static DateUtils.TimePeriod getMonthPeriod(Calendar selectedDate) {
+        Calendar dayFrom = (Calendar) selectedDate.clone();
+        dayFrom.set(Calendar.DAY_OF_MONTH, 1);
+        dayFrom.set(Calendar.HOUR_OF_DAY, 0);
+        dayFrom.set(Calendar.MINUTE, 0);
+        dayFrom.set(Calendar.SECOND, 0);
+        dayFrom.set(Calendar.MILLISECOND, 0);
+        Calendar dayTo = (Calendar) dayFrom.clone();
+        dayTo.add(Calendar.DAY_OF_MONTH, dayFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return new DateUtils.TimePeriod(dayFrom.getTime(), dayTo.getTime());
     }
 
     public static TimePeriod getWeekPeriod(Calendar selectedDate) {
@@ -182,7 +207,65 @@ public class DateUtils {
         return getWeekPeriod(selectedDateCalendar);
     }
 
+    public static DateUtils.TimePeriod getDayPeriod(Calendar selectedDate) {
+        Calendar dayFrom = (Calendar) selectedDate.clone();
+        dayFrom.set(Calendar.HOUR_OF_DAY, 0);
+        dayFrom.set(Calendar.MINUTE, 0);
+        dayFrom.set(Calendar.SECOND, 0);
+        dayFrom.set(Calendar.MILLISECOND, 0);
+        Calendar dayTo = (Calendar) dayFrom.clone();
+        dayTo.add(Calendar.HOUR_OF_DAY, 24);
+        return new DateUtils.TimePeriod(dayFrom.getTime(), dayTo.getTime());
+    }
+
+    public static DateUtils.TimePeriod getHourPeriod(Calendar selectedDate) {
+        Calendar dayFrom = (Calendar) selectedDate.clone();
+        dayFrom.set(Calendar.MINUTE, 0);
+        dayFrom.set(Calendar.SECOND, 0);
+        dayFrom.set(Calendar.MILLISECOND, 0);
+        Calendar dayTo = (Calendar) dayFrom.clone();
+        dayTo.add(Calendar.HOUR_OF_DAY, 1);
+        return new DateUtils.TimePeriod(dayFrom.getTime(), dayTo.getTime());
+    }
+
+    public static DateUtils.TimePeriod getMinutePeriod(Calendar selectedDate) {
+        Calendar dayFrom = (Calendar) selectedDate.clone();
+        dayFrom.set(Calendar.SECOND, 0);
+        dayFrom.set(Calendar.MILLISECOND, 0);
+        Calendar dayTo = (Calendar) dayFrom.clone();
+        dayTo.add(Calendar.SECOND, 60);
+        return new DateUtils.TimePeriod(dayFrom.getTime(), dayTo.getTime());
+    }
+
+    public static DateUtils.TimePeriod getSecondPeriod(Calendar selectedDate) {
+        Calendar dayFrom = (Calendar) selectedDate.clone();
+        dayFrom.set(Calendar.MILLISECOND, 0);
+        Calendar dayTo = (Calendar) dayFrom.clone();
+        dayTo.add(Calendar.MILLISECOND, 1000);
+        return new DateUtils.TimePeriod(dayFrom.getTime(), dayTo.getTime());
+    }
+
+    public static TimePeriod getLapsePeriod(Date selectedDate, TimePeriod.Lapse timePeriodLapse) throws ExceptionVS {
+        Calendar selectedDateCalendar = Calendar.getInstance();
+        selectedDateCalendar.setTime(selectedDate);
+        switch(timePeriodLapse) {
+            case YEAR: return getYearPeriod(selectedDateCalendar);
+            case MONTH: return getMonthPeriod(selectedDateCalendar);
+            case WEEK: return getWeekPeriod(selectedDateCalendar);
+            case DAY: return getDayPeriod(selectedDateCalendar);
+            case HOUR: return getHourPeriod(selectedDateCalendar);
+            case MINUTE: return getMinutePeriod(selectedDateCalendar);
+            case SECOND: return getSecondPeriod(selectedDateCalendar);
+        }
+        throw new ExceptionVS("Unsupported Lapse period: '" + timePeriodLapse + "'");
+    }
+
+
+
     public static class TimePeriod {
+
+        public enum Lapse {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}
+
         private Date dateFrom;
         private Date dateTo;
 

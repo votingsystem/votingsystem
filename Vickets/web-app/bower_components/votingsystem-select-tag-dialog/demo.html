@@ -2,13 +2,13 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>votingsystem-select-tag-dialog Demo</title>
+  <title>tagvs-select-dialog Demo</title>
 
   <script src="../platform/platform.js"></script>
   <link rel="import" href="../polymer/polymer.html">
   <link rel="import" href="../paper-button/paper-button.html">
   <link rel="import" href="../paper-ripple/paper-ripple.html">
-  <link rel="import" href="votingsystem-select-tag-dialog.html">
+  <link rel="import" href="../../../grails-app/views/polymer/dialog/tagvs-select-dialog.html">
 
 
   <style shim-shadowdom>
@@ -50,14 +50,14 @@
 </head>
 <body unresolved>
 
-  <p>An example of using <code>&lt;votingsystem-select-tag-dialog></code>:</p>
+  <p>An example of using <code>&lt;tagvs-select-dialog></code>:</p>
 
 
 
   <paper-button raisedButton label="Toggle tag dialog" class="colored hover"  onclick="showTagDialog()"></paper-button>
 
-  <votingsystem-select-tag-dialog id="tagDialog" opened="true" caption="Select Tag"
-                                  serviceURL="/Vickets/vicketTagVS/index"></votingsystem-select-tag-dialog>
+  <tagvs-select-dialog id="tagDialog" opened="true" caption="Select Tag"
+                                  serviceURL="/Vickets/vicketTagVS/index"></tagvs-select-dialog>
 
 </body>
 </html>

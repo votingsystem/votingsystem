@@ -1,12 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-transactionvs-table']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/send-message-dialog']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 
-<polymer-element name="uservs-data" attributes="opened url">
+<polymer-element name="uservs-data" attributes="">
 <template>
+    <g:include view="/include/styles.gsp"/>
     <!-- place all overlay styles inside the overlay target -->
     <style no-shim>
         .uservsCancelled {
@@ -25,32 +25,35 @@
             -moz-transform: rotate(20deg);
         }
     </style>
-    <core-ajax id="ajax" auto url="{{url}}" response="{{uservs}}" handleAs="json" method="get"
-               contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
+
+    <template if="{{uservs.name}}">
     <div style="margin:0px 30px 0px 30px;">
-        <div id="messagePanel" class="messagePanel messageContent text-center" style="display: none;">
-        </div>
+        {{uservs | setType}}
         <div layout horizontal center center-justified>
-            <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
+            <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
                 <div style="text-align: center;">{{uservsType}} - {{uservs.name}}</div>
             </div>
-            <div style="position: absolute; top: 0px; right: 0px;">
-                <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
-            </div>
         </div>
+        <div layout horizontal style="color: #888; margin: 0 0 0 0;">
+            <template if="{{uservs.firstName}}">
+                <div flex>{{uservs.firstName}} {{uservs.lastName}}</div>
+            </template>
+            <div  style="margin: 0 0 0 0; font-size: 0.8em;"><b>IBAN: </b>{{uservs.IBAN}}</div>
+        </div>
+
         <template if="{{uservs.state != 'ACTIVE'}}">
             <div class="uservsCancelled">{{uservs.state}}</div>
         </template>
 
-
+        <div style="display:{{isClientToolConnected?'block':'none'}}">
             <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
                 <votingsystem-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
-                        style="margin:10px 20px 0px 0px;">
-                    <g:message code="sendMessageVSLbl"/> <i class="fa fa fa-envelope-square"></i>
+                                     style="margin:10px 20px 0px 0px;">
+                    <i class="fa fa-envelope-square" style="margin:0 7px 0 3px;"></i> <g:message code="sendMessageVSLbl"/>
                 </votingsystem-button>
                 <votingsystem-button id="makeDepositButton" type="submit" on-click="{{makeDeposit}}"
-                        style="margin:10px 20px 0px 0px;">
-                    <g:message code="makeDepositLbl"/> <i class="fa fa fa-money"></i>
+                                     style="margin:10px 20px 0px 0px;">
+                    <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
                 </votingsystem-button>
                 <template if="{{menuType == 'superadmin'}}">
                     <votingsystem-button id="blockUserVSButton" type="submit"
@@ -59,21 +62,15 @@
                     </votingsystem-button>
                 </template>
             </div>
+        </div>
 
         <template if="{{uservs.description}}">
-            <div style="margin: 20px 0 0px 0;">
+            <div style="margin:0 0 20px 0;">
                 <div id="userDescriptionDiv" class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
                     <votingsystem-html-echo html="{{uservs.description}}"></votingsystem-html-echo>
                 </div>
             </div>
         </template>
-        <div layout horizontal style="color: #888;">
-            <template if="{{uservs.firstName}}">
-                <div flex>{{uservs.firstName}} {{uservs.lastName}}</div>
-            </template>
-            <div  style="margin: 0px 0 15px 0; font-size: 0.9em;"><b>IBAN: </b>{{uservs.IBAN}}</div>
-        </div>
-
 
         <template if="{{isActive && menuType == 'user'}}"> </template>
 
@@ -82,55 +79,48 @@
             def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
         %>
 
-        <div  style="text-align:center; font-size: 1.3em;font-weight: bold; color: #888;">
-            <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom]}"/>
-        </div>
 
-        <vicket-transactionvs-table id="transactionvsTable" transactionList="{{uservs.transactionList}}"></vicket-transactionvs-table>
+        <template if="{{uservs.transactionVSMap && uservs.transactionVSMap.queryRecordCount > 0}}">
+            <div  style="text-align:center; font-size: 1.3em;font-weight: bold; color: #888; margin:25px 0 0 0;">
+                <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom]}"/>
+            </div>
+            <vicket-transactionvs-table id="transactionvsTable" userNif="{{uservs.nif}}"
+                        transactionList="{{uservs.transactionVSMap.transactionVSList}}"></vicket-transactionvs-table>
+        </template>
+        <template if="{{!uservs.transactionVSMap || uservs.transactionVSMap.queryRecordCount == 0}}">
+            <div  style="text-align:center; font-size: 1.3em;font-weight: bold; color: #888; margin:15px 0 0 0;">
+                <g:message code="transactionsEmptyCurrentWeekPeriodMsg" args="${[weekFrom]}"/>
+            </div>
+        </template>
 
     </div>
+    </template>
     <send-message-dialog id="sendMessageDialog" on-message-response="{{sendMessageDialogResponse}}"></send-message-dialog>
 </template>
 <script>
 
     Polymer('uservs-data', {
-        isUserVS:false,
-        isVicketSource:false,
-        isGroupVS:false,
         isActive:false,
         menuType:null,
-        opened:false,
         uservsType:'',
         isClientToolConnected:false,
         sendMessageTemplateMsg:"<g:message code="uservsMessageVSLbl"/>",
         publish: {
-            uservs: {value: {}}
+            uservs: {}
         },
         ready: function() {
             this.menuType = menuType
-            this.isClientToolConnected = window['isClientToolConnected']
+            //this.isClientToolConnected = window['isClientToolConnected']
+            this.isClientToolConnected = true
             console.log(this.tagName + " - ready - menuType: " + this.menuType + " - isClientToolConnected: " + isClientToolConnected)
         },
-        close:function() {
-            this.opened = false
-        },
         uservsChanged:function() {
-            console.log("uservsChanged - uservs: " + this.uservs)
+            console.log(this.tagName + " - uservsChanged - uservs: " + JSON.stringify(this.uservs))
+        },
+        setType:function() {
+            console.log(this.tagName + " - setType")
             if('VICKET_SOURCE' == this.uservs.type) this.uservsType = "<g:message code="vicketSourceLbl"/>"
             if('USER' == this.uservs.type) this.uservsType = "<g:message code="userLbl"/>"
-
-        },
-        onCoreOverlayOpen:function(e) {
-            this.opened = this.$.xDialog.opened
-        },
-        openedChanged:function() {
-            this.async(function() { this.$.xDialog.opened = this.opened});
-        },
-        urlChanged:function() {
-            if(this.url != null && '' != this.url.trim()) this.opened = true
-        },
-        show:function(baseURL, userId) {
-
         },
         blockUser:function() {
             console.log(this.tagName + " - blockUser")

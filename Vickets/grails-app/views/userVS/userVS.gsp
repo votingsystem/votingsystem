@@ -5,6 +5,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/uservs-data']"/>">
+    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/uservs-data-dialog']"/>">
 </head>
 <body>
 <div class="pageContentDiv" style="max-width: 1000px; padding:0px 30px 0px 30px;">
@@ -20,9 +21,5 @@
 </body>
 </html>
 <asset:script>
-    document.addEventListener('polymer-ready', function() {
-        console.log("main.gsp - polymer-ready")
-        document.querySelector("#userData").opened = true
-    });
 </asset:script>
 <asset:deferredScripts/>

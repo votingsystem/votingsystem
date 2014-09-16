@@ -11,6 +11,7 @@ import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 
@@ -22,6 +23,96 @@ class UserVSController {
     def transactionVSService
     def groupVSService
     def userVSService
+
+    def index() {
+        def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
+        if (params.long('id') || params.IBAN) {
+            UserVS uservs
+            Map resultMap
+            String msg
+            if(params.long('id')) {
+                UserVS.withTransaction { uservs = UserVS.get(params.long('id'))  }
+                if(!uservs) msg = message(code: 'itemNotFoundMsg', args:[params.long('id')])
+            }
+            else if (params.IBAN) {
+                UserVSAccount.withTransaction {
+                    UserVSAccount userAccount = UserVSAccount.findWhere(IBAN:params.IBAN)
+                    if(userAccount) uservs = userAccount.userVS
+                    else msg = message(code: 'itemNotFoundByIBANMsg', args:[params.IBAN])
+                }
+            }
+            String view = null
+            if(uservs) {
+                if(uservs instanceof GroupVS) {
+                    resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
+                    view = '/groupVS/groupvs'
+                } else if(uservs instanceof VicketSource) {
+                    resultMap = [uservsMap:userVSService.getUserVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
+                    view = 'userVS'
+                } else {
+                    resultMap = [uservsMap:userVSService.getUserVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
+                    view = 'userVS'
+                }
+            }
+            else {
+                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)]
+            }
+            if(request.contentType?.contains("json")) {
+                render resultMap?.values()?.iterator().next() as JSON
+            } else {
+                render(view:view, model: resultMap)
+            }
+        } else {
+            Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
+            Map.Entry sortParam
+            if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
+            List<UserVS> userList = null
+            int totalUsers = 0;
+            UserVS.withTransaction {
+                if(params.searchText || params.searchFrom || params.searchTo || params.type || params.state) {
+                    UserVS.Type userType = null
+                    UserVS.State userState = null
+                    Date dateFrom = null
+                    Date dateTo = null
+                    try {userType = UserVS.Type.valueOf(params.type)} catch(Exception ex) {}
+                    try {userState = UserVS.State.valueOf(params.state)} catch(Exception ex) {}
+                    //searchFrom:2014/04/14 00:00:00, max:100, searchTo
+                    if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
+                    if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
+
+                    userList = UserVS.createCriteria().list(max: params.max, offset: params.offset,
+                            sort:sortParam?.key, order:sortParam?.value) {
+                        or {
+                            if(type) eq("currency", userType)
+                            if(userState) eq("state", userState)
+                            ilike('name', "%${params.searchText}%")
+                            ilike('firstName', "%${params.searchText}%")
+                            ilike('lastName', "%${params.searchText}%")
+                            ilike('nif', "%${params.searchText}%")
+                            ilike('IBAN', "%${params.searchText}%")
+                        }
+                        and {
+                            if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
+                            else if(dateFrom) {ge("dateCreated", dateFrom)}
+                            else if(dateTo) {le("dateCreated", dateTo)}
+                        }
+                    }
+                    totalUsers = userList.totalCount
+                } else {
+                    userList = UserVS.createCriteria().list(max: params.max, offset: params.offset,
+                            sort:sortParam?.key, order:sortParam?.value){
+                    };
+                    totalUsers = userList.totalCount
+                }
+            }
+            def resultList = []
+            userList.each {userItem ->
+                resultList.add(userVSService.getUserVSDataMap(userItem))
+            }
+            def resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
+            render resultMap as JSON
+        }
+    }
 
     def search() {
         if(request.contentType?.contains('json')) {
@@ -92,85 +183,6 @@ class UserVSController {
         }
     }
 
-    def index() {
-        if (params.long('id')) {
-            UserVS uservs
-            Map resultMap
-            UserVS.withTransaction { uservs = UserVS.get(params.long('id'))  }
-            String view = null
-            if(uservs) {
-                if(uservs instanceof GroupVS) {
-                    resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
-                    view = '/groupVS/group'
-                } else if(uservs instanceof VicketSource) {
-                    resultMap = [uservsMap:userVSService.getVicketSourceDataMap(uservs)]
-                    view = 'userVS'
-                } else {
-                    resultMap = [uservsMap:userVSService.getUserVSDataMap(uservs)]
-                    view = 'userVS'
-                }
-            }
-            else {
-                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-                        message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]
-            }
-            if(request.contentType?.contains("json")) {
-                render resultMap as JSON
-            } else {
-                render(view:view, model: resultMap)
-            }
-        } else {
-            Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
-            Map.Entry sortParam
-            if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
-            List<UserVS> userList = null
-            int totalUsers = 0;
-            UserVS.withTransaction {
-                if(params.searchText || params.searchFrom || params.searchTo || params.type || params.state) {
-                    UserVS.Type userType = null
-                    UserVS.State userState = null
-                    Date dateFrom = null
-                    Date dateTo = null
-                    try {userType = UserVS.Type.valueOf(params.type)} catch(Exception ex) {}
-                    try {userState = UserVS.State.valueOf(params.state)} catch(Exception ex) {}
-                    //searchFrom:2014/04/14 00:00:00, max:100, searchTo
-                    if(params.searchFrom) try {dateFrom = DateUtils.getDateFromString(params.searchFrom)} catch(Exception ex) {}
-                    if(params.searchTo) try {dateTo = DateUtils.getDateFromString(params.searchTo)} catch(Exception ex) {}
-
-                    userList = UserVS.createCriteria().list(max: params.max, offset: params.offset,
-                            sort:sortParam?.key, order:sortParam?.value) {
-                        or {
-                            if(type) eq("currency", userType)
-                            if(userState) eq("state", userState)
-                            ilike('name', "%${params.searchText}%")
-                            ilike('firstName', "%${params.searchText}%")
-                            ilike('lastName', "%${params.searchText}%")
-                            ilike('nif', "%${params.searchText}%")
-                            ilike('IBAN', "%${params.searchText}%")
-                        }
-                        and {
-                            if(dateFrom && dateTo) {between("dateCreated", dateFrom, dateTo)}
-                            else if(dateFrom) {ge("dateCreated", dateFrom)}
-                            else if(dateTo) {le("dateCreated", dateTo)}
-                        }
-                    }
-                    totalUsers = userList.totalCount
-                } else {
-                    userList = UserVS.createCriteria().list(max: params.max, offset: params.offset,
-                            sort:sortParam?.key, order:sortParam?.value){
-                    };
-                    totalUsers = userList.totalCount
-                }
-            }
-            def resultList = []
-            userList.each {userItem ->
-                resultList.add(userVSService.getUserVSDataMap(userItem))
-            }
-            def resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
-            render resultMap as JSON
-        }
-    }
-
     def vicketSourceList() {
         if(request.contentType?.contains('json')) {
             List<VicketSource> vicketSourceList = null
@@ -222,9 +234,10 @@ class UserVSController {
             calendar.set(Calendar.YEAR, params.int('year'))
             calendar.set(Calendar.MONTH, params.int('month') - 1) //Zero based
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
-        } else calendar = DateUtils.getMonday(calendar)
+        }
 
-        Map responseMap = transactionVSService.getUserInfoMap(userVS, calendar)
+        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
+        Map responseMap = transactionVSService.getUserVSVicketTransactionVSMap(userVS, timePeriod)
         ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap)
         responseVS.setContentType(ContentTypeVS.JSON)
         X509Certificate cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate

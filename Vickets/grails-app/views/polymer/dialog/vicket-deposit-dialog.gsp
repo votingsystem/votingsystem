@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-select-tag-dialog', file: 'votingsystem-select-tag-dialog.html')}">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/tagvs-select-dialog']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
@@ -56,15 +56,19 @@
                 <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
-            <div layout vertical style="padding: 5px 20px 0px 20px;">
-                <input id="amount" class="form-control" pattern="^[0-9]*$" required
-                       title="<g:message code="amountLbl"/>"
-                       placeholder="<g:message code="amountLbl"/> (EUR)"/>
-                <input id="depositSubject" class="form-control" pattern="^[0-9]*$" required
-                       title="<g:message code="subjectLbl"/>"
-                       placeholder="<g:message code="subjectLbl"/> (EUR)"/>
-
-
+            <div layout vertical id="formDataDiv" style="padding: 5px 20px 0px 20px;">
+                <div layout horizontal>
+                    <div>
+                        <input type="text" id="amount" class="form-control" pattern="^[0-9]*$" required
+                               title="<g:message code="amountLbl"/>"
+                               placeholder="<g:message code="amountLbl"/> (EUR)"/>
+                    </div>
+                    <div style="margin: 0 0 0 15px;">
+                        <input type="text" id="depositSubject" class="form-control" required
+                               title="<g:message code="subjectLbl"/>"
+                               placeholder="<g:message code="subjectLbl"/> (EUR)"/>
+                    </div>
+                </div>
 
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
                         font-size: 1.1em; display: none; padding: 5px; display:{{isDepositToAll ? 'block':'none'}}">
@@ -75,14 +79,14 @@
                         <div layout horizontal center center-justified style="font-weight:bold;display: {{selectedTags.length == 0? 'none':'block'}};">
                             <g:message code="selectedTagsLbl"/>
                             <template repeat="{{tag in selectedTags}}">
-                                <button data-tagId='{{tag.id}}' on-click="{{removeTag}}" type="button" class="btn btn-default"
-                                        style="margin:7px 10px 0px 0px;">{{tag.name}}  <i class="fa fa-minus-circle"></i>
-                                </button>
+                                <a class="btn btn-default" data-tagId='{{tag.id}}' on-click="{{removeTag}}"
+                                   style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                                    <i class="fa fa-minus"></i> {{tag.name}}</a>
                             </template>
                         </div>
                     </div>
-                    <votingsystem-button on-click="{{toggleTagDialog}}" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                        <g:message code="addTagLbl"/>
+                    <votingsystem-button on-click="{{showTagDialog}}" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        <i class="fa fa-tag" style="margin:0 7px 0 3px;"></i> <g:message code="addTagLbl"/>
                     </votingsystem-button>
                 </div>
                 <div style="display:{{isDepositToAll ? 'none':'block'}}">
@@ -101,18 +105,9 @@
                     </div>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
-                    <div flex>
-
-
-
-                        <div style="">
-                            <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
-                        </div>
-
-
-                    </div>
+                    <div flex></div>
                     <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
-                        <g:message code="acceptLbl"/> <i class="fa fa-check"></i>
+                        <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
                     </votingsystem-button>
                 </div>
             </div>
@@ -120,8 +115,8 @@
 
     <div>
         <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
-            <votingsystem-select-tag-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
-                serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></votingsystem-select-tag-dialog>
+            <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
+                serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></tagvs-select-dialog>
         </div>
     </div>
     </votingsystem-dialog>
@@ -165,7 +160,7 @@
             this.$.xDialog.opened = this.opened
             if(this.opened == false) this.close()
         },
-        toggleTagDialog: function() {
+        showTagDialog: function() {
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
         },
 
@@ -194,6 +189,10 @@
         },
 
         submitForm: function () {
+            var formElements = this.$.formDataDiv.children
+            for(var i = 0; i < formElements.length; i++) {
+                formElements[i].classList.remove("formFieldError");
+            }
             switch(this.operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     if(this.$.receptorBox.getUserList().length == 0){
@@ -210,11 +209,13 @@
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                     break;
             }
-            if(this.$.amount.invalid) {
+            if(!this.$.amount.validity.valid) {
+                this.$.amount.classList.add("formFieldError")
                 this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
                 return
             }
-            if(this.$.depositSubject.invalid) {
+            if(!this.$.depositSubject.validity.valid) {
+                this.$.depositSubject.classList.add("formFieldError")
                 this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
                 return
             }

@@ -30,13 +30,15 @@ class ReportsController {
     def index() {
         String weekReportsBaseDir = "${grailsApplication.config.VotingSystem.backupCopyPath}/weekReports"
         def dir = new File(weekReportsBaseDir)
-        DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        List<DateUtils.TimePeriod> periods = []
-        dir.eachFileRecurse (FileType.FILES) { file ->
-            if("balances.json".equals(file.getName())) {
-                String[] period = file.getParentFile().getName().split("_")
-                DateUtils.TimePeriod timePeriod = new DateUtils.TimePeriod(formatter.parse(period[0]), formatter.parse(period[1]));
-                periods.add(timePeriod)
+        if(dir.exists()) {
+            DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            List<DateUtils.TimePeriod> periods = []
+            dir.eachFileRecurse (FileType.FILES) { file ->
+                if("balances.json".equals(file.getName())) {
+                    String[] period = file.getParentFile().getName().split("_")
+                    DateUtils.TimePeriod timePeriod = new DateUtils.TimePeriod(formatter.parse(period[0]), formatter.parse(period[1]));
+                    periods.add(timePeriod)
+                }
             }
         }
         render(view:'index', model: [periods:periods])
@@ -61,19 +63,9 @@ class ReportsController {
         Date selectedDate
         DateUtils.TimePeriod timePeriod
         Map<String, File> reportFiles
-        try {
-            selectedDate = formatter.parse(params.date)
-            timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(selectedDate)
-            reportFiles = filesService.getWeekReportFiles(timePeriod)
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex)
-            String msg = "Request date with errors: ${params.date}"
-            log.error(msg)
-            response.status = ResponseVS.SC_ERROR_REQUEST
-            render msg
-            return false
-
-        }
+        selectedDate = formatter.parse(params.date)
+        timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(selectedDate)
+        reportFiles = filesService.getWeekReportFiles(timePeriod)
         if(request.contentType?.contains("json")) {
             if(reportFiles.reportsFile.exists()) {
                 render JSON.parse(reportFiles.reportsFile.text) as JSON

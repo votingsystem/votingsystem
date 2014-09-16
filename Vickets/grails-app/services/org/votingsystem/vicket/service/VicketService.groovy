@@ -34,62 +34,51 @@ class VicketService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
-        def dataRequestJSON
-        try {
-            dataRequestJSON = JSON.parse(smimeMessageReq.getSignedContent())
-            String vicketServerURL = StringUtils.checkURL(dataRequestJSON.serverURL)
-            String serverURL = grailsApplication.config.grails.serverURL
-            if(!serverURL.equals(vicketServerURL)) throw new ExceptionVS(messageSource.getMessage("serverMismatchErrorMsg",
-                    [serverURL, vicketServerURL].toArray(), locale));
+        def dataRequestJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        String vicketServerURL = StringUtils.checkURL(dataRequestJSON.serverURL)
+        String serverURL = grailsApplication.config.grails.serverURL
+        if(!serverURL.equals(vicketServerURL)) throw new ExceptionVS(messageSource.getMessage("serverMismatchErrorMsg",
+                [serverURL, vicketServerURL].toArray(), locale));
 
-            TypeVS operation = TypeVS.valueOf(dataRequestJSON.operation)
-            if(TypeVS.VICKET_REQUEST != operation) throw new ExceptionVS(messageSource.getMessage(
-                    "operationMismatchErrorMsg", [TypeVS.VICKET_REQUEST.toString(), operation.toString()].toArray(),
-                    locale));
+        TypeVS operation = TypeVS.valueOf(dataRequestJSON.operation)
+        if(TypeVS.VICKET_REQUEST != operation) throw new ExceptionVS(messageSource.getMessage(
+                "operationMismatchErrorMsg", [TypeVS.VICKET_REQUEST.toString(), operation.toString()].toArray(),
+                locale));
 
-            Currency requestCurrency = Currency.getInstance(dataRequestJSON.currency)
+        Currency requestCurrency = Currency.getInstance(dataRequestJSON.currency)
 
-            Calendar mondayLapse = DateUtils.getMonday(Calendar.getInstance())
-            String dirPath = DateUtils.getDirPath(mondayLapse.getTime())
-            Map userInfoMap = transactionVSService.getUserInfoMap(signer, mondayLapse)
+        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
+        String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
+        Map userInfoMap = transactionVSService.getUserVSVicketTransactionVSMap(signer, timePeriod)
 
-            Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.getCurrencyCode())
-            if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
-                    [requestCurrency.getCurrencyCode()].toArray(), locale));
+        Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.getCurrencyCode())
+        if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
+                [requestCurrency.getCurrencyCode()].toArray(), locale));
 
-            BigDecimal currencyAvailable = ((BigDecimal)currencyMap.totalInputs).add(
-                    ((BigDecimal)currencyMap.totalOutputs).negate())
+        BigDecimal currencyAvailable = ((BigDecimal)currencyMap.totalInputs).add(
+                ((BigDecimal)currencyMap.totalOutputs).negate())
 
-            BigDecimal totalAmount = new BigDecimal(dataRequestJSON.totalAmount)
-            if(currencyAvailable.compareTo(totalAmount) < 0) throw new ExceptionVS(
-                    messageSource.getMessage("vicketRequestAvailableErrorMsg",
-                    [totalAmount, currencyAvailable,requestCurrency.getCurrencyCode()].toArray(), locale));
+        BigDecimal totalAmount = new BigDecimal(dataRequestJSON.totalAmount)
+        if(currencyAvailable.compareTo(totalAmount) < 0) throw new ExceptionVS(
+                messageSource.getMessage("vicketRequestAvailableErrorMsg",
+                        [totalAmount, currencyAvailable,requestCurrency.getCurrencyCode()].toArray(), locale));
 
-            Integer numTotalVickets = 0
-            def vicketsArray = dataRequestJSON.vickets
-            BigDecimal vicketsAmount = new BigDecimal(0)
-            vicketsArray.each {
-                Integer numVickets = it.numVickets
-                Integer vicketsValue = it.vicketValue
-                numTotalVickets = numTotalVickets + it.numVickets
-                vicketsAmount = vicketsAmount.add(new BigDecimal(numVickets * vicketsValue))
-                log.debug("batch of '${numVickets}' vickets of '${vicketsValue}' euros")
-            }
-            log.debug("numTotalVickets: ${numTotalVickets} - vicketsAmount: ${vicketsAmount}")
-            if(totalAmount.compareTo(vicketsAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
-                    "vicketRequestAmountErrorMsg", [totalAmount, vicketsAmount].toArray(), locale));
-
-            Map resultMap = [amount:totalAmount, currency:requestCurrency, userInfoMap:userInfoMap]
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.VICKET_REQUEST,)
-        } catch(ExceptionVS ex) {
-            log.error(ex.getMessage(), ex);
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(),
-                    type:TypeVS.VICKET_REQUEST_ERROR)
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.VICKET_REQUEST_ERROR,
-                    message:messageSource.getMessage('vicketRequestDataError', null, locale))
+        Integer numTotalVickets = 0
+        def vicketsArray = dataRequestJSON.vickets
+        BigDecimal vicketsAmount = new BigDecimal(0)
+        vicketsArray.each {
+            Integer numVickets = it.numVickets
+            Integer vicketsValue = it.vicketValue
+            numTotalVickets = numTotalVickets + it.numVickets
+            vicketsAmount = vicketsAmount.add(new BigDecimal(numVickets * vicketsValue))
+            log.debug("batch of '${numVickets}' vickets of '${vicketsValue}' euros")
         }
+        log.debug("numTotalVickets: ${numTotalVickets} - vicketsAmount: ${vicketsAmount}")
+        if(totalAmount.compareTo(vicketsAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
+                "vicketRequestAmountErrorMsg", [totalAmount, vicketsAmount].toArray(), locale));
+
+        Map resultMap = [amount:totalAmount, currency:requestCurrency, userInfoMap:userInfoMap]
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.VICKET_REQUEST,)
     }
 
     public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq, Locale locale) {

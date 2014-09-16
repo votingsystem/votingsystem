@@ -166,6 +166,11 @@ class UrlMappings {
             }
         }
 
+        "/userVS/IBAN/$IBAN"{
+            controller = "userVS"
+            action = "index"
+        }
+
         "/userVS/$id/balance"{
             controller = "userVSAccount"
             action = "balance"
@@ -174,7 +179,13 @@ class UrlMappings {
             }
         }
 
-
+        "/userVS/$id/transacionVS/$timePeriod"{
+            controller = "transactionVS"
+            action = "userVS"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
 
         "/model/request" {
             controller = "model"

@@ -22,7 +22,7 @@ class PolymerTestController {
 
     def transitions() {}
 
-    def webView() {}
+
 
     def transitions1() {}
 }

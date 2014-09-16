@@ -59,7 +59,7 @@ class UserVSService {
 
         //{info:textEditor.getData(),certChainPEM:$("#pemCert").val(), operation:Operation.VICKET_SOURCE_NEW}
 
-        VicketSource vicketSource = UserVS.getUserVS(x509Certificate, new VicketSource())
+        VicketSource vicketSource = VicketSource.getUserVS(x509Certificate)
         String validatedNIF = org.votingsystem.util.NifUtils.validate(vicketSource.getNif())
         if(!validatedNIF) {
             msg = messageSource.getMessage('NIFWithErrorsMsg', [vicketSource.getNif()].toArray(), locale)
@@ -158,53 +158,6 @@ class UserVSService {
 		return [totalNumUsu:usersVS?usersVS.getTotalCount():0]
 	}
 
-    @Transactional
-    public Map getVicketSourceDataMap(VicketSource vicketSource) {
-        def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
-        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('fromUserVS', vicketSource)
-            gt('dateCreated', currentWeekPeriod.getDateFrom())
-        }
-        def transactionListJSON = []
-        transactionList.each { transaction ->
-            transactionListJSON.add(transactionVSService.getTransactionMap(transaction))
-        }
-        Map resultMap = getUserVSDataMap(vicketSource)
-        resultMap.transactionList = transactionListJSON
-        return resultMap
-    }
-
-    @Transactional
-    public Map getUserVSDataMap(UserVS userVS){
-        String name = userVS.name
-        def certificateList = []
-        def certificates = CertificateVS.findAllWhere(userVS:userVS, state:CertificateVS.State.OK)
-        certificates.each {certItem ->
-            X509Certificate x509Cert = certItem.getX509Cert()
-            certificateList.add([serialNumber:"${certItem.serialNumber}",
-                 pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
-        }
-
-        if(!userVS.name) name = "${userVS.firstName} ${userVS.lastName}"
-        return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, name:name,
-                IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString(), reason:userVS.reason,
-                description:userVS.description, certificateList:certificateList]
-    }
-
-    public Map getUserVSBasicDataMap(UserVS userVS){
-        String name = userVS.name
-        def certificateList = []
-        def certificates = CertificateVS.findAllWhere(userVS:userVS, state:CertificateVS.State.OK)
-        certificates.each {certItem ->
-            X509Certificate x509Cert = certItem.getX509Cert()
-            certificateList.add([serialNumber:"${certItem.serialNumber}",
-                                 pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
-        }
-
-        if(!userVS.name) name = "${userVS.firstName} ${userVS.lastName}"
-        return [nif:userVS?.nif, name:name]
-    }
-
     public Map getSubscriptionVSDataMap(SubscriptionVS subscriptionVS){
         Map resultMap = [id:subscriptionVS.id, dateActivated:subscriptionVS.dateActivated,
              dateCancelled:subscriptionVS.dateCancelled, lastUpdated:subscriptionVS.lastUpdated,
@@ -237,6 +190,55 @@ class UserVSService {
         if(result) log.debug("isUserAdmin - nif: ${nif}")
 		return result
 	}
+
+    public Map getUserVSBasicDataMap(UserVS userVS){
+        String name = userVS.name
+        if(!name) name = "${userVS.firstName} ${userVS.lastName}"
+        return [nif:userVS?.nif, name:name]
+    }
+
+    @Transactional
+    public Map getUserVSDataMap(UserVS userVS){
+        String name = userVS.name
+        if(!userVS.name) name = "${userVS.firstName} ${userVS.lastName}"
+        def certificateList = []
+        def certificates = CertificateVS.findAllWhere(userVS:userVS, state:CertificateVS.State.OK)
+        certificates.each {certItem ->
+            X509Certificate x509Cert = certItem.getX509Cert()
+            certificateList.add([serialNumber:"${certItem.serialNumber}",
+                                 pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
+        }
+
+
+        return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, name:name,
+                IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString(), reason:userVS.reason,
+                description:userVS.description, certificateList:certificateList]
+    }
+
+
+    /*@Transactional
+    public Map getVicketSourceDataMap(VicketSource vicketSource, DateUtils.TimePeriod timePeriod) {
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            eq('fromUserVS', vicketSource)
+            if(timePeriod) gt('dateCreated', timePeriod.getDateFrom())
+            isNotNull('transactionParent')
+        }
+        def transactionListJSON = []
+        transactionList.each { transaction ->
+            transactionListJSON.add(transactionVSService.getTransactionMap(transaction))
+        }
+        Map resultMap = getUserVSDataMap(vicketSource)
+        resultMap.transactionList = transactionListJSON
+        return resultMap
+    }*/
+
+
+    @Transactional
+    public Map getUserVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){
+        Map resultMap = getUserVSDataMap(userVS)
+        resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)
+        return resultMap
+    }
 
     @Transactional
     public Map getDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod){

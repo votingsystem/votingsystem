@@ -26,10 +26,10 @@
         <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsWithDetails}}" handleAs="json" method="get"
                    contentType="json"></core-ajax>
         <div  style="margin:0px auto 0px auto;">
-            <paper-tabs  style="margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
+            <paper-tabs  style="margin:0px auto 0px auto; border-bottom: 1px solid #ff0000" class="transparent-teal center" valueattr="name"
                          selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
-                <paper-tab name="balanceList" style="width: 400px, padding:2px;"><g:message code="balanceListLbl"/></paper-tab>
-                <paper-tab name="transactionsTo" style="padding:2px;"><g:message code="incomeLbl"/></paper-tab>
+                <paper-tab name="balanceList" style="width:400px; padding:2px;"><g:message code="balanceListLbl"/></paper-tab>
+                <paper-tab name="transactionsTo" style="padding:2px;"><g:message code="incomesLbl"/></paper-tab>
                 <paper-tab name="transactionsFrom" style="padding:2px;"><g:message code="expensesLbl"/></paper-tab>
                 <paper-tab name="userList" style="padding:2px;"><g:message code="usersLbl"/></paper-tab>
             </paper-tabs>
