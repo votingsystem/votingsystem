@@ -32,7 +32,7 @@ class TransactionVSService {
     def grailsApplication
     def webSocketService
     def transactionVS_GroupVSService
-    def transactionVS_VicketSourceService
+    def transactionVS_BankVSService
 
     public void addTransactionListener (String listenerId) {
         listenerSet.add(listenerId)
@@ -60,7 +60,7 @@ class TransactionVSService {
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
         switch(transactionType) {
             case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
-                return transactionVS_VicketSourceService.processDeposit(messageSMIMEReq, messageJSON, locale)
+                return transactionVS_BankVSService.processDeposit(messageSMIMEReq, messageJSON, locale)
                 break;
             case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
             case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
@@ -316,7 +316,7 @@ class TransactionVSService {
                 typeDescription = messageSource.getMessage('vicketCancellationLbl', null, locale);
                 break;
             case 'VICKET_SOURCE_INPUT':
-                typeDescription = messageSource.getMessage('vicketSourceInputLbl', null, locale);
+                typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
                 break;
             case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':
                 typeDescription = messageSource.getMessage('vicketDepositFromGroupToMember', null, locale);

@@ -1,18 +1,10 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
-import net.sf.json.JSONObject
-import org.bouncycastle.asn1.ASN1InputStream
-import org.bouncycastle.asn1.DERObject
-import org.bouncycastle.asn1.DEROctetString
-import org.bouncycastle.asn1.DERTaggedObject
-import org.bouncycastle.asn1.DERUTF8String
 import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.vicket.model.UserVSAccount
-import org.votingsystem.vicket.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 
 import java.security.cert.X509Certificate
@@ -46,7 +38,7 @@ class UserVSController {
                 if(uservs instanceof GroupVS) {
                     resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
                     view = '/groupVS/groupvs'
-                } else if(uservs instanceof VicketSource) {
+                } else if(uservs instanceof BankVS) {
                     resultMap = [uservsMap:userVSService.getUserVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
                     view = 'userVS'
                 } else {
@@ -183,21 +175,21 @@ class UserVSController {
         }
     }
 
-    def vicketSourceList() {
+    def bankVSList() {
         if(request.contentType?.contains('json')) {
-            List<VicketSource> vicketSourceList = null
-            int numTotalVicketSources = 0;
-            VicketSource.withTransaction {
-                vicketSourceList = VicketSource.createCriteria().list(max: params.max, offset: params.offset,
+            List<BankVS> bankVSList = null
+            int numTotalBankVSs = 0;
+            BankVS.withTransaction {
+                bankVSList = BankVS.createCriteria().list(max: params.max, offset: params.offset,
                         sort:'dateCreated', order:'desc'){
                 };
-                numTotalVicketSources = vicketSourceList.totalCount
+                numTotalBankVSs = bankVSList.totalCount
             }
             def resultList = []
-            vicketSourceList.each {userItem ->
+            bankVSList.each {userItem ->
                 resultList.add(userVSService.getUserVSDataMap(userItem))
             }
-            def resultMap = [vicketSourceList:resultList, queryRecordCount: numTotalVicketSources, numTotalVicketSources:numTotalVicketSources ]
+            def resultMap = [bankVSList:resultList, queryRecordCount: numTotalBankVSs, numTotalBankVSs:numTotalBankVSs ]
             render resultMap as JSON
         }
     }
@@ -283,14 +275,14 @@ class UserVSController {
      * @param pemCertificate certificado en formato PEM del Usuario que se desea añadir.
      * @return Si todo va bien devuelve un código de estado HTTP 200.
      */
-    def newVicketSource() {
+    def newBankVS() {
         ResponseVS responseVS = null
         if("POST".equals(request.method)) {
             MessageSMIME messageSMIMEReq = request.messageSMIMEReq
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            responseVS = userVSService.saveVicketSource(messageSMIMEReq, request.getLocale())
+            responseVS = userVSService.saveBankVS(messageSMIMEReq, request.getLocale())
             return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
         }
     }

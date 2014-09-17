@@ -96,7 +96,7 @@
                 console.log(this.tagName + " - signedDocumentChanged - signedDocument: " + this.signedDocumentStr)
                 switch (this.signedDocument.operation) {
                     case 'VICKET_DEPOSIT_FROM_VICKET_SOURCE':
-                        this.caption = "<g:message code="depositFromVicketSourceLbl"/>"
+                        this.caption = "<g:message code="depositFromBankVSLbl"/>"
                         break
                     default:
                         this.caption = signedDocument.operation

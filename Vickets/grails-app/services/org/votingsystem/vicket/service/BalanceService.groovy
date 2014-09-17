@@ -8,7 +8,7 @@ import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketSource
+import org.votingsystem.model.BankVS
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.StringUtils
@@ -24,7 +24,7 @@ class BalanceService {
     def transactionVSService
     def groupVSService
     def userVSService
-    def vicketSourceService
+    def bankVSService
     def filesService
     def signatureVSService
     Map<String, VicketTagVS> tagMap = [:]
@@ -137,7 +137,7 @@ class BalanceService {
 
         List groupBalanceList = []
         List userBalanceList = []
-        List vicketSourceBalanceList = []
+        List bankVSBalanceList = []
 
         ScrollableResults scrollableResults = UserVS.createCriteria().scroll {//Check active users and users cancelled last week period
             or {
@@ -151,7 +151,7 @@ class BalanceService {
         while (scrollableResults.next()) {
             UserVS userVS = (UserVS) scrollableResults.get(0);
 
-            if(userVS instanceof VicketSource) vicketSourceBalanceList.add(genBalanceForVicketSource(userVS, timePeriod))
+            if(userVS instanceof BankVS) bankVSBalanceList.add(genBalanceForBankVS(userVS, timePeriod))
             else if(userVS instanceof GroupVS) groupBalanceList.add(genBalanceForGroupVS(userVS, timePeriod))
             else userBalanceList.add(genBalanceForUserVS(userVS, timePeriod))
 
@@ -171,7 +171,7 @@ class BalanceService {
 
         Map systemBalance = genBalanceForSystem(systemService.getSystemUser(), timePeriod)
         Map userBalances = [systemBalance:systemBalance, groupBalanceList:groupBalanceList,
-                        userBalanceList:userBalanceList, vicketSourceBalanceList:vicketSourceBalanceList]
+                        userBalanceList:userBalanceList, bankVSBalanceList:bankVSBalanceList]
         Map resultMap = [userBalances:userBalances]
         //transactionslog.info(new JSON(dataMap) + ",");
         JSON userBalancesJSON = new JSON(resultMap)
@@ -191,16 +191,16 @@ class BalanceService {
 
     public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) {
         if(UserVS.Type.SYSTEM == uservs.type) return genBalanceForSystem(uservs, timePeriod)
-        if(uservs instanceof VicketSource) return genBalanceForVicketSource(uservs, timePeriod)
+        if(uservs instanceof BankVS) return genBalanceForBankVS(uservs, timePeriod)
         else if (uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
         else return genBalanceForUserVS(uservs, timePeriod)
     }
 
-    private Map genBalanceForVicketSource(VicketSource vicketSource, DateUtils.TimePeriod timePeriod) {
+    private Map genBalanceForBankVS(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("genBalanceForVicketSource - id '${vicketSource.id}'")
-        Map dataMap = vicketSourceService.getDetailedDataMapWithBalances(vicketSource, timePeriod)
-        if(vicketSource.state == UserVS.State.ACTIVE) {
+        log.debug("genBalanceForBankVS - id '${bankVS.id}'")
+        Map dataMap = bankVSService.getDetailedDataMapWithBalances(bankVS, timePeriod)
+        if(bankVS.state == UserVS.State.ACTIVE) {
 
         } else {}
         return dataMap

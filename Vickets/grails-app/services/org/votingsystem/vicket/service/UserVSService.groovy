@@ -6,7 +6,6 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
-import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.util.MetaInfMsg
 
@@ -28,7 +27,7 @@ class UserVSService {
     def subscriptionVSService
     def transactionVSService
 
-    public ResponseVS saveVicketSource(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS saveBankVS(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         UserVS userSigner = messageSMIMEReq.getUserVS()
         log.debug("${methodName} - signer: ${userSigner?.nif}")
@@ -59,39 +58,39 @@ class UserVSService {
 
         //{info:textEditor.getData(),certChainPEM:$("#pemCert").val(), operation:Operation.VICKET_SOURCE_NEW}
 
-        VicketSource vicketSource = VicketSource.getUserVS(x509Certificate)
-        String validatedNIF = org.votingsystem.util.NifUtils.validate(vicketSource.getNif())
+        BankVS bankVS = BankVS.getUserVS(x509Certificate)
+        String validatedNIF = org.votingsystem.util.NifUtils.validate(bankVS.getNif())
         if(!validatedNIF) {
-            msg = messageSource.getMessage('NIFWithErrorsMsg', [vicketSource.getNif()].toArray(), locale)
+            msg = messageSource.getMessage('NIFWithErrorsMsg', [bankVS.getNif()].toArray(), locale)
             log.error("checkUser - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
                     metaInf: MetaInfMsg.getErrorMsg(methodName, "nif"))
         }
 
-        def vicketSourceDB = VicketSource.findWhere(nif:validatedNIF.toUpperCase())
+        def bankVSDB = BankVS.findWhere(nif:validatedNIF.toUpperCase())
 
-        if(!vicketSourceDB) {
-            vicketSourceDB = vicketSource
-            vicketSourceDB.description = messageJSON.info
-            vicketSourceDB.save()
-            vicketSourceDB.setIBAN(IbanVSUtil.getInstance().getIBAN(vicketSourceDB.id))
-            log.debug("${methodName} - NEW vicketSource.id: '${vicketSourceDB.id}'")
+        if(!bankVSDB) {
+            bankVSDB = bankVS
+            bankVSDB.description = messageJSON.info
+            bankVSDB.save()
+            bankVSDB.setIBAN(IbanVSUtil.getInstance().getIBAN(bankVSDB.id))
+            log.debug("${methodName} - NEW bankVS.id: '${bankVSDB.id}'")
         } else {
-            log.debug("${methodName} - updating vicketSource.id: '${vicketSourceDB.id}'")
-            vicketSourceDB.description = messageJSON.info
-            vicketSourceDB.setCertificateCA(vicketSource.getCertificateCA())
-            vicketSourceDB.setCertificate(vicketSource.getCertificate())
-            vicketSourceDB.setTimeStampToken(vicketSource.getTimeStampToken())
+            log.debug("${methodName} - updating bankVS.id: '${bankVSDB.id}'")
+            bankVSDB.description = messageJSON.info
+            bankVSDB.setCertificateCA(bankVS.getCertificateCA())
+            bankVSDB.setCertificate(bankVS.getCertificate())
+            bankVSDB.setTimeStampToken(bankVS.getTimeStampToken())
         }
-        CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(vicketSourceDB, null)
+        CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(bankVSDB, null)
 
-        vicketSourceDB.save()
-        msg = messageSource.getMessage('newVicketSourceOKMsg', [x509Certificate.subjectDN].toArray(), locale)
-        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "vicketSource_${vicketSourceDB.id}_certificateVS_${certificateVS.id}")
-        String vicketSourceURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${vicketSourceDB.id}"
+        bankVSDB.save()
+        msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
+        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "bankVS_${bankVSDB.id}_certificateVS_${certificateVS.id}")
+        String bankVSURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${bankVSDB.id}"
         log.debug("${metaInfMsg}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_SOURCE_NEW, message:msg, metaInf:metaInfMsg,
-            data:[message:msg, URL:vicketSourceURL, statusCode:ResponseVS.SC_OK], contentType:ContentTypeVS.JSON)
+            data:[message:msg, URL:bankVSURL, statusCode:ResponseVS.SC_OK], contentType:ContentTypeVS.JSON)
     }
 
     /*
@@ -217,9 +216,9 @@ class UserVSService {
 
 
     /*@Transactional
-    public Map getVicketSourceDataMap(VicketSource vicketSource, DateUtils.TimePeriod timePeriod) {
+    public Map getBankVSDataMap(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('fromUserVS', vicketSource)
+            eq('fromUserVS', bankVS)
             if(timePeriod) gt('dateCreated', timePeriod.getDateFrom())
             isNotNull('transactionParent')
         }
@@ -227,7 +226,7 @@ class UserVSService {
         transactionList.each { transaction ->
             transactionListJSON.add(transactionVSService.getTransactionMap(transaction))
         }
-        Map resultMap = getUserVSDataMap(vicketSource)
+        Map resultMap = getUserVSDataMap(bankVS)
         resultMap.transactionList = transactionListJSON
         return resultMap
     }*/

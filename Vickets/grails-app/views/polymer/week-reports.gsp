@@ -28,11 +28,10 @@
                 </template>
             </div>
 
-            <div class="sectionHeader"><g:message code="vicketSourcesLbl"/></div>
+            <div class="sectionHeader"><g:message code="bankVSsLbl"/></div>
             <div layout flex horizontal wrap around-justified>
-                <template repeat="{{vicketSource in weekReport.userBalances.vicketSourceBalanceList}}">
-                    <user-balance class="_vicketSource" balance="{{vicketSource}}"></user-balance>
-                </template>
+                <template repeat="{{vicketbankVSekReport.userBalances.vicketSourcebankVS}">
+                    <user-balance class="_vicketSource" balabankVStSource}}"></user-bbankVS            </template>
             </div>
 
             <div class="sectionHeader"><g:message code="groupsLbl"/></div>
@@ -80,7 +79,7 @@
             calculateStatistics:function() {
                 var userBalances = this.shadowRoot.querySelectorAll("user-balance._uservs")
                 var groupBalances = this.shadowRoot.querySelectorAll("user-balance._group")
-                var vicketSourceBalances = this.shadowRoot.querySelectorAll("user-balance._vicketSource")
+                var vicketSourceBalances = this.shbankVSrySelectorAll("user-balance._vicketSource")
 
             },
             showBalanceDetails:function(e, detail, sender) {

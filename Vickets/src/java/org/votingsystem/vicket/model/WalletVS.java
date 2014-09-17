@@ -63,7 +63,7 @@ public class WalletVS {
                         "balanceErrorMsg", wildTagAccount.getBalance() + " " + currencyCode,  amount + " " + currencyCode));
             }
         }
-        return new ResponseVS<Map<UserVSAccount, BigDecimal>>(ResponseVS.SC_OK,  result);
+        return new ResponseVS<Map<UserVSAccount, BigDecimal>>(ResponseVS.SC_OK, null, result);
     }
 
     public BigDecimal getTagBalance(String tagName) {

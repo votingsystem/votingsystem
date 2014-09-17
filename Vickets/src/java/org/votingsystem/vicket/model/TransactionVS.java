@@ -53,7 +53,7 @@ public class TransactionVS  implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
 
-    //This is for Transactions From Vicket Sources, and not anonymous transactions
+    //This is for Transactions From BankVS, and not anonymous transactions
     @Column(name="fromUserIBAN") private String fromUserIBAN;
     @Column(name="fromUser") private String fromUser;
 

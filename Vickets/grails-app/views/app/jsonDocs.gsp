@@ -11,10 +11,10 @@
 <body>
     <div layout flex horizontal wrap around-justified>
         <div layout vertical>
-            <votingsystem-button onclick="sendDepositFromVicketSource()" style="margin: 0px 0px 0px 5px;">
-                Deposit from Vicket Source
+            <votingsystem-button onclick="sendDepositFromBankVS()" style="margin: 0px 0px 0px 5px;">
+                Deposit from BankVS
             </votingsystem-button>
-            <div id="depositFromVicketSource" style="width: 500px; height: 300px;"></div>
+            <div id="depositFromBankVS" style="width: 500px; height: 300px;"></div>
         </div>
 
         <div layout vertical>
@@ -26,8 +26,8 @@
         </div>
 
         <div layout vertical>
-            New Vicket Source
-            <div id="newVicketSourceEditor" style="width: 500px; height: 400px;"></div>
+            New BankVS
+            <div id="newBankVSEditor" style="width: 500px; height: 400px;"></div>
         </div>
 
     </div>
@@ -35,10 +35,10 @@
 </html>
 <asset:script>
     //date -> 'yyyy/MM/dd HH:mm:ss'
-    var depositFromVicketSource = new JSONEditor(document.querySelector("#depositFromVicketSource"));
+    var depositFromBankVS = new JSONEditor(document.querySelector("#depositFromBankVS"));
     var signedContent
-    var jsonDepositFromVicketSource = {operation:"VICKET_DEPOSIT_FROM_VICKET_SOURCE",
-        signedMessageSubject:"Deposit from Vicket Source",
+    var jsonDepositFromBankVS = {operation:"VICKET_DEPOSIT_FROM_VICKET_SOURCE",
+        signedMessageSubject:"Deposit from BankVS",
         signedContent:{operation:"VICKET_DEPOSIT_FROM_VICKET_SOURCE", fromUser: "Implantación proyecto Vickets",
             fromUserIBAN:"ES1877777777450000000050", toUserIBAN:"ES8378788989450000000015",
             amount:"30000", tags:[{name:"HIDROGENO"}], validTo:"2014/09/21 00:00:00", subject:"Ingreso viernes 25", currency:"EUR" },
@@ -46,20 +46,20 @@
         serverURL:"${grailsApplication.config.grails.serverURL}",
         urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
         }
-    //fromUserIBAN -> IBAN external to Vicket System controlled by VicketSource
+    //fromUserIBAN -> IBAN external to Vicket System controlled by BankVS
     //if validTo present -> change to limited in time Vickets
-    depositFromVicketSource.set(jsonDepositFromVicketSource);
+    depositFromBankVS.set(jsonDepositFromBankVS);
 
 
-    function sendDepositFromVicketSource() {
-        console.log("depositFromVicketSource")
-        var webAppMessage = depositFromVicketSource.get();
+    function sendDepositFromBankVS() {
+        console.log("depositFromBankVS")
+        var webAppMessage = depositFromBankVS.get();
         webAppMessage.statusCode = ResponseVS.SC_PROCESSING
         var objectId = Math.random().toString(36).substring(7)
         window[objectId] = {setClientToolMessage: function(appMessage) {
-            console.log("sendDepositFromVicketSource - message: " + appMessage);
+            console.log("sendDepositFromBankVS - message: " + appMessage);
             appMessageJSON = JSON.parse(appMessage)
-            showMessageVS(JSON.stringify(appMessageJSON.message), "sendDepositFromVicketSource " + appMessageJSON.statusCode)
+            showMessageVS(JSON.stringify(appMessageJSON.message), "sendDepositFromBankVS " + appMessageJSON.statusCode)
         }}
         webAppMessage.callerCallback = objectId
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
@@ -76,7 +76,7 @@
 
 
 
-    var vicketSourceEditor = new JSONEditor(document.querySelector("#newVicketSourceEditor"));
+    var bankVSEditor = new JSONEditor(document.querySelector("#newBankVSEditor"));
     var certChain = "-----BEGIN CERTIFICATE-----\n" +
             "MIICuzCCAiSgAwIBAgIGAUZWGs81MA0GCSqGSIb3DQEBBQUAMD4xLDAqBgNVBAMM\n" +
             "I1ZvdGluZyBTeXN0ZW0gQ2VydGlmaWNhdGUgQXV0aG9yaXR5MQ4wDAYDVQQLDAVD\n" +
@@ -94,11 +94,11 @@
             "iDMkmC/CTxCxAz9ASd+LxFWw/vfZ1NCd1muYkEpX7TPk07sNDGkF0K0wCBic6o2t\n" +
             "t3UeDZwwOEWugyyp2cDDI/16ApdAsorhs0urCo21dg==\n" +
             "-----END CERTIFICATE-----"
-    var jsonVicketSourceEditor = {
+    var jsonBankVSEditor = {
         operation:"VICKET_SOURCE_NEW", info:"Información de la nueva fuente de Vickets", IBAN:"ES8378788989450000000015",
         certChainPEM:certChain,
 
     };
-    vicketSourceEditor.set(jsonVicketSourceEditor);
+    vicketSourceEditor.set(jsonBankVSEditor);
 </asset:script>
 <asset:deferredScripts/>

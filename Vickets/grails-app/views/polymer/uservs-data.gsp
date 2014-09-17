@@ -119,7 +119,7 @@
         },
         setType:function() {
             console.log(this.tagName + " - setType")
-            if('VICKET_SOURCE' == this.uservs.type) this.uservsType = "<g:message code="vicketSourceLbl"/>"
+            if('VICKET_SOURCE' == this.uservs.type) this.uservsType = "<g:message code="bankVSLbl"/>"
             if('USER' == this.uservs.type) this.uservsType = "<g:message code="userLbl"/>"
         },
         blockUser:function() {

@@ -9,8 +9,8 @@ import java.security.cert.X509Certificate;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Entity @Table(name="VicketSource") @DiscriminatorValue("VicketSource")
-public class VicketSource extends UserVS implements java.io.Serializable {
+@Entity @Table(name="BankVS") @DiscriminatorValue("BankVS")
+public class BankVS extends UserVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -18,8 +18,8 @@ public class VicketSource extends UserVS implements java.io.Serializable {
         if(getType() == null) setType(Type.VICKET_SOURCE);
     }
 
-    public static VicketSource getUserVS (X509Certificate certificate) {
-        VicketSource userVS = new VicketSource();
+    public static BankVS getUserVS (X509Certificate certificate) {
+        BankVS userVS = new BankVS();
         userVS.setCertificate(certificate);
         String subjectDN = certificate.getSubjectDN().getName();
         if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);

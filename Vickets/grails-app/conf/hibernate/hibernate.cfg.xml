@@ -31,7 +31,7 @@
         <mapping class="org.votingsystem.model.UserRequestCsrVS" />
         <mapping class="org.votingsystem.model.UserVS" />
         <mapping class="org.votingsystem.model.GroupVS" />
-        <mapping class="org.votingsystem.model.VicketSource" />
+        <mapping class="org.votingsystem.model.BankVS" />
         <mapping class="org.votingsystem.model.VicketTagVS" />
         <mapping class="org.votingsystem.model.VoteVSCanceller"/>
         <mapping class="org.votingsystem.model.VoteVS" />

@@ -53,8 +53,8 @@
                             {{ "<g:message code="adminPageTitle"/>" | setTitle}}
                         </g:if>
                         <g:elseif test="${"superadmin".equals(params.menu)}">
-                            <paper-item data-href="${createLink(controller: 'userVS', action: 'newVicketSource', absolute: true)}">
-                                <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newVicketSourceLbl"/>
+                            <paper-item data-href="${createLink(controller: 'userVS', action: 'newBankVS', absolute: true)}">
+                                <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> <g:message code="newBankVSLbl"/>
                             </paper-item>
                             <paper-item data-href="${createLink(controller: 'certificateVS', action: 'addCertificateAuthority', absolute: true)}"
                                         style="margin:0px 10px 0px 0px;">

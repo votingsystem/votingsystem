@@ -9,7 +9,7 @@ import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.MetaInfMsg
 
 @Transactional
-class TransactionVS_VicketSourceService {
+class TransactionVS_BankVSService {
 
     def messageSource
     def systemService
@@ -30,9 +30,9 @@ class TransactionVS_VicketSourceService {
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
         }
         log.debug("${methodName} - signer: '${messageSigner.nif}'")
-        VicketSource signer = VicketSource.findWhere(nif:messageSigner.nif)
+        BankVS signer = BankVS.findWhere(nif:messageSigner.nif)
         if(!(signer)) {
-            msg = messageSource.getMessage('vicketSourcePrivilegesErrorMsg', [messageJSON.operation].toArray(), locale)
+            msg = messageSource.getMessage('bankVSPrivilegesErrorMsg', [messageJSON.operation].toArray(), locale)
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
         }
         Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
@@ -63,10 +63,10 @@ class TransactionVS_VicketSourceService {
         TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.amount, toUser, messageJSON.toUserIBAN).save();
 
-        //transaction?.errors.each { log.error("processDepositFromVicketSource - error - ${it}")}
+        //transaction?.errors.each { log.error("processDepositFromBankVS - error - ${it}")}
 
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${triggeredTransaction.id}")
-        log.debug("${metaInfMsg} - from VicketSource '${signer.id}' to userVS '${toUser.id}' ")
+        log.debug("${metaInfMsg} - from BankVS '${signer.id}' to userVS '${toUser.id}' ")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", metaInf:metaInfMsg,
                 type:TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE)
     }

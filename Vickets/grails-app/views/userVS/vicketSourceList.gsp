@@ -11,13 +11,13 @@
         <ol class="breadcrumbVS">
             <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
             <li><a href="${createLink(controller: 'userVS', action:'search')}"><g:message code="usersvsLbl"/></a></li>
-            <li class="active"><g:message code="vicketSourceListPageLbl"/></li>
+            <li class="active"><g:message code="bankVSListPageLbl"/></li>
         </ol>
 
         <div layout horizontal center center-justified>
-            <select id="vicketSourceStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                     onchange="vicketSourceState(this)">
-                <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveVicketSourceLbl"/> - </option>
+            <select id="bankVSStateSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                     onchange="bankVSState(this)">
+                <option value="ACTIVE"  style="color:#388746;"> - <g:message code="selectActiveBankVSLbl"/> - </option>
             </select>
         </div>
 
@@ -29,12 +29,12 @@
                 <style></style>
                 <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="json"></core-ajax>
                 <div flex horizontal wrap around-justified layout>
-                    <template repeat="{{vicketSource in responseData.vicketSourceList}}">
-                        <div class='card vicketSourceDiv {{vicketSource | stateClass}}' on-click="{{showVicketSourceDetails}}">
-                            <div class='vicketSourceSubjectDiv'><h2>{{vicketSource.name}}</h2></div>
-                            <div class='vicketSourceDescriptionDiv'><p>{{vicketSource.description | getHtml}}</p></div>
-                            <div class='vicketSourceReasonDiv'>
-                                <p>{{vicketSource.reason}}</p>
+                    <template repeat="{{bankVS in responseData.bankVSList}}">
+                        <div class='card bankVSDiv {{bankVS | stateClass}}' on-click="{{showBankVSDetails}}">
+                            <div class='bankVSSubjectDiv'><h2>{{bankVS.name}}</h2></div>
+                            <div class='bankVSDescriptionDiv'><p>{{bankVS.description | getHtml}}</p></div>
+                            <div class='bankVSReasonDiv'>
+                                <p>{{bankVS.reason}}</p>
                             </div>
                         </div>
                     </template>
@@ -42,15 +42,15 @@
             </template>
             <script>
                 Polymer('vicket-source-list', {
-                    showVicketSourceDetails:function(e) {
+                    showBankVSDetails:function(e) {
                         var targetURL = "${createLink( controller:'userVS')}/" +
-                                e.target.templateInstance.model.vicketSource.id + "?menu=" + menuType
+                                e.target.templateInstance.model.bankVS.id + "?menu=" + menuType
                         window.location.href = targetURL
                     },
-                    stateClass:function(vicketSource) {
-                        if('ACTIVE' == vicketSource.state) return "vicketSourceActive";
-                        if('PENDING' == vicketSource.state) return "vicketSourcePending";
-                        if('CLOSED' == vicketSource.state) return "vicketSourceFinished";
+                    stateClass:function(bankVS) {
+                        if('ACTIVE' == bankVS.state) return "bankVSActive";
+                        if('PENDING' == bankVS.state) return "bankVSPending";
+                        if('CLOSED' == bankVS.state) return "bankVSFinished";
                     },
                     getHtml:function(htmlEncoded) {
                         var element = document.createElement("div");
@@ -61,26 +61,26 @@
                 });
             </script>
         </polymer-element>
-        <vicket-source-list id="vicketSourceList"></vicket-source-list>
+        <vicket-source-list id="bankVSList"></vicket-source-list>
 
-        <div id="vicketSourceList" class="row container"><ul></ul></div>
+        <div id="bankVSList" class="row container"><ul></ul></div>
     </div>
 </div>
 
 </body>
 </html>
 <asset:script>
-    document.querySelector("#vicketSourceList").url = "<g:createLink controller="userVS" action="vicketSourceList"/>?menu=" + menuType
+    document.querySelector("#bankVSList").url = "<g:createLink controller="userVS" action="bankVSList"/>?menu=" + menuType
 
-    function vicketSourceState(selected) {
+    function bankVSState(selected) {
         var optionSelected = selected.value
-        console.log("vicketSourceStateSelect: " + optionSelected)
-        var targetURL = "${createLink(controller: 'userVS', action:'vicketSourceList')}?menu=" + menuType;
+        console.log("bankVSStateSelect: " + optionSelected)
+        var targetURL = "${createLink(controller: 'userVS', action:'bankVSList')}?menu=" + menuType;
         if("" != optionSelected) {
-            targetURL = targetURL + "&state=" + vicketSourceState
+            targetURL = targetURL + "&state=" + bankVSState
         }
         history.pushState(null, null, targetURL);
-        document.querySelector("#vicketSourceList").url = targetURL
+        document.querySelector("#bankVSList").url = targetURL
     }
 </asset:script>
 <asset:deferredScripts/>

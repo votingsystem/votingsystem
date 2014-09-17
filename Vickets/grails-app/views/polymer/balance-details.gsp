@@ -165,7 +165,7 @@
                 this.expensesLbl = "<g:message code="expensesLbl"/>"
             }
             else if('VICKET_SOURCE' == this.balance.type) {
-                this.caption = caption.format("<g:message code="vicketSourceLbl"/>")
+                this.caption = caption.format("<g:message code="bankVSLbl"/>")
                 this.description = "NIF:" + this.balance.nif + " - IBAN: " + this.balance.IBAN
                 this.expensesLbl = "<g:message code="contributionsLbl"/>"
             }
