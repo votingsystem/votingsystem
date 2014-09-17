@@ -58,7 +58,7 @@ class BalanceService {
             eq("state", UserVS.State.ACTIVE)
             not {
                 eq("type", UserVS.Type.SYSTEM)
-                eq("type", UserVS.Type.VICKET_SOURCE)
+                eq("type", UserVS.Type.BANKVS)
             }
         }
 

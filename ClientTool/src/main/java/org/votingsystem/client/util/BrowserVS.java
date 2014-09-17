@@ -411,7 +411,7 @@ public class BrowserVS extends Region {
                         JSONObject documentJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocument());
                         WebSocketService.getInstance().sendMessage(documentJSON.toString());
                         break;
-                    /*case VICKET_SOURCE_NEW:
+                    /*case BANKVS_NEW:
                         PEMCertFormPane.showDialog();
                         String pemCert = PEMCertFormPane.getCertChainPEM();
                         if(pemCert != null) {

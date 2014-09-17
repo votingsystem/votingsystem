@@ -45,9 +45,9 @@
 
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
-                    <votingsystem-button onclick="submitForm()" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                    <button class="btn btn-default" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                         <g:message code="newBankVSLbl"/> <i class="fa fa fa-check"></i>
-                    </votingsystem-button>
+                    </button>
                 </div>
             </div>
 
@@ -60,8 +60,9 @@
     var appMessageJSON = null
 
     function submitForm() {
+        try {
         var textEditor = document.querySelector('#textEditor')
-        if(document.querySelector('#vicketbankVS.invalid) {
+        if(document.querySelector('#bankVSIBAN').invalid) {
             showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
             return false
         }
@@ -74,13 +75,13 @@
             showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
             return false
         }
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_SOURCE_NEW)
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.BANKVS_NEW)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newBankVS", absolute:true)}"
         webAppMessage.signedMessageSubject = "<g:message code='newBankVSMsgSubject'/>"
         webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
-            IBAN:document.querySelector("#vicketSourceIBAN").value, operation:Operation.VICKET_SOURCE_NEW}
+            IBAN:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW}
         webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
         var objectId = Math.random().toString(36).substring(7)
         window[objectId] = {setClientToolMessage: function(appMessage) {
@@ -100,6 +101,11 @@
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         appMessageJSON = null
         return false
+        } catch(ex) {
+            console.log(ex)
+            return false
+        }
+
     }
 
     document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {

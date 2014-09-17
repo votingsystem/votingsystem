@@ -33,7 +33,7 @@ public class UserVS implements Serializable {
 
     private static Logger log = Logger.getLogger(UserVS.class);
 
-    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, VICKET_SOURCE}
+    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
 

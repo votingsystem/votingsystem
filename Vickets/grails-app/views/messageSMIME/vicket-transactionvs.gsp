@@ -95,7 +95,7 @@
                 this.signedDocumentStr = JSON.stringify(this.signedDocument)
                 console.log(this.tagName + " - signedDocumentChanged - signedDocument: " + this.signedDocumentStr)
                 switch (this.signedDocument.operation) {
-                    case 'VICKET_DEPOSIT_FROM_VICKET_SOURCE':
+                    case 'VICKET_DEPOSIT_FROM_BANKVS':
                         this.caption = "<g:message code="depositFromBankVSLbl"/>"
                         break
                     default:

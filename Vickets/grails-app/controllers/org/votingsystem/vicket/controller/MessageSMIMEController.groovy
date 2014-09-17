@@ -106,7 +106,7 @@ class MessageSMIMEController {
                     case TypeVS.SEND_SMIME_VOTE:
                         viewer = "receipt-votevs"
                         break;
-                    case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
+                    case TypeVS.VICKET_DEPOSIT_FROM_BANKVS:
                         viewer = "vicket-transactionvs"
                         break;
                 }

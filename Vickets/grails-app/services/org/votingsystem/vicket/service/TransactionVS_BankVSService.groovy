@@ -23,7 +23,7 @@ class TransactionVS_BankVSService {
         UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN)
         //[ fromUser:Implantación proyecto Vickets, fromUserIBAN:ES1877777777450000000050, subject:Ingreso viernes 25, toUserIBAN:ES8378788989450000000015,UUID:693dc9c4-f01c-443d-8934-7eeed0ce582b, operation:VICKET_DEPOSIT_FROM_VICKET_SOURCE, tags:[[name:HIDROGENO]], validTo:2014/07/28 00:00:00]
         if (!messageJSON.amount || !messageJSON.currency || !toUser || ! messageJSON.fromUserIBAN ||
-                !messageJSON.fromUser|| (TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE != TypeVS.valueOf(messageJSON.operation))) {
+                !messageJSON.fromUser|| (TypeVS.VICKET_DEPOSIT_FROM_BANKVS != TypeVS.valueOf(messageJSON.operation))) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
@@ -58,7 +58,7 @@ class TransactionVS_BankVSService {
                 fromUserVS:signer, fromUserIBAN: messageJSON.fromUserIBAN, fromUser:messageJSON.fromUser,
                 state:TransactionVS.State.OK, validTo:validTo,
                 subject:subject, currencyCode: currency.getCurrencyCode(),
-                type:TransactionVS.Type.VICKET_SOURCE_INPUT,  tag:tag).save()
+                type:TransactionVS.Type.BANKVS_INPUT,  tag:tag).save()
 
         TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.amount, toUser, messageJSON.toUserIBAN).save();
@@ -68,7 +68,7 @@ class TransactionVS_BankVSService {
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${triggeredTransaction.id}")
         log.debug("${metaInfMsg} - from BankVS '${signer.id}' to userVS '${toUser.id}' ")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", metaInf:metaInfMsg,
-                type:TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE)
+                type:TypeVS.VICKET_DEPOSIT_FROM_BANKVS)
     }
 
 }

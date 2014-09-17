@@ -59,7 +59,7 @@ class TransactionVSService {
         }
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
         switch(transactionType) {
-            case TypeVS.VICKET_DEPOSIT_FROM_VICKET_SOURCE:
+            case TypeVS.VICKET_DEPOSIT_FROM_BANKVS:
                 return transactionVS_BankVSService.processDeposit(messageSMIMEReq, messageJSON, locale)
                 break;
             case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
@@ -105,7 +105,7 @@ class TransactionVSService {
 
             } else {
                 if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
-                    if(transactionVS.type != TransactionVS.Type.VICKET_SOURCE_INPUT) {
+                    if(transactionVS.type != TransactionVS.Type.BANKVS_INPUT) {
                         transactionVS.accountFromMovements.each { userAccountFrom, amount->
                             userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
                             userAccountFrom.save()
@@ -315,7 +315,7 @@ class TransactionVSService {
             case 'VICKET_CANCELLATION':
                 typeDescription = messageSource.getMessage('vicketCancellationLbl', null, locale);
                 break;
-            case 'VICKET_SOURCE_INPUT':
+            case 'BANKVS_INPUT':
                 typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
                 break;
             case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':

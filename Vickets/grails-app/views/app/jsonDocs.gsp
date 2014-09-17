@@ -37,9 +37,9 @@
     //date -> 'yyyy/MM/dd HH:mm:ss'
     var depositFromBankVS = new JSONEditor(document.querySelector("#depositFromBankVS"));
     var signedContent
-    var jsonDepositFromBankVS = {operation:"VICKET_DEPOSIT_FROM_VICKET_SOURCE",
+    var jsonDepositFromBankVS = {operation:"VICKET_DEPOSIT_FROM_BANKVS",
         signedMessageSubject:"Deposit from BankVS",
-        signedContent:{operation:"VICKET_DEPOSIT_FROM_VICKET_SOURCE", fromUser: "Implantación proyecto Vickets",
+        signedContent:{operation:"VICKET_DEPOSIT_FROM_BANKVS", fromUser: "Implantación proyecto Vickets",
             fromUserIBAN:"ES1877777777450000000050", toUserIBAN:"ES8378788989450000000015",
             amount:"30000", tags:[{name:"HIDROGENO"}], validTo:"2014/09/21 00:00:00", subject:"Ingreso viernes 25", currency:"EUR" },
         serviceURL:"${createLink( controller:'transactionVS', action:"deposit", absolute:true)}",
@@ -94,11 +94,11 @@
             "iDMkmC/CTxCxAz9ASd+LxFWw/vfZ1NCd1muYkEpX7TPk07sNDGkF0K0wCBic6o2t\n" +
             "t3UeDZwwOEWugyyp2cDDI/16ApdAsorhs0urCo21dg==\n" +
             "-----END CERTIFICATE-----"
-    var jsonBankVSEditor = {
-        operation:"VICKET_SOURCE_NEW", info:"Información de la nueva fuente de Vickets", IBAN:"ES8378788989450000000015",
+    var jsonBankVSEditor = {IBAN:'ES1877777777450000000050',
+        operation:"BANKVS_NEW", info:"Información del nuevo banco",
         certChainPEM:certChain,
-
     };
-    vicketSourceEditor.set(jsonBankVSEditor);
+
+    bankVSEditor.set(jsonBankVSEditor);
 </asset:script>
 <asset:deferredScripts/>

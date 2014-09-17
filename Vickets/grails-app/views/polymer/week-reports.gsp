@@ -30,7 +30,7 @@
 
             <div class="sectionHeader"><g:message code="bankVSsLbl"/></div>
             <div layout flex horizontal wrap around-justified>
-                <template repeat="{{vicketbankVSekReport.userBalances.vicketSourcebankVS}">
+                <template repeat="{{weekReport.userBalances.bankVS}">
                     <user-balance class="_vicketSource" balabankVStSource}}"></user-bbankVS            </template>
             </div>
 

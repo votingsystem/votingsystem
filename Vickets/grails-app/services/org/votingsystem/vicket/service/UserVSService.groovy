@@ -33,7 +33,7 @@ class UserVSService {
         log.debug("${methodName} - signer: ${userSigner?.nif}")
         String msg = null
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
-        if (!messageJSON.info || (TypeVS.VICKET_SOURCE_NEW != TypeVS.valueOf(messageJSON.operation)) ||
+        if (!messageJSON.info || (TypeVS.BANKVS_NEW != TypeVS.valueOf(messageJSON.operation)) ||
                 !messageJSON.certChainPEM) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - PARAMS ERROR - ${msg} - messageJSON: ${messageJSON}"
@@ -43,7 +43,7 @@ class UserVSService {
 
         if(!isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
-                    TypeVS.VICKET_SOURCE_NEW.toString()].toArray(), locale)
+                    TypeVS.BANKVS_NEW.toString()].toArray(), locale)
             log.error "${methodName} - ${msg}"
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
@@ -56,7 +56,7 @@ class UserVSService {
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         X509Certificate x509Certificate = certChain.iterator().next();
 
-        //{info:textEditor.getData(),certChainPEM:$("#pemCert").val(), operation:Operation.VICKET_SOURCE_NEW}
+        //{info:textEditor.getData(),certChainPEM:$("#pemCert").val(), operation:Operation.BANKVS_NEW}
 
         BankVS bankVS = BankVS.getUserVS(x509Certificate)
         String validatedNIF = org.votingsystem.util.NifUtils.validate(bankVS.getNif())
@@ -89,7 +89,7 @@ class UserVSService {
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "bankVS_${bankVSDB.id}_certificateVS_${certificateVS.id}")
         String bankVSURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${bankVSDB.id}"
         log.debug("${metaInfMsg}")
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET_SOURCE_NEW, message:msg, metaInf:metaInfMsg,
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.BANKVS_NEW, message:msg, metaInf:metaInfMsg,
             data:[message:msg, URL:bankVSURL, statusCode:ResponseVS.SC_OK], contentType:ContentTypeVS.JSON)
     }
 

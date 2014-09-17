@@ -56,7 +56,7 @@
             case 'VICKET_CANCELLATION':
                 transactionDescription = "<g:message code="selectVicketCancellationLbl"/>"
                 break;
-            case 'VICKET_SOURCE_INPUT':
+            case 'BANKVS_INPUT':
                 transactionDescription = "<g:message code="bankVSInputLbl"/>"
                 break;
             case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':
