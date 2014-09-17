@@ -2,6 +2,7 @@ package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.vicket.model.UserVSAccount;
 import org.votingsystem.model.VicketTagVS;
 import org.votingsystem.vicket.util.ApplicationContextHolder;
@@ -31,15 +32,13 @@ public class WalletVS {
     }
 
     public ResponseVS<Map<UserVSAccount, BigDecimal>> getAccountMovementsForTransaction(
-            VicketTagVS tag, BigDecimal amount) throws Exception {
-        if(amount.compareTo(BigDecimal.ZERO) < 0) {
-            log.debug("getMovementsForTransaction - negative amount: " + amount);
-            return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
-                    "negativeAmountRequestedErrorMsg", amount.toString()));
-        }
+            VicketTagVS tag, BigDecimal amount, String currencyCode) throws Exception {
+        if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
+                ApplicationContextHolder.getMessage("negativeAmountRequestedErrorMsg", amount.toString()));
+
         Map<UserVSAccount, BigDecimal> result = new HashMap<UserVSAccount, BigDecimal>();
         UserVSAccount wildTagAccount = tagDataMap.get(VicketTagVS.WILDTAG);
-        if(tag == null) throw new Exception("Transaction without tag!!!");
+        if(tag == null) throw new ExceptionVS("Transaction without tag!!!");
         if(!VicketTagVS.WILDTAG.equals(tag.getName())) {
             UserVSAccount tagAccount = tagDataMap.get(tag.getName());
             if(tagAccount != null && tagAccount.getBalance().compareTo(amount) > 0) result.put(tagAccount, amount);
@@ -50,9 +49,11 @@ public class WalletVS {
                     if(tagAccount != null) result.put(tagAccount, tagAccount.getBalance());
                     result.put(wildTagAccount, tagAccountDeficit);
                 } else {
-                    BigDecimal available = tagAccount.getBalance().add(wildTagAccount.getBalance());
+                    BigDecimal tagAccountAvailable = (tagAccount != null) ? tagAccount.getBalance():BigDecimal.ZERO;
+                    BigDecimal available = tagAccountAvailable.add(wildTagAccount.getBalance());
                     return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
-                            "lowBalanceForTagErrorMsg", tag.getName(), available.toString(), amount.toString()));
+                            "lowBalanceForTagErrorMsg", tag.getName(), available.toString() + " " + currencyCode,
+                            amount.toString() + " " + currencyCode));
                 }
             }
         } else {

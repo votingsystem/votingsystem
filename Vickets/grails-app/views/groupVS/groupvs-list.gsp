@@ -26,7 +26,7 @@
         <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
             <section id="page1">
-                <div cross-fade>
+                <div class="pageContentDiv" cross-fade>
                     <div layout horizontal center center-justified>
                         <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
                                 on-change="{{groupvsTypeSelect}}" class="form-control">
@@ -52,7 +52,7 @@
             </section>
 
             <section id="page2">
-                <div cross-fade>
+                <div class="pageContentDiv" cross-fade>
                     <groupvs-details id="groupDetails" page="{{subpage}}" subpage vertical layout groupvs="{{groupvs}}"></groupvs-details>
                 </div>
             </section>

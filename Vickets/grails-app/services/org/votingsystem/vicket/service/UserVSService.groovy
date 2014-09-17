@@ -68,7 +68,6 @@ class UserVSService {
         }
 
         def bankVSDB = BankVS.findWhere(nif:validatedNIF.toUpperCase())
-
         if(!bankVSDB) {
             bankVSDB = bankVS
             bankVSDB.description = messageJSON.info

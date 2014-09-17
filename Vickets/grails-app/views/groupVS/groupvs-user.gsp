@@ -45,20 +45,20 @@
                     <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
             </div>
             <template if="{{isClientToolConnected}}">
-                <div layout horizontal center center-justified>
+                <div layout horizontal center center-justified style="margin:10px 0 0 0;">
                     <votingsystem-button id="activateUserButton" type="button" on-click="{{groupVSUserLastOperations}}"
-                         style="margin:10px 0px 0px 0px;display:{{isActive?'none':'block'}}"><g:message code="groupVSUserLastOperationsLbl"/>
+                         style="margin:0 0 0 10px;display:{{isActive?'none':'block'}}"><g:message code="groupVSUserLastOperationsLbl"/>
                     </votingsystem-button>
                     <votingsystem-button id="activateUserButton" type="button" on-click="{{activateUser}}"
-                                         style="margin:10px 0px 0px 0px;display:{{isActive?'none':'block'}}">
-                        <i class="fa fa-thumbs-o-up" style="margin:0 7px 0 3px;"> <g:message code="activateUserLbl"/></i>
+                         style="margin:0 0 0 10px;display:{{isActive?'none':'block'}}">
+                        <i class="fa fa-thumbs-o-up" style="margin:0 7px 0 3px;"></i> <g:message code="activateUserLbl"/>
                     </votingsystem-button>
                     <votingsystem-button id="deActivateUserButton" on-click="{{initCancellation}}"
-                                         style="margin:10px 0px 0px 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
+                         style="margin:0 0 0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
                         <i class="fa fa-thumbs-o-down" style="margin:0 7px 0 3px;"></i> <g:message code="deActivateUserLbl"/>
                     </votingsystem-button>
                     <votingsystem-button id="makeDepositButton" on-click="{{makeDeposit}}"
-                                         style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                        style="margin:0 0 0 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                         <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
                     </votingsystem-button>
                 </div>
@@ -149,7 +149,7 @@
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "<g:message code='activateUserOKLbl'/>"
                             this.opened = false
-                            this.fire('core-signal', {name: "refresh-user-list", data: {uservs:this.userId}});
+                            this.fire('core-signal', {name: "refresh-uservs-list", data: {uservs:this.userId}});
                         }
                         showMessageVS(appMessageJSON.message, caption)
                     }}.bind(this)}

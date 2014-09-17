@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 
-<polymer-element name="user-list" attributes="url userURLPrefix menuType">
+<polymer-element name="uservs-list" attributes="url userURLPrefix menuType">
     <template>
         <style>
         .nifColumn {
@@ -35,7 +35,7 @@
             text-align:center;
         }
         </style>
-        <core-signals on-core-signal-refresh-user-list="{{refreshUserList}}"></core-signals>
+        <core-signals on-core-signal-refresh-uservs-list="{{refreshUserList}}"></core-signals>
         <core-ajax id="ajax" auto url="{{url}}" response="{{userList}}" handleAs="json" method="get" contentType="json"></core-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
@@ -62,7 +62,7 @@
         </div>
     </template>
     <script>
-        Polymer('user-list', {
+        Polymer('uservs-list', {
             ready: function() {console.log(this.tagName + " - ready") },
             userSelected: function(e) {
                 console.log(this.tagName + " - userSelected -userId: " + e.target.templateInstance.model.uservs.uservs.id)

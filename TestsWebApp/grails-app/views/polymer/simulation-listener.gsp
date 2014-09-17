@@ -16,13 +16,11 @@
                 <div flex id="pageTitle" class="pageHeader" style="text-align: center;"><h3>{{pagetitle}}</h3></div>
             </div>
 
-            <div style="width:100%;">
-                <div layout horizontal center center-justified id="progressDiv"
-                     style="width:100%; margin:20px auto; height:100%;display:{{isProcessing? 'block':'none'}}">
-                    <progress></progress>
+            <div style="display:{{isProcessing? 'block':'none'}}">
+                <div layout vertical center center-justified  style="text-align:center;min-height: 150px;">
+                    <progress style="margin:20px auto;"></progress>
                 </div>
             </div>
-
 
             <template if="{{message}}">
                 <div id="messageFromService" class="messageFromServiceBox">

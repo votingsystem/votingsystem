@@ -31,7 +31,6 @@
         <div id="container" style="padding:10px;">
             <div layout vertical>
 
-
             <div>
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
@@ -42,7 +41,6 @@
                     </div>
                 </div>
             </div>
-
 
             <div>
                 <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
@@ -55,7 +53,6 @@
                         </template>
                     </div>
                 </div>
-
             </div>
 
             <div>
@@ -126,10 +123,9 @@
         },
 
         searchTag: function() {
-            console.log("======= searchTag")
-            if(!this.$.tagSearchInput.invalid) {
+            if(this.$.tagSearchInput.validity.valid) {
                 this.$.ajax.url = this.serviceURL + "?tag=" + this.$.tagSearchInput.value
-                console.log("======= searchTag - this.$.ajax.url: " + this.$.ajax.url)
+                console.log(this.tagName + " - searchTag - this.$.ajax.url: " + this.$.ajax.url)
                 this.searchString = this.$.tagSearchInput.value
             }
         },

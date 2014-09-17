@@ -128,7 +128,7 @@ class GroupVSService {
                 description:messageJSON.groupvsInfo,tagVSSet:tagSet).save()
         groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))
         new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:groupVS,
-                balance:BigDecimal.ZERO, IBAN:groupVS.getIBAN()).save()
+                balance:BigDecimal.ZERO, IBAN:groupVS.getIBAN(), tag:systemService.getWildTag()).save()
 
         String metaInf =  MetaInfMsg.getOKMsg(methodName, "groupVS_${groupVS.id}")
 

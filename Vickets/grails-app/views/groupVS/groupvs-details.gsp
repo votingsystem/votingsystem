@@ -29,7 +29,7 @@
     <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
                   on-core-signal-uservs-selected="{{showUserDetails}}" ></core-signals>
 
-    <div class="pageContentDiv" style="max-width: 1000px; margin:0px auto 0px auto;"  cross-fade>
+    <div class="pageContentDiv" style="max-width: 1000px; min-width:800px; margin:0px auto 0px auto;"  cross-fade>
         <div layout horizontal center center-justified>
             <template if="{{subpage}}">
                 <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">

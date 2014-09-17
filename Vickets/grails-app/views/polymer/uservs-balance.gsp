@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 
-<polymer-element name="user-balance" attributes="balance">
+<polymer-element name="uservs-balance" attributes="balance">
     <template>
         <g:include view="/include/styles.gsp"/>
             <section id="page1">
@@ -15,7 +15,7 @@
 
 
     <script>
-        Polymer('user-balance', {
+        Polymer('uservs-balance', {
             ready: function() {
                 //console.log(this.tagName + " - ready")
                 this.isVisible = false
@@ -39,7 +39,7 @@
             },
             showBalanceDetails:function() {
                 console.log("showBalanceDetails")
-                this.fire('core-signal', {name: "user-balance-show-details", data: this.balance});
+                this.fire('core-signal', {name: "uservs-balance-show-details", data: this.balance});
             }
         });
     </script>

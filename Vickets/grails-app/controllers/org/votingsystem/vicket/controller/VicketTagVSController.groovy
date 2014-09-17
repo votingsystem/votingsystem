@@ -27,7 +27,8 @@ class VicketTagVSController {
         if("POST".equals(request.method)|| "OPTIONS".equals(request.method)) {
             def requestJSON = request.JSON
             if(!requestJSON.tag) {
-                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code: 'missingParamErrorMsg', args:['tag']))]
+                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'missingParamErrorMsg', args:['tag']))]
             } else  {
                 VicketTagVS tag
                 VicketTagVS.withTransaction { tag = VicketTagVS.findWhere(name:requestJSON.tag) }
@@ -45,6 +46,10 @@ class VicketTagVSController {
                 else render result as JSON
             }
         } else {
+            if(!params.tag || params.tag.isEmpty()) {
+                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'missingParamErrorMsg', args:['tag']))]
+            }
             def listDB
             VicketTagVS.withTransaction {
                 listDB = VicketTagVS.createCriteria().list(offset: 0) {

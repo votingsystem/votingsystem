@@ -103,8 +103,9 @@
     left: 0px;
     right: 0px;
     padding: 2px 7px 2px 7px;
-    color: #fff;
+    color: #fefefe;
     font-weight: bold;
+    font-size: 0.9em;
     background: rgba(0, 0, 0, 0.45);
 }
 
@@ -117,8 +118,7 @@
 }
 
 .numTotalUsersDiv {
-    right: 0px;
-    display: block;
+    padding: 3px 0 0 10px;
     color:#379;
     margin: 0px 20px 0px 0px;
     text-transform:uppercase;

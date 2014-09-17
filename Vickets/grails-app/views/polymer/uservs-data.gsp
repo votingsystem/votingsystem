@@ -51,10 +51,12 @@
                                      style="margin:10px 20px 0px 0px;">
                     <i class="fa fa-envelope-square" style="margin:0 7px 0 3px;"></i> <g:message code="sendMessageVSLbl"/>
                 </votingsystem-button>
-                <votingsystem-button id="makeDepositButton" type="submit" on-click="{{makeDeposit}}"
-                                     style="margin:10px 20px 0px 0px;">
-                    <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
-                </votingsystem-button>
+                <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
+                    <votingsystem-button id="makeDepositButton" type="submit" on-click="{{makeDeposit}}"
+                                         style="margin:10px 20px 0px 0px;">
+                        <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
+                    </votingsystem-button>
+                </div>
                 <template if="{{menuType == 'superadmin'}}">
                     <votingsystem-button id="blockUserVSButton" type="submit"
                                          style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">

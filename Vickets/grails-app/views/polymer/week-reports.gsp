@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/user-balance']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/uservs-balance']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-details']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 
@@ -16,13 +16,13 @@
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{weekReport}}" handleAs="json" contentType="json"
                    on-core-complete="{{ajaxComplete}}" on-core-response="{{coreResponse}}"/>
-        <core-signals on-core-signal-user-balance-show-details="{{showBalanceDetails}}"
+        <core-signals on-core-signal-uservs-balance-show-details="{{showBalanceDetails}}"
                       on-core-signal-balance-details-closed="{{closeBalanceDetails}}"></core-signals>
 
             <div layout horizontal center center-justified>
                 <template bind="{{weekReport.userBalances}}">
                     <div>
-                        <user-balance class="_uservs" balance="{{systemBalance}}"></user-balance>
+                        <uservs-balance class="_uservs" balance="{{systemBalance}}"></uservs-balance>
 
                     </div>
                 </template>
@@ -31,20 +31,20 @@
             <div class="sectionHeader"><g:message code="bankVSsLbl"/></div>
             <div layout flex horizontal wrap around-justified>
                 <template repeat="{{weekReport.userBalances.bankVS}">
-                    <user-balance class="_vicketSource" balabankVStSource}}"></user-bbankVS            </template>
+                    <uservs-balance class="_vicketSource" balabankVStSource}}"></user-bbankVS            </template>
             </div>
 
             <div class="sectionHeader"><g:message code="groupsLbl"/></div>
             <div layout flex horizontal wrap around-justified>
                 <template repeat="{{group in weekReport.userBalances.groupBalanceList}}">
-                    <user-balance class="_group" balance="{{group}}"></user-balance>
+                    <uservs-balance class="_group" balance="{{group}}"></uservs-balance>
                 </template>
             </div>
 
             <div class="sectionHeader"><g:message code="usersLbl"/></div>
             <div layout flex horizontal wrap around-justified>
                 <template repeat="{{user in weekReport.userBalances.userBalanceList}}">
-                    <user-balance class="_uservs" balance="{{user}}"></user-balance>
+                    <uservs-balance class="_uservs" balance="{{user}}"></uservs-balance>
                 </template>
             </div>
 
@@ -77,9 +77,9 @@
                 console.log(this.tagName + " - coreResponse")
             },
             calculateStatistics:function() {
-                var userBalances = this.shadowRoot.querySelectorAll("user-balance._uservs")
-                var groupBalances = this.shadowRoot.querySelectorAll("user-balance._group")
-                var vicketSourceBalances = this.shbankVSrySelectorAll("user-balance._vicketSource")
+                var userBalances = this.shadowRoot.querySelectorAll("uservs-balance._uservs")
+                var groupBalances = this.shadowRoot.querySelectorAll("uservs-balance._group")
+                var vicketSourceBalances = this.shbankVSrySelectorAll("uservs-balance._vicketSource")
 
             },
             showBalanceDetails:function(e, detail, sender) {

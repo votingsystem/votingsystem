@@ -54,6 +54,7 @@ votingsystem-button i {padding: 0px 0px 0px 5px; }
 
 .formFieldError{
     font-weight: bold;
+    font-size: 3em;
     background: #f6ccd0;
     border-color: #ba0011;
 }
