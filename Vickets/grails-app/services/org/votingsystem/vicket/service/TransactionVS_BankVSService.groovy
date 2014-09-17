@@ -21,10 +21,10 @@ class TransactionVS_BankVSService {
         UserVS messageSigner = messageSMIMEReq.userVS
         String msg;
         UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN)
-        //[ fromUser:Implantación proyecto Vickets, fromUserIBAN:ES1877777777450000000050, subject:Ingreso viernes 25, toUserIBAN:ES8378788989450000000015,UUID:693dc9c4-f01c-443d-8934-7eeed0ce582b, operation:VICKET_DEPOSIT_FROM_VICKET_SOURCE, tags:[[name:HIDROGENO]], validTo:2014/07/28 00:00:00]
         if (!messageJSON.amount || !messageJSON.currency || !toUser || ! messageJSON.fromUserIBAN ||
                 !messageJSON.fromUser|| (TypeVS.VICKET_DEPOSIT_FROM_BANKVS != TypeVS.valueOf(messageJSON.operation))) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
+            if(!toUser) msg = messageSource.getMessage('userNotFoundForIBANErrorMsg', [messageJSON.toUserIBAN].toArray(), locale)
+            else msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
@@ -33,11 +33,9 @@ class TransactionVS_BankVSService {
         BankVS signer = BankVS.findWhere(nif:messageSigner.nif)
         if(!(signer)) {
             msg = messageSource.getMessage('bankVSPrivilegesErrorMsg', [messageJSON.operation].toArray(), locale)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, reason:msg,
+                    type:TypeVS.ERROR,metaInf: MetaInfMsg.getErrorMsg(methodName, "bankVSPrivilegesError") )
         }
-        Calendar weekFromCalendar = DateUtils.getMonday(Calendar.getInstance())
-        Calendar weekToCalendar = weekFromCalendar.clone();
-        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
 
         Currency currency = Currency.getInstance(messageJSON.currency)
         String subject = messageJSON.subject

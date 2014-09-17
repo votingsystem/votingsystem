@@ -29,11 +29,10 @@ class SystemService {
     }
 
     public void updateTagBalance(BigDecimal amount, String currencyCode, VicketTagVS tag) {
-        UserVSAccount tagAccount = UserVSAccount.findWhere(userVS:systemUser, tag:tag, currencyCode:currencyCode,
+        UserVSAccount tagAccount = UserVSAccount.findWhere(userVS:getSystemUser(), tag:tag, currencyCode:currencyCode,
                 state: UserVSAccount.State.ACTIVE)
         if(!tagAccount) throw new Exception("THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR TAG '${tag.name}' and currency '${currencyCode}'")
-        if(amount.compareTo(BigDecimal.ZERO) > 0) tagAccount.balance = tagAccount.balance.add(amount)
-        else tagAccount.balance = tagAccount.balance.subtract(amount)
+        tagAccount.balance = tagAccount.balance.add(amount)
         tagAccount.save()
     }
 

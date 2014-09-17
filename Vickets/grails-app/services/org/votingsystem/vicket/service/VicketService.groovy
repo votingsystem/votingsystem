@@ -15,6 +15,7 @@ import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketBatchRequest
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
 
@@ -29,6 +30,7 @@ class VicketService {
     def grailsApplication
     def signatureVSService
     def userVSService
+    def csrService
 
 	public ResponseVS processRequest(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -160,83 +162,53 @@ class VicketService {
         X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         String msg;
         ResponseVS resultResponseVS;
-        try {
-            IbanVSUtil.validate(toUser);
-        } catch(Exception ex) {
-            msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
-                    locale)
-            log.error("${msg} - ${ex.getMessage()}", ex)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"),
-                    contentType: ContentTypeVS.ENCRYPTED, type:TypeVS.VICKET_DEPOSIT_ERROR)
+        IbanVSUtil.validate(toUser);
+
+        String fromUser = grailsApplication.config.VotingSystem.serverName
+        String toUser = smimeMessageReq.getFrom().toString()
+        String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
+
+        String hashCertVS = null;
+        byte[] vicketExtensionValue = vicketX509Cert.getExtensionValue(ContextVS.VICKET_OID);
+        if(vicketExtensionValue != null) {
+            DERTaggedObject vicketCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(vicketExtensionValue);
+            def vicketCertData = JSON.parse(((DERUTF8String) vicketCertDataDER.getObject()).toString());
+            hashCertVS = vicketCertData.hashCertVS
         }
-
-
-        try {
-            String fromUser = grailsApplication.config.VotingSystem.serverName
-            String toUser = smimeMessageReq.getFrom().toString()
-            String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
-
-            String hashCertVS = null;
-            byte[] vicketExtensionValue = vicketX509Cert.getExtensionValue(ContextVS.VICKET_OID);
-            if(vicketExtensionValue != null) {
-                DERTaggedObject vicketCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(vicketExtensionValue);
-                def vicketCertData = JSON.parse(((DERUTF8String) vicketCertDataDER.getObject()).toString());
-                hashCertVS = vicketCertData.hashCertVS
-            }
-            Vicket vicket = Vicket.findWhere(serialNumber:vicketX509Cert.serialNumber.longValue(),
-                    hashCertVS:hashCertVS)
-            if(!vicket) throw new ExceptionVS(messageSource.getMessage("vicketNotFoundErrorMsg", null, locale))
-            if(Vicket.State.OK == vicket.state) {
-                vicket.setMessageSMIME(messageSMIMEReq)
-                vicket.state = Vicket.State.EXPENDED
-                vicket.save()
-                messageSMIMEReq.setType(TypeVS.VICKET);
-                messageSMIMEReq.save()
-                SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
-                        smimeMessageReq, subject)
-                MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                        content:smimeMessageResp.getBytes()).save()
-
-                TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
-                    subject:messageSource.getMessage('sendVicketTransactionSubject', null, locale),
-                    state:TransactionVS.State.OK, currency:vicket.currency, type:TransactionVS.Type.VICKET_SEND).save()
-
-                Map dataMap = [vicketReceipt:messageSMIMEResp, vicket:vicket]
-                resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET, data:dataMap)
-            } else if (Vicket.State.EXPENDED == vicket.state) {
-                log.error("processVicketDeposit - model '${vicket.id}' state ${vicket.state}")
-                Map dataMap = [message:messageSource.getMessage("vicketExpendedErrorMsg", null, locale),
-                        messageSMIME:new String(Base64.encode(vicket.messageSMIME.content))]
-                resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
-                        type:TypeVS.VICKET_DEPOSIT_ERROR, messageBytes: "${dataMap as JSON}".getBytes(), data:dataMap,
-                        contentType:ContentTypeVS.JSON_ENCRYPTED)
-            }
-        } catch(ExceptionVS ex) {
-            log.error(ex.getMessage(), ex);
-            resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage(),
-                    type:TypeVS.VICKET_DEPOSIT_ERROR)
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            msg = messageSource.getMessage('depositDataError', null, locale)
-            resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VICKET_DEPOSIT_ERROR)
-        } finally {
-            if(ResponseVS.SC_OK != resultResponseVS.getStatusCode()) {
-                messageSMIMEReq.setType(TypeVS.VICKET_DEPOSIT_ERROR)
-                if(ResponseVS.SC_ERROR_REQUEST_REPEATED == resultResponseVS.getStatusCode()) {
-                    messageSMIMEReq.setReason("VICKET EXPENDED")
-                } else  messageSMIMEReq.setReason(resultResponseVS.getMessage())
-            } else {
-                messageSMIMEReq.setType(TypeVS.VICKET)
-            }
-            if(batchRequest) messageSMIMEReq.batchRequest = batchRequest
+        Vicket vicket = Vicket.findWhere(serialNumber:vicketX509Cert.serialNumber.longValue(),
+                hashCertVS:hashCertVS)
+        if(!vicket) throw new ExceptionVS(messageSource.getMessage("vicketNotFoundErrorMsg", null, locale))
+        if(Vicket.State.OK == vicket.state) {
+            vicket.setMessageSMIME(messageSMIMEReq)
+            vicket.state = Vicket.State.EXPENDED
+            vicket.save()
+            messageSMIMEReq.setType(TypeVS.VICKET);
             messageSMIMEReq.save()
-            return resultResponseVS
+            SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+                    smimeMessageReq, subject)
+            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
+                    content:smimeMessageResp.getBytes()).save()
+
+            TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
+                    subject:messageSource.getMessage('sendVicketTransactionSubject', null, locale),
+                    state:TransactionVS.State.OK, currency:vicket.currencyCode, type:TransactionVS.Type.VICKET_SEND).save()
+
+            Map dataMap = [vicketReceipt:messageSMIMEResp, vicket:vicket]
+            messageSMIMEReq.setType(TypeVS.VICKET)
+            resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET, data:dataMap)
+        } else if (Vicket.State.EXPENDED == vicket.state) {
+            log.error("processVicketDeposit - model '${vicket.id}' state ${vicket.state}")
+            Map dataMap = [message:messageSource.getMessage("vicketExpendedErrorMsg", null, locale),
+                           messageSMIME:new String(Base64.encode(vicket.messageSMIME.content))]
+            resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
+                    type:TypeVS.ERROR, messageBytes: "${dataMap as JSON}".getBytes(), data:dataMap,
+                    contentType:ContentTypeVS.JSON, reason:dataMap.message,
+                    metaInf: MetaInfMsg.getErrorMsg(methodName, "vicketExpendedError"))
         }
+        if(batchRequest) messageSMIMEReq.batchRequest = batchRequest
+        messageSMIMEReq.save()
+        return resultResponseVS
     }
-
-    def csrService
-
 
     public ResponseVS processVicketRequest(MessageSMIME messageSMIMEReq, byte[] csrRequest, Locale locale) {
         log.debug("processVicketRequest");
