@@ -109,6 +109,10 @@ class MessageSMIMEController {
                     case TypeVS.VICKET_DEPOSIT_FROM_BANKVS:
                         viewer = "vicket-transactionvs"
                         break;
+                        break;
+                    case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                        viewer = "vicket-transactionvs"
+                        break;
                 }
             } catch(Exception ex) { log.error(ex.getMessage(), ex)}
         }

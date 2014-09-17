@@ -17,8 +17,9 @@
             color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;
         }
         </style>
-        <div layout vertical style="margin: 0px 30px; max-width:1000px;">
-            <div class="pageHeader"  layout horizontal center center-justified><h3>{{caption}}</h3></div>
+        <div layout vertical style="margin: 0px auto; max-width:800px;">
+            <div class="pageHeader"  layout horizontal center center-justified
+                 style="margin:0 0 10px 0;font-size: 1.2em;">{{caption}}</div>
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
             </div>
@@ -44,11 +45,11 @@
                     <div style=""><b><g:message code="IBANLbl"/>: </b>{{signedDocument.fromUserIBAN}}</div>
                 </div>
             </div>
-            <div style="margin:20px 0px 0px 20px;">
+            <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible?'block':'none'}}">
                 <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;"><g:message code="receptorLbl"/></div>
-                <div id="toUserDiv">
-                    <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">
-                        <b><g:message code="IBANLbl"/>: </b>{{signedDocument.toUserIBAN}}</div>
+                <div>
+                    <b><g:message code="IBANLbl"/>: </b>
+                    <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{signedDocument.toUserIBAN}}</div>
                 </div>
             </div >
             <template if="{{signedDocument.tags.length > 0}}">
@@ -80,6 +81,7 @@
             messageToUser:null,
             timeStampDate:null,
             caption:null,
+            isReceptorVisible:true,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttoolconnected', function() {
@@ -91,15 +93,22 @@
                 this.fire('attached', null);
             },
             signedDocumentChanged:function() {
+                console.log("signedDocumentChanged")
                 this.messageToUser = null
+                this.isReceptorVisible = true
                 this.signedDocumentStr = JSON.stringify(this.signedDocument)
                 console.log(this.tagName + " - signedDocumentChanged - signedDocument: " + this.signedDocumentStr)
                 switch (this.signedDocument.operation) {
                     case 'VICKET_DEPOSIT_FROM_BANKVS':
                         this.caption = "<g:message code="depositFromBankVSLbl"/>"
-                        break
+                        break;
+                    case 'VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS':
+                        this.isReceptorVisible = false
+                        this.caption = "<g:message code="vicketDepositFromGroupToAllMembers"/>"
+                        break;
                     default:
                         this.caption = signedDocument.operation
+
                 }
             },
             showToUserInfo:function(e) {

@@ -3,7 +3,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/uservs-data-dialog']"/>">
 
-<polymer-element name="uservs-search" attributes="url">
+<polymer-element name="uservs-search" attributes="url isSelector">
     <template>
         <style>
             /*Android browser doesn't fetch this properties from vickets.css*/
@@ -34,7 +34,7 @@
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="json"></core-ajax>
-        <div layout vertical center style="">
+        <div layout vertical center>
             <div style="width:100%; display: {{userVSList.length == 0? 'none':'block'}};">
                 <div layout horizontal center center justified class="tableHeadervs">
                     <div flex><g:message code="nifLbl"/></div>
@@ -59,13 +59,16 @@
     </template>
     <script>
         Polymer('uservs-search', {
+            isSelector:false,
             ready: function() {
                 this.url = this.url || '';
                 this.userVSList = []
             },
             urlChanged:function(e) {},
             showUserDetails:function(e) {
-                this.$.userDataDialog.show(e.target.templateInstance.model.uservs)
+
+                if(this.isSelector) this.fire("user-clicked", e.target.templateInstance.model.uservs)
+                else this.$.userDataDialog.show(e.target.templateInstance.model.uservs)
             },
             reset: function() {
                 this.userVSList = []

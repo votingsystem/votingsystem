@@ -8,7 +8,7 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/uservs-search.gsp']"/>">
 
 
-<polymer-element name="vicket-deposit-form">
+<polymer-element name="vicket-deposit-form" attributes="subpage">
 <template>
         <g:include view="/include/styles.gsp"/>
         <style no-shim>
@@ -18,10 +18,18 @@
             background: #f9f9f9;
             padding:10px 20px 10px 20px;
         }
+        .container{
+            margin: 0 auto;
+            max-width: 600px;
+        }
         </style>
-        <div id="container">
+        <div class="container">
 
-            <div layout horizontal center center-justified style="display:{{isDialog?'none':'block'}}">
+            <div layout horizontal center center-justified style="">
+                <template if="{{subpage}}">
+                    <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
+                        <i class="fa fa-arrow-left"></i></votingsystem-button>
+                </template>
                 <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
                     <votingsystem-html-echo html="{{caption}}"></votingsystem-html-echo>
                 </div>
@@ -40,16 +48,12 @@
             </div>
 
             <div layout vertical id="formDataDiv" style="padding: 5px 20px 0px 20px; height: 100%;">
-                <div layout horizontal center center-justified>
-                    <div style="margin:0 15px 0 0;" >
-                        <input type="text" id="amount" class="form-control" style="width:150px;" pattern="^[0-9]*$" required
-                               title="<g:message code="amountLbl"/>"
-                               placeholder="<g:message code="amountLbl"/> (EUR)"/>
-                    </div>
-                    <div>
-                        <input type="text" id="depositSubject" class="form-control" style="width:350px;" required
-                               title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/> (EUR)"/>
-                    </div>
+                <div>
+                    <input type="text" id="amount" class="form-control" style="width:150px;margin:0 0 10px 0;" pattern="^[0-9]*$" required
+                           title="<g:message code="amountLbl"/>"
+                           placeholder="<g:message code="amountLbl"/> (EUR)"/>
+                    <input type="text" id="depositSubject" class="form-control" style="width:350px;" required
+                           title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/> (EUR)"/>
                 </div>
 
                 <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
@@ -72,25 +76,27 @@
                     </votingsystem-button>
                 </div>
                 <div style="display:{{isDepositToAll ? 'none':'block'}}">
-                    <div class="center" style="padding: 10px;">{{selectReceptorMsg}}</div>
-                    <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                    <div>
+                        <div class="center" style="padding: 10px;">{{selectReceptorMsg}}</div>
+                        <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                    </div>
 
-                    <div id="receptorPanelDiv">
-                        <div layout horizontal center center-justified id="searchPanel" style="margin:15px auto 0px auto;width: 100%;">
+                    <div>
+                        <div layout horizontal center center-justified id="searchPanel" style="margin:5px auto 0px auto;width: 100%;">
                             <input id="userSearchInput" type="text" style="width:200px;" class="form-control"
                                    placeholder="<g:message code="enterReceptorDataMsg"/>">
                             <votingsystem-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
-                                <g:message code="userSearchLbl"/> <i class="fa fa-search"></i>
+                                <i class="fa fa-search" style="margin:0 7px 0 3px;"></i> <g:message code="userSearchLbl"/>
                             </votingsystem-button>
                         </div>
-                        <uservs-search id="userSearchList"></uservs-search>
+                        <uservs-search id="userSearchList" isSelector="true"></uservs-search>
                     </div>
                 </div>
                 <div flex>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
-                    <votingsystem-button on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                    <votingsystem-button on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">
                         <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
                     </votingsystem-button>
                 </div>
@@ -106,7 +112,6 @@
 </template>
 <script>
     Polymer('vicket-deposit-form', {
-        isDialog:false,
         operation:null,
         maxNumberTags:1,
         fromUserName:null,
@@ -114,14 +119,13 @@
         dateValidTo:null,
         groupId:null,
         selectedTags: [],
-
+        subpage:false,
         ready: function() {
             console.log(this.tagName + " - " + this.id)
             this.isDepositToAll = false
-            var depositDialog = this
             this.$.userSearchList.addEventListener('user-clicked', function (e) {
-                depositDialog.$.receptorBox.addUser(e.detail)
-            })
+                this.$.receptorBox.addUser(e.detail)
+            }.bind(this))
 
             this.$.tagDialog.addEventListener('tag-selected', function (e) {
                 console.log("tag-selected: " + JSON.stringify(e.detail))
@@ -129,11 +133,8 @@
             })
 
             this.$.userSearchInput.onkeypress = function(event){
-                var chCode = ('charCode' in event) ? event.charCode : event.keyCode;
-                if (chCode == 13) {
-                    depositDialog.searchUser()
-                }
-            }
+                if (event.keyCode == 13)  this.searchUser()
+            }.bind(this)
         },
 
         showTagDialog: function() {
@@ -219,13 +220,13 @@
                 toUserIBAN:this.toUserIBAN(), amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName,
                 fromUserIBAN:this.fromUserIBAN, validTo:this.dateValidTo }
 
+            var tagList = []
             if(this.selectedTags.length > 0) {
-                var tagList = []
                 for(tagIdx in this.selectedTags) {
                     tagList.push({id:this.selectedTags[tagIdx].id, name:this.selectedTags[tagIdx].name});
                 }
-                webAppMessage.signedContent.tags = tagList
-            }
+            } else tagList.push({id:1, name:'WILDTAG'});
+            webAppMessage.signedContent.tags = tagList
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             var objectId = Math.random().toString(36).substring(7)
             window[objectId] = {setClientToolMessage: function(appMessage) {
@@ -264,9 +265,11 @@
             this.status = status
             this.messageToUser = message
         },
-        init:function(operation, fromUser, fromIBAN, validTo, targetGroupId, isDialog) {
-            console.log(this.id + " - init - operation: " + operation + " - isDialog: " + isDialog)
-            this.isDialog = isDialog? isDialog: false
+        back:function() {
+            this.fire('operation-finished')
+        },
+        init:function(operation, fromUser, fromIBAN, validTo, targetGroupId) {
+            console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage)
             this.operation = operation
             this.fromUserName = fromUser
             this.fromUserIBAN = fromIBAN

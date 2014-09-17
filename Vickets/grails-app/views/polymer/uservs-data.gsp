@@ -36,9 +36,9 @@
         </div>
         <div layout horizontal style="color: #888; margin: 0 0 0 0;">
             <template if="{{uservs.firstName}}">
-                <div flex>{{uservs.firstName}} {{uservs.lastName}}</div>
+                <div  style="margin: 0 0 0 0; font-size: 0.8em;" flex>{{uservs.firstName}} {{uservs.lastName}}</div>
             </template>
-            <div  style="margin: 0 0 0 0; font-size: 0.8em;"><b>IBAN: </b>{{uservs.IBAN}}</div>
+            <div style="margin: 0 0 0 0; font-size: 0.8em;"><b>IBAN: </b>{{uservs.IBAN}}</div>
         </div>
 
         <template if="{{uservs.state != 'ACTIVE'}}">
@@ -47,22 +47,25 @@
 
         <div style="display:{{isClientToolConnected?'block':'none'}}">
             <div layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
-                <votingsystem-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
-                                     style="margin:10px 20px 0px 0px;">
-                    <i class="fa fa-envelope-square" style="margin:0 7px 0 3px;"></i> <g:message code="sendMessageVSLbl"/>
-                </votingsystem-button>
+                <div>
+                    <votingsystem-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
+                                         style="margin:10px 20px 0px 0px;">
+                        <i class="fa fa-envelope-square" style="margin:0 7px 0 3px;"></i> <g:message code="sendMessageVSLbl"/>
+                    </votingsystem-button>
+                </div>
+
                 <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
                     <votingsystem-button id="makeDepositButton" type="submit" on-click="{{makeDeposit}}"
                                          style="margin:10px 20px 0px 0px;">
                         <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
                     </votingsystem-button>
                 </div>
-                <template if="{{menuType == 'superadmin'}}">
+                <div style="display: {{'superadmin' == menuType ? 'block':'none'}}">
                     <votingsystem-button id="blockUserVSButton" type="submit"
                                          style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
                         <g:message code="blockUserVSLbl"/> <i class="fa fa fa-thumbs-o-down"></i>
                     </votingsystem-button>
-                </template>
+                </div>
             </div>
         </div>
 
@@ -74,13 +77,22 @@
             </div>
         </template>
 
-        <template if="{{isActive && menuType == 'user'}}"> </template>
+        <template if="{{uservs.subscriptionVSList && uservs.subscriptionVSList.length > 0}}">
+            <div layout flex horizontal wrap style="border:1px solid #eee; padding: 5px;">
+                <div style="font-size: 0.9em;font-weight: bold; color: #888; margin:0 15px 0 0;">
+                    - <g:message code="groupsLbl"/> -
+                </div>
+                <template repeat="{{subscriptionVS in uservs.subscriptionVSList}}">
+                    <a href="${createLink(controller: 'userVS')}/{{subscriptionVS.groupVS.id}}" style="margin: 0 10px 10px 0;">{{subscriptionVS.groupVS.name}}</a>
+                </template>
+            </div>
+
+        </template>
 
         <%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
             def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewShortDateFormat')
             def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
         %>
-
 
         <template if="{{uservs.transactionVSMap && uservs.transactionVSMap.queryRecordCount > 0}}">
             <div  style="text-align:center; font-size: 1.3em;font-weight: bold; color: #888; margin:25px 0 0 0;">
@@ -142,6 +154,9 @@
                 caption = '<g:message code="sendMessageOKCaption"/>'
             }
             showMessageVS(msg, caption)
+        },
+        domReady: function() {
+            update_a_elements(this.shadowRoot.querySelectorAll("a"))
         }
     });
 

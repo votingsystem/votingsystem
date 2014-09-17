@@ -39,7 +39,7 @@ class UserVSController {
                     resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
                     view = '/groupVS/groupvs'
                 } else if(uservs instanceof BankVS) {
-                    resultMap = [uservsMap:userVSService.getUserVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
+                    resultMap = [uservsMap:userVSService.getBankVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
                     view = 'userVS'
                 } else {
                     resultMap = [uservsMap:userVSService.getUserVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]

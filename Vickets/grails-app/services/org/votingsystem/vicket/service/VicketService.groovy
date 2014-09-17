@@ -112,7 +112,7 @@ class VicketService {
                     fromUserVS:signer, toUserVS:signer, state:TransactionVS.State.OK,
                     currency:vicket.currency, type:TransactionVS.Type.VICKET_CANCELLATION, validTo:vicket.validTo).save()
             log.debug("cancelVicket - model: ${vicket.id} - transactionVS: ${transaction.id}");
-            return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+            return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED,
                     messageBytes: vicket.cancelMessage.content, type:TypeVS.VICKET_CANCEL)
         } else {
             log.error("cancelVicket - ERROR - request for cancel model: ${vicket.id} - with state: ${vicket.state}");
@@ -121,10 +121,10 @@ class VicketService {
             int statusCode = ResponseVS.SC_ERROR_REQUEST
             //ResponseVS.
             if(Vicket.State.CANCELLED == vicket.getState()) {
-                contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
+                contentType = ContentTypeVS.JSON_SIGNED
                 messageBytes = vicket.cancelMessage.content
             } else if(Vicket.State.EXPENDED == vicket.getState()) {
-                contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED
+                contentType = ContentTypeVS.JSON_SIGNED
                 messageBytes = vicket.messageSMIME.content
             }
             if(Vicket.State.LAPSED == vicket.getState()) {
@@ -153,7 +153,7 @@ class VicketService {
         MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                 content:smimeMessageResp.getBytes()).save()
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, type:TypeVS.VICKET_CANCEL, data:messageSMIMEResp,
-                contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED)
+                contentType: ContentTypeVS.JSON_SIGNED)
     }
 
     public ResponseVS processVicketDeposit(MessageSMIME messageSMIMEReq, VicketBatchRequest batchRequest, Locale locale) {

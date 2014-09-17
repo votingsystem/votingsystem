@@ -28,6 +28,14 @@ public class IbanVSUtil {
         return iban.toString();
     }
 
+    public static String getIBAN(Long userId, String bankCodeStr, String branchCodeStr) {
+        String accountNumberStr = String.format("%010d", userId);
+        Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCodeStr).branchCode(branchCodeStr)
+                .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
+        return iban.toString();
+    }
+
+
     public static IbanVSUtil getInstance() {
         return INSTANCE;
     }

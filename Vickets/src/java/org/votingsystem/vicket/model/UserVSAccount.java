@@ -25,11 +25,14 @@ public class UserVSAccount implements Serializable {
 
     public enum State {ACTIVE, SUSPENDED, CANCELLED}
 
+    public enum Type {SYSTEM, EXTERNAL}
+
     public static final long serialVersionUID = 1L;
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.ACTIVE;
+    @Column(name="type") @Enumerated(EnumType.STRING) private Type type = Type.SYSTEM;
 
     @Column(name="balance", nullable=false) private BigDecimal balance = null;
 
@@ -115,6 +118,14 @@ public class UserVSAccount implements Serializable {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public void afterInsert() {

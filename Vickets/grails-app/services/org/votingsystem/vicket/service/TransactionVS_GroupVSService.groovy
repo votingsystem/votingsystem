@@ -14,6 +14,7 @@ import java.math.RoundingMode
 @Transactional
 class TransactionVS_GroupVSService {
 
+    private static final CLASS_NAME = TransactionVS_GroupVSService.class.getSimpleName()
     def walletVSService
     def messageSource
     def systemService
@@ -32,7 +33,7 @@ class TransactionVS_GroupVSService {
                     [messageJSON.fromUserIBAN, messageSigner.nif].toArray(), locale)
             log.error "${methodName} - ${msg}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
-                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+                    message:msg, metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "params"))
         }
         ResponseVS responseVS
         TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
@@ -43,7 +44,7 @@ class TransactionVS_GroupVSService {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
-                    message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+                    message:msg, metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "params"))
         }
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
@@ -58,7 +59,7 @@ class TransactionVS_GroupVSService {
             log.error "${methodName} - ${accountFromMovements.getMessage()}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     reason:accountFromMovements.getMessage(), message:accountFromMovements.getMessage(),
-                    metaInf: MetaInfMsg.getErrorMsg(methodName, "lowBalance"))
+                    metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
         if(operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS) {
             return processDepositForAllMembers(messageSMIMEReq, messageJSON, accountFromMovements.data, transactionValidTo ,
@@ -70,7 +71,7 @@ class TransactionVS_GroupVSService {
                     msg = messageSource.getMessage('groupUserNotFoundByIBANErrorMsg', [it, groupVS.name].toArray(), locale)
                     log.error "${methodName} - ${msg}"
                     responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
-                            message:msg, metaInf: MetaInfMsg.getErrorMsg(methodName, "params"))
+                            message:msg, metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "params"))
                 } else {
                     receptorList.add(userVS)
                 }

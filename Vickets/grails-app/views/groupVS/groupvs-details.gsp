@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-menu-button', file: 'paper-menu-button.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-deposit-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-deposit-form']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-page-tabs']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
@@ -8,6 +8,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-user']"/>">
+<link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 
 <%
     def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
@@ -28,7 +29,9 @@
     <g:include view="/include/styles.gsp"/>
     <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
                   on-core-signal-uservs-selected="{{showUserDetails}}" ></core-signals>
-
+    <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+         transitions="cross-fade-all">
+    <section id="page1">
     <div class="pageContentDiv" style="max-width: 1000px; min-width:800px; margin:0px auto 0px auto;"  cross-fade>
         <div layout horizontal center center-justified>
             <template if="{{subpage}}">
@@ -100,7 +103,7 @@
                 </div>
                 <div layout horizontal>
                     <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
-                        <b><g:message code="groupRepresentativeLbl"/>: </b>{{groupvs.representative.firstName}} {{groupvs.representative.lastName}}
+                        <b><g:message code="representativeLbl"/>: </b>{{groupvs.representative.firstName}} {{groupvs.representative.lastName}}
                     </div>
                     <div flex></div>
                     <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
@@ -128,10 +131,16 @@
             </div>
         </template>
     </div>
+    </section>
+
+    <section id="page2">
+        <div class="pageContentDiv" cross-fade>
+            <vicket-deposit-form id="depositForm" subpage></vicket-deposit-form>
+        </div>
+    </section>
+    </core-animated-pages>
 
     <groupvs-user id="userDescription"></groupvs-user>
-
-    <vicket-deposit-dialog id="depositDialog"></vicket-deposit-dialog>
 
 </template>
 <script>
@@ -156,6 +165,9 @@
             this.$.selectDepositOptionsViv.onclick = function(event){
                 event.stopPropagation();
             }
+            this.$.depositForm.addEventListener('operation-finished', function (e) {
+                this.page = 0;
+            }.bind(this))
         },
         messagedialog:function(e, detail, sender) {
             console.log("messagedialog signal - cancelgroup: " + detail)
@@ -259,15 +271,18 @@
             console.log("showDepositDialog")
             if(e.detail.isSelected) {
                 if('fromGroupToMember' == e.detail.item.id) {
-                    this.$.depositDialog.show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, this.groupvs.name, this.groupvs.IBAN,
+                    this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, this.groupvs.name, this.groupvs.IBAN,
                             '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', this.groupvs.id)
                 } else if('fromGroupToMemberGroup' == e.detail.item.id) {
-                    this.$.depositDialog.show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name, this.groupvs.IBAN,
+                    this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name, this.groupvs.IBAN,
                             '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', this.groupvs.id)
                 } else if('fromGroupToAllMember' == e.detail.item.id) {
-                    this.$.depositDialog.show(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name, this.groupvs.IBAN,
+                    this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name, this.groupvs.IBAN,
                             '${formatDate(date:currentWeekPeriod.getDateTo(), format:"yyyy/MM/dd HH:mm:ss")}', this.groupvs.id)
                 }
+
+                this.page = 1;
+
                 this.$.coreSelector.selected = null
             }
         },

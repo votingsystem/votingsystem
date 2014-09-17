@@ -3,6 +3,8 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.hibernate.ScrollableResults
+import org.iban4j.CountryCode
+import org.iban4j.Iban
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -63,7 +65,10 @@ class TestingController {
     }
 
     def IBAN() {
-        render IbanVSUtil.getInstance().getIBAN(1111111111)
+        String accountNumberStr = String.format("%010d", 12345L);
+        Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode("7777").branchCode( "7777")
+                .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
+        render iban.toString();
         return false
     }
 

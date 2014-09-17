@@ -6,6 +6,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.util.MetaInfMsg
 
@@ -26,6 +27,7 @@ class UserVSService {
     def messageSource
     def subscriptionVSService
     def transactionVSService
+    def systemService
 
     public ResponseVS saveBankVS(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -33,6 +35,9 @@ class UserVSService {
         log.debug("${methodName} - signer: ${userSigner?.nif}")
         String msg = null
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
+
+        IbanVSUtil.validate(messageJSON.bankIBAN)
+
         if (!messageJSON.info || (TypeVS.BANKVS_NEW != TypeVS.valueOf(messageJSON.operation)) ||
                 !messageJSON.certChainPEM) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
@@ -50,7 +55,6 @@ class UserVSService {
         }
 
         Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
-
 
         ResponseVS responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
@@ -82,6 +86,9 @@ class UserVSService {
             bankVSDB.setTimeStampToken(bankVS.getTimeStampToken())
         }
         CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(bankVSDB, null)
+
+        new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
+                type: UserVSAccount.Type.EXTERNAL, IBAN:messageJSON.bankIBAN, tag:systemService.getWildTag()).save()
 
         bankVSDB.save()
         msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
@@ -230,10 +237,24 @@ class UserVSService {
         return resultMap
     }*/
 
+    @Transactional
+    public Map getBankVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){
+        Map resultMap = getUserVSDataMap(userVS)
+        resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)
+        return resultMap
+    }
 
     @Transactional
     public Map getUserVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){
         Map resultMap = getUserVSDataMap(userVS)
+        def subscriptions = SubscriptionVS.findAllWhere(userVS:userVS, state: SubscriptionVS.State.ACTIVE)
+        List subscriptionList = []
+        subscriptions.each { it->
+            (0 ..15).each { at->subscriptionList.add([id:it.id, groupVS:[id:it.groupVS.id, name:it.groupVS.name]])
+            }
+
+        }
+        resultMap.subscriptionVSList = subscriptionList
         resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)
         return resultMap
     }

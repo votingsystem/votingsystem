@@ -39,8 +39,9 @@
     var signedContent
     var jsonDepositFromBankVS = {operation:"VICKET_DEPOSIT_FROM_BANKVS",
         signedMessageSubject:"Deposit from BankVS",
-        signedContent:{operation:"VICKET_DEPOSIT_FROM_BANKVS", fromUser: "JOSE J. APELLIDO1 APELLIDO2",
-            fromUserIBAN:"ES1877777777450000000050", toUserIBAN:"ES8378788989450000000015",
+        signedContent:{operation:"VICKET_DEPOSIT_FROM_BANKVS", bankIBAN:"ES1877777777450000000050",
+            fromUser: "JOSE J. APELLIDO1 APELLIDO2",
+            fromUserIBAN:"ES8477777777450000012345", toUserIBAN:"ES8378788989450000000015",
             amount:"30000", tags:[{name:"HIDROGENO"}], validTo:"2014/09/21 00:00:00", subject:"Ingreso viernes 25", currency:"EUR" },
         serviceURL:"${createLink( controller:'transactionVS', action:"deposit", absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
