@@ -38,7 +38,7 @@
             <div>
                 <template repeat="{{account in balanceList.accounts}}">
                     <div class="rowvs" layout horizontal center center-justified>
-                        <div flex style="width: 80px;">{{account.tag.name}}</div>
+                        <div flex style="width: 80px;">{{account.tag.name | getTagDescription}}</div>
                         <div flex style="width:80px;">{{account.amount | formatAmount}}</div>
                         <div style="">{{account.currency}}</div>
                         <div flex style="">{{account.lastUpdated}}</div>
@@ -51,6 +51,12 @@
     <script>
         Polymer('balance-list', {
             ready: function() {},
+            getTagDescription: function(tagName) {
+                switch (tagName) {
+                    case 'WILDTAG': return "<g:message code="wildTagLbl"/>".toUpperCase()
+                    default: return tagName
+                }
+            },
             formatAmount: function(amount) {
                 if(typeof amount == 'number') return amount.toFixed(2)
             }

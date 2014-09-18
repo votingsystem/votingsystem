@@ -61,7 +61,7 @@ public class WalletVS {
                 result.put(wildTagAccount, amount);
             } else {
                 return new ResponseVS<>(ResponseVS.SC_ERROR, ApplicationContextHolder.getMessage(
-                        "balanceErrorMsg", wildTagAccount.getBalance() + " " + currencyCode,  amount + " " + currencyCode));
+                        "wildTagLowBalanceErrorMsg", wildTagAccount.getBalance() + " " + currencyCode,  amount + " " + currencyCode));
             }
         }
         return new ResponseVS<Map<UserVSAccount, BigDecimal>>(ResponseVS.SC_OK, null, result);

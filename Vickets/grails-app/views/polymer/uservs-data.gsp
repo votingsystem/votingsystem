@@ -31,7 +31,7 @@
         {{uservs | setType}}
         <div layout horizontal center center-justified>
             <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                <div style="text-align: center;">{{uservsType}} - {{uservs.name}}</div>
+                <div userId-data="{{uservs.id}}" style="text-align: center;">{{uservsType}} - {{uservs.name}}</div>
             </div>
         </div>
         <div layout horizontal style="color: #888; margin: 0 0 0 0;">

@@ -1,5 +1,6 @@
 <script>
     window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
+    window.CKEDITOR_BASEPATH = '${grailsApplication.config.grails.serverURL}/bower_components/ckeditor/';
 
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {

@@ -46,10 +46,14 @@
                 </div>
             </div>
             <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible?'block':'none'}}">
-                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;"><g:message code="receptorLbl"/></div>
-                <div>
-                    <b><g:message code="IBANLbl"/>: </b>
-                    <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{signedDocument.toUserIBAN}}</div>
+                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;">{{receptorLbl}}</div>
+                <div layout horizontal>
+                    <div><b><g:message code="IBANLbl"/>: </b></div>
+                    <div layout vertical>
+                        <template repeat="{{IBAN in signedDocument.toUserIBAN}}">
+                            <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
+                        </template>
+                    </div>
                 </div>
             </div >
             <template if="{{signedDocument.tags.length > 0}}">
@@ -96,6 +100,10 @@
                 console.log("signedDocumentChanged")
                 this.messageToUser = null
                 this.isReceptorVisible = true
+                if(this.signedDocument.toUserIBAN.length > 1) {
+                    this.receptorLbl = '<g:message code="receptorsLbl"/>'
+                } else this.receptorLbl = '<g:message code="receptorLbl"/>'
+
                 this.signedDocumentStr = JSON.stringify(this.signedDocument)
                 console.log(this.tagName + " - signedDocumentChanged - signedDocument: " + this.signedDocumentStr)
                 switch (this.signedDocument.operation) {
@@ -106,8 +114,14 @@
                         this.isReceptorVisible = false
                         this.caption = "<g:message code="vicketDepositFromGroupToAllMembers"/>"
                         break;
+                    case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':
+                        this.caption = "<g:message code="vicketDepositFromGroupToMember"/>"
+                        break;
+                    case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP':
+                        this.caption = "<g:message code="vicketDepositFromGroupToMemberGroup"/>"
+                        break;
                     default:
-                        this.caption = signedDocument.operation
+                        this.caption = this.signedDocument.operation
 
                 }
             },
@@ -124,8 +138,8 @@
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showToUserIBAN:function(e) {
-                console.log(this.tagName + " - showToUserIBAN")
-                this.$.userVSDialog.showByIBAN(e.target.templateInstance.model.signedDocument.toUserIBAN)
+                console.log(this.tagName + " - showToUserIBAN - " + e)
+                this.$.userVSDialog.showByIBAN(e.target.templateInstance.model.IBAN)
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)

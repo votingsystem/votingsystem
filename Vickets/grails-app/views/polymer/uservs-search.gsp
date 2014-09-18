@@ -66,8 +66,10 @@
             },
             urlChanged:function(e) {},
             showUserDetails:function(e) {
-
-                if(this.isSelector) this.fire("user-clicked", e.target.templateInstance.model.uservs)
+                if(this.isSelector) {
+                    this.fire("user-clicked", e.target.templateInstance.model.uservs)
+                    this.fire('core-signal', {name: "user-clicked", data: e.target.templateInstance.model.uservs});
+                }
                 else this.$.userDataDialog.show(e.target.templateInstance.model.uservs)
             },
             reset: function() {

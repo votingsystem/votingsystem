@@ -22,9 +22,8 @@ class ChangeWeekLapseJob {
     private checkCancelledVickets() {
         Calendar calendar = Calendar.getInstance()
         Vicket.withTransaction {
-            def criteria = Vicket.createCriteria()
             log.debug("checkCancelledVickets ${calendar.getTime()}")
-            def criteriaVicket = criteria.scroll {
+            def criteriaVicket = Vicket.createCriteria().scroll {
                 le("validTo", calendar.getTime())
                 eq("state", Vicket.State.OK)
             }

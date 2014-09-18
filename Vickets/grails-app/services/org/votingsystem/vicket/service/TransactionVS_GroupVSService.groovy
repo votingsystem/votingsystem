@@ -96,7 +96,7 @@ class TransactionVS_GroupVSService {
             TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
                     fromUserVS:groupVS, fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK,
                     validTo: transactionValidTo, subject:messageJSON.subject, type:transactionVSType,
-                    accountFromMovements: accountFromMovements, currencyCode: currency.getCurrencyCode(), tag:tag).save()
+                    accountFromMovements: accountFromMovements.data, currencyCode: currency.getCurrencyCode(), tag:tag).save()
             receptorList.each { toUser ->
                 TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart,toUser, toUser.IBAN).save()
@@ -111,12 +111,13 @@ class TransactionVS_GroupVSService {
 
     @Transactional
     private UserVS getUserFromGroup (GroupVS groupVS, String IBAN) {
-        def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
+        List subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
             eq("groupVS", groupVS)
             eq("state", SubscriptionVS.State.ACTIVE)
             userVS { eq("IBAN", IBAN)}
         }
-        return subscriptionList.iterator()?.next()?.userVS
+        if(subscriptionList.isEmpty()) return null
+        else return subscriptionList?.iterator()?.next().userVS
     }
 
     @Transactional

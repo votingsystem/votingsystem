@@ -3,7 +3,7 @@
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-deposit-form']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-page-tabs']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-item', file: 'core-item.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
@@ -35,8 +35,10 @@
     <div class="pageContentDiv" style="max-width: 1000px; min-width:800px; margin:0px auto 0px auto;"  cross-fade>
         <div layout horizontal center center-justified>
             <template if="{{subpage}}">
-                <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
-                    <i class="fa fa-arrow-left"></i></votingsystem-button>
+                <div title="<g:message code="backLbl"/>">
+                    <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
+                        <i class="fa fa-arrow-left"></i></votingsystem-button>
+                </div>
             </template>
 
             <div layout vertical flex>
@@ -44,15 +46,15 @@
                 </div>
 
                 <div style="display:{{isAdminView && isClientToolConnected? 'block':'none'}}">
-                    <div layout horizontal center center-justified style="margin:0 0 0 0;">
+                    <div layout horizontal center center-justified style="margin:0 0 20px 0;">
                         <div id="groupConfigOptionsViv">
-                            <paper-menu-button id="groupConfigOptions" class="menuButton" valign="bottom" style="width: 0px;padding:0px;">
+                            <paper-menu-button id="groupConfigOptions" class="menuButton" valign="bottom">
                                 <core-selector target="{{$.groupOptions}}" id="groupOptionsSelector" valueattr="id" on-core-select="{{configGroup}}">
-                                    <div id="groupOptions" style=" border: 1px solid #6c0404;">
-                                        <paper-item id="editGroup" label="<g:message code="editDataLbl"/>">
-                                            <div flex></div><i class="fa fa-pencil-square-o"></i></paper-item>
-                                        <paper-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>">
-                                            <div flex></div><i class="fa fa-trash-o"></i></paper-item>
+                                    <div id="groupOptions" style=" border: 1px solid #6c0404;padding:0 10px 0 10px;">
+                                        <core-item id="editGroup" label="<g:message code="editDataLbl"/>">
+                                            <div flex></div><i class="fa fa-pencil-square-o"></i></core-item>
+                                        <core-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>">
+                                            <div flex></div><i class="fa fa-trash-o"></i></core-item>
                                     </div>
                                 </core-selector>
                             </paper-menu-button>
@@ -62,12 +64,12 @@
                         </div>
 
                         <div id="selectDepositOptionsViv">
-                            <paper-menu-button id="selectDepositOptions" class="menuButton" valign="bottom" style="width: 0px;padding:0px;">
+                            <paper-menu-button id="selectDepositOptions" class="menuButton" valign="bottom">
                                 <core-selector target="{{$.depositOptions}}" id="coreSelector" valueattr="id" on-core-select="{{showDepositDialog}}">
-                                    <div id="depositOptions" style=" border: 1px solid #6c0404;">
-                                        <paper-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></paper-item>
-                                        <paper-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></paper-item>
-                                        <paper-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"</paper-item>
+                                    <div id="depositOptions" style=" border: 1px solid #6c0404;padding:0 10px 0 10px;">
+                                        <core-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></core-item>
+                                        <core-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></core-item>
+                                        <core-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"></core-item>
                                     </div>
                                 </core-selector>
                             </paper-menu-button>
@@ -75,7 +77,6 @@
                                 <i class="fa fa-money" style="margin:0 7px 0 3px;"></i>  <g:message code="makeDepositFromGroupVSLbl"/>
                             </votingsystem-button>
                         </div>
-
                     </div>
                 </div>
 

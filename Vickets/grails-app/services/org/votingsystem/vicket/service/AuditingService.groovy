@@ -13,22 +13,14 @@ class AuditingService {
     def grailsLinkGenerator
 
     //Check that the sum of all issued Vickets match with valid user signed request
-    def checkVicketRequest(Date selectedDate) {
-        Calendar weekFromCalendar = Calendar.getInstance();
-        weekFromCalendar.setTime(selectedDate)
-        weekFromCalendar = DateUtils.getMonday(weekFromCalendar)
-        Calendar weekToCalendar = weekFromCalendar.clone();
-        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
-        weekFromCalendar.add(Calendar.SECOND, -1)
-        //weekFromCalendar.add(Calendar.SECOND, 1)
-        weekToCalendar.add(Calendar.SECOND, 1)
+    def checkVicketRequest(DateUtils.TimePeriod timePeriod) {
         def vickets = Vicket.createCriteria().scroll {
-            ge("validFrom", weekFromCalendar.getTime())
-            le("validTo", weekToCalendar.getTime())
+            ge("validFrom", timePeriod.getDateFrom())
+            le("validTo", timePeriod.getDateTo())
         }
         int numVicketsCancelled = 0
         int numVickets = 0
-        BigDecimal amountIssued = new BigDecimal(0)
+        BigDecimal amountIssued = BigDecimal.ZERO
         //euro
         while(vickets.next()) {
             Vicket vicket = (Vicket) vickets.get(0);
@@ -49,10 +41,9 @@ class AuditingService {
 
         def vicketRequests = TransactionVS.createCriteria().scroll {
             eq("type", TransactionVS.Type.VICKET_REQUEST)
-            ge("dateCreated", weekFromCalendar.getTime())
-            le("dateCreated", weekToCalendar.getTime())
+            between('dateCreated', timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
-        BigDecimal amountRequested = new BigDecimal(0)
+        BigDecimal amountRequested = BigDecimal.ZERO
         while(vicketRequests.next()) {
             //user signed requests
             TransactionVS vicketTransaction = (TransactionVS) vicketRequests.get(0);
@@ -64,16 +55,14 @@ class AuditingService {
 
 
     //Backup user transactions for the week of the selected date
-    //Users
-    def backupUserTransactionHistory (Date selectedDate) {
+    def backupUserTransactionHistory (DateUtils.TimePeriod timePeriod) {
         Calendar weekFromCalendar = Calendar.getInstance();
         weekFromCalendar.setTime(selectedDate)
         weekFromCalendar = DateUtils.getMonday(weekFromCalendar)
         weekFromCalendar.add(Calendar.SECOND, 1)
         Calendar weekToCalendar = weekFromCalendar.clone();
         weekToCalendar.add(Calendar.DAY_OF_YEAR, 7)
-        log.debug("backupUserTransactionHistory - selectedDate: ${selectedDate} - weekFrom :${weekFromCalendar.getTime()} " +
-                "- weekTo :${weekToCalendar.getTime()}")
+        log.debug("backupUserTransactionHistory - from: ${timePeriod.getDateFrom()} - to :${timePeriod.getDateTo()}")
 
         String lapsePath = DateUtils.getDirPath(weekFromCalendar.getTime())
         String basePath = "${grailsApplication.config.VotingSystem.backupCopyPath}/userTransactionHistory${lapsePath}"
@@ -127,6 +116,5 @@ class AuditingService {
             }
         }*/
     }
-
 
 }

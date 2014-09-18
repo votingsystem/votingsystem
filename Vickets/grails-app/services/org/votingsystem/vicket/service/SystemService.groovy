@@ -11,6 +11,7 @@ class SystemService {
 
     private UserVS systemUser
     private VicketTagVS wildTag
+    private Locale defaultLocale
     def grailsApplication
 
     public synchronized Map init() throws Exception {
@@ -34,6 +35,11 @@ class SystemService {
         if(!tagAccount) throw new Exception("THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR TAG '${tag.name}' and currency '${currencyCode}'")
         tagAccount.balance = tagAccount.balance.add(amount)
         tagAccount.save()
+    }
+
+    public Locale getDefaultLocale() {
+        if(defaultLocale == null) defaultLocale = new Locale(grailsApplication.config.VotingSystem.defaultLocale)
+        return defaultLocale
     }
 
     public UserVS getSystemUser() {

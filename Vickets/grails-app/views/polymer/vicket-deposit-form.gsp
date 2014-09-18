@@ -2,11 +2,10 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/tagvs-select-dialog']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/uservs-search.gsp']"/>">
-
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/tagvs-select-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/uservs-search-dialog']"/>">
 
 <polymer-element name="vicket-deposit-form" attributes="subpage">
 <template>
@@ -20,18 +19,24 @@
         }
         .container{
             margin: 0 auto;
-            max-width: 600px;
+            max-width: 500px;
         }
         </style>
         <div class="container">
 
             <div layout horizontal center center-justified style="">
                 <template if="{{subpage}}">
-                    <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
-                        <i class="fa fa-arrow-left"></i></votingsystem-button>
+                    <div title="<g:message code="backLbl"/>" >
+                        <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
+                            <i class="fa fa-arrow-left"></i></votingsystem-button>
+                    </div>
+
                 </template>
-                <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
-                    <votingsystem-html-echo html="{{caption}}"></votingsystem-html-echo>
+                <div flex style=" margin:0 0 0 20px; color:#6c0404;">
+                    <div>
+                        <div style="font-size: 1.5em; font-weight: bold;">{{operationMsg}}</div>
+                        <div>{{fromUserName}}</div>
+                    </div>
                 </div>
             </div>
 
@@ -47,7 +52,7 @@
                 </div>
             </div>
 
-            <div layout vertical id="formDataDiv" style="padding: 5px 20px 0px 20px; height: 100%;">
+            <div layout vertical id="formDataDiv" style="padding: 15px 20px 0px 20px; height: 100%;">
                 <div>
                     <input type="text" id="amount" class="form-control" style="width:150px;margin:0 0 10px 0;" pattern="^[0-9]*$" required
                            title="<g:message code="amountLbl"/>"
@@ -56,8 +61,9 @@
                            title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/> (EUR)"/>
                 </div>
 
-                <div  layout horizontal id="tagDataDiv" style="width:100%;margin:15px 0px 15px 0px; border: 1px solid #ccc;
-                        font-size: 1.1em; display: none; padding: 5px; display:{{isDepositToAll ? 'block':'none'}}">
+                <div  layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
+                    font-size: 1.1em; padding: 5px;display: block;}}">
+                    <div>{{selectedTagMsg}}</div>
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
                         <div style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
                             <g:message code="depositWithTagAdvertMsg"/>
@@ -71,26 +77,15 @@
                             </template>
                         </div>
                     </div>
-                    <votingsystem-button on-click="{{showTagDialog}}" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                    <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
                         <i class="fa fa-tag" style="margin:0 7px 0 3px;"></i> <g:message code="addTagLbl"/>
                     </votingsystem-button>
                 </div>
-                <div style="display:{{isDepositToAll ? 'none':'block'}}">
-                    <div>
-                        <div class="center" style="padding: 10px;">{{selectReceptorMsg}}</div>
-                        <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
-                    </div>
-
-                    <div>
-                        <div layout horizontal center center-justified id="searchPanel" style="margin:5px auto 0px auto;width: 100%;">
-                            <input id="userSearchInput" type="text" style="width:200px;" class="form-control"
-                                   placeholder="<g:message code="enterReceptorDataMsg"/>">
-                            <votingsystem-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-search" style="margin:0 7px 0 3px;"></i> <g:message code="userSearchLbl"/>
-                            </votingsystem-button>
-                        </div>
-                        <uservs-search id="userSearchList" isSelector="true"></uservs-search>
-                    </div>
+                <div style="display:{{isDepositFromGroupToAllMembers ? 'none':'block'}}">
+                    <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
+                        <i class="fa fa-user" style="margin:0 7px 0 3px;"></i> {{selectReceptorMsg}}
+                    </votingsystem-button>
+                    <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
                 </div>
                 <div flex>
                 </div>
@@ -103,6 +98,7 @@
             </div>
         </div>
 
+        <uservs-search-dialog id="searchDialog"></uservs-search-dialog>
     <div>
         <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
             <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
@@ -122,25 +118,28 @@
         subpage:false,
         ready: function() {
             console.log(this.tagName + " - " + this.id)
-            this.isDepositToAll = false
-            this.$.userSearchList.addEventListener('user-clicked', function (e) {
+            this.isDepositFromGroupToAllMembers = false
+
+            document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
                 this.$.receptorBox.addUser(e.detail)
-            }.bind(this))
+            }.bind(this));
 
             this.$.tagDialog.addEventListener('tag-selected', function (e) {
                 console.log("tag-selected: " + JSON.stringify(e.detail))
-                depositDialog.selectedTags = e.detail
-            })
+                this.selectedTags = e.detail
+            }.bind(this))
 
-            this.$.userSearchInput.onkeypress = function(event){
-                if (event.keyCode == 13)  this.searchUser()
-            }.bind(this)
         },
-
+        openSearchUserDialog:function(){
+            this.$.searchDialog.show()
+        },
         showTagDialog: function() {
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
         },
-
+        selectedTagsChanged: function(e) {
+            if(this.selectedTags.length > 0) this.selectedTagMsg = "<g:message code="onlyTagAllowedExpendingMsg"/>"
+            else this.selectedTagMsg = null
+        },
         removeTag: function(e) {
             var tagToDelete = e.target.templateInstance.model.tag
             for(tagIdx in this.selectedTags) {
@@ -153,16 +152,12 @@
         reset: function() {
             console.log(this.id + " - reset")
             this.removeErrorStyle(this.$.formDataDiv)
-            this.isDepositToAll = false
-            this.$.userSearchInput.value = ""
+            this.isDepositFromGroupToAllMembers = false
             this.$.amount.value = ""
             this.$.depositSubject.value = ""
-            this.$.userSearchList.url = ""
             this.setMessage(200, null)
             this.$.receptorBox.removeUsers()
-            this.$.userSearchList.reset()
             this.$.tagDialog.reset()
-            this.$.tagDataDiv.style.display = 'none'
         },
 
         removeErrorStyle: function (element) {
@@ -181,6 +176,7 @@
 
         submitForm: function () {
             this.removeErrorStyle(this.$.formDataDiv)
+            console.log("====== submitForm")
             switch(this.operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     if(this.$.receptorBox.getUserList().length == 0){
@@ -225,7 +221,7 @@
                 for(tagIdx in this.selectedTags) {
                     tagList.push({id:this.selectedTags[tagIdx].id, name:this.selectedTags[tagIdx].name});
                 }
-            } else tagList.push({id:1, name:'WILDTAG'});
+            } else tagList.push({id:1, name:'WILDTAG'}); //No tags, receptor can expend money with any tag
             webAppMessage.signedContent.tags = tagList
             webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
             var objectId = Math.random().toString(36).substring(7)
@@ -251,15 +247,6 @@
             }
             return result
         },
-        searchUser: function() {
-            var textToSearch = this.$.userSearchInput.value
-            if(textToSearch.trim() == "") return
-            var targetURL
-            if(this.groupId != null) targetURL = "${createLink(controller: 'userVS', action: 'searchGroup')}?searchText=" + textToSearch + "&groupId=" + this.groupId
-            else targetURL = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
-            this.$.userSearchList.url = targetURL
-        },
-
         setMessage:function(status, message) {
             console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
             this.status = status
@@ -275,22 +262,22 @@
             this.fromUserIBAN = fromIBAN
             this.dateValidTo = validTo
             this.groupId = targetGroupId
+            this.isDepositFromGroupToAllMembers = false
             switch(operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
-                    this.caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMember'/></div>"
+                    this.operationMsg = "<g:message code='vicketDepositFromGroupToMember'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
                     this.$.receptorBox.multiSelection = false
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
-                    this.caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToMemberGroup'/></div>"
+                    this.operationMsg = "<g:message code='vicketDepositFromGroupToMemberGroup'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
                     this.$.receptorBox.multiSelection = true
                     break;
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
-                    this.isDepositToAll = true
-                    this.caption = fromUser + "<br/><div style='font-weight: normal;'><g:message code='vicketDepositFromGroupToAllMembers'/></div>"
+                    this.isDepositFromGroupToAllMembers = true
+                    this.operationMsg = "<g:message code='vicketDepositFromGroupToAllMembers'/>"
                     this.selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
-                    this.$.tagDataDiv.style.display = 'block'
                     break;
             }
             this.selectedTags = []

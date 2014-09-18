@@ -250,9 +250,7 @@ class UserVSService {
         def subscriptions = SubscriptionVS.findAllWhere(userVS:userVS, state: SubscriptionVS.State.ACTIVE)
         List subscriptionList = []
         subscriptions.each { it->
-            (0 ..15).each { at->subscriptionList.add([id:it.id, groupVS:[id:it.groupVS.id, name:it.groupVS.name]])
-            }
-
+            subscriptionList.add([id:it.id, groupVS:[id:it.groupVS.id, name:it.groupVS.name]])
         }
         resultMap.subscriptionVSList = subscriptionList
         resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)

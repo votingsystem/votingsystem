@@ -32,6 +32,13 @@
             <p><b>¿Quien puede emitir Vickets?</b> El sistema es libre, cualquiera puede instalarlo. Depende del usuario el
             confiar o no en los Vickets emitidos por una determinada organización. Puede ser utilizado por un centro
             comercial para cupones y descuentos, para la gestión (y control) de entradas en eventos, como moneda alternativa...</p>
+            <p><b>¿Por qué llevan asociados algunos ingresos una etiqueta?</b> Los ingresos que llevan asociados una <b>etiqueta</b>
+            sirven para que el destinatario sólo pueda emplear ese dinero en servicios que tengan asociada esa <b>etiqueta</b>.</p>
+            <p><b>¿Por qué llevan asociados algunos ingresos una fecha de caducidad?</b> Los ingresos que llevan asociados
+            <b>una fecha de caducidad</b> sirven para obligar a los usuarios a que empleen ese dinero antes de la <b>fecha
+             de caducidad</b> del mismo. En caso contrario el dinero con <b>fecha de caducidad</b> que no haya sido utilizado
+            pasará a ser propiedad del sistema.
+            </p>
         </div>
 
         <div class="text-justify" style="margin: 20px auto 300px auto;font-size: 1.2em;">
