@@ -4,11 +4,14 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
+    <style>
+
+    </style>
 </head>
 <body>
     <div class="pageContentDiv" style="max-width: 1300px; margin: 0px auto 0px auto; padding: 0px 30px 0px 30px;">
         <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
-            <h3 class="page-header">Vickets, moneda electrónica basada en arquitecturas de clave pública.</h3>
+            <h3 class="pageHeader">Vickets, moneda electrónica basada en arquitecturas de clave pública.</h3>
             <ul>
                 <li>Con <b>Autoridad Certificadora</b> y <b>Servidor de Sellos de Tiempo</b> propios.</li>
                 <li>Operativas transparentes y seguras.</li>
@@ -20,7 +23,7 @@
         </div>
 
         <div class="text-justify" style="margin: 20px auto 0 auto;font-size: 1.2em;">
-            <h3 class="page-header">Preguntas frecuentes</h3>
+            <h3 class="pageHeader">Preguntas frecuentes</h3>
             <p><b>¿Qué es un Vicket?</b> Es un certificado electrónico anónimo (sin información que pueda relacionarlo con el
             propietario) que tiene asociado un valor y que permite <b>intercambios monetarios anónimos de forma segura</b>.</p>
             <p><b>¿Cómo se produce un intercambio de Vickets?</b> El usuario que desea hacer una transacción utiliza los
@@ -42,9 +45,8 @@
         </div>
 
         <div class="text-justify" style="margin: 20px auto 300px auto;font-size: 1.2em;">
-            <h3 class="page-header">Alquimia digital</h3>
+            <h3 class="pageHeader">Alquimia digital. Estímulo de actividad mediante monedas electrónicas</h3>
             <p><b>La moneda electrónica sirve para poder añadir nuevas funcionalidades a la moneda tradicional</b></p>
-            <p><b>Estímulo de actividad mediante monedas electrónicas</b></p>
             <p>Lo que necesitan las empresas es demanda efectiva, es decir, que sus potenciales compradores tengan más
             ingresos para gastar. Es solo el incremento de gasto por parte de los consumidores lo que puede hacer que
             aumente la actividad.</p>

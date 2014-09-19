@@ -85,16 +85,13 @@
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
                     var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_DEACTIVATE)
-                    webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                    webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                     webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'deActivateUser',absolute:true)}"
                     webAppMessage.signedMessageSubject = "<g:message code="deActivateGroupUserMessageSubject"/>" + " '" + this.subscriptionData.groupvs.name + "'"
                     webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEACTIVATE,
                         groupvs:{name:this.subscriptionData.groupvs.name, id:this.subscriptionData.groupvs.id},
                         uservs:{name:this.subscriptionData.uservs.name, NIF:this.subscriptionData.uservs.NIF}, reason:e.detail}
                     webAppMessage.contentType = 'application/x-pkcs7-signature'
-                    var objectId = Math.random().toString(36).substring(7)
-                    window[objectId] = {setClientToolMessage: function(appMessage) {
+                    webAppMessage.setCallback(function(appMessage) {
                         console.log("deActivateUserCallback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
                         var caption = '<g:message code="deActivateUserERRORLbl"/>'
@@ -103,9 +100,7 @@
                         }
                         var msg = appMessageJSON.message
                         showMessageVS(msg, caption)
-                        }}
-                    webAppMessage.callerCallback = objectId
-                    webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+                    }.bind(this))
                     VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 }.bind(this))
             },

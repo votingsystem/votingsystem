@@ -17,6 +17,8 @@ import org.votingsystem.vicket.model.TransactionVS
 //@Transactional
 class BalanceService {
 
+    private static final CLASS_NAME = BalanceService.class.getSimpleName()
+
     def systemService
     def messageSource
     def grailsApplication

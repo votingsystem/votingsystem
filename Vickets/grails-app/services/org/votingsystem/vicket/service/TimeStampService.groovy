@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.service
 
+import grails.transaction.Transactional
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DERObject
 import org.bouncycastle.asn1.cms.CMSAttributes
@@ -23,8 +24,11 @@ import org.votingsystem.util.MetaInfMsg
 import java.security.MessageDigest
 import java.security.cert.X509Certificate
 
+@Transactional
 class TimeStampService {
-	
+
+    private static final CLASS_NAME = TimeStampService.class.getSimpleName()
+
 	def grailsApplication
 	def messageSource
 

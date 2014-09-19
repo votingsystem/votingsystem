@@ -65,13 +65,23 @@
             return false
         }
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_CA_NEW)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink( controller:'certificateVS', action:"addCertificateAuthority", absolute:true)}"
         webAppMessage.signedMessageSubject = "<g:message code='newCertificateAuthorityMsgSubject'/>"
         webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
                     operation:Operation.CERT_CA_NEW}
-        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        webAppMessage.setCallback(function(appMessage) {
+            console.log("newCertifiateAuthorityCallback - message: " + appMessage);
+            appMessageJSON = toJSON(appMessage)
+            var caption = '<g:message code="newCACertERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="newCACertOKCaption"/>'
+                var msgTemplate = '<g:message code='accessLinkMsg'/>';
+            }
+            showMessageVS(msg, caption)
+            window.scrollTo(0,0);
+        })
+
         var objectId = Math.random().toString(36).substring(7)
         window[objectId] = callbackListener
         webAppMessage.callerCallback = objectId
@@ -80,19 +90,6 @@
     }
 
     var appMessageJSON
-
-    var callbackListener = {setClientToolMessage: function(appMessage) {
-        console.log("newCertifiateAuthorityCallback - message: " + appMessage);
-        appMessageJSON = toJSON(appMessage)
-        var caption = '<g:message code="newCACertERRORCaption"/>'
-        var msg = appMessageJSON.message
-        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-            caption = '<g:message code="newCACertOKCaption"/>'
-            var msgTemplate = '<g:message code='accessLinkMsg'/>';
-        }
-        showMessageVS(msg, caption)
-        window.scrollTo(0,0);
-    }}
 
     document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function() {
         if(appMessageJSON != null) {

@@ -19,6 +19,8 @@ class SubscriptionVSService {
 
 	static transactional = false
 
+    private static final CLASS_NAME = SubscriptionVSService.class.getSimpleName()
+
     def grailsApplication
 	def messageSource
     def userVSService
@@ -42,12 +44,6 @@ class SubscriptionVSService {
                     metaInf: MetaInfMsg.getErrorMsg(methodName, "missingCert"))
 		}
 		String validatedNIF = org.votingsystem.util.NifUtils.validate(userVS.getNif())
-		if(!validatedNIF) {
-			msg = messageSource.getMessage('NIFWithErrorsMsg', [userVS.getNif()].toArray(), locale)
-			log.error("checkUser - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
-                    metaInf: MetaInfMsg.getErrorMsg(methodName,"nif"))
-		}
 		UserVS userVSDB = UserVS.findByNif(validatedNIF.toUpperCase())
         JSONObject deviceData = CertUtil.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
         boolean isNewUser = false
@@ -56,10 +52,9 @@ class SubscriptionVSService {
             userVS.type = UserVS.Type.USER
 			userVS.save();
             userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
-            userVS.save()
+            userVSDB = userVS.save()
             new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
                     balance:BigDecimal.ZERO, IBAN:userVS.getIBAN(), tag:systemService.getWildTag()).save()
-            userVSDB = userVS
 			certificate = saveUserCertificate(userVS, deviceData);
             isNewUser = true
 			log.debug "checkUser ### NEW UserVS '${userVSDB.nif}' CertificateVS id '${certificate.id}'"
@@ -108,10 +103,6 @@ class SubscriptionVSService {
 				messageSource.getMessage('requestWithoutData', null, locale))
 		}
 		String validatedNIF = org.votingsystem.util.NifUtils.validate(nif)
-		if(!validatedNIF) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-				messageSource.getMessage('NIFWithErrorsMsg', [nif].toArray(), locale))
-		}
 		UserVS userVS = UserVS.findWhere(nif:validatedNIF)
 		if (!userVS) {
 			userVS = new UserVS(nif:validatedNIF, email:email, phone:phone, type:UserVS.Type.USER,

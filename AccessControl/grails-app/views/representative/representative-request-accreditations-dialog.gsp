@@ -81,18 +81,13 @@
                 }
 
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
                     representativeNif:this.representative.nif, email:this.$.emailRequest.value,
                     representativeName:this.representativeFullName, selectedDate: dateRequest.formatWithTime()}
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
                 webAppMessage.email = this.$.emailRequest.value
-
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("requestAccreditationsCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '<g:message code="operationERRORCaption"/>'
@@ -103,8 +98,7 @@
                     }
                     var msg = appMessageJSON.message
                     showMessageVS(msg, caption)
-                    }.bind(this)}
-
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.close()
             },

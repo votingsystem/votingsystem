@@ -100,19 +100,15 @@ v1.0, 2013-05-20: First draft
 
                 if(this.$.isSignedDocument.checked) {
                     var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, 'VICKET')
-                    webAppMessage.statusCode = ResponseVS.SC_PROCESSING
-                    webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                     webAppMessage.serviceURL = serviceURL
                     webAppMessage.signedMessageSubject = "AsciiDoc TEST"
                     webAppMessage.signedContent = {asciiDoc:asciiDoc, operation:'VICKET'}
                     webAppMessage.asciiDoc = asciiDoc
-                    var objectId = Math.random().toString(36).substring(7)
-                    window[objectId] = {setClientToolMessage: function(appMessage) {
+                    webAppMessage.setCallback(function(appMessage) {
                         console.log("sendCertAuthority - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
                         showMessageVS(appMessageJSON.message, "sendCertAuthority - status: " + appMessageJSON.statusCode)
-                    }}
-                    webAppMessage.callerCallback = objectId
+                    })
                     VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 } else {
                     this.$.ajax.url = ""

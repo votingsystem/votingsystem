@@ -96,18 +96,10 @@
                 eventVS.content = this.$.textEditor.getData();
                 eventVS.dateFinish = dateFinish.formatWithTime();
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.MANIFEST_PUBLISHING)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.signedContent = eventVS
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="publishManifestSubject"/>"
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                this.appMessageJSON = null
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("publishDocumentCallback - message: " + appMessage);
                     this.appMessageJSON = toJSON(appMessage)
                     electionDocumentURL = null
@@ -121,8 +113,7 @@
                         }
                         showMessageVS(msg, caption)
                     }
-                    }.bind(this)}
-
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
             },
             messagedialog:function() {

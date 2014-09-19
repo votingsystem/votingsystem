@@ -149,36 +149,24 @@
                 else eventVS.cardinality = "EXCLUSIVE"
                 eventVS.backupAvailable = this.$.allowBackupRequestCheckbox.checked
 
-
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CLAIM_PUBLISHING)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.signedContent = eventVS
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="publishClaimSubject"/>"
-
                 this.appMessageJSON = null
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
-                        console.log("publishDocumentCallback - message: " + appMessage);
-                        var appMessageJSON = toJSON(appMessage)
-                        electionDocumentURL = null
-                        var caption = '<g:message code="publishERRORCaption"/>'
-                        var msg = appMessageJSON.message
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = '<g:message code="publishOKCaption"/>'
-                            var msgTemplate = "<g:message code='documentLinkMsg'/>";
-                            msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
-                        }
-                        showMessageVS(msg, caption)
-                    }.bind(this)}
-
-
-
-
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("publishDocumentCallback - message: " + appMessage);
+                    var appMessageJSON = toJSON(appMessage)
+                    electionDocumentURL = null
+                    var caption = '<g:message code="publishERRORCaption"/>'
+                    var msg = appMessageJSON.message
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = '<g:message code="publishOKCaption"/>'
+                        var msgTemplate = "<g:message code='documentLinkMsg'/>";
+                        msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
+                    }
+                    showMessageVS(msg, caption)
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
             },
             messagedialog:function() {

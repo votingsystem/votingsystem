@@ -18,8 +18,8 @@ import java.security.cert.X509Certificate
 */
 @Transactional
 class UserVSService {
-	
-	static transactional = false
+
+    private static final CLASS_NAME = UserVSService.class.getSimpleName()
 
     def signatureVSService
 	def grailsApplication
@@ -35,9 +35,7 @@ class UserVSService {
         log.debug("${methodName} - signer: ${userSigner?.nif}")
         String msg = null
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
-
         IbanVSUtil.validate(messageJSON.bankIBAN)
-
         if (!messageJSON.info || (TypeVS.BANKVS_NEW != TypeVS.valueOf(messageJSON.operation)) ||
                 !messageJSON.certChainPEM) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
@@ -45,7 +43,6 @@ class UserVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, reason:msg,
                     metaInf:MetaInfMsg.getErrorMsg(methodName), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-
         if(!isUserAdmin(userSigner.getNif())) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
                     TypeVS.BANKVS_NEW.toString()].toArray(), locale)
@@ -53,29 +50,16 @@ class UserVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-
         Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
-
         ResponseVS responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         X509Certificate x509Certificate = certChain.iterator().next();
-
-        //{info:textEditor.getData(),certChainPEM:$("#pemCert").val(), operation:Operation.BANKVS_NEW}
-
         BankVS bankVS = BankVS.getUserVS(x509Certificate)
         String validatedNIF = org.votingsystem.util.NifUtils.validate(bankVS.getNif())
-        if(!validatedNIF) {
-            msg = messageSource.getMessage('NIFWithErrorsMsg', [bankVS.getNif()].toArray(), locale)
-            log.error("checkUser - ${msg}")
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.USER_ERROR,
-                    metaInf: MetaInfMsg.getErrorMsg(methodName, "nif"))
-        }
-
-        def bankVSDB = BankVS.findWhere(nif:validatedNIF.toUpperCase())
+        def bankVSDB = BankVS.findWhere(nif:validatedNIF)
         if(!bankVSDB) {
-            bankVSDB = bankVS
-            bankVSDB.description = messageJSON.info
-            bankVSDB.save()
+            bankVS.description = messageJSON.info
+            bankVSDB = bankVS.save()
             bankVSDB.setIBAN(IbanVSUtil.getInstance().getIBAN(bankVSDB.id))
             log.debug("${methodName} - NEW bankVS.id: '${bankVSDB.id}'")
         } else {
@@ -86,10 +70,8 @@ class UserVSService {
             bankVSDB.setTimeStampToken(bankVS.getTimeStampToken())
         }
         CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(bankVSDB, null)
-
         new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
                 type: UserVSAccount.Type.EXTERNAL, IBAN:messageJSON.bankIBAN, tag:systemService.getWildTag()).save()
-
         bankVSDB.save()
         msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "bankVS_${bankVSDB.id}_certificateVS_${certificateVS.id}")

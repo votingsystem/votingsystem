@@ -99,13 +99,10 @@
         console.log("decryptMessageVS: " + messageVSId)
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS_DECRYPT)
         webAppMessage.signedMessageSubject = "<g:message code="decryptMessageSubject"/>"
-
-        var objectId = Math.random().toString(36).substring(7)
-        window[objectId] = {setClientToolMessage: function(appMessage) {
+        webAppMessage.setCallback(function(appMessage) {
             var messageVS = JSON.parse(appMessage)
-            showMessageVS(messageVS.messageContent, '<g:message code="messageVSDecryptedCaption"/>') }}
-
-        webAppMessage.callerCallback = objectId
+            showMessageVS(messageVS.messageContent, '<g:message code="messageVSDecryptedCaption"/>')
+        })
         webAppMessage.documentToDecrypt = messageVSMap[messageVSId]
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }

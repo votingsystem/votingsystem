@@ -21,15 +21,11 @@ WebView Test
     function webViewLoaded() {
         console.log("webViewLoaded")
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, 'init')
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
     function serverMessage(message) {
         var webAppMessage = new WebAppMessage(ResponseVS.OK, 'message: ' + message)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 

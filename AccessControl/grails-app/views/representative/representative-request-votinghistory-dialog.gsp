@@ -100,21 +100,15 @@
                     showMessageVS('<g:message code="emailERRORMsg"/>', '<g:message code="errorLbl"/>')
                     return false
                 }
-
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representativeNif:this.representative.nif,
                     representativeName:this.representativeFullName, dateFrom:dateFrom.formatWithTime(),
                     dateTo:dateTo.formatWithTime(), email:this.$.emailRequest.value}
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="requestVotingHistoryLbl"/>'
                 webAppMessage.email = this.$.emailRequest.value
-
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("requestAccreditationsCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '<g:message code="operationERRORCaption"/>'
@@ -125,8 +119,7 @@
                     }
                     var msg = appMessageJSON.message
                     showMessageVS(msg, caption)
-                    }.bind(this)}
-
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.close()
             },

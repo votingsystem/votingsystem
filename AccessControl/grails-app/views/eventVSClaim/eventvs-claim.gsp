@@ -140,40 +140,25 @@
                 }
                 this.eventvs.fieldsEventVS = fieldsArray
 
-
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SMIME_CLAIM_SIGNATURE)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSClaimCollector', absolute:true)}"
                 webAppMessage.signedMessageSubject = this.eventvs.subject
-                //signed and encrypted
                 webAppMessage.contentType = 'application/x-pkcs7-signature'
                 webAppMessage.eventVS = this.eventvs
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.documentURL = this.eventvs.URL
-
-
-
                 this.eventvs.operation = Operation.SMIME_CLAIM_SIGNATURE
                 webAppMessage.signedContent = this.eventvs
-
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
-                        console.log(this.tagName + "eventvs-claim callback - message: " + appMessage);
-                        var appMessageJSON = toJSON(appMessage)
-                        var caption = '<g:message code="operationERRORCaption"/>'
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = "<g:message code='operationOKCaption'/>"
-                        } else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
-                            caption = "<g:message code='operationCANCELLEDLbl'/>"
-                        }
-                        showMessageVS(appMessageJSON.message, caption)
-                    }.bind(this)}
-
-                console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log(this.tagName + "eventvs-claim callback - message: " + appMessage);
+                    var appMessageJSON = toJSON(appMessage)
+                    var caption = '<g:message code="operationERRORCaption"/>'
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = "<g:message code='operationOKCaption'/>"
+                    } else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
+                        caption = "<g:message code='operationCANCELLEDLbl'/>"
+                    }
+                    showMessageVS(appMessageJSON.message, caption)
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }
         });

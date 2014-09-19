@@ -231,7 +231,7 @@ public class OperationVS {
             String serverURL = StringUtils.checkURL((String)dataMap.get("serverURL"));
             operationVS.setUrlServer(serverURL);
         }
-        if (dataMap.containsKey("callerCallback")) operationVS.setCallerCallback((String)dataMap.get("callerCallback"));
+        if (dataMap.containsKey("objectId")) operationVS.setCallerCallback((String)dataMap.get("objectId"));
         if (dataMap.containsKey("eventVS")) {
             EventVS eventVS = EventVS.populate((Map) dataMap.get("eventVS"));
             operationVS.setEventVS(eventVS);

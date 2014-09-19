@@ -49,15 +49,11 @@
                     return
                 }
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_EDIT)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"edit", absolute:true)}/" + this.groupvs.id
                 webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
                 webAppMessage.signedContent = {groupvsInfo:this.$.textEditor.getData(), groupvsName:this.groupvs.name,
                     id:this.groupvs.id, operation:Operation.VICKET_GROUP_NEW}
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("editGroupVSCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '<g:message code="editGroupERRORCaption"/>'
@@ -69,8 +65,7 @@
                     }
                     showMessageVS(msg, caption)
                     window.scrollTo(0,0);
-                }}
-                webAppMessage.callerCallback = objectId
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }
         })

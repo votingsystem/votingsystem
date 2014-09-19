@@ -84,20 +84,12 @@
             submitManifest:function() {
                 console.log("submitManifest")
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MANIFEST_SIGN)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink( controller:'eventVSManifestCollector', absolute:true)}/" + this.eventvs.id
                 webAppMessage.signedMessageSubject = this.eventvs.subject
-                //signed and encrypted
                 webAppMessage.contentType = 'application/x-pkcs7-signature'
                 webAppMessage.eventVS = this.eventvs
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.documentURL = this.eventvs.URL
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log(this.tagName + " - vote callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '<g:message code="operationERRORCaption"/>'
@@ -105,8 +97,7 @@
                         caption = "<g:message code='operationOKCaption'/>"
                     }
                     showMessageVS(appMessageJSON.message, caption)
-                    }.bind(this)}
-
+                }.bind(this))
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }

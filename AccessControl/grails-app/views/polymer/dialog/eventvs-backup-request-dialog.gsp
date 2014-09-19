@@ -69,19 +69,12 @@
                     return
                 }
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.BACKUP_REQUEST)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink(controller:'backupVS', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="requestEventvsBackupMsgSubject"/>'
                 webAppMessage.eventVS = this.eventvs
                 webAppMessage.signedContent = this.eventvs
                 webAppMessage.email = this.$.eventBackupUserEmailText.value
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '<g:message code="operationERRORCaption"/>'
@@ -91,7 +84,7 @@
                         this.opened = false
                     }
                     showMessageVS(appMessageJSON.message, caption)
-                    }.bind(this)}
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
             },
             close: function() {

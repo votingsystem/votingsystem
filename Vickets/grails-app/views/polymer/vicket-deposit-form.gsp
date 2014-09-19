@@ -207,14 +207,6 @@
                 return
             }
             this.setMessage(200, null)
-            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
-            webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
-            webAppMessage.signedContent = {operation:this.operation, subject:this.$.depositSubject.value,
-                toUserIBAN:this.toUserIBAN(), amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName,
-                fromUserIBAN:this.fromUserIBAN, validTo:this.dateValidTo }
 
             var tagList = []
             if(this.selectedTags.length > 0) {
@@ -222,20 +214,22 @@
                     tagList.push({id:this.selectedTags[tagIdx].id, name:this.selectedTags[tagIdx].name});
                 }
             } else tagList.push({id:1, name:'WILDTAG'}); //No tags, receptor can expend money with any tag
-            webAppMessage.signedContent.tags = tagList
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-            var objectId = Math.random().toString(36).substring(7)
-            window[objectId] = {setClientToolMessage: function(appMessage) {
-                var appMessageJSON = JSON.parse(appMessage)
-                var caption
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    caption = "<g:message code='depositOKLbl'/>"
-                    this.fire('operation-finished')
-                } else caption = '<g:message code="depositERRORLbl"/>'
-                showMessageVS(appMessageJSON.message, caption)
-            }.bind(this)}
-            console.log(this.tagName + " - window[objectId] - objectId: " + objectId)
-            webAppMessage.callerCallback = objectId
+
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
+            webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
+            webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
+            webAppMessage.signedContent = {operation:this.operation, subject:this.$.depositSubject.value,
+                toUserIBAN:this.toUserIBAN(), amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName,
+                fromUserIBAN:this.fromUserIBAN, validTo:this.dateValidTo, tags:tagList}
+            webAppMessage.setCallback(function(appMessage) {
+                    var appMessageJSON = JSON.parse(appMessage)
+                    var caption
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = "<g:message code='depositOKLbl'/>"
+                        this.fire('operation-finished')
+                    } else caption = '<g:message code="depositERRORLbl"/>'
+                    showMessageVS(appMessageJSON.message, caption)
+                }.bind(this))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
 

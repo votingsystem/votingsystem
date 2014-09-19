@@ -95,20 +95,13 @@
                         messageSubject = '<g:message code="cancelEventVSMsgSubject"/>'
                     }
                     var webAppMessage = new WebAppMessage( ResponseVS.SC_PROCESSING, Operation.EVENT_CANCELLATION)
-                    webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                    webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-                    webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                     webAppMessage.serviceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
                     var signedContent = {operation:Operation.EVENT_CANCELLATION,
                         accessControlURL:"${grailsApplication.config.grails.serverURL}",
                         eventId:Number(this.eventvs.id), state:state}
                     webAppMessage.signedContent = signedContent
                     webAppMessage.signedMessageSubject = messageSubject
-
-                    var objectId = Math.random().toString(36).substring(7)
-                    webAppMessage.callerCallback = objectId
-
-                    window[objectId] = {setClientToolMessage: function(appMessage) {
+                    webAppMessage.setCallback(function(appMessage) {
                         console.log("eventvs-admin-dialog callback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
                         var caption
@@ -122,7 +115,7 @@
                             msg = appMessageJSON.message
                         }
                         showMessageVS(msg, caption)
-                        }.bind(this)}
+                    }.bind(this))
                     VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 }
             },

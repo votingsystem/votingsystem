@@ -67,12 +67,9 @@
             },
             selectImage: function() {
                 console.log(this.tagName + " - selectImage")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SELECT_IMAGE)
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
                 this.appMessageJSON = null
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SELECT_IMAGE)
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("selectImageCallback - appMessage: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -80,8 +77,7 @@
                     } else if(appMessageJSON.message){
                         showMessageVS(appMessageJSON.message, '<g:message code='errorLbl'/>')
                     }
-                }.bind(this)}
-
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
             submitForm: function() {

@@ -13,9 +13,10 @@ import org.votingsystem.vicket.model.MessageVS
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class MessageVSService {
-	
-	static transactional = true
+
+    private static final CLASS_NAME = MessageVSService.class.getSimpleName()
 
 	def grailsApplication
 	def messageSource

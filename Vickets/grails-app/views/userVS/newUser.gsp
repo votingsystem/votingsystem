@@ -66,16 +66,12 @@
             return false
         }
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_CA_NEW)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"save", absolute:true)}"
         webAppMessage.signedMessageSubject = "<g:message code='newUserCertLbl'/>"
         webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
                     operation:Operation.CERT_USER_NEW}
-        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        var objectId = Math.random().toString(36).substring(7)
-        window[objectId] = {setClientToolMessage: function(appMessage) {
-            console.log("newUserCertCallback - message: " + appMessage);
+        webAppMessage.setCallback(function(appMessage) {
+        console.log("newUserCertCallback - message: " + appMessage);
             appMessageJSON = toJSON(appMessage)
             var caption = '<g:message code="newUserCertERRORCaption"/>'
             var msg = appMessageJSON.message
@@ -85,8 +81,8 @@
             }
             newCertURL = updateMenuLink(appMessageJSON.URL)
             showMessageVS(msg, caption)
-            window.scrollTo(0,0); }}
-        webAppMessage.callerCallback = objectId
+            window.scrollTo(0,0);
+        })
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         return false
     }

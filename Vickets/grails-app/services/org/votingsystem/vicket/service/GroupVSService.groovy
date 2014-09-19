@@ -13,9 +13,10 @@ import org.votingsystem.util.MetaInfMsg
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class GroupVSService {
 
-	//static transactional = true
+    private static final CLASS_NAME = CsrService.class.getSimpleName()
 
     def userVSService
     def messageSource

@@ -67,6 +67,9 @@ class CertificateVSController {
                     userVS:userVS, state:CertificateVS.State.OK)}
             if (certificate) {
                 X509Certificate certX509 = CertUtil.loadCertificate (certificate.content)
+
+                log.debug("====== certX509.hashCode(): ${certX509.hashCode()}")
+
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
                         messageBytes: CertUtil.getPEMEncoded (certX509))]
             } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,

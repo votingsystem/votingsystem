@@ -25,6 +25,8 @@ import java.security.cert.X509Certificate
 */
 class VicketService {
 
+    private static final CLASS_NAME = VicketService.class.getSimpleName()
+
     def messageSource
     def transactionVSService
     def grailsApplication
@@ -36,49 +38,41 @@ class VicketService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
-        def dataRequestJSON = JSON.parse(smimeMessageReq.getSignedContent())
-        String vicketServerURL = StringUtils.checkURL(dataRequestJSON.serverURL)
+        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+        String vicketServerURL = StringUtils.checkURL(messageJSON.serverURL)
         String serverURL = grailsApplication.config.grails.serverURL
         if(!serverURL.equals(vicketServerURL)) throw new ExceptionVS(messageSource.getMessage("serverMismatchErrorMsg",
                 [serverURL, vicketServerURL].toArray(), locale));
-
-        TypeVS operation = TypeVS.valueOf(dataRequestJSON.operation)
-        if(TypeVS.VICKET_REQUEST != operation) throw new ExceptionVS(messageSource.getMessage(
-                "operationMismatchErrorMsg", [TypeVS.VICKET_REQUEST.toString(), operation.toString()].toArray(),
-                locale));
-
-        Currency requestCurrency = Currency.getInstance(dataRequestJSON.currency)
-
+        TypeVS operation = TypeVS.valueOf(messageJSON.operation)
+        if(TypeVS.VICKET_REQUEST != operation) throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
+                [TypeVS.VICKET_REQUEST.toString(), operation.toString()].toArray(), locale));
+        Currency requestCurrency = Currency.getInstance(messageJSON.currency)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
-        Map userInfoMap = transactionVSService.getUserVSVicketTransactionVSMap(signer, timePeriod)
 
+        Map userInfoMap = transactionVSService.getUserVSVicketTransactionVSMap(signer, timePeriod)
         Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.getCurrencyCode())
         if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
                 [requestCurrency.getCurrencyCode()].toArray(), locale));
-
         BigDecimal currencyAvailable = ((BigDecimal)currencyMap.totalInputs).add(
                 ((BigDecimal)currencyMap.totalOutputs).negate())
-
-        BigDecimal totalAmount = new BigDecimal(dataRequestJSON.totalAmount)
+        BigDecimal totalAmount = new BigDecimal(messageJSON.totalAmount)
         if(currencyAvailable.compareTo(totalAmount) < 0) throw new ExceptionVS(
                 messageSource.getMessage("vicketRequestAvailableErrorMsg",
-                        [totalAmount, currencyAvailable,requestCurrency.getCurrencyCode()].toArray(), locale));
-
+                [totalAmount, currencyAvailable,requestCurrency.getCurrencyCode()].toArray(), locale));
         Integer numTotalVickets = 0
-        def vicketsArray = dataRequestJSON.vickets
+        def vicketsArray = messageJSON.vickets
         BigDecimal vicketsAmount = new BigDecimal(0)
         vicketsArray.each {
             Integer numVickets = it.numVickets
             Integer vicketsValue = it.vicketValue
             numTotalVickets = numTotalVickets + it.numVickets
             vicketsAmount = vicketsAmount.add(new BigDecimal(numVickets * vicketsValue))
-            log.debug("batch of '${numVickets}' vickets of '${vicketsValue}' euros")
+            log.debug("$methodName - batch of '${numVickets}' vickets of '${vicketsValue}' euros")
         }
-        log.debug("numTotalVickets: ${numTotalVickets} - vicketsAmount: ${vicketsAmount}")
+        log.debug("$methodName - numTotalVickets: ${numTotalVickets} - vicketsAmount: ${vicketsAmount}")
         if(totalAmount.compareTo(vicketsAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
                 "vicketRequestAmountErrorMsg", [totalAmount, vicketsAmount].toArray(), locale));
-
         Map resultMap = [amount:totalAmount, currency:requestCurrency, userInfoMap:userInfoMap]
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.VICKET_REQUEST,)
     }
@@ -89,8 +83,8 @@ class VicketService {
         UserVS signer = messageSMIMEReq.userVS
         def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if(TypeVS.VICKET_CANCEL != TypeVS.valueOf(requestJSON.operation))
-            throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
-                    [TypeVS.VICKET_CANCEL.toString(),requestJSON.operation ].toArray(), locale))
+                throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
+                [TypeVS.VICKET_CANCEL.toString(),requestJSON.operation ].toArray(), locale))
         def hashCertVSBase64 = CMSUtils.getHashBase64(requestJSON.originHashCertVS, ContextVS.VOTING_DATA_DIGEST)
         if(!hashCertVSBase64.equals(requestJSON.hashCertVSBase64))
             throw new ExceptionVS(messageSource.getMessage("originHashErrorMsg", null, locale))
@@ -115,11 +109,10 @@ class VicketService {
             return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_SIGNED,
                     messageBytes: vicket.cancelMessage.content, type:TypeVS.VICKET_CANCEL)
         } else {
-            log.error("cancelVicket - ERROR - request for cancel model: ${vicket.id} - with state: ${vicket.state}");
+            log.error("$methodName - ERROR - request for cancel vicket: ${vicket.id} - with state: ${vicket.state}");
             byte[] messageBytes
-            ContentTypeVS contentType = ContentTypeVS.ENCRYPTED
+            ContentTypeVS contentType = ContentTypeVS.TEXT
             int statusCode = ResponseVS.SC_ERROR_REQUEST
-            //ResponseVS.
             if(Vicket.State.CANCELLED == vicket.getState()) {
                 contentType = ContentTypeVS.JSON_SIGNED
                 messageBytes = vicket.cancelMessage.content
@@ -128,14 +121,14 @@ class VicketService {
                 messageBytes = vicket.messageSMIME.content
             }
             if(Vicket.State.LAPSED == vicket.getState()) {
-                contentType = ContentTypeVS.ENCRYPTED
+                contentType = ContentTypeVS.TEXT
                 messageBytes = messageSource.getMessage("vicketLapsedErrorMsg",
                         [vicket.serialNumber].toArray(), locale).getBytes()
             }
             return new ResponseVS(statusCode:statusCode, messageBytes: messageBytes, contentType: contentType,
                     type:TypeVS.ERROR)
             return new ResponseVS(type:TypeVS.ERROR, messageBytes: messageBytes, contentType: contentType,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "VicketState_" + vicket.getState().toString()),
+                    metaInf:MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "VicketState_" + vicket.getState().toString()),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }
@@ -203,7 +196,7 @@ class VicketService {
             resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
                     type:TypeVS.ERROR, messageBytes: "${dataMap as JSON}".getBytes(), data:dataMap,
                     contentType:ContentTypeVS.JSON, reason:dataMap.message,
-                    metaInf: MetaInfMsg.getErrorMsg(methodName, "vicketExpendedError"))
+                    metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "vicketExpendedError"))
         }
         if(batchRequest) messageSMIMEReq.batchRequest = batchRequest
         messageSMIMEReq.save()
@@ -211,7 +204,8 @@ class VicketService {
     }
 
     public ResponseVS processVicketRequest(MessageSMIME messageSMIMEReq, byte[] csrRequest, Locale locale) {
-        log.debug("processVicketRequest");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.debug("$methodName");
         //To avoid circular references issues
         ResponseVS responseVS = processRequest(messageSMIMEReq, locale)
         if (ResponseVS.SC_OK == responseVS.statusCode) {

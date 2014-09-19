@@ -2,22 +2,15 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.hibernate.ScrollableResults
 import org.iban4j.CountryCode
 import org.iban4j.Iban
-import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.util.DateUtils
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.LoggerVS
-import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.util.DateUtils
-import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.WebViewWrapper
 import org.votingsystem.vicket.websocket.SessionVSHelper
-
-import java.text.Normalizer
 
 /**
  * @infoController TestingController
@@ -42,6 +35,7 @@ class TestingController {
     def index() {
 
     }
+
 
     def webViewLoadTest() {
         WebViewWrapper webViewTest = WebViewWrapper.getInstance()

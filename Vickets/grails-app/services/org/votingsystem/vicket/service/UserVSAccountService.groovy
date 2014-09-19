@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.service
 
+import grails.transaction.Transactional
 import org.votingsystem.model.UserVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.model.WalletVS
@@ -9,9 +10,10 @@ import org.votingsystem.vicket.model.WalletVS
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class UserVSAccountService {
-	
-	static transactional = true
+
+    private static final CLASS_NAME = UserVSAccountService.class.getSimpleName()
 
 	def grailsApplication
 	def messageSource
@@ -26,7 +28,7 @@ class UserVSAccountService {
         WalletVS walletVS = new WalletVS()
         List userAccounts = []
         userAccountsDB.each { it ->
-            userAccounts.add(userVSAccountService.getUserVSAccountMap(it))
+            userAccounts.add(getUserVSAccountMap(it))
         }
     }
 

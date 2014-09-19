@@ -132,17 +132,12 @@
             return false
         }
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VICKET_GROUP_NEW)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         webAppMessage.serviceURL = "${createLink( controller:'groupVS', action:"newGroup", absolute:true)}"
         webAppMessage.signedMessageSubject = "<g:message code='newGroupVSMsgSubject'/>"
         webAppMessage.signedContent = {groupvsInfo:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
             groupvsName:document.querySelector("#groupSubject").value, operation:Operation.VICKET_GROUP_NEW}
         webAppMessage.signedContent.tags = document.querySelector('#selectedTags').selectedTags
-        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-
-        var objectId = Math.random().toString(36).substring(7)
-        window[objectId] = {setClientToolMessage: function(appMessage) {
+        webAppMessage.setCallback(function(appMessage) {
             console.log("newGroupVSCallback - message: " + appMessage);
             appMessageJSON = toJSON(appMessage)
             var callBackResult = null
@@ -152,8 +147,8 @@
                 caption = '<g:message code="newGroupOKCaption"/>'
             }
             showMessageVS(msg, caption)
-            window.scrollTo(0,0); }}
-        webAppMessage.callerCallback = objectId
+            window.scrollTo(0,0);
+        })
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         appMessageJSON = null
         return false

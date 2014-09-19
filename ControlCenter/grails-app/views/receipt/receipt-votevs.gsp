@@ -71,11 +71,9 @@
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
                 webAppMessage.message = this.smimeMessage
-
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("saveReceiptCallback - message: " + appMessage);}}
-                webAppMessage.callerCallback = objectId
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("saveReceiptCallback - message: " + appMessage)
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }
         });

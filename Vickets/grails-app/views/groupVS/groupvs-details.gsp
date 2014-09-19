@@ -174,14 +174,11 @@
             console.log("messagedialog signal - cancelgroup: " + detail)
             if('cancel_group' == detail) {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + this.groupvs.id
                 webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
                 webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:this.groupvs.name, id:this.groupvs.id}
                 webAppMessage.contentType = 'application/x-pkcs7-signature'
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     this.appMessageJSON = JSON.parse(appMessage)
                     if(this.appMessageJSON != null) {
                         var caption = '<g:message code="groupCancelERRORLbl"/>'
@@ -190,10 +187,7 @@
                         }
                         showMessageVS(this.appMessageJSON.message, caption, this.tagName)
                     }
-                }}
-
-                webAppMessage.callerCallback = this.objectId
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.appMessageJSON = null
             }
@@ -211,14 +205,11 @@
             var groupvsRepresentative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
             var groupVSData = {id:this.groupvs.id, name:this.groupvs.name , representative:groupvsRepresentative}
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_SUBSCRIBE)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}/" + this.groupvs.id + "/subscribe"
             webAppMessage.signedMessageSubject = "<g:message code="subscribeToVicketGroupMsg"/>"
             webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_SUBSCRIBE, groupvs:groupVSData}
             webAppMessage.contentType = 'application/x-pkcs7-signature'
-            var objectId = Math.random().toString(36).substring(7)
-            window[objectId] =  {setClientToolMessage: function(appMessage) {
+            webAppMessage.setCallback(function(appMessage) {
                 console.log("subscribeToGroupCallback - message: " + appMessage);
                 var appMessageJSON = JSON.parse(appMessage)
                 var caption
@@ -226,9 +217,7 @@
                 else caption = '<g:message code="groupSubscriptionERRORLbl"/>'
                 var msg = appMessageJSON.message
                 showMessageVS(msg, caption)
-            }}
-            webAppMessage.callerCallback = objectId
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+            }.bind(this))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
         groupvsChanged:function() {

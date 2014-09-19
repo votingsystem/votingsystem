@@ -115,24 +115,16 @@
                 console.log("submitVote")
                 var voteVS = {optionSelected:this.optionVSSelected, eventId:this.eventvs.id, eventURL:this.eventvs.URL}
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SEND_SMIME_VOTE)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 this.eventvs.voteVS = voteVS
                 webAppMessage.eventVS = this.eventvs
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.signedMessageSubject = '<g:message code="sendVoteMsgSubject"/>'
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log(this.tagName + " - vote callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     appMessageJSON.eventVS = this.eventvs
                     appMessageJSON.optionSelected = this.optionVSSelected.content
                     this.$.votevsResultDialog.show(appMessageJSON)
-                    }.bind(this)}
-
+                }.bind(this))
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }

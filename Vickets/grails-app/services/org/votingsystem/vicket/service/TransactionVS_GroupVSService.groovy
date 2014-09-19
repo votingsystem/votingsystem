@@ -15,6 +15,7 @@ import java.math.RoundingMode
 class TransactionVS_GroupVSService {
 
     private static final CLASS_NAME = TransactionVS_GroupVSService.class.getSimpleName()
+
     def walletVSService
     def messageSource
     def systemService

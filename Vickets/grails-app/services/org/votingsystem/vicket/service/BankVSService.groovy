@@ -7,6 +7,8 @@ import org.votingsystem.util.DateUtils
 @Transactional
 class BankVSService {
 
+    private static final CLASS_NAME = BankVSService.class.getSimpleName()
+
     def userVSService
     def transactionVSService
 

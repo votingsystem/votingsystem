@@ -59,17 +59,10 @@
             accept: function() {
                 console.log(this.tagName + " - removeRepresentative")
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_REVOKE)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE}
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="removeRepresentativeMsgSubject"/>'
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log(this.tagName + "removeRepresentativeCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '<g:message code="operationERRORCaption"/>'
@@ -81,8 +74,7 @@
                         caption = "<g:message code='operationCANCELLEDLbl'/>"
                     }
                     showMessageVS(msg, caption)
-                    }.bind(this)}
-
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.close()
             },

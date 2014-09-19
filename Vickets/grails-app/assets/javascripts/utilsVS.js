@@ -1,17 +1,3 @@
-function WebAppMessage(statusCode, operation) {
-	this.statusCode = statusCode
-	this.operation = operation
-	this.subject ;
-	this.signedContent;
-	this.serviceURL;
-	this.documentURL;
-	this.receiverName;
-	this.serverURL;
-	this.message;
-	this.caption;
-	this.callerCallback;
-}
-
 var Operation = {
     MESSAGEVS:"MESSAGEVS",
     MESSAGEVS_GET: "MESSAGEVS_GET",
@@ -36,9 +22,9 @@ var Operation = {
     CERT_EDIT:"CERT_EDIT"
 }
 
-function httpGet(theUrl){
+function httpGet(serviceURL){
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.open( "GET", serviceURL, false );
     xmlHttp.send( null );
     return xmlHttp.responseText;
 }
@@ -369,8 +355,8 @@ function notifiyClientToolConnection() {
 }
 
 //Message -> base64 encoded JSON
-https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
 function setClientToolMessage(callerId, message) {
     var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
-    window[callerId].setClientToolMessage(b64_to_utf8)
+    window[callerId](b64_to_utf8)
 }

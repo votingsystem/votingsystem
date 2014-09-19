@@ -11,9 +11,10 @@ import org.votingsystem.vicket.model.WalletVS
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class WalletVSService {
 
-	static transactional = true
+    private static final CLASS_NAME = WalletVSService.class.getSimpleName()
 
 	def grailsApplication
 	def messageSource
@@ -30,7 +31,8 @@ class WalletVSService {
             def tagAccount = UserVSAccount.findWhere(IBAN:fromUserIBAN, currencyCode: currencyCode, tag:tag)
             if(tagAccount) accountList.add(tagAccount)
         }
-        if(accountList.isEmpty()) throw new ExceptionVS("No accounts for IBAN: '$fromUserIBAN' - tag: '$tag.name' - currencyCode: '$currencyCode'")
+        if(accountList.isEmpty()) throw new ExceptionVS(
+                "No accounts for IBAN: '$fromUserIBAN' - tag: '$tag.name' - currencyCode: '$currencyCode'")
         else return new WalletVS(accountList, currencyCode)
     }
 

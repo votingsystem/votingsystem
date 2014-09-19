@@ -30,9 +30,12 @@ import java.security.cert.CertPathValidatorException
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
+@Transactional
 class  SignatureVSService {
 
-    static transactional = false
+    private static final CLASS_NAME = SignatureVSService.class.getSimpleName()
+
+    //static transactional = false
 	
 	private SignedMailGenerator signedMailGenerator;
     private static Set<TrustAnchor> trustAnchors;
@@ -129,14 +132,10 @@ class  SignatureVSService {
     }
 
 	public boolean isSystemSignedMessage(Set<UserVS> signers) {
-		boolean result = false
-		log.debug "isSystemSignedMessage - localServerCert num. serie: ${localServerCertSigner.getSerialNumber().longValue()}"
-		signers.each {
-			long signerId = ((UserVS)it).getCertificate().getSerialNumber().longValue()
-			log.debug " --- num serie signer: ${signerId}"
-			if(signerId == localServerCertSigner.getSerialNumber().longValue()) result = true;
-		}
-		return result
+        for(UserVS userVS: signers) {
+            if(userVS.getCertificate().equals(localServerCertSigner)) return true
+        }
+		return false
 	}
 
     /**

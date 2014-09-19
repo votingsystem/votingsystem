@@ -19,6 +19,7 @@ import java.nio.ByteBuffer
 
 class WebSocketService {
 
+    private static final CLASS_NAME = WebSocketService.class.getSimpleName()
 
     def grailsApplication
     def messageSource

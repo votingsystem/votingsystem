@@ -27,7 +27,14 @@
 </body>
 </html>
 <asset:script>
+    var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
+    webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
+    webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
+    webAppMessage.signedContent = {operation:"TEST"}
 
-
+    webAppMessage.setCallback(function () {
+            console.log("====#### callback")
+    })
+    window[webAppMessage.objectId]()
 </asset:script>
 <asset:deferredScripts/>

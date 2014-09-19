@@ -70,10 +70,9 @@
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
                 webAppMessage.message = this.smimeMessage
                 webAppMessage.document = this.signedDocument
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("savesignedDocumentCallback - message: " + appMessage);}}
-                webAppMessage.callerCallback = objectId
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("savesignedDocumentCallback - message: " + appMessage);
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }
         });

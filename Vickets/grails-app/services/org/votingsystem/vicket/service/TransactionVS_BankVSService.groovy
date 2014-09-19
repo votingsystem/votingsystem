@@ -11,6 +11,8 @@ import org.votingsystem.util.MetaInfMsg
 @Transactional
 class TransactionVS_BankVSService {
 
+    private static final CLASS_NAME = TransactionVS_BankVSService.class.getSimpleName()
+
     def messageSource
     def systemService
 

@@ -1,5 +1,25 @@
 <script>
     window['serverURL'] = "${grailsApplication.config.grails.serverURL}"
+    window.CKEDITOR_BASEPATH = '${grailsApplication.config.grails.serverURL}/bower_components/ckeditor/';
+
+    function WebAppMessage(statusCode, operation) {
+        this.statusCode = statusCode
+        this.operation = operation
+        this.caption;
+        this.message;
+        this.subject ;
+        this.signedContent;
+        this.serviceURL;
+        this.documentURL;
+        this.receiverName = "${grailsApplication.config.VotingSystem.serverName}";
+        this.serverURL = "${grailsApplication.config.grails.serverURL}";
+        this.urlTimeStampServer = "${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+        this.objectId = Math.random().toString(36).substring(7);
+    }
+
+    WebAppMessage.prototype.setCallback = function(callbackFunction) {
+        window[this.objectId] = callbackFunction;
+    }
 
     function EventVS() {}
 

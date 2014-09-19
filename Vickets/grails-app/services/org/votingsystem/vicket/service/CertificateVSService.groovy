@@ -11,6 +11,8 @@ import java.security.cert.X509Certificate
 //@Transactional
 class CertificateVSService {
 
+    private static final CLASS_NAME = CertificateVSService.class.getSimpleName()
+
     def userVSService
     def signatureVSService
     def messageSource

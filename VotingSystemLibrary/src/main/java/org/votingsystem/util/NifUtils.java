@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import org.votingsystem.model.ContextVS;
+
 public class NifUtils {
 	    
     public static String getNif(int number) {
@@ -7,30 +9,30 @@ public class NifUtils {
         return numberStr + getNifLetter(number);
     }
     
-    public static String validate(String nif) {
-    	if(nif == null) return null;
-    	nif  = nif.toUpperCase();
-    	if(nif.length() <= 9) {
-            int numberZeros = 9 - nif.length();
-            for(int i = 0; i < numberZeros ; i++) {
-                nif = "0" + nif;
-            }
-    	} else return null;
-    	String number = nif.substring(0, 8);
-        String letter = nif.substring(8, 9);
+    public static String validate(String nifParam) throws ExceptionVS {
         try {
-            if(!letter.equals(getNifLetter(new Integer(number)))) return null;
-            else return nif;
-        } catch (Exception ex) {
-            return null;
+            String nif = new String(nifParam);
+            if(nif != null && nif.length() <= 9) {
+                nif  = nif.toUpperCase();
+                int numberZeros = 9 - nif.length();
+                for(int i = 0; i < numberZeros ; i++) {
+                    nif = "0" + nif;
+                }
+                String number = nif.substring(0, 8);
+                String letter = nif.substring(8, 9);
+                if(letter.equals(getNifLetter(new Integer(number)))) return nif;
+            }
+        } catch(Exception ex) {
+            throw new ExceptionVS(ContextVS.getMessage("NIFWithErrorsMsg", nifParam));
         }
+        throw new ExceptionVS(ContextVS.getMessage("NIFWithErrorsMsg", nifParam));
     }
 
     public static String getNifLetter(int dni) {
-        String juegoCaracteres="TRWAGMYFPDXBNJZSQVHLCKET";
-        int modulo= dni % 23;
-        Character letra = juegoCaracteres.charAt(modulo);
-        return letra.toString(); 
+        String nifChars ="TRWAGMYFPDXBNJZSQVHLCKET";
+        int module = dni % 23;
+        Character letter = nifChars.charAt(module);
+        return letter.toString();
     }
 
 }

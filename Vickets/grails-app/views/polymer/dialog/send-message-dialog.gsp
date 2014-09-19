@@ -53,8 +53,6 @@
             certificateList:[],
 
             ready: function() {
-                this.objectId = Math.random().toString(36).substring(7)
-                window[this.objectId] = this
             },
             onCoreOverlayOpen:function(e) {
                 this.opened = this.$.xDialog.opened
@@ -75,26 +73,19 @@
             sendMessage: function () {
                 console.log("sendMessageVS")
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.MESSAGEVS)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink(controller:'messageVS', absolute:true)}/"
                 webAppMessage.signedMessageSubject = "<g:message code="sendEncryptedMessageSubject"/>"
                 webAppMessage.signedContent = {operation:Operation.MESSAGEVS, toUserNIF:this.toUserNIF}
                 webAppMessage.documentToEncrypt = {operation:Operation.MESSAGEVS,
                     messageContent:this.$.messageVSContent.value}
                 webAppMessage.targetCertList = this.certificateList
-
                 webAppMessage.contentType = 'application/messagevs'
-                webAppMessage.callerCallback = this.objectId
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log(this.tagName + " - " + this.id + " - setClientToolMessage: " + appMessage);
+                    this.fire('message-response', appMessage)
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 this.opened = false
-            },
-
-            /*This method is called from JavaFX client. So we put referencens on global window */
-            setClientToolMessage:function(appMessage) {
-                console.log(this.tagName + " - " + this.id + " - setClientToolMessage: " + appMessage);
-                this.fire('message-response', appMessage)
             }
         });
     </script>

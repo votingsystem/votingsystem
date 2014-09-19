@@ -45,19 +45,14 @@
     document.addEventListener('polymer-ready', function() {
         document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CERT_EDIT)
-            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.serviceURL = "${createLink(controller:'certificateVS', action:'editCert',absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code="cancelCertMessageSubject"/>"
             webAppMessage.signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                 changeCertToState:"${CertificateVS.State.CANCELLED.toString()}", serialNumber:"${certMap.serialNumber}"}
             webAppMessage.contentType = 'application/x-pkcs7-signature'
-            var objectId = Math.random().toString(36).substring(7)
-            window[objectId] = {setClientToolMessage: function(appMessage) {
+            webAppMessage.setCallback(function(appMessage) {
                 document.querySelector("#certData").url = "${createLink( controller:'certificateVS', action:'cert')}/" + certMap.serialNumber + "?menu=" + menuType
-            }}
-            webAppMessage.callerCallback = objectId
-            webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+            })
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         })
     });

@@ -61,30 +61,26 @@
 
     function submitForm() {
         try {
-        var textEditor = document.querySelector('#textEditor')
-        if(document.querySelector('#bankVSIBAN').invalid) {
-            showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
-            return false
-        }
-        if(!document.querySelector('#pemCert').validity.valid) {
-            showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
-            return false
-        }
-        if(textEditor.getData() == 0) {
-            textEditor.classList.add("formFieldError");
-            showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
-            return false
-        }
-        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.BANKVS_NEW)
-        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-        webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newBankVS", absolute:true)}"
-        webAppMessage.signedMessageSubject = "<g:message code='newBankVSMsgSubject'/>"
-        webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
-            IBAN:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW}
-        webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-        var objectId = Math.random().toString(36).substring(7)
-        window[objectId] = {setClientToolMessage: function(appMessage) {
+            var textEditor = document.querySelector('#textEditor')
+            if(document.querySelector('#bankVSIBAN').invalid) {
+                showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
+                return false
+            }
+            if(!document.querySelector('#pemCert').validity.valid) {
+                showMessageVS('<g:message code="fillAllFieldsERRORLbl"/>', '<g:message code="dataFormERRORLbl"/>')
+                return false
+            }
+            if(textEditor.getData() == 0) {
+                textEditor.classList.add("formFieldError");
+                showMessageVS('<g:message code="emptyDocumentERRORMsg"/>', '<g:message code="dataFormERRORLbl"/>')
+                return false
+            }
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.BANKVS_NEW)
+            webAppMessage.serviceURL = "${createLink( controller:'userVS', action:"newBankVS", absolute:true)}"
+            webAppMessage.signedMessageSubject = "<g:message code='newBankVSMsgSubject'/>"
+            webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
+                IBAN:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW}
+            webAppMessage.setCallback(function(appMessage) {
                 console.log("newBankVSCallback - message: " + appMessage);
                 appMessageJSON = toJSON(appMessage)
                 var caption = '<g:message code="newBankVSERRORCaption"/>'
@@ -96,16 +92,14 @@
                 }
                 showMessageVS(msg, caption)
                 window.scrollTo(0,0);
-            }}
-        webAppMessage.callerCallback = objectId
-        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
-        appMessageJSON = null
-        return false
+            })
+            VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+            appMessageJSON = null
+            return false
         } catch(ex) {
             console.log(ex)
             return false
         }
-
     }
 
     document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {

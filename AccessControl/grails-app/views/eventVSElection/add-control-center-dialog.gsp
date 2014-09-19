@@ -138,34 +138,25 @@
             },
             associateControlCenter:function(controlCenterURL) {
                 console.log(this.tagName + " associateControlCenter - controlCenterURL: " + controlCenterURL);
-                var webAppMessage = new WebAppMessage(
-                        ResponseVS.SC_PROCESSING,
-                        Operation.CONTROL_CENTER_ASSOCIATION)
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CONTROL_CENTER_ASSOCIATION)
                 var signatureContent = {
                     serverURL:controlCenterURL,
                     operation:Operation.CONTROL_CENTER_ASSOCIATION}
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.signedContent = signatureContent
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.signedMessageSubject = '<g:message code="addControlCenterMsgSubject"/>'
                 webAppMessage.serviceURL = "${createLink( controller:'subscriptionVS', absolute:true)}"
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
-                        console.log("activateUserCallback - message: " + appMessage);
-                        var appMessageJSON = toJSON(appMessage)
-                        var caption = '<g:message code="operationERRORCaption"/>'
-                        var msg = appMessageJSON.message
-                        if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
-                            caption = '<g:message code="operationOKCaption"/>'
-                            msg = "<g:message code='operationOKMsg'/>";
-                        }
-                        showMessageVS(msg, caption)
-                        this.checking = false
-                    }.bind(this)}
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("activateUserCallback - message: " + appMessage);
+                    var appMessageJSON = toJSON(appMessage)
+                    var caption = '<g:message code="operationERRORCaption"/>'
+                    var msg = appMessageJSON.message
+                    if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
+                        caption = '<g:message code="operationOKCaption"/>'
+                        msg = "<g:message code='operationOKMsg'/>";
+                    }
+                    showMessageVS(msg, caption)
+                    this.checking = false
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage)
             }
         });

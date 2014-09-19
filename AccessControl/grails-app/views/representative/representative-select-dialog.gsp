@@ -166,10 +166,9 @@
                 console.log(this.tagName + " - saveAnonymousDelegation - hashCertVSBase64: " + this.hashCertVSBase64)
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT_ANONYMOUS_DELEGATION)
                 webAppMessage.message = this.hashCertVSBase64
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) { }.bind(this)}
-                webAppMessage.callerCallback = objectId
-
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("saveAnonymousDelegation callback")
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
             submit: function() {

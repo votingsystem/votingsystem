@@ -54,7 +54,7 @@ public class LoggerVS {
         if(tag != null) dataMap.put("tag", tag.getName());
         dataMap.put("dateCreated", dateCreated);
         dataMap.put("isParent", isParent);
-        transactionslog.info(new JSON(dataMap) + ",");
+        transactionslog.info(new JSON(dataMap).toString(false) + ",");
     }
 
 }

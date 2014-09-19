@@ -1,6 +1,7 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.votingsystem.util.DateUtils
 
 import java.text.DateFormat
@@ -12,9 +13,10 @@ import java.util.concurrent.Executors
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@Transactional
 class FilesService {
-	
-	static transactional = true
+
+    private static final CLASS_NAME = CsrService.class.getSimpleName()
 
 	def grailsApplication
 	def messageSource

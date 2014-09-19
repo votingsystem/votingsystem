@@ -1,19 +1,3 @@
-function WebAppMessage(statusCode, operation) {
-	this.statusCode = statusCode
-	this.operation = operation
-	this.subject ;
-	this.filePath;
-	this.signedContent;
-	this.serviceURL;
-	this.documentURL;
-	this.receiverName;
-	this.serverURL;
-	this.eventVS;
-	this.message;
-	this.caption;
-	this.callerCallback;
-}
-
 var Operation = {
     SAVE_RECEIPT: "SAVE_RECEIPT",
     SAVE_RECEIPT_ANONYMOUS_DELEGATION:"SAVE_RECEIPT_ANONYMOUS_DELEGATION",
@@ -395,5 +379,5 @@ function notifiyClientToolConnection() {
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
 function setClientToolMessage(callerId, message) {
     var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
-    window[callerId].setClientToolMessage(b64_to_utf8)
+    window[callerId](b64_to_utf8)
 }

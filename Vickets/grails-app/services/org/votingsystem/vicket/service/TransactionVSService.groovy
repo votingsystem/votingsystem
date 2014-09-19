@@ -24,6 +24,8 @@ import org.votingsystem.vicket.model.CoreSignal
 @Transactional
 class TransactionVSService {
 
+    private static final CLASS_NAME = TransactionVSService.class.getSimpleName()
+
     private final Set<String> listenerSet = Collections.synchronizedSet(new HashSet<String>());
 
     def systemService
@@ -43,19 +45,11 @@ class TransactionVSService {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         String msg;
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
-        try {
-            if(messageJSON.toUserIBAN instanceof JSONArray) {
-                messageJSON.toUserIBAN.each { it ->
-                    IbanVSUtil.validate(it);}
-            } else {
-                IbanVSUtil.validate(messageJSON.toUserIBAN);
-            }
-        } catch(Exception ex) {
-            msg = messageSource.getMessage('IBANCodeErrorMsg', [smimeMessageReq.getFrom().toString()].toArray(),
-                    locale)
-            log.error("${methodName} - ${msg} - ${ex.getMessage()}", ex)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: msg,
-                    metaInf:MetaInfMsg.getExceptionMsg(methodName, ex, "IBAN_code"), type:TypeVS.ERROR)
+        if(messageJSON.toUserIBAN instanceof JSONArray) {
+            messageJSON.toUserIBAN.each { it ->
+                IbanVSUtil.validate(it);}
+        } else {
+            IbanVSUtil.validate(messageJSON.toUserIBAN);
         }
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
         switch(transactionType) {
@@ -148,9 +142,7 @@ class TransactionVSService {
                 }
                 eq("toUserVS", userVS)
             }
-            and {
-                between('dateCreated', timePeriod.getDateFrom(), timePeriod.getDateTo())
-            }
+            and { between('dateCreated', timePeriod.getDateFrom(), timePeriod.getDateTo()) }
         }
         List userTransactionVSList = []
         userVSTransactions.each { it ->
@@ -339,8 +331,7 @@ class TransactionVSService {
             or {
                 eq("type", TransactionVS.Type.VICKET_CANCELLATION)
             }
-            ge("dateCreated", timePeriod.getDateFrom())
-            le("dateCreated", timePeriod.getDateTo())
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
         }
 
         String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
