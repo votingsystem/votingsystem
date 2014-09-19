@@ -183,5 +183,5 @@ task installAllBowerComponents(dependsOn: ['AccessControl:installBowerComponents
 //  2) /gradlew.bat which is the windows bat script for for executing builds
 //  3) /wrapper which is a directory named by the "jarPath" config which contains other needed files.
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.11'
+	gradleVersion = '2.1'
 }
