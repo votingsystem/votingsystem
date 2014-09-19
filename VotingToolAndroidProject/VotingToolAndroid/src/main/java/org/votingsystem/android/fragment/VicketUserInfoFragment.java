@@ -29,14 +29,15 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.Utils;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.CurrencyData;
-import org.votingsystem.model.CurrencyVS;
+import org.votingsystem.model.TagVSData;
+
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Currency;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -51,7 +52,7 @@ public class VicketUserInfoFragment extends Fragment {
     private static final int ADMIN_ACCESS_CONTROL = 1;
 
     private BigDecimal amount;
-    private CurrencyVS currencyVS = CurrencyVS.EURO;
+    private String currencyCode = Currency.getInstance("EUR").getCurrencyCode();
     private Uri uriData;
     private String IBAN;
     private String subject;
@@ -94,8 +95,7 @@ public class VicketUserInfoFragment extends Fragment {
                         amount = (BigDecimal) responseVS.getData();
                         PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                                 getString(R.string.vicket_request_pin_msg, amount,
-                                currencyVS.toString()), false,
-                                TypeVS.VICKET_REQUEST);
+                                currencyCode), false, TypeVS.VICKET_REQUEST);
                     } else {
                         showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                                 responseVS.getNotificationMessage());
@@ -164,7 +164,7 @@ public class VicketUserInfoFragment extends Fragment {
         setHasOptionsMenu(true);
         loadUserInfo();
         if(savedInstanceState != null) {
-            currencyVS = (CurrencyVS) savedInstanceState.getSerializable(ContextVS.CURRENCY_KEY);
+            currencyCode = (String) savedInstanceState.getSerializable(ContextVS.CURRENCY_KEY);
             amount = (BigDecimal) savedInstanceState.getSerializable(ContextVS.VALUE_KEY);
             IBAN = savedInstanceState.getString(ContextVS.IBAN_KEY);
         }
@@ -177,20 +177,20 @@ public class VicketUserInfoFragment extends Fragment {
         uriData = getArguments().getParcelable(ContextVS.URI_KEY);
         if(uriData != null) {
             amount = new BigDecimal(uriData.getQueryParameter("amount"));
-            currencyVS = CurrencyVS.valueOf(uriData.getQueryParameter("currency"));
+            currencyCode = uriData.getQueryParameter("currency");
             subject = uriData.getQueryParameter("subject");
             receptor = uriData.getQueryParameter("receptor");
             Log.d(TAG + ".onStart(...)", "amount: " + amount + " - subject: " + subject +
                     " - receptor: " + receptor);
-            CurrencyData currencyData = Utils.getCurrencyData(contextVS, currencyVS);
+            TagVSData currencyData = Utils.getCurrencyData(contextVS, currencyCode);
             BigDecimal cashAvailable = currencyData.getCashBalance();
             if(cashAvailable != null && cashAvailable.compareTo(amount) >= 0) {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.vicket_send_pin_msg, amount,
-                                currencyVS.toString(), receptor, subject), false, TypeVS.VICKET_SEND);
+                                currencyCode.toString(), receptor, subject), false, TypeVS.VICKET_SEND);
             } else {
                 showMessage(ResponseVS.SC_ERROR, getString(R.string.insufficient_cash_caption),
-                        getString(R.string.insufficient_cash_msg, currencyVS.toString(),
+                        getString(R.string.insufficient_cash_msg, currencyCode,
                                 amount.toString(), cashAvailable.toString()));
             }
         }
@@ -203,14 +203,15 @@ public class VicketUserInfoFragment extends Fragment {
                             Calendar.getInstance())));
             return;
         }
-        final CurrencyData currencyData = Utils.getCurrencyData(contextVS, CurrencyVS.EURO);
+        final TagVSData currencyData = Utils.getCurrencyData(contextVS,
+                Currency.getInstance("EUR").getCurrencyCode());
         if(currencyData != null) {
             request_button.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
                             getString(R.string.cash_request_dialog_caption),
-                            getString(R.string.cash_dialog_msg,
-                                    currencyData.getAccountBalance(), CurrencyVS.EURO.toString()),
+                            getString(R.string.cash_dialog_msg, currencyData.getAccountBalance(),
+                            Currency.getInstance("EUR").getCurrencyCode()),
                             currencyData.getAccountBalance(), TypeVS.VICKET_REQUEST);
                 }
             });
@@ -218,9 +219,9 @@ public class VicketUserInfoFragment extends Fragment {
             last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
                     DateUtils.getLongDate_Es(lastCheckedTime))));
             vicket_account_info.setText(Html.fromHtml(getString(R.string.vicket_account_amount_info_lbl,
-                    currencyData.getAccountBalance(), currencyVS.toString())));
+                    currencyData.getAccountBalance(), currencyCode)));
             vicket_cash_info.setText(Html.fromHtml(getString(R.string.vicket_cash_amount_info_lbl,
-                    currencyData.getCashBalance(), currencyVS.toString())));
+                    currencyData.getCashBalance(), currencyCode)));
 
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 7);
@@ -299,7 +300,7 @@ public class VicketUserInfoFragment extends Fragment {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.VALUE_KEY, amount);
-            startIntent.putExtra(ContextVS.CURRENCY_KEY, currencyVS);
+            startIntent.putExtra(ContextVS.CURRENCY_KEY, currencyCode);
             showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
@@ -384,7 +385,7 @@ public class VicketUserInfoFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
-        outState.putSerializable(ContextVS.CURRENCY_KEY, currencyVS);
+        outState.putSerializable(ContextVS.CURRENCY_KEY, currencyCode);
         outState.putSerializable(ContextVS.VALUE_KEY, amount);
         outState.putSerializable(ContextVS.IBAN_KEY, IBAN);
     }

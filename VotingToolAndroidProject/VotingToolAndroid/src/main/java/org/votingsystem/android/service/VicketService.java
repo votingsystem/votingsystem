@@ -25,13 +25,13 @@ import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.CurrencyData;
-import org.votingsystem.model.CurrencyVS;
+import org.votingsystem.model.TagVSData;
+
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.Vicket;
-import org.votingsystem.model.VicketAccount;
+import org.votingsystem.model.UserVSAccount;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
@@ -76,7 +76,7 @@ public class VicketService extends IntentService {
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         Uri uriData =  arguments.getParcelable(ContextVS.URI_KEY);;
         BigDecimal amount = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
-        CurrencyVS currencyVS = (CurrencyVS) arguments.getSerializable(ContextVS.CURRENCY_KEY);
+        String currencyCode = (String) arguments.getSerializable(ContextVS.CURRENCY_KEY);
         ResponseVS responseVS = null;
         switch(operationType) {
             case VICKET_USER_INFO:
@@ -86,7 +86,7 @@ public class VicketService extends IntentService {
                 contextVS.sendBroadcast(responseVS);
                 break;
             case VICKET_REQUEST:
-                responseVS = vicketRequest(amount, currencyVS);
+                responseVS = vicketRequest(amount, currencyCode);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.showNotification(responseVS);
@@ -94,11 +94,11 @@ public class VicketService extends IntentService {
                 break;
             case VICKET_SEND:
                 amount = new BigDecimal(uriData.getQueryParameter("amount"));
-                currencyVS = CurrencyVS.valueOf(uriData.getQueryParameter("currency"));
+                currencyCode = uriData.getQueryParameter("currency");
                 String subject = uriData.getQueryParameter("subject");
                 String receptor = uriData.getQueryParameter("receptor");
                 String IBAN = uriData.getQueryParameter("IBAN");
-                responseVS = vicketSend(amount, currencyVS, subject, receptor, IBAN);
+                responseVS = vicketSend(amount, currencyCode, subject, receptor, IBAN);
                 responseVS.setTypeVS(operationType);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.showNotification(responseVS);
@@ -211,8 +211,8 @@ public class VicketService extends IntentService {
         }
     }
 
-    private ResponseVS vicketSend(BigDecimal requestAmount, CurrencyVS currencyVS,
-                                  String subject, String receptor, String IBAN) {
+    private ResponseVS vicketSend(BigDecimal requestAmount, String currencyCode,
+              String subject, String receptor, String IBAN) {
         ResponseVS responseVS = null;
         String message = null;
         String caption = null;
@@ -220,10 +220,10 @@ public class VicketService extends IntentService {
         Integer iconId = R.drawable.cancel_22;
         Map <Long,Vicket> sendedVicketsMap = new HashMap<Long, Vicket>();
         try {
-            CurrencyData availableCurrencyData = Utils.getCurrencyData(contextVS, currencyVS);
+            TagVSData availableCurrencyData = Utils.getCurrencyData(contextVS, currencyCode);
             BigDecimal available = availableCurrencyData.getCashBalance();
             if(available.compareTo(requestAmount) < 0) {
-                throw new Exception(getString(R.string.insufficient_cash_msg, currencyVS.toString(),
+                throw new Exception(getString(R.string.insufficient_cash_msg, currencyCode,
                         requestAmount.toString(), available.toString()));
             }
             responseVS = getVicketServer();
@@ -241,7 +241,7 @@ public class VicketService extends IntentService {
             mapToSend.put("operation", TypeVS.VICKET.toString());
             mapToSend.put("subject", subject);
             mapToSend.put("IBAN", IBAN);
-            mapToSend.put("currency", currencyVS.toString());
+            mapToSend.put("currency", currencyCode);
             mapToSend.put("amount", vicketAmount.toString());
 
             List<String> smimeVicketList = new ArrayList<String>();
@@ -268,7 +268,7 @@ public class VicketService extends IntentService {
             String publicKeyStr = new String(Base64.encode(keyPair.getPublic().getEncoded()));
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 mapToSend.put("amount", requestAmount.toString());
-                mapToSend.put("currency", currencyVS.toString());
+                mapToSend.put("currency", currencyCode);
                 mapToSend.put("operation", TypeVS.VICKET_SEND.toString());
                 mapToSend.put("vickets", smimeVicketList);
                 mapToSend.put("publicKey", publicKeyStr);
@@ -296,7 +296,7 @@ public class VicketService extends IntentService {
                         List<Vicket> vicketList = new ArrayList<Vicket>();
                         vicketList.addAll(sendedVicketsMap.values());
                         TransactionVS vicketSendTransaction = new TransactionVS(TransactionVS.Type.
-                                VICKET_SEND, dateCreated, vicketList, requestAmount, currencyVS);
+                                VICKET_SEND, dateCreated, vicketList, requestAmount, currencyCode);
                         TransactionVSContentProvider.addTransaction(contextVS,
                                 vicketSendTransaction, contextVS.getCurrentWeekLapseId());
                     }
@@ -344,7 +344,7 @@ public class VicketService extends IntentService {
                 iconId = R.drawable.fa_money_24;
                 caption = getString(R.string.vicket_send_ok_caption);
                 message = getString(R.string.vicket_send_ok_msg, requestAmount.toString(),
-                        currencyVS.toString(), subject, receptor);
+                        currencyCode, subject, receptor);
             }
             responseVS.setIconId(iconId);
             responseVS.setCaption(caption);
@@ -353,7 +353,7 @@ public class VicketService extends IntentService {
         }
     }
 
-    private ResponseVS vicketRequest(BigDecimal requestAmount, CurrencyVS currencyVS) {
+    private ResponseVS vicketRequest(BigDecimal requestAmount, String currencyCode) {
         ResponseVS responseVS = getVicketServer();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         VicketServer vicketServer = (VicketServer) responseVS.getData();
@@ -367,7 +367,7 @@ public class VicketService extends IntentService {
             List<Vicket> vicketList = new ArrayList<Vicket>();
             for(int i = 0; i < numVickets.intValue(); i++) {
                 Vicket vicket = new Vicket(vicketServer.getServerURL(),
-                        vicketsValue, currencyVS, TypeVS.VICKET);
+                        vicketsValue, currencyCode, TypeVS.VICKET);
                 vicketList.add(vicket);
                 vicketsMap.put(vicket.getHashCertVSBase64(), vicket);
             }
@@ -384,7 +384,7 @@ public class VicketService extends IntentService {
 
             Map smimeContentMap = new HashMap();
             smimeContentMap.put("totalAmount", requestAmount.toString());
-            smimeContentMap.put("currency", currencyVS.toString());
+            smimeContentMap.put("currency", currencyCode);
             smimeContentMap.put("vickets", vicketsMapList);
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("serverURL", contextVS.getVicketServer().getServerURL());
@@ -397,7 +397,7 @@ public class VicketService extends IntentService {
             List<Map> vicketCSRList = new ArrayList<Map>();
             for(Vicket vicket : vicketList) {
                 Map csrVicketMap = new HashMap();
-                csrVicketMap.put("currency", currencyVS.toString());
+                csrVicketMap.put("currency", currencyCode);
                 csrVicketMap.put("vicketValue", vicketsValue);
                 csrVicketMap.put("csr", new String(vicket.getCertificationRequest().getCsrPEM(), "UTF-8"));
                 vicketCSRList.add(csrVicketMap);
@@ -457,7 +457,7 @@ public class VicketService extends IntentService {
                 VicketContentProvider.insertVickets(contextVS, vicketsMap.values());
                 caption = getString(R.string.vicket_request_ok_caption);
                 message = getString(R.string.vicket_request_ok_msg, requestAmount.toString(),
-                        currencyVS.toString());
+                        currencyCode);
                 iconId = R.drawable.fa_money_24;
             } else {
                 caption = getString(R.string.vicket_request_error_caption);
@@ -503,19 +503,19 @@ public class VicketService extends IntentService {
                 Date requestDate = DateUtils.getDateFromString(responseJSON.getString("date"));
 
                 Iterator weeksIterator = responseJSON.keys();
-                VicketAccount vicketAccount = null;
+                UserVSAccount userVSAccount = null;
                 while(weeksIterator.hasNext()) {
                     String keyStr = (String) weeksIterator.next();
                     if(currentLapseStr.equals(keyStr)) {
-                        vicketAccount = VicketAccount.parse(responseJSON.getJSONObject(keyStr));
-                        vicketAccount.setWeekLapse(currentLapseCalendar.getTime());
+                        userVSAccount = UserVSAccount.parse(responseJSON.getJSONObject(keyStr));
+                        userVSAccount.setWeekLapse(currentLapseCalendar.getTime());
                         break;
                     }
                 }
-                if(vicketAccount != null) {
-                    vicketAccount.setLastRequestDate(requestDate);
+                if(userVSAccount != null) {
+                    userVSAccount.setLastRequestDate(requestDate);
                 } else Log.d(TAG + "updateUserInfo(...)", "Current week data not found");
-                TransactionVSContentProvider.setVicketAccount(contextVS, vicketAccount);
+                TransactionVSContentProvider.setVicketAccount(contextVS, userVSAccount);
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
             }

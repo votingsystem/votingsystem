@@ -144,7 +144,7 @@ public class TransactionVSFragment extends Fragment {
         }
         String transactionHtml = getString(R.string.transactionvs_formatted,
                 DateUtils.getLongDate_Es(transactionvs.getDateCreated()),
-                transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyVS().toString());
+                transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyCode());
         messageSMIME = transactionvs.getMessageSMIME();
         transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));
         transactionvs_content.setText(Html.fromHtml(transactionHtml));

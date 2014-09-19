@@ -306,8 +306,8 @@ public class VicketGridFragment extends Fragment
 
                 TextView amount = (TextView) view.findViewById(R.id.amount);
                 amount.setText(vicket.getAmount().toPlainString());
-                TextView currency = (TextView) view.findViewById(R.id.currency);
-                currency.setText(vicket.getCurrency().toString());
+                TextView currency = (TextView) view.findViewById(R.id.currencyCode);
+                currency.setText(vicket.getCurrencyCode().toString());
             }
         }
     }

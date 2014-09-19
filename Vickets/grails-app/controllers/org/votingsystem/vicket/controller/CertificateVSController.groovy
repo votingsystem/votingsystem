@@ -110,9 +110,9 @@ class CertificateVSController {
      *
      * @httpMethod [POST]
      * @serviceURL [/certificateVS/editCert]
-     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo con los datos
+     * @requestContentType [application/x-pkcs7-signature] Obligatorio. El archivo con los datos
      *                  datos del nuevo estado del certificado
-     * @responseContentType [application/x-pkcs7-signature,application/x-pkcs7-mime]
+     * @responseContentType [application/x-pkcs7-signature]
      */
     def editCert() {
         MessageSMIME messageSMIMEReq = request.messageSMIMEReq

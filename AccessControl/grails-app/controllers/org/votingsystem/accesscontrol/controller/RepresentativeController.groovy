@@ -140,7 +140,7 @@ class RepresentativeController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/revoke]
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. documento firmado
 	 *                     en formato SMIME con los datos de la baja.
 	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
 	 * 

@@ -320,59 +320,8 @@ class TransactionVSService {
                 typeDescription = messageSource.getMessage('vicketDepositFromGroupToAllMembers', null, locale);
                 break;
             default: typeDescription = transactionType
-
         }
         return typeDescription
-    }
-
-    public Map getUserVSVicketTransactionVSMap(UserVS userVS, DateUtils.TimePeriod timePeriod) {
-        def userInputTransactions = TransactionVS.createCriteria().scroll {
-            eq("toUserVS", userVS)
-            or {
-                eq("type", TransactionVS.Type.VICKET_CANCELLATION)
-            }
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-        }
-
-        String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
-        //int year =  calendar.get(Calendar.YEAR);
-        //int month = calendar.get(Calendar.MONTH) + 1; // Note: zero based!
-        //int day = calendar.get(Calendar.DAY_OF_MONTH);
-        def userOutputTransactions = TransactionVS.createCriteria().scroll {
-            eq("fromUserVS", userVS)
-            eq("type", TransactionVS.Type.VICKET_REQUEST)
-            ge("dateCreated", mondayLapse.getTime())
-        }
-
-        Map resultMap = [:]
-        Map dateResultMap = [:]
-        dateResultMap[Currency.getInstance("EUR").getCurrencyCode()] = [totalOutputs: new BigDecimal(0),
-                totalInputs:new BigDecimal(0), transactionList:[]]
-
-        while (userInputTransactions.next()) {
-            TransactionVS transactionVS = (TransactionVS) userInputTransactions.get(0);
-            Map currencyMap = dateResultMap.get(transactionVS.getCurrencyCode())
-            if(!currencyMap) {
-                currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
-                dateResultMap.put(transactionVS.getCurrencyCode(), currencyMap)
-            }
-            currencyMap.totalInputs = currencyMap.totalInputs.add(transactionVS.amount)
-            currencyMap.transactionList.add(getTransactionMap(transactionVS))
-        }
-
-        while (userOutputTransactions.next()) {
-            TransactionVS transactionVS = (TransactionVS) userOutputTransactions.get(0);
-            Map currencyMap = dateResultMap.get(transactionVS.getCurrencyCode())
-            if(!currencyMap) {
-                currencyMap = [totalOutputs: new BigDecimal(0), totalInputs:new BigDecimal(0), transactionList:[]]
-                dateResultMap.put(transactionVS.getCurrencyCode(), currencyMap)
-            }
-            currencyMap.totalOutputs = currencyMap.totalOutputs.add(transactionVS.amount)
-            currencyMap.transactionList.add(getTransactionMap(transactionVS))
-        }
-        resultMap.date = DateUtils.getStringFromDate(Calendar.getInstance().getTime())
-        resultMap[dirPath] = dateResultMap
-        return resultMap
     }
 
 }

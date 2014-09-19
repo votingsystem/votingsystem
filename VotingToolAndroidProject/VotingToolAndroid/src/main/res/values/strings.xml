@@ -355,10 +355,6 @@
     <br/>URL de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
     <string name="vicket_request_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
     %3$s Vickets de %4$s %2$ss<br/><br/>URL de servidor: <a href=\'%5$s\'>%5$s</a>]]></string>
-    <string name="user_allocation_input_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
-    Repartidos entre <b>%3$s usuarios</b>]]></string>
-    <string name="user_allocation_input_receipt_formatted"><![CDATA[Importe total de la operación: <b>%1$s %2$ss</b><br/>
-    IBAN: <b>%3$s usuarios</b>]]></string>
 
     <string name="receipt_vote_subtitle">Voto</string>
     <string name="receipt_cancel_vote_subtitle">Cancelación de voto</string>
@@ -413,7 +409,6 @@
     <string name="transactionvs_to_user_lbl"><![CDATA[Usuario <b>receptor</b>:<br/><b>NIF:</b> %1$s <br/>
         <b>Nombre:</b> %2$s]]></string>
     <string name="transactionvs_receipt_url"><![CDATA[<a href=\'%1$s\'>Justificante</a>]]></string>
-    <string name="user_allocation_receipt_url"><![CDATA[<a href=\'%1$s\'>Ingreso original</a>]]></string>
     <string name="vicket_cancellation_msg_subject">Cancelación de Vicket</string>
     <string name="open_vicket_grid_menu">Ver Vickets</string>
     <string name="cert_info_lbl">Datos del certificado</string>

@@ -24,8 +24,6 @@ android {
         abortOnError false
     }
 
-
-
     signingConfigs {
         release {
             storeFile file("$rootProject.projectDir/$rootProject.testUserKeyStorePath",)
@@ -34,10 +32,6 @@ android {
             keyPassword rootProject.keyStorePassword
         }
     }
-
-    /*defaultConfig {
-        minSdkVersion 18
-    }*/
 
     compileSdkVersion 19
     buildToolsVersion "19.1.0"

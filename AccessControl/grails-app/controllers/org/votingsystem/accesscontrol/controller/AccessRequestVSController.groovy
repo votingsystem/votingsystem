@@ -43,7 +43,7 @@ class AccessRequestVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/accessRequestVS]
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de acceso.
+	 * @requestContentType [application/x-pkcs7-signature] La solicitud de acceso.
 	 * @param [csr] Obligatorio. La solicitud de certificado de voto.
 	 * @return La solicitud de certificado de voto firmada.
 	 */

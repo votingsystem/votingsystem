@@ -165,7 +165,7 @@ class EventVSClaimController {
 	 * Servicio para publicar reclamaciones.
 	 *
 	 * @httpMethod [POST]
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio.
 	 *                     documento en formato SMIME  en cuyo content se
 	 *        encuentra la reclamación que se desea publicar en formato HTML.
 	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.

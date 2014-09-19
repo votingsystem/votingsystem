@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 
 import org.bouncycastle2.util.encoders.Base64;

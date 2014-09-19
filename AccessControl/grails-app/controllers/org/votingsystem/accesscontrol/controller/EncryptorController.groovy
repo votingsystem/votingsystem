@@ -37,7 +37,7 @@ class EncryptorController {
 	}
 	
 	/**
-	 * Servicio para comprbar la creación de documentos con multifirma
+	 * Servicio para comprobar la creación de documentos con multifirma
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/getMultiSignedMessage]

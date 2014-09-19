@@ -44,7 +44,7 @@ class EncryptorController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/getMultiSignedMessage]
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio.
 	 *                     Documento SMIME firmado.
 	 * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
 	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.

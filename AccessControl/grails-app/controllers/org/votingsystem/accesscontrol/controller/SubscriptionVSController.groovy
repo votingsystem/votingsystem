@@ -34,7 +34,7 @@ class SubscriptionVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/subscriptionVS]
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio.
 	 *					Archivo con los datos del Centro de Control que se desea dar de alta.
 	 */
 	def index() { 

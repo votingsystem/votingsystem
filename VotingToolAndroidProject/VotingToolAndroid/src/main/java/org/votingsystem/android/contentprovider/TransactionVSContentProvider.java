@@ -13,15 +13,12 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
-
 import org.votingsystem.android.AppContextVS;
-import org.votingsystem.model.CurrencyData;
-import org.votingsystem.model.CurrencyVS;
+import org.votingsystem.model.TagVSData;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.VicketAccount;
+import org.votingsystem.model.UserVSAccount;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -249,13 +246,13 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
 
-    public static void setVicketAccount(AppContextVS contextVS, VicketAccount updatedVicketAccount) {
-        Set<CurrencyVS> keySet = updatedVicketAccount.getCurrencyMap().keySet();
-        for(CurrencyVS currencyVS : keySet) {
-            CurrencyData currencyData = updatedVicketAccount.getCurrencyMap().get(currencyVS);
+    public static void setVicketAccount(AppContextVS contextVS, UserVSAccount updatedUserVSAccount) {
+        Set<String> keySet = updatedUserVSAccount.getCurrencyMap().keySet();
+        for(String currencyVS : keySet) {
+            TagVSData currencyData = updatedUserVSAccount.getCurrencyMap().get(currencyVS);
             for(TransactionVS transactionVS : currencyData.getTransactionList()) {
                 addTransaction(contextVS, transactionVS,
-                        DateUtils.getDirPath(updatedVicketAccount.getWeekLapse()));
+                        DateUtils.getDirPath(updatedUserVSAccount.getWeekLapse()));
             }
             currencyData.setTransactionList(null);
         }
@@ -287,7 +284,7 @@ public class TransactionVSContentProvider extends ContentProvider {
                 TransactionVSContentProvider.TO_USER_COL, transactionVS.getToUserVS().getNif());
         values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
         values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
-        values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyVS().toString());
+        values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyCode());
         values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
         values.put(TransactionVSContentProvider.SERIALIZED_OBJECT_COL,
                 ObjectUtils.serializeObject(transactionVS));

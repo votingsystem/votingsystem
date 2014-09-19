@@ -41,7 +41,7 @@ class VicketController {
      *
      * @httpMethod [POST]
      * @serviceURL [/model/request]
-     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de certificado de delegación.
+     * @requestContentType [application/x-pkcs7-signature] La solicitud de certificado de delegación.
      * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
      * @return La solicitud de certificado de delegación anónima firmada.
      */

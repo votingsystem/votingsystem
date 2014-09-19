@@ -49,7 +49,7 @@ class VoteVSCancellerController {
 	 * 
      * @httpMethod [POST]
 	 * @serviceURL [/voteVSCanceller]
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] documento correspondiente al
+	 * @requestContentType [application/x-pkcs7-signature] documento correspondiente al
 	 *              <a href="https://github.com/votingsystem/votingsystem/wiki/Anulador-de-voto">anulador de voto</a>
 	 * 				firmado y cifrado	 
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 

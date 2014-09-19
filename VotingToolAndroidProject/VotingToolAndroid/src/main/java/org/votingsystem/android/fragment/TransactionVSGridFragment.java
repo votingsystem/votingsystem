@@ -325,8 +325,8 @@ public class TransactionVSGridFragment extends Fragment
 
                 TextView amount = (TextView) view.findViewById(R.id.amount);
                 amount.setText(transactionVS.getAmount().toPlainString());
-                TextView currency = (TextView) view.findViewById(R.id.currency);
-                currency.setText(transactionVS.getCurrencyVS().toString());
+                TextView currency = (TextView) view.findViewById(R.id.currencyCode);
+                currency.setText(transactionVS.getCurrencyCode());
 
                 ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
                         transactionVS.getIconId(getActivity().getApplicationContext()));

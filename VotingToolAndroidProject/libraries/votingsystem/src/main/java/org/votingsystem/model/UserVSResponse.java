@@ -12,7 +12,7 @@ import java.util.List;
 
 public class UserVSResponse {
 	
-	public static final String TAG = "UserVSResponse";
+	public static final String TAG = UserVSResponse.class.getSimpleName();
 
     private Long numRepresentatives;
     private Long numTotalRepresentatives;

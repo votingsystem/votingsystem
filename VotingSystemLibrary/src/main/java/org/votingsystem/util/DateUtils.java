@@ -116,6 +116,11 @@ public class DateUtils {
         return formatter.format(date);
     }
 
+    public static String getTimePeriodPath (TimePeriod timePeriod) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
+        return "/" + formatter.format(timePeriod.getDateFrom()) + "__" +  formatter.format(timePeriod.getDateTo());
+    }
+
     public static Date getDateFromPath (String dateStr) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
         return formatter.parse(dateStr);

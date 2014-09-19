@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
@@ -33,7 +34,18 @@ class TestingController {
     def systemService
 
     def index() {
-
+        UserVS userVS
+        UserVS.withTransaction {
+            userVS = UserVS.findWhere(id:params.long('userId'))
+        }
+        if(!userVS?.nif) {
+            render "USerVS id '${params.long('userId')}' nif -> ${userVS?.nif}"
+            return false
+        } else {
+            DateUtils.TimePeriod currentWeekPeriod = DateUtils.getCurrentWeekPeriod()
+            Map result = transactionVSService.getTransactionToListWithBalances(userVS, currentWeekPeriod)
+            render result as JSON
+        }
     }
 
 
@@ -89,12 +101,6 @@ class TestingController {
         auditingService.checkVicketRequest(Calendar.getInstance().getTime())
         render "OK"
     }
-
-    def backup() {
-        auditingService.backupUserTransactionHistory(Calendar.getInstance().getTime())
-        render "OK"
-    }
-
 
     def webViewJSTest() {
         String jsCommand = "serverMessage('message to server webkit')"

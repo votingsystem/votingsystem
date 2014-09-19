@@ -50,7 +50,9 @@ class VicketService {
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
 
-        Map userInfoMap = transactionVSService.getUserVSVicketTransactionVSMap(signer, timePeriod)
+        throw new Exception("TODO - check wallet for cash - TODO")
+
+        //Map userInfoMap = transactionVSService.getUserVSVicketTransactionVSMap(signer, timePeriod)
         Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.getCurrencyCode())
         if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
                 [requestCurrency.getCurrencyCode()].toArray(), locale));

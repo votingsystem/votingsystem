@@ -1,6 +1,5 @@
 package org.votingsystem.signature.util;
 
-import android.security.KeyPairGeneratorSpec;
 import android.util.Log;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
@@ -20,12 +19,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -35,11 +32,7 @@ import java.util.Map;
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
 
-import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
-import static org.votingsystem.model.ContextVS.KEY_SIZE;
-import static org.votingsystem.model.ContextVS.PROVIDER;
-import static org.votingsystem.model.ContextVS.SIG_NAME;
 
 /**
 * @author jgzornoza

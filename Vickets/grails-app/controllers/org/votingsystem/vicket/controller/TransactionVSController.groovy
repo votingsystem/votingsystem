@@ -255,7 +255,7 @@ class TransactionVSController {
      *
      * @httpMethod [POST]
      * @serviceURL [/transactionVS/deposit]
-     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
+     * @requestContentType [application/x-pkcs7-signature] Obligatorio.
      *                     documento SMIME firmado con un model emitido por el sistema.
      * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
      * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.

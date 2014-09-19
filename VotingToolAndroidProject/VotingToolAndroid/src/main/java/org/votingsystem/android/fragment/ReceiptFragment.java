@@ -254,29 +254,11 @@ public class ReceiptFragment extends Fragment {
                     contentFormatted = getString(R.string.vicket_request_formatted,
                             totalAmount.toPlainString(), currency, numVickets, vicketValueStr, serverURL);
                     break;
-                case USER_ALLOCATION_INPUT:
-                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
-                    totalAmount = new BigDecimal(dataJSON.getString("amount"));
-                    currency = dataJSON.getString("currency");
-                    Integer numUsers = dataJSON.getInt("numUsers");
-                    bas64EncodedSMIMEChild = dataJSON.getString("allocationMessage");
-                    contentFormatted = getString(R.string.user_allocation_input_formatted,
-                            totalAmount.toPlainString(), currency, numUsers);
-                    break;
-                case USER_ALLOCATION_INPUT_RECEIPT:
-                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
-                    totalAmount = new BigDecimal(dataJSON.getString("amount"));
-                    currency = dataJSON.getString("currency");
-                    receiptSubjectStr = dataJSON.getString("subject");
-                    String IBAN = dataJSON.getString("IBAN");
-                    contentFormatted = getString(R.string.user_allocation_input_receipt_formatted,
-                            totalAmount.toPlainString(), currency, IBAN);
-                    break;
                 default: contentFormatted = receiptContainer.getReceipt().getSignedContent();
             }
             receiptSubject.setText(getString(R.string.smime_subject_msg, receiptSubjectStr));
             receipt_content.setText(Html.fromHtml(contentFormatted));
-            if(receiptContainer.getTypeVS() == TypeVS.USER_ALLOCATION_INPUT) {
+            /*if(receiptContainer.getTypeVS() == TypeVS.USER_ALLOCATION_INPUT) {
                 receipt.setText(Html.fromHtml(getString(R.string.user_allocation_receipt_url, "")));
                 receipt.setVisibility(View.VISIBLE);
                 final byte[] selectedReceiptChildBytes = Base64.decode(bas64EncodedSMIMEChild);
@@ -291,7 +273,7 @@ public class ReceiptFragment extends Fragment {
                         } catch(Exception ex) {ex.printStackTrace();}
                     }
                 });
-            } else receipt.setVisibility(View.GONE);
+            } else receipt.setVisibility(View.GONE);*/
         } catch(Exception ex) {
             ex.printStackTrace();
         }

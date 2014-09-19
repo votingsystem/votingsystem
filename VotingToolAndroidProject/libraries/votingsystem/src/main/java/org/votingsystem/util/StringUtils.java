@@ -2,18 +2,11 @@ package org.votingsystem.util;
 
 import android.util.Log;
 
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.smime.CMSUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Random;

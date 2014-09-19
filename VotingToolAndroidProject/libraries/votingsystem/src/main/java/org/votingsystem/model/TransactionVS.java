@@ -23,8 +23,10 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type {VICKET_REQUEST, USER_ALLOCATION, USER_ALLOCATION_INPUT, VICKET_CANCELLATION,
-        VICKET_SEND;}
+
+    public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, BANKVS_INPUT,
+        VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,
+        VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, TIME_LIMITED, INIT_PERIOD;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -40,7 +42,7 @@ public class TransactionVS  implements Serializable {
     private byte[] cancellationSMIMEBytes;
 
     private TransactionVS transactionParent;
-    private CurrencyVS currencyVS;
+    private String currencyCode;
 
     private UserVS fromUserVS;
     private UserVS toUserVS;
@@ -61,11 +63,11 @@ public class TransactionVS  implements Serializable {
     }
 
     public TransactionVS(Type type, Date dateCreated,  List<Vicket> vickets, BigDecimal amount,
-                 CurrencyVS currencyVS) {
+                 String currencyCode) {
         this.type = type;
         this.vickets = vickets;
         this.amount = amount;
-        this.currencyVS = currencyVS;
+        this.currencyCode = currencyCode;
         this.dateCreated = dateCreated;
     }
 
@@ -133,12 +135,12 @@ public class TransactionVS  implements Serializable {
         this.type = type;
     }
 
-    public CurrencyVS getCurrencyVS() {
-        return currencyVS;
+    public String getCurrencyCode() {
+        return currencyCode;
     }
 
-    public void setCurrencyVS(CurrencyVS currencyVS) {
-        this.currencyVS = currencyVS;
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
     public String getSubject() {
@@ -224,7 +226,6 @@ public class TransactionVS  implements Serializable {
     public int getIconId(Context context) {
         switch(type) {
             case VICKET_CANCELLATION:
-            case USER_ALLOCATION_INPUT:
                 return R.drawable.edit_redo_24;
             case VICKET_REQUEST:
                 return R.drawable.edit_undo_24;
@@ -239,8 +240,6 @@ public class TransactionVS  implements Serializable {
         switch(getType()){
             case VICKET_REQUEST:
                 return TypeVS.VICKET_REQUEST;
-            case USER_ALLOCATION_INPUT:
-                return TypeVS.USER_ALLOCATION_INPUT;
             default: return null;
         }
     }
@@ -249,7 +248,9 @@ public class TransactionVS  implements Serializable {
         switch(type) {
             case VICKET_CANCELLATION:
                 return context.getString(R.string.vicket_cancellation);
-            case USER_ALLOCATION_INPUT:
+            case VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+            case VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
+            case VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
                 return context.getString(R.string.account_input);
             case VICKET_REQUEST:
                 return context.getString(R.string.account_output);
@@ -301,7 +302,7 @@ public class TransactionVS  implements Serializable {
             transactionVS.setToUserVS(toUserVS);
         }
         transactionVS.setSubject(jsonData.getString("subject"));
-        transactionVS.setCurrencyVS(CurrencyVS.valueOf(jsonData.getString("currency")));
+        transactionVS.setCurrencyCode(jsonData.getString("currency"));
         transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated")));
         if(jsonData.has("validTo")) transactionVS.setValidTo(
                 DateUtils.getDateFromString(jsonData.getString("validTo")));

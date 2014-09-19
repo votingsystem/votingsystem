@@ -200,7 +200,7 @@ class UserVSController {
      *
      * @httpMethod [POST]
      * @serviceURL [/userVS/userInfo]
-     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
+     * @requestContentType [application/x-pkcs7-signature] Obligatorio.
      *                     documento SMIME firmado con datos del usuario que solicita la información.
      * @responseContentType [application/json;application/pkcs7-mime]. Documento JSON cifrado con datos de
      *                      la cuenta del usuario.
@@ -215,27 +215,21 @@ class UserVSController {
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
         UserVS userVS = messageSMIMEReq.getUserVS()
         if(!messageJSON.NIF.equals(userVS.getNif())) {
-            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, message(code:'nifMisMatchErrorMsg',
-                    args: [userVS.getNif(), messageJSON.NIF]))
-            responseVS.setContentType(ContentTypeVS.TEXT)
+            ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_ERROR, message:  message(code:'nifMisMatchErrorMsg',
+                    args: [userVS.getNif(), messageJSON.NIF]), contentType:ContentTypeVS.TEXT)
             return [responseVS:responseVS]
         }
-
         Calendar calendar = Calendar.getInstance()
         if(params.year && params.month && params.day) {
             calendar.set(Calendar.YEAR, params.int('year'))
             calendar.set(Calendar.MONTH, params.int('month') - 1) //Zero based
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
         }
-
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        Map responseMap = transactionVSService.getUserVSVicketTransactionVSMap(userVS, timePeriod)
-        ResponseVS responseVS = new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap)
-        responseVS.setContentType(ContentTypeVS.JSON)
-        X509Certificate cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
-
-        responseVS.setType(TypeVS.VICKET_USER_INFO)
-        return [responseVS:responseVS]
+        Map responseMap = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
+        //X509Certificate cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
+        return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap,
+                contentType: ContentTypeVS.JSON, type: TypeVS.VICKET_USER_INFO)]
     }
 
 

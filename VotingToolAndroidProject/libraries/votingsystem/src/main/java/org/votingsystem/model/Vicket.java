@@ -42,22 +42,22 @@ public class Vicket extends ReceiptContainer {
     private String subject;
     private State state;
     private Date cancellationDate;
-    private CurrencyVS currency;
+    private String currencyCode;
     private String url;
     private String vicketServerURL;
 
-    public Vicket(String vicketServerURL, BigDecimal amount, CurrencyVS currency, TypeVS typeVS) {
+    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, TypeVS typeVS) {
         this.amount = amount;
         setTypeVS(typeVS);
         this.vicketServerURL = vicketServerURL;
-        this.currency = currency;
+        this.currencyCode = this.currencyCode;
         try {
             setOriginHashCertVS(UUID.randomUUID().toString());
             setHashCertVSBase64(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
             certificationRequest = CertificationRequestVS.getVicketRequest(
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                     ContextVS.PROVIDER, vicketServerURL, hashCertVSBase64, amount.toString(),
-                    currency.toString());
+                    this.currencyCode.toString());
 
 
             //public static CertificationRequestVS getVicketRequest(int keySize, String keyName, String signatureMechanism, String provider, String vicketProviderURL, String hashCertVS, String amount)
@@ -71,12 +71,12 @@ public class Vicket extends ReceiptContainer {
         return certificationRequest;
     }
 
-    public CurrencyVS getCurrency() {
-        return currency;
+    public String getCurrencyCode() {
+        return currencyCode;
     }
 
-    public void setCurrency(CurrencyVS currency) {
-        this.currency = currency;
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
     @Override public String getSubject() {

@@ -45,8 +45,6 @@
     <string name="account_output">Retirada de efectivo</string>
     <string name="vicket_send">Pago en Vickets</string>
     <string name="vicket_request_subtitle">Obtención de Vickets</string>
-    <string name="user_allocation_input">Confirmación de ingreso colectivo.</string>
-    <string name="user_allocation_input_receipt">Ingreso colectivo.</string>
     <string name="vicket_cancellation">Cancelación de Vickets</string>
 
 </resources>

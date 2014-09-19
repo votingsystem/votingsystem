@@ -25,10 +25,10 @@ class VoteVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo voto firmado por el
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. El archivo voto firmado por el
 	 *        <a href="https://github.com/votingsystem/votingsystem/wiki/Certificado-de-voto">certificado de VoteVS.</a>
 	 *        y el certificado del Centro de Control.
-	 * @responseContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 
+	 * @responseContentType [application/x-pkcs7-signature]
 	 * @return  <a href="https://github.com/votingsystem/votingsystem/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
 	 */
     def save() { 

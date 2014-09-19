@@ -355,7 +355,7 @@ public class AppContextVS extends Application {
     public void showNotification(ResponseVS responseVS){
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
-        Intent clickIntent = new Intent(this, MessageActivity.class);
+        Intent clickIntent = new Intent(this, MessageActivity.class);http://javapapers.com/core-java/java-email/
         clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, ContextVS.
                 VICKET_SERVICE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);

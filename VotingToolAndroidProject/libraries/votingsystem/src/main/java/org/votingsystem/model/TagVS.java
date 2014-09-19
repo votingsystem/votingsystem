@@ -10,6 +10,8 @@ import java.util.Set;
 */
 public class TagVS {
 
+    public static final String WILDTAG = "WILDTAG";
+
     private Long id;
     private String name;
     private Long frequency;

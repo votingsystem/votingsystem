@@ -219,7 +219,7 @@ public class VicketContentProvider extends ContentProvider {
                                                             Vicket vicket) {
         ContentValues values = new ContentValues();
         values.put(VicketContentProvider.AMOUNT_COL, vicket.getAmount().toPlainString());
-        values.put(VicketContentProvider.CURRENCY_COL, vicket.getCurrency().toString());
+        values.put(VicketContentProvider.CURRENCY_COL, vicket.getCurrencyCode().toString());
         values.put(VicketContentProvider.STATE_COL, vicket.getState().toString());
         values.put(VicketContentProvider.SERIALIZED_OBJECT_COL,
                 ObjectUtils.serializeObject(vicket));

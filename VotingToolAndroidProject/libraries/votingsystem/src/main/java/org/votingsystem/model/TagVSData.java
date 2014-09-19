@@ -14,9 +14,9 @@ import java.util.Date;
 import java.util.List;
 
 
-public class CurrencyData implements Serializable {
+public class TagVSData implements Serializable {
 
-    public static final String TAG = "CurrencyData";
+    public static final String TAG = TagVSData.class.getSimpleName();
 
     public static final long serialVersionUID = 1L;
 
@@ -25,20 +25,22 @@ public class CurrencyData implements Serializable {
     private BigDecimal totalInputs = new BigDecimal(0);
     private BigDecimal totalOutputs = new BigDecimal(0);
     private Date lastRequestDate;
-    private CurrencyVS currencyVS;
+    private String currencyCode;
 
+    public TagVSData() {}
 
-    public CurrencyData() {}
+    public TagVSData(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
 
-    public CurrencyData(List<TransactionVS> transactionList) throws Exception {
+    public TagVSData(List<TransactionVS> transactionList) throws Exception {
         this.transactionList = transactionList;
         for (TransactionVS transaction : transactionList) {
-            if(currencyVS == null) currencyVS = transaction.getCurrencyVS();
-            else if(currencyVS != transaction.getCurrencyVS()) throw new Exception(
-                    "Transaction List with mixed currencies " + currencyVS + ", " +
-                    transaction.getCurrencyVS());
+            if(currencyCode == null) currencyCode = transaction.getCurrencyCode();
+            else if(currencyCode != transaction.getCurrencyCode()) throw new Exception(
+                    "currencyCode ERROR expected: '" + currencyCode + "' - found: '" +
+                            transaction.getCurrencyCode() + "'");
             switch(transaction.getType()) {
-                case USER_ALLOCATION_INPUT:
                 case VICKET_CANCELLATION:
                     totalInputs = totalInputs.add(transaction.getAmount());
                     break;
@@ -99,13 +101,13 @@ public class CurrencyData implements Serializable {
     }
 
 
-    public static CurrencyData parse(JSONObject jsonData) throws
+    public static TagVSData parse(JSONObject jsonData) throws
             ParseException, JSONException {
         JSONArray jsonArray;
         JSONObject jsonObject;
         BigDecimal totalInputs = null;
         BigDecimal totalOutputs = null;
-        CurrencyData currencyData = new CurrencyData();
+        TagVSData currencyData = new TagVSData();
         if(jsonData.has("totalInputs")) {
             totalInputs = new BigDecimal(jsonData.getString("totalInputs"));
             currencyData.setTotalInputs(totalInputs);
@@ -122,8 +124,11 @@ public class CurrencyData implements Serializable {
             for (int i = 0; i< jsonArray.length(); i++) {
                 TransactionVS transaction = TransactionVS.parse(jsonArray.getJSONObject(i));
                 switch(transaction.getType()) {
-                    case USER_ALLOCATION_INPUT:
+                    case VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
+                    case VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
+                    case VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
                     case VICKET_CANCELLATION:
+                    case BANKVS_INPUT:
                         totalInputsTransactions = totalInputsTransactions.add(transaction.getAmount());
                         break;
                     case VICKET_REQUEST:
@@ -162,12 +167,12 @@ public class CurrencyData implements Serializable {
     }
 
 
-    public CurrencyVS getCurrencyVS() {
-        return currencyVS;
+    public String getCurrencyCode() {
+        return currencyCode;
     }
 
-    public void setCurrencyVS(CurrencyVS currencyVS) {
-        this.currencyVS = currencyVS;
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
 }

@@ -33,7 +33,7 @@ class IBANController {
                     eq("fromUserVS.IBAN", iban.toString())
                 }
                 transactionList.each {transaction ->
-                    result.add(transactionVSService.getTransactionMap(transaction))
+                    result.add(transactionVSService.getTransactionMap(transaction, request.locale))
                 }
             }
         } else {
@@ -43,7 +43,7 @@ class IBANController {
                     eq("fromUserIBAN", iban.toString())
                 }
                 transactionList.each {transaction ->
-                    result.add(transactionVSService.getTransactionMap(transaction))
+                    result.add(transactionVSService.getTransactionMap(transaction, request.locale))
                 }
             }
         }

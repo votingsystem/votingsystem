@@ -23,13 +23,11 @@ import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
 import org.bouncycastle2.util.io.Streams;
 import org.votingsystem.model.ContextVS;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
