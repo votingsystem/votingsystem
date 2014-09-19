@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.MessageTimeStamper;
-import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -78,32 +77,6 @@ public class SignAndSendService extends IntentService {
             Log.d(TAG + ".onHandleIntent(...) ", "operationType: " + operationType +
                     " - contentType: " + contentType);
             switch(operationType) {
-                case MANIFEST_PUBLISHING:
-                    //Get the PDF to sign
-                    responseVS = HttpHelper.sendData(signatureContent.getBytes(), null,
-                            serviceURL, "eventId");
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        String manifestId = ((List<String>)responseVS.getData()).iterator().next();
-                        pdfBytes = responseVS.getMessageBytes();
-                        serviceURL = serviceURL + "/" + manifestId;
-                        PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes, serviceURL,
-                                null, null,
-                                (AppContextVS)getApplicationContext());
-                        responseVS = pdfSignedSender.call();
-                    }
-                    break;
-                case MANIFEST_EVENT:
-                    //Get the PDF to sign
-                    responseVS = HttpHelper.getData(contextVS.getAccessControl().
-                            getEventVSManifestURL(eventId), ContentTypeVS.PDF);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        pdfBytes = responseVS.getMessageBytes();
-                        PDFSignedSender pdfSignedSender = new PDFSignedSender(pdfBytes,
-                                contextVS.getAccessControl().getEventVSManifestCollectorURL(eventId),
-                                null, null, (AppContextVS)getApplicationContext());
-                        responseVS = pdfSignedSender.call();
-                    }
-                    break;
                 case VOTING_PUBLISHING:
                 case CLAIM_PUBLISHING:
                 case CONTROL_CENTER_ASSOCIATION:

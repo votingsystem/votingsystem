@@ -51,5 +51,4 @@ dependencies {
         exclude module: 'httpcore'
     }
     compile project(':libraries:bc')
-    compile project(':libraries:itext')
 }

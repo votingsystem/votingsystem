@@ -11,9 +11,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
-
-import com.itextpdf.text.Context_iTextVS;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.activity.BrowserVSActivity;
@@ -116,7 +113,6 @@ public class AppContextVS extends Application {
                 Log.d(TAG, "Subject DN: " + cert.getSubjectX500Principal().toString());
                 Log.d(TAG, "Issuer DN: " + cert.getIssuerDN().getName());
             }*/
-            Context_iTextVS.init(getApplicationContext());
             VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));

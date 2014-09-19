@@ -68,7 +68,6 @@ dependencies {
     compile 'com.android.support:support-v4:18.0.0'
     compile "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.6"
     compile project(':libraries:bc')
-    compile project(':libraries:itext')
     compile project(':libraries:votingsystem')
 }
 
