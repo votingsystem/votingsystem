@@ -68,16 +68,19 @@ public class VotingAppService extends Service implements Runnable {
 
     private void processOperation (String accessControlURL, OperationVS operationVS) {
         Log.d(TAG + ".processOperation(...)", "accessControlURL: " + accessControlURL);
-        ResponseVS responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(appContextVS.getVicketServerURL()),
-                ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            try {
+        ResponseVS responseVS = null;
+        appContextVS.setInitialized(true);
+        try {
+            responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(appContextVS.getVicketServerURL()),
+                    ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 VicketServer vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
                 appContextVS.setVicketServer(vicketServer);
-            } catch(Exception ex) {
-                ex.printStackTrace();
             }
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
+
         responseVS = HttpHelper.getData(AccessControlVS.
                 getServerInfoURL(accessControlURL), ContentTypeVS.JSON);
         SharedPreferences pref = getSharedPreferences(

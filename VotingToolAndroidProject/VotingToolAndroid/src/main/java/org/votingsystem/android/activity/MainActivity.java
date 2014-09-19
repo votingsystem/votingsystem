@@ -62,7 +62,7 @@ public class MainActivity extends FragmentActivity {
         }
         if (savedInstanceState != null) return;
         ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(contextVS.getAccessControl() == null) runAppService(uriData);
+        if(contextVS.getAccessControl() == null && !contextVS.isInitialized()) runAppService(uriData);
         if(responseVS != null) showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                 responseVS.getNotificationMessage());
         else if(contextVS.getAccessControl() != null) {

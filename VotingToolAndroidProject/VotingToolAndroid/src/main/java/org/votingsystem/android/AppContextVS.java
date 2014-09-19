@@ -87,6 +87,7 @@ public class AppContextVS extends Application {
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private OperationVS operationVS = null;
+    private boolean initialized = false;
 
     public void setServer(ActorVS actorVS) {
         if(serverMap.get(actorVS.getServerURL()) == null) {
@@ -124,6 +125,15 @@ public class AppContextVS extends Application {
             ex.printStackTrace();
         }
 	}
+
+    public boolean isInitialized() {
+        return this.initialized;
+    }
+
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
+
 
     public String getVicketServerURL() {
         return vicketServerURL;
