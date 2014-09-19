@@ -62,7 +62,7 @@ public class UserCertRequestFormFragment extends Fragment {
 
 	public static final String TAG = UserCertRequestFormFragment.class.getSimpleName();
 
-    private String broadCastId = null;
+    private String broadCastId = UserCertRequestFormFragment.class.getSimpleName();
     private String givenname = null;
     private String surname = null;
     private String email = null;
@@ -98,7 +98,6 @@ public class UserCertRequestFormFragment extends Fragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        broadCastId = UserCertRequestFormFragment.class.getSimpleName();
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         // if set to true savedInstanceState will be allways null
         setRetainInstance(true);
@@ -165,7 +164,7 @@ public class UserCertRequestFormFragment extends Fragment {
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         Log.d(TAG + ".onResume() ", "onResume");
     }

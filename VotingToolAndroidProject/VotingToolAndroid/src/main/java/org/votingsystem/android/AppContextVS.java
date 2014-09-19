@@ -374,10 +374,10 @@ public class AppContextVS extends Application {
         Log.d(TAG + ".sendBroadcast(...) ", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
+        Intent intent = new Intent(responseVS.getServiceCaller());
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         if(responseVS.getTypeVS() != null) {
-            Intent intent = new Intent(responseVS.getServiceCaller());
-            intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             switch(responseVS.getTypeVS()) {
                 case INIT_VALIDATED_SESSION:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -407,7 +407,7 @@ public class AppContextVS extends Application {
                     }
                     break;
             }
-        }
+        } else  Log.d(TAG + ".sendBroadcast(...) ", "broadcast response with null type!!!");
     }
 
     public String getWebSocketSessionId() {
