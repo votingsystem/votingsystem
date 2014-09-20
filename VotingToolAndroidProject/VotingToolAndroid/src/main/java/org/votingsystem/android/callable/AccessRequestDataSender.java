@@ -64,7 +64,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
 
             String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
+                    ContentTypeVS.JSON_SIGNED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, csrEncryptedBytes);
             mapToSend.put(accessRequestFileName, csrEncryptedAccessRequestBytes);

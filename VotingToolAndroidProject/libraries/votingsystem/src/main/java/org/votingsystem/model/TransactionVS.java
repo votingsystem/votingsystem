@@ -2,7 +2,7 @@ package org.votingsystem.model;
 
 import android.content.Context;
 
-import org.json.JSONException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -14,15 +14,33 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
+    public UserVS getSender() {
+        return sender;
+    }
+
+    public void setSender(UserVS sender) {
+        this.sender = sender;
+    }
+
+    public List<TagVS> getTagVSList() {
+        return tagVSList;
+    }
+
+    public void setTagVSList(List<TagVS> tagVSList) {
+        this.tagVSList = tagVSList;
+    }
 
     public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, BANKVS_INPUT,
         VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,
@@ -45,9 +63,11 @@ public class TransactionVS  implements Serializable {
     private String currencyCode;
 
     private UserVS fromUserVS;
+    private UserVS sender;
     private UserVS toUserVS;
 
     private List<Vicket> vickets;
+    private List<TagVS> tagVSList;
     private Type type;
 
     private Date validTo;
@@ -284,22 +304,22 @@ public class TransactionVS  implements Serializable {
         cancellationSMIMEBytes = (byte[]) s.readObject();
     }
 
-    public static TransactionVS parse(JSONObject jsonData) throws ParseException, JSONException {
+    public static TransactionVS parse(JSONObject jsonData) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setId(jsonData.getLong("id"));
         if(jsonData.has("fromUserVS")) {
-            JSONObject fromUserVSJSON = jsonData.getJSONObject("fromUserVS");
-            UserVS fromUserVS = new UserVS();
-            fromUserVS.setFullName(fromUserVSJSON.getString("name"));
-            fromUserVS.setNif(fromUserVSJSON.getString("nif"));
-            transactionVS.setFromUserVS(fromUserVS);
+            JSONObject fromUserJSON = jsonData.getJSONObject("fromUserVS");
+            transactionVS.setFromUserVS(UserVS.parse(fromUserJSON));
+            if(fromUserJSON.has("sender")) {
+                JSONObject senderJSON = fromUserJSON.getJSONObject("sender");
+                UserVS sender = new UserVS();
+                sender.setIBAN(senderJSON.getString("fromUserIBAN"));
+                sender.setName(senderJSON.getString("fromUser"));
+                transactionVS.setSender(sender);
+            }
         }
         if(jsonData.has("toUserVS")) {
-            JSONObject toUserVSJSON = jsonData.getJSONObject("toUserVS");
-            UserVS toUserVS = new UserVS();
-            toUserVS.setFullName(toUserVSJSON.getString("name"));
-            toUserVS.setNif(toUserVSJSON.getString("nif"));
-            transactionVS.setToUserVS(toUserVS);
+            transactionVS.setToUserVS(UserVS.parse(jsonData.getJSONObject("toUserVS")));
         }
         transactionVS.setSubject(jsonData.getString("subject"));
         transactionVS.setCurrencyCode(jsonData.getString("currency"));
@@ -309,7 +329,16 @@ public class TransactionVS  implements Serializable {
         transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         transactionVS.setMessageSMIMEURL(jsonData.getString("messageSMIMEURL"));
+        if(jsonData.has("tags")) transactionVS.setTagVSList(TagVS.parse(jsonData.getJSONArray("tags"))); ;
         return transactionVS;
+    }
+
+    public static List<TransactionVS> parseList(JSONArray transactionArray) throws Exception {
+        List<TransactionVS> result = new ArrayList<TransactionVS>();
+        for(int i = 0; i < transactionArray.length(); i++) {
+            result.add(TransactionVS.parse((JSONObject) transactionArray.get(i)));
+        }
+        return result;
     }
 
 }

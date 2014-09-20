@@ -112,7 +112,7 @@ public class RepresentativeGridFragment extends Fragment
             startIntent.putExtra(ContextVS.URL_KEY,
                     contextVS.getAccessControl().getRepresentativeRevokeServiceURL());
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+                    ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
                     getString(R.string.revoke_representative_msg_subject));
             Map signedContentDataMap = new HashMap();

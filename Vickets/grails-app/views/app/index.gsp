@@ -42,6 +42,15 @@
              de caducidad</b> del mismo. En caso contrario el dinero con <b>fecha de caducidad</b> que no haya sido utilizado
             pasará a ser propiedad del sistema.
             </p>
+            <p><b>¿Por qué puede interesarme retirar efectivo?</b> Los pagos pueden ser anónimos o no. Los pagos
+            <b>NO anónimos</b> quedan reflejados en un documento firmado que identifica de forma inequívoca al pagador.
+            Los pagos <b>ANONIMOS</b> están efectuados con certificados electrónicos que no tienen ninguna información del pagador,
+            estos certificados se solicitan con un documento firmado en el que si que figura la identidad. Si
+            se realiza un pago anónimo sin retirar efectivo existe la posibilidad de que se pueda relacionar un certificado
+            anónimo con su solicitud por la proximidad de los sellos de tiempo. Si alguien hace un pago anónimo de 132,47 euros
+            a las 7:45 quedará también reflejado que a las 7:45 alguien perfectamente identificado solicitó 132,47 euros.
+            En cambio si se retiran 20 euros en efectivo para gastarlos en otro momento se evitarán ese tipo de relaciones.
+            </p>
         </div>
 
         <div class="text-justify" style="margin: 20px auto 300px auto;font-size: 1.2em;">

@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
@@ -15,6 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
+import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -22,8 +25,11 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.UserVSTransactionVSListInfo;
+import org.votingsystem.model.Vicket;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -44,10 +50,12 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -84,6 +92,7 @@ public class AppContextVS extends Application {
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private OperationVS operationVS = null;
+    private UserVSTransactionVSListInfo userVSTransactionVSListInfo;
     private boolean initialized = false;
 
     public void setServer(ActorVS actorVS) {
@@ -215,15 +224,9 @@ public class AppContextVS extends Application {
         }
     }
 
-    public String getLapseWeekLbl(Calendar calendar) {
-        Calendar thisWeekMonday = DateUtils.getMonday(calendar);
-        calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
+    public String getPeriodLbl(DateUtils.TimePeriod timePeriod) {
         return getString(R.string.week_lapse_lbl, DateUtils.getDate_Es(
-                thisWeekMonday.getTime()), DateUtils.getDate_Es(calendar.getTime()));
+                timePeriod.getDateFrom()), DateUtils.getDate_Es(timePeriod.getDateTo()));
     }
 
     public void updateVicketAccountLastChecked() {
@@ -233,6 +236,43 @@ public class AppContextVS extends Application {
         editor.putLong(ContextVS.VICKET_ACCOUNT_LAST_CHECKED_KEY,
         Calendar.getInstance().getTimeInMillis());
         editor.commit();
+    }
+
+    public UserVSTransactionVSListInfo getUserVSTransactionVSListInfo() {
+        return userVSTransactionVSListInfo;
+    }
+
+    public void setUserVSTransactionVSListInfo(UserVSTransactionVSListInfo userInfo) {
+        this.userVSTransactionVSListInfo = userInfo;
+    }
+
+    public List<Vicket> getVicketList(String currencyCode) {
+        String selection = VicketContentProvider.WEEK_LAPSE_COL + " =? AND " +
+                VicketContentProvider.STATE_COL + " =? AND " +
+                VicketContentProvider.CURRENCY_COL + "= ? ";
+        String weekLapseId = getCurrentWeekLapseId();
+        Cursor cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, selection,
+                new String[]{weekLapseId, Vicket.State.OK.toString(), currencyCode}, null);
+        Log.d(TAG + ".getCurrencyData(...)", "VicketContentProvider - cursor.getCount(): " + cursor.getCount());
+        List<Vicket> vicketList = new ArrayList<Vicket>();
+        while(cursor.moveToNext()) {
+            Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(VicketContentProvider.SERIALIZED_OBJECT_COL)));
+            Long vicketId = cursor.getLong(cursor.getColumnIndex(VicketContentProvider.ID_COL));
+            vicket.setLocalId(vicketId);
+            vicketList.add(vicket);
+        }
+        selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? AND " +
+                TransactionVSContentProvider.CURRENCY_COL + "= ? ";
+        cursor =  getContentResolver().query(TransactionVSContentProvider.CONTENT_URI,null,
+                selection, new String[]{weekLapseId, currencyCode}, null);
+        List<TransactionVS> transactionList = new ArrayList<TransactionVS>();
+        while(cursor.moveToNext()) {
+            TransactionVS transactionVS = (TransactionVS) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(TransactionVSContentProvider.SERIALIZED_OBJECT_COL)));
+            transactionList.add(transactionVS);
+        }
+        return vicketList;
     }
 
     public Date getVicketAccountLastChecked() {

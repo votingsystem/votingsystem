@@ -50,14 +50,14 @@ public class Vicket extends ReceiptContainer {
         this.amount = amount;
         setTypeVS(typeVS);
         this.vicketServerURL = vicketServerURL;
-        this.currencyCode = this.currencyCode;
+        this.currencyCode = currencyCode;
         try {
             setOriginHashCertVS(UUID.randomUUID().toString());
             setHashCertVSBase64(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
             certificationRequest = CertificationRequestVS.getVicketRequest(
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                     ContextVS.PROVIDER, vicketServerURL, hashCertVSBase64, amount.toString(),
-                    this.currencyCode.toString());
+                    this.currencyCode);
 
 
             //public static CertificationRequestVS getVicketRequest(int keySize, String keyName, String signatureMechanism, String provider, String vicketProviderURL, String hashCertVS, String amount)

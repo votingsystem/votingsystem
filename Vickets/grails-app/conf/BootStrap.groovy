@@ -11,7 +11,6 @@ class BootStrap {
     def grailsApplication
 
     def init = { servletContext ->
-        //JSON.registerObjectMarshaller(Date) { return it?.format("yyyy/MM/dd' 'HH:mm:ss") }
         JSON.registerObjectMarshaller(Date) { return it?.format("dd MMM yyyy' 'HH:mm") }
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init()

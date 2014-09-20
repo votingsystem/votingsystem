@@ -11,7 +11,7 @@ buildscript {
 }
 
 apply plugin: 'announce'
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 
 repositories {

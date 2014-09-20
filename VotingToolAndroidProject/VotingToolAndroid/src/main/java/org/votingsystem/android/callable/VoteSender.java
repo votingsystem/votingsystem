@@ -139,7 +139,7 @@ public class VoteSender implements Callable<ResponseVS> {
             JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                     contextVS.getUserVS().getNif(),contextVS.getAccessControl().getNameNormalized(),
-                    serviceURL, cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    serviceURL, cancelDataJSON.toString(), ContentTypeVS.JSON_SIGNED,
                     subject, contextVS.getAccessControl().getCertificate(), contextVS);
             return smimeSignedSender.call();
         } catch(Exception ex) {

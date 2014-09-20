@@ -33,7 +33,7 @@ import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.UserVSResponse;
+import org.votingsystem.model.UserVSRepresentativesInfo;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
@@ -97,7 +97,7 @@ public class RepresentativeService extends IntentService {
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             try {
                 JSONObject requestJSON = new JSONObject(responseVS.getMessage());
-                UserVSResponse response = UserVSResponse.populate(requestJSON);
+                UserVSRepresentativesInfo response = UserVSRepresentativesInfo.parse(requestJSON);
                 UserContentProvider.setNumTotalRepresentatives(
                         response.getNumTotalRepresentatives());
                 List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
@@ -164,7 +164,7 @@ public class RepresentativeService extends IntentService {
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject requestJSON = new JSONObject(responseVS.getMessage());
-                UserVS representative = UserVS.populate(requestJSON);
+                UserVS representative = UserVS.parse(requestJSON);
                 representative.setImageBytes(representativeImageBytes);
                 Uri representativeURI = UserContentProvider.getRepresentativeURI(
                         representative.getId());
@@ -218,7 +218,7 @@ public class RepresentativeService extends IntentService {
             JSONObject requestJSON = new JSONObject(smimeContentMap);
 
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
+                    ContentTypeVS.JSON_SIGNED.getName();
 
             byte[] encryptedCSRBytes = Encryptor.encryptMessage(anonymousDelegation.
                     getCertificationRequest().getCsrPEM(),destinationCert,
@@ -232,7 +232,7 @@ public class RepresentativeService extends IntentService {
                     contextVS.getAccessControl().getNameNormalized(),
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
-                    representativeDataFileName, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    representativeDataFileName, ContentTypeVS.JSON_SIGNED,
                     contextVS.getAccessControl().getCertificate(),
                     anonymousDelegation.getCertificationRequest().getPublicKey(),
                     anonymousDelegation.getCertificationRequest().getPrivateKey(),
@@ -257,7 +257,7 @@ public class RepresentativeService extends IntentService {
                         toUser, new JSONObject(smimeContentMap).toString(), messageSubject, null,
                         contextVS.getAccessControl().getAnonymousDelegationServiceURL(),
                         contextVS.getAccessControl().getCertificate(),
-                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                        ContentTypeVS.JSON_SIGNED,
                         anonymousDelegation.getCertificationRequest(),
                         (AppContextVS)getApplicationContext());
                 responseVS = anonymousSender.call();
@@ -361,7 +361,7 @@ public class RepresentativeService extends IntentService {
                         smimeMessage, contextVS.getAccessControl().getCertificate());
                 Map<String, Object> fileMap = new HashMap<String, Object>();
                 String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
-                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
+                        ContentTypeVS.JSON_SIGNED.getName();
                 fileMap.put(representativeDataFileName, representativeEncryptedDataBytes);
                 fileMap.put(ContextVS.IMAGE_FILE_NAME, imageBytes);
                 responseVS = HttpHelper.sendObjectMap(fileMap, serviceURL);

@@ -10,9 +10,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserVSResponse {
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+public class UserVSRepresentativesInfo {
 	
-	public static final String TAG = UserVSResponse.class.getSimpleName();
+	public static final String TAG = UserVSRepresentativesInfo.class.getSimpleName();
 
     private Long numRepresentatives;
     private Long numTotalRepresentatives;
@@ -52,14 +56,14 @@ public class UserVSResponse {
         this.numTotalRepresentatives = numTotalRepresentatives;
     }
 
-	public static UserVSResponse populate(JSONObject userJSON) throws ParseException, JSONException {
+	public static UserVSRepresentativesInfo parse(JSONObject userJSON) throws Exception {
     	Log.d(TAG + ".parse(...)", "parse(...)");
-        UserVSResponse eventVSResponse = new UserVSResponse();
+        UserVSRepresentativesInfo eventVSResponse = new UserVSRepresentativesInfo();
         List<UserVS> users = new ArrayList<UserVS>();
         JSONArray representativesArray = userJSON.getJSONArray("representatives");
         if (representativesArray != null) {
             for (int i=0; i < representativesArray.length(); i++) {
-                UserVS representative = UserVS.populate(representativesArray.getJSONObject(i));
+                UserVS representative = UserVS.parse(representativesArray.getJSONObject(i));
                 users.add(representative);
             }
         }

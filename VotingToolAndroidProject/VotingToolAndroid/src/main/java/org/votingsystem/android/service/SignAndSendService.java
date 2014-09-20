@@ -221,7 +221,7 @@ public class SignAndSendService extends IntentService {
         Log.d(TAG + ".sendSMIME(...) ", "sendSMIME");
         String toUser = operationVS.getNormalizedReceiverName();
         String serviceURL = operationVS.getServiceURL();
-        ContentTypeVS contentType = ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED;
+        ContentTypeVS contentType = ContentTypeVS.JSON_SIGNED;
         String messageSubject = operationVS.getSignedMessageSubject();
         String signatureContent = operationVS.getDocumentToSignJSON().toString();
         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(

@@ -134,7 +134,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
             String messageSubject = getString(R.string.representative_delegation_lbl);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+                    ContentTypeVS.JSON_SIGNED);
 
 
             startIntent.putExtra(ContextVS.USER_KEY, representative);

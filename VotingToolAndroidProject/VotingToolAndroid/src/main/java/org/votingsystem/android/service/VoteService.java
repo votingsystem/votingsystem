@@ -163,7 +163,7 @@ public class VoteService extends IntentService {
         try {
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                     contextVS.getUserVS().getNif(), toUser, serviceURL, signatureContent,
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject,
+                    ContentTypeVS.JSON_SIGNED, subject,
                     contextVS.getAccessControl().getCertificate(),
                     (AppContextVS)getApplicationContext());
             responseVS = smimeSignedSender.call();

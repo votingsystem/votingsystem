@@ -252,7 +252,7 @@ class TransactionVSService {
             transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.getDefaultName(),
                 type:transaction.fromUserVS.type.toString(), id:transaction.fromUserVS.id]
             if(transaction.fromUserIBAN) {
-                transactionMap.fromUserVS.payer = [fromUserIBAN: transaction.fromUserIBAN, fromUser:transaction.fromUser]
+                transactionMap.fromUserVS.sender = [fromUserIBAN: transaction.fromUserIBAN, fromUser:transaction.fromUser]
             }
         }
         if(transaction.toUserVS) {

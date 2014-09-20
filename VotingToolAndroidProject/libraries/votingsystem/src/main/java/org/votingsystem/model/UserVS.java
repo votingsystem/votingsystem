@@ -2,13 +2,11 @@ package org.votingsystem.model;
 
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,11 +18,40 @@ public class UserVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Type {REPRESENTATIVE, USER}
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS}
+
+    public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
 
     private Long id;
     private Long numRepresentations;
     private String nif;
+    private String IBAN;
+    private State state;
+    private Type type;
     private byte[] imageBytes;
     private String firstName;
     private String lastName;
@@ -36,6 +63,7 @@ public class UserVS implements Serializable {
     private String organization;
     private String email;
     private String phone;
+    private String reason;
     private String description;
 
     private String subjectDN;
@@ -44,6 +72,7 @@ public class UserVS implements Serializable {
     private String signedContent;
     private TimeStampToken timeStampToken;
     private Set<CommentVS> commentSet = new HashSet<CommentVS>(0);
+    private UserVSCertificateListInfo certificateListInfo;
     private X509Certificate certificate;
     private CertificateVS certificateCA;
 
@@ -63,6 +92,22 @@ public class UserVS implements Serializable {
         if (subjectDN.contains("CN="))
             userVS.setCn(subjectDN.split("CN=")[1]);
         return userVS;
+    }
+
+    public String getIBAN() {
+        return IBAN;
+    }
+
+    public void setIBAN(String IBAN) {
+        this.IBAN = IBAN;
+    }
+
+    public UserVSCertificateListInfo getCertificateListInfo() {
+        return certificateListInfo;
+    }
+
+    public void setCertificateListInfo(UserVSCertificateListInfo certificateListInfo) {
+        this.certificateListInfo = certificateListInfo;
     }
 
     public byte[] getImageBytes() {
@@ -244,11 +289,17 @@ public class UserVS implements Serializable {
         this.numRepresentations = numRepresentations;
     }
 
-    public static UserVS populate(JSONObject userJSON) throws ParseException, JSONException {
+    public static UserVS parse(JSONObject userJSON) throws Exception {
         UserVS userVS = new UserVS();
         if (userJSON.has("id")) userVS.setId(userJSON.getLong("id"));
         if (userJSON.has("URL")) userVS.setURL(userJSON.getString("URL"));
         if (userJSON.has("nif")) userVS.setNif(userJSON.getString("nif"));
+        if (userJSON.has("IBAN"))  userVS.setIBAN(userJSON.getString("IBAN"));
+        if (userJSON.has("state"))  userVS.setState(State.valueOf(userJSON.getString("state")));
+        if (userJSON.has("type"))  userVS.setType(Type.valueOf(userJSON.getString("type")));
+        if (userJSON.has("reason"))  userVS.setReason(userJSON.getString("reason")) ;
+        if (userJSON.has("certificateList"))  userVS.setCertificateListInfo(
+                UserVSCertificateListInfo.parse(userJSON.getJSONArray("certificateList")));
         if (userJSON.has("numRepresentations")) userVS.setNumRepresentations(
                 userJSON.getLong("numRepresentations"));
         if (userJSON.has("name")) userVS.setName(userJSON.getString("name"));

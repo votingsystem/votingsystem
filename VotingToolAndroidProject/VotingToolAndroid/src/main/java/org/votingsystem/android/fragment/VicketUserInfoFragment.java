@@ -26,12 +26,13 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.contentprovider.Utils;
+
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TagVSData;
+
 
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 
@@ -52,6 +53,7 @@ public class VicketUserInfoFragment extends Fragment {
     private static final int ADMIN_ACCESS_CONTROL = 1;
 
     private BigDecimal amount;
+    private String tagVS;
     private String currencyCode = Currency.getInstance("EUR").getCurrencyCode();
     private Uri uriData;
     private String IBAN;
@@ -177,13 +179,17 @@ public class VicketUserInfoFragment extends Fragment {
         uriData = getArguments().getParcelable(ContextVS.URI_KEY);
         if(uriData != null) {
             amount = new BigDecimal(uriData.getQueryParameter("amount"));
+            tagVS = uriData.getQueryParameter("tagVS");
             currencyCode = uriData.getQueryParameter("currency");
             subject = uriData.getQueryParameter("subject");
             receptor = uriData.getQueryParameter("receptor");
             Log.d(TAG + ".onStart(...)", "amount: " + amount + " - subject: " + subject +
                     " - receptor: " + receptor);
-            TagVSData currencyData = Utils.getCurrencyData(contextVS, currencyCode);
-            BigDecimal cashAvailable = currencyData.getCashBalance();
+            BigDecimal cashAvailable = null;
+            try {
+                cashAvailable = contextVS.getUserVSTransactionVSListInfo().getAvailableForTagVS(
+                        Currency.getInstance("EUR").getCurrencyCode(), TagVS.WILDTAG);
+            } catch(Exception ex) {ex.printStackTrace();}
             if(cashAvailable != null && cashAvailable.compareTo(amount) >= 0) {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.vicket_send_pin_msg, amount,
@@ -199,37 +205,38 @@ public class VicketUserInfoFragment extends Fragment {
         Date lastCheckedTime = contextVS.getVicketAccountLastChecked();
         if(lastCheckedTime == null) {
             showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_vicket_user_info_caption),
-                    getString(R.string.empty_vicket_user_info, contextVS.getLapseWeekLbl(
-                            Calendar.getInstance())));
+                    getString(R.string.empty_vicket_user_info, contextVS.getPeriodLbl(
+                    DateUtils.getWeekPeriod(Calendar.getInstance()))));
             return;
         }
-        final TagVSData currencyData = Utils.getCurrencyData(contextVS,
-                Currency.getInstance("EUR").getCurrencyCode());
-        if(currencyData != null) {
-            request_button.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
+        try {
+            final BigDecimal accountBalance = contextVS.getUserVSTransactionVSListInfo().getAvailableForTagVS(
+                    Currency.getInstance("EUR").getCurrencyCode(), TagVS.WILDTAG);
+            if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
+                request_button.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
                             getString(R.string.cash_request_dialog_caption),
-                            getString(R.string.cash_dialog_msg, currencyData.getAccountBalance(),
+                            getString(R.string.cash_dialog_msg, accountBalance,
                             Currency.getInstance("EUR").getCurrencyCode()),
-                            currencyData.getAccountBalance(), TypeVS.VICKET_REQUEST);
-                }
-            });
-            request_button.setVisibility(View.VISIBLE);
-            last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
-                    DateUtils.getLongDate_Es(lastCheckedTime))));
-            vicket_account_info.setText(Html.fromHtml(getString(R.string.vicket_account_amount_info_lbl,
-                    currencyData.getAccountBalance(), currencyCode)));
-            vicket_cash_info.setText(Html.fromHtml(getString(R.string.vicket_cash_amount_info_lbl,
-                    currencyData.getCashBalance(), currencyCode)));
+                            accountBalance, TypeVS.VICKET_REQUEST);
+                    }
+                });
+                request_button.setVisibility(View.VISIBLE);
+                last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
+                        DateUtils.getLongDate_Es(lastCheckedTime))));
+                vicket_account_info.setText(Html.fromHtml(getString(R.string.vicket_account_amount_info_lbl,
+                        accountBalance, currencyCode)));
+                vicket_cash_info.setText(Html.fromHtml(getString(R.string.vicket_cash_amount_info_lbl,
+                        accountBalance, currencyCode)));
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_YEAR, 7);
-            time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                    DateUtils.getLongDate_Es(DateUtils.getMonday(calendar).getTime()))));
-        }
-        if (currencyData == null || !(currencyData.getAccountBalance().intValue() > 0)) {
-            request_button.setVisibility(View.GONE);
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DAY_OF_YEAR, 7);
+                time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
+                        DateUtils.getLongDate_Es(DateUtils.getMonday(calendar).getTime()))));
+            } else request_button.setVisibility(View.GONE);
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
     }
 

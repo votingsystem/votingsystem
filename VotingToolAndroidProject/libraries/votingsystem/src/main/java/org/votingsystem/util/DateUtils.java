@@ -2,6 +2,8 @@ package org.votingsystem.util;
 
 import android.content.Context;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 
 import java.io.File;
@@ -76,6 +78,11 @@ public class DateUtils {
      */
     public static Date getDateFromString (String dateString) throws ParseException {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
+        return formatter.parse(dateString);
+    }
+
+    public static Date getDateFromString (String dateString, String format) throws ParseException {
+        DateFormat formatter = new SimpleDateFormat(format);
         return formatter.parse(dateString);
     }
 
@@ -237,4 +244,47 @@ public class DateUtils {
         return calendar;
     }
 
+    public static String getStringFromDate (Date date) {
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
+        return formatter.format(date);
+    }
+
+    public static TimePeriod getWeekPeriod(Calendar selectedDate) {
+        Calendar weekFromCalendar = getMonday(selectedDate);
+        Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
+        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7);
+        return new TimePeriod(weekFromCalendar.getTime(), weekToCalendar.getTime());
+    }
+
+    public static class TimePeriod {
+
+        public enum Lapse {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}
+
+        private Date dateFrom;
+        private Date dateTo;
+
+        public TimePeriod(Date dateFrom, Date dateTo) {
+            this.dateFrom = dateFrom;
+            this.dateTo = dateTo;
+        }
+
+        public Date getDateFrom() {
+            return dateFrom;
+        }
+
+        public Date getDateTo() {
+            return dateTo;
+        }
+
+        public static TimePeriod parse(JSONObject jsonData) throws ParseException, JSONException {
+            Date dateFrom = DateUtils.getDateFromString(jsonData.getString("dateFrom"), "dd MMM yyyy' 'HH:mm");
+            Date dateTo = DateUtils.getDateFromString(jsonData.getString("dateTo"), "dd MMM yyyy' 'HH:mm");
+            return new TimePeriod(dateFrom, dateTo);
+        }
+
+        @Override public String toString() {
+            return "Period from [" + getStringFromDate(dateFrom) + " - " + getStringFromDate(dateTo) + "]";
+        }
+
+    }
 }

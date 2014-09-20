@@ -104,7 +104,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 startIntent.putExtra(ContextVS.URL_KEY,
                         contextVS.getAccessControl().getEventVSClaimCollectorURL());
                 startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                        ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+                        ContentTypeVS.JSON_SIGNED);
                 String messageSubject = getActivity().getString(R.string.signature_msg_subject)
                         + eventVS.getSubject();
                 startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, messageSubject);

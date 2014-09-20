@@ -137,7 +137,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.URL_KEY, serviceURL);
             startIntent.putExtra(ContextVS.CONTENT_TYPE_KEY,
-                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED);
+                    ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
             startIntent.putExtra(ContextVS.MESSAGE_KEY, editorContent);
             startIntent.putExtra(ContextVS.URI_KEY, representativeImageUri);

@@ -1,7 +1,16 @@
 package org.votingsystem.model;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,6 +78,32 @@ public class TagVS {
 
     public Date getLastUpdated() {
         return lastUpdated;
+    }
+
+    public static Map<String, BigDecimal> parseTagVSBalanceMap(JSONObject jsonData) throws Exception {
+        Map<String, BigDecimal> result = new HashMap<String, BigDecimal>();
+        Iterator tagIterator = jsonData.keys();
+        while(tagIterator.hasNext()) {
+            String tagStr = (String) tagIterator.next();
+            BigDecimal tagBalance = new BigDecimal(jsonData.getString(tagStr));
+            result.put(tagStr, tagBalance);
+        }
+        return result;
+    }
+
+    public static TagVS parse(JSONObject jsonData) throws Exception {
+        TagVS tagVS = new TagVS();
+        tagVS.setName(jsonData.getString(jsonData.getString("name")));
+        tagVS.setId(jsonData.getLong("id"));
+        return tagVS;
+    }
+
+    public static List<TagVS> parse(JSONArray jsonArray) throws Exception {
+        List<TagVS> result = new ArrayList<TagVS>();
+        for(int i = 0; i < jsonArray.length(); i++) {
+            result.add(parse((JSONObject) jsonArray.get(i)));
+        }
+        return result;
     }
 
 }

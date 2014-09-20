@@ -14,15 +14,13 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import org.votingsystem.android.AppContextVS;
-import org.votingsystem.model.TagVSData;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.model.UserVSAccount;
+import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author jgzornoza
@@ -238,7 +236,7 @@ public class TransactionVSContentProvider extends ContentProvider {
                 " - lastTransactionDate: " + lastTransactionCalendar.getTime());
         Calendar iteratorCalendar = (Calendar) lastTransactionCalendar.clone();
         while(iteratorCalendar.before(lastTransactionCalendar)) {
-            String lapseWeekLbl = contextVS.getLapseWeekLbl(iteratorCalendar);
+            String lapseWeekLbl = contextVS.getPeriodLbl(DateUtils.getWeekPeriod(Calendar.getInstance()));
             result.add(lapseWeekLbl);
             Log.d(TAG + ".getTransactionWeekList() ", "lapseWeekLbl: " + lapseWeekLbl);
         }
@@ -246,15 +244,11 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
 
-    public static void setVicketAccount(AppContextVS contextVS, UserVSAccount updatedUserVSAccount) {
-        Set<String> keySet = updatedUserVSAccount.getCurrencyMap().keySet();
-        for(String currencyVS : keySet) {
-            TagVSData currencyData = updatedUserVSAccount.getCurrencyMap().get(currencyVS);
-            for(TransactionVS transactionVS : currencyData.getTransactionList()) {
-                addTransaction(contextVS, transactionVS,
-                        DateUtils.getDirPath(updatedUserVSAccount.getWeekLapse()));
-            }
-            currencyData.setTransactionList(null);
+    public static void updateUserVSTransactionVSList(AppContextVS contextVS,
+        UserVSTransactionVSListInfo userInfo) {
+        for(TransactionVS transactionVS : userInfo.getTransactionList()) {
+            addTransaction(contextVS, transactionVS,
+                    DateUtils.getDirPath(userInfo.getTimePeriod().getDateFrom()));
         }
         contextVS.updateVicketAccountLastChecked();
     }

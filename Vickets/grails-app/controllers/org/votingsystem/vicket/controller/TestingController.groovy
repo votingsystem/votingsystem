@@ -42,8 +42,9 @@ class TestingController {
             render "USerVS id '${params.long('userId')}' nif -> ${userVS?.nif}"
             return false
         } else {
-            DateUtils.TimePeriod currentWeekPeriod = DateUtils.getCurrentWeekPeriod()
-            Map result = transactionVSService.getTransactionToListWithBalances(userVS, currentWeekPeriod)
+            DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod()
+            //Map result = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
+            Map result = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
             render result as JSON
         }
     }

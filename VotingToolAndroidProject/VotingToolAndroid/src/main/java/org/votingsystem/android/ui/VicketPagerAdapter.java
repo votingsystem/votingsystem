@@ -15,6 +15,7 @@ import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.fragment.VicketUserInfoFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
+import org.votingsystem.util.DateUtils;
 
 import java.util.Calendar;
 
@@ -62,7 +63,7 @@ public class VicketPagerAdapter extends FragmentStatePagerAdapter
     public String getSelectedChildDescription(AppContextVS context) {
         switch(selectedChild) {
             case VICKET_USER_INFO:
-                return context.getLapseWeekLbl(Calendar.getInstance());
+                return context.getPeriodLbl(DateUtils.getWeekPeriod(Calendar.getInstance()));
             case VICKET_LIST:
                 return context.getString(R.string.vickets_list_lbl);
             default:
