@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.R;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
@@ -236,9 +237,11 @@ public class TransactionVSContentProvider extends ContentProvider {
                 " - lastTransactionDate: " + lastTransactionCalendar.getTime());
         Calendar iteratorCalendar = (Calendar) lastTransactionCalendar.clone();
         while(iteratorCalendar.before(lastTransactionCalendar)) {
-            String lapseWeekLbl = contextVS.getPeriodLbl(DateUtils.getWeekPeriod(Calendar.getInstance()));
-            result.add(lapseWeekLbl);
-            Log.d(TAG + ".getTransactionWeekList() ", "lapseWeekLbl: " + lapseWeekLbl);
+            DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
+            String periodLbl = contextVS.getString(R.string.week_lapse_lbl, DateUtils.getDate_Es(
+                    timePeriod.getDateFrom()), DateUtils.getDate_Es(timePeriod.getDateTo()));
+            result.add(periodLbl);
+            Log.d(TAG + ".getTransactionWeekList() ", "periodLbl: " + periodLbl);
         }
         return result;
     }

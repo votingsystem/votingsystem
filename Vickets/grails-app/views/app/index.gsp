@@ -48,8 +48,8 @@
             estos certificados se solicitan con un documento firmado en el que si que figura la identidad. Si
             se realiza un pago anónimo sin retirar efectivo existe la posibilidad de que se pueda relacionar un certificado
             anónimo con su solicitud por la proximidad de los sellos de tiempo. Si alguien hace un pago anónimo de 132,47 euros
-            a las 7:45 quedará también reflejado que a las 7:45 alguien perfectamente identificado solicitó 132,47 euros.
-            En cambio si se retiran 20 euros en efectivo para gastarlos en otro momento se evitarán ese tipo de relaciones.
+            a las 7:45 quedará también reflejado que entre las 7:00 y la 8:00 alguien perfectamente identificado solicitó 132,47 euros.
+            En cambio si se retiran 20 euros en efectivo para gastarlos en otro momento se evitan ese tipo de relaciones.
             </p>
         </div>
 

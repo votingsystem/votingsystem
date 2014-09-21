@@ -3,6 +3,7 @@ package org.votingsystem.model;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,7 +18,9 @@ import java.util.Set;
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class TagVS {
+public class TagVS  implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     public static final String WILDTAG = "WILDTAG";
 
@@ -93,9 +96,16 @@ public class TagVS {
 
     public static TagVS parse(JSONObject jsonData) throws Exception {
         TagVS tagVS = new TagVS();
-        tagVS.setName(jsonData.getString(jsonData.getString("name")));
-        tagVS.setId(jsonData.getLong("id"));
+        tagVS.setName(jsonData.getString("name"));
+        if(jsonData.has("id")) tagVS.setId(jsonData.getLong("id"));
         return tagVS;
+    }
+
+    public JSONObject toJSON() throws Exception {
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("id", id);
+        jsonData.put("name", name);
+        return jsonData;
     }
 
     public static List<TagVS> parse(JSONArray jsonArray) throws Exception {

@@ -116,7 +116,15 @@ public class ActorVS implements Serializable {
     }
 
     public static String getTimeStampServiceURL(String serverURL) {
-        return StringUtils.checkURL(serverURL) + "/timeStamp";
+        return StringUtils.checkURL(serverURL) + "/timeStamp/discrete";
+    }
+
+    public String getTimeStampDiscreteServiceURL() {
+        return getTimeStampServerURL() + "/timeStamp";
+    }
+
+    public static String getTimeStampDiscreteServiceURL(String serverURL) {
+        return StringUtils.checkURL(serverURL) + "/timeStamp/discrete";
     }
 
     public String getTimeStampServerURL() {

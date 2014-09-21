@@ -368,9 +368,8 @@
     <string name="share_vicket_lbl">Compartir Vicket</string>
     <string name="vicket_user_info_lbl">Información del usuario</string>
     <string name="request_button">Retirar efectivo</string>
-    <string name="empty_vicket_user_info_caption">Faltan los datos del usuario</string>
-    <string name="empty_vicket_user_info"><![CDATA[Todavía no ha actualizado los datos para el
-    periodo comprendido entre:<br/> <b>\'%1$s\'</b>]]></string>
+    <string name="uservs_accountvs_info_missing_caption">Faltan los datos del usuario</string>
+    <string name="uservs_accountvs_info_missing"><![CDATA[No ha actualizado los datos de la semana]]></string>
     <string name="update_signers_info_lbl">Actualizar datos</string>
     <string name="send_message_lbl">Enviar mensaje</string>
     <string name="update_user_info_pin_msg">Para obtener los datos necesita firmar una solicitud</string>

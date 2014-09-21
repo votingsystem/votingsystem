@@ -475,6 +475,7 @@ public class VicketService extends IntentService {
     }
 
     private ResponseVS updateUserInfo() {
+        Log.d(TAG + ".updateUserInfo(...)", "updateUserInfo");
         ResponseVS responseVS = getVicketServer();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         VicketServer vicketServer = (VicketServer) responseVS.getData();
@@ -492,8 +493,10 @@ public class VicketService extends IntentService {
             responseVS = smimeSignedSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String responseStr = responseVS.getMessage();
-                UserVSTransactionVSListInfo userInfo = UserVSTransactionVSListInfo.parse(new JSONObject(responseStr));
-                contextVS.setUserVSTransactionVSListInfo(userInfo);
+                UserVSTransactionVSListInfo userInfo = UserVSTransactionVSListInfo.parse(
+                        new JSONObject(responseStr));
+                contextVS.setUserVSTransactionVSListInfo(userInfo,
+                        DateUtils.getWeekPeriod(Calendar.getInstance()));
                 TransactionVSContentProvider.updateUserVSTransactionVSList(contextVS, userInfo);
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));

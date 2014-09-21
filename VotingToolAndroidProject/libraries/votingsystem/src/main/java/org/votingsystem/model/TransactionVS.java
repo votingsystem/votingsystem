@@ -323,14 +323,49 @@ public class TransactionVS  implements Serializable {
         }
         transactionVS.setSubject(jsonData.getString("subject"));
         transactionVS.setCurrencyCode(jsonData.getString("currency"));
-        transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated")));
+        transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated"),
+                "dd MMM yyyy' 'HH:mm"));
         if(jsonData.has("validTo")) transactionVS.setValidTo(
-                DateUtils.getDateFromString(jsonData.getString("validTo")));
+                DateUtils.getDateFromString(jsonData.getString("validTo"), "dd MMM yyyy' 'HH:mm"));
         transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         transactionVS.setMessageSMIMEURL(jsonData.getString("messageSMIMEURL"));
         if(jsonData.has("tags")) transactionVS.setTagVSList(TagVS.parse(jsonData.getJSONArray("tags"))); ;
         return transactionVS;
+    }
+
+    public JSONObject toJSON() throws Exception {
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("id", this.id);
+        if(fromUserVS != null) {
+            if(sender != null) {
+                JSONObject sederJSON = new JSONObject();
+                sederJSON.put("fromUserIBAN", sender.getIBAN());
+                sederJSON.put("fromUser", sender.getName());
+            }
+            JSONObject userJSON = fromUserVS.toJSON();
+            jsonData.put("fromUserVS", userJSON);
+        }
+        if(toUserVS != null) {
+            jsonData.put("toUserVS", toUserVS.toJSON());
+        }
+        jsonData.put("subject", subject);
+        jsonData.put("currency", currencyCode);
+        if(dateCreated != null)
+            jsonData.put("dateCreated", DateUtils.getDateStr(dateCreated, "dd MMM yyyy' 'HH:mm"));
+        if(validTo != null)
+            jsonData.put("validTo", DateUtils.getDateStr(validTo, "dd MMM yyyy' 'HH:mm"));
+        if(type != null) jsonData.put("type", type.toString());
+        if(amount != null) jsonData.put("amount", amount.toString());
+        jsonData.put("messageSMIMEURL", messageSMIMEURL);
+        if(tagVSList != null && !tagVSList.isEmpty()) {
+            JSONArray jsonArray = new JSONArray();
+            for(TagVS tag:tagVSList) {
+                jsonArray.put(tag.toJSON());
+            }
+            jsonData.put("tags", jsonArray);
+        }
+        return jsonData;
     }
 
     public static List<TransactionVS> parseList(JSONArray transactionArray) throws Exception {

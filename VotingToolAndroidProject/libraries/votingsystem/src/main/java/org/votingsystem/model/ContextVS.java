@@ -46,6 +46,7 @@ public class ContextVS {
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";
     public static final String PIN_KEY = "PIN";
+    public static final String PERIOD_KEY = "PERIOD";
     public static final String URL_KEY = "URL";
     public static final String JS_COMMAND_KEY = "JS_COMMAND_KEY";
     public static final String FORM_DATA_KEY = "FORM_DATA";

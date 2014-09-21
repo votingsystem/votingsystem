@@ -22,7 +22,7 @@ import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.activity.UserCertResponseActivity;
-import org.votingsystem.android.fragment.VicketUserInfoFragment;
+import org.votingsystem.android.fragment.UserVSAccountsFragment;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -112,7 +112,7 @@ public class VotingAppService extends Service implements Runnable {
                         }
                     } else if(operationVS.getTypeVS() == TypeVS.TRANSACTION) {
                         Intent newIntent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-                        newIntent.putExtra(ContextVS.FRAGMENT_KEY, VicketUserInfoFragment.class.getName());
+                        newIntent.putExtra(ContextVS.FRAGMENT_KEY, UserVSAccountsFragment.class.getName());
                         newIntent.putExtra(ContextVS.URI_KEY, operationVS.getUriData());
                         newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(newIntent);

@@ -309,27 +309,29 @@ public class TransactionVSGridFragment extends Fragment
             if(cursor != null) {
                 byte[] serializedTransactionVS = cursor.getBlob(cursor.getColumnIndex(
                         TransactionVSContentProvider.SERIALIZED_OBJECT_COL));
-                TransactionVS transactionVS = (TransactionVS) ObjectUtils.
-                        deSerializeObject(serializedTransactionVS);
-                String weekLapseStr = cursor.getString(cursor.getColumnIndex(
-                        TransactionVSContentProvider.WEEK_LAPSE_COL));
-                Date weekLapse = DateUtils.getDateFromDirPath(weekLapseStr);
-                Calendar weekLapseCalendar = Calendar.getInstance();
-                weekLapseCalendar.setTime(weekLapse);
-                LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
-                linearLayout.setBackgroundColor(Color.WHITE);
-                TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
-                transaction_type.setText(transactionVS.getDescription(getActivity().getApplicationContext()));
-                TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
-                week_lapse.setText(DateUtils.getLongDate_Es(transactionVS.getDateCreated()));
+                if(serializedTransactionVS != null) {
+                    TransactionVS transactionVS = (TransactionVS) ObjectUtils.
+                            deSerializeObject(serializedTransactionVS);
+                    String weekLapseStr = cursor.getString(cursor.getColumnIndex(
+                            TransactionVSContentProvider.WEEK_LAPSE_COL));
+                    Date weekLapse = DateUtils.getDateFromDirPath(weekLapseStr);
+                    Calendar weekLapseCalendar = Calendar.getInstance();
+                    weekLapseCalendar.setTime(weekLapse);
+                    LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
+                    linearLayout.setBackgroundColor(Color.WHITE);
+                    TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
+                    transaction_type.setText(transactionVS.getDescription(getActivity().getApplicationContext()));
+                    TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
+                    week_lapse.setText(DateUtils.getLongDate_Es(transactionVS.getDateCreated()));
 
-                TextView amount = (TextView) view.findViewById(R.id.amount);
-                amount.setText(transactionVS.getAmount().toPlainString());
-                TextView currency = (TextView) view.findViewById(R.id.currencyCode);
-                currency.setText(transactionVS.getCurrencyCode());
+                    TextView amount = (TextView) view.findViewById(R.id.amount);
+                    amount.setText(transactionVS.getAmount().toPlainString());
+                    TextView currency = (TextView) view.findViewById(R.id.currencyCode);
+                    currency.setText(transactionVS.getCurrencyCode());
 
-                ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
-                        transactionVS.getIconId(getActivity().getApplicationContext()));
+                    ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
+                            transactionVS.getIconId(getActivity().getApplicationContext()));
+                }
             }
         }
     }

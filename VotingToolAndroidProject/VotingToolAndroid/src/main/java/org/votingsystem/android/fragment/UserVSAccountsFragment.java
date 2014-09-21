@@ -20,8 +20,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
@@ -34,21 +36,26 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VicketUserInfoFragment extends Fragment {
+public class UserVSAccountsFragment extends Fragment {
 
-	public static final String TAG = VicketUserInfoFragment.class.getSimpleName();
+	public static final String TAG = UserVSAccountsFragment.class.getSimpleName();
 
     private static final int ADMIN_ACCESS_CONTROL = 1;
 
@@ -60,15 +67,13 @@ public class VicketUserInfoFragment extends Fragment {
     private String subject;
     private String receptor;
     private View rootView;
-    private String broadCastId = VicketUserInfoFragment.class.getSimpleName();
+    private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
     private AppContextVS contextVS;
-    private Button request_button;
     private View progressContainer;
-    private TextView vicket_account_info;
     private TextView lapse_info;
-    private TextView vicket_cash_info;
     private TextView last_request_date;
     private TextView time_remaining_info;
+    private ListView accounts_list_view;
     private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private Menu fragmentMenu;
@@ -101,17 +106,19 @@ public class VicketUserInfoFragment extends Fragment {
                     } else {
                         showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                                 responseVS.getNotificationMessage());
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) loadUserInfo();
+                        if(ResponseVS.SC_OK == responseVS.getStatusCode())
+                            loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
                     }
                     break;
                 case VICKET_SEND:
                     showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) loadUserInfo();
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode())
+                        loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
                     break;
                 case VICKET_USER_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        loadUserInfo();
+                        loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
                     } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
                     break;
@@ -121,7 +128,6 @@ public class VicketUserInfoFragment extends Fragment {
                             MenuItem connectToServiceMenuItem = fragmentMenu.findItem(R.id.connect_to_service);
                             connectToServiceMenuItem.setTitle(getString(R.string.disconnect_from_service_lbl));
                         }
-
                     }
                     break;
                 case WEB_SOCKET_CLOSE:
@@ -139,7 +145,7 @@ public class VicketUserInfoFragment extends Fragment {
     };
 
     public static Fragment newInstance(Long representativeId) {
-        VicketUserInfoFragment fragment = new VicketUserInfoFragment();
+        UserVSAccountsFragment fragment = new UserVSAccountsFragment();
         Bundle args = new Bundle();
         args.putLong(ContextVS.USER_KEY, representativeId);
         fragment.setArguments(args);
@@ -152,19 +158,15 @@ public class VicketUserInfoFragment extends Fragment {
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-
-        rootView = inflater.inflate(R.layout.vicket_user_info, container, false);
-        vicket_account_info = (TextView)rootView.findViewById(R.id.vicket_account_info);
-        vicket_cash_info = (TextView)rootView.findViewById(R.id.vicket_cash_info);
+        rootView = inflater.inflate(R.layout.uservs_accounts_fragment, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
-
-        request_button = (Button) rootView.findViewById(R.id.request_button);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
+        accounts_list_view = (ListView) rootView.findViewById(R.id.accounts_list_view);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
-        loadUserInfo();
+        loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
         if(savedInstanceState != null) {
             currencyCode = (String) savedInstanceState.getSerializable(ContextVS.CURRENCY_KEY);
             amount = (BigDecimal) savedInstanceState.getSerializable(ContextVS.VALUE_KEY);
@@ -201,40 +203,28 @@ public class VicketUserInfoFragment extends Fragment {
             }
         }
     }
-    private void loadUserInfo() {
+    private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
         Date lastCheckedTime = contextVS.getVicketAccountLastChecked();
         if(lastCheckedTime == null) {
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.empty_vicket_user_info_caption),
-                    getString(R.string.empty_vicket_user_info, contextVS.getPeriodLbl(
-                    DateUtils.getWeekPeriod(Calendar.getInstance()))));
+            showMessage(ResponseVS.SC_ERROR, getString(R.string.uservs_accountvs_info_missing_caption),
+                    getString(R.string.uservs_accountvs_info_missing));
             return;
         }
         try {
-            final BigDecimal accountBalance = contextVS.getUserVSTransactionVSListInfo().getAvailableForTagVS(
-                    Currency.getInstance("EUR").getCurrencyCode(), TagVS.WILDTAG);
-            if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
-                request_button.setOnClickListener(new OnClickListener() {
-                    public void onClick(View v) {
-                        CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
-                            getString(R.string.cash_request_dialog_caption),
-                            getString(R.string.cash_dialog_msg, accountBalance,
-                            Currency.getInstance("EUR").getCurrencyCode()),
-                            accountBalance, TypeVS.VICKET_REQUEST);
-                    }
-                });
-                request_button.setVisibility(View.VISIBLE);
-                last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
-                        DateUtils.getLongDate_Es(lastCheckedTime))));
-                vicket_account_info.setText(Html.fromHtml(getString(R.string.vicket_account_amount_info_lbl,
-                        accountBalance, currencyCode)));
-                vicket_cash_info.setText(Html.fromHtml(getString(R.string.vicket_cash_amount_info_lbl,
-                        accountBalance, currencyCode)));
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.DAY_OF_YEAR, 7);
-                time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                        DateUtils.getLongDate_Es(DateUtils.getMonday(calendar).getTime()))));
-            } else request_button.setVisibility(View.GONE);
+            last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
+                    DateUtils.getLongDate_Es(lastCheckedTime))));
+            time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
+                    DateUtils.getLongDate_Es(timePeriod.getDateTo()))));
+            UserVSTransactionVSListInfo userInfo = contextVS.getUserVSTransactionVSListInfo();
+            if(userInfo != null) {
+                Map<String, BigDecimal> tagVSBalancesMap = contextVS.getUserVSTransactionVSListInfo().
+                        getTagVSBalancesMap(Currency.getInstance("EUR").getCurrencyCode());
+                String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
+                AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(contextVS,
+                        tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
+                accounts_list_view.setAdapter(accountVSInfoAdapter);
+                accountVSInfoAdapter.notifyDataSetChanged();
+            }
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -395,6 +385,54 @@ public class VicketUserInfoFragment extends Fragment {
         outState.putSerializable(ContextVS.CURRENCY_KEY, currencyCode);
         outState.putSerializable(ContextVS.VALUE_KEY, amount);
         outState.putSerializable(ContextVS.IBAN_KEY, IBAN);
+    }
+
+    public class AccountVSInfoAdapter extends ArrayAdapter<String> {
+        private final Context context;
+        private Map<String, BigDecimal> tagVSListBalances;
+        private List<String> tagVSList;
+        private String currencyCode;
+
+        public AccountVSInfoAdapter(Context context, Map<String, BigDecimal> tagVSListBalances,
+                    String currencyCode, String[] tagArray) {
+            super(context, R.layout.accountvs_info, tagArray);
+            this.context = context;
+            this.currencyCode = currencyCode;
+            this.tagVSListBalances = tagVSListBalances;
+            tagVSList = new ArrayList<String>();
+            tagVSList.addAll(tagVSListBalances.keySet());
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            View accountView = inflater.inflate(R.layout.accountvs_info, parent, false);
+            String selectedtag = tagVSList.get(position);
+            final BigDecimal accountBalance = tagVSListBalances.get(selectedtag);
+            Button request_button = (Button) accountView.findViewById(R.id.request_button);
+            if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
+                request_button.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        CashDialogFragment.showDialog(getFragmentManager(), broadCastId,
+                                getString(R.string.cash_request_dialog_caption),
+                                getString(R.string.cash_dialog_msg, accountBalance, currencyCode),
+                                accountBalance, TypeVS.VICKET_REQUEST);
+                    }
+                });
+                request_button.setVisibility(View.VISIBLE);
+            } else request_button.setVisibility(View.GONE);
+
+            TextView vicket_account_info = (TextView)accountView.findViewById(R.id.vicket_account_info);
+            vicket_account_info.setText(Html.fromHtml(getString(R.string.vicket_account_amount_info_lbl,
+                    accountBalance, currencyCode)));
+            //vicket_cash_info.setText(Html.fromHtml(getString(R.string.vicket_cash_amount_info_lbl,
+            //        accountBalance, currencyCode)));
+            TextView vicket_cash_info = (TextView)accountView.findViewById(R.id.vicket_cash_info);
+            vicket_cash_info.setText("vicket_cash_info ");
+            return accountView;
+        }
+
     }
 
 }

@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
@@ -224,11 +225,6 @@ public class AppContextVS extends Application {
         }
     }
 
-    public String getPeriodLbl(DateUtils.TimePeriod timePeriod) {
-        return getString(R.string.week_lapse_lbl, DateUtils.getDate_Es(
-                timePeriod.getDateFrom()), DateUtils.getDate_Es(timePeriod.getDateTo()));
-    }
-
     public void updateVicketAccountLastChecked() {
         SharedPreferences settings = getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -238,11 +234,27 @@ public class AppContextVS extends Application {
         editor.commit();
     }
 
-    public UserVSTransactionVSListInfo getUserVSTransactionVSListInfo() {
+    public UserVSTransactionVSListInfo getUserVSTransactionVSListInfo() throws Exception {
+        if(userVSTransactionVSListInfo == null) {
+            Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
+            String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getDirPath(currentMonday.getTime());
+            SharedPreferences pref = getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+                    Context.MODE_PRIVATE);
+            String userInfoStr = pref.getString(editorKey, null);
+            userVSTransactionVSListInfo = UserVSTransactionVSListInfo.parse(new JSONObject(userInfoStr));
+        }
         return userVSTransactionVSListInfo;
     }
 
-    public void setUserVSTransactionVSListInfo(UserVSTransactionVSListInfo userInfo) {
+    public void setUserVSTransactionVSListInfo(UserVSTransactionVSListInfo userInfo,
+               DateUtils.TimePeriod timePeriod) throws Exception {
+        SharedPreferences settings = getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getDirPath(timePeriod.getDateFrom());
+        Log.d(TAG + ".setUserVSTransactionVSListInfo(...)", "editorKey: " + editorKey);
+        editor.putString(editorKey, userInfo.toJSON().toString());
+        editor.commit();
         this.userVSTransactionVSListInfo = userInfo;
     }
 

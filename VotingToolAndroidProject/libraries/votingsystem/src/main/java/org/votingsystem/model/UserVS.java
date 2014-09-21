@@ -2,12 +2,16 @@ package org.votingsystem.model;
 
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.votingsystem.signature.util.CertUtil;
 
 import java.io.Serializable;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,6 +46,14 @@ public class UserVS implements Serializable {
         this.reason = reason;
     }
 
+    public Map<String, X509Certificate> getCertificateMap() {
+        return certificateMap;
+    }
+
+    public void setCertificateMap(Map<String, X509Certificate> certificateMap) {
+        this.certificateMap = certificateMap;
+    }
+
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
@@ -72,7 +84,7 @@ public class UserVS implements Serializable {
     private String signedContent;
     private TimeStampToken timeStampToken;
     private Set<CommentVS> commentSet = new HashSet<CommentVS>(0);
-    private UserVSCertificateListInfo certificateListInfo;
+    private Map<String, X509Certificate> certificateMap;
     private X509Certificate certificate;
     private CertificateVS certificateCA;
 
@@ -100,14 +112,6 @@ public class UserVS implements Serializable {
 
     public void setIBAN(String IBAN) {
         this.IBAN = IBAN;
-    }
-
-    public UserVSCertificateListInfo getCertificateListInfo() {
-        return certificateListInfo;
-    }
-
-    public void setCertificateListInfo(UserVSCertificateListInfo certificateListInfo) {
-        this.certificateListInfo = certificateListInfo;
     }
 
     public byte[] getImageBytes() {
@@ -298,8 +302,18 @@ public class UserVS implements Serializable {
         if (userJSON.has("state"))  userVS.setState(State.valueOf(userJSON.getString("state")));
         if (userJSON.has("type"))  userVS.setType(Type.valueOf(userJSON.getString("type")));
         if (userJSON.has("reason"))  userVS.setReason(userJSON.getString("reason")) ;
-        if (userJSON.has("certificateList"))  userVS.setCertificateListInfo(
-                UserVSCertificateListInfo.parse(userJSON.getJSONArray("certificateList")));
+        if (userJSON.has("certificateList")) {
+            JSONArray jsonArrayData = userJSON.getJSONArray("certificateList");
+            Map certificateMap = new HashMap<String, X509Certificate>();
+            for(int i = 0; i < jsonArrayData.length(); i++) {
+                JSONObject certInfo = (JSONObject) jsonArrayData.get(i);
+                String serialNumber = certInfo.getString("serialNumber");
+                String pemCert = certInfo.getString("pemCert");
+                X509Certificate x509Cert = CertUtil.fromPEMToX509Cert(pemCert.getBytes("UTF-8"));
+                certificateMap.put(pemCert, x509Cert);
+            }
+            userVS.setCertificateMap(certificateMap);
+        }
         if (userJSON.has("numRepresentations")) userVS.setNumRepresentations(
                 userJSON.getLong("numRepresentations"));
         if (userJSON.has("name")) userVS.setName(userJSON.getString("name"));
@@ -307,6 +321,35 @@ public class UserVS implements Serializable {
         if (userJSON.has("lastName"))  userVS.setLastName(userJSON.getString("lastName"));
         if (userJSON.has("description")) userVS.setDescription(userJSON.getString("description"));
         return userVS;
+    }
+
+    public JSONObject toJSON() throws Exception {
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("id", id);
+        jsonData.put("URL", URL);
+        jsonData.put("nif", nif);
+        jsonData.put("IBAN", IBAN);
+        if(state != null) jsonData.put("state", state.toString());
+        if(type != null) jsonData.put("type", type.toString());
+        if(reason != null) jsonData.put("reason", reason);
+        if(certificateMap != null) {
+            Set<String> certIdSet = certificateMap.keySet();
+            JSONArray jsonArrayData = new JSONArray();
+            for(String certId : certIdSet) {
+                X509Certificate x509Cert = certificateMap.get(certId);
+                JSONObject jsonCertData = new JSONObject();
+                jsonCertData.put("serialNumber", certId);
+                jsonCertData.put("pemCert", new String(CertUtil.getPEMEncoded(x509Cert), "UTF-8"));
+                jsonArrayData.put(jsonCertData);
+            }
+            jsonData.put("certificateList", jsonArrayData);
+        }
+        jsonData.put("numRepresentations", numRepresentations);
+        jsonData.put("name", name);
+        jsonData.put("firstName", firstName);
+        jsonData.put("lastName", lastName);
+        jsonData.put("description", description);
+        return jsonData;
     }
 
 }

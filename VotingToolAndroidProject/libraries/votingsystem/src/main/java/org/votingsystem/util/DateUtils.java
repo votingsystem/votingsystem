@@ -69,6 +69,11 @@ public class DateUtils {
     	return formatter.format(date);
     }
 
+    public static String getDateStr (Date date, String format) {
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        return formatter.format(date);
+    }
+
     /**
      * Método que devuelve un Date a partir de un String con formato "yyyy/MM/dd'T'HH:mm:ss"
      *
@@ -280,6 +285,13 @@ public class DateUtils {
             Date dateFrom = DateUtils.getDateFromString(jsonData.getString("dateFrom"), "dd MMM yyyy' 'HH:mm");
             Date dateTo = DateUtils.getDateFromString(jsonData.getString("dateTo"), "dd MMM yyyy' 'HH:mm");
             return new TimePeriod(dateFrom, dateTo);
+        }
+
+        public JSONObject toJSON() throws JSONException {
+            JSONObject jsonData = new JSONObject();
+            jsonData.put("dateFrom", DateUtils.getDateStr(dateFrom, "dd MMM yyyy' 'HH:mm"));
+            jsonData.put("dateTo", DateUtils.getDateStr(dateTo, "dd MMM yyyy' 'HH:mm"));
+            return jsonData;
         }
 
         @Override public String toString() {

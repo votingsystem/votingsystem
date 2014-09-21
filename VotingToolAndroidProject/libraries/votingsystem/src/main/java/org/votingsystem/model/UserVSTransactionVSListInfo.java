@@ -1,15 +1,16 @@
 package org.votingsystem.model;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author jgzornoza
@@ -90,6 +91,13 @@ public class UserVSTransactionVSListInfo {
         throw new ExceptionVS("User has not account for tag '" + tagStr + "' with currency '" + currencyCode +"'");
     }
 
+    public Map<String, BigDecimal> getTagVSBalancesMap(String currencyCode) throws ExceptionVS {
+        if(balancesResultMap.containsKey(currencyCode)) {
+            return balancesResultMap.get(currencyCode);
+        }
+        throw new ExceptionVS("User has not accounts for currency '" + currencyCode +"'");
+    }
+
     public static UserVSTransactionVSListInfo parse(JSONObject jsonData) throws Exception {
         UserVSTransactionVSListInfo result =  new UserVSTransactionVSListInfo();
         DateUtils.TimePeriod timePeriod = DateUtils.TimePeriod.parse(jsonData.getJSONObject("timePeriod"));
@@ -108,6 +116,31 @@ public class UserVSTransactionVSListInfo {
         return result;
     }
 
+    public JSONObject toJSON() throws Exception {
+        JSONObject jsonData = new JSONObject();
+        if(timePeriod != null) jsonData.put("timePeriod", timePeriod.toJSON());
+        if(userVS != null) jsonData.put("userVS", userVS.toJSON());
+        if(transactionVSFromList != null && !transactionVSFromList.isEmpty()) {
+            JSONArray jsonArray = new JSONArray();
+            for(TransactionVS transactionVS: transactionVSFromList) {
+                jsonArray.put(transactionVS.toJSON());
+            }
+            jsonData.put("transactionFromList", jsonArray);
+        }
+        if(transactionVSToList != null && !transactionVSToList.isEmpty()) {
+            JSONArray jsonArray = new JSONArray();
+            for(TransactionVS transactionVS: transactionVSToList) {
+                jsonArray.put(transactionVS.toJSON());
+            }
+            jsonData.put("transactionToList", jsonArray);
+        }
+        if(balancesFromMap != null) jsonData.put("balancesFrom", toJSON(balancesFromMap));
+        if(balancesToMap != null) jsonData.put("balancesTo", toJSON(balancesToMap));
+        if(balancesResultMap != null) jsonData.put("balanceResult", toJSON(balancesResultMap));
+        return jsonData;
+    }
+
+
     public static Map<String, Map<String, BigDecimal>> parseBalanceMap(JSONObject jsonData) throws Exception {
         Iterator currencyIterator = jsonData.keys();
         Map<String, Map<String, BigDecimal>> result = new HashMap<String, Map<String, BigDecimal>>();
@@ -117,6 +150,21 @@ public class UserVSTransactionVSListInfo {
             result.put(currencyStr, tagVSBalanceMap);
         }
         return result;
+    }
+
+    public static JSONObject toJSON(Map<String, Map<String, BigDecimal>> balancesMap) throws Exception {
+        JSONObject jsonData = new JSONObject();
+        Set<String> currencySet = balancesMap.keySet();
+        for(String currency: currencySet) {
+            Map tagVSMap = balancesMap.get(currency);
+            JSONObject jsonTagVSData = new JSONObject();
+            Set<String> tagSet = tagVSMap.keySet();
+            for(String tag: tagSet) {
+                jsonTagVSData.put(tag, tagVSMap.get(tag).toString());
+            }
+            jsonData.put(currency, jsonTagVSData);
+        }
+        return jsonData;
     }
 
     public DateUtils.TimePeriod getTimePeriod() {

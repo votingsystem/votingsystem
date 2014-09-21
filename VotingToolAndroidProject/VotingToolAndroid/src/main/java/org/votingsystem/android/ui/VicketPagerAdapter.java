@@ -12,7 +12,7 @@ import android.util.Log;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
-import org.votingsystem.android.fragment.VicketUserInfoFragment;
+import org.votingsystem.android.fragment.UserVSAccountsFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.util.DateUtils;
@@ -46,7 +46,7 @@ public class VicketPagerAdapter extends FragmentStatePagerAdapter
         Fragment selectedFragment = null;
         switch(childPosition) {
             case VICKET_USER_INFO:
-                selectedFragment = new VicketUserInfoFragment();
+                selectedFragment = new UserVSAccountsFragment();
                 break;
             case VICKET_LIST:
                 selectedFragment = new TransactionVSGridFragment();
@@ -63,7 +63,10 @@ public class VicketPagerAdapter extends FragmentStatePagerAdapter
     public String getSelectedChildDescription(AppContextVS context) {
         switch(selectedChild) {
             case VICKET_USER_INFO:
-                return context.getPeriodLbl(DateUtils.getWeekPeriod(Calendar.getInstance()));
+                DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
+                String periodLbl = context.getString(R.string.week_lapse_lbl, DateUtils.getDate_Es(
+                        timePeriod.getDateFrom()), DateUtils.getDate_Es(timePeriod.getDateTo()));
+                return periodLbl;
             case VICKET_LIST:
                 return context.getString(R.string.vickets_list_lbl);
             default:
