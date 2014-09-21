@@ -45,7 +45,7 @@ public enum TypeVS {
     VICKET_CANCEL,
     VICKET_GROUP_NEW,
 
-    TRANSACTION,
+    TRANSACTIONVS,
 
     MESSAGEVS,
     MESSAGEVS_GET,

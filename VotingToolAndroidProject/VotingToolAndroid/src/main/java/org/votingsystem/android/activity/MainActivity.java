@@ -55,6 +55,7 @@ public class MainActivity extends FragmentActivity {
             ex.printStackTrace();
         }
         Uri uriData = getIntent().getData();
+        if(uriData != null) runAppService(uriData);
         if(savedInstanceState != null && savedInstanceState.getBoolean(
                 ContextVS.LOADING_KEY, false)) {
             showProgressDialog(getString(R.string.connecting_caption),

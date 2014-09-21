@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/msg"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:layout_gravity="center"
+        android:textSize="21sp" />
+
+    <CheckBox android:id="@+id/anonymous_transaction_checkbox"
+        android:textSize="22sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/anonymous_transactionvs_msg"/>
+
+    <EditText
+        android:id="@+id/user_pin"
+        android:layout_height="wrap_content"
+        android:layout_width="70dp"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:inputType="numberPassword"
+        android:maxLength="4"
+        android:layout_gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium" >
+        	<requestFocus />
+      </EditText>
+    
+</LinearLayout>

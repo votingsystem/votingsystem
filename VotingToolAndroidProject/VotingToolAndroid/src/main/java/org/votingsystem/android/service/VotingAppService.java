@@ -110,7 +110,7 @@ public class VotingAppService extends Service implements Runnable {
                             operationVS.setEventVS(selectedEvent);
                             processOperation(operationVS);
                         }
-                    } else if(operationVS.getTypeVS() == TypeVS.TRANSACTION) {
+                    } else if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS) {
                         Intent newIntent = new Intent(getBaseContext(), FragmentContainerActivity.class);
                         newIntent.putExtra(ContextVS.FRAGMENT_KEY, UserVSAccountsFragment.class.getName());
                         newIntent.putExtra(ContextVS.URI_KEY, operationVS.getUriData());

@@ -38,6 +38,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ExceptionVS;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -85,13 +86,16 @@ public class UserVSAccountsFragment extends Fragment {
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case VICKET_USER_INFO:
-                    launchUpdateUserInfoService();
+                    sendUserInfoRequest();
                     break;
                 case VICKET_REQUEST:
-                    launchVicketRequest();
+                    sendVicketRequest();
                     break;
                 case VICKET_SEND:
-                    launchVicketSend();
+                    sendVicket();
+                    break;
+                case TRANSACTIONVS:
+                    sendTransactionVS();
                     break;
             }
 
@@ -182,24 +186,25 @@ public class UserVSAccountsFragment extends Fragment {
         if(uriData != null) {
             amount = new BigDecimal(uriData.getQueryParameter("amount"));
             tagVS = uriData.getQueryParameter("tagVS");
-            currencyCode = uriData.getQueryParameter("currency");
+            if(tagVS == null || tagVS.isEmpty()) tagVS = TagVS.WILDTAG;
+            currencyCode = uriData.getQueryParameter("currencyCode");
             subject = uriData.getQueryParameter("subject");
             receptor = uriData.getQueryParameter("receptor");
-            Log.d(TAG + ".onStart(...)", "amount: " + amount + " - subject: " + subject +
-                    " - receptor: " + receptor);
+            Log.d(TAG + ".onStart(...)", "tag: " +  tagVS + " - amount: " + amount + " - currency: "
+                    + currencyCode + " - subject: " + subject + " - receptor: " + receptor);
             BigDecimal cashAvailable = null;
             try {
                 cashAvailable = contextVS.getUserVSTransactionVSListInfo().getAvailableForTagVS(
-                        Currency.getInstance("EUR").getCurrencyCode(), TagVS.WILDTAG);
+                        currencyCode, tagVS);
             } catch(Exception ex) {ex.printStackTrace();}
-            if(cashAvailable != null && cashAvailable.compareTo(amount) >= 0) {
-                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.vicket_send_pin_msg, amount,
-                                currencyCode.toString(), receptor, subject), false, TypeVS.VICKET_SEND);
+            if(cashAvailable != null && cashAvailable.compareTo(amount) == 1) {
+                TransactionVSDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        getString(R.string.transactionvs_send_pin_msg, amount,
+                                currencyCode.toString(), receptor, subject), false);
             } else {
                 showMessage(ResponseVS.SC_ERROR, getString(R.string.insufficient_cash_caption),
                         getString(R.string.insufficient_cash_msg, currencyCode,
-                                amount.toString(), cashAvailable.toString()));
+                                amount.toString(), cashAvailable));
             }
         }
     }
@@ -275,8 +280,8 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
 
-    private void launchUpdateUserInfoService() {
-        Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");
+    private void sendUserInfoRequest() {
+        Log.d(TAG + ".sendUserInfoRequest(...) ", "");
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
@@ -289,8 +294,8 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
 
-    private void launchVicketRequest() {
-        Log.d(TAG + ".launchVicketRequest(...) ", "amount: " + amount);
+    private void sendVicketRequest() {
+        Log.d(TAG + ".sendVicketRequest(...) ", "amount: " + amount);
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
@@ -305,8 +310,8 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
 
-    private void launchVicketSend() {
-        Log.d(TAG + ".launchVicketSend(...) ", "amount: " + amount);
+    private void sendVicket() {
+        Log.d(TAG + ".sendVicket(...) ", "amount: " + amount);
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
@@ -320,6 +325,9 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
 
+    private void sendTransactionVS() {
+        Log.d(TAG + ".sendTransactionVS(...) - TODO - ", "sendTransactionVS: " + amount);
+    }
 
     public void showProgress(boolean showProgress, boolean animate) {
         if (progressVisible.get() == showProgress)  return;

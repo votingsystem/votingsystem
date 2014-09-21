@@ -337,6 +337,7 @@
     <string name="confirm_selection_msg">Confirme la selección</string>
     <string name="representative_delegation_lbl">Delegar en representante</string>
     <string name="anonymous_delegation_lbl">Delegar de forma anónima</string>
+    <string name="anonymous_transactionvs_lbl">pago anónimo</string>
     <string name="anonymous_delegation_caption">Delegación anónima</string>
     <string name="public_delegation_lbl">Delegar de forma pública</string>
     <string name="anonymous_delegation_time_msg">Indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
@@ -385,7 +386,7 @@
     <string name="min_withdrawal_msg">El importe debe ser mayor que cero</string>
     <string name="vicket_request_msg_subject">Retirada de Vickets</string>
     <string name="vicket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$ss en efectivo]]></string>
-    <string name="vicket_send_pin_msg"><![CDATA[Va a realizar un pago de <b>\'%1$s\'</b> %2$ss a
+    <string name="transactionvs_send_pin_msg"><![CDATA[Va a realizar un pago de <b>\'%1$s\'</b> %2$s. a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
     <string name="vicket_request_ok_caption">Retirada de efectivo con éxito</string>
     <string name="vicket_request_error_caption">Error retirando efectivo</string>
@@ -445,5 +446,6 @@
     <string name="vickets_menu_user_lbl">Operaciones de Vickets</string>
     <string name="connecting_to_service_msg">Conectando a servicio</string>
     <string name="messagevs_send_ok_msg">El mensaje se ha enviado corréctamente</string>
+    <string name="anonymous_transactionvs_msg">Deseo que el pago sea anónimo</string>
 
 </resources>
