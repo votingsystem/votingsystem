@@ -21,7 +21,7 @@ class EventVSManifestSignatureCollectorService {
 			if(documento) {
 				messageValidacionDocumento = messageSource.getMessage(
 						'pdfSignatureManifestRepeated',	[userVS.nif, eventVS.subject, DateUtils.
-						getStringFromDate(documento.dateCreated)].toArray(), locale)
+						getDateStr(documento.dateCreated)].toArray(), locale)
 				log.debug ("saveManifestSignature - ${messageValidacionDocumento}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageValidacionDocumento)
 			} else {

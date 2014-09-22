@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.springframework.dao.DataAccessException
+import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
@@ -47,7 +48,7 @@ class TransactionVSController {
 
     def index() {
         if(request.contentType?.contains("json")) {
-            Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
+            Map sortParamsMap = RequestUtils.getSortParamsMap(params)
             Map.Entry sortParam
             if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
             List<TransactionVS> transactionList = null

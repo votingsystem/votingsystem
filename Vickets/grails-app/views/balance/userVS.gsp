@@ -7,6 +7,8 @@
     <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-details']"/>">
 </head>
 <body>
-    <balance-details id="balanceDetails" url="${createLink(controller: 'balance', action: 'userVS', absolute:true)}/${params.userId}" opened="true"></balance-details>
+    <div style="max-width: 1000px; margin: 0 auto;">
+        <balance-details id="balanceDetails" balance="${balanceMap as grails.converters.JSON}" opened="true"></balance-details>
+    </div>
 </body>
 </html>

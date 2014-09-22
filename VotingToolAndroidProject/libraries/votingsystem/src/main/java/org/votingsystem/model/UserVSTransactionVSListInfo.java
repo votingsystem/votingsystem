@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.util.DateUtils;
@@ -94,8 +96,10 @@ public class UserVSTransactionVSListInfo {
     public Map<String, BigDecimal> getTagVSBalancesMap(String currencyCode) throws ExceptionVS {
         if(balancesResultMap.containsKey(currencyCode)) {
             return balancesResultMap.get(currencyCode);
+        } else {
+            Log.d(TAG + ".getTagVSBalancesMap(...)", "User has not accounts for currency '" + currencyCode +"'");
+            return null;
         }
-        throw new ExceptionVS("User has not accounts for currency '" + currencyCode +"'");
     }
 
     public static UserVSTransactionVSListInfo parse(JSONObject jsonData) throws Exception {

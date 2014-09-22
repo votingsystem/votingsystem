@@ -18,6 +18,28 @@ class UrlMappings {
             }
         }
 
+        "/balance/userVS/$userId/$year/$month/$day" {
+            controller = "balance"
+            action = "userVS"
+            constraints {
+                userId(matches:/\d*/)
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
+        "/balance/weekReport/$requestFile/$year/$month/$day" {
+            controller = "balance"
+            action = "weekReport"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
+
         "/certificateVS/cert/$serialNumber"{
             controller = "certificateVS"
             action = "cert"
@@ -38,8 +60,6 @@ class UrlMappings {
                 userId(matches:/\d*/)
             }
         }
-
-
 
         "/groupVS/$id"{
             controller = "groupVS"

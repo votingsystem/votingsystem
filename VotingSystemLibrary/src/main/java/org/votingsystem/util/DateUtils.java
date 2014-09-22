@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -86,7 +88,7 @@ public class DateUtils {
      * @return dateString fecha en formato String
      * @throws import java.text.ParseException;
      */
-    public static String getStringFromDate (Date date) {
+    public static String getDateStr (Date date) {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
     	return formatter.format(date);
     }
@@ -200,6 +202,7 @@ public class DateUtils {
     }
 
     public static TimePeriod getWeekPeriod(Calendar selectedDate) {
+        selectedDate.getTime();//to make sure set values are updated
         Calendar weekFromCalendar = getMonday(selectedDate);
         Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
         weekToCalendar.add(Calendar.DAY_OF_YEAR, 7);
@@ -265,7 +268,15 @@ public class DateUtils {
         throw new ExceptionVS("Unsupported Lapse period: '" + timePeriodLapse + "'");
     }
 
+    public static Date getDateFromString (String dateString, String format) throws ParseException {
+        DateFormat formatter = new SimpleDateFormat(format);
+        return formatter.parse(dateString);
+    }
 
+    public static String getDateStr (Date date, String format) {
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        return formatter.format(date);
+    }
 
     public static class TimePeriod {
 
@@ -287,8 +298,21 @@ public class DateUtils {
             return dateTo;
         }
 
+        public static TimePeriod parse(JSONObject jsonData) throws ParseException, JSONException {
+            Date dateFrom = DateUtils.getDateFromString(jsonData.getString("dateFrom"), "dd MMM yyyy' 'HH:mm");
+            Date dateTo = DateUtils.getDateFromString(jsonData.getString("dateTo"), "dd MMM yyyy' 'HH:mm");
+            return new TimePeriod(dateFrom, dateTo);
+        }
+
+        public JSONObject toJSON() throws JSONException {
+            JSONObject jsonData = new JSONObject();
+            jsonData.put("dateFrom", DateUtils.getDateStr(dateFrom, "dd MMM yyyy' 'HH:mm"));
+            jsonData.put("dateTo", DateUtils.getDateStr(dateTo, "dd MMM yyyy' 'HH:mm"));
+            return jsonData;
+        }
+
         @Override public String toString() {
-            return "Period from [" + getStringFromDate(dateFrom) + " - " + getStringFromDate(dateTo) + "]";
+            return "Period from [" + getDateStr(dateFrom) + " - " + getDateStr(dateTo) + "]";
         }
     }
 }

@@ -165,7 +165,7 @@ class EventVSManifestController {
             Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", eventVSJSON.dateFinish)
             if(dateFinish.before(Calendar.getInstance().getTime())) {
                 String msg = message(code:'publishDocumentDateErrorMsg',
-                        args:[DateUtils.getStringFromDate(dateFinish)])
+                        args:[DateUtils.getDateStr(dateFinish)])
                 log.error("DATE ERROR - msg: ${msg}")
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR, msg)]
             }

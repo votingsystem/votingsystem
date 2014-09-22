@@ -14,10 +14,10 @@ class BootStrap {
         JSON.registerObjectMarshaller(Date) { return it?.format("dd MMM yyyy' 'HH:mm") }
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init()
+        systemService.init()
         filesService.init()
         signatureVSService.init();
         timeStampService.init();
-        systemService.init()
     }
 
     def destroy = { }

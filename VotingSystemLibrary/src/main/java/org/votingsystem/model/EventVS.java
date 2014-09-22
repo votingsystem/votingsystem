@@ -360,8 +360,8 @@ public class EventVS implements Serializable {
         Map map = new HashMap();
         map.put("subject", subject);
         map.put("content", content);
-        map.put("dateBegin", DateUtils.getStringFromDate(dateBegin));
-        map.put("dateFinish", DateUtils.getStringFromDate(dateFinish));
+        map.put("dateBegin", DateUtils.getDateStr(dateBegin));
+        map.put("dateFinish", DateUtils.getDateStr(dateFinish));
         if(url != null) map.put("url", url);
         map.put("backupAvailable", backupAvailable);
         if(userVS != null) {

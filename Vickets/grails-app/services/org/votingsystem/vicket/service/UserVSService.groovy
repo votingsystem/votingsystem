@@ -185,17 +185,18 @@ class UserVSService {
     }
 
     @Transactional
-    public Map getUserVSDataMap(UserVS userVS){
+    public Map getUserVSDataMap(UserVS userVS, boolean withCerts){
         String name = userVS.name
         if(!userVS.name) name = "${userVS.firstName} ${userVS.lastName}"
         def certificateList = []
-        def certificates = CertificateVS.findAllWhere(userVS:userVS, state:CertificateVS.State.OK)
-        certificates.each {certItem ->
-            X509Certificate x509Cert = certItem.getX509Cert()
-            certificateList.add([serialNumber:"${certItem.serialNumber}",
-                                 pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
+        if(withCerts) {
+            def certificates = CertificateVS.findAllWhere(userVS:userVS, state:CertificateVS.State.OK)
+            certificates.each {certItem ->
+                X509Certificate x509Cert = certItem.getX509Cert()
+                certificateList.add([serialNumber:"${certItem.serialNumber}",
+                                     pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
+            }
         }
-
 
         return [id:userVS?.id, nif:userVS?.nif, firstName: userVS.firstName, lastName: userVS.lastName, name:name,
                 IBAN:userVS.IBAN, state:userVS.state.toString(), type:userVS.type.toString(), reason:userVS.reason,
@@ -221,14 +222,14 @@ class UserVSService {
 
     @Transactional
     public Map getBankVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){
-        Map resultMap = getUserVSDataMap(userVS)
+        Map resultMap = getUserVSDataMap(userVS, false)
         resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)
         return resultMap
     }
 
     @Transactional
     public Map getUserVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){
-        Map resultMap = getUserVSDataMap(userVS)
+        Map resultMap = getUserVSDataMap(userVS, false)
         def subscriptions = SubscriptionVS.findAllWhere(userVS:userVS, state: SubscriptionVS.State.ACTIVE)
         List subscriptionList = []
         subscriptions.each { it->
@@ -241,7 +242,7 @@ class UserVSService {
 
     @Transactional
     public Map getDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod){
-        Map resultMap = getUserVSDataMap(userVS)
+        Map resultMap = getUserVSDataMap(userVS, false)
 
         def transactionFromListJSON = []
         transactionVSService.getTransactionFromList(userVS, timePeriod).each { transaction ->
@@ -261,7 +262,7 @@ class UserVSService {
     public Map getDetailedDataMapWithBalances(UserVS userVS, DateUtils.TimePeriod timePeriod){
         Map resultMap = [:]
         resultMap.timePeriod = [dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]
-        resultMap.userVS = getUserVSDataMap(userVS)
+        resultMap.userVS = getUserVSDataMap(userVS, false)
 
 
         Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(userVS, timePeriod)

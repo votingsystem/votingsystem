@@ -377,7 +377,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 		if(simulationTimer != null) simulationTimer.cancel();
 		if(broadcastTimer != null) broadcastTimer.cancel();
 		if(simulatorExecutor != null) simulatorExecutor.shutdownNow();
-        log.info("Begin: " + DateUtils.getStringFromDate( simulationData.getBeginDate())  + " - Duration: " +
+        log.info("Begin: " + DateUtils.getDateStr( simulationData.getBeginDate())  + " - Duration: " +
 				simulationData.getDurationStr());
         log.info("------- SIMULATION RESULT for EventVS: " + eventVS?.getId());
         log.info("NumOfElectors: " + simulationData.getNumOfElectors());

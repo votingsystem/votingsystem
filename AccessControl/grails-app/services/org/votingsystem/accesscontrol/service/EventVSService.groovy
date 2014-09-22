@@ -287,8 +287,8 @@ class EventVSService {
 		eventMap.put("id", event.id);
 		eventMap.put("serverURL", "${grailsApplication.config.grails.serverURL}")
 		eventMap.put("subject", event.subject)
-		eventMap.put("dateInit", DateUtils.getStringFromDate(event.getDateBegin()))
-		eventMap.put("dateFinish", DateUtils.getStringFromDate(event.getDateFinish()))
+		eventMap.put("dateInit", DateUtils.getDateStr(event.getDateBegin()))
+		eventMap.put("dateFinish", DateUtils.getDateStr(event.getDateFinish()))
 		if(event instanceof EventVSElection) {
 			eventMap.put("type", TypeVS.VOTING_EVENT.toString())
 		} else if(event instanceof EventVSClaim) {

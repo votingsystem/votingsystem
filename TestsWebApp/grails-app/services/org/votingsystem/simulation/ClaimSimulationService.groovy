@@ -340,7 +340,7 @@ class ClaimSimulationService {
 		
 		if(simulatorExecutor != null) simulatorExecutor.shutdownNow();
 
-        log.info("Begin: " + DateUtils.getStringFromDate(simulationData.getBeginDate())  + " - Duration: " +
+        log.info("Begin: " + DateUtils.getDateStr(simulationData.getBeginDate())  + " - Duration: " +
 				simulationData.getDurationStr());
         log.info("------- SIMULATION RESULT for EventVS: " + eventVS?.getId());
         log.info("numRequestsProjected: " + simulationData.getNumRequestsProjected());

@@ -13,7 +13,7 @@ class BankVSService {
     def transactionVSService
 
     public Map getDetailedDataMap(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
-        Map resultMap = userVSService.getUserVSDataMap(bankVS)
+        Map resultMap = userVSService.getUserVSDataMap(bankVS, false)
         def transactionFromListJSON = []
         transactionVSService.getTransactionFromList(bankVS, timePeriod).each { transaction ->
             transactionFromListJSON.add(transactionVSService.getTransactionMap(transaction))
@@ -23,7 +23,7 @@ class BankVSService {
     }
 
     public Map getDetailedDataMapWithBalances(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
-        Map resultMap = userVSService.getUserVSDataMap(bankVS)
+        Map resultMap = userVSService.getUserVSDataMap(bankVS, false)
         Map transactionsWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(bankVS, timePeriod)
         resultMap.transactionFromList = transactionsWithBalancesMap.transactionFromList
         resultMap.balancesFrom = transactionsWithBalancesMap.balancesFrom

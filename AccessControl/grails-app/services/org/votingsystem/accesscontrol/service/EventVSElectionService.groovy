@@ -77,7 +77,7 @@ class EventVSElectionService {
         log.debug("$methodName - Saved voting event '${eventVS.id}'")
         messageJSON.id = eventVS.id
         messageJSON.URL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVS.id}"
-        messageJSON.dateCreated = DateUtils.getStringFromDate(eventVS.dateCreated)
+        messageJSON.dateCreated = DateUtils.getDateStr(eventVS.dateCreated)
         messageJSON.type = TypeVS.VOTING_EVENT
         responseVS = keyStoreService.generateElectionKeysStore(eventVS)
         if(ResponseVS.SC_OK != responseVS.statusCode) {
@@ -137,7 +137,7 @@ class EventVSElectionService {
 		try {
 			if (eventVS.isActive(Calendar.getInstance().getTime())) {
 				msg = messageSource.getMessage('eventDateNotFinished', null, locale)
-				String currentDateStr = DateUtils.getStringFromDate(
+				String currentDateStr = DateUtils.getDateStr(
 					new Date(System.currentTimeMillis()))
 				log.error("generateBackup - DATE ERROR  ${msg} - " +
 					"Actual date '${currentDateStr}' - dateFinish eventVS '${eventVS.dateFinish}'")

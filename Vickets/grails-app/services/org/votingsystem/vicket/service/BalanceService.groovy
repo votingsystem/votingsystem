@@ -11,6 +11,7 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.BankVS
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 
@@ -47,47 +48,55 @@ class BalanceService {
         Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
         DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
         DateUtils.TimePeriod currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
-        int week = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
-        String subject =  messageSource.getMessage('initWeekMsg', [week].toArray(), systemService.getDefaultLocale())
+        String currentWeekStr = DateUtils.getDateStr(currentWeekPeriod.getDateFrom(), "dd MMM yyyy")
+        String transactionMsgSubject =  messageSource.getMessage('initWeekMsg', [currentWeekStr].toArray(),
+                systemService.getDefaultLocale())
 
         Map globalDataMap = [:]
         int numTotalUsers = UserVS.countByDateCancelledIsNullOrDateCancelledGreaterThanEquals(timePeriod.getDateFrom())
+        log.debug("$methodName - Initializing week '$transactionMsgSubject' - numTotalUsers: '$numTotalUsers'")
 
         Map<String, File> weekReportFiles
         ScrollableResults scrollableResults = UserVS.createCriteria().scroll {//init week only with active users
-            eq("state", UserVS.State.ACTIVE)
+            or {
+                gt("dateCancelled", timePeriod.getDateFrom())
+                isNull("dateCancelled")
+            }
             inList("type", [UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.REPRESENTATIVE])
         }
 
         while (scrollableResults.next()) {
             UserVS userVS = (UserVS) scrollableResults.get(0);
             Map balanceMap
-            String userSubPath
+            String userSubPath = "userSubPath"
             if(userVS instanceof GroupVS) {
                 balanceMap = genBalanceForGroupVS(userVS, timePeriod)
                 userSubPath = "GroupVS_${userVS.id}"
             } else if (userVS instanceof UserVS) {
                 balanceMap = genBalanceForUserVS(userVS, timePeriod)
-                userSubPath = StringUtils.getUserDirPath(userVS.getNif());
-            } else throw new Exception("User type not valid for operation ${methodName} - UserVS id ${userVS.id}")
+                //userSubPath = StringUtils.getUserDirPath(userVS.getNif());
+                userSubPath = userVS.getNif();
+            } else {
+                log.debug("$methodName - #### User type not valid for operation ${methodName} - UserVS id ${userVS.id}")
+            }
 
             weekReportFiles = filesService.getWeekReportFiles(timePeriod, userSubPath)
             //[baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json"), systemReceipt:receiptFile]
-
-            Map<String, Map> balanceResult = balanceMap.balanceResult
-            Set<Map.Entry<String, Map>> mapEntries = balanceResult.entrySet()
-            mapEntries.each { currency ->
-                Map<String, BigDecimal> currencyMap = currency.getValue()
-                Set<Map.Entry<String, BigDecimal>> currencyEntries = currencyMap.entrySet()
-                currencyEntries.each {
+            log.debug("$methodName - Making data for UserVS '$userVS.nif' - dir: '$weekReportFiles.baseDir'")
+            Map<String, Map> currencyMap = balanceMap.balanceResult
+            Set<Map.Entry<String, Map>> currencyEntries = currencyMap.entrySet()
+            currencyEntries.each { currency ->
+                Map<String, BigDecimal> tagVSMap = currency.getValue()
+                Set<Map.Entry<String, BigDecimal>> tagVSEntries = tagVSMap.entrySet()
+                tagVSEntries.each {
                     String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg',
                             [it.getKey()].toArray(), systemService.getDefaultLocale())
-                    Map transactionData = [amount:it.getValue(), tag:it.getKey(), toUserVS: userVS.name,
+                    Map transactionData = [operation:TypeVS.VICKET_INIT_PERIOD , amount:it.getValue(), tag:it.getKey(), toUserVS: userVS.name,
                                toUserNIF:userVS.nif, toUserId:userVS.id, toUserIBAN:userVS.IBAN, UUID:UUID.randomUUID()]
                     ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
-                            userVS.getNif(), new JSONObject(transactionData).toString(), "${subject} - ${signedMessageSubject}")
+                            userVS.getNif(), new JSONObject(transactionData).toString(), "${transactionMsgSubject} - ${signedMessageSubject}")
 
-                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new Exception(
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(
                             "${methodName} - error signing system transaction - ${responseVS.getMessage()}")
 
                     MessageSMIME messageSMIME = new MessageSMIME(userVS:systemService.getSystemUser(),
@@ -96,10 +105,13 @@ class BalanceService {
                             base64ContentDigest:responseVS.getSmimeMessage().getContentDigestStr())
                     messageSMIME.save()
 
-                    TransactionVS transactionVS = new TransactionVS(amount: it.getValue(), fromUserVS:systemService.getSystemUser(),
-                            fromUserIBAN: systemService.getSystemUser().IBAN, toUserIBAN: userVS.IBAN, validTo: currentWeekPeriod.dateTo,
-                            messageSMIME:messageSMIME, toUserVS: userVS, state:TransactionVS.State.OK, subject:subject,
+                    TransactionVS transactionParent = new TransactionVS(amount: it.getValue(), fromUserVS:userVS,
+                            fromUserIBAN: userVS.IBAN, toUserIBAN: userVS.IBAN, validTo: currentWeekPeriod.dateTo,
+                            messageSMIME:messageSMIME, toUserVS: userVS, state:TransactionVS.State.OK, transactionMsgSubject:transactionMsgSubject,
                             type:TransactionVS.Type.INIT_PERIOD, currencyCode: currency.getKey(), tag:getTag(it.getKey())).save()
+                    TransactionVS transactionTriggered = TransactionVS.generateTriggeredTransaction(
+                            transactionParent, it.getValue(), userVS, userVS.IBAN).save()
+
                     File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${it.getKey()}.p7s")
                     responseVS.getSmimeMessage().writeTo(new FileOutputStream(tagReceiptFile))
                 }
@@ -140,8 +152,8 @@ class BalanceService {
                 isNull("dateCancelled")
                 ge("dateCancelled", timePeriod.getDateFrom())
             }
-            not {
-                eq("type", UserVS.Type.SYSTEM)
+            and {
+                inList("type", [UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.REPRESENTATIVE])
             }
         }
         while (scrollableResults.next()) {
@@ -154,7 +166,7 @@ class BalanceService {
             if((scrollableResults.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
                         System.currentTimeMillis() - beginCalc)
-                log.debug("userVS ${scrollableResults.getRowNumber()} of ${numTotalUsers} - ${elapsedTimeStr}");
+                log.debug("userVS ${scrollableResults.getRowNumber()} of ${numTotalUsers} - elapsedTime: '$elapsedTimeStr'");
                 sessionFactory.currentSession.flush()
                 sessionFactory.currentSession.clear()
             }
@@ -162,10 +174,9 @@ class BalanceService {
                 //accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
                 //new File(accessRequestBaseDir).mkdirs()
             }
-
         }
 
-        Map systemBalance = genBalanceForSystem(systemService.getSystemUser(), timePeriod)
+        Map systemBalance = genBalanceForSystem(timePeriod)
         Map userBalances = [systemBalance:systemBalance, groupBalanceList:groupBalanceList,
                         userBalanceList:userBalanceList, bankVSBalanceList:bankVSBalanceList]
         Map resultMap = [userBalances:userBalances]
@@ -174,7 +185,7 @@ class BalanceService {
         reportsFile.write(userBalancesJSON.toString())
 
         String subject =  messageSource.getMessage('periodBalancesReportMsgSubject',
-                ["[${DateUtils.getStringFromDate(timePeriod.getDateFrom())} - ${DateUtils.getStringFromDate(timePeriod.getDateTo())}]"].toArray(),
+                ["[${DateUtils.getDateStr(timePeriod.getDateFrom())} - ${DateUtils.getDateStr(timePeriod.getDateTo())}]"].toArray(),
                 systemService.getDefaultLocale())
         ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
                 "", userBalancesJSON.toString(),subject)
@@ -186,7 +197,7 @@ class BalanceService {
     }
 
     public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) {
-        if(UserVS.Type.SYSTEM == uservs.type) return genBalanceForSystem(uservs, timePeriod)
+        if(UserVS.Type.SYSTEM == uservs.type) return genBalanceForSystem(timePeriod)
         if(uservs instanceof BankVS) return genBalanceForBankVS(uservs, timePeriod)
         else if (uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
         else return genBalanceForUserVS(uservs, timePeriod)
@@ -204,7 +215,7 @@ class BalanceService {
 
     private Map genBalanceForGroupVS(GroupVS groupvs, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("$methodName - id '${groupvs.id}'")
+        log.debug("$methodName - id '${groupvs.id}' -  $timePeriod")
         Map dataMap = groupVSService.getDetailedDataMapWithBalances(groupvs, timePeriod)
         //Now we calculate balances for each tag and make the beginning of period adjustment
 
@@ -220,19 +231,19 @@ class BalanceService {
         log.debug("$methodName - id '${uservs.id}'")
         Map dataMap = userVSService.getDetailedDataMapWithBalances(uservs, timePeriod)
         if(uservs.state == UserVS.State.ACTIVE) {
-
         } else {}
         return dataMap
     }
 
-    private Map genBalanceForSystem(UserVS systemUser, DateUtils.TimePeriod timePeriod) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    private Map genBalanceForSystem(DateUtils.TimePeriod timePeriod) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod()?.getName();
         log.debug("$methodName - timePeriod [${timePeriod.toString()}]")
-        Map resultMap = userVSService.getUserVSDataMap(systemUser)
-
+        Map resultMap = userVSService.getUserVSDataMap(systemService.getSystemUser(), false)
+        resultMap.timePeriod = [dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+            //not{ inList("type", [TransactionVS.Type.INIT_PERIOD])}
         }
         def transactionFromList = []
         Map<String, Map> balancesMap = [:]
@@ -254,7 +265,9 @@ class BalanceService {
         transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNotNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+            //not{ inList("type", [TransactionVS.Type.INIT_PERIOD]) }
         }
+
 
         def transactionToList = []
         balancesMap = [:]

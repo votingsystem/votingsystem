@@ -58,23 +58,6 @@ public class DateUtils {
     }
 
     /**
-     * Método que devuelve un String con formato "yyyy/MM/dd HH:mm:ss a partir de un Date"
-     *
-     * @param Date fecha en formato Date
-     * @return dateString fecha en formato String
-     * @throws import java.text.ParseException;
-     */
-    public static String getDateStr (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    	return formatter.format(date);
-    }
-
-    public static String getDateStr (Date date, String format) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        return formatter.format(date);
-    }
-
-    /**
      * Método que devuelve un Date a partir de un String con formato "yyyy/MM/dd'T'HH:mm:ss"
      *
      * @param dateString fecha en formato String
@@ -89,6 +72,23 @@ public class DateUtils {
     public static Date getDateFromString (String dateString, String format) throws ParseException {
         DateFormat formatter = new SimpleDateFormat(format);
         return formatter.parse(dateString);
+    }
+
+    /**
+     * Método que devuelve un String con formato "yyyy/MM/dd HH:mm:ss a partir de un Date"
+     *
+     * @param Date fecha en formato Date
+     * @return dateString fecha en formato String
+     * @throws import java.text.ParseException;
+     */
+    public static String getDateStr (Date date) {
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        return formatter.format(date);
+    }
+
+    public static String getDateStr (Date date, String format) {
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        return formatter.format(date);
     }
 
     /**
@@ -249,11 +249,6 @@ public class DateUtils {
         return calendar;
     }
 
-    public static String getStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
-        return formatter.format(date);
-    }
-
     public static TimePeriod getWeekPeriod(Calendar selectedDate) {
         Calendar weekFromCalendar = getMonday(selectedDate);
         Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
@@ -295,7 +290,7 @@ public class DateUtils {
         }
 
         @Override public String toString() {
-            return "Period from [" + getStringFromDate(dateFrom) + " - " + getStringFromDate(dateTo) + "]";
+            return "Period from [" + getDateStr(dateFrom) + " - " + getDateStr(dateTo) + "]";
         }
 
     }

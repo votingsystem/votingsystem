@@ -232,7 +232,7 @@ class UserBaseDataSimulationService {
         simulationData.setRepresentativeNifList(representativeNifList);
         if(requestExecutor != null) requestExecutor.shutdownNow();
         log.debug("--------------- UserBaseDataSimulationService -----------");
-        log.info("Begin: " + DateUtils.getStringFromDate(
+        log.info("Begin: " + DateUtils.getDateStr(
                 simulationData.getBeginDate())  + " - Duration: " + simulationData.getDurationStr());
         log.info("numRepresentativeRequests: " + simulationData.getNumRepresentativeRequests());
         log.info("numRepresentativeRequestsOK: " + simulationData.getNumRepresentativeRequestsOK());

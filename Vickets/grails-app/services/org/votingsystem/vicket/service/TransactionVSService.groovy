@@ -99,7 +99,7 @@ class TransactionVSService {
 
             } else {
                 if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
-                    if(transactionVS.type != TransactionVS.Type.BANKVS_INPUT) {
+                    if(transactionVS.type != TransactionVS.Type.FROM_BANKVS) {
                         transactionVS.accountFromMovements.each { userAccountFrom, amount->
                             userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
                             userAccountFrom.save()
@@ -222,17 +222,19 @@ class TransactionVSService {
     }
 
     public Map<String, BigDecimal> balanceResult(Map<String, BigDecimal> balancesTo, Map<String, BigDecimal> balancesFrom) {
-        Map<String, Map> balanceResult = balancesTo.clone()
+        Map<String, Map> balanceResult = new HashMap<String, Map>(balancesTo)
         Set<Map.Entry<String, Map>> mapEntries = balancesFrom.entrySet()
         mapEntries.each { currency ->
             Map<String, BigDecimal> currencyBalanceMap = currency.getValue()
             if(balanceResult [currency.getKey()]) {
-                Set<Map.Entry<String, BigDecimal>> currencyEntriesFrom = currency.getValue()
-                Set<Map.Entry<String, BigDecimal>> currencyEntriesTo = balanceResult[currency.getKey()]
-                currencyEntriesFrom.each { currEntry ->
-                    if(currencyEntriesTo[currEntry.getKey()]) {
-                        currencyEntriesTo[currEntry.getKey()] = ((BigDecimal) currencyEntriesTo[currEntry.getKey()]).subtract(currEntry.getValue())
-                    } else currencyEntriesTo[(currEntry.getKey())] = currEntry.getValue().negate()
+                Set<Map.Entry<String, BigDecimal>> currencyEntriesFrom = currency.getValue().entrySet()
+                Map<String, BigDecimal> currencyEntriesTo = [:]
+                currencyEntriesTo << balanceResult[currency.getKey()] //To avoid balanceTo modification
+                currencyEntriesFrom.each { tagEntry ->
+                    if(currencyEntriesTo[tagEntry.getKey()]) {
+                        BigDecimal balanceResultTagAmount = new BigDecimal ((currencyEntriesTo[tagEntry.getKey()]).toString())
+                        currencyEntriesTo[tagEntry.getKey()] = balanceResultTagAmount.subtract(tagEntry.getValue())
+                    } else currencyEntriesTo[(tagEntry.getKey())] = tagEntry.getValue().negate()
                 }
             } else {
                 balanceResult[(currency.getKey())] = currency.getValue()
@@ -307,7 +309,7 @@ class TransactionVSService {
             case 'VICKET_CANCELLATION':
                 typeDescription = messageSource.getMessage('vicketCancellationLbl', null, locale);
                 break;
-            case 'BANKVS_INPUT':
+            case 'FROM_BANKVS':
                 typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
                 break;
             case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':

@@ -135,7 +135,7 @@ class RepresentativeDelegationService {
         calendar.add(Calendar.DAY_OF_YEAR, 7 * Integer.valueOf(messageJSON.weeksOperationActive));
         Date dateTo = calendar.getTime()
         msg = messageSource.getMessage('anonymousDelegationRangeMsg', [userVS.getNif(),
-                   DateUtils.getStringFromDate(dateFrom), DateUtils.getStringFromDate(dateTo)].toArray(), locale)
+                   DateUtils.getDateStr(dateFrom), DateUtils.getDateStr(dateTo)].toArray(), locale)
         log.debug("$methodName - ${msg}")
         AnonymousDelegation anonymousDelegation = new AnonymousDelegation(status:AnonymousDelegation.Status.OK,
                 delegationSMIME:messageSMIMEReq, userVS:userVS, dateFrom:dateFrom, dateTo:dateTo).save();

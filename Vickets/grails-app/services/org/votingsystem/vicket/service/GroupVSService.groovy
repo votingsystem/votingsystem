@@ -188,7 +188,7 @@ class GroupVSService {
  	public Map getGroupVSDataMap(GroupVS groupVS){
         Map resultMap = [id:groupVS.id, IBAN:groupVS.IBAN, name:groupVS.name, description:groupVS.description,
             state:groupVS.state.toString(), dateCreated:groupVS.dateCreated,
-            representative:userVSService.getUserVSDataMap(groupVS.representative), type:groupVS.type.toString()]
+            representative:userVSService.getUserVSDataMap(groupVS.representative, false), type:groupVS.type.toString()]
         if(groupVS.tagVSSet) {
             List tagList = []
             groupVS.tagVSSet.each {tag ->
@@ -222,6 +222,7 @@ class GroupVSService {
     @Transactional
     public Map getDetailedDataMapWithBalances(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
         Map resultMap = getGroupVSDataMap(groupVS)
+        resultMap.timePeriod = [dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]
 
         Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(groupVS, timePeriod)
         resultMap.transactionFromList = transactionsFromWithBalancesMap.transactionFromList

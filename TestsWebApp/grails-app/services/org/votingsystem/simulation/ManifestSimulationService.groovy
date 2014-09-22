@@ -346,7 +346,7 @@ class ManifestSimulationService {
 
 		if(simulatorExecutor != null) simulatorExecutor.shutdown();
 
-        log.info("Begin: " + DateUtils.getStringFromDate( simulationData.getBeginDate())  + " - Duration: " +
+        log.info("Begin: " + DateUtils.getDateStr( simulationData.getBeginDate())  + " - Duration: " +
 				simulationData.getDurationStr());
         log.info("------- SIMULATION RESULT for EventVS: " + eventVS?.getId());
 		log.info("Number of projected requests: " + simulationData.getNumRequestsProjected());

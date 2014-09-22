@@ -185,7 +185,7 @@ class GroupVSController {
             }
             def resultList = []
             result.each {item ->
-                resultList.add(userVSService.getUserVSDataMap(item.userVS))
+                resultList.add(userVSService.getUserVSDataMap(item.userVS, false))
             }
             int totalCount = result.totalCount
             resultMap = ["${message(code: 'uservsRecordsLbl')}":resultList, queryRecordCount: totalCount,

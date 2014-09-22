@@ -155,8 +155,8 @@ class CertificateVSService {
                type:certificate.type.toString(), state:certificate.state.toString(),
                subjectDN:x509Cert.getSubjectDN().toString(),
                issuerDN: x509Cert.getIssuerDN().toString(), sigAlgName:x509Cert.getSigAlgName(),
-               notBefore:DateUtils.getStringFromDate(x509Cert.getNotBefore()),
-               notAfter:DateUtils.getStringFromDate(x509Cert.getNotAfter())]
+               notBefore:DateUtils.getDateStr(x509Cert.getNotBefore()),
+               notAfter:DateUtils.getDateStr(x509Cert.getNotAfter())]
         if(certificate.getAuthorityCertificateVS()) certMap.issuerSerialNumber = "${certificate.getAuthorityCertificateVS()?.serialNumber}"
         return certMap
     }

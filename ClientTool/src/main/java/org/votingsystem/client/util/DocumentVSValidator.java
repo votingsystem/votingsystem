@@ -68,8 +68,8 @@ public class DocumentVSValidator {
                 getTimeStampInfo().getGenTime();
         if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
-                    "tokenDateErrorMsg", signedFile.getName(), DateUtils.getStringFromDate(tokenDate),
-                    DateUtils.getStringFromDate(dateInit), DateUtils.getStringFromDate(dateFinish)));
+                    "tokenDateErrorMsg", signedFile.getName(), DateUtils.getDateStr(tokenDate),
+                    DateUtils.getDateStr(dateInit), DateUtils.getDateStr(dateFinish)));
         }
 
         JSONObject contentJSON = signedFile.getContent();
@@ -136,7 +136,7 @@ public class DocumentVSValidator {
         Date tokenDate = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!tokenDate.before(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("dateErrorMsg",
-                    DateUtils.getStringFromDate(dateFinish),DateUtils.getStringFromDate(tokenDate),
+                    DateUtils.getDateStr(dateFinish),DateUtils.getDateStr(tokenDate),
                     signedFile.getName()));
         }
         JSONObject contentJSON = signedFile.getContent();
@@ -210,8 +210,8 @@ public class DocumentVSValidator {
         Date tokenDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
-                    "tokenDateErrorMsg", signedFile.getName(), DateUtils.getStringFromDate(tokenDate),
-                    DateUtils.getStringFromDate(dateInit), DateUtils.getStringFromDate(dateFinish)));
+                    "tokenDateErrorMsg", signedFile.getName(), DateUtils.getDateStr(tokenDate),
+                    DateUtils.getDateStr(dateInit), DateUtils.getDateStr(dateFinish)));
         }
         return new ResponseVS(ResponseVS.SC_OK);
     }
@@ -261,8 +261,8 @@ public class DocumentVSValidator {
         Date tokenDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
-                    "tokenDateErrorMsg", signedFile.getName(), DateUtils.getStringFromDate(tokenDate),
-                    DateUtils.getStringFromDate(dateInit), DateUtils.getStringFromDate(dateFinish)));
+                    "tokenDateErrorMsg", signedFile.getName(), DateUtils.getDateStr(tokenDate),
+                    DateUtils.getDateStr(dateInit), DateUtils.getDateStr(dateFinish)));
         }
         return new ResponseVS(ResponseVS.SC_OK);
     }
@@ -293,8 +293,8 @@ public class DocumentVSValidator {
                 logger.error("signature fail - " + object);
             }
             for(X509Certificate cert:signCertificateChain) {
-                String notAfter = DateUtils.getStringFromDate(cert.getNotAfter());
-                String notBefore = DateUtils.getStringFromDate(cert.getNotBefore());
+                String notAfter = DateUtils.getDateStr(cert.getNotAfter());
+                String notBefore = DateUtils.getDateStr(cert.getNotBefore());
                 logger.debug("pdf checkSignature - fails - Cert:" + cert.getSubjectDN()
                         + " - NotBefore: " + notBefore + " - NotAfter:" + notAfter);
             }

@@ -157,7 +157,7 @@ class VicketDepositSimulationService {
         log.debug("finishSimulation ### Enter FINISH_SIMULATION status - StatusCode: ${responseVS.getStatusCode()}")
             simulationData.finish(responseVS.getStatusCode(), System.currentTimeMillis());
         log.debug("--------------- UserBaseDataSimulationService -----------");
-        log.info("Begin: " + DateUtils.getStringFromDate(simulationData.getBeginDate())  +
+        log.info("Begin: " + DateUtils.getDateStr(simulationData.getBeginDate())  +
                 " - Duration: " + simulationData.getDurationStr());
         if(!errorList.isEmpty()) {
             String errorsMsg = StringUtils.getFormattedErrorList(errorList);

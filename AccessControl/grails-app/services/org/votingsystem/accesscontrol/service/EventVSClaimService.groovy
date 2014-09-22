@@ -37,7 +37,7 @@ class EventVSClaimService {
         Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish)
         if(dateFinish.before(Calendar.getInstance().getTime())) {
             String msg = messageSource.getMessage('publishDocumentDateErrorMsg',
-                    [DateUtils.getStringFromDate(dateFinish)].toArray(), locale)
+                    [DateUtils.getDateStr(dateFinish)].toArray(), locale)
             log.error("DATE ERROR - msg: ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
                     message:msg, type:TypeVS.CLAIM_EVENT_ERROR, eventVS:eventVS)
@@ -56,7 +56,7 @@ class EventVSClaimService {
             eventVS.setTagVSSet(tagSet)
         }
         messageJSON.id = eventVS.id
-        messageJSON.dateCreated = DateUtils.getStringFromDate(eventVS.dateCreated)
+        messageJSON.dateCreated = DateUtils.getDateStr(eventVS.dateCreated)
         messageJSON.type = TypeVS.CLAIM_EVENT
         JSONArray fieldsArray = new JSONArray()
         messageJSON.fieldsEventVS?.each { fieldEventVSItem ->

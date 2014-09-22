@@ -58,7 +58,7 @@ class TransactionVS_BankVSService {
                 fromUserVS:signer, fromUserIBAN: messageJSON.fromUserIBAN, fromUser:messageJSON.fromUser,
                 state:TransactionVS.State.OK, validTo:validTo,
                 subject:subject, currencyCode: currency.getCurrencyCode(),
-                type:TransactionVS.Type.BANKVS_INPUT,  tag:tag).save()
+                type:TransactionVS.Type.FROM_BANKVS,  tag:tag).save()
 
         TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.amount, toUser, messageJSON.toUserIBAN).save();

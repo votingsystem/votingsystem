@@ -224,11 +224,13 @@ public class UserVSAccountsFragment extends Fragment {
             if(userInfo != null) {
                 Map<String, BigDecimal> tagVSBalancesMap = contextVS.getUserVSTransactionVSListInfo().
                         getTagVSBalancesMap(Currency.getInstance("EUR").getCurrencyCode());
-                String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
-                AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(contextVS,
-                        tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
-                accounts_list_view.setAdapter(accountVSInfoAdapter);
-                accountVSInfoAdapter.notifyDataSetChanged();
+                if(tagVSBalancesMap != null) {
+                    String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
+                    AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(contextVS,
+                            tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
+                    accounts_list_view.setAdapter(accountVSInfoAdapter);
+                    //accountVSInfoAdapter.notifyDataSetChanged();
+                }
             }
         } catch(Exception ex) {
             ex.printStackTrace();

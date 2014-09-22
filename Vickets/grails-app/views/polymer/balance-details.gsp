@@ -3,17 +3,15 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-transition', file: 'core-transition-css.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-icon', file: 'core-icon.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/google-chart', file: 'google-chart.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-dialog']"/>">
 
 
 <!-- an element that uses the votingsystem-dialog element and core-overlay -->
-<polymer-element name="balance-details" attributes="opened url">
+<polymer-element name="balance-details" attributes="url">
 <template>
     <vicket-transactionvs-dialog id="transactionViewer"></vicket-transactionvs-dialog>
-    <votingsystem-dialog id="xDialog" class="dialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <!-- place all overlay styles inside the overlay target -->
         <style no-shim>
         .dialog {
@@ -40,7 +38,8 @@
         .subjectColumn {
             width:220px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; cursor: pointer;
         }
-        .amountColumn {width:100px;text-align: right; }
+        .amountColumn {width:120px;text-align: right; }
+        .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 100px; text-overflow: ellipsis;}
         </style>
 
         <core-ajax auto id="ajax" handleAs="json" response="{{balance}}" contentType="json"
@@ -48,11 +47,14 @@
         <div layout vertical style="" >
 
             <div layout horizontal center center-justified style="" >
-                <h3 id="caption" flex style="color: #6c0404; font-weight: bold;">{{caption}} - {{balance.name}}</h3>
-                <div style="cursor:pointer;" on-click="{{tapHandler}}">
-                    <core-icon-button icon="close" style="color:#6c0404;"></core-icon-button>
-                </div>
+                <div id="caption" flex style="color: #6c0404; font-weight: bold; font-size: 1.2em; text-align: center;
+                    margin:10px 0 10px 0;">
+                    {{caption}} - {{balance.name}}</div>
             </div>
+            <div style="text-align: center">
+                <g:message code="periodLbl"/>: {{balance.timePeriod.dateFrom}} -- {{balance.timePeriod.dateTo}}
+            </div>
+
             <div style="font-size: 0.8em; color: #888;">{{description}}</div>
             <template if="{{status}}">
                 <div class="messageToUser" style="color: {{message.status == 200?'#388746':'#ba0011'}};">
@@ -64,42 +66,43 @@
                 </div>
             </template>
             <div style="display:{{balance.nif != null ? 'block':'none'}}">
+                <div layout horizontal>
                 <div style="display: {{balance.transactionToList.length > 0 ? 'block':'none'}}">
-                    <div layout horizontal style="border: 1px solid #6c0404; padding: 10px 0px 0px 10px;">
-                        <div layout vertical>
-                            <div style="font-weight: bold; color:#6c0404;"><g:message code="incomesLbl"/></div>
-                            <div layout vertical center center-justified>
-                                <div>
-                                    <template repeat="{{transaction in balance.transactionToList}}">
-                                        <div layout horizontal on-click="{{viewTransaction}}">
-                                            <div class="subjectColumn" style="">{{transaction.subject}}</div>
-                                            <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
-                                        </div>
-                                    </template>
-                                    <div layout horizontal>
-                                        <div flex class="subjectColumn" style="text-align: right;font-weight: bold;">
-                                            <g:message code="totalLbl"/>: </div>
-                                        <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionToTotal}}</div>
+                    <div layout vertical style="border-right: 2px solid #6c0404; padding:0 30px 0 0; margin: 0 20px 0 0;">
+                        <div style="font-weight: bold; color:#6c0404;"><g:message code="incomesLbl"/></div>
+                        <div layout vertical center center-justified>
+                            <div>
+                                <template repeat="{{transaction in balance.transactionToList}}">
+                                    <div layout horizontal on-click="{{viewTransaction}}">
+                                        <div layout vertical center center-justified class="tagColumn">{{transaction.tags[0].name}}</div>
+                                        <div class="subjectColumn" style="">{{transaction.subject}}</div>
+                                        <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                                     </div>
+                                </template>
+                                <div layout horizontal>
+                                    <div flex class="subjectColumn" style="text-align: right;font-weight: bold;">
+                                        <g:message code="totalLbl"/>: </div>
+                                    <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionToTotal}}</div>
                                 </div>
                             </div>
-                        </div>
-                        <div style="margin:0px 0px 0px 20px; max-width: 200px;">
-                            <google-chart id='balanceToChart' type='pie' height='200px' width='250px'
-                                          options='{"title": "<g:message code="tagsLbl"/>", "pieHole": 0.4, "chartArea":{"left":"0","width":"100%"},
+                            <div style="margin:0px 0px 0px 20px;">
+                                <google-chart id='balanceToChart' type='pie' height='200px' width='250px'
+                                              options='{"title": "<g:message code="tagsLbl"/>", "pieHole": 0.4, "chartArea":{"left":"0","width":"100%"},
                               "legend":{"alignment":"center", "position":"right"}, "animation": {"duration": "1000"}}'
-                                          cols='[{"label": "Data", "type": "string"},{"label": "Cantidad", "type": "number"}]'>
-                            </google-chart>
+                                              cols='[{"label": "Data", "type": "string"},{"label": "Cantidad", "type": "number"}]'>
+                                </google-chart>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div layout horizontal style="border: 1px solid #6c0404; padding: 10px 0px 0px 10px;margin-top:10px;">
+                <div style="display:{{balance.transactionFromList.length > 0 ? 'block':'none'}}">
                     <div layout vertical>
                         <div style="font-weight: bold;color:#6c0404;">{{expensesLbl}}</div>
                         <div layout vertical center center-justified>
                             <div>
                                 <template repeat="{{transaction in balance.transactionFromList}}">
                                     <div layout horizontal on-click="{{viewTransaction}}">
+                                        <div layout vertical center center-justified class="tagColumn">{{transaction.tags[0].name}}</div>
                                         <div class="subjectColumn" style="">{{transaction.subject}}</div>
                                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                                     </div>
@@ -110,21 +113,21 @@
                                     <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionFromTotal}}</div>
                                 </div>
                             </div>
+                            <div style="margin:0px 0px 0px 20px; max-width: 200px;">
+                                <google-chart id='balanceFromChart' type='pie' height='200px' width='250px'
+                                              options='{"title": "<g:message code="tagsLbl"/>", "pieHole": 0.4, "chartArea":{"left":"0","width":"100%"},
+                              "legend":{"alignment":"center", "position":"right"}, "animation": {"duration": "1000"}}'
+                                              cols='[{"label": "Data", "type": "string"},{"label": "Cantidad", "type": "number"}]'>
+                                </google-chart>
+                            </div>
                         </div>
                     </div>
-                    <div style="margin:0px 0px 0px 20px; max-width: 200px;">
-                        <google-chart id='balanceFromChart' type='pie' height='200px' width='250px'
-                                      options='{"title": "<g:message code="tagsLbl"/>", "pieHole": 0.4, "chartArea":{"left":"0","width":"100%"},
-                                  "legend":{"alignment":"center", "position":"right"}, "animation": {"duration": "1000"}}'
-                                      cols='[{"label": "Data", "type": "string"},{"label": "Cantidad", "type": "number"}]'>
-                        </google-chart>
-                    </div>
+                </div>
                 </div>
             </div>
-
+            </div>
         </div>
     </div>
-    </votingsystem-dialog>
 </template>
 <script>
 
@@ -139,21 +142,12 @@
         ready: function(e) {
             console.log(this.tagName + " - ready")
         },
-        onCoreOverlayOpen:function(e) {
-            this.opened = this.$.xDialog.opened
-            this.$.balanceFromChart.width = "100px"
-        },
-        openedChanged:function() {
-
-            this.async(function() {
-                this.$.xDialog.opened = this.opened});
-        },
         viewTransaction: function(e) {
             console.log(this.tagName + " - viewTransaction")
             this.$.transactionViewer.transactionvs =  e.target.templateInstance.model.transaction;
-            this.$.transactionViewer.opened = true
         },
         balanceChanged: function() {
+            console.log(this.tagName + " - balanceChanged - balance.type: " + this.balance.type)
             this.$.balanceToChart.rows = []
             this.$.balanceFromChart.rows = []
             var transactionTotal = 0
@@ -173,14 +167,18 @@
                 this.caption = caption.format("<g:message code="groupLbl"/>")
                 this.description = "IBAN: " + this.balance.IBAN
                 this.expensesLbl = "<g:message code="expensesLbl"/>"
+                this.balance.nif = ""
             }
-            else if('USER' == this.balance.type) {
+            else if('USER' == this.balance.type || this.balance.userVS) {
+                this.balance.nif = this.balance.userVS.nif
+                this.balance.name = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
                 this.caption = caption.format("<g:message code="userLbl"/>")
-                this.description = "NIF:" + this.balance.nif + " - IBAN: " + this.balance.IBAN
+                this.description = "NIF:" + this.balance.nif + " - IBAN: " + this.balance.userVS.IBAN
                 this.expensesLbl = "<g:message code="expensesLbl"/>"
             }
 
-            if(this.balance.balancesTo) { //incomes
+
+            if(this.balance.balancesTo && this.balance.balancesTo["EUR"]) { //incomes
                 transactionTotal = 0
                 Object.keys(this.balance.balancesTo["EUR"]).forEach(function(entry) {
                     transactionTotal = addNumbers(transactionTotal, this.balance.balancesTo["EUR"][entry])
@@ -190,14 +188,15 @@
                 this.transactionToTotal = new Number(transactionTotal).toFixed(2) + " EUR"
             }
 
-            //expenses
-            transactionTotal = 0
-            Object.keys(this.balance.balancesFrom["EUR"]).forEach(function(entry) {
-                transactionTotal = addNumbers(transactionTotal, this.balance.balancesFrom["EUR"][entry])
-                var row = [entry, this.balance.balancesFrom["EUR"][entry]]
-                this.$.balanceFromChart.rows.push(row)
-            }.bind(this))
-            this.transactionFromTotal = new Number(transactionTotal).toFixed(2) + " EUR"
+            if(this.balance.balancesFrom && this.balance.balancesFrom["EUR"]) {//expenses
+                transactionTotal = 0
+                Object.keys(this.balance.balancesFrom["EUR"]).forEach(function(entry) {
+                    transactionTotal = addNumbers(transactionTotal, this.balance.balancesFrom["EUR"][entry])
+                    var row = [entry, this.balance.balancesFrom["EUR"][entry]]
+                    this.$.balanceFromChart.rows.push(row)
+                }.bind(this))
+                this.transactionFromTotal = new Number(transactionTotal).toFixed(2) + " EUR"
+            }
 
         },
         tapHandler: function() {

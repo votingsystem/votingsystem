@@ -571,7 +571,7 @@ class RepresentativeService {
 			}
 		}
 		def metaInfMap = [numVotes:numVotes,
-                dateFrom: DateUtils.getStringFromDate(dateFrom), dateTo:DateUtils.getStringFromDate(dateTo),
+                dateFrom: DateUtils.getDateStr(dateFrom), dateTo:DateUtils.getDateStr(dateTo),
 			    representativeURL:"${grailsApplication.config.grails.serverURL}/representative/${representative.id}"]
 		String metaInfJSONStr = metaInfMap as JSON
 		metaInfFile = new File("${basedir}/meta.inf")

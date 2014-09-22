@@ -54,7 +54,7 @@ class MessageVSService {
         pendingMessageVSList.each { messageVS ->
             JSONObject messageVSJSON = JSONSerializer.toJSON(new String(messageVS.content, "UTF-8"));
             Map fromUser = [id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.getDefaultName()]
-            messageVSList.add([id:messageVS.id, fromUser: fromUser, dateCreated:DateUtils.getStringFromDate(messageVS.dateCreated),
+            messageVSList.add([id:messageVS.id, fromUser: fromUser, dateCreated:DateUtils.getDateStr(messageVS.dateCreated),
                                encryptedDataList:messageVSJSON.encryptedDataList])
         }
         return messageVSList

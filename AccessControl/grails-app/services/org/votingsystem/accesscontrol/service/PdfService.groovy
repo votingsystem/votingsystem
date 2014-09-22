@@ -85,8 +85,8 @@ class PdfService {
 			if(fails != null) {
 				log.debug("checkSignature - fails - Cert '${signingCert.getSerialNumber()?.longValue()}' has fails: ${fails[1]}" );
 				for(X509Certificate cert:pkc) {
-					String notAfter = DateUtils.getStringFromDate(cert.getNotAfter())
-					String notBefore = DateUtils.getStringFromDate(cert.getNotBefore())
+					String notAfter = DateUtils.getDateStr(cert.getNotAfter())
+					String notBefore = DateUtils.getDateStr(cert.getNotBefore())
 					log.debug("checkSignature - fails - Cert: ${cert.getSubjectDN()} - NotBefore: ${notBefore} - NotAfter: ${notAfter}")
 				}
                 msg = messageSource.getMessage('pdfSignedCertsErrorMsg', null, locale)

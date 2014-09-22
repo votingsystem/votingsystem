@@ -2,12 +2,11 @@ package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
 import org.springframework.dao.DataAccessException
+import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.util.DateUtils
-
-import java.security.cert.X509Certificate
 
 class UserVSController {
 	
@@ -55,7 +54,7 @@ class UserVSController {
                 render(view:view, model: resultMap)
             }
         } else {
-            Map sortParamsMap = org.votingsystem.groovy.util.StringUtils.getSortParamsMap(params)
+            Map sortParamsMap = RequestUtils.getSortParamsMap(params)
             Map.Entry sortParam
             if(!sortParamsMap.isEmpty()) sortParam = sortParamsMap?.entrySet()?.iterator()?.next()
             List<UserVS> userList = null
@@ -99,7 +98,7 @@ class UserVSController {
             }
             def resultList = []
             userList.each {userItem ->
-                resultList.add(userVSService.getUserVSDataMap(userItem))
+                resultList.add(userVSService.getUserVSDataMap(userItem, false))
             }
             def resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
             render resultMap as JSON
@@ -125,7 +124,7 @@ class UserVSController {
                     }
                     def resultList = []
                     userList.each {userItem ->
-                        resultList.add(userVSService.getUserVSDataMap(userItem))
+                        resultList.add(userVSService.getUserVSDataMap(userItem, false))
                     }
                     int totalUsers = userList.totalCount
                     Map resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
@@ -166,7 +165,7 @@ class UserVSController {
                 }
                 def resultList = []
                 subscriptionList.each {userSubscriptionItem ->
-                    resultList.add(userVSService.getUserVSDataMap(userSubscriptionItem.userVS))
+                    resultList.add(userVSService.getUserVSDataMap(userSubscriptionItem.userVS, false))
                 }
                 int totalUsers = subscriptionList.totalCount
                 Map resultMap = [userVSList:resultList, queryRecordCount: totalUsers, numTotalTransactions:totalUsers ]
@@ -187,7 +186,7 @@ class UserVSController {
             }
             def resultList = []
             bankVSList.each {userItem ->
-                resultList.add(userVSService.getUserVSDataMap(userItem))
+                resultList.add(userVSService.getUserVSDataMap(userItem, false))
             }
             def resultMap = [bankVSList:resultList, queryRecordCount: numTotalBankVSs, numTotalBankVSs:numTotalBankVSs ]
             render resultMap as JSON
