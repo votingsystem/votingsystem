@@ -43,10 +43,8 @@ class TransactionVS_BankVSService {
         String subject = messageJSON.subject
         BigDecimal amount = new BigDecimal(messageJSON.amount)
 
-        Date validTo =  DateUtils.getDateFromString(messageJSON.validTo)
-        if(validTo.before(Calendar.getInstance().getTime())) {
-            throw new Exception(messageSource.getMessage('depositDateRangeERRORMsg', [messageJSON.validTo].toArray(), locale))
-        }
+        Date validTo = null
+        if(messageJSON.isTimeLimited == true) validTo = DateUtils.getCurrentWeekPeriod().dateTo
 
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
@@ -56,8 +54,7 @@ class TransactionVS_BankVSService {
 
         TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
                 fromUserVS:signer, fromUserIBAN: messageJSON.fromUserIBAN, fromUser:messageJSON.fromUser,
-                state:TransactionVS.State.OK, validTo:validTo,
-                subject:subject, currencyCode: currency.getCurrencyCode(),
+                state:TransactionVS.State.OK, validTo:validTo, subject:subject, currencyCode: currency.getCurrencyCode(),
                 type:TransactionVS.Type.FROM_BANKVS,  tag:tag).save()
 
         TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(

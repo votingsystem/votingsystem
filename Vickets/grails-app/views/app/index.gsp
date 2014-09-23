@@ -37,10 +37,10 @@
             comercial para cupones y descuentos, para la gestión (y control) de entradas en eventos, como moneda alternativa...</p>
             <p><b>¿Por qué llevan asociados algunos ingresos una etiqueta?</b> Los ingresos que llevan asociados una <b>etiqueta</b>
             sirven para que el destinatario sólo pueda emplear ese dinero en servicios que tengan asociada esa <b>etiqueta</b>.</p>
-            <p><b>¿Por qué llevan asociados algunos ingresos una fecha de caducidad?</b> Los ingresos que llevan asociados
-            <b>una fecha de caducidad</b> sirven para obligar a los usuarios a que empleen ese dinero antes de la <b>fecha
-             de caducidad</b> del mismo. En caso contrario el dinero con <b>fecha de caducidad</b> que no haya sido utilizado
-            pasará a ser propiedad del sistema.
+            <p><b>¿Por qué llevan asociados algunos ingresos una fecha de caducidad?</b> Cuando se marca un ingreso como
+            <b>caducable</b> la fecha de caducidad corresponde a las <b>24:00 horas del domingo de la semana en curso</b>.
+            Los ingresos que llevan asociados <b>una fecha de caducidad</b> sirven para obligar a los usuarios a que
+            empleen ese dinero antes de la <b>fecha de caducidad</b> del mismo, en caso contrario ese dinero pasará al sistema.
             </p>
             <p><b>¿Por qué puede interesarme retirar efectivo?</b> Los pagos pueden ser anónimos o no. Los pagos
             <b>NO anónimos</b> quedan reflejados en un documento firmado que identifica de forma inequívoca al pagador.

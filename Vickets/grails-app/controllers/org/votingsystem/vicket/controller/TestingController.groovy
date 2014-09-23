@@ -14,6 +14,8 @@ import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.util.WebViewWrapper
 import org.votingsystem.vicket.websocket.SessionVSHelper
 
+import java.text.NumberFormat
+
 /**
  * @infoController TestingController
  * @descController Servicios de acceso a la aplicación web principal
@@ -33,57 +35,52 @@ class TestingController {
     def systemService
     def groupVSService
 
+
     def index() {
-        //balanceService.initWeekPeriod()
-        GroupVS groupVS
-        GroupVS.withTransaction {
-            groupVS = GroupVS.findWhere(id:4L)
-        }
-        Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
-        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
-        Map resultMap = groupVSService.getDetailedDataMapWithBalances(groupVS, timePeriod)
-        render resultMap as JSON
+        BigDecimal testBD = new BigDecimal(1).setScale(2, BigDecimal.ROUND_DOWN)
+        render testBD;
         return false
     }
 
-    def index1() {
+    def balance() {
+        Map balanceTo = [EUR:[HIDROGENO:new BigDecimal(880.5), NITROGENO:new BigDecimal(100)], DOLLAR:[WILDTAG:new BigDecimal(1454)]]
+        Map balanceFrom = [EUR:[HIDROGENO:new BigDecimal(1080.5), OXIGENO:new BigDecimal(350)], DOLLAR:[WILDTAG:new BigDecimal(6000)],
+                           YEN:[WILDTAG1:new BigDecimal(8000)]]
+        Map result = transactionVSService.balanceResult(balanceTo, balanceFrom)
+        Map allResults = [balanceTo:balanceTo, balanceFrom:balanceFrom, result:result]
+        render allResults as JSON
+    }
+
+    def newWeek() {
+        balanceService.initWeekPeriod()
+        /*List transactionList
+        TransactionVS.withTransaction {
+            transactionList = TransactionVS.findAllWhere(type:TransactionVS.Type.INIT_PERIOD)
+            for(TransactionVS transaction : transactionList) {
+                transaction.delete()
+            }
+        }*/
+        render "OK"
+        return false
+    }
+
+    def userVSBalance() {
         UserVS userVS
         UserVS.withTransaction {
-            userVS = UserVS.findWhere(id:params.long('userId'))
+            userVS = UserVS.findWhere(id:params.long('id'))
         }
-        if(!userVS?.nif) {
-            render "USerVS id '${params.long('userId')}' nif -> ${userVS?.nif}"
-            return false
-        } else {
-            //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod()
-            //Map result = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
-            Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
-            DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
-            Map result = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
-            render result as JSON
-        }
-    }
-
-
-    def webViewLoadTest() {
-        WebViewWrapper webViewTest = WebViewWrapper.getInstance()
-        webViewTest.loadWebView("http://vickets:8086/Vickets/polymerTest/webView?mode=simplePage");
-        render "webViewLoadTest - OK"
-        return false
+        //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod()
+        //Map result = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
+        Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
+        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
+        Map result = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
+        render result as JSON
     }
 
     def broadcast() {
         SessionVSHelper.getInstance().broadcast(new JSONObject([status:200, message:"Hello", coreSignal:"transactionvs-new"]))
         render "OK"
         return false
-    }
-
-    def tagAcccount() {
-        UserVSAccount groupAccount
-        UserVSAccount.withTransaction {
-            groupAccount = UserVSAccount.findWhere(IBAN:"ES1978788989450000000003")
-        }
-        render groupAccount as JSON
     }
 
     def IBAN() {
@@ -118,11 +115,23 @@ class TestingController {
         render "OK"
     }
 
+
+    def webViewLoadTest() {
+        WebViewWrapper webViewTest = WebViewWrapper.getInstance()
+        webViewTest.loadWebView("http://vickets:8086/Vickets/polymerTest/webView?mode=simplePage");
+        render "webViewLoadTest - OK"
+        return false
+    }
+
     def webViewJSTest() {
         String jsCommand = "serverMessage('message to server webkit')"
         WebViewWrapper webViewTest = WebViewWrapper.getInstance().executeScript(jsCommand);
         render "webViewJSTest - OK"
         return false
+    }
+
+    def highcharts() {
+        log.debug("====")
     }
 
     def accounts() { }

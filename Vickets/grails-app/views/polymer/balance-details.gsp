@@ -6,11 +6,71 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/google-chart', file: 'google-chart.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/vicket-transactionvs-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/balance/uservs-balance-chart']"/>">
 
+<asset:javascript src="balanceVSUtils.js"/>
+
+<polymer-element name="balance-item" attributes="transactionList caption balance">
+<template>
+<style>
+        .subjectColumn {
+            width:220px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; cursor: pointer;
+        }
+        .amountColumn {width:120px;text-align: right; }
+        .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 100px; text-overflow: ellipsis;}
+</style>
+<div style="display:{{transactionList.length > 0 ? 'block':'none'}}">
+    <div layout vertical>
+    <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
+        <div layout vertical center center-justified>
+            <div>
+                <template repeat="{{transaction in transactionList}}">
+                    <div layout horizontal on-click="{{viewTransaction}}">
+                        <div layout vertical center center-justified class="tagColumn">{{transaction.tags[0].name}}</div>
+                        <div class="subjectColumn" style="">{{transaction.subject}}</div>
+                        <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
+                    </div>
+                </template>
+                <div layout horizontal>
+                    <div flex class="subjectColumn" style="text-align: right;font-weight: bold;">
+                    <g:message code="totalLbl"/>: </div>
+                    <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionTotal}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    Polymer('balance-item', {
+        caption:"<g:message code="expensesLbl"/>",
+        publish: {
+            transactionList: {value: {}},
+            balance: {value: {}}
+        },
+        viewTransaction: function(e) {
+            console.log(this.tagName + " - viewTransaction")
+            this.fire("transactionviewer", e.target.templateInstance.model.transaction)
+        },
+        balanceChanged:function() {
+            if(this.balance["EUR"]) {
+                transactionTotal = 0
+                Object.keys(this.balance["EUR"]).forEach(function(entry) {
+                    transactionTotal = addNumbers(transactionTotal, this.balance["EUR"][entry])
+                }.bind(this))
+                this.transactionTotal = new Number(transactionTotal).toFixed(2) + " EUR"
+            }
+        },
+        ready: function() {
+            console.log(this.tagName + " - ready")
+        }
+    });
+</script>
 
 <!-- an element that uses the votingsystem-dialog element and core-overlay -->
 <polymer-element name="balance-details" attributes="url">
 <template>
+    <asset:javascript src="balanceVSUtils.js"/>
     <vicket-transactionvs-dialog id="transactionViewer"></vicket-transactionvs-dialog>
         <!-- place all overlay styles inside the overlay target -->
         <style no-shim>
@@ -66,107 +126,106 @@
                 </div>
             </template>
             <div style="display:{{balance.nif != null ? 'block':'none'}}">
+                <div layout horizontal style="width: 100%; border-bottom: 2px solid #6c0404; padding: 10px 0 10px 0;">
+                    <div style="min-width: 300px; padding: 0 0 0 20px;">
+                        <template repeat="{{currency in getMapKeys(balance.balanceResult)}}">
+                            <div style="font-weight: bold;color:#6c0404; margin: 0 0 5px 0;">
+                                <g:message code="cashLbl"/> - <g:message code="currencyLbl"/> {{currency}}
+                            </div>
+                            <div style="margin:0 0 0 15px;">
+                                <template repeat="{{tag in getMapKeys(balance.balanceResult[currency])}}">
+                                    {{tag}} {{balance.balanceResult[currency][tag] | formatAmount}}
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <div>
+                        <template repeat="{{currency in getMapKeys(balance.balancesToTimeLimited)}}">
+                            <div style="font-weight: bold;color:#6c0404; margin: 0 0 5px 0;">
+                                <g:message code="timeLimitedLbl"/> - <g:message code="currencyLbl"/> {{currency}}
+                            </div>
+                            <div style="margin:0 0 0 15px;">
+                                <template repeat="{{tag in getMapKeys(balance.balancesToTimeLimited[currency])}}">
+                                    {{tag}} {{balance.balancesToTimeLimited[currency][tag] | formatAmount}}
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
                 <div layout horizontal>
-                <div style="display: {{balance.transactionToList.length > 0 ? 'block':'none'}}">
-                    <div layout vertical style="border-right: 2px solid #6c0404; padding:0 30px 0 0; margin: 0 20px 0 0;">
-                        <div style="font-weight: bold; color:#6c0404;"><g:message code="incomesLbl"/></div>
-                        <div layout vertical center center-justified>
-                            <div>
-                                <template repeat="{{transaction in balance.transactionToList}}">
-                                    <div layout horizontal on-click="{{viewTransaction}}">
-                                        <div layout vertical center center-justified class="tagColumn">{{transaction.tags[0].name}}</div>
-                                        <div class="subjectColumn" style="">{{transaction.subject}}</div>
-                                        <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
-                                    </div>
-                                </template>
-                                <div layout horizontal>
-                                    <div flex class="subjectColumn" style="text-align: right;font-weight: bold;">
-                                        <g:message code="totalLbl"/>: </div>
-                                    <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionToTotal}}</div>
-                                </div>
-                            </div>
-                            <div style="margin:0px 0px 0px 20px;">
-                                <google-chart id='balanceToChart' type='pie' height='200px' width='250px'
-                                              options='{"title": "<g:message code="tagsLbl"/>", "pieHole": 0.4, "chartArea":{"left":"0","width":"100%"},
-                              "legend":{"alignment":"center", "position":"right"}, "animation": {"duration": "1000"}}'
-                                              cols='[{"label": "Data", "type": "string"},{"label": "Cantidad", "type": "number"}]'>
-                                </google-chart>
-                            </div>
-                        </div>
+                    <div style="border-right: 2px solid  #6c0404; margin:0px 20px 0 0; padding:0 20px 0 20px;">
+                        <balance-item caption="<g:message code="incomesLbl"/>" transactionList="{{balance.transactionToList}}"
+                                      balance="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></balance-item>
                     </div>
-                </div>
-                <div style="display:{{balance.transactionFromList.length > 0 ? 'block':'none'}}">
-                    <div layout vertical>
-                        <div style="font-weight: bold;color:#6c0404;">{{expensesLbl}}</div>
-                        <div layout vertical center center-justified>
-                            <div>
-                                <template repeat="{{transaction in balance.transactionFromList}}">
-                                    <div layout horizontal on-click="{{viewTransaction}}">
-                                        <div layout vertical center center-justified class="tagColumn">{{transaction.tags[0].name}}</div>
-                                        <div class="subjectColumn" style="">{{transaction.subject}}</div>
-                                        <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
-                                    </div>
-                                </template>
-                                <div layout horizontal>
-                                    <div flex class="subjectColumn" style="text-align: right;font-weight: bold;">
-                                        <g:message code="totalLbl"/>: </div>
-                                    <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionFromTotal}}</div>
-                                </div>
-                            </div>
-                            <div style="margin:0px 0px 0px 20px; max-width: 200px;">
-                                <google-chart id='balanceFromChart' type='pie' height='200px' width='250px'
-                                              options='{"title": "<g:message code="tagsLbl"/>", "pieHole": 0.4, "chartArea":{"left":"0","width":"100%"},
-                              "legend":{"alignment":"center", "position":"right"}, "animation": {"duration": "1000"}}'
-                                              cols='[{"label": "Data", "type": "string"},{"label": "Cantidad", "type": "number"}]'>
-                                </google-chart>
-                            </div>
-                        </div>
+                    <div>
+                        <balance-item id="balanceFromItem"  transactionList="{{balance.transactionFromList}}"
+                                      balance="{{balance.balancesTo}}"></balance-item>
                     </div>
-                </div>
                 </div>
             </div>
+
+                <div id="currencyChartContainer" style="margin: 15px auto;">
+                    <uservs-balance-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"
+                        title="<g:message code="userVSBalancesLbl"/>"
+                        xAxisCategories="['<g:message code="incomesLbl"/>', '<g:message code="expensesLbl"/>',
+                        '<g:message code="cashLbl"/> (<g:message code="timeLimitedIncludedLbl"/>)',
+                        '<g:message code="timeLimitedLbl"/>']">
+                    </uservs-balance-chart>
+                </div>
+
+            <div id="currencyChartContainer1" style=""></div>
             </div>
         </div>
     </div>
 </template>
 <script>
 
-    function addNumbers(num1, num2) {
-        return (new Number(num1) + new Number(num2)).toFixed(2)
-    }
 
     Polymer('balance-details', {
+        url:null,
+        caption:null,
+        description:null,
+        transactionFromTotal:null,
+        status:null,
+        message:null,
         publish: {
             balance: {value: {}}
         },
+        formatAmount: function(amount) {
+            return amount.toFixed(2)
+        },
+        getMapKeys: function(e) {
+            if(e == null) return []
+            else return Object.keys(e)
+        },
         ready: function(e) {
             console.log(this.tagName + " - ready")
+            //var toMap = {"EUR":{"HIDROGENO":880.5, "NITROGENO":100},  "DOLLAR":{"WILDTAG":345}}
+            //var fromMap = {"EUR":{"HIDROGENO":580.5, "OXIGENO":250}, "DOLLAR":{"WILDTAG":245}}
+            //var resultCalc = calculateBalanceResultMap(toMap, fromMap)
+            //calculateUserBalanceSeries(toMap.EUR, fromMap.EUR, {}, {})
         },
         viewTransaction: function(e) {
-            console.log(this.tagName + " - viewTransaction")
-            this.$.transactionViewer.transactionvs =  e.target.templateInstance.model.transaction;
+            console.log(this.tagName + " - viewTransaction - e.detail: " + JSON.stringify(e.detail))
+            this.$.transactionViewer.transactionvs =  e.detail;
         },
         balanceChanged: function() {
             console.log(this.tagName + " - balanceChanged - balance.type: " + this.balance.type)
-            this.$.balanceToChart.rows = []
-            this.$.balanceFromChart.rows = []
             var transactionTotal = 0
             var caption = "<g:message code="balanceDetailCaption"/>"
             var userType
             if('SYSTEM' == this.balance.type) {
                 this.caption = caption.format("<g:message code="systemLbl"/>")
                 this.description = "IBAN: " + this.balance.IBAN
-                this.expensesLbl = "<g:message code="expensesLbl"/>"
             }
             else if('BANKVS' == this.balance.type) {
                 this.caption = caption.format("<g:message code="bankVSLbl"/>")
                 this.description = "NIF:" + this.balance.nif + " - IBAN: " + this.balance.IBAN
-                this.expensesLbl = "<g:message code="contributionsLbl"/>"
+                this.$.balanceFromItem.caption = "<g:message code="contributionsLbl"/>"
             }
             else if('GROUP' == this.balance.type) {
                 this.caption = caption.format("<g:message code="groupLbl"/>")
                 this.description = "IBAN: " + this.balance.IBAN
-                this.expensesLbl = "<g:message code="expensesLbl"/>"
                 this.balance.nif = ""
             }
             else if('USER' == this.balance.type || this.balance.userVS) {
@@ -174,29 +233,15 @@
                 this.balance.name = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
                 this.caption = caption.format("<g:message code="userLbl"/>")
                 this.description = "NIF:" + this.balance.nif + " - IBAN: " + this.balance.userVS.IBAN
-                this.expensesLbl = "<g:message code="expensesLbl"/>"
             }
 
-
-            if(this.balance.balancesTo && this.balance.balancesTo["EUR"]) { //incomes
-                transactionTotal = 0
-                Object.keys(this.balance.balancesTo["EUR"]).forEach(function(entry) {
-                    transactionTotal = addNumbers(transactionTotal, this.balance.balancesTo["EUR"][entry])
-                    var row = [entry, this.balance.balancesTo["EUR"][entry]]
-                    this.$.balanceToChart.rows.push(row)
-                }.bind(this))
-                this.transactionToTotal = new Number(transactionTotal).toFixed(2) + " EUR"
-            }
-
-            if(this.balance.balancesFrom && this.balance.balancesFrom["EUR"]) {//expenses
-                transactionTotal = 0
-                Object.keys(this.balance.balancesFrom["EUR"]).forEach(function(entry) {
-                    transactionTotal = addNumbers(transactionTotal, this.balance.balancesFrom["EUR"][entry])
-                    var row = [entry, this.balance.balancesFrom["EUR"][entry]]
-                    this.$.balanceFromChart.rows.push(row)
-                }.bind(this))
-                this.transactionFromTotal = new Number(transactionTotal).toFixed(2) + " EUR"
-            }
+            var balancesToMap = this.balance.balancesTo == null ? {}: this.balance.balancesTo.EUR || {}
+            var balancesFromMap = this.balance.balancesFrom == null ? {}: this.balance.balancesFrom.EUR || {}
+            var balanceResultMap = this.balance.balanceResult == null ? {}: this.balance.balanceResult.EUR || {}
+            var balanceResultTimeLimitedMap = this.balance.balancesToTimeLimited == null ? {}: this.balance.balancesToTimeLimited.EUR || {}
+            //we know the order serie -> incomes, expenses, available, time limited available
+            this.$.balanceChart.series = calculateUserBalanceSeries(balancesToMap, balancesFromMap, balanceResultMap,
+                    balanceResultTimeLimitedMap)
 
         },
         tapHandler: function() {

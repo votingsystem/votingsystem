@@ -1,5 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
+<asset:javascript src="balanceVSUtils.js"/>
 
 <polymer-element name="balance-uservs-details" attributes="balance">
     <template>
@@ -59,50 +60,13 @@
 
     </template>
     <script>
-        function checkBalanceMap(calculatedBalanceMap, serverBalanceMap) {
-            console.log("checkBalanceMap")
-            Object.keys(calculatedBalanceMap).forEach(function(entry) {
-                if(serverBalanceMap[entry] == null) {
-                    throw new Error("Calculated currency: '" + entry + "' not found on server balance map")
-                }
-                var tagDataMap = calculatedBalanceMap[entry]
-                Object.keys(tagDataMap).forEach(function(tagEntry) {
-                    var calculatedAmount = tagDataMap[tagEntry].amount
-                    var serverAmount = new Number(serverBalanceMap[entry][tagEntry]).toFixed(2)
-                    if(calculatedAmount !== serverAmount)
-                        throw new Error("ERROR currency: '" + entry + "' tag: '" + tagEntry +
-                                "' calculated amount: '" + calculatedAmount + "' server amount: ''" + serverAmount + "''")
-                });
-            });
-        }
-
-        function getCurrencyInfoMap(transactionVSList) {
-            var currencyInfoMap = {}
-            for(idx in transactionVSList) {
-                var transactionvs = transactionVSList[idx]
-                var tagName = transactionvs.tags[0].name
-                if(currencyInfoMap[transactionvs.currency]) {
-                    if(currencyInfoMap[transactionvs.currency][tagName] != null){
-                        var tagVSInfoMap = currencyInfoMap[transactionvs.currency][tagName]
-                        tagVSInfoMap.numTransactionVS = ++tagVSInfoMap.numTransactionVS
-                        var totalAmount = new Number(transactionvs.amount) + new Number(tagVSInfoMap.amount)
-                        tagVSInfoMap.amount = totalAmount.toFixed(2)
-                    } else {
-                        currencyInfoMap[transactionvs.currency][tagName] =
-                        {numTransactionVS:1, amount:transactionvs.amount}
-                    }
-                } else {
-                    currencyInfoMap[transactionvs.currency] = {}
-                    currencyInfoMap[transactionvs.currency][tagName] =
-                    {numTransactionVS:1, amount:transactionvs.amount}
-                }
-            }
-            return currencyInfoMap
-        }
 
         Polymer('balance-uservs-details', {
             ready: function() {
                 console.log(this.tagName + " - ready")
+
+                //calculateBalanceResultMap()
+
             },
             getCurrencyList:function(transactionFromInfoMap) {
                 console.log("getCurrencyList")
@@ -144,6 +108,7 @@
                 } catch(e) {
                     this.errorMessage = "transactionTo - " + e
                 }
+
                 this.currencyInfoMapStr = JSON.stringify(this.transactionFromInfoMap)
             }
         });

@@ -39,14 +39,16 @@ class TransactionVS_GroupVSService {
         ResponseVS responseVS
         TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
         Currency currency = Currency.getInstance(messageJSON.currency)
-        Date transactionValidTo = DateUtils.getDateFromString(messageJSON.validTo)
-        if (!messageJSON.amount || !messageJSON.currency  || !messageJSON.validTo||
-                Calendar.getInstance().getTime().after(transactionValidTo) || !messageJSON.subject) {
+        if (!messageJSON.amount || !messageJSON.currency  || !messageJSON.subject) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
                     message:msg, metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "params"))
         }
+
+        Date validTo = null
+        if(messageJSON.isTimeLimited == true) validTo = DateUtils.getCurrentWeekPeriod().dateTo
+
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
             tag = VicketTagVS.findWhere(name:messageJSON.tags[0].name)
@@ -63,7 +65,7 @@ class TransactionVS_GroupVSService {
                     metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
         if(operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS) {
-            return processDepositForAllMembers(messageSMIMEReq, messageJSON, accountFromMovements.data, transactionValidTo ,
+            return processDepositForAllMembers(messageSMIMEReq, messageJSON, accountFromMovements.data, validTo ,
                     currency, groupVS, tag, locale)
         } else {
             messageJSON.toUserIBAN?.each { it ->
@@ -96,7 +98,7 @@ class TransactionVS_GroupVSService {
             }
             TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
                     fromUserVS:groupVS, fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK,
-                    validTo: transactionValidTo, subject:messageJSON.subject, type:transactionVSType,
+                    validTo: validTo, subject:messageJSON.subject, type:transactionVSType,
                     accountFromMovements: accountFromMovements.data, currencyCode: currency.getCurrencyCode(), tag:tag).save()
             receptorList.each { toUser ->
                 TransactionVS transaction = TransactionVS.generateTriggeredTransaction(

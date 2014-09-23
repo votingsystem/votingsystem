@@ -106,8 +106,8 @@ class BalanceService {
                     messageSMIME.save()
 
                     TransactionVS transactionParent = new TransactionVS(amount: it.getValue(), fromUserVS:userVS,
-                            fromUserIBAN: userVS.IBAN, toUserIBAN: userVS.IBAN, validTo: currentWeekPeriod.dateTo,
-                            messageSMIME:messageSMIME, toUserVS: userVS, state:TransactionVS.State.OK, transactionMsgSubject:transactionMsgSubject,
+                            fromUserIBAN: userVS.IBAN, toUserIBAN: userVS.IBAN, messageSMIME:messageSMIME,
+                            toUserVS: userVS, state:TransactionVS.State.OK, transactionMsgSubject:transactionMsgSubject,
                             type:TransactionVS.Type.INIT_PERIOD, currencyCode: currency.getKey(), tag:getTag(it.getKey())).save()
                     TransactionVS transactionTriggered = TransactionVS.generateTriggeredTransaction(
                             transactionParent, it.getValue(), userVS, userVS.IBAN).save()
@@ -228,7 +228,7 @@ class BalanceService {
 
     private Map genBalanceForUserVS(UserVS uservs, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("$methodName - id '${uservs.id}'")
+        log.debug("$methodName - id '${uservs.id}' - timePeriod: '$timePeriod'")
         Map dataMap = userVSService.getDetailedDataMapWithBalances(uservs, timePeriod)
         if(uservs.state == UserVS.State.ACTIVE) {
         } else {}

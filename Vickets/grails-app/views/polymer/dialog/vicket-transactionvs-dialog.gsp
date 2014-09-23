@@ -57,6 +57,7 @@
                 this.$.transactionViewer.timeStampDate = this.transactionvs.timeStampDate
                 this.$.transactionViewer.smimeMessage = this.transactionvs.smimeMessage
                 this.isProcessing = false
+                this.$.xDialog.opened = true
             },
             show: function(transactionvsURL) {
                 this.isProcessing = true

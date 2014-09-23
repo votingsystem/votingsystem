@@ -4,6 +4,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-user-box', file: 'votingsystem-user-box.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-checkbox', file: 'paper-checkbox.html')}">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/tagvs-select-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/uservs-search-dialog']"/>">
 
@@ -53,6 +54,12 @@
             </div>
 
             <div layout vertical id="formDataDiv" style="padding: 15px 20px 0px 20px; height: 100%;">
+
+                <div layout horizontal center center-justified>
+                    <div style="margin: 0 10px 0 0;"><paper-checkbox id="timeLimitedCheckBox"></paper-checkbox></div>
+                    <div><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
+                </div>
+
                 <div>
                     <input type="text" id="amount" class="form-control" style="width:150px;margin:0 0 10px 0;" pattern="^[0-9]*$" required
                            title="<g:message code="amountLbl"/>"
@@ -112,7 +119,6 @@
         maxNumberTags:1,
         fromUserName:null,
         fromUserIBAN:null,
-        dateValidTo:null,
         groupId:null,
         selectedTags: [],
         subpage:false,
@@ -175,8 +181,8 @@
         },
 
         submitForm: function () {
+            console.log("========= this.$.timeLimitedCheckBox.checked: " + this.$.timeLimitedCheckBox.checked)
             this.removeErrorStyle(this.$.formDataDiv)
-            console.log("====== submitForm")
             switch(this.operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     if(this.$.receptorBox.getUserList().length == 0){
@@ -219,8 +225,8 @@
             webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.depositSubject.value,
-                toUserIBAN:this.toUserIBAN(), amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName,
-                fromUserIBAN:this.fromUserIBAN, validTo:this.dateValidTo, tags:tagList}
+                isTimeLimited:this.$.timeLimitedCheckBox.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,
+                amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN}
             webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption
@@ -249,14 +255,14 @@
         back:function() {
             this.fire('operation-finished')
         },
-        init:function(operation, fromUser, fromIBAN, validTo, targetGroupId) {
+        init:function(operation, fromUser, fromIBAN, targetGroupId) {
             console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage)
             this.operation = operation
             this.fromUserName = fromUser
             this.fromUserIBAN = fromIBAN
-            this.dateValidTo = validTo
             this.groupId = targetGroupId
             this.isDepositFromGroupToAllMembers = false
+            this.$.timeLimitedCheckBox.checked = false
             switch(operation) {
                 case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
                     this.operationMsg = "<g:message code='vicketDepositFromGroupToMember'/>"

@@ -2,6 +2,8 @@ import grails.converters.JSON
 import grails.util.Metadata
 import org.votingsystem.model.ContextVS
 
+import java.text.NumberFormat
+
 class BootStrap {
 
     def systemService
@@ -12,6 +14,10 @@ class BootStrap {
 
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) { return it?.format("dd MMM yyyy' 'HH:mm") }
+        JSON.registerObjectMarshaller(BigDecimal) { return NumberFormat.getCurrencyInstance().format(it); }
+
+
+
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init()
         systemService.init()

@@ -39,11 +39,7 @@ class TransactionVSController {
                 resultMap.receipt = receipt
             }
         }
-        if(request.contentType?.contains("json")) {
-            render resultMap as JSON
-        } else {
-            render(view:'transactionViewer', model: [transactionvsMap:resultMap])
-        }
+        render resultMap as JSON
     }
 
     def index() {
