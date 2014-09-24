@@ -1,7 +1,7 @@
 <%@ page import="java.text.DateFormat; java.text.SimpleDateFormat" %>
 
 <%
-    DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+    DateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd");
 %>
 <!DOCTYPE html>
 <html>
@@ -15,14 +15,14 @@
 
         <g:each in="${periods}">
             <div>
-                <a href="<g:createLink controller="reports" action="forWeek"/>?date=${formatter.format(it.getDateFrom())}">
-                    <g:message code="weekFromLbl" args="${[formatDate(date:it.getDateFrom(), formatName:'webViewDateFormat'),
-                                                           formatDate(date:it.getDateTo(), formatName:'webViewDateFormat')]}"/>
+                <a href="<g:createLink controller="reports" action="week"/>${formatter.format(it.getDateFrom())}">
+                    <g:message code="transactionsCurrentWeekPeriodMsg"
+                               args="${[formatDate(date:it.getDateFrom(), formatName:'webViewDateFormat')]}"/>
                 </a>
             </div>
         </g:each>
         <div style="margin:20px 0px;">
-            <a href="<g:createLink controller="reports" action="forWeek"/>?date=${formatter.format(Calendar.getInstance().getTime())}">
+            <a href="<g:createLink controller="reports" action="week"/>${formatter.format(Calendar.getInstance().getTime())}">
                 <g:message code="currentWeekLbl"/>
             </a>
         </div>

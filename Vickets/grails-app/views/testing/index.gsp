@@ -15,7 +15,7 @@
                   precision="day" years="${1930..1970}"/>
 
 
-    <g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-list']"/>
+    <g:createLink  controller="element" params="[element: '/groupVS/groupvs-list']"/>
 
     <div style="font-weight: bold;">{{messages.fromDate}}: </div>
     <div>

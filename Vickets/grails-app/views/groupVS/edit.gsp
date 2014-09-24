@@ -7,7 +7,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-editor']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-editor']"/>">
 
 </head>
 <body>

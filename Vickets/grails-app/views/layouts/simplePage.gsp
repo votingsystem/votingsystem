@@ -9,7 +9,7 @@
     <asset:stylesheet src="vickets.css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
@@ -24,7 +24,7 @@
 
     <div layout horizontal center center-justified style="position:absolute; top:100px; width:1200px;">
         <div>
-            <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+            <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
         </div>
     </div>
 <core-signals id="coreSignals"></core-signals>

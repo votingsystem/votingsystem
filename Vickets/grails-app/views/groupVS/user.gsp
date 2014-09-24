@@ -6,6 +6,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/reason-dialog']"/>">
 </head>
 <style>
 
@@ -31,9 +32,8 @@
 
         </div>
     </div>
-<g:include view="/polymer/dialog/get-reason-dialog.gsp"/>
-<get-reason-dialog id="reasonDialog" caption="<g:message code="cancelSubscriptionFormCaption"/>" opened="false"
-       messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></get-reason-dialog>
+<reason-dialog id="reasonDialog" caption="<g:message code="cancelSubscriptionFormCaption"/>" opened="false"
+       messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></reason-dialog>
 </body>
 </html>
 <asset:script id="vicketScript">

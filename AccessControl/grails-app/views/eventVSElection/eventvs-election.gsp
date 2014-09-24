@@ -1,7 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/eventVSElection/eventvs-election-voteconfirm-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/eventvs-admin-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votevs-result-dialog']"/>">
+<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSElection/eventvs-election-voteconfirm-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-admin-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/votevs-result-dialog']"/>">
 
 <polymer-element name="eventvs-election" attributes="subpage">
     <template>
@@ -22,8 +23,7 @@
             <div style="margin: 0px 30px;">
             <div layout horizontal center center-justified style="width:100%;">
                 <template if="{{subpage}}">
-                    <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
-                        <i class="fa fa-arrow-left"></i></votingsystem-button>
+                    <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </template>
                 <div flex id="pageTitle" class="pageHeader text-center"><h3>{{eventvs.subject}}</h3></div>
             </div>

@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/balance-list']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-transactionvs-table']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/uservs-list']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/balance/balance-list']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-list']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 
@@ -37,10 +37,10 @@
                 <balance-list id="balanceList"></balance-list>
             </div>
             <div id="transactionsTo" class="tabContent" style="display:{{selectedTab == 'transactionsTo'?'block':'none'}}">
-                <vicket-transactionvs-table id="transactionToTable"></vicket-transactionvs-table>
+                <transactionvs-table id="transactionToTable"></transactionvs-table>
             </div>
             <div id="transactionsFrom" class="tabContent" style="display:{{selectedTab == 'transactionsFrom'?'block':'none'}}">
-                <vicket-transactionvs-table id="transactionFromTable"></vicket-transactionvs-table>
+                <transactionvs-table id="transactionFromTable"></transactionvs-table>
             </div>
             <div id="userList" class="tabContent" style="display:{{selectedTab == 'userList'?'block':'none'}}">
                 <uservs-list id="userList" menuType="${params.menu}"></uservs-list>

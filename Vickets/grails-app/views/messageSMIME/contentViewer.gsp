@@ -5,8 +5,8 @@
     <g:include view="/include/utils_js.gsp"/>
     <script src="${resource(dir: '/bower_components/platform', file: 'platform.js')}"> </script>
 
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog']"/>">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/messageSMIME/'+ viewer]"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/'+ viewer]"/>">
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="${assetPath(src: 'icon_16/fa-credit-card.png')}" type="image/x-icon">

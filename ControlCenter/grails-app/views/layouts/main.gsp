@@ -16,7 +16,7 @@
     <link rel="import" href="${resource(dir: '/bower_components/paper-item', file: 'paper-item.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog']"/>">
 
     <!--<script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>-->
     <g:layoutHead/>
@@ -135,7 +135,7 @@
 </div>
 
 <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;">
-    <votingsystem-message-dialog id="_votingsystemMessageDialog"></votingsystem-message-dialog>
+    <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
 </div>
 <core-signals id="coreSignals"></core-signals>
 </body>
@@ -172,7 +172,7 @@
 
     document.addEventListener('polymer-ready', function() {
         console.log("main.gsp - polymer-ready")
-        update_a_elements(document.getElementsByTagName('a'))
+        updateLinksVS(document.getElementsByTagName('a'))
     });
 
     document.querySelector('#navBar').addEventListener('nav-bar-ready', function(e) {
@@ -206,19 +206,7 @@
         }
         document.querySelector("#navBar").innerHTML = ajaxDocument.body.innerHTML
 
-        update_a_elements(document.querySelectorAll("#navBar a"))
+        updateLinksVS(document.querySelectorAll("#navBar a"))
     });
-
-    function update_a_elements(elementsArray) {
-         for (var i = 0; i < elementsArray.length; i++) {
-            //console.log("elementsArray[i].href: " + elementsArray[i].href)
-            if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
-                elementsArray[i].addEventListener('click', function(e) {
-                    document.querySelector('#navBar').loadURL(e.target.href)
-                    e.preventDefault()
-                });
-            } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)
-        }
-    }
 </asset:script>
 <asset:deferredScripts/>

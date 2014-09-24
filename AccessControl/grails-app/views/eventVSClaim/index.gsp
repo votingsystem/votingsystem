@@ -4,8 +4,8 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-advanced-search-dialog', file: 'votingsystem-advanced-search-dialog.html')}">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/search-info.gsp']"/>">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/eventVSClaim/eventvs-claim-list']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/search-info.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/eventVSClaim/eventvs-claim-list']"/>">
 </head>
 <body>
     <div class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">

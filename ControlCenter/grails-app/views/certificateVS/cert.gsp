@@ -5,8 +5,8 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/votingsystem-cert.gsp']"/>">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/get-reason-dialog.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/certificateVS/votingsystem-cert.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/reason-dialog.gsp']"/>">
 
     <style type="text/css" media="screen">
 
@@ -34,8 +34,8 @@
 
 <div style="position: absolute; width: 100%; top:0px;left:0px;visibility:hidden">
     <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
-        <get-reason-dialog id="reasonDialog" caption="<g:message code="cancelCertFormCaption"/>" opened="false"
-                           isForAdmins="true"></get-reason-dialog>
+        <reason-dialog id="reasonDialog" caption="<g:message code="cancelCertFormCaption"/>" opened="false"
+                           isForAdmins="true"></reason-dialog>
     </div>
 </div>
 

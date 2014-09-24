@@ -1,30 +1,23 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-menu-button', file: 'paper-menu-button.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/vicket-deposit-form']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-page-tabs']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-form']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-page-tabs']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-item', file: 'core-item.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-ripple', file: 'paper-ripple.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-user']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-user']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 
 <%
     def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
     def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
-    def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
 %>
 <polymer-element name="groupvs-details" attributes="selectedItem subpage">
 <template>
     <style shim-shadowdom>
-    .view { :host {position: relative;} }
-    .menuButton #menu{
-        overflow: auto;
-        background: white;
-        padding: 0px;
-        border: #6c0404;
-    }
+        body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
+        .optionsIcon {margin:0 7px 0 3px; color:#6c0404;}
     </style>
     <g:include view="/include/styles.gsp"/>
     <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
@@ -36,8 +29,7 @@
         <div layout horizontal center center-justified>
             <template if="{{subpage}}">
                 <div title="<g:message code="backLbl"/>">
-                    <votingsystem-button isFab on-click="{{back}}" style="font-size: 1.5em; margin:5px 0px 0px 0px;">
-                        <i class="fa fa-arrow-left"></i></votingsystem-button>
+                    <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </div>
             </template>
 
@@ -47,35 +39,31 @@
 
                 <div style="display:{{isAdminView && isClientToolConnected? 'block':'none'}}">
                     <div layout horizontal center center-justified style="margin:0 0 20px 0;">
-                        <div id="groupConfigOptionsViv">
-                            <paper-menu-button id="groupConfigOptions" class="menuButton" valign="bottom">
-                                <core-selector target="{{$.groupOptions}}" id="groupOptionsSelector" valueattr="id" on-core-select="{{configGroup}}">
-                                    <div id="groupOptions" style=" border: 1px solid #6c0404;padding:0 10px 0 10px;">
-                                        <core-item id="editGroup" label="<g:message code="editDataLbl"/>">
-                                            <div flex></div><i class="fa fa-pencil-square-o"></i></core-item>
-                                        <core-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>">
-                                            <div flex></div><i class="fa fa-trash-o"></i></core-item>
+                        <div layout horizontal center center-justified>
+                            <i class="fa fa-cogs optionsIcon"></i>
+                            <paper-dropdown-menu id="configGroupDropDown" valueattr="label"
+                                         label="<g:message code="configGroupvsLbl"/>" style="width: 200px;">
+                                <core-selector target="{{$.groupOptions}}" valueattr="id" on-core-select="{{configGroup}}">
+                                    <div id="groupOptions" style="padding:0 10px 0 10px;">
+                                        <core-item id="editGroup" label="<g:message code="editDataLbl"/>"></core-item>
+                                        <core-item id="cancelGroup" label="<g:message code="cancelGroupVSLbl"/>"></core-item>
                                     </div>
                                 </core-selector>
-                            </paper-menu-button>
-                            <votingsystem-button on-click="{{openConfigGroupOptions}}">
-                                <i class="fa fa-cogs" style="margin:0 7px 0 3px;"></i> <g:message code="configGroupvsLbl"/>
-                            </votingsystem-button>
+                            </paper-dropdown-menu>
                         </div>
 
-                        <div id="selectDepositOptionsViv">
-                            <paper-menu-button id="selectDepositOptions" class="menuButton" valign="bottom">
-                                <core-selector target="{{$.depositOptions}}" id="coreSelector" valueattr="id" on-core-select="{{showDepositDialog}}">
-                                    <div id="depositOptions" style=" border: 1px solid #6c0404;padding:0 10px 0 10px;">
+                        <div layout horizontal center center-justified style="margin:0 0 0 60px;">
+                            <i class="fa fa-money optionsIcon"></i>
+                            <paper-dropdown-menu id="selectDepositDropDown" valueattr="label"
+                                             label="<g:message code="makeDepositFromGroupVSLbl"/>" style="width: 300px;">
+                                <core-selector target="{{$.depositOptions}}" valueattr="id" on-core-select="{{showDepositDialog}}">
+                                    <div id="depositOptions" style="padding:0 10px 0 10px;">
                                         <core-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></core-item>
                                         <core-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></core-item>
                                         <core-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"></core-item>
                                     </div>
                                 </core-selector>
-                            </paper-menu-button>
-                            <votingsystem-button on-click="{{openDepositDialogOptions}}">
-                                <i class="fa fa-money" style="margin:0 7px 0 3px;"></i>  <g:message code="makeDepositFromGroupVSLbl"/>
-                            </votingsystem-button>
+                            </paper-dropdown-menu>
                         </div>
                     </div>
                 </div>
@@ -136,7 +124,7 @@
 
     <section id="page2">
         <div class="pageContentDiv" cross-fade>
-            <vicket-deposit-form id="depositForm" subpage></vicket-deposit-form>
+            <transactionvs-form id="depositForm" subpage></transactionvs-form>
         </div>
     </section>
     </core-animated-pages>
@@ -156,16 +144,6 @@
             console.log(this.tagName + " - ready - subpage: " + this.subpage)
             //this.isClientToolConnected = window['isClientToolConnected']
             this.isClientToolConnected = true
-            window.onclick = function(event){
-                this.$.selectDepositOptions.opened = false
-                this.$.groupConfigOptions.opened = false
-            }.bind(this)
-            this.$.groupConfigOptionsViv.onclick = function(event){
-                event.stopPropagation();
-            }
-            this.$.selectDepositOptionsViv.onclick = function(event){
-                event.stopPropagation();
-            }
             this.$.depositForm.addEventListener('operation-finished', function (e) {
                 this.page = 0;
             }.bind(this))
@@ -242,46 +220,38 @@
                 this.$.messagePanel.style.display = 'block'
                 this.isAdminView = false
             }
-
         },
         configGroup:function(e) {
-            if(e.detail.isSelected) {
-                if('cancelGroup' == e.detail.item.id) {
-                    showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.name),
-                            "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
-                } else if('editGroup' == e.detail.item.id) {
-                    var editorURL = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.id + "?menu=admin"
-                    //var editorURL = "${createLink(controller: 'groupVS', action: 'newGroup')}"
-                    this.fire('core-signal', {name: "innerpage", data: editorURL});
-                }
-                this.$.coreSelector.selected = null
+            //e.detail.isSelected = false
+            if('cancelGroup' == e.detail.item.id) {
+                showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.name),
+                        "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
+            }else if('editGroup' == e.detail.item.id) {
+                var editorURL = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.id + "?menu=admin"
+                this.fire('core-signal', {name: "innerpage", data: editorURL});
             }
+            this.$.configGroupDropDown.selected = ""
+            this.$.configGroupDropDown.selectedItem = null
         },
         showDepositDialog:function(e) {
             console.log("showDepositDialog")
-            if(e.detail.isSelected) {
-                if('fromGroupToMember' == e.detail.item.id) {
-                    this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, this.groupvs.name,
-                            this.groupvs.IBAN , this.groupvs.id)
-                } else if('fromGroupToMemberGroup' == e.detail.item.id) {
-                    this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
-                            this.groupvs.IBAN, this.groupvs.id)
-                } else if('fromGroupToAllMember' == e.detail.item.id) {
-                    this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
-                            this.groupvs.IBAN, this.groupvs.id)
-                }
-                this.page = 1;
-                this.$.coreSelector.selected = null
+            //e.detail.isSelected
+            if('fromGroupToMember' == e.detail.item.id) {
+                this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, this.groupvs.name,
+                        this.groupvs.IBAN , this.groupvs.id)
+            } else if('fromGroupToMemberGroup' == e.detail.item.id) {
+                this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
+                        this.groupvs.IBAN, this.groupvs.id)
+            } else if('fromGroupToAllMember' == e.detail.item.id) {
+                this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
+                        this.groupvs.IBAN, this.groupvs.id)
             }
+            this.page = 1;
+            this.$.selectDepositDropDown.selected = ""
+            this.$.selectDepositDropDown.selectedItem = null
         },
         back:function() {
             this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.id});
-        },
-        openDepositDialogOptions:function() {
-            this.$.selectDepositOptions.opened = true
-        },
-        openConfigGroupOptions:function() {
-            this.$.groupConfigOptions.opened = true
         },
         showUserDetails:function(e, detail, sender) {
             console.log(this.tagName + " - showUserDetails")

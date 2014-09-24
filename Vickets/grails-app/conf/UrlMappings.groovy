@@ -136,6 +136,16 @@ class UrlMappings {
             action = "receipt"
         }
 
+        "/reports/week/$year/$month/$day" {
+            controller = "reports"
+            action = "week"
+            constraints {
+                year(matches:/\d*/)
+                month(matches:/\d*/)
+                day(matches:/\d*/)
+            }
+        }
+
         "/subscriptionVS/$id/activate"{
             controller = "subscriptionVS"
             action = "activate"

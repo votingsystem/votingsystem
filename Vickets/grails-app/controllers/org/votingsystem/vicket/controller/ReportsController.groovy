@@ -4,6 +4,7 @@ import grails.converters.JSON
 import groovy.io.FileType
 import org.apache.log4j.Logger
 import org.apache.log4j.RollingFileAppender
+import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -30,9 +31,9 @@ class ReportsController {
     def index() {
         String weekReportsBaseDir = "${grailsApplication.config.VotingSystem.backupCopyPath}/weekReports"
         def dir = new File(weekReportsBaseDir)
+        List<DateUtils.TimePeriod> periods = []
         if(dir.exists()) {
             DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-            List<DateUtils.TimePeriod> periods = []
             dir.eachFileRecurse (FileType.FILES) { file ->
                 if("balances.json".equals(file.getName())) {
                     String[] period = file.getParentFile().getName().split("_")
@@ -58,13 +59,10 @@ class ReportsController {
         }
     }
 
-    def forWeek() {
-        DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        Date selectedDate
-        DateUtils.TimePeriod timePeriod
+    def week() {
+        Calendar calendar = RequestUtils.getCalendar(params)
+        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         Map<String, File> reportFiles
-        selectedDate = formatter.parse(params.date)
-        timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(selectedDate)
         reportFiles = filesService.getWeekReportFiles(timePeriod)
         if(request.contentType?.contains("json")) {
             if(reportFiles.reportsFile.exists()) {
@@ -79,7 +77,7 @@ class ReportsController {
                 response.status = ResponseVS.SC_PRECONDITION_FAILED
                 render(view:'/error412',  model: [message:message(code:'reportsForPeriodMissingMsg',
                         args:[timePeriod.toString()])])
-            } else render(view:'forWeek',  model: [date:params.date])
+            } else render(view:'week',  model: [date:params.date])
         }
     }
 

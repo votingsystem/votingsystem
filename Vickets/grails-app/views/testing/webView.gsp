@@ -9,7 +9,7 @@
     <asset:stylesheet src="vickets.css"/>
     <asset:javascript src="utilsVS.js"/>
     <g:include view="/include/utils_js.gsp"/>
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/votingsystem-message-dialog.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/alert-dialog.gsp']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 </head>
 <body id="voting_system_page">

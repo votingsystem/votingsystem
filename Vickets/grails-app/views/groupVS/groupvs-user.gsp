@@ -1,39 +1,14 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/get-reason-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/reason-dialog']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 
 
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
-        <votingsystem-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
-        <!-- place all overlay styles inside the overlay target -->
-        <style no-shim>
-            .uservsDialog {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                overflow: auto;
-                background: white;
-                padding:10px 30px 30px 30px;
-                outline: 1px solid rgba(0,0,0,0.2);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 540px;
-            }
-        </style>
+        <votingsystem-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 540px;">
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
-            <div layout horizontal style="margin:0 0 10px 0;">
-                <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
-                    <div style="text-align: center;">{{caption}}</div>
-                </div>
-                <div style="position: absolute; top: 0px; right: 0px;">
-                    <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
-                </div>
-            </div>
             <div id="" style="border: 1px solid #6c0404; width: 450px;margin:auto; padding: 15px;">
                 <div layout horizontal>
                     <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
@@ -70,8 +45,8 @@
         </div>
         <div style="position: absolute; width: 100%; top:0px;left:0px;">
             <div layout horizontal center center-justified style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
-                <get-reason-dialog id="reasonDialog" caption="<g:message code="cancelSubscriptionFormCaption"/>" opened="false"
-                                   messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></get-reason-dialog>
+                <reason-dialog id="reasonDialog" caption="<g:message code="cancelSubscriptionFormCaption"/>" opened="false"
+                                   messageToUser="<g:message code="cancelSubscriptionFormMsg"/>"></reason-dialog>
             </div>
         </div>
         </votingsystem-dialog>
@@ -113,7 +88,7 @@
             show:function(baseURL, userId) {
                 this.subscriptionDataURLPrefix = baseURL
                 this.userId = userId
-                this.opened = true
+                this.$.xDialog.opened = true
             },
             userIdChanged:function() {
                 this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId + "?mode=simplePage&menu=" + menuType

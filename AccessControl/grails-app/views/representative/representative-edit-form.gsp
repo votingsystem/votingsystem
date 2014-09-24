@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-editor']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-cancel-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-editor']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-cancel-dialog']"/>">
 
 <polymer-element name="representative-edit-form">
     <template>

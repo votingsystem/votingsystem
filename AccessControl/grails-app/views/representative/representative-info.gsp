@@ -1,8 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/image-viewer-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-select-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-request-accreditations-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/representative/representative-request-votinghistory-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/image-viewer-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-select-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-request-accreditations-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/representative/representative-request-votinghistory-dialog']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
 
 <polymer-element name="representative-info" attributes="subpage">

@@ -23,7 +23,8 @@ class BankVSService {
     }
 
     public Map getDetailedDataMapWithBalances(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
-        Map resultMap = userVSService.getUserVSDataMap(bankVS, false)
+        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        resultMap.userVS = userVSService.getUserVSDataMap(bankVS, false)
         Map transactionsWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(bankVS, timePeriod)
         resultMap.transactionFromList = transactionsWithBalancesMap.transactionFromList
         resultMap.balancesFrom = transactionsWithBalancesMap.balancesFrom

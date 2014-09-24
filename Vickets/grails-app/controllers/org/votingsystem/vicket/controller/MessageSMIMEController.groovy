@@ -76,7 +76,7 @@ class MessageSMIMEController {
     }
 
     def contentViewer() {
-        String viewer = "receipt-votingsystem"
+        String viewer = "message-smime"
         String smimeMessageStr
         String timeStampDate
         boolean isAsciiDoc = false
@@ -98,24 +98,20 @@ class MessageSMIMEController {
             if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS = userVSService.getUserVSBasicDataMap(params.messageSMIME.userVS)
             params.operation = signedContentJSON.operation
         }
-        if(params.operation) {
+        /*if(params.operation) {
             try {
                 TypeVS operationType = TypeVS.valueOf(params.operation.toUpperCase())
                 operationType = TypeVS.valueOf(params.operation.toUpperCase())
                 switch(operationType) {
-                    case TypeVS.SEND_SMIME_VOTE:
-                        viewer = "receipt-votevs"
-                        break;
                     case TypeVS.VICKET_DEPOSIT_FROM_BANKVS:
-                        viewer = "vicket-transactionvs"
-                        break;
+                        viewer = "message-smime"
                         break;
                     case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
-                        viewer = "vicket-transactionvs"
+                        viewer = "message-smime"
                         break;
                 }
             } catch(Exception ex) { log.error(ex.getMessage(), ex)}
-        }
+        }*/
         Map model = [operation:params.operation, smimeMessage:smimeMessageStr,
                viewer:viewer, signedContentMap:signedContentJSON, timeStampDate:timeStampDate]
         if(request.contentType?.contains("json")) {

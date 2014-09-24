@@ -38,7 +38,7 @@ function enterTagsMapData(allTagsMap, tagBalanceMapParam) {
     return allTagsMap
 }
 
-//we know the order serie -> incomes, expenses, available, time limited available
+//we know the order serie -> incomes, incomes time limited, expenses, available
 function calculateUserBalanceSeries(balanceToMap, balanceFromMap, balanceResult, balancesToTimeLimited) {
     var allTagsMap = {}
 
@@ -48,9 +48,9 @@ function calculateUserBalanceSeries(balanceToMap, balanceFromMap, balanceResult,
         })
     }
     enterTagsMapData(allTagsMap, balanceToMap)
+    enterTagsMapData(allTagsMap, balancesToTimeLimited)
     enterTagsMapData(allTagsMap, balanceFromMap)
     enterTagsMapData(allTagsMap, balanceResult)
-    enterTagsMapData(allTagsMap, balancesToTimeLimited)
 
     var seriesData = []
     Object.keys(allTagsMap).forEach(function(tag) {

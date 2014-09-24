@@ -34,6 +34,7 @@
       "paper-elements":"Polymer/paper-elements",
       "paper-fab":"Polymer/paper-fab",
       "paper-item":"Polymer/paper-item",
+      "paper-spinner":"PolymerLabs/paper-spinner",
       "core-field":"Polymer/core-field",
       "core-layout":"Polymer/core-layout",
       "core-layout-grid":"Polymer/core-layout-grid",

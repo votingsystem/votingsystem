@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/simulation-listener']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/simulation-listener']"/>">
 
 
 <polymer-element name="encryption-form">

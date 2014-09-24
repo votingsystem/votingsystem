@@ -198,8 +198,8 @@ class BalanceService {
 
     public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) {
         if(UserVS.Type.SYSTEM == uservs.type) return genBalanceForSystem(timePeriod)
-        if(uservs instanceof BankVS) return genBalanceForBankVS(uservs, timePeriod)
-        else if (uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
+        else if(uservs instanceof BankVS) return genBalanceForBankVS(uservs, timePeriod)
+        else if(uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
         else return genBalanceForUserVS(uservs, timePeriod)
     }
 
@@ -219,7 +219,6 @@ class BalanceService {
         Map dataMap = groupVSService.getDetailedDataMapWithBalances(groupvs, timePeriod)
         //Now we calculate balances for each tag and make the beginning of period adjustment
 
-
         if(groupvs.state == UserVS.State.ACTIVE) {
 
         } else {}
@@ -238,8 +237,8 @@ class BalanceService {
     private Map genBalanceForSystem(DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod()?.getName();
         log.debug("$methodName - timePeriod [${timePeriod.toString()}]")
-        Map resultMap = userVSService.getUserVSDataMap(systemService.getSystemUser(), false)
-        resultMap.timePeriod = [dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]
+        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        resultMap.userVS = userVSService.getUserVSDataMap(systemService.getSystemUser(), false)
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())

@@ -24,4 +24,6 @@ class TestingController {
 
     def index() {  }
 
+    def polymer() {  }
+
 }

@@ -1,5 +1,5 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-details']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-details']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">

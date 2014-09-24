@@ -64,19 +64,6 @@ class TestingController {
         return false
     }
 
-    def userVSBalance() {
-        UserVS userVS
-        UserVS.withTransaction {
-            userVS = UserVS.findWhere(id:params.long('id'))
-        }
-        //DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod()
-        //Map result = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
-        Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
-        DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
-        Map result = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
-        render result as JSON
-    }
-
     def broadcast() {
         SessionVSHelper.getInstance().broadcast(new JSONObject([status:200, message:"Hello", coreSignal:"transactionvs-new"]))
         render "OK"

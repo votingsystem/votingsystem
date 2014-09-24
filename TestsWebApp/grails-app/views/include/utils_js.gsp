@@ -63,7 +63,7 @@
             document.querySelector("#_votingsystemMessageDialog").setMessage(text,
                     "<g:message code="messageLbl"/>")
         }  else {
-            console.log('votingsystem-message-dialog not found');
+            console.log('alert-dialog not found');
             window._originalAlert(text);
         }
     }

@@ -22,7 +22,7 @@ class VotingSystemTestFilters {
         paramsCheck(controller:'*', action:'*') {
             before = {
                 if("assets".equals(params.controller) || params.isEmpty()) return
-                if(!"polymer".equals(params.controller)) {
+                if(!"element".equals(params.controller)) {
                     log.debug "###########################<${params.controller}> - before ###################################"
                     log.debug "Method: " + request.method
                     log.debug "Params: " + params

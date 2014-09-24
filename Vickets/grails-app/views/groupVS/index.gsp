@@ -5,7 +5,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <asset:stylesheet src="vickets_groupvs.css"/>
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/groupVS/groupvs-list']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-list']"/>">
 </head>
 <body>
 <div class="pageContentDiv" style="margin: 0px auto 0px auto;padding:0px 30px 0px 30px;">

@@ -131,7 +131,7 @@ function showMessageVS(message, caption, callerId, isConfirmMessage) {
         document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
         document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption, callerId, isConfirmMessage)
     }  else {
-        console.log('votingsystem-message-dialog not found');
+        console.log('alert-dialog not found');
         window._originalAlert(message);
     }
 }
@@ -159,6 +159,18 @@ String.prototype.getDate = function() {
 	  var timeMillis = Date.parse(this)
 	  return new Date(timeMillis)
 };
+
+function updateLinksVS(elementsArray) {
+    for (var i = 0; i < elementsArray.length; i++) {
+        //console.log("elementsArray[i].href: " + elementsArray[i].href)
+        if(elementsArray[i].href.indexOf("${grailsApplication.config.grails.serverURL}") > -1) {
+            elementsArray[i].addEventListener('click', function(e) {
+                document.querySelector('#navBar').loadURL(e.target.href)
+                e.preventDefault()
+            });
+        } else if("" != elementsArray[i].href.trim()) console.log("main.gsp - not system url: " + elementsArray[i].href)
+    }
+}
 
 String.prototype.getElapsedTime = function() {
 	  return this.getDate().getElapsedTime()

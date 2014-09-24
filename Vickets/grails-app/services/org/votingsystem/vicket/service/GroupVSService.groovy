@@ -221,8 +221,8 @@ class GroupVSService {
 
     @Transactional
     public Map getDetailedDataMapWithBalances(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
-        Map resultMap = getGroupVSDataMap(groupVS)
-        resultMap.timePeriod = [dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]
+        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        resultMap.userVS = getGroupVSDataMap(groupVS)
 
         Map transactionsFromWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(groupVS, timePeriod)
         resultMap.transactionFromList = transactionsFromWithBalancesMap.transactionFromList

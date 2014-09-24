@@ -2,8 +2,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/simulation-listener']"/>">
-<link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/add-eventvs-option-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/simulation-listener']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/element/eventvs-add-option-dialog']"/>">
 
 
 <polymer-element name="claim-simulation-form">
@@ -137,7 +137,7 @@
                 </div>
             </section>
         </core-animated-pages>
-        <add-eventvs-option-dialog id="eventvsOptionDialog"></add-eventvs-option-dialog>
+        <eventvs-add-option-dialog id="eventvsOptionDialog"></eventvs-add-option-dialog>
     </template>
     <script>
         Polymer('claim-simulation-form', {

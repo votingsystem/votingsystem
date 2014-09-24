@@ -30,7 +30,7 @@ class AccessControlFilters {
         paramsCheck(controller:'*', action:'*') {
             before = {
                 if("assets".equals(params.controller) || params.isEmpty()) return
-                if(!"polymer".equals(params.controller)) {
+                if(!"element".equals(params.controller)) {
                     log.debug "###########################<${params.controller}> - before ################################"
                     log.debug "Method: " + request.method
                     log.debug "Params: " + params
@@ -120,7 +120,7 @@ class AccessControlFilters {
 
         votingSystemFilter(controller:'*', action:'*') {
             before = {
-                if("assets".equals(params.controller) || params.isEmpty() || "polymer".equals(params.controller)) return
+                if("assets".equals(params.controller) || params.isEmpty() || "element".equals(params.controller)) return
                 ResponseVS responseVS = null
                 try {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)

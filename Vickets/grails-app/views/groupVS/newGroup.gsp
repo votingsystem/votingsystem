@@ -4,7 +4,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-texteditor', file: 'votingsystem-texteditor.html')}">
-    <link rel="import" href="<g:createLink  controller="polymer" params="[element: '/polymer/dialog/tagvs-select-dialog']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicketTagVS/tagvs-select-dialog']"/>">
 </head>
 <body>
 
