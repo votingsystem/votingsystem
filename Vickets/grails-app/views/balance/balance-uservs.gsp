@@ -14,8 +14,7 @@
 <polymer-element name="balance-uservs" attributes="url balance">
 <template>
     <g:include view="/include/styles.gsp"/>
-    <votingsystem-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>"
-             style="">
+    <votingsystem-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>">
         <transactionvs-data id="transactionViewer"></transactionvs-data>
     </votingsystem-dialog>
     <style no-shim>
@@ -26,15 +25,19 @@
     </style>
     <div layout vertical style="" >
         <div layout horizontal center center-justified style="" >
-            <div id="caption" flex style="color: #6c0404; font-weight: bold; font-size: 1.2em; text-align: center;
+            <div flex id="caption" flex style="color: #6c0404; font-weight: bold; font-size: 1.2em; text-align: center;
                 margin:10px 0 10px 0;">
                 {{caption}} - {{balance.name}}</div>
         </div>
-        <div style="text-align: center; font-weight: bold; color: #888; margin:0 0 8px 0;">
-            <g:message code="periodLbl"/>: {{balance.timePeriod.dateFrom}} - {{balance.timePeriod.dateTo}}
+        <div horizontal layout center style="position: relative; display: block;">
+            <div flex style="text-align: center; font-weight: bold; color: #888; margin:0 0 8px 0;">
+                <g:message code="periodLbl"/>: {{balance.timePeriod.dateFrom}} - {{balance.timePeriod.dateTo}}
+            </div>
+            <div style="font-size: 0.8em; color: #888; font-weight: normal; position: absolute; right:0px;top:0px;">
+                {{description}}
+            </div>
         </div>
 
-        <div style="font-size: 0.8em; color: #888;">{{description}}</div>
         <template if="{{status}}">
             <div class="messageToUser" style="color: {{message.status == 200?'#388746':'#ba0011'}};">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
@@ -46,19 +49,34 @@
         </template>
         <div style="">
             <div layout horizontal style="width: 100%; border-bottom: 2px solid #6c0404; padding: 10px 0 10px 0;">
-                <div style="min-width: 300px; padding: 0 0 0 20px;">
+                <div style="min-width: 300px; margin: 0 0 0 20px;">
                     <template repeat="{{currency in getMapKeys(balance.balanceCash)}}">
                         <div style="font-weight: bold;color:#6c0404; margin: 0 0 5px 0;">
                             <g:message code="cashLbl"/> - <g:message code="currencyLbl"/> {{currency}}
                         </div>
-                        <div style="margin:0 0 0 15px;">
-                            <template repeat="{{tag in getMapKeys(balance.balanceCash[currency])}}">
-                                {{tag}} {{balance.balanceCash[currency][tag] | formatAmount}}
-                                <core-tooltip label="<g:message code="timeLimitedAdviceMsg"/>" position="top">
-                                    <paper-progress value="40" style="width: 70px;"></paper-progress>
-                                    <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em"></i>
-                                </core-tooltip>
-                            </template>
+                        <div>
+                            <div horizontal layout>
+                                <template repeat="{{tag in getMapKeys(balance.balanceCash[currency])}}">
+                                    <div style="margin:0 0 0 80px;">
+                                        <div>{{tag}}: {{balance.balanceCash[currency][tag] | formatAmount}}</div>
+                                        <div>
+                                            <template if="{{isTimeLimited(currency, tag)}}">
+                                                <core-tooltip large label="{{getTimeLimitedForTagMsg(currency, tag)}}" position="right">
+                                                    <div horizontal layout center center-justified style="vertical-align: top;">
+                                                        <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 70px;"></paper-progress>
+                                                        <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
+                                                    </div>
+                                                </core-tooltip>
+                                            </template>
+                                            <template if="{{!isTimeLimited(currency, tag)}}">
+                                                <div style="text-align: center;">
+                                                <i class="fa fa-check" style="color:darkgreen;font-size: 0.8em; margin:0 0 0 10px;"></i>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -78,7 +96,7 @@
         <div horizontal layout center center-justified  id="currencyChartContainer" style="margin: 15px auto;">
             <balance-uservs-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"
                 title="<g:message code="userVSBalancesLbl"/>"
-                xAxisCategories="['<g:message code="incomesLbl"/>', '<g:message code="icomesTimeLimitedLbl"/>',
+                xAxisCategories="['<g:message code="incomesLbl"/> (<g:message code="totalLbl"/>)', '<g:message code="icomesTimeLimitedLbl"/>',
                 '<g:message code="cashLbl"/>', '<g:message code="expensesLbl"/>']">
             </balance-uservs-chart>
         </div>
@@ -101,6 +119,25 @@
         formatAmount: function(amount) {
             return amount.toFixed(2)
         },
+        getTimeLimitedForTagMsg: function(currency, tag) {
+            var tagAlreadyExpended = this.balance.balancesFrom[currency][tag]
+            tagAlreadyExpended = tagAlreadyExpended == null? 0 : tagAlreadyExpended
+            var tagToExpend = this.balance.balancesTo[currency][tag].timeLimited
+            var tagCash = tagToExpend - tagAlreadyExpended
+            return "<g:message code="timeLimitedForTagMsg"/>".format(tagCash, currency, tag)
+        },
+        getPercentageForTagMsg: function(currency, tag) {
+            var tagAlreadyExpended = this.balance.balancesFrom[currency][tag]
+            tagAlreadyExpended = tagAlreadyExpended == null? 0 : tagAlreadyExpended
+            var tagToExpend = this.balance.balancesTo[currency][tag].timeLimited
+            var pertecentageExpended = tagAlreadyExpended * 100 / tagToExpend
+            //console.log("pertecentageExpended: " + pertecentageExpended)
+            return pertecentageExpended.toFixed(0)
+        },
+        isTimeLimited: function(currency, tag) {
+            if(this.balance.balancesTo[currency][tag].timeLimited === 0) return false
+            else return true
+        },
         getMapKeys: function(e) {
             if(e == null) return []
             else return Object.keys(e)
@@ -119,7 +156,7 @@
             var caption = "<g:message code="balanceDetailCaption"/>"
             if('SYSTEM' == this.balance.userVS.type) {
                 this.caption = caption.format("<g:message code="systemLbl"/>")
-                this.description = "IBAN: " + this.balance.IBAN
+                this.description = "IBAN: " + this.balance.userVS.IBAN
             }
             else if('BANKVS' == this.balance.userVS.type) {
                 this.caption = caption.format("<g:message code="bankVSLbl"/>")
@@ -128,7 +165,7 @@
             }
             else if('GROUP' == this.balance.userVS.type) {
                 this.caption = caption.format("<g:message code="groupLbl"/>")
-                this.description = "IBAN: " + this.balance.IBAN
+                this.description = "IBAN: " + this.balance.userVS.IBAN
                 this.balance.userVS.nif = ""
             }
             else if('USER' == this.balance.userVS.type) {

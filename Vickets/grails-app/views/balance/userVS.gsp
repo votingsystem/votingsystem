@@ -7,7 +7,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/balance/balance-uservs']"/>">
 </head>
 <body>
-    <div style="max-width: 1000px; margin: 0 auto;">
+    <div style="max-width: 1200px; margin: 0 auto;">
         <balance-uservs id="balanceDetails" balance="${balanceMap as grails.converters.JSON}" opened="true"></balance-uservs>
     </div>
 </body>

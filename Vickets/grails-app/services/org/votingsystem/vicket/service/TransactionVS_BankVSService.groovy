@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.MetaInfMsg
 
@@ -22,7 +23,9 @@ class TransactionVS_BankVSService {
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS messageSigner = messageSMIMEReq.userVS
         String msg;
-        UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN)
+        if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
+                "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
+        UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))
         if (!messageJSON.amount || !messageJSON.currency || !toUser || ! messageJSON.fromUserIBAN ||
                 !messageJSON.fromUser|| (TypeVS.VICKET_DEPOSIT_FROM_BANKVS != TypeVS.valueOf(messageJSON.operation))) {
             if(!toUser) msg = messageSource.getMessage('userNotFoundForIBANErrorMsg', [messageJSON.toUserIBAN].toArray(), locale)
@@ -58,7 +61,7 @@ class TransactionVS_BankVSService {
                 type:TransactionVS.Type.FROM_BANKVS,  tag:tag).save()
 
         TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
-                transactionParent, transactionParent.amount, toUser, messageJSON.toUserIBAN).save();
+                transactionParent, transactionParent.amount, toUser, messageJSON.toUserIBAN.get(0)).save();
 
         //transaction?.errors.each { log.error("processDepositFromBankVS - error - ${it}")}
 

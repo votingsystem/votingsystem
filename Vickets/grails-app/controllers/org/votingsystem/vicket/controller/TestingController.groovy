@@ -42,7 +42,9 @@ class TestingController {
     }
 
     def balance() {
-        Map balanceTo = [EUR:[HIDROGENO:new BigDecimal(880.5), NITROGENO:new BigDecimal(100)], DOLLAR:[WILDTAG:new BigDecimal(1454)]]
+        Map balanceTo = [EUR:[HIDROGENO:[total:new BigDecimal(880.5), timeLimited:new BigDecimal(700.5)],
+                              NITROGENO:[total:new BigDecimal(100), timeLimited:new BigDecimal(50.5)]],
+                        DOLLAR:[WILDTAG:[total:new BigDecimal(1454), timeLimited:new BigDecimal(400.5)]]]
         Map balanceFrom = [EUR:[HIDROGENO:new BigDecimal(1080.5), OXIGENO:new BigDecimal(350)], DOLLAR:[WILDTAG:new BigDecimal(6000)],
                            YEN:[WILDTAG1:new BigDecimal(8000)]]
         Map result = transactionVSService.balanceCash(balanceTo, balanceFrom)

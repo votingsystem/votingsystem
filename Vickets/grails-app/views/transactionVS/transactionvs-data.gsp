@@ -127,7 +127,7 @@
             getFromUserIBAN: function (transactionvs) {
                 var result
                 if(transactionvs.fromUserVS) {
-                    if(transactionvs.fromUserVS.sender.IBAN != null) result = transactionvs.fromUserVS.sender.IBAN
+                    if(transactionvs.fromUserVS.sender.fromUserIBAN != null) result = transactionvs.fromUserVS.sender.fromUserIBAN
                     else result = transactionvs.fromUserVS.IBAN
                 }
                 return result
@@ -159,7 +159,9 @@
                         this.$.fromUserDiv.innerHTML = "<g:message code="systemLbl"/>"
                         this.$.fromUserDiv.classList.add("pageHeader");
                         break;
-
+                    case 'FROM_BANKVS':
+                        this.caption = "<g:message code="vicketDepositFromBankVS"/>"
+                        break;
                     default:
                         this.caption = this.transactionvs.type
 
@@ -180,7 +182,7 @@
             },
             showToUserIBAN:function(e) {
                 console.log(this.tagName + " - showToUserIBAN - " + e)
-                this.$.uservsData.showByIBAN(e.target.templateInstance.model.IBAN)
+                this.$.uservsData.showByIBAN(this.transactionvs.toUserVS.IBAN)
                 this.$.xDialog.opened = true
             },
             checkReceipt: function() {

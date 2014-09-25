@@ -40,9 +40,9 @@
     var jsonDepositFromBankVS = {operation:"VICKET_DEPOSIT_FROM_BANKVS",
         signedMessageSubject:"Deposit from BankVS",
         signedContent:{operation:"VICKET_DEPOSIT_FROM_BANKVS", bankIBAN:"ES1877777777450000000050",
-            fromUser: "JOSE J. APELLIDO1 APELLIDO2",
-            fromUserIBAN:"ES8477777777450000012345", toUserIBAN:"ES8378788989450000000015",
-            amount:"30000", tags:[{name:"HIDROGENO"}], isTimeLimited:true, subject:"Ingreso viernes 25", currency:"EUR" },
+            fromUser: "ClientBankVS App1 App2", currency: "EUR",
+            fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"],
+            amount:"30000", tags:[{name:"HIDROGENO"}], isTimeLimited:true, subject:"BankVS deposit" },
         serviceURL:"${createLink( controller:'transactionVS', action:"deposit", absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
         urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
@@ -56,13 +56,12 @@
         console.log("depositFromBankVS")
         var webAppMessage = depositFromBankVS.get();
         webAppMessage.statusCode = ResponseVS.SC_PROCESSING
-        var objectId = Math.random().toString(36).substring(7)
-        window[objectId] = {setClientToolMessage: function(appMessage) {
+        webAppMessage.objectId = Math.random().toString(36).substring(7)
+        window[webAppMessage.objectId] = function(appMessage) {
             console.log("sendDepositFromBankVS - message: " + appMessage);
             appMessageJSON = JSON.parse(appMessage)
             showMessageVS(JSON.stringify(appMessageJSON.message), "sendDepositFromBankVS " + appMessageJSON.statusCode)
-        }}
-        webAppMessage.callerCallback = objectId
+        }
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 

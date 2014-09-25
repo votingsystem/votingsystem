@@ -6,32 +6,11 @@
 
 <polymer-element name="alert-dialog">
     <template>
-        <votingsystem-dialog id="xDialog" class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
-            <style no-shim>
-            .votingsystemMessageDialog {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                overflow: auto;
-                background: white;
-                padding:10px 30px 30px 30px;
-                outline: 1px solid rgba(0,0,0,0.2);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 500px;
-            }
-            </style>
+        <votingsystem-dialog id="xDialog" class="votingsystemMessageDialog" style="max-width: 600px;"
+                 on-core-overlay-open="{{onCoreOverlayOpen}}" on-closed="{{close}}">
+            <style no-shim></style>
             <div>
-                <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
-                        <div style="text-align: center;display:{{caption? 'block':'none'}}">{{caption}}</div>
-                    </div>
-                    <div style="position: absolute; top: 0px; right: 0px;">
-                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
-                    </div>
-                </div>
+
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <votingsystem-html-echo html="{{message}}"></votingsystem-html-echo>
                 </div>
@@ -60,22 +39,20 @@
             onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {
                 this.message = message
-                this.caption = caption
+                this.$.xDialog.title = caption
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
                 this.$.xDialog.opened = true
             },
-
             accept: function() {
                 this.close()
                 this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
             },
             close: function() {
-                this.$.xDialog.opened = false
+                console.log(this.tagName + " - close")
                 this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});
                 this.message = null
                 this.callerId = null
-                this.caption = null
                 this.isConfirmMessage = false
             }
         });

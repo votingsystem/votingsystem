@@ -425,7 +425,7 @@ public class UserVS implements Serializable {
             this.nif = nif.toUpperCase();
         }
         if(name == null) {
-            this.name = firstName == null? "":firstName + lastName == null? "":lastName;
+            this.name = (firstName == null? "":firstName + " " + lastName == null? "":lastName).trim();
         }
     }
 

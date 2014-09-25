@@ -59,8 +59,8 @@ function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanc
 
     enterTagsMapData(allTagsMap, getSubBalanceFromMap(detailedBalanceToMap, 'total'))
     enterTagsMapData(allTagsMap, getSubBalanceFromMap(detailedBalanceToMap, 'timeLimited'))
-    enterTagsMapData(allTagsMap, balanceFromMap)
     enterTagsMapData(allTagsMap, balanceCash)
+    enterTagsMapData(allTagsMap, balanceFromMap)
 
     var seriesData = []
     Object.keys(allTagsMap).forEach(function(tag) {

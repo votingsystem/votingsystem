@@ -244,20 +244,27 @@ class TransactionVSService {
         }
     }
 
-    public Map<String, BigDecimal> balanceCash(Map<String, BigDecimal> balancesTo, Map<String, BigDecimal> balancesFrom) {
-        Map<String, Map> balanceCash = JSONSerializer.toJSON(balancesTo);
-        Set<Map.Entry<String, Map>> mapEntries = balancesFrom.entrySet()
-        mapEntries.each { currency ->
-            if(balancesTo [currency.getKey()]) {
-                if(!balanceCash[currency.getKey()]) balanceCash[currency.getKey()] = [:]
-                Set<Map.Entry<String, BigDecimal>> tagEntriesFrom = currency.getValue().entrySet()
-                tagEntriesFrom.each { tagEntry ->
-                    if(balancesTo[currency.getKey()][tagEntry.getKey()]) {
-                        if(!balanceCash[currency.getKey()][tagEntry.getKey()]) {
-                            balanceCash[currency.getKey()][tagEntry.getKey()] = new BigDecimal(
-                                    balancesTo[currency.getKey()][tagEntry.getKey()].total)
-                        }
-                        BigDecimal balanceCashTagAmount = balanceCash[currency.getKey()][tagEntry.getKey()].total
+    private Map<String, Map> getSubBalanceFromMap(Map<String, Map> detailedBalance, String subBalanceParam) {
+        Map<String, Map> detailedBalanceMap = JSONSerializer.toJSON(detailedBalance);
+        Set<Map.Entry<String, Map>> tagEntries = detailedBalanceMap.entrySet()
+        Map<String, Map> result = [:]
+        for(Map.Entry<String, Map> entry : tagEntries) {
+            Map<String, BigDecimal> tagDataMap = [:]
+            for(Map.Entry<String, Map> mapEntry : entry.getValue().entrySet()) {
+                tagDataMap[mapEntry.getKey()] = mapEntry.getValue().total
+            }
+            result[(entry.getKey())] = tagDataMap
+        }
+        return result
+    }
+
+    public Map<String, BigDecimal> balanceCash(Map<String, Map> balancesTo, Map<String, BigDecimal> balancesFrom) {
+        Map<String, Map> balanceCash = getSubBalanceFromMap(balancesTo, 'total');
+        for(Map.Entry<String, Map> currency : balancesFrom.entrySet()) {
+            if(balanceCash [currency.getKey()]) {
+                for(Map.Entry<String, BigDecimal> tagEntry : currency.getValue().entrySet()) {
+                    if(balanceCash[currency.getKey()][tagEntry.getKey()]) {
+                        BigDecimal balanceCashTagAmount = balanceCash[currency.getKey()][tagEntry.getKey()]
                         balanceCash[currency.getKey()][tagEntry.getKey()] = balanceCashTagAmount.subtract(tagEntry.getValue())
                     } else balanceCash[currency.getKey()][tagEntry.getKey()] = new BigDecimal(tagEntry.getValue()).negate()
                 }

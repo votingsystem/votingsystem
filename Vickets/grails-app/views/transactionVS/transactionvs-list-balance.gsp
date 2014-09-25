@@ -8,11 +8,11 @@
         <g:include view="/include/styles.gsp"/>
         <style>
         .transactionvsRow { cursor: pointer;}
-        .dateCreated {font-size: 0.8em; color:#888; width: 100px;}
+        .dateCreated {font-size: 0.8em; color:#888; width: 100px; margin: 0 10px 0 0;}
         .subjectColumn {
-            width:220px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px;
+            width:260px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.9em;
         }
-        .amountColumn {width:120px;text-align: right; }
+        .amountColumn {width:140px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
         </style>
         <div layout vertical>
@@ -28,21 +28,25 @@
                         <div class="subjectColumn">{{transaction.subject}}</div>
                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                         <div layout horizontal center center-justified class="tagColumn">
-                            <div layout vertical center center-justified>{{transaction.tags[0].name}}</div>
-                            <div style="margin:0 0 0 5px;display:{{ isTimeLimited(transaction) ? 'block':'none'}}">
-                                <core-tooltip label="<g:message code="timeLimitedAdviceMsg"/>" position="top">
-                                    <i class="fa fa-clock-o"></i>
-                                </core-tooltip>
+                            <div flex horizontal layout center center-justified>{{transaction.tags[0].name}}</div>
+                            <div style="margin:0 0 0 5px; width: 10px;">
+                                <div style="display:{{ isTimeLimited(transaction) ? 'block':'none'}}">
+                                    <core-tooltip large label="<g:message code="timeLimitedAdviceMsg"/>" position="top">
+                                        <i class="fa fa-clock-o"></i>
+                                    </core-tooltip>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </template>
 
-                <div layout horizontal style="padding: 0 100px 0 0;">
-                    <div flex class="subjectColumn" style="text-align: right;font-weight: bold;">
+                <div layout horizontal>
+                    <div class="dateCreated" style=""></div>
+                    <div class="subjectColumn" style="text-align: right;font-weight: bold;">
                         <g:message code="totalLbl"/>:
                     </div>
                     <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionTotal}}</div>
+                    <div class="tagColumn" style=""></div>
                 </div>
             </div>
         </div>
@@ -62,7 +66,7 @@
                 return DateUtils.trimYear(dateStr)
             },
             isTimeLimited: function(tranctionvs) {
-                return true
+                return (tranctionvs.validTo != null)
             },
             viewTransaction: function(e) {
                 console.log(this.tagName + " - viewTransaction")

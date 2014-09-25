@@ -5,7 +5,7 @@
     <meta name="layout" content="simplePage" />
 
 
-    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-highcharts', file: 'votingsystem-highcharts.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/votingsystem-highcharts', file: 'demo.html')}">
 
 
 </head>

@@ -82,9 +82,9 @@
                 </div>
             </div>
         </template>
-        <votingsystem-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>"
-                             style="">
+        <votingsystem-dialog id="xDialog" style="top: 30px; left:100px;" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="userLbl"/>">
             <uservs-data id="uservsData"></uservs-data>
+        </votingsystem-dialog>
     </template>
     <script>
         Polymer('message-smime', {

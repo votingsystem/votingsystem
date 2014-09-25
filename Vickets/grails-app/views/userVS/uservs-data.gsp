@@ -24,7 +24,7 @@
             -moz-transform: rotate(20deg);
         }
     </style>
-    <core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" response="{{userVS}}" handleAs="json"
+    <core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" response="{{uservs}}" handleAs="json"
                method="get" contentType="json"></core-ajax>
 
     <template if="{{uservs.name}}">
@@ -129,9 +129,6 @@
             this.isClientToolConnected = true
             console.log(this.tagName + " - ready - menuType: " + this.menuType + " - isClientToolConnected: " + isClientToolConnected)
         },
-        uservsChanged:function() {
-            console.log(this.tagName + " - uservsChanged - uservs: " + JSON.stringify(this.uservs))
-        },
         setType:function() {
             console.log(this.tagName + " - setType")
             if('BANKVS' == this.uservs.type) this.uservsType = "<g:message code="bankVSLbl"/>"
@@ -144,7 +141,7 @@
             console.log(this.tagName + " - makeDeposit")
         },
         showByIBAN:function(IBAN) {
-            var serviceURL =  "${createLink( controller:'userVS', action:"index")}?IBAN=" + IBAN
+            var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + IBAN
             if(this.$.ajax.url != serviceURL) {
                 this.$.ajax.url = serviceURL
             }
