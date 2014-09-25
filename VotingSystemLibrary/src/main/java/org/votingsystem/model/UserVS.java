@@ -151,12 +151,6 @@ public class UserVS implements Serializable {
         return name;
     }
 
-    public String getDefaultName() {
-        if(name != null) return name;
-        else if(firstName == null) return lastName;
-        else return firstName + " " + lastName;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -214,8 +208,6 @@ public class UserVS implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
-	public void beforeInsert(){ if(nif != null) this.nif = nif.toUpperCase();}
 
 	public CertificateVS getCertificateCA() {
 		return certificateCA;
@@ -426,6 +418,15 @@ public class UserVS implements Serializable {
             userVS.setType(type);
         }
         return userVS;
+    }
+
+    public void beforeInsert(){
+        if(nif != null) {
+            this.nif = nif.toUpperCase();
+        }
+        if(name == null) {
+            this.name = firstName == null? "":firstName + lastName == null? "":lastName;
+        }
     }
 
 }

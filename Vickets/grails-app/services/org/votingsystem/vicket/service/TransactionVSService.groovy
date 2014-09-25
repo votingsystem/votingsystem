@@ -96,7 +96,7 @@ class TransactionVSService {
     public void updateBalances(TransactionVS transactionVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(transactionVS.state == TransactionVS.State.OK) {
-            if(transactionVS.type == TransactionVS.Type.INIT_PERIOD) {
+            if(transactionVS.type == TransactionVS.Type.VICKET_INIT_PERIOD) {
 
             } else {
                 if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
@@ -207,71 +207,86 @@ class TransactionVSService {
         }
         def transactionToList = []
         Map<String, Map> balancesMap = [:]
-        Map<String, Map> timeLimitedBalanceMap = [:]
         for(TransactionVS transaction : transactionList) {
             addTransactionVSToBalance(balancesMap, transaction)
-            if(transaction.validTo) addTransactionVSToBalance(timeLimitedBalanceMap, transaction)
             transactionToList.add(getTransactionMap(transaction))
         }
-        return [transactionToList:transactionToList, balancesTo:balancesMap, balancesToTimeLimited:timeLimitedBalanceMap]
+        return [transactionToList:transactionToList, balancesTo:balancesMap]
     }
 
 
     private void addTransactionVSToBalance(Map<String, Map> balancesMap, TransactionVS transactionVS) {
         if(balancesMap[transactionVS.currencyCode]) {
-            Map<String, BigDecimal> currencyMap = balancesMap[transactionVS.currencyCode]
+            Map<String, Map> currencyMap = balancesMap[transactionVS.currencyCode]
             if(currencyMap[transactionVS.tag.name]) {
-                currencyMap[transactionVS.tag.name] = currencyMap[transactionVS.tag.name].add(transactionVS.amount).setScale(2, BigDecimal.ROUND_DOWN)
-            } else currencyMap[(transactionVS.tag.name)] = transactionVS.amount.setScale(2, BigDecimal.ROUND_DOWN)
+                if(transactionVS.validTo){
+                    currencyMap[transactionVS.tag.name].total = currencyMap[transactionVS.tag.name].total.add(
+                            transactionVS.amount).setScale(2, BigDecimal.ROUND_DOWN)
+                    currencyMap[transactionVS.tag.name].timeLimited = currencyMap[transactionVS.tag.name].timeLimited.add(
+                            transactionVS.amount).setScale(2, BigDecimal.ROUND_DOWN)
+                } else {
+                    currencyMap[transactionVS.tag.name].total = currencyMap[transactionVS.tag.name].total.add(
+                            transactionVS.amount).setScale(2, BigDecimal.ROUND_DOWN)
+                }
+            } else {
+                Map tagDataMap
+                if(transactionVS.validTo){
+                    tagDataMap = [total:transactionVS.amount, timeLimited:transactionVS.amount]
+                } else tagDataMap = [total:transactionVS.amount, timeLimited:BigDecimal.ZERO]
+                currencyMap[(transactionVS.tag.name)] = tagDataMap
+            }
         } else {
-            Map<String, BigDecimal> currencyMap = [(transactionVS.tag.name):transactionVS.amount]
-            balancesMap[(transactionVS.currencyCode)] = currencyMap
+            Map tagDataMap
+            if(transactionVS.validTo){
+                tagDataMap = [(transactionVS.tag.name):[total:transactionVS.amount, timeLimited:transactionVS.amount]]
+            } else tagDataMap = [(transactionVS.tag.name):[total:transactionVS.amount, timeLimited:BigDecimal.ZERO]]
+            balancesMap[(transactionVS.currencyCode)] = tagDataMap
         }
     }
 
-    public Map<String, BigDecimal> balanceResult(Map<String, BigDecimal> balancesTo, Map<String, BigDecimal> balancesFrom) {
-        Map<String, Map> balanceResult = JSONSerializer.toJSON(balancesTo);
+    public Map<String, BigDecimal> balanceCash(Map<String, BigDecimal> balancesTo, Map<String, BigDecimal> balancesFrom) {
+        Map<String, Map> balanceCash = JSONSerializer.toJSON(balancesTo);
         Set<Map.Entry<String, Map>> mapEntries = balancesFrom.entrySet()
         mapEntries.each { currency ->
             if(balancesTo [currency.getKey()]) {
-                if(!balanceResult[currency.getKey()]) balanceResult[currency.getKey()] = [:]
+                if(!balanceCash[currency.getKey()]) balanceCash[currency.getKey()] = [:]
                 Set<Map.Entry<String, BigDecimal>> tagEntriesFrom = currency.getValue().entrySet()
                 tagEntriesFrom.each { tagEntry ->
                     if(balancesTo[currency.getKey()][tagEntry.getKey()]) {
-                        if(!balanceResult[currency.getKey()][tagEntry.getKey()]) {
-                            balanceResult[currency.getKey()][tagEntry.getKey()] = new BigDecimal(
-                                    balancesTo[currency.getKey()][tagEntry.getKey()])
+                        if(!balanceCash[currency.getKey()][tagEntry.getKey()]) {
+                            balanceCash[currency.getKey()][tagEntry.getKey()] = new BigDecimal(
+                                    balancesTo[currency.getKey()][tagEntry.getKey()].total)
                         }
-                        BigDecimal balanceResultTagAmount = balanceResult[currency.getKey()][tagEntry.getKey()]
-                        balanceResult[currency.getKey()][tagEntry.getKey()] = balanceResultTagAmount.subtract(tagEntry.getValue())
-                    } else balanceResult[currency.getKey()][tagEntry.getKey()] = new BigDecimal(tagEntry.getValue()).negate()
+                        BigDecimal balanceCashTagAmount = balanceCash[currency.getKey()][tagEntry.getKey()].total
+                        balanceCash[currency.getKey()][tagEntry.getKey()] = balanceCashTagAmount.subtract(tagEntry.getValue())
+                    } else balanceCash[currency.getKey()][tagEntry.getKey()] = new BigDecimal(tagEntry.getValue()).negate()
                 }
             } else {
-                balanceResult[(currency.getKey())] = [:]
-                balanceResult[(currency.getKey())].putAll(currency.getValue())
-                Set<Map.Entry<String, BigDecimal>> tagEntries = balanceResult[(currency.getKey())].entrySet()
+                balanceCash[(currency.getKey())] = [:]
+                balanceCash[(currency.getKey())].putAll(currency.getValue())
+                Set<Map.Entry<String, BigDecimal>> tagEntries = balanceCash[(currency.getKey())].entrySet()
                 tagEntries.each { tagEntry ->
                     tagEntry.setValue(tagEntry.getValue().negate())
                 }
             }
         }
-        return balanceResult
+        return balanceCash
     }
 
     @Transactional
     public Map getTransactionMap(TransactionVS transaction, Locale locale) {
         Map transactionMap = [:]
         if(transaction.fromUserVS) {
-            transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.getDefaultName(),
+            transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.name,
                 type:transaction.fromUserVS.type.toString(), id:transaction.fromUserVS.id]
             if(transaction.fromUserIBAN) {
                 transactionMap.fromUserVS.sender = [fromUserIBAN: transaction.fromUserIBAN, fromUser:transaction.fromUser]
             }
         }
         if(transaction.toUserVS) {
-            String toUserVSName = "${transaction.toUserVS.getDefaultName()}"
+            String toUserVSName = "${transaction.toUserVS.name}"
             transactionMap.toUserVS = [nif:transaction.toUserVS.nif, name:toUserVSName, id:transaction.toUserVS.id,
-                                       type:transaction.toUserVS.type.toString()]
+                      IBAN:transaction.toUserVS.IBAN, type:transaction.toUserVS.type.toString()]
         }
         transactionMap.dateCreated = transaction.dateCreated
         if(transaction.validTo) transactionMap.validTo = transaction.validTo

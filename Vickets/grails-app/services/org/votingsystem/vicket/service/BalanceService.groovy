@@ -83,16 +83,27 @@ class BalanceService {
             weekReportFiles = filesService.getWeekReportFiles(timePeriod, userSubPath)
             //[baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json"), systemReceipt:receiptFile]
             log.debug("$methodName - Making data for UserVS '$userVS.nif' - dir: '$weekReportFiles.baseDir'")
-            Map<String, Map> currencyMap = balanceMap.balanceResult
+            Map<String, Map> currencyMap = balanceMap.balanceCash
             Set<Map.Entry<String, Map>> currencyEntries = currencyMap.entrySet()
             currencyEntries.each { currency ->
                 Map<String, BigDecimal> tagVSMap = currency.getValue()
-                Set<Map.Entry<String, BigDecimal>> tagVSEntries = tagVSMap.entrySet()
-                tagVSEntries.each {
+                for(Map.Entry<String, BigDecimal> tagVSEntry: tagVSMap.entrySet()) {
+                    VicketTagVS currentTagVS = getTag(tagVSEntry.key)
+                    List<TransactionVS> transactionList = TransactionVS.createCriteria().list(offset: 0,) {
+                        ge("dateCreated", timePeriod.getDateFrom())
+                        eq("type", TransactionVS.Type.VICKET_INIT_PERIOD)
+                        eq("state", TransactionVS.State.OK)
+                        eq("tag", currentTagVS)
+                        eq("toUserVS", userVS)
+                    }
+                    if(!transactionList.isEmpty()) throw new ExceptionVS("REPEATED VICKET_INIT_PERIOD TransactionVS for " +
+                            "UserVS: '${userVS.id}' - tag: '${tagVSEntry.key}' - timePeriod: '${timePeriod}'")
+
                     String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg',
-                            [it.getKey()].toArray(), systemService.getDefaultLocale())
-                    Map transactionData = [operation:TypeVS.VICKET_INIT_PERIOD , amount:it.getValue(), tag:it.getKey(), toUserVS: userVS.name,
-                               toUserNIF:userVS.nif, toUserId:userVS.id, toUserIBAN:userVS.IBAN, UUID:UUID.randomUUID()]
+                            [tagVSEntry.getKey()].toArray(), systemService.getDefaultLocale())
+                    Map transactionData = [operation:TypeVS.VICKET_INIT_PERIOD , amount:tagVSEntry.getValue(),
+                               tag:tagVSEntry.getKey(), toUserVS: userVS.name, toUserNIF:userVS.nif, toUserId:userVS.id,
+                               toUserIBAN:[userVS.IBAN], UUID:UUID.randomUUID()]
                     ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
                             userVS.getNif(), new JSONObject(transactionData).toString(), "${transactionMsgSubject} - ${signedMessageSubject}")
 
@@ -105,14 +116,14 @@ class BalanceService {
                             base64ContentDigest:responseVS.getSmimeMessage().getContentDigestStr())
                     messageSMIME.save()
 
-                    TransactionVS transactionParent = new TransactionVS(amount: it.getValue(), fromUserVS:userVS,
+                    TransactionVS transactionParent = new TransactionVS(amount: tagVSEntry.getValue(), fromUserVS:userVS,
                             fromUserIBAN: userVS.IBAN, toUserIBAN: userVS.IBAN, messageSMIME:messageSMIME,
-                            toUserVS: userVS, state:TransactionVS.State.OK, transactionMsgSubject:transactionMsgSubject,
-                            type:TransactionVS.Type.INIT_PERIOD, currencyCode: currency.getKey(), tag:getTag(it.getKey())).save()
+                            toUserVS: userVS, state:TransactionVS.State.OK, subject: signedMessageSubject,
+                            type:TransactionVS.Type.VICKET_INIT_PERIOD, currencyCode: currency.getKey(), tag:getTag(it.getKey())).save()
                     TransactionVS transactionTriggered = TransactionVS.generateTriggeredTransaction(
-                            transactionParent, it.getValue(), userVS, userVS.IBAN).save()
+                            transactionParent, tagVSEntry.getValue(), userVS, userVS.IBAN).save()
 
-                    File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${it.getKey()}.p7s")
+                    File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${tagVSEntry.getKey()}.p7s")
                     responseVS.getSmimeMessage().writeTo(new FileOutputStream(tagReceiptFile))
                 }
             }
@@ -242,7 +253,7 @@ class BalanceService {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-            //not{ inList("type", [TransactionVS.Type.INIT_PERIOD])}
+            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD])}
         }
         def transactionFromList = []
         Map<String, Map> balancesMap = [:]
@@ -264,7 +275,7 @@ class BalanceService {
         transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             isNotNull('transactionParent')
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-            //not{ inList("type", [TransactionVS.Type.INIT_PERIOD]) }
+            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD]) }
         }
 
 

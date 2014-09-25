@@ -49,7 +49,7 @@
 
     function setMessageVSList(messageVSList) {
         for(var i = 0; i < messageVSList.length ; i++) {
-            //fromUser:[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.getDefaultName()]
+            //fromUser:[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.name]
             //messageVSList.add([fromUser: fromUser, dateCreated:messageVS.dateCreated,
             //encryptedDataList:messageVSJSON.encryptedDataList]
             var messageVS = messageVSList[i]

@@ -2,9 +2,10 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-data']"/>">
 
-<polymer-element name="transactionvs-db" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -17,10 +18,26 @@
         .timeStampMsg {
             color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;
         }
+        .IBANLink{
+            text-decoration: underline; color: #0000ee; cursor: pointer;
+        }
         </style>
         <div layout vertical style="margin: 0px auto; max-width:800px;">
+
             <div class="pageHeader"  layout horizontal center center-justified
-                 style="margin:0 0 10px 0;font-size: 1.2em;">{{caption}}</div>
+                 style="margin:0 0 10px 0;font-size: 1.2em;">{{caption}}
+            </div>
+            <template if="{{transactionvs.tags.length > 0}}">
+                <core-tooltip label="<g:message code="tagLbl"/>" position="top">
+                    <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
+                        <div style="margin:0 10px 0 0; color: #888;"><i class="fa fa-tag"></i></div>
+                        <template repeat="{{tag in transactionvs.tags}}">
+                            <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
+                        </template>
+                    </div>
+                </core-tooltip>
+            </template>
+
             <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
                 <b><g:message code="timeStampDateLbl"/>: </b>{{timeStampDate}}
             </div>
@@ -33,37 +50,36 @@
                 </div>
             </div>
 
+
+
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
             <div style=""><b><g:message code="subjectLbl"/>: </b>{{transactionvs.subject}}</div>
+
             <div style=""><b><g:message code="amountLbl"/>: </b>{{transactionvs.amount}} {{transactionvs.currency}}</div>
-            <div style=""><b><g:message code="validToLbl"/>: </b>{{transactionvs.validTo}}</div>
+
+            <div horizontal layout>
+                <div style=""><b><g:message code="dateLbl"/>: </b>{{transactionvs.dateCreated}}</div>
+                <template if="{{transactionvs.validTo}}">
+                    <div style="margin: 0 0 0 15px;"><b><g:message code="validToLbl"/>: </b>{{transactionvs.validTo}}</div>
+                </template>
+            </div>
+
 
             <div style="margin-left: 20px;">
                 <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
-                    <g:message code="pagerLbl"/></div>
+                    <g:message code="senderLbl"/></div>
                 <div id="fromUserDiv">
-                    <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.fromUser}}</div>
-                    <div style=""><b><g:message code="IBANLbl"/>: </b>{{transactionvs.fromUserIBAN}}</div>
+                    <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
+                    <div style=""><b><g:message code="IBANLbl"/>: </b>{{transactionvs | getFromUserIBAN}}</div>
                 </div>
             </div>
             <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible?'block':'none'}}">
                 <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;">{{receptorLbl}}</div>
-                <div layout horizontal>
-                    <div><b><g:message code="IBANLbl"/>: </b></div>
-                    <div layout vertical>
-                        <template repeat="{{IBAN in transactionvs.toUserIBAN}}">
-                            <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
-                        </template>
-                    </div>
+                <div>
+                    <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.toUserVS.name}}</div>
+                    <div on-click="{{showToUserIBAN}}" class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs.toUserVS.IBAN}}</div>
                 </div>
             </div >
-            <template if="{{transactionvs.tags.length > 0}}">
-                <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
-                    <template repeat="{{tag in transactionvs.tags}}">
-                        <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
-                    </template>
-                </div>
-            </template>
         </div>
         <template if="{{isClientToolConnected}}">
             <div layout horizontal style="margin:0px 20px 0px 0px;">
@@ -80,7 +96,7 @@
         </votingsystem-dialog>
     </template>
     <script>
-        Polymer('transactionvs-db', {
+        Polymer('transactionvs-data', {
             publish: {
                 transactionvs: {value: {}}
             },
@@ -100,14 +116,30 @@
                 console.log(this.tagName + " - attached")
                 this.fire('attached', null);
             },
+            getFromUserName: function (transactionvs) {
+                var result
+                if(transactionvs.fromUserVS) {
+                    if(transactionvs.fromUserVS.sender.fromUser != null) result = transactionvs.fromUserVS.sender.fromUser
+                    else result = transactionvs.fromUserVS.name
+                }
+                return result
+            },
+            getFromUserIBAN: function (transactionvs) {
+                var result
+                if(transactionvs.fromUserVS) {
+                    if(transactionvs.fromUserVS.sender.IBAN != null) result = transactionvs.fromUserVS.sender.IBAN
+                    else result = transactionvs.fromUserVS.IBAN
+                }
+                return result
+            },
             transactionvsChanged:function() {
+                this.$.fromUserDiv.classList.remove("pageHeader");
                 this.messageToUser = null
                 this.isReceptorVisible = true
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
                     this.receptorLbl = '<g:message code="receptorsLbl"/>'
                 } else this.receptorLbl = '<g:message code="receptorLbl"/>'
-
-                console.log(this.tagName + " - transactionvsChanged - transactionvs: " + JSON.stringify(this.transactionvs))
+                //console.log(this.tagName + " - transactionvsChanged - transactionvs: " + JSON.stringify(this.transactionvs))
                 switch (this.transactionvs.type) {
                     case 'VICKET_DEPOSIT_FROM_BANKVS':
                         this.caption = "<g:message code="depositFromBankVSLbl"/>"
@@ -122,11 +154,18 @@
                     case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP':
                         this.caption = "<g:message code="vicketDepositFromGroupToMemberGroup"/>"
                         break;
+                    case 'VICKET_INIT_PERIOD':
+                        this.caption = "<g:message code="vicketInitPeriodLbl"/>"
+                        this.$.fromUserDiv.innerHTML = "<g:message code="systemLbl"/>"
+                        this.$.fromUserDiv.classList.add("pageHeader");
+                        break;
+
                     default:
-                        this.caption = this.transactionvs.operation
+                        this.caption = this.transactionvs.type
 
                 }
             },
+
             showToUserInfo:function(e) {
                 var groupURL = "${createLink(uri:'/groupVS')}/" + e.target.templateInstance.model.transactionvs.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
@@ -146,7 +185,10 @@
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
-                webAppMessage.message = this.smimeMessage
+                if(this.smimeMessage == null) {
+                    webAppMessage.serviceURL = this.transactionvs.messageSMIMEURL
+                    webAppMessage.operation = Operation.OPEN_RECEIPT_FROM_URL
+                } else webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);
                 }.bind(this))

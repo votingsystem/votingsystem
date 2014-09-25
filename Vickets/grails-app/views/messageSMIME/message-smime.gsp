@@ -35,12 +35,19 @@
 
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
             <div style=""><b><g:message code="subjectLbl"/>: </b>{{signedDocument.subject}}</div>
-            <div style=""><b><g:message code="amountLbl"/>: </b>{{signedDocument.amount}} {{signedDocument.currency}}</div>
-            <div style=""><b><g:message code="validToLbl"/>: </b>{{signedDocument.validTo}}</div>
+            <div horizontal layout>
+                <div style=""><b><g:message code="amountLbl"/>: </b>{{signedDocument.amount}} {{signedDocument.currency}}</div>
+                <template if="{{signedDocument.isTimeLimited}}">
+                    <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
+                        ${message(code: 'timeLimitedLbl', null).toUpperCase()}</b>
+                    </div>
+                </template>
+            </div>
+
 
             <div style="margin-left: 20px;">
                 <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
-                    <g:message code="pagerLbl"/></div>
+                    <g:message code="senderLbl"/></div>
                 <div id="fromUserDiv">
                     <div style=""><b><g:message code="nameLbl"/>: </b>{{signedDocument.fromUser}}</div>
                     <div style=""><b><g:message code="IBANLbl"/>: </b>{{signedDocument.fromUserIBAN}}</div>
@@ -122,6 +129,11 @@
                         break;
                     case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP':
                         this.caption = "<g:message code="vicketDepositFromGroupToMemberGroup"/>"
+                        break;
+                    case 'VICKET_INIT_PERIOD':
+                        this.caption = "<g:message code="vicketInitPeriodLbl"/>"
+                        this.$.fromUserDiv.innerHTML = "<g:message code="systemLbl"/>"
+                        this.$.fromUserDiv.classList.add("pageHeader");
                         break;
                     default:
                         this.caption = this.signedDocument.operation

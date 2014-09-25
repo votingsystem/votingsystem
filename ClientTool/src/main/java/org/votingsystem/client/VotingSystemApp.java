@@ -43,7 +43,9 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -67,6 +69,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     private AtomicBoolean wsConnected = new AtomicBoolean(false);
     public static String locale = "es";
     private static VotingSystemApp INSTANCE;
+    private Map<String, String> smimeMessageMap;
 
     static {
         //Without this WebView always send requests with 'en-us,en;q=0.5'
@@ -110,6 +113,19 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             }
         }
     };
+
+
+    public String getSmimeMessage(String smimeMessageURL) {
+        if(smimeMessageMap ==  null) return null;
+        else return smimeMessageMap.get(smimeMessageURL);
+    }
+
+    public void setSmimeMessage(String smimeMessageURL, String smimeMessageStr) {
+        if(smimeMessageMap ==  null) {
+            smimeMessageMap = new HashMap<String, String>();
+        }
+        smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
+    }
 
     @Override public void stop() {
         logger.debug("stop");
@@ -475,7 +491,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 wsConnected.set(true);
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
-                        messageText.setText(WebSocketService.getInstance().getSessionUser().getDefaultName());
+                        messageText.setText(WebSocketService.getInstance().getSessionUser().getName());
                         connectButton.setGraphic(new ImageView(Utils.getImage(VotingSystemApp.this, "connected")));
                         connectButton.setText(ContextVS.getMessage("disConnectLbl"));
                         connectButton.setDisable(false);

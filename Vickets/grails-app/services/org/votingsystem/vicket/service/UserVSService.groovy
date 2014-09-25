@@ -270,8 +270,7 @@ class UserVSService {
         Map transactionsToWithBalancesMap = transactionVSService.getTransactionToListWithBalances(userVS, timePeriod)
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
-        resultMap.balancesToTimeLimited = transactionsToWithBalancesMap.balancesToTimeLimited
-        resultMap.balanceResult = transactionVSService.balanceResult(resultMap.balancesTo, resultMap.balancesFrom)
+        resultMap.balanceCash = transactionVSService.balanceCash(resultMap.balancesTo, resultMap.balancesFrom)
         return resultMap
     }
 }

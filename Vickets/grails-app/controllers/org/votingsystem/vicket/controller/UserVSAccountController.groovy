@@ -37,7 +37,7 @@ class UserVSAccountController {
             userAccountsDB.each { it ->
                 userAccounts.add(userVSAccountService.getUserVSAccountMap(it))
             }
-            resultMap = [name: userVS.getDefaultName(), id:userVS.id, accounts:userAccounts]
+            resultMap = [name: userVS.name, id:userVS.id, accounts:userAccounts]
             render resultMap as JSON
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 message: message(code: 'requestWithErrors'))]

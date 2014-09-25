@@ -76,7 +76,7 @@
             case 'VICKET_CANCELLATION':
                 transactionDescription = "<g:message code="selectVicketCancellationLbl"/>"
                 break;
-            case 'INIT_PERIOD':
+            case 'VICKET_INIT_PERIOD':
                 transactionDescription = "<g:message code="vicketInitPeriodLbl"/>"
                 break;
             case 'FROM_BANKVS':

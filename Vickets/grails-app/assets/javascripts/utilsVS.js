@@ -5,6 +5,7 @@ var Operation = {
     LISTEN_TRANSACTIONS : "LISTEN_TRANSACTIONS",
     SAVE_RECEIPT: "SAVE_RECEIPT",
     OPEN_RECEIPT: "OPEN_RECEIPT",
+    OPEN_RECEIPT_FROM_URL: "OPEN_RECEIPT_FROM_URL",
     VICKET_GROUP_NEW : "VICKET_GROUP_NEW",
     VICKET_GROUP_EDIT: "VICKET_GROUP_EDIT",
     VICKET_GROUP_CANCEL: "VICKET_GROUP_CANCEL",
@@ -44,6 +45,13 @@ DateUtils.parse = function (dateStr) {
         (+dateArray[6])
     );
     return dateObject
+}
+
+//removes year from date with format -> 'dd MMM yyyy HH:mm'
+DateUtils.trimYear = function (dateStr) {
+    var reggie = /(\d{2}) (\w{3}) (\d{4}) (\d{2}):(\d{2})/;
+    var dateArray = reggie.exec(dateStr);
+    return dateArray[1] + " " + dateArray[2] + " " + dateArray[4] + ":" + dateArray[5]
 }
 
 //parse dates with format "dd/mm/aa"

@@ -21,8 +21,8 @@ function calculateBalanceResultMap(balanceToMapParam, balanceFromMapParam) {
 
         })
     }
-    /*console.log("calculateBalanceResultMap - balanceResult: " +JSON.stringify(balanceResult))
-    console.log("calculateBalanceResultMap - balanceFromMapParam: " +JSON.stringify(balanceFromMapParam))
+    /*console.log("calculateBalanceResultMap - balanceResult: " +JSONbalanceCashlanceResult))
+    consbalanceCashulateBalanceResultMap - balanceFromMapParam: " +JSON.stringify(balanceFromMapParam))
     console.log("calculateBalanceResultMap - balanceToMapParam: " +JSON.stringify(balanceToMapParam))*/
 
     return balanceResult
@@ -38,8 +38,17 @@ function enterTagsMapData(allTagsMap, tagBalanceMapParam) {
     return allTagsMap
 }
 
-//we know the order serie -> incomes, incomes time limited, expenses, available
-function calculateUserBalanceSeries(balanceToMap, balanceFromMap, balanceResult, balancesToTimeLimited) {
+function getSubBalanceFromMap(detailedBalanceMap, subBalanceParam) {
+    if(detailedBalanceMap == null) return null
+    var result = {}
+    Object.keys(detailedBalanceMap).forEach(function(tag) {
+        result[tag] = detailedBalanceMap[tag][subBalanceParam]
+    })
+    return result
+}
+
+//we know the order serie -> incomes, time limited ,expenses, available
+function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanceCash) {
     var allTagsMap = {}
 
     for(var i = 0; i < arguments.length; i++ ) {
@@ -47,10 +56,11 @@ function calculateUserBalanceSeries(balanceToMap, balanceFromMap, balanceResult,
             if(allTagsMap[tag] == null) allTagsMap[tag] = []
         })
     }
-    enterTagsMapData(allTagsMap, balanceToMap)
-    enterTagsMapData(allTagsMap, balancesToTimeLimited)
+
+    enterTagsMapData(allTagsMap, getSubBalanceFromMap(detailedBalanceToMap, 'total'))
+    enterTagsMapData(allTagsMap, getSubBalanceFromMap(detailedBalanceToMap, 'timeLimited'))
     enterTagsMapData(allTagsMap, balanceFromMap)
-    enterTagsMapData(allTagsMap, balanceResult)
+    enterTagsMapData(allTagsMap, balanceCash)
 
     var seriesData = []
     Object.keys(allTagsMap).forEach(function(tag) {
@@ -60,6 +70,7 @@ function calculateUserBalanceSeries(balanceToMap, balanceFromMap, balanceResult,
     console.log(" seriesData: " + JSON.stringify(seriesData))
     return seriesData
 }
+
 
 function addNumbers(num1, num2) {
     return (new Number(num1) + new Number(num2)).toFixed(2)

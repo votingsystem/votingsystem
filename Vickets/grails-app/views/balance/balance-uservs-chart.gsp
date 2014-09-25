@@ -1,14 +1,12 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-highcharts', file: 'highcharts-import.html')}">
 
-<polymer-element name="uservs-balance-chart" attributes="chart title yAxisTitle xAxisCategories">
+<polymer-element name="balance-uservs-chart" attributes="chart title yAxisTitle xAxisCategories">
     <template>
-        <style>
-
-        </style>
-        <div id="container"></div>
+        <style></style>
+        <div id="container" style="padding: 10px;"></div>
     </template>
     <script>
-        Polymer('uservs-balance-chart', {
+        Polymer('balance-uservs-chart', {
             title:null,
             chart:null,
             yAxisTitle:null,
@@ -48,7 +46,7 @@
             ready: function() {
                 this.options.chart.type = this.chart = this.chart || 'bar'
                 this.options.chart.renderTo = this.$.container
-                this.options.title.text = this.title || 'uservs-balance-chart'
+                this.options.title.text = this.title || 'balance-uservs-chart'
                 this.options.xAxis.categories = this.xAxisCategories
                 this.options.yAxis.title.text = this.yAxisTitle
 

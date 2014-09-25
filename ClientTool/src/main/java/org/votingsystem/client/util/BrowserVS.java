@@ -84,7 +84,9 @@ public class BrowserVS extends Region {
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
                         ResponseVS responseVS = browserHelper.getSignatureService().getValue();
-                        if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                        if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
+                            logger.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
+                        } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
                             sendMessageToBrowserApp(responseVS.getMessageJSON(),
                                     browserHelper.getSignatureService().getOperationVS().getCallerCallback());
                         } else sendMessageToBrowserApp(responseVS.getStatusCode(), responseVS.getMessage(),
@@ -400,6 +402,9 @@ public class BrowserVS extends Region {
                         break;
                     case OPEN_RECEIPT:
                         openReceipt(operationVS);
+                        break;
+                    case OPEN_RECEIPT_FROM_URL:
+                        browserHelper.processOperationVS(null, operationVS);
                         break;
                     case SAVE_RECEIPT:
                         saveReceipt(operationVS);

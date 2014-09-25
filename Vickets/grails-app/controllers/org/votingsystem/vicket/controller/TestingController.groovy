@@ -37,16 +37,15 @@ class TestingController {
 
 
     def index() {
-        BigDecimal testBD = new BigDecimal(1).setScale(2, BigDecimal.ROUND_DOWN)
-        render testBD;
-        return false
+        Map testMap = [date:DateUtils.getDateFromShortString("2014/05/01")]
+        render testMap as JSON;
     }
 
     def balance() {
         Map balanceTo = [EUR:[HIDROGENO:new BigDecimal(880.5), NITROGENO:new BigDecimal(100)], DOLLAR:[WILDTAG:new BigDecimal(1454)]]
         Map balanceFrom = [EUR:[HIDROGENO:new BigDecimal(1080.5), OXIGENO:new BigDecimal(350)], DOLLAR:[WILDTAG:new BigDecimal(6000)],
                            YEN:[WILDTAG1:new BigDecimal(8000)]]
-        Map result = transactionVSService.balanceResult(balanceTo, balanceFrom)
+        Map result = transactionVSService.balanceCash(balanceTo, balanceFrom)
         Map allResults = [balanceTo:balanceTo, balanceFrom:balanceFrom, result:result]
         render allResults as JSON
     }
@@ -55,7 +54,7 @@ class TestingController {
         balanceService.initWeekPeriod()
         /*List transactionList
         TransactionVS.withTransaction {
-            transactionList = TransactionVS.findAllWhere(type:TransactionVS.Type.INIT_PERIOD)
+            transactionList = TransactionVS.findAllWhere(type:TransactionVS.Type.VICKET_INIT_PERIOD)
             for(TransactionVS transaction : transactionList) {
                 transaction.delete()
             }

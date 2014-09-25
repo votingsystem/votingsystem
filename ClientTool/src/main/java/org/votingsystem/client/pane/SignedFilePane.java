@@ -109,7 +109,7 @@ public class SignedFilePane extends GridPane {
             try {
                 JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(
                         signedFile.getSMIMEMessageWraper().getSignedContent());
-                contentStr = Formatter.format(contentJSON.toString(5));
+                contentStr = Formatter.format(contentJSON);
             }  catch(Exception ex) {
                 contentStr = signedFile.getSMIMEMessageWraper().getSignedContent();
             }

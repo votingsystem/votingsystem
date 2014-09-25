@@ -1,6 +1,7 @@
 package org.votingsystem.client.util;
 
 import com.itextpdf.text.pdf.PdfReader;
+import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import net.sf.json.JSONObject;
@@ -9,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.*;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.*;
@@ -117,6 +119,8 @@ public class SignatureService extends Service<ResponseVS> {
                         case MESSAGEVS_DECRYPT:
                             responseVS = decryptMessageVS(operationVS);
                             break;
+                        case OPEN_RECEIPT_FROM_URL:
+                            responseVS = openReceiptFromURL(operationVS);
                         default:
                             responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
                     }
@@ -127,6 +131,30 @@ public class SignatureService extends Service<ResponseVS> {
                 logger.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
+        }
+
+        private ResponseVS openReceiptFromURL(final OperationVS operationVS) throws Exception {
+            ResponseVS responseVS = null;
+            if(VotingSystemApp.getInstance().getSmimeMessage(operationVS.getServiceURL()) != null) {
+                responseVS = new ResponseVS(ResponseVS.SC_OK,
+                        VotingSystemApp.getInstance().getSmimeMessage(operationVS.getServiceURL()));
+            } else {
+                responseVS = HttpHelper.getInstance().getData(operationVS.getServiceURL(), ContentTypeVS.TEXT);
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    VotingSystemApp.getInstance().setSmimeMessage(operationVS.getServiceURL(),
+                            responseVS.getMessage());
+                }
+            }
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                responseVS.setStatusCode(ResponseVS.SC_INITIALIZED);
+                operationVS.setMessage(responseVS.getMessage());
+                PlatformImpl.runLater(new Runnable() {
+                    @Override public void run() {
+                        SignedDocumentsBrowser.showDialog(operationVS.getMessage(), operationVS.getDocument());
+                    }
+                });
+            }
+            return responseVS;
         }
 
         //we know this is done in a background thread
@@ -326,7 +354,7 @@ public class SignatureService extends Service<ResponseVS> {
                 logger.error("Unable to decrypt from this device");
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR);
             }
-            //[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.getDefaultName()]
+            //[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.name]
             //messageVSList.add([fromUser: fromUser, dateCreated:messageVS.dateCreated,
             //encryptedDataList:messageVSJSON.encryptedDataList]
 

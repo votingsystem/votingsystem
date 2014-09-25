@@ -18,6 +18,8 @@ public class Formatter {
     
     private static Logger logger = Logger.getLogger(Formatter.class);
 
+    private static final int INDENT_FACTOR = 7;
+
     private static String accessControlLbl = ContextVS.getMessage("accessControlLbl");
     private static String nameLabel = ContextVS.getMessage("nameLabel");
     private static String subjectLabel = ContextVS.getMessage("subjectLabel");
@@ -39,10 +41,9 @@ public class Formatter {
                         certificate.getNotAfter()));
     }
 
-    public static String format(String textToFormat) {
+    public static String format(JSONObject jsonObject) {
         String result = null;
         try {
-            JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(textToFormat);
             OperationVS operation = OperationVS.populate(jsonObject);
             switch(operation.getType()) {
                 case SEND_SMIME_VOTE:
@@ -52,12 +53,12 @@ public class Formatter {
                     result = formatVicketDepositFromGroupToAllMembers(jsonObject);
                     break;
                 default:
-                    logger.debug("Formatter nor found for "  + operation.getType());
-                    result = textToFormat;
+                    logger.debug("Formatter not found for "  + operation.getType());
+                    result = jsonObject.toString(INDENT_FACTOR);
             }
 
         } catch(Exception ex) {
-            logger.error("textToFormat: " + textToFormat + " - " + ex.getMessage(), ex);
+            logger.error("format - jsonObject: " + jsonObject + " - " + ex.getMessage(), ex);
         }
         return result;
     }

@@ -172,6 +172,10 @@ public class BrowserVSPane extends StackPane {
         return password;
     }
 
+    public void processOperationVS(String password, OperationVS operationVS) {
+        signatureService.processOperationVS(password, operationVS);
+    }
+
     private void checkPasswords() {
         logger.debug("checkPasswords");
         PlatformImpl.runLater(new Runnable(){
