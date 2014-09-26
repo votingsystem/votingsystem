@@ -47,9 +47,9 @@
            class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:275px;">
             <g:message code="initUserBaseDataButton"/>
         </a>
-        <a id="makeDepositButton" href="${createLink(controller: 'vicket', action:'deposit', absolute:true)}"
+        <a id="makeTransactionVSButton" href="${createLink(controller: 'vicket', action:'transactionvs', absolute:true)}"
            class="btn btn-default btn-lg" role="button" style="margin:15px 20px 0px 0px; width:275px;">
-            <g:message code="makeDepositButton"/>
+            <g:message code="makeTransactionVSButton"/>
         </a>
     </div>
 </body>

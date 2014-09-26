@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContentTypeVS;
@@ -54,8 +55,6 @@ public class VicketFragment extends Fragment {
 
     private AppContextVS contextVS;
     private Vicket selectedVicket;
-    private View progressContainer;
-    private FrameLayout mainLayout;
     private TextView vicketSubject;
     private TextView vicket_content;
     private TextView vicket_cancellation_date;
@@ -83,8 +82,8 @@ public class VicketFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchVicketCancellation();
             else {
-                showProgress(false, true);
-                showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                ((ActivityVS)getActivity()).showProgress(false, true);
+                ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
             }
         }
@@ -98,7 +97,7 @@ public class VicketFragment extends Fragment {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_CANCEL);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.ITEM_ID_KEY, cursorPosition);
-            showProgress(true, true);
+            ((ActivityVS)getActivity()).showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -121,9 +120,6 @@ public class VicketFragment extends Fragment {
         vicket_content.setMovementMethod(LinkMovementMethod.getInstance());
         vicketSubject = (TextView)rootView.findViewById(R.id.vicket_subject);
         cancel_button = (Button)rootView.findViewById(R.id.cancel_button);
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         if(savedInstanceState != null) {
             selectedVicket = (Vicket) savedInstanceState.getSerializable(ContextVS.RECEIPT_KEY);
@@ -261,61 +257,11 @@ public class VicketFragment extends Fragment {
         Log.d(TAG + ".setActionBar() ", "");
     }
 
-
-    private void showMessage(Integer statusCode,String caption,String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
-    }
-
     public class VicketDownloader extends AsyncTask<String, String, ResponseVS> {
 
         public VicketDownloader() { }
 
-        @Override protected void onPreExecute() {showProgress(true, true); }
+        @Override protected void onPreExecute() {((ActivityVS)getActivity()).showProgress(true, true); }
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String vicketURL = urls[0];
@@ -332,14 +278,14 @@ public class VicketFragment extends Fragment {
                     setActionBar();
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    showMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
+                    ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
                             ex.getMessage());
                 }
             } else {
-                showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                         responseVS.getMessage());
             }
-            showProgress(false, true);
+            ((ActivityVS)getActivity()).showProgress(false, true);
         }
     }
 

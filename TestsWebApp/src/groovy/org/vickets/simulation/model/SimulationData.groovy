@@ -41,7 +41,7 @@ class SimulationData {
     private String backupRequestEmail = null;
     private Long receptorId = null;
     private Long groupId = null;
-    private BigDecimal depositAmount;
+    private BigDecimal transactionvsAmount;
     private String currencyCode;
 
     private UserBaseSimulationData userBaseSimulationData;
@@ -135,8 +135,8 @@ class SimulationData {
         if (!dataJSON.isNull("eventId")) {
             simulationData.setEventId(dataJSON.getLong("eventId"));
         }
-        if (dataJSON.containsKey("depositAmount")) {
-            simulationData.setDepositAmount(new BigDecimal(dataJSON.getLong("depositAmount")));
+        if (dataJSON.containsKey("transactionvsAmount")) {
+            simulationData.setTransactionVSAmount(new BigDecimal(dataJSON.getLong("transactionvsAmount")));
         }
         if (dataJSON.containsKey("currency")) {
             simulationData.setCurrency(dataJSON.getString("currency").toUpperCase());
@@ -347,11 +347,11 @@ class SimulationData {
     }
 
 
-    public BigDecimal getDepositAmount() {
-        return depositAmount;
+    public BigDecimal getTransactionVSAmount() {
+        return transactionvsAmount;
     }
 
-    public void setDepositAmount(BigDecimal depositAmount) {
-        this.depositAmount = depositAmount;
+    public void setTransactionVSAmount(BigDecimal transactionvsAmount) {
+        this.transactionvsAmount = transactionvsAmount;
     }
 }

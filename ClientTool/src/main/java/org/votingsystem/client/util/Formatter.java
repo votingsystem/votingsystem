@@ -50,7 +50,7 @@ public class Formatter {
                     result = formatVote(jsonObject);
                     break;
                 case TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
-                    result = formatVicketDepositFromGroupToAllMembers(jsonObject);
+                    result = formatTransactionVSFromGroupToAllMembers(jsonObject);
                     break;
                 default:
                     logger.debug("Formatter not found for "  + operation.getType());
@@ -74,7 +74,7 @@ public class Formatter {
         return result.toString();
     }
 
-    private static String formatVicketDepositFromGroupToAllMembers(JSONObject jsonObject){
+    private static String formatTransactionVSFromGroupToAllMembers(JSONObject jsonObject){
         StringBuilder result = new StringBuilder("<html>");
         return result.toString();
     }

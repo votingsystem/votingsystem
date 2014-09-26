@@ -23,7 +23,7 @@ class TransactionVS_GroupVSService {
     def signatureVSService
 
     @Transactional
-    private ResponseVS processDeposit(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
+    private ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS messageSigner = messageSMIMEReq.userVS
@@ -66,7 +66,7 @@ class TransactionVS_GroupVSService {
                     metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
         if(operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS) {
-            return processDepositForAllMembers(messageSMIMEReq, messageJSON, accountFromMovements.data, validTo ,
+            return processTransactionVSForAllMembers(messageSMIMEReq, messageJSON, accountFromMovements.data, validTo ,
                     currency, groupVS, tag, locale)
         } else {
             messageJSON.toUserIBAN?.each { it ->
@@ -90,11 +90,11 @@ class TransactionVS_GroupVSService {
             TransactionVS.Type transactionVSType
             if(operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER) {
                 transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_MEMBER
-                msg = messageSource.getMessage('vicketDepositFromGroupToMemberOKMsg',
+                msg = messageSource.getMessage('transactionVSFromGroupToMemberOKMsg',
                         ["${messageJSON.amount} ${currency.getCurrencyCode()}", receptorList.iterator().next().nif].toArray(), locale)
             } else if (operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP) {
                 transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP
-                msg = messageSource.getMessage('vicketDepositFromGroupToMemberGroupOKMsg',
+                msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
                         ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
             }
             TransactionVS transactionParent = new TransactionVS(amount: messageJSON.amount, messageSMIME:messageSMIMEReq,
@@ -125,7 +125,7 @@ class TransactionVS_GroupVSService {
     }
 
     @Transactional
-    private ResponseVS processDepositForAllMembers(MessageSMIME messageSMIMEReq, JSONObject messageJSON,
+    private ResponseVS processTransactionVSForAllMembers(MessageSMIME messageSMIMEReq, JSONObject messageJSON,
             Map<UserVSAccount, BigDecimal> accountFromMovements, Date transactionValidTo,
             Currency currency, GroupVS groupVS, VicketTagVS tag, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -143,7 +143,7 @@ class TransactionVS_GroupVSService {
         BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
 
         TransactionVS.Type transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS
-        msg = messageSource.getMessage('vicketDepositFromGroupToAllMembersGroupOKMsg',
+        msg = messageSource.getMessage('transactionVSFromGroupToAllMembersGroupOKMsg',
                 ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
         TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
                 fromUserVS:groupVS, fromUserIBAN: messageJSON.fromUserIBAN, state:TransactionVS.State.OK,

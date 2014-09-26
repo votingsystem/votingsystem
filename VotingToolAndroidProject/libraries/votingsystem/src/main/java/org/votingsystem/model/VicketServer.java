@@ -17,15 +17,11 @@ public class VicketServer extends ActorVS implements Serializable {
 
 
     public String getTransactionVSServiceURL() {
-        return getServerURL() + "/transactionVS/deposit";
+        return getServerURL() + "/transactionVS";
     }
 
     public String getVicketRequestServiceURL() {
         return getServerURL() + "/vicket/request";
-    }
-
-    public String getVicketDepositServiceURL() {
-        return getServerURL() + "/vicket/deposit";
     }
 
     public String getVicketBatchCancellationServiceURL() {

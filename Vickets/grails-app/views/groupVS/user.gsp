@@ -25,8 +25,8 @@
         <button id="deActivateUserButton" type="button" class="btn btn-default" onclick="document.querySelector('#reasonDialog').toggle();"
                 style="margin:10px 0px 0px 10px; "><g:message code="deActivateUserLbl"/> <i class="fa fa-thumbs-o-down"></i>
         </button>
-        <button id="makeDepositButton" type="button" class="btn btn-default" onclick="makeDeposit();"
-                style="margin:10px 0px 0px 10px; "><g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
+        <button id="makeTransactionVSButton" type="button" class="btn btn-default" onclick="makeTransactionVS();"
+                style="margin:10px 0px 0px 10px; "><g:message code="makeTransactionVSLbl"/> <i class="fa fa-money"></i>
         </button>
         <div id="receipt" style="display:none;">
 
@@ -74,12 +74,12 @@
     </g:if>
     <g:if test="${SubscriptionVS.State.PENDING.toString().equals(subscriptionMap.state)}">
         document.getElementById("messageDiv").innerHTML = "<g:message code="userStatePendingLbl"/>"
-            document.getElementById("makeDepositButton").style.display = 'none'
+            document.getElementById("makeTransactionVSButton").style.display = 'none'
     </g:if>
     <g:if test="${SubscriptionVS.State.CANCELLED.toString().equals(subscriptionMap.state)}">
         document.getElementById("messageDiv").innerHTML = "<g:message code="userStateCancelledLbl"/>"
         document.getElementById("deActivateUserButton").style.display = 'none'
-        document.getElementById("makeDepositButton").style.display = 'none'
+        document.getElementById("makeTransactionVSButton").style.display = 'none'
     </g:if>
 
     function activateUser () {
@@ -100,7 +100,7 @@
                         caption = "<g:message code='activateUserOKLbl'/>"
                         document.querySelector("#messageDiv").innerHTML = "<g:message code="userStateActiveLbl"/>"
                         document.querySelector("#activateUserButton").style.display = 'none'
-                        document.querySelector("#makeDepositButton").style.display = 'block'
+                        document.querySelector("#makeTransactionVSButton").style.display = 'block'
                         document.querySelector("#deActivateUserButton").style.display = 'block'
                     }
                 showMessageVS(appMessageJSON.message, caption)
@@ -108,8 +108,8 @@
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
-    function makeDeposit () {
-        console.log("makeDeposit - TODO -")
+    function makeTransactionVS () {
+        console.log("makeTransactionVS - TODO -")
     }
 
 </asset:script>

@@ -4,7 +4,7 @@
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/element/simulation-listener']"/>">
 
 
-<polymer-element name="deposit-form">
+<polymer-element name="transactionvs-form">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style>
@@ -37,9 +37,9 @@
                     <div id="formDataDiv">
                         <form on-submit="{{submitForm}}">
                             <input type="hidden" autofocus="autofocus" />
-                            <input id="resetvicketDepositSimulationDataForm" type="reset" style="display:none;">
-                            <fieldset id="Deposit">
-                                <legend style="font-size: 1.2em; font-weight: bold;"><g:message code="depositCaption"/></legend>
+                            <input id="resettransactionVSSimulationDataForm" type="reset" style="display:none;">
+                            <fieldset id="TransactionVS">
+                                <legend style="font-size: 1.2em; font-weight: bold;"><g:message code="transactionvsCaption"/></legend>
                                 <div style="margin: 0px 0px 5px 0px;">
                                     <div layout horizontal>
                                         <input type="number" id="receptorId" style="width:180px; margin:0 10px 0 0;" required
@@ -55,12 +55,12 @@
                                     </div>
                                     <div style="margin:10px 0px 0px 0px;">
                                         <div layout horizontal>
-                                            <label style="margin:0px 0px 0px 0px;"><g:message code="depositAmount"/></label>
-                                            <input type="number" id="depositAmount" min="0" value="1" required
-                                                   class="DepositInputNumber form-control"
+                                            <label style="margin:0px 0px 0px 0px;"><g:message code="transactionvsAmount"/></label>
+                                            <input transactionvsumber" id="transactionvsAmount" min="0" value="1" required
+                                                   class="TransactionVSInputNumber form-control"
                                                    style="width:150px;margin:0px 20px 0px 7px;"
-                                                   title="<g:message code="depositAmount"/>"
-                                                   placeholder="<g:message code="depositAmount"/>"/>
+                                                   transactionvs<g:message code="transactionvsAmount"/>"
+                                                   transactionvslder="<g:message code="transactionvsAmount"/>"/>
                                             <select id="currencySelect" style="margin:0px 20px 0px 0px; width:280px;"
                                                     class="form-control" title="<g:message code="currencyLbl"/>">
                                                 <option value="<g:message code="euroLbl"/>"> - <g:message code="euroLbl"/> - </option>
@@ -70,7 +70,7 @@
                                 </div>
                             </fieldset>
                             <button id="submitButton" type="submit" class="btn btn-warning" style="margin:25px 20px 20px 0px; float:right;">
-                                <g:message code="initVicketDepositButton"/>
+                                <g:message code="initTransactionVSButton"/>
                             </button>
                         </form>
                     </div>
@@ -86,7 +86,7 @@
         </core-animated-pages>
     </template>
     <script>
-        Polymer('deposit-form', {
+        Polymer('transactionvs-form', {
             isWithTimer:false,
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -110,9 +110,9 @@
                 var currenSelected = currencyElement.options[currencyElement.selectedIndex].value;
                 //var strUser = currencyElement.options[currencyElement.selectedIndex].text;
 
-                var simulationData = {service:'vicketDepositSimulationService', status:"INIT_SIMULATION",
+                var simulationData = {service:'transactionVSSimulationService', status:"INIT_SIMULATION",
                     receptorId:this.$.receptorId.value,
-                    serverURL:this.$.vicketServerURL.value,  depositAmount: this.$.depositAmount.value,
+                   transactionvsURL:this.transactionvstServerURL.value,  transactionvsAmount: this.$.transactionvsAmount.value,
                     subject:this.$.subject.value, currency:currenSelected}
 
                 console.log(this.tagName + " - simulationData: " + JSON.stringify(simulationData))

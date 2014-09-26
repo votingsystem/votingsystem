@@ -165,12 +165,17 @@ class UrlMappings {
         }
 
 
-        "/transaction/$id"{
-            controller = "transaction"
+        "/transactionVS/$id"{
+            controller = "transactionVS"
             action = "get"
             constraints {
                 id(matches:/\d*/)
             }
+        }
+
+        "/transactionVS"{
+            controller = "transactionVS"
+            action = "post"
         }
 
         "/userVS" {

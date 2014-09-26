@@ -51,10 +51,10 @@
             reset: function() {
                 console.log(this.id + " - reset")
                 this.removeErrorStyle(this.$.formDataDiv)
-                this.isDepositFromGroupToAllMembers = false
+                this.isTransactionVSFromGroupToAllMembers = false
                 this.$.userSearchInput.value = ""
                 this.$.amount.value = ""
-                this.$.depositSubject.value = ""
+                this.$.transactionvsSubject.value = ""
                 this.$.userSearchList.url = ""
                 this.setMessage(200, null)
                 this.$.receptorBox.removeUsers()

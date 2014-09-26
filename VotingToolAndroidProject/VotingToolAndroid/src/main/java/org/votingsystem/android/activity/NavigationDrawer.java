@@ -31,22 +31,18 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.AnimationUtils;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
 import org.votingsystem.android.fragment.VicketGridFragment;
@@ -60,8 +56,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ScreenUtils;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -128,9 +122,10 @@ public class NavigationDrawer extends ActivityVS {
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature(Window.FEATURE_PROGRESS);
+        //requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        //requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.navigation_drawer);
+        //setProgressBarIndeterminateVisibility(true);
         initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -217,8 +212,6 @@ public class NavigationDrawer extends ActivityVS {
         if(savedInstanceState != null) {
             selectedGroupPosition = savedInstanceState.getInt(GROUP_POSITION_KEY);
             selectedChildPosition = savedInstanceState.getInt(CHILD_POSITION_KEY);
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgressDialog(
-                    getString(R.string.connecting_caption), getString(R.string.loading_data_msg));
         }
         selectItem(selectedGroupPosition,selectedChildPosition);
     }

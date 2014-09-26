@@ -4,7 +4,7 @@ class VicketController {
 
     def index() {}
 
-    def deposit() {}
+    def transactionvs() {}
 
     def initUserBaseData() {}
 

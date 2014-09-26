@@ -32,9 +32,9 @@
                          style="margin:0 0 0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
                         <i class="fa fa-thumbs-o-down" style="margin:0 7px 0 3px;"></i> <g:message code="deActivateUserLbl"/>
                     </votingsystem-button>
-                    <votingsystem-button id="makeDepositButton" on-click="{{makeDeposit}}"
+                    <votingsystem-button id="makeTransactionVSButton" on-click="{{makeTransactionVS}}"
                         style="margin:0 0 0 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                        <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
+                        <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeTransactionVSLbl"/>
                     </votingsystem-button>
                 </div>
             </template>
@@ -124,8 +124,8 @@
             initCancellation : function(e) {
                 this.$.reasonDialog.toggle();
             },
-            makeDeposit : function(e) {
-                console.log("makeDeposit - TODO - ")
+            makeTransactionVS : function(e) {
+                console.log("makeTransactionVS - TODO - ")
             },
             ajaxResponse:function() {
                 this.isActive = false

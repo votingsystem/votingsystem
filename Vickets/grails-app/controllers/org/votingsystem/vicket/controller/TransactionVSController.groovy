@@ -171,14 +171,14 @@ class TransactionVSController {
                     type: TypeVS.ERROR, metaInf: metaInfMsg, contentType: ContentTypeVS.MULTIPART_ENCRYPTED,
                     messageBytes: msg.getBytes())]
         } else {
-            List<ResponseVS> depositResponseList = new ArrayList<ResponseVS>()
+            List<ResponseVS> transactionvsResponseList = new ArrayList<ResponseVS>()
             for(ResponseVS response : responseList) {
-                ResponseVS depositResponse = vicketService.processVicketDeposit(
+                ResponseVS transactionvsResponse = vicketService.processTransactionVS(
                         response.data, batchRequest, request.locale)
-                if(ResponseVS.SC_OK == depositResponse.getStatusCode()) {
-                    depositResponseList.add(depositResponse);
+                if(ResponseVS.SC_OK == transactionvsResponse.getStatusCode()) {
+                    transactionvsResponseList.add(transactionvsResponse);
                 } else {
-                    responseVS = depositResponse
+                    responseVS = transactionvsResponse
                     break;
                 }
             }
@@ -187,20 +187,20 @@ class TransactionVSController {
                     String metaInfMsg = MetaInfMsg.getErrorMsg(methodName, TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED.toString())
                     cancelVicketBatchRequest(responseList, batchRequest, TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED,
                             responseVS.data.message, metaInfMsg)
-                    cancelVicketBatchDeposit(depositResponseList, batchRequest,TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED,
+                    cancelVicketBatchTransactionVS(transactionvsResponseList, batchRequest,TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED,
                             responseVS.data.message, metaInfMsg)
                     return [receiverPublicKey:receiverPublic, responseVS:responseVS];
                 } else {
                     String msg = message(code: "vicketBatchErrorMsg") + " ${responseVS.getMessage()}"
                     cancelVicketBatchRequest(responseList, batchRequest, TypeVS.VICKET_BATCH_ERROR, msg)
-                    cancelVicketBatchDeposit(depositResponseList, batchRequest,TypeVS.VICKET_BATCH_ERROR, msg)
+                    cancelVicketBatchTransactionVS(transactionvsResponseList, batchRequest,TypeVS.VICKET_BATCH_ERROR, msg)
                     return [receiverPublicKey:receiverPublic,  responseVS:new ResponseVS(
                             statusCode:responseVS.getStatusCode(), type:TypeVS.VICKET_BATCH_ERROR,
                             contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
                 }
             } else {
                 List<String> vicketReceiptList = new ArrayList<String>()
-                for(ResponseVS response: depositResponseList) {
+                for(ResponseVS response: transactionvsResponseList) {
                     //Map dataMap = [vicketReceipt:messageSMIMEResp, model:model]
                     vicketReceiptList.add(new String(Base64.encode(((MessageSMIME)response.getData().vicketReceipt).content)))
                 }
@@ -212,9 +212,9 @@ class TransactionVSController {
         }
     }
 
-    private void cancelVicketBatchDeposit(List<ResponseVS> responseList, VicketBatchRequest batchRequest, TypeVS typeVS,
+    private void cancelVicketBatchTransactionVS(List<ResponseVS> responseList, VicketBatchRequest batchRequest, TypeVS typeVS,
               String reason, String metaInf) {
-        log.error("cancelVicketBatchDeposit - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
+        log.error("cancelVicketBatchTransactionVS - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
         for(ResponseVS responseVS: responseList) {
             if(responseVS.data instanceof Map) {
                 ((MessageSMIME)responseVS.data.vicketReceipt).type = typeVS
@@ -257,7 +257,7 @@ class TransactionVSController {
      * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
      * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
      */
-    def deposit() {
+    def post() {
         MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
@@ -265,8 +265,8 @@ class TransactionVSController {
         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
         ResponseVS responseVS = null
         if(ContentTypeVS.VICKET == contentTypeVS) {
-            responseVS = vicketService.processVicketDeposit(messageSMIMEReq, null, request.locale)
-        } else responseVS = transactionVSService.processDeposit(messageSMIMEReq, request.locale)
+            responseVS = vicketService.processTransactionVS(messageSMIMEReq, null, request.locale)
+        } else responseVS = transactionVSService.processTransactionVS(messageSMIMEReq, request.locale)
         return [responseVS:responseVS]
     }
 

@@ -45,7 +45,7 @@
 <asset:script>
     var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
     webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
-    webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
+    webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
     webAppMessage.signedContent = {operation:"TEST"}
 
     webAppMessage.setCallback(function () {

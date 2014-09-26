@@ -8,8 +8,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/mainLayout"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:foreground="@drawable/shape_window_dim" >
+        android:layout_height="fill_parent">
 
         <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/scroller"
@@ -68,7 +67,7 @@
                     android:layout_marginTop="15dp"
                     android:layout_height="0.2dp"
                     android:layout_marginBottom="50dp"
-                    android:id="@+id/separator"
+                    android:id="@+id/separator1"
                     android:visibility="visible"
                     android:background="@android:color/darker_gray"/>
             </LinearLayout>

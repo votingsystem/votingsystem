@@ -1,13 +1,11 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
@@ -17,9 +15,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
-import org.votingsystem.model.VoteVS;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,17 +57,16 @@ public class TransactionVSService extends IntentService {
                 VicketServer vicketServer = (VicketServer) responseVS.getData();
                 SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                         contextVS.getUserVS().getNif(), transactionVS.getToUserVS().getIBAN(),
-                        vicketServer.getTransactionVSServiceURL(), signatureContent,
-                        ContentTypeVS.JSON, messageSubject, null, contextVS);
+                        vicketServer.getTransactionVSServiceURL(), new JSONObject(mapToSend).toString(),
+                        ContentTypeVS.JSON, getString(R.string.transactionvs_from_uservs_msg_subject), null, contextVS);
                 responseVS = smimeSignedSender.call();
 
-                webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
             }
         } catch(Exception ex) {
             ex.printStackTrace();
             message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = contextVS.getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
             responseVS.setServiceCaller(serviceCaller);

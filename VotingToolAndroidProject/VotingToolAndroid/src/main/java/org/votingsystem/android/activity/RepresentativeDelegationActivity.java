@@ -54,24 +54,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeDelegationActivity extends ActionBarActivity {
+public class RepresentativeDelegationActivity extends ActivityVS {
 	
 	public static final String TAG = RepresentativeDelegationActivity.class.getSimpleName();
 
     public static final String ANONYMOUS_SELECTED_KEY  = "ANONYMOUS_SELECTED_KEY";
     public static final String PUBLIC_SELECTED_KEY     = "PUBLIC_SELECTED_KEY";
 
-    private View progressContainer;
     private TypeVS operationType;
     private Button acceptButton;
     private CheckBox anonymousCheckBox;
     private CheckBox publicCheckBox;
     private EditText weeks_delegation;
-    private FrameLayout mainLayout;
     private AppContextVS contextVS = null;
     private String broadCastId = null;
     private UserVS representative = null;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private Date anonymousDelegationFromDate;
     private Date anonymousDelegationToDate;
 
@@ -152,9 +149,7 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
         contextVS = (AppContextVS) getApplicationContext();
         representative = (UserVS) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
-        mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
-        mainLayout.getForeground().setAlpha(0);
-        progressContainer = findViewById(R.id.progressContainer);
+        initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
         acceptButton = (Button) findViewById(R.id.accept_button);
         anonymousCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
         publicCheckBox = (CheckBox) findViewById(R.id.public_delegation_checkbox);
@@ -196,58 +191,6 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
                 publicCheckBox.setChecked(true);
             }
             if(selectedCheckBoxId > 0) onCheckboxClicked(selectedCheckBoxId);
-        }
-    }
-
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        showProgress(false, true);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            ((LinearLayout)findViewById(R.id.form_layout)).setVisibility(View.GONE);
-            getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            ((LinearLayout)findViewById(R.id.form_layout)).setVisibility(View.VISIBLE);
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(this,
-                        android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
         }
     }
 
@@ -350,7 +293,6 @@ public class RepresentativeDelegationActivity extends ActionBarActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putBoolean(ANONYMOUS_SELECTED_KEY, anonymousCheckBox.isChecked());
         outState.putBoolean(PUBLIC_SELECTED_KEY, publicCheckBox.isChecked());
         outState.putSerializable(ContextVS.TYPEVS_KEY, operationType);

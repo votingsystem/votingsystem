@@ -35,16 +35,16 @@ public class VicketServer extends ActorVS implements Serializable {
         return Type.VICKETS;
     }
 
-    @Transient public String getDepositURL() {
-        return getServerURL() + "/transaction/deposit";
+    @Transient public String getTransactionVSServiceURL() {
+        return getServerURL() + "/transactionVS";
     }
 
     @Transient public String getVicketRequestServiceURL() {
-        return getServerURL() + "/model/request";
+        return getServerURL() + "/vicket/request";
     }
 
-    @Transient public String getVicketDepositServiceURL() {
-        return getServerURL() + "/model/deposit";
+    @Transient public String getVicketSendServiceURL() {
+        return getServerURL() + "/vicket/deposit";
     }
 
     @Transient public String getUserProceduresPageURL() {

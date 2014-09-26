@@ -7,12 +7,8 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -22,7 +18,6 @@ import android.widget.FrameLayout;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.service.WebSocketService;
@@ -34,7 +29,6 @@ import org.votingsystem.model.TypeVS;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -103,7 +97,7 @@ public class BrowserVSActivity extends ActivityVS {
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
-        initActivityVS((FrameLayout)findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
+        initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //getSupportActionBar().setTitle(getString(R.string.browswevs_lbl));
         getSupportActionBar().hide();

@@ -63,7 +63,7 @@
                     <input type="text" id="amount" class="form-control" style="width:150px;margin:0 0 10px 0;" pattern="^[0-9]*$" required
                            title="<g:message code="amountLbl"/>"
                            placeholder="<g:message code="amountLbl"/> (EUR)"/>
-                    <input type="text" id="depositSubject" class="form-control" style="width:350px;" required
+                    <input type="text" id="transactionvsSubject" class="form-control" style="width:350px;" required
                            title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/> (EUR)"/>
                 </div>
 
@@ -72,7 +72,7 @@
                     <div>{{selectedTagMsg}}</div>
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
                         <div style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
-                            <g:message code="depositWithTagAdvertMsg"/>
+                            <g:message code="transactionvsWithTagAdvertMsg"/>
                         </div>
                         <div layout horizontal center center-justified style="font-weight:bold;display: {{selectedTags.length == 0? 'none':'block'}};">
                             <g:message code="selectedTagsLbl"/>
@@ -87,7 +87,7 @@
                         <i class="fa fa-tag" style="margin:0 7px 0 3px;"></i> <g:message code="addTagLbl"/>
                     </votingsystem-button>
                 </div>
-                <div style="display:{{isDepositFromGroupToAllMembers ? 'none':'block'}}">
+                <div style="display:{{isTransactionVSFromGroupToAllMembers ? 'none':'block'}}">
                     <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
                         <i class="fa fa-user" style="margin:0 7px 0 3px;"></i> {{selectReceptorMsg}}
                     </votingsystem-button>
@@ -123,7 +123,7 @@
         subpage:false,
         ready: function() {
             console.log(this.tagName + " - " + this.id)
-            this.isDepositFromGroupToAllMembers = false
+            this.isTransactionVSFromGroupToAllMembers = false
 
             document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
                 this.$.receptorBox.addUser(e.detail)
@@ -157,9 +157,9 @@
         reset: function() {
             console.log(this.id + " - reset")
             this.removeErrorStyle(this.$.formDataDiv)
-            this.isDepositFromGroupToAllMembers = false
+            this.isTransactionVSFromGroupToAllMembers = false
             this.$.amount.value = ""
-            this.$.depositSubject.value = ""
+            this.$.transactionvsSubject.value = ""
             this.setMessage(200, null)
             this.$.receptorBox.removeUsers()
             this.$.tagDialog.reset()
@@ -204,9 +204,9 @@
                 return
             }
 
-            if(!this.$.depositSubject.validity.valid) {
-                //this.$.depositSubject.classList.add("formFieldError")
-                this.$.depositSubject.style.background = '#f6ccd0'
+            if(!this.$.transactionvsSubject.validity.valid) {
+                //this.$.transactionvsSubject.classList.add("formFieldError")
+                this.$.transactionvsSubject.style.background = '#f6ccd0'
                 this.setMessage(500, "<g:message code='emptyFieldMsg'/>")
                 return
             }
@@ -220,18 +220,18 @@
             } else tagList.push({id:1, name:'WILDTAG'}); //No tags, receptor can expend money with any tag
 
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
-            webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"deposit", absolute:true)}"
-            webAppMessage.signedMessageSubject = "<g:message code='depositFromGroupMsgSubject'/>"
-            webAppMessage.signedContent = {operation:this.operation, subject:this.$.depositSubject.value,
+            webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"transactionvs", absolute:true)}"
+            webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
+            webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 isTimeLimited:this.$.timeLimitedCheckBox.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,
                 amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN}
             webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "<g:message code='depositOKLbl'/>"
+                        caption = "<g:message code='transactionvsOKLbl'/>"
                         this.fire('operation-finished')
-                    } else caption = '<g:message code="depositERRORLbl"/>'
+                    } else caption = '<g:message code="transactionvsERRORLbl"/>'
                     showMessageVS(appMessageJSON.message, caption)
                 }.bind(this))
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
@@ -259,23 +259,23 @@
             this.fromUserName = fromUser
             this.fromUserIBAN = fromIBAN
             this.groupId = targetGroupId
-            this.isDepositFromGroupToAllMembers = false
+            this.isTransactionVSFromGroupToAllMembers = false
             this.$.timeLimitedCheckBox.checked = false
             switch(operation) {
                 case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
-                    this.operationMsg = "<g:message code='vicketDepositFromGroupToMember'/>"
+                    this.operationMsg = "<g:message code='transactionVSFromGroupToMember'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
                     this.$.receptorBox.multiSelection = false
                     break;
                 case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
-                    this.operationMsg = "<g:message code='vicketDepositFromGroupToMemberGroup'/>"
+                    this.operationMsg = "<g:message code='transactionVSFromGroupToMemberGroup'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
                     this.$.receptorBox.multiSelection = true
                     break;
                 case Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
-                    this.isDepositFromGroupToAllMembers = true
-                    this.operationMsg = "<g:message code='vicketDepositFromGroupToAllMembers'/>"
-                    this.selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'
+                    this.isTransactionVSFromGroupToAllMembers = true
+                    this.operationMsg = "<g:message code='transactionVSFromGroupToAllMembers'/>"
+                    this.selectReceptorMsg = '<g:message code="transactionvsToAllGroupMembersMsg"/>'
                     break;
             }
             this.selectedTags = []

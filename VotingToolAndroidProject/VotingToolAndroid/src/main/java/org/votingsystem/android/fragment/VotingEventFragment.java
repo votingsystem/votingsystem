@@ -31,6 +31,7 @@ import android.widget.TextView;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
@@ -66,9 +67,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     private Button cancelVoteButton;
     private AppContextVS contextVS;
     private View rootView;
-    private View progressContainer;
-    private FrameLayout mainLayout;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
 
     private ProgressDialog progressDialog = null;
@@ -127,7 +125,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             startIntent.putExtra(ContextVS.VOTE_KEY, vote);
             if(operation == TypeVS.CANCEL_VOTE) cancelVoteButton.setEnabled(false);
             else setOptionButtonsEnabled(false);
-            showProgress(true, true);
+            ((ActivityVS)getActivity()).showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -159,9 +157,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
         saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
         cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         Button cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
         cancelVoteButton.setOnClickListener(this);
@@ -338,7 +333,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        showProgress(false, true);
+        ((ActivityVS)getActivity()).showProgress(false, true);
     }
 
     @Override public void onDestroy() {
@@ -349,14 +344,14 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putSerializable(ContextVS.VOTE_KEY, vote);
     }
 
     @Override public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
         if(bundle != null) {
-            if(bundle.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
+            if(bundle.getBoolean(ContextVS.LOADING_KEY, false))
+                ((ActivityVS)getActivity()).showProgress(true, true);
             vote = (VoteVS) bundle.getSerializable(ContextVS.VOTE_KEY);
         }
         if(vote != null && vote.getVoteReceipt() != null) setReceiptScreen(vote);
@@ -366,20 +361,6 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
     @Override public void onStop() {
         Log.d(TAG + ".onStop()", "");
         super.onStop();
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if(progressVisible.get()) {
-            if (progressDialog == null) progressDialog = new ProgressDialog(getActivity());
-            progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle(getString(R.string.send_vote_caption));
-            progressDialog.setMessage(getString(R.string.subject_lbl) + ": " + eventVS.getSubject());
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        } else if (progressDialog != null) progressDialog.dismiss();
     }
 
     public void saveCancelReceipt(VoteVS vote) {

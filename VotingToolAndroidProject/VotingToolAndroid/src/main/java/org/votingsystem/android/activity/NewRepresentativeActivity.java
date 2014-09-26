@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class NewRepresentativeActivity extends ActionBarActivity {
+public class NewRepresentativeActivity extends ActivityVS {
 	
 	public static final String TAG = NewRepresentativeActivity.class.getSimpleName();
 
@@ -62,11 +62,8 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     private TypeVS operationType;
     private EditorFragment editorFragment;
     private AppContextVS contextVS;
-    private View progressContainer;
-    private FrameLayout mainLayout;
     private TextView imageCaption;
     private UserVS representative;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
     private String representativeImageName = null;
     private String editorContent = null;
@@ -159,15 +156,13 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         editorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(
                 EditorFragment.TAG);
-        mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
-        progressContainer = findViewById(R.id.progressContainer);
+        initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
         imageCaption = (TextView) findViewById(R.id.representative_image_caption);
         imageCaption.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 openFileChooser();
             }
         });
-        mainLayout.getForeground().setAlpha(0);
         if(operationType != null && TypeVS.REPRESENTATIVE == operationType) {
             File representativeDataFile = new File(getApplicationContext().getFilesDir(),
                     ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
@@ -351,47 +346,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ContextVS.URI_KEY, representativeImageUri);
         outState.putSerializable(ContextVS.ICON_KEY, representativeImageName);
-        outState.putSerializable(ContextVS.LOADING_KEY, progressVisible.get());
         Log.d(TAG + ".onSaveInstanceState(...)", "outState: " + outState);
-    }
-
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            if(TypeVS.REPRESENTATIVE == operationType) ((TextView)findViewById(R.id.progressMessage)).
-                    setText(getString(R.string.updating_representative_data_msg));
-            getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getApplicationContext(), android.R.anim.fade_in));
-            progressContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getApplicationContext(), android.R.anim.fade_out));
-            progressContainer.setVisibility(View.GONE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
     }
 
     @Override public void onResume() {

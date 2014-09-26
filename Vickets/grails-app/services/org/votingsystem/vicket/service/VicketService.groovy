@@ -135,7 +135,7 @@ class VicketService {
         }
     }
 
-    public ResponseVS cancelVicketDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS cancelTransactionVS(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         //messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
@@ -151,7 +151,7 @@ class VicketService {
                 contentType: ContentTypeVS.JSON_SIGNED)
     }
 
-    public ResponseVS processVicketDeposit(MessageSMIME messageSMIMEReq, VicketBatchRequest batchRequest, Locale locale) {
+    public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, VicketBatchRequest batchRequest, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
@@ -192,7 +192,7 @@ class VicketService {
             messageSMIMEReq.setType(TypeVS.VICKET)
             resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET, data:dataMap)
         } else if (Vicket.State.EXPENDED == vicket.state) {
-            log.error("processVicketDeposit - model '${vicket.id}' state ${vicket.state}")
+            log.error("processTransactionVS - model '${vicket.id}' state ${vicket.state}")
             Map dataMap = [message:messageSource.getMessage("vicketExpendedErrorMsg", null, locale),
                            messageSMIME:new String(Base64.encode(vicket.messageSMIME.content))]
             resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,

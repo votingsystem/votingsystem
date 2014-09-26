@@ -27,7 +27,7 @@
         <g:datePicker name="dateBegin" value="${new Date()}" precision="minute" relativeYears="[0..1]"/>
     </div>
     <div layout vertical>
-        <paper-input id="depositSubject" floatinglabel label="<g:message code="subjectLbl"/>" required></paper-input>
+        <paper-input id="transactionvsSubject" floatinglabel label="<g:message code="subjectLbl"/>" required></paper-input>
     </div>
     <add-control-center-dialog id="addControlCenterDialog"></add-control-center-dialog>
     <add-voting-option-dialog id="addVotingOptionDialog"></add-voting-option-dialog>
@@ -46,7 +46,7 @@
 
     document.addEventListener('polymer-ready', function() {
         document.querySelector("#addVotingOptionDialog").addEventListener('on-submit', function (e) {
-            console.log("========== e.detail: " + e.detail)
+            console.log("polymer.gsp - e.detail: " + e.detail)
         })
     });
 

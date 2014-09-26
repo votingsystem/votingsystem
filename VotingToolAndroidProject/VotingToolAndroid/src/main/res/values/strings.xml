@@ -400,8 +400,8 @@
     <string name="vicket_send_error_msg"><![CDATA[Problemas realizando el pago. \'%1$s\']]></string>
     <string name="week_lapse_lbl">%1$s y %2$s</string>
     <string name="week_lbl">semana</string>
-    <string name="transactionv_lbl">Transacción</string>
-    <string name="transactionvs_lbl">Transacciones</string>
+    <string name="transactionvs_lbl">Transacción</string>
+    <string name="transactionsvs_lbl">Transacciones</string>
     <string name="transactionvs_formatted"><![CDATA[Fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$ss]]></string>
     <string name="transactionvs_from_user_lbl"><![CDATA[Usuario <b>emisor</b>:<br/><b>NIF:</b> %1$s<br/>
     <b>Nombre:</b> %2$s]]></string>
@@ -446,5 +446,6 @@
     <string name="connecting_to_service_msg">Conectando a servicio</string>
     <string name="messagevs_send_ok_msg">El mensaje se ha enviado corréctamente</string>
     <string name="anonymous_transactionvs_msg">Deseo que el pago sea anónimo</string>
+    <string name="transactionvs_from_uservs_msg_subject">Ingreso de usuario</string>
 
 </resources>

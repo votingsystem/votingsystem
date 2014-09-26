@@ -19,20 +19,14 @@ package org.votingsystem.android.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza

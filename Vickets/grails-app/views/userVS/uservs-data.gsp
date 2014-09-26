@@ -56,9 +56,9 @@
                 </div>
 
                 <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
-                    <votingsystem-button id="makeDepositButton" type="submit" on-click="{{makeDeposit}}"
+                    <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
                                          style="margin:10px 20px 0px 0px;">
-                        <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeDepositLbl"/>
+                        <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeTransactionVSLbl"/>
                     </votingsystem-button>
                 </div>
                 <div style="display: {{'superadmin' == menuType ? 'block':'none'}}">
@@ -137,8 +137,8 @@
         blockUser:function() {
             console.log(this.tagName + " - blockUser")
         },
-        makeDeposit:function() {
-            console.log(this.tagName + " - makeDeposit")
+        makeTransactionVS:function() {
+            console.log(this.tagName + " - makeTransactionVS")
         },
         showByIBAN:function(IBAN) {
             var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + IBAN

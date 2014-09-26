@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.ReceiptPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.model.ContextVS;
@@ -48,13 +49,8 @@ public class ReceiptGridFragment extends Fragment implements
     private View rootView;
     private ReceiptGridAdapter adapter = null;
     private VoteVS vote = null;
-    private ContextVS contextVS;
-    private View progressContainer;
-    private FrameLayout mainLayout;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private int menuItemSelected = R.id.all_receipts;
     private GridView gridView;
-    private FrameLayout gridContainer;
     private Menu menu;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -76,9 +72,6 @@ public class ReceiptGridFragment extends Fragment implements
             }
         });
         gridView.setOnScrollListener(this);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        gridContainer =  (FrameLayout)rootView.findViewById(R.id.gridContainer);
-        gridContainer.getForeground().setAlpha(0);
         getLoaderManager().initLoader(ContextVS.RECEIPT_LOADER_ID, null, this);
         return rootView;
     }
@@ -117,7 +110,7 @@ public class ReceiptGridFragment extends Fragment implements
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount());
-        showProgress(false, true);
+        ((ActivityVS)getActivity()).showProgress(false, true);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
@@ -201,40 +194,10 @@ public class ReceiptGridFragment extends Fragment implements
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
         outState.putInt(ContextVS.ITEM_ID_KEY, menuItemSelected);
         Log.d(TAG + ".onSaveInstanceState(...) ", "outState: " + outState);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_in));
-            progressContainer.setVisibility(View.VISIBLE);
-            gridContainer.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_out));
-            progressContainer.setVisibility(View.GONE);
-            gridContainer.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
     }
 
 }

@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.service.VicketService;
@@ -61,14 +62,11 @@ public class TransactionVSGridFragment extends Fragment
 
     private View rootView;
     private GridView gridView;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private TransactionVSListAdapter adapter = null;
     private String queryStr = null;
     private AppContextVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
-    private View progressContainer;
-    private FrameLayout gridContainer;
     private String broadCastId = TransactionVSGridFragment.class.getName();
     private int loaderId = -1;
 
@@ -87,7 +85,7 @@ public class TransactionVSGridFragment extends Fragment
                 case VICKET_USER_INFO:
                     break;
             }
-            showProgress(false, false);
+            ((ActivityVS)getActivity()).showProgress(false, false);
         }
         }
     };
@@ -100,7 +98,7 @@ public class TransactionVSGridFragment extends Fragment
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            showProgress(true, true);
+            ((ActivityVS)getActivity()).showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -126,14 +124,6 @@ public class TransactionVSGridFragment extends Fragment
         setHasOptionsMenu(true);
     };
 
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
@@ -152,9 +142,6 @@ public class TransactionVSGridFragment extends Fragment
             }
         });
         gridView.setOnScrollListener(this);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        gridContainer =  (FrameLayout)rootView.findViewById(R.id.gridContainer);
-        gridContainer.getForeground().setAlpha(0);
         return rootView;
     }
 
@@ -167,7 +154,8 @@ public class TransactionVSGridFragment extends Fragment
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
+                ((ActivityVS)getActivity()).showProgress(true, true);
         }
     }
 
@@ -236,7 +224,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        showProgress(false, true);
+        ((ActivityVS)getActivity()).showProgress(false, true);
         if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
         firstVisiblePosition = null;
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
@@ -260,35 +248,6 @@ public class TransactionVSGridFragment extends Fragment
             }
             Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
-        }
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_in));
-            progressContainer.setVisibility(View.VISIBLE);
-            gridContainer.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_out));
-            progressContainer.setVisibility(View.GONE);
-            gridContainer.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
         }
     }
 
@@ -341,7 +300,6 @@ public class TransactionVSGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 

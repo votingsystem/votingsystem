@@ -11,18 +11,18 @@
 <body>
     <div layout flex horizontal wrap around-justified>
         <div layout vertical>
-            <votingsystem-button onclick="sendDepositFromBankVS()" style="margin: 0px 0px 0px 5px;">
-                Deposit from BankVS
+            <votingsystem-button onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
+                TransactionVS from BankVS
             </votingsystem-button>
-            <div id="depositFromBankVS" style="width: 500px; height: 300px;"></div>
+            <div id="transactionvsFromBankVS" style="width: 500px; height: 300px;"></div>
         </div>
 
         <div layout vertical>
             <div layout horizontal center center-justified>
-                <votingsystem-button style="margin: 0px 0px 0px 5px;">Deposit </votingsystem-button>
+                <votingsystem-button style="margin: 0px 0px 0px 5px;">TransactionVS </votingsystem-button>
                 - http://vickets:8086/Vickets/transaction/deposit
             </div>
-            <div id="depositEditor" style="width: 500px; height: 300px;"></div>
+            <div id="transactionvsEditor" style="width: 500px; height: 300px;"></div>
         </div>
 
         <div layout vertical>
@@ -35,44 +35,44 @@
 </html>
 <asset:script>
     //date -> 'yyyy/MM/dd HH:mm:ss'
-    var depositFromBankVS = new JSONEditor(document.querySelector("#depositFromBankVS"));
+    var transactionvsFromBankVS = new JSONEditor(document.querySelector("#transactionvsFromBankVS"));
     var signedContent
-    var jsonDepositFromBankVS = {operation:"TRANSACTIONVS_FROM_BANKVS",
-        signedMessageSubject:"Deposit from BankVS",
+    var jsonTransactionVSFromBankVS = {operation:"TRANSACTIONVS_FROM_BANKVS",
+        signedMessageSubject:"TransactionVS from BankVS",
         signedContent:{operation:"TRANSACTIONVS_FROM_BANKVS", bankIBAN:"ES1877777777450000000050",
             fromUser: "ClientBankVS App1 App2", currency: "EUR",
             fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"],
-            amount:"30000", tags:[{name:"HIDROGENO"}], isTimeLimited:true, subject:"BankVS deposit" },
+            amount:"30000", tags:[{name:"HIDROGENO"}], isTimeLimited:true, subject:"BankVS transactionvs" },
         serviceURL:"${createLink( controller:'transactionVS', action:"deposit", absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
         urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
         }
     //fromUserIBAN -> IBAN external to Vicket System controlled by BankVS
     //if validTo present -> change to limited in time Vickets
-    depositFromBankVS.set(jsonDepositFromBankVS);
+    transactionvsFromBankVS.set(jsonTransactionVSFromBankVS);
 
 
-    function sendDepositFromBankVS() {
-        console.log("depositFromBankVS")
-        var webAppMessage = depositFromBankVS.get();
+    function sendTransactionVSFromBankVS() {
+        console.log("transactionvsFromBankVS")
+        var webAppMessage = transactionvsFromBankVS.get();
         webAppMessage.statusCode = ResponseVS.SC_PROCESSING
         webAppMessage.objectId = Math.random().toString(36).substring(7)
         window[webAppMessage.objectId] = function(appMessage) {
-            console.log("sendDepositFromBankVS - message: " + appMessage);
+            console.log("sendTransactionVSFromBankVS - message: " + appMessage);
             appMessageJSON = JSON.parse(appMessage)
-            showMessageVS(JSON.stringify(appMessageJSON.message), "sendDepositFromBankVS " + appMessageJSON.statusCode)
+            showMessageVS(JSON.stringify(appMessageJSON.message), "sendTransactionVSFromBankVS " + appMessageJSON.statusCode)
         }
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
 
 
 
-    var depositEditor = new JSONEditor(document.querySelector("#depositEditor"));
-    var jsonDepositEditor = {  "operation": "TRANSACTIONVS_FROM_GROUP_TO_MEMBER", "amount": "10", "fromUser":
+    var transactionvsEditor = new JSONEditor(document.querySelector("#transactionvsEditor"));
+    var jsonTransactionVSEditor = {  "operation": "TRANSACTIONVS_FROM_GROUP_TO_MEMBER", "amount": "10", "fromUser":
         "Cheques comida &apos;proyecto Vickets&apos;", "subject": "Transacción 'sábado' \"21 junio\" a 20C",
         "fromUserIBAN": "ES8978788989450000000004", "toUserIBAN":  [ "ES9478788989450000000011"], "currency": "EUR",
         "validTo": "2014/06/23 00:00:00"}
-    depositEditor.set(jsonDepositEditor);
+    transactionvsEditor.set(jsonTransactionVSEditor);
 
 
 

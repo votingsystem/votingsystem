@@ -18,7 +18,7 @@ class TransactionVS_BankVSService {
     def systemService
 
     @Transactional
-    private ResponseVS processDeposit(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
+    private ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS messageSigner = messageSMIMEReq.userVS
@@ -63,7 +63,7 @@ class TransactionVS_BankVSService {
         TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.amount, toUser, messageJSON.toUserIBAN.get(0)).save();
 
-        //transaction?.errors.each { log.error("processDepositFromBankVS - error - ${it}")}
+        //transaction?.errors.each { log.error("processTransactionVSFromBankVS - error - ${it}")}
 
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${triggeredTransaction.id}")
         log.debug("${metaInfMsg} - from BankVS '${signer.id}' to userVS '${toUser.id}' ")

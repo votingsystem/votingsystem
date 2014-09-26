@@ -54,13 +54,13 @@
 
                         <div layout horizontal center center-justified style="margin:0 0 0 60px;">
                             <i class="fa fa-money optionsIcon"></i>
-                            <paper-dropdown-menu id="selectDepositDropDown" valueattr="label"
-                                             label="<g:message code="makeDepositFromGroupVSLbl"/>" style="width: 300px;">
-                                <core-selector target="{{$.depositOptions}}" valueattr="id" on-core-select="{{showDepositDialog}}">
-                                    <div id="depositOptions" style="padding:0 10px 0 10px;">
-                                        <core-item id="fromGroupToMember" label="<g:message code="makeDepositFromGroupVSToMemberLbl"/>"></core-item>
-                                        <core-item id="fromGroupToMemberGroup" label="<g:message code="makeDepositFromGroupVSToMemberGroupLbl"/>"></core-item>
-                                        <core-item id="fromGroupToAllMember" label="<g:message code="makeDepositFromGroupVSToAllMembersLbl"/>"></core-item>
+                            <paper-dropdown-menu id="selectTransactionVSDropDown" valueattr="label"
+                                             label="<g:message code="makeTransactionVSFromGroupVSLbl"/>" style="width: 300px;">
+                                <core-selector target="{{$.transactionvsOptions}}" valueattr="id" on-core-select="{{showTransactionVSDialog}}">
+                                    <div id="transactionvsOptions" style="padding:0 10px 0 10px;">
+                                        <core-item id="fromGroupToMember" label="<g:message code="makeTransactionVSFromGroupVSToMemberLbl"/>"></core-item>
+                                        <core-item id="fromGroupToMemberGroup" label="<g:message code="makeTransactionVSFromGroupVSToMemberGroupLbl"/>"></core-item>
+                                        <core-item id="fromGroupToAllMember" label="<g:message code="makeTransactionVSFromGroupVSToAllMembersLbl"/>"></core-item>
                                     </div>
                                 </core-selector>
                             </paper-dropdown-menu>
@@ -73,7 +73,7 @@
                         <g:message code="subscribeGroupVSLbl"/> <i class="fa fa-sign-in"></i>
                     </votingsystem-button>
                     <votingsystem-button on-click="{{subscribeToGroup}}">
-                        <g:message code="makeDepositLbl"/> <i class="fa fa-money"></i>
+                        <g:message code="makeTransactionVSLbl"/> <i class="fa fa-money"></i>
                     </votingsystem-button>
                 </div>
 
@@ -124,7 +124,7 @@
 
     <section id="page2">
         <div class="pageContentDiv" cross-fade>
-            <transactionvs-form id="depositForm" subpage></transactionvs-form>
+            <transactionvs-form id="transactionvsForm" subpage></transactionvs-form>
         </div>
     </section>
     </core-animated-pages>
@@ -144,7 +144,7 @@
             console.log(this.tagName + " - ready - subpage: " + this.subpage)
             //this.isClientToolConnected = window['isClientToolConnected']
             this.isClientToolConnected = true
-            this.$.depositForm.addEventListener('operation-finished', function (e) {
+            this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
                 this.page = 0;
             }.bind(this))
         },
@@ -233,22 +233,22 @@
             this.$.configGroupDropDown.selected = ""
             this.$.configGroupDropDown.selectedItem = null
         },
-        showDepositDialog:function(e) {
-            console.log("showDepositDialog")
+        showTransactionVSDialog:function(e) {
+            console.log("showTransactionVSDialog")
             //e.detail.isSelected
             if('fromGroupToMember' == e.detail.item.id) {
-                this.$.depositForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER, this.groupvs.name,
+                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER, this.groupvs.name,
                         this.groupvs.IBAN , this.groupvs.id)
             } else if('fromGroupToMemberGroup' == e.detail.item.id) {
-                this.$.depositForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
+                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
                         this.groupvs.IBAN, this.groupvs.id)
             } else if('fromGroupToAllMember' == e.detail.item.id) {
-                this.$.depositForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
+                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
                         this.groupvs.IBAN, this.groupvs.id)
             }
             this.page = 1;
-            this.$.selectDepositDropDown.selected = ""
-            this.$.selectDepositDropDown.selectedItem = null
+            this.$.selectTransactionVSDropDown.selected = ""
+            this.$.selectTransactionVSDropDown.selectedItem = null
         },
         back:function() {
             this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.id});

@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
@@ -66,16 +67,12 @@ public class PublishEventVSFragment extends Fragment {
 	private TypeVS formType;
     private EditorFragment editorFragment;
     private AppContextVS contextVS;
-    private TextView progressMessage;
     private EditText dateFinishEditText;
     private EditText dateBeginEditText;
     private TextView optionCaption;
     private Spinner controlCenterSetSpinner;
     private EditText subjectEditText;
-    private View progressContainer;
-    private FrameLayout mainLayout;
     private LinearLayout optionContainer;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private View rootView;
     private String broadCastId = null;
     private List<ControlCenterVS> controlCenterList = new ArrayList<ControlCenterVS>();
@@ -97,7 +94,8 @@ public class PublishEventVSFragment extends Fragment {
                 String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
                 if(TypeVS.ITEM_REQUEST == operationType) {
                     if(optionList.contains(message)) {
-                        showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                        ((ActivityVS)getActivity()).showMessage(
+                                ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
                                 getActivity().getString(R.string.option_repeated_msg, message));
                     } else {
                         optionList.add(message);
@@ -105,7 +103,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                     return;
                 }
-                showProgress(false, true);
+                ((ActivityVS)getActivity()).showProgress(false, true);
                 GroupPosition selectedSubsystem = null;
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     caption = getString(R.string.operation_ok_msg);
@@ -139,7 +137,8 @@ public class PublishEventVSFragment extends Fragment {
                     //to avoid avoid dissapear on screen orientation change
                     dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 } else {
-                    showMessage(responseStatusCode, getString(R.string.publish_document_ERROR_msg),
+                    ((ActivityVS)getActivity()).showMessage(
+                            responseStatusCode, getString(R.string.publish_document_ERROR_msg),
                             Html.fromHtml(responseVS.getNotificationMessage()).toString());
                 }
             }
@@ -158,12 +157,14 @@ public class PublishEventVSFragment extends Fragment {
             newCalendar.set(Calendar.MONTH, monthOfYear);
             newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             if(todayCalendar.after(newCalendar)) {
-                showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                ((ActivityVS)getActivity()).showMessage(
+                        ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
                         getActivity().getString(R.string.date_error_lbl));
             } else {
                 if(dateBeginCalendar != null) {
                     if(dateBeginCalendar.after(newCalendar)) {
-                        showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                        ((ActivityVS)getActivity()).showMessage(
+                                ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
                                 getActivity().getString(R.string.date_init_after_finish_error_lbl));
                         return;
                     }
@@ -185,12 +186,14 @@ public class PublishEventVSFragment extends Fragment {
             newCalendar.set(Calendar.MONTH, monthOfYear);
             newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             if(todayCalendar.after(newCalendar)) {
-                showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                ((ActivityVS)getActivity()).showMessage(
+                        ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
                         getActivity().getString(R.string.date_error_lbl));
             } else {
                 if(dateFinishCalendar != null) {
                     if(newCalendar.after(dateFinishCalendar)) {
-                        showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                        ((ActivityVS)getActivity()).showMessage(
+                                ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
                                 getActivity().getString(R.string.date_init_after_finish_error_lbl));
                         return;
                     }
@@ -244,8 +247,9 @@ public class PublishEventVSFragment extends Fragment {
                     ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
             startIntent.putExtra(ContextVS.MESSAGE_KEY, eventVS.toJSON().toString());
-            progressMessage.setText(R.string.publishing_document_msg);
-            showProgress(true, true);
+            ((ActivityVS)getActivity()).showProgressMessage(getActivity().getString(
+                    R.string.publishing_document_msg));
+            ((ActivityVS)getActivity()).showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -301,7 +305,6 @@ public class PublishEventVSFragment extends Fragment {
                 dateBeginEditText.setKeyListener(null);
                 break;
         }
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         subjectEditText = (EditText) rootView.findViewById(R.id.subject);
         dateFinishEditText = (EditText) rootView.findViewById(R.id.dateFinish);
         dateFinishEditText.setOnClickListener(new View.OnClickListener() {
@@ -323,9 +326,6 @@ public class PublishEventVSFragment extends Fragment {
                 addOption();
             }
         });
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        progressMessage = (TextView)rootView.findViewById(R.id.progressMessage);
-        mainLayout.getForeground().setAlpha(0);
         // if set to true savedInstanceState will be allways null
         //setRetainInstance(true);
         setHasOptionsMenu(true);
@@ -339,7 +339,8 @@ public class PublishEventVSFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         editorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(EditorFragment.TAG);
         if(savedInstanceState != null) {
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
+                ((ActivityVS)getActivity()).showProgress(true, true);
             optionList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
             for(String optionContent:optionList) {
                 addEventOption(optionContent);
@@ -382,7 +383,6 @@ public class PublishEventVSFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) optionList);
         //Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
         Log.d(TAG +  ".onSaveInstanceState(...)", "");
@@ -438,33 +438,39 @@ public class PublishEventVSFragment extends Fragment {
         Log.d(TAG + ".validateForm()", "");
         if(formType == TypeVS.VOTING_PUBLISHING) {
             if(controlCenterSetSpinner.getSelectedItemId() == 0) {
-                showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
+                        getActivity().getString(R.string.error_lbl),
                         getActivity().getString(R.string.control_center_missing_error_lbl));
                 return false;
             }
             if(dateBeginCalendar == null) {
-                showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
+                        getActivity().getString(R.string.error_lbl),
                         getActivity().getString(R.string.date_error_lbl));
                 return false;
             }
             if(optionList.size() < ContextVS.NUM_MIN_OPTIONS) {
-                showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
+                        getActivity().getString(R.string.error_lbl),
                         getActivity().getString(R.string.num_vote_options_error_msg));
                 return false;
             }
         }
         if(editorFragment.isEditorDataEmpty()) {
-            showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
+                    getActivity().getString(R.string.error_lbl),
                     getActivity().getString(R.string.editor_empty_error_lbl));
             return false;
         }
         if(dateFinishCalendar == null) {
-            showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
+                    getActivity().getString(R.string.error_lbl),
                     getActivity().getString(R.string.date_error_lbl));
             return false;
         }
         if(TextUtils.isEmpty(subjectEditText.getText())) {
-            showMessage(ResponseVS.SC_ERROR, getActivity().getString(R.string.error_lbl),
+            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR,
+                    getActivity().getString(R.string.error_lbl),
                     getActivity().getString(R.string.subject_error_lbl));
             return false;
         }
@@ -474,43 +480,6 @@ public class PublishEventVSFragment extends Fragment {
     @Override public void onDestroy() {
         Log.d(TAG + ".onDestroy()", "onDestroy");
         super.onDestroy();
-    }
-
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_in));
-            progressContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity().getApplicationContext(), android.R.anim.fade_out));
-            progressContainer.setVisibility(View.GONE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
     }
 
     @Override public void onPause() {

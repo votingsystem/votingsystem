@@ -46,15 +46,12 @@ public class TransactionVSFragment extends Fragment {
     public static final String TAG = TransactionVSFragment.class.getSimpleName();
 
     private TransactionVS selectedTransactionVS;
-    private View progressContainer;
-    private FrameLayout mainLayout;
     private Menu menu;
     private TextView transactionvsSubject;
     private TextView transactionvs_content;
     private TextView to_user;
     private TextView from_user;
     private TextView receipt;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private SMIMEMessageWrapper messageSMIME;
     private String broadCastId = null;
     private AppContextVS contextVS;
@@ -112,9 +109,6 @@ public class TransactionVSFragment extends Fragment {
         transactionvs_content = (TextView)rootView.findViewById(R.id.transactionvs_content);
         transactionvs_content.setMovementMethod(LinkMovementMethod.getInstance());
         transactionvsSubject = (TextView)rootView.findViewById(R.id.transactionvs_subject);
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         return rootView;
     }
@@ -176,7 +170,7 @@ public class TransactionVSFragment extends Fragment {
                     selectedTransactionVS.getType());
         }
         if(getActivity() instanceof ActionBarActivity) {
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionv_lbl));
+            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.transactionvs_lbl));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
                     selectedTransactionVS.getDescription(getActivity().getApplicationContext()));
             ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
@@ -219,55 +213,4 @@ public class TransactionVSFragment extends Fragment {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private void showMessage(Integer statusCode, String caption,String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
-    }
-
-
 }

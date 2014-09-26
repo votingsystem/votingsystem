@@ -41,7 +41,7 @@ class TransactionVSService {
         listenerSet.add(listenerId)
     }
 
-    public ResponseVS processDeposit(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         String msg;
@@ -55,12 +55,12 @@ class TransactionVSService {
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
         switch(transactionType) {
             case TypeVS.TRANSACTIONVS_FROM_BANKVS:
-                return transactionVS_BankVSService.processDeposit(messageSMIMEReq, messageJSON, locale)
+                return transactionVS_BankVSService.processTransactionVS(messageSMIMEReq, messageJSON, locale)
                 break;
             case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
             case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
             case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionVS_GroupVSService.processDeposit(messageSMIMEReq, messageJSON, locale)
+                return transactionVS_GroupVSService.processTransactionVS(messageSMIMEReq, messageJSON, locale)
                 break;
             default:
                 msg = messageSource.getMessage('unknownTransactionErrorMsg', [transactionType.toString()].toArray(), locale)
@@ -346,13 +346,13 @@ class TransactionVSService {
                 typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
                 break;
             case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
-                typeDescription = messageSource.getMessage('vicketDepositFromGroupToMember', null, locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToMember', null, locale);
                 break;
             case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
-                typeDescription = messageSource.getMessage('vicketDepositFromGroupToMemberGroup', null, locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToMemberGroup', null, locale);
                 break;
             case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
-                typeDescription = messageSource.getMessage('vicketDepositFromGroupToAllMembers', null, locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToAllMembers', null, locale);
                 break;
             default: typeDescription = transactionType
         }

@@ -3,6 +3,8 @@ package org.votingsystem.android.activity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -44,6 +46,7 @@ public abstract class ActivityVS extends ActionBarActivity {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
+        showProgress(false, true);
     }
 
     public void showProgress(boolean showProgress, boolean animate) {
@@ -89,13 +92,23 @@ public abstract class ActivityVS extends ActionBarActivity {
         }
     }
 
+    public boolean isProgressVisible() {
+        return progressVisible.get();
+    }
+
     public void showProgressMessage(String message) {
         TextView progressMessage = (TextView) progressContainer.findViewById(R.id.progressMessage);
         progressMessage.setText(getString(R.string.loading_data_msg));
+    }
+
+    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
     }
+
 }

@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -51,9 +52,6 @@ public class EventVSStatisticsFragment extends Fragment {
     private View rootView;
     private EventVS eventVS;
     private AppContextVS contextVS;
-    private View progressContainer;
-    private FrameLayout mainLayout;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String htmlContent;
     private String baseURL;
 
@@ -82,9 +80,6 @@ public class EventVSStatisticsFragment extends Fragment {
             ex.printStackTrace();
         }
         rootView = inflater.inflate(R.layout.eventvs_statistics_fragment, container, false);
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         return rootView;
     }
@@ -94,7 +89,8 @@ public class EventVSStatisticsFragment extends Fragment {
         Log.d(TAG +  ".onActivityCreated(...)", "");
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
+                ((ActivityVS)getActivity()).showProgress(true, true);
             htmlContent = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
             baseURL = savedInstanceState.getString(ContextVS.URL_KEY);
             if(htmlContent != null && baseURL != null) loadHTMLContent(baseURL, htmlContent);
@@ -110,50 +106,8 @@ public class EventVSStatisticsFragment extends Fragment {
         Log.d(TAG + ".onDestroy()", " - onDestroy");
     };
 
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
-    }
-
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putString(ContextVS.MESSAGE_KEY, htmlContent);
         outState.putString(ContextVS.URL_KEY, baseURL);
         //Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
@@ -173,7 +127,7 @@ public class EventVSStatisticsFragment extends Fragment {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webview.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                showProgress(false, true);
+                ((ActivityVS)getActivity()).showProgress(false, true);
             }
         });
         webview.loadUrl(serverURL);
@@ -185,14 +139,6 @@ public class EventVSStatisticsFragment extends Fragment {
         webview.loadDataWithBaseURL(baseURL, htmlContent, "text/html", "UTF-8", "");
     }
 
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-    }
-
     public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
 
         private ContentTypeVS contentType = null;
@@ -200,7 +146,7 @@ public class EventVSStatisticsFragment extends Fragment {
         public GetDataTask(ContentTypeVS contentType) { }
 
         @Override protected void onPreExecute() {
-            showProgress(true, true);
+            ((ActivityVS)getActivity()).showProgress(true, true);
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
@@ -218,10 +164,10 @@ public class EventVSStatisticsFragment extends Fragment {
                 htmlContent = responseVS.getMessage();
                 loadHTMLContent(baseURL, htmlContent);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                showMessage(responseVS.getStatusCode(), getString(R.string.operation_error_msg),
-                        responseVS.getMessage());
+                ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(),
+                        getString(R.string.operation_error_msg), responseVS.getMessage());
             }
-            showProgress(false, true);
+            ((ActivityVS)getActivity()).showProgress(false, true);
         }
     }
 }

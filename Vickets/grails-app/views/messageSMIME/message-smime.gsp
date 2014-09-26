@@ -118,17 +118,17 @@
                 console.log(this.tagName + " - signedDocumentChanged - signedDocument: " + this.signedDocumentStr)
                 switch (this.signedDocument.operation) {
                     case 'TRANSACTIONVS_FROM_BANKVS':
-                        this.caption = "<g:message code="depositFromBankVSLbl"/>"
+                        this.caption = "<g:message code="transactionvsFromBankVSLbl"/>"
                         break;
                     case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false
-                        this.caption = "<g:message code="vicketDepositFromGroupToAllMembers"/>"
+                        this.caption = "<g:message code="transactionVSFromGroupToAllMembers"/>"
                         break;
                     case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
-                        this.caption = "<g:message code="vicketDepositFromGroupToMember"/>"
+                        this.caption = "<g:message code="transactionVSFromGroupToMember"/>"
                         break;
                     case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
-                        this.caption = "<g:message code="vicketDepositFromGroupToMemberGroup"/>"
+                        this.caption = "<g:message code="transactionVSFromGroupToMemberGroup"/>"
                         break;
                     case 'VICKET_INIT_PERIOD':
                         this.caption = "<g:message code="vicketInitPeriodLbl"/>"

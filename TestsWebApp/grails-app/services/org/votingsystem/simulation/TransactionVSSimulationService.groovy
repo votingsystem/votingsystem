@@ -24,7 +24,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
 @Transactional
-class VicketDepositSimulationService {
+class TransactionVSSimulationService {
 
     public enum Status implements StatusVS<Status> {INIT_SIMULATION, INITIALIZE_SERVER,
         MAKE_DEPOSIT, FINISH_SIMULATION, LISTEN}
@@ -121,8 +121,8 @@ class VicketDepositSimulationService {
         } finally {changeSimulationStatus(responseVS)}
     }
 
-    private void makeDeposit() {
-        log.debug("makeDeposit ### Enter status MAKE_DEPOSIT");
+    private void makeTransactionVS() {
+        log.debug("makeTransactionVS ### Enter status MAKE_DEPOSIT");
         ResponseVS responseVS = null;
         try {
             String userNif = NifUtils.getNif(8888888);
@@ -132,16 +132,16 @@ class VicketDepositSimulationService {
                     ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(privateKey, chain,
                     ContextVS.DNIe_SIGN_MECHANISM);
-            String msgSubject =  messageSource.getMessage("depositMsgSubject", null, locale)
-            Map signatureContentMap = [amount:simulationData.getDepositAmount().toString(),
+            String msgSubject =  messageSource.getMessage("transactionvsMsgSubject", null, locale)
+            Map signatureContentMap = [amount:simulationData.getTransactionVSAmount().toString(),
                     "UUID": UUID.randomUUID().toString(), currency:simulationData.getCurrency().toString(),
                     subject:simulationData.getSubject(),
                     typeVS:TypeVS.TRANSACTIONVS_FROM_BANKVS, IBAN:"ESkk bbbb gggg xxcc cccc cccc"]
             String signatureContentStr = new JSONObject(signatureContentMap).toString()
-            log.debug("makeDeposit ${signatureContentStr}")
+            log.debug("makeTransactionVS ${signatureContentStr}")
             SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(userNif,
                     vicketServer.getNameNormalized(),signatureContentStr , msgSubject);
-            SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, vicketServer.getDepositURL(),
+            SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, vicketServer.getTransactionVSServiceURL(),
                     vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
             responseVS = signedSender.call();
         } catch (Exception ex) {
@@ -185,7 +185,7 @@ class VicketDepositSimulationService {
                     finishSimulation(statusFromResponse);
                 } else {
                     try {
-                        requestExecutor.execute(new Runnable() {@Override public void run() {makeDeposit();}});
+                        requestExecutor.execute(new Runnable() {@Override public void run() {makeTransactionVS();}});
                     } catch(Exception ex) {
                         log.error(ex.getMessage(), ex);
                         errorList.add(ex.getMessage())
