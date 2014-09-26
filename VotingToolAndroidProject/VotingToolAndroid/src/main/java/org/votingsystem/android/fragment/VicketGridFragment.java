@@ -21,13 +21,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,7 +47,6 @@ import java.text.Collator;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class VicketGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {

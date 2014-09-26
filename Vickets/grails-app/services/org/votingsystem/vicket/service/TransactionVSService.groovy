@@ -62,6 +62,9 @@ class TransactionVSService {
             case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
                 return transactionVS_GroupVSService.processTransactionVS(messageSMIMEReq, messageJSON, locale)
                 break;
+            case TypeVS.TRANSACTIONVS_FROM_USERVS:
+                log.debug("${methodName} - TRANSACTIONVS_FROM_USERVS - TODO - ");
+                //break;
             default:
                 msg = messageSource.getMessage('unknownTransactionErrorMsg', [transactionType.toString()].toArray(), locale)
                 log.debug("${methodName} - ${msg}");

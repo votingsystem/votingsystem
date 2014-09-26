@@ -7,7 +7,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-
+import org.votingsystem.android.lib.R;
 import java.io.ByteArrayInputStream;
 
 
@@ -270,10 +270,8 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public String getCaption() {
-        String result = null;
-        if(caption == null && operation != null)  result = operation.getSignedMessageSubject();
-        else result = caption;
-        return result;
+        if(caption == null && operation != null) return operation.getSignedMessageSubject();
+        else return caption;
     }
 
     public void setCaption(String caption) {

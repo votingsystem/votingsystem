@@ -400,13 +400,17 @@ public class AppContextVS extends Application {
     }
 
     //HTTP request -> this must be called from 'appropiated' threads
-    public ResponseVS updateVicketServer() {
+    public ResponseVS getHTTPVicketServer() {
         ResponseVS responseVS = null;
         try {
-            responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(getVicketServerURL()),
-                    ContentTypeVS.JSON);
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
+            if(vicketServer != null)  {
+                responseVS = new ResponseVS(ResponseVS.SC_OK);
+            } else {
+                responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(getVicketServerURL()),
+                        ContentTypeVS.JSON);
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
+                }
             }
         } catch(Exception ex) {
             ex.printStackTrace();

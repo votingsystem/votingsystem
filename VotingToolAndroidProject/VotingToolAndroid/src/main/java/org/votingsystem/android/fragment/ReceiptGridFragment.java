@@ -15,13 +15,10 @@ import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,7 +36,6 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReceiptGridFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{

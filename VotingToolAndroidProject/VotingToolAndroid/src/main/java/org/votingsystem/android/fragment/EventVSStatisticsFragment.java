@@ -22,14 +22,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
 
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -41,8 +38,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class EventVSStatisticsFragment extends Fragment {

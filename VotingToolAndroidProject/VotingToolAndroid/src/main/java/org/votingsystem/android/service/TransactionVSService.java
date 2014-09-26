@@ -19,6 +19,7 @@ import org.votingsystem.model.VicketServer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 /**
@@ -35,6 +36,7 @@ public class TransactionVSService extends IntentService {
     private String serviceCaller;
 
     @Override protected void onHandleIntent(Intent intent) {
+        contextVS = (AppContextVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
@@ -52,13 +54,14 @@ public class TransactionVSService extends IntentService {
             mapToSend.put("tags", Arrays.asList(transactionVS.getTagVS().getName()));
             mapToSend.put("amount", transactionVS.getAmount().toString());
             mapToSend.put("currency", transactionVS.getCurrencyCode());
-            responseVS = contextVS.updateVicketServer();
+            mapToSend.put("UUID", UUID.randomUUID().toString());
+            responseVS = contextVS.getHTTPVicketServer();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 VicketServer vicketServer = (VicketServer) responseVS.getData();
                 SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                         contextVS.getUserVS().getNif(), transactionVS.getToUserVS().getIBAN(),
                         vicketServer.getTransactionVSServiceURL(), new JSONObject(mapToSend).toString(),
-                        ContentTypeVS.JSON, getString(R.string.transactionvs_from_uservs_msg_subject), null, contextVS);
+                        ContentTypeVS.JSON_SIGNED, getString(R.string.transactionvs_from_uservs_msg_subject), null, contextVS);
                 responseVS = smimeSignedSender.call();
 
             }
@@ -69,6 +72,14 @@ public class TransactionVSService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                responseVS.setIconId(R.drawable.fa_check_32);
+                responseVS.setCaption(getString(R.string.ok_lbl));
+
+            } else {
+                responseVS.setIconId(R.drawable.fa_times_32);
+                responseVS.setCaption(getString(R.string.error_lbl));
+            }
             responseVS.setServiceCaller(serviceCaller);
             responseVS.setTypeVS(operation);
             broadCastResponse(responseVS);

@@ -47,7 +47,6 @@ import org.votingsystem.util.ObjectUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 

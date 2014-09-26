@@ -3,8 +3,6 @@ package org.votingsystem.android.activity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -27,18 +25,12 @@ public abstract class ActivityVS extends ActionBarActivity {
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private View progressContainer;
     private FrameLayout mainLayout;
-    /*public void showProgress(boolean showProgress, boolean animate);
-
-    public void showMessage(Integer statusCode, String caption, String message);*/
-
-    //@Override public boolean onKeyDown(int keyCode, KeyEvent event) {}
 
     public void initActivityVS(FrameLayout mainLayout, View progressContainer) {
         this.mainLayout = mainLayout;
         this.mainLayout.getForeground().setAlpha(0);
         this.progressContainer = progressContainer;
     }
-
 
     public void showMessage(Integer statusCode, String caption, String message) {
         Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
