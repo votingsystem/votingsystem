@@ -83,7 +83,7 @@ class BalanceService {
             weekReportFiles = filesService.getWeekReportFiles(timePeriod, userSubPath)
             //[baseDir:baseDir, reportsFile:new File("${baseDirPath}/balances.json"), systemReceipt:receiptFile]
             log.debug("$methodName - Making data for UserVS '$userVS.nif' - dir: '$weekReportFiles.baseDir'")
-            Map<String, Map> currencyMap = balanceMap.balanceCash
+            Map<String, Map> currencyMap = balanceMap.balancesCash
             Set<Map.Entry<String, Map>> currencyEntries = currencyMap.entrySet()
             currencyEntries.each { currency ->
                 Map<String, BigDecimal> tagVSMap = currency.getValue()

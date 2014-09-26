@@ -1,13 +1,12 @@
 package org.votingsystem.model;
 
 import android.content.Context;
-
+import android.net.Uri;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -26,25 +26,10 @@ public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public UserVS getSender() {
-        return sender;
-    }
-
-    public void setSender(UserVS sender) {
-        this.sender = sender;
-    }
-
-    public List<TagVS> getTagVSList() {
-        return tagVSList;
-    }
-
-    public void setTagVSList(List<TagVS> tagVSList) {
-        this.tagVSList = tagVSList;
-    }
 
     public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, FROM_BANKVS, FROM_USERVS,
-        VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER,
-        VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, INIT_PERIOD;}
+        TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, TRANSACTIONVS_FROM_GROUP_TO_MEMBER,
+        TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -73,7 +58,6 @@ public class TransactionVS  implements Serializable {
     private Date validTo;
     private Date dateCreated;
     private Date lastUpdated;
-
 
     public TransactionVS() {}
 
@@ -169,6 +153,26 @@ public class TransactionVS  implements Serializable {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public UserVS getSender() {
+        return sender;
+    }
+
+    public void setSender(UserVS sender) {
+        this.sender = sender;
+    }
+
+    public List<TagVS> getTagVSList() {
+        return tagVSList;
+    }
+
+    public TagVS getTagVS() {
+        return tagVSList.iterator().next();
+    }
+
+    public void setTagVSList(List<TagVS> tagVSList) {
+        this.tagVSList = tagVSList;
     }
 
     public SMIMEMessageWrapper getMessageSMIME() {
@@ -268,9 +272,9 @@ public class TransactionVS  implements Serializable {
         switch(type) {
             case VICKET_CANCELLATION:
                 return context.getString(R.string.vicket_cancellation);
-            case VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
-            case VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
-            case VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
+            case TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
+            case TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
+            case TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
                 return context.getString(R.string.account_input);
             case VICKET_REQUEST:
                 return context.getString(R.string.account_output);
@@ -302,6 +306,22 @@ public class TransactionVS  implements Serializable {
         s.defaultReadObject();
         messageSMIMEBytes = (byte[]) s.readObject();
         cancellationSMIMEBytes = (byte[]) s.readObject();
+    }
+
+    public static TransactionVS parse(Uri uriData) {
+        TransactionVS transactionVS = new TransactionVS();
+        transactionVS.setAmount(new BigDecimal(uriData.getQueryParameter("amount")));
+        TagVS tagVS = null;
+        if(uriData.getQueryParameter("tagVS") != null) tagVS = new TagVS(uriData.getQueryParameter("tagVS"));
+        else tagVS = new TagVS(TagVS.WILDTAG);
+        transactionVS.setTagVSList(Arrays.asList(tagVS));
+        transactionVS.setCurrencyCode(uriData.getQueryParameter("currencyCode"));
+        transactionVS.setSubject(uriData.getQueryParameter("subject"));
+        UserVS toUserVS = new UserVS();
+        toUserVS.setName(uriData.getQueryParameter("toUser"));
+        toUserVS.setIBAN(uriData.getQueryParameter("toUserIBAN"));
+        transactionVS.setToUserVS(toUserVS);
+        return transactionVS;
     }
 
     public static TransactionVS parse(JSONObject jsonData) throws Exception {
@@ -374,6 +394,15 @@ public class TransactionVS  implements Serializable {
             result.add(TransactionVS.parse((JSONObject) transactionArray.get(i)));
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        String tagVS = null;
+        if(tagVSList != null && !tagVSList.isEmpty()) tagVS = tagVSList.iterator().next().getName();
+        return  "[TransactionVS - subject: '" + subject + "' - amount: '" + amount + "'" +
+            " - currencyCode: " + currencyCode + " - tagVS: '" + tagVS + " - toUser: '" +
+                toUserVS.getName() + "' - toUserIBAN: '" + toUserVS.getIBAN() +"']";
     }
 
 }

@@ -49,7 +49,7 @@ public class Formatter {
                 case SEND_SMIME_VOTE:
                     result = formatVote(jsonObject);
                     break;
-                case VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                case TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
                     result = formatVicketDepositFromGroupToAllMembers(jsonObject);
                     break;
                 default:

@@ -232,7 +232,7 @@ class GroupVSService {
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
 
-        resultMap.balanceCash = transactionVSService.balanceCash(resultMap.balancesTo, resultMap.balancesFrom)
+        resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
 
         return resultMap
     }

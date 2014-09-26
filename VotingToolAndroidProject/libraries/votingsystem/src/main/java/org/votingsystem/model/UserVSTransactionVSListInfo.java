@@ -26,9 +26,9 @@ public class UserVSTransactionVSListInfo {
     private DateUtils.TimePeriod timePeriod;
     private List<TransactionVS> transactionVSFromList;
     private List<TransactionVS> transactionVSToList;
-    private Map<String, Map<String, BigDecimal>> balancesToMap;
-    private Map<String, Map<String, BigDecimal>> balancesFromMap;
-    private Map<String, Map<String, BigDecimal>> balancesResultMap;
+    private Map<String, Map<String, TagVS>> balancesToMap;
+    private Map<String, Map<String, TagVS>> balancesFromMap;
+    private Map<String, Map<String, TagVS>> balancesCashMap;
 
     public List<TransactionVS> getTransactionList() {
         List<TransactionVS> result = new ArrayList<TransactionVS>();
@@ -61,41 +61,33 @@ public class UserVSTransactionVSListInfo {
         this.transactionVSToList = transactionVSToList;
     }
 
-    public Map<String, Map<String, BigDecimal>> getBalancesToMap() {
+    public Map<String, Map<String, TagVS>> getBalancesToMap() {
         return balancesToMap;
     }
 
-    public void setBalancesToMap(Map<String, Map<String, BigDecimal>> balancesToMap) {
+    public void setBalancesToMap(Map<String, Map<String, TagVS>> balancesToMap) {
         this.balancesToMap = balancesToMap;
     }
 
-    public Map<String, Map<String, BigDecimal>> getBalancesFromMap() {
+    public Map<String, Map<String, TagVS>> getBalancesFromMap() {
         return balancesFromMap;
     }
 
-    public void setBalancesFromMap(Map<String, Map<String, BigDecimal>> balancesFromMap) {
+    public void setBalancesFromMap(Map<String, Map<String, TagVS>> balancesFromMap) {
         this.balancesFromMap = balancesFromMap;
     }
 
-    public Map<String, Map<String, BigDecimal>> getBalancesResultMap() {
-        return balancesResultMap;
-    }
-
-    public void setBalancesResultMap(Map<String, Map<String, BigDecimal>> balancesResultMap) {
-        this.balancesResultMap = balancesResultMap;
-    }
-
     public BigDecimal getAvailableForTagVS(String currencyCode, String tagStr) throws ExceptionVS {
-        if(balancesResultMap.containsKey(currencyCode)) {
-            Map<String, BigDecimal> currencyMap = balancesResultMap.get(currencyCode);
-            if(currencyMap.containsKey(tagStr)) return currencyMap.get(tagStr);
+        if(balancesCashMap.containsKey(currencyCode)) {
+            Map<String, TagVS> currencyMap = balancesCashMap.get(currencyCode);
+            if(currencyMap.containsKey(tagStr)) return currencyMap.get(tagStr).getTotal();
         }
         throw new ExceptionVS("User has not account for tag '" + tagStr + "' with currency '" + currencyCode +"'");
     }
 
-    public Map<String, BigDecimal> getTagVSBalancesMap(String currencyCode) throws ExceptionVS {
-        if(balancesResultMap.containsKey(currencyCode)) {
-            return balancesResultMap.get(currencyCode);
+    public Map<String, TagVS> getTagVSBalancesMap(String currencyCode) throws ExceptionVS {
+        if(balancesCashMap.containsKey(currencyCode)) {
+            return balancesCashMap.get(currencyCode);
         } else {
             Log.d(TAG + ".getTagVSBalancesMap(...)", "User has not accounts for currency '" + currencyCode +"'");
             return null;
@@ -115,8 +107,8 @@ public class UserVSTransactionVSListInfo {
                 parseBalanceMap(jsonData.getJSONObject("balancesFrom")));
         if(jsonData.has("balancesTo")) result.setBalancesToMap(
                 parseBalanceMap(jsonData.getJSONObject("balancesTo")));
-        if(jsonData.has("balanceResult")) result.setBalancesResultMap(
-                parseBalanceMap(jsonData.getJSONObject("balanceResult")));
+        if(jsonData.has("balancesCash")) result.setBalancesCashMap(
+                parseBalanceMap(jsonData.getJSONObject("balancesCash")));
         return result;
     }
 
@@ -138,33 +130,41 @@ public class UserVSTransactionVSListInfo {
             }
             jsonData.put("transactionToList", jsonArray);
         }
-        if(balancesFromMap != null) jsonData.put("balancesFrom", toJSON(balancesFromMap));
-        if(balancesToMap != null) jsonData.put("balancesTo", toJSON(balancesToMap));
-        if(balancesResultMap != null) jsonData.put("balanceResult", toJSON(balancesResultMap));
+        if(balancesFromMap != null) jsonData.put("balancesFrom", toJSON(balancesFromMap, false));
+        if(balancesToMap != null) jsonData.put("balancesTo", toJSON(balancesToMap, true));
+        if(balancesCashMap != null) jsonData.put("balancesCash", toJSON(balancesCashMap, false));
         return jsonData;
     }
 
 
-    public static Map<String, Map<String, BigDecimal>> parseBalanceMap(JSONObject jsonData) throws Exception {
+    public static Map<String, Map<String, TagVS>> parseBalanceMap(JSONObject jsonData) throws Exception {
         Iterator currencyIterator = jsonData.keys();
-        Map<String, Map<String, BigDecimal>> result = new HashMap<String, Map<String, BigDecimal>>();
+        Map<String, Map<String, TagVS>> result = new HashMap<String, Map<String, TagVS>>();
         while(currencyIterator.hasNext()) {
             String currencyStr = (String) currencyIterator.next();
-            Map<String, BigDecimal> tagVSBalanceMap = TagVS.parseTagVSBalanceMap(jsonData.getJSONObject(currencyStr));
+            Map<String, TagVS> tagVSBalanceMap = TagVS.parseTagVSBalanceMap(jsonData.getJSONObject(currencyStr));
             result.put(currencyStr, tagVSBalanceMap);
         }
         return result;
     }
 
-    public static JSONObject toJSON(Map<String, Map<String, BigDecimal>> balancesMap) throws Exception {
+    public static JSONObject toJSON(Map<String, Map<String, TagVS>> balancesMap,
+                   boolean isWithTimeLimitedData) throws Exception {
         JSONObject jsonData = new JSONObject();
         Set<String> currencySet = balancesMap.keySet();
         for(String currency: currencySet) {
-            Map tagVSMap = balancesMap.get(currency);
+            Map<String, TagVS> tagVSMap = balancesMap.get(currency);
             JSONObject jsonTagVSData = new JSONObject();
             Set<String> tagSet = tagVSMap.keySet();
             for(String tag: tagSet) {
-                jsonTagVSData.put(tag, tagVSMap.get(tag).toString());
+                if(isWithTimeLimitedData) {
+                    JSONObject data = new JSONObject();
+                    data.put("total", tagVSMap.get(tag).getTotal());
+                    data.put("timeLimited", tagVSMap.get(tag).getTimeLimited());
+                    jsonTagVSData.put(tag, data);
+                } else {
+                    jsonTagVSData.put(tag, tagVSMap.get(tag).getTotal());
+                }
             }
             jsonData.put(currency, jsonTagVSData);
         }
@@ -179,4 +179,11 @@ public class UserVSTransactionVSListInfo {
         this.timePeriod = timePeriod;
     }
 
+    public Map<String, Map<String, TagVS>> getBalancesCashMap() {
+        return balancesCashMap;
+    }
+
+    public void setBalancesCashMap(Map<String, Map<String, TagVS>> balancesCashMap) {
+        this.balancesCashMap = balancesCashMap;
+    }
 }

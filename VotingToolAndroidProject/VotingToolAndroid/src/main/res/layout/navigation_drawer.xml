@@ -1,42 +1,64 @@
-<!--
-  Copyright 2013 https://github.com/votingsystem/votingsystem
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  -->
-
-<android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/drawer_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    <FrameLayout android:id="@+id/mainLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:foreground="@drawable/shape_window_dim" >
+        <android.support.v4.widget.DrawerLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/drawer_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
 
-    <android.support.v4.view.ViewPager
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/pager"
+            <android.support.v4.view.ViewPager
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+            </android.support.v4.view.ViewPager>
+
+            <ExpandableListView
+                android:id="@+id/left_drawer"
+                android:layout_height="match_parent"
+                android:layout_width="235dp"
+                android:layout_gravity="start"
+                android:choiceMode="singleChoice"
+                android:groupIndicator="@drawable/navigation_drawer_expandable_icon"
+                android:divider="@android:color/background_light"
+                android:dividerHeight="1dp"
+                android:background="#ffff"/>
+
+        </android.support.v4.widget.DrawerLayout>
+    </FrameLayout>
+
+    <LinearLayout android:id="@+id/progressContainer"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </android.support.v4.view.ViewPager>
-
-    <ExpandableListView
-        android:id="@+id/left_drawer"
         android:layout_height="match_parent"
-        android:layout_width="235dp"
-        android:layout_gravity="start"
-        android:choiceMode="singleChoice"
-        android:groupIndicator="@drawable/navigation_drawer_expandable_icon"
-        android:divider="@android:color/background_light"
-        android:dividerHeight="1dp"
-        android:background="#ffff"/>
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        android:gravity="center">
+        <ProgressBar android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateDrawable="@drawable/progress_loading"/>
+        <TextView android:id="@+id/progressMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/connecting_caption"
+            android:layout_marginLeft="10dip"
+            android:textColor="@color/loading_data"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:paddingTop="4dip"
+            android:singleLine="true" />
+    </LinearLayout>
 
-</android.support.v4.widget.DrawerLayout>
+</RelativeLayout>

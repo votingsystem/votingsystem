@@ -82,13 +82,13 @@
             case 'FROM_BANKVS':
                 transactionDescription = "<g:message code="bankVSInputLbl"/>"
                 break;
-            case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':
+            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
                 transactionDescription = "<g:message code="vicketDepositFromGroupToMember"/>"
                 break;
-            case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP':
+            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
                 transactionDescription = "<g:message code="vicketDepositFromGroupToMemberGroup"/>"
                 break;
-            case 'VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS':
+            case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
                 transactionDescription = "<g:message code="vicketDepositFromGroupToAllMembers"/>"
                 break;
         }

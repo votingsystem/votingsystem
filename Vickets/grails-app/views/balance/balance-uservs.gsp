@@ -50,15 +50,15 @@
         <div style="">
             <div layout horizontal style="width: 100%; border-bottom: 2px solid #6c0404; padding: 10px 0 10px 0;">
                 <div style="min-width: 300px; margin: 0 0 0 20px;">
-                    <template repeat="{{currency in getMapKeys(balance.balanceCash)}}">
+                    <template repeat="{{currency in getMapKeys(balance.balancesCash)}}">
                         <div style="font-weight: bold;color:#6c0404; margin: 0 0 5px 0;">
                             <g:message code="cashLbl"/> - <g:message code="currencyLbl"/> {{currency}}
                         </div>
                         <div>
                             <div horizontal layout>
-                                <template repeat="{{tag in getMapKeys(balance.balanceCash[currency])}}">
+                                <template repeat="{{tag in getMapKeys(balance.balancesCash[currency])}}">
                                     <div style="margin:0 0 0 80px;">
-                                        <div>{{tag}}: {{balance.balanceCash[currency][tag] | formatAmount}}</div>
+                                        <div>{{tag}}: {{balance.balancesCash[currency][tag] | formatAmount}}</div>
                                         <div>
                                             <template if="{{isTimeLimited(currency, tag)}}">
                                                 <core-tooltip large label="{{getTimeLimitedForTagMsg(currency, tag)}}" position="right">
@@ -176,10 +176,10 @@
 
             var balancesToMap = this.balance.balancesTo == null ? {}: this.balance.balancesTo.EUR || {}
             var balancesFromMap = this.balance.balancesFrom == null ? {}: this.balance.balancesFrom.EUR || {}
-            var balanceCashMap = this.balance.balanceCash == null ? {}: this.balance.balanceCash.EUR || {}
+            var balancesCashMap = this.balance.balancesCash == null ? {}: this.balance.balancesCash.EUR || {}
 
             //we know the order serie -> incomes, expenses, available, time limited available
-            this.$.balanceChart.series = calculateUserBalanceSeries(balancesToMap, balancesFromMap, balanceCashMap)
+            this.$.balanceChart.series = calculateUserBalanceSeries(balancesToMap, balancesFromMap, balancesCashMap)
         },
         viewTransaction: function(e) {
             //console.log(this.tagName + " - viewTransaction - e.detail: " + JSON.stringify(e.detail))

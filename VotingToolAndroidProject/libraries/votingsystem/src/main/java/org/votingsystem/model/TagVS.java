@@ -26,6 +26,8 @@ public class TagVS  implements Serializable {
 
     private Long id;
     private String name;
+    private BigDecimal total;
+    private BigDecimal timeLimited;
     private Long frequency;
     private Date dateCreated;
     private Date lastUpdated;
@@ -34,6 +36,16 @@ public class TagVS  implements Serializable {
     private Set<EventTagVS> eventTagVSes = new HashSet<EventTagVS>(0);
 
     public TagVS() { }
+
+    public TagVS(String name) {
+        this.name = name;
+    }
+
+    public TagVS(String name, BigDecimal total, BigDecimal timeLimited) {
+        this.name = name;
+        this.total = total;
+        this.timeLimited = timeLimited;
+    }
    
     public Long getId() {
         return this.id;
@@ -83,13 +95,19 @@ public class TagVS  implements Serializable {
         return lastUpdated;
     }
 
-    public static Map<String, BigDecimal> parseTagVSBalanceMap(JSONObject jsonData) throws Exception {
-        Map<String, BigDecimal> result = new HashMap<String, BigDecimal>();
+    public static Map<String, TagVS> parseTagVSBalanceMap(JSONObject jsonData) throws Exception {
+        Map<String, TagVS> result = new HashMap<String, TagVS>();
         Iterator tagIterator = jsonData.keys();
         while(tagIterator.hasNext()) {
             String tagStr = (String) tagIterator.next();
-            BigDecimal tagBalance = new BigDecimal(jsonData.getString(tagStr));
-            result.put(tagStr, tagBalance);
+            Object tagData = jsonData.get(tagStr);
+            if(tagData instanceof String || tagData instanceof Double) {
+                result.put(tagStr, new TagVS(tagStr, new BigDecimal(tagData.toString()), null));
+            } else {
+                BigDecimal tagTotal = new BigDecimal(((JSONObject)tagData).getString("total"));
+                BigDecimal tagTimeLimited = new BigDecimal(((JSONObject)tagData).getString("timeLimited"));
+                result.put(tagStr, new TagVS(tagStr, tagTotal, tagTimeLimited));
+            }
         }
         return result;
     }
@@ -116,4 +134,19 @@ public class TagVS  implements Serializable {
         return result;
     }
 
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
+
+    public BigDecimal getTimeLimited() {
+        return timeLimited;
+    }
+
+    public void setTimeLimited(BigDecimal timeLimited) {
+        this.timeLimited = timeLimited;
+    }
 }

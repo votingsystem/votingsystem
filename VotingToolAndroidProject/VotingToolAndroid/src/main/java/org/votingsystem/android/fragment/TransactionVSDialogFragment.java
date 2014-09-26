@@ -60,30 +60,22 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
 
 
     public static void showPinScreen(FragmentManager fragmentManager, String broadCastId,
-             String message, boolean isWithPasswordConfirm) {
+             String message, boolean isWithPasswordConfirm, TypeVS type) {
         boolean isWithCertValidation = true;
         TransactionVSDialogFragment pinDialog = TransactionVSDialogFragment.newInstance(
-                message, isWithPasswordConfirm, isWithCertValidation, broadCastId);
+                message, isWithPasswordConfirm, isWithCertValidation, broadCastId, type);
         pinDialog.show(fragmentManager, TransactionVSDialogFragment.TAG);
     }
-
-    public static void showPinScreenWithoutCertValidation(FragmentManager fragmentManager,
-            String broadCastId, String message, boolean isWithPasswordConfirm) {
-        boolean isWithCertValidation = false;
-        TransactionVSDialogFragment pinDialog = TransactionVSDialogFragment.newInstance(
-                message, isWithPasswordConfirm, isWithCertValidation, broadCastId);
-        pinDialog.show(fragmentManager, TransactionVSDialogFragment.TAG);
-    }
-
 
     public static TransactionVSDialogFragment newInstance(String msg, boolean isWithPasswordConfirm,
-            boolean isWithCertValidation, String caller) {
+            boolean isWithCertValidation, String caller, TypeVS type) {
         TransactionVSDialogFragment dialog = new TransactionVSDialogFragment();
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, msg);
         args.putString(ContextVS.CALLER_KEY, caller);
         args.putBoolean(ContextVS.PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
         args.putBoolean(ContextVS.CERT_VALIDATION_KEY, isWithCertValidation);
+        args.putSerializable(ContextVS.TYPEVS_KEY, type);
         dialog.setArguments(args);
         return dialog;
     }

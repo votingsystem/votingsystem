@@ -36,12 +36,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
 import org.votingsystem.android.fragment.VicketGridFragment;
@@ -56,11 +61,13 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ScreenUtils;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class NavigationDrawer extends ActionBarActivity {
+public class NavigationDrawer extends ActivityVS {
 
     public static final String TAG = NavigationDrawer.class.getSimpleName();
 
@@ -76,10 +83,11 @@ public class NavigationDrawer extends ActionBarActivity {
     private AppContextVS contextVS = null;
     private String broadCastId = NavigationDrawer.class.getSimpleName();
     //private RepresentativeNavigationPagerAdapter representativePagerAdapter;
+    private Menu mainMenu;
     private SingleOptionPagerAdapter singleOptionPagerAdapter;
     private EventNavigationPagerAdapter pagerAdapter;
     private VicketPagerAdapter vicketAdapter;
-    private Menu mainMenu;
+
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -120,8 +128,10 @@ public class NavigationDrawer extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.navigation_drawer);
-
+        initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
 

@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.util.encoders.Base64;
@@ -37,6 +38,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TimestampException;
+
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
@@ -48,7 +50,6 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

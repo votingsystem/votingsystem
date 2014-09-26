@@ -19,7 +19,6 @@ var Operation = {
     SAVE_RECEIPT_ANONYMOUS_DELEGATION:"SAVE_RECEIPT_ANONYMOUS_DELEGATION",
     OPEN_RECEIPT: "OPEN_RECEIPT",
     CONTROL_CENTER_ASSOCIATION : "CONTROL_CENTER_ASSOCIATION",
-    CONTROL_CENTER_STATE_CHANGE_SMIME: "CONTROL_CENTER_STATE_CHANGE_SMIME",
     BACKUP_REQUEST: "BACKUP_REQUEST",
     MANIFEST_PUBLISHING: "MANIFEST_PUBLISHING",
     MANIFEST_SIGN: "MANIFEST_SIGN",
@@ -391,8 +390,8 @@ function notifiyClientToolConnection() {
 }
 
 //Message -> base64 encoded JSON
-https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
-    function setClientToolMessage(callerId, message) {
-        var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
-        window[callerId].setClientToolMessage(b64_to_utf8)
-    }
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
+function setClientToolMessage(callerId, message) {
+    var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
+    window[callerId](b64_to_utf8)
+}

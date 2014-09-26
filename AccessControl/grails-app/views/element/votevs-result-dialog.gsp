@@ -149,14 +149,9 @@
                 console.log("cancellationConfirmed")
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CANCEL_VOTE)
                 webAppMessage.message = this.hashCertVSBase64
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                 webAppMessage.serviceURL = "${createLink(controller:'voteVSCanceller', absolute:true)}"
                 webAppMessage.signedMessageSubject = "<g:message code="cancelVoteLbl"/>"
-
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("vote cancellation callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     this.statusCode = appMessageJSON.statusCode
@@ -166,8 +161,7 @@
                         this.message = "<g:message code="voteVSCancellationOKMsg"/>"
                         this.caption =  "<g:message code="voteVSCancellationCaption"/>"
                     } else  showMessageVS(appMessageJSON.message, '<g:message code="voteVSCancellationErrorCaption"/>')
-                }.bind(this)}
-                webAppMessage.callerCallback = objectId
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }
         });

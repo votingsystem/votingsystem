@@ -27,7 +27,7 @@ class TransactionVS_BankVSService {
                 "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
         UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))
         if (!messageJSON.amount || !messageJSON.currency || !toUser || ! messageJSON.fromUserIBAN ||
-                !messageJSON.fromUser|| (TypeVS.VICKET_DEPOSIT_FROM_BANKVS != TypeVS.valueOf(messageJSON.operation))) {
+                !messageJSON.fromUser|| (TypeVS.TRANSACTIONVS_FROM_BANKVS != TypeVS.valueOf(messageJSON.operation))) {
             if(!toUser) msg = messageSource.getMessage('userNotFoundForIBANErrorMsg', [messageJSON.toUserIBAN].toArray(), locale)
             else msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
@@ -68,7 +68,7 @@ class TransactionVS_BankVSService {
         String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${triggeredTransaction.id}")
         log.debug("${metaInfMsg} - from BankVS '${signer.id}' to userVS '${toUser.id}' ")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Transaction OK", metaInf:metaInfMsg,
-                type:TypeVS.VICKET_DEPOSIT_FROM_BANKVS)
+                type:TypeVS.TRANSACTIONVS_FROM_BANKVS)
     }
 
 }

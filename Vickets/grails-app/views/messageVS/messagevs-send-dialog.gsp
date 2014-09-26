@@ -59,7 +59,7 @@
                 webAppMessage.targetCertList = this.certificateList
                 webAppMessage.contentType = 'application/messagevs'
                 webAppMessage.setCallback(function(appMessage) {
-                    console.log(this.tagName + " - " + this.id + " - setClientToolMessage: " + appMessage);
+                    console.log(this.tagName + " - " + this.id + " - sendMessageVS callback: " + appMessage);
                     this.fire('message-response', appMessage)
                 }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);

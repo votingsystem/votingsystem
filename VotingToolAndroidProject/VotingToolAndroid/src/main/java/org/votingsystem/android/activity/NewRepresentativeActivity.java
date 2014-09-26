@@ -210,7 +210,7 @@ public class NewRepresentativeActivity extends ActionBarActivity {
     }
 
     private void loadRepresentativeData(String representativeNif) {
-        TextView progressMessage = (TextView) findViewById(R.id.progressContainer);
+        TextView progressMessage = (TextView) findViewById(R.id.progressMessage);
         progressMessage.setText(getString(R.string.loading_data_msg));
         showProgress(true, true);
         Intent startIntent = new Intent(this, RepresentativeService.class);

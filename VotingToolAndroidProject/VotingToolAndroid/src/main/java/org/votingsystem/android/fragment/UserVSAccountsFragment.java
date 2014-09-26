@@ -15,30 +15,27 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-
+import org.votingsystem.android.activity.ActivityVS;
+import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContextVS;
-
-
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ExceptionVS;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -47,7 +44,6 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -58,24 +54,13 @@ public class UserVSAccountsFragment extends Fragment {
 
 	public static final String TAG = UserVSAccountsFragment.class.getSimpleName();
 
-    private static final int ADMIN_ACCESS_CONTROL = 1;
-
-    private BigDecimal amount;
-    private String tagVS;
-    private String currencyCode = Currency.getInstance("EUR").getCurrencyCode();
-    private Uri uriData;
-    private String IBAN;
-    private String subject;
-    private String receptor;
+    private TransactionVS transactionVS;
     private View rootView;
     private String broadCastId = UserVSAccountsFragment.class.getSimpleName();
     private AppContextVS contextVS;
-    private View progressContainer;
-    private TextView lapse_info;
     private TextView last_request_date;
     private TextView time_remaining_info;
     private ListView accounts_list_view;
-    private FrameLayout mainLayout;
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private Menu fragmentMenu;
 
@@ -98,24 +83,23 @@ public class UserVSAccountsFragment extends Fragment {
                     sendTransactionVS();
                     break;
             }
-
         } else {
             switch(responseVS.getTypeVS()) {
                 case VICKET_REQUEST:
                     if(ResponseVS.SC_PROCESSING == responseVS.getStatusCode()) {
-                        amount = (BigDecimal) responseVS.getData();
+                        BigDecimal amount = (BigDecimal) responseVS.getData();
                         PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                                 getString(R.string.vicket_request_pin_msg, amount,
-                                currencyCode), false, TypeVS.VICKET_REQUEST);
+                                transactionVS.getCurrencyCode()), false, TypeVS.VICKET_REQUEST);
                     } else {
-                        showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                        ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                                 responseVS.getNotificationMessage());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode())
                             loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
                     }
                     break;
                 case VICKET_SEND:
-                    showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode())
                         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
@@ -123,7 +107,7 @@ public class UserVSAccountsFragment extends Fragment {
                 case VICKET_USER_INFO:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
-                    } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                    } else ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                             responseVS.getNotificationMessage());
                     break;
                 case INIT_VALIDATED_SESSION:
@@ -140,10 +124,10 @@ public class UserVSAccountsFragment extends Fragment {
                         connectToServiceMenuItem.setTitle(getString(R.string.connect_to_service_lbl));
                     }
                     break;
-                default: showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
+                default: ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
             }
-            showProgress(false, false);
+            ((ActivityVS)getActivity()).showProgress(false, false);
         }
         }
     };
@@ -165,16 +149,11 @@ public class UserVSAccountsFragment extends Fragment {
         rootView = inflater.inflate(R.layout.uservs_accounts_fragment, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         accounts_list_view = (ListView) rootView.findViewById(R.id.accounts_list_view);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
         if(savedInstanceState != null) {
-            currencyCode = (String) savedInstanceState.getSerializable(ContextVS.CURRENCY_KEY);
-            amount = (BigDecimal) savedInstanceState.getSerializable(ContextVS.VALUE_KEY);
-            IBAN = savedInstanceState.getString(ContextVS.IBAN_KEY);
+            transactionVS = (TransactionVS)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);;
         }
         return rootView;
     }
@@ -182,36 +161,31 @@ public class UserVSAccountsFragment extends Fragment {
     @Override public void onStart() {
         Log.d(TAG + ".onStart()", "onStart");
         super.onStart();
-        uriData = getArguments().getParcelable(ContextVS.URI_KEY);
-        if(uriData != null) {
-            amount = new BigDecimal(uriData.getQueryParameter("amount"));
-            tagVS = uriData.getQueryParameter("tagVS");
-            if(tagVS == null || tagVS.isEmpty()) tagVS = TagVS.WILDTAG;
-            currencyCode = uriData.getQueryParameter("currencyCode");
-            subject = uriData.getQueryParameter("subject");
-            receptor = uriData.getQueryParameter("receptor");
-            Log.d(TAG + ".onStart(...)", "tag: " +  tagVS + " - amount: " + amount + " - currency: "
-                    + currencyCode + " - subject: " + subject + " - receptor: " + receptor);
+        if(getArguments().getParcelable(ContextVS.URI_KEY) != null) {
+            transactionVS = TransactionVS.parse((Uri) getArguments().getParcelable(
+                    ContextVS.URI_KEY));
+            Log.d(TAG + ".onStart(...)", transactionVS.toString());
             BigDecimal cashAvailable = null;
             try {
                 cashAvailable = contextVS.getUserVSTransactionVSListInfo().getAvailableForTagVS(
-                        currencyCode, tagVS);
+                        transactionVS.getCurrencyCode(), transactionVS.getTagVS().getName());
             } catch(Exception ex) {ex.printStackTrace();}
-            if(cashAvailable != null && cashAvailable.compareTo(amount) == 1) {
+            if(cashAvailable != null && cashAvailable.compareTo(transactionVS.getAmount()) == 1) {
                 TransactionVSDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.transactionvs_send_pin_msg, amount,
-                                currencyCode.toString(), receptor, subject), false);
+                        getString(R.string.transactionvs_send_pin_msg, transactionVS.getAmount(),
+                            transactionVS.getCurrencyCode(), transactionVS.getToUserVS().getName(),
+                            transactionVS.getSubject()), false, null);
             } else {
-                showMessage(ResponseVS.SC_ERROR, getString(R.string.insufficient_cash_caption),
-                        getString(R.string.insufficient_cash_msg, currencyCode,
-                                amount.toString(), cashAvailable));
+                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.insufficient_cash_caption),
+                        getString(R.string.insufficient_cash_msg, transactionVS.getCurrencyCode(),
+                                transactionVS.getAmount().toString(), cashAvailable));
             }
         }
     }
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
         Date lastCheckedTime = contextVS.getVicketAccountLastChecked();
         if(lastCheckedTime == null) {
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.uservs_accountvs_info_missing_caption),
+            ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.uservs_accountvs_info_missing_caption),
                     getString(R.string.uservs_accountvs_info_missing));
             return;
         }
@@ -222,7 +196,7 @@ public class UserVSAccountsFragment extends Fragment {
                     DateUtils.getLongDate_Es(timePeriod.getDateTo()))));
             UserVSTransactionVSListInfo userInfo = contextVS.getUserVSTransactionVSListInfo();
             if(userInfo != null) {
-                Map<String, BigDecimal> tagVSBalancesMap = contextVS.getUserVSTransactionVSListInfo().
+                Map<String, TagVS> tagVSBalancesMap = contextVS.getUserVSTransactionVSListInfo().
                         getTagVSBalancesMap(Currency.getInstance("EUR").getCurrencyCode());
                 if(tagVSBalancesMap != null) {
                     String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
@@ -247,20 +221,12 @@ public class UserVSAccountsFragment extends Fragment {
         if(Activity.RESULT_OK == requestCode) {
             statusCode = ResponseVS.SC_OK;
             caption = getString(R.string.operation_ok_msg);
-            showMessage(statusCode, caption, message);
+            ((ActivityVS)getActivity()).showMessage(statusCode, caption, message);
         } else if(message != null) {
             statusCode = ResponseVS.SC_ERROR;
             caption = getString(R.string.operation_error_msg);
-            showMessage(statusCode, caption, message);
+            ((ActivityVS)getActivity()).showMessage(statusCode, caption, message);
         }
-    }
-
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -289,7 +255,7 @@ public class UserVSAccountsFragment extends Fragment {
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            showProgress(true, true);
+            ((ActivityVS)getActivity()).showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -297,15 +263,13 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendVicketRequest() {
-        Log.d(TAG + ".sendVicketRequest(...) ", "amount: " + amount);
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.VALUE_KEY, amount);
-            startIntent.putExtra(ContextVS.CURRENCY_KEY, currencyCode);
-            showProgress(true, true);
+            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
+            ((NavigationDrawer)getActivity()).showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -313,14 +277,13 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendVicket() {
-        Log.d(TAG + ".sendVicket(...) ", "amount: " + amount);
         try {
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.URI_KEY, uriData);
-            showProgress(true, true);
+            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
+            ((NavigationDrawer)getActivity()).showProgress(true, true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -328,47 +291,16 @@ public class UserVSAccountsFragment extends Fragment {
     }
 
     private void sendTransactionVS() {
-        Log.d(TAG + ".sendTransactionVS(...) - TODO - ", "sendTransactionVS: " + amount);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
+        try {
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    TransactionVSService.class);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);
+            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
+            ((ActivityVS)getActivity()).showProgress(true, true);
+            getActivity().startService(startIntent);
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -379,7 +311,6 @@ public class UserVSAccountsFragment extends Fragment {
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
-
     }
 
     @Override public void onPause() {
@@ -392,18 +323,16 @@ public class UserVSAccountsFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
-        outState.putSerializable(ContextVS.CURRENCY_KEY, currencyCode);
-        outState.putSerializable(ContextVS.VALUE_KEY, amount);
-        outState.putSerializable(ContextVS.IBAN_KEY, IBAN);
+        outState.putSerializable(ContextVS.TRANSACTION_KEY, transactionVS);
     }
 
     public class AccountVSInfoAdapter extends ArrayAdapter<String> {
         private final Context context;
-        private Map<String, BigDecimal> tagVSListBalances;
+        private Map<String, TagVS> tagVSListBalances;
         private List<String> tagVSList;
         private String currencyCode;
 
-        public AccountVSInfoAdapter(Context context, Map<String, BigDecimal> tagVSListBalances,
+        public AccountVSInfoAdapter(Context context, Map<String, TagVS> tagVSListBalances,
                     String currencyCode, String[] tagArray) {
             super(context, R.layout.accountvs_info, tagArray);
             this.context = context;
@@ -419,7 +348,7 @@ public class UserVSAccountsFragment extends Fragment {
                     Context.LAYOUT_INFLATER_SERVICE);
             View accountView = inflater.inflate(R.layout.accountvs_info, parent, false);
             String selectedtag = tagVSList.get(position);
-            final BigDecimal accountBalance = tagVSListBalances.get(selectedtag);
+            final BigDecimal accountBalance = tagVSListBalances.get(selectedtag).getTotal();
             Button request_button = (Button) accountView.findViewById(R.id.request_button);
             if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
                 request_button.setOnClickListener(new OnClickListener() {

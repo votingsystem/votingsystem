@@ -40,19 +40,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVSActivity extends ActionBarActivity {
+public class BrowserVSActivity extends ActivityVS {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
     private String viewerURL = null;
-    private View progressContainer;
     private TypeVS operationType;
-    private FrameLayout mainLayout;
     private AppContextVS contextVS = null;
     private String broadCastId = BrowserVSActivity.class.getSimpleName();
     private WebView webView;
     private OperationVS operationVS;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -106,9 +103,7 @@ public class BrowserVSActivity extends ActionBarActivity {
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
-        mainLayout = (FrameLayout)findViewById(R.id.mainLayout);
-        mainLayout.getForeground().setAlpha(0);
-        progressContainer = findViewById(R.id.progressContainer);
+        initActivityVS((FrameLayout)findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //getSupportActionBar().setTitle(getString(R.string.browswevs_lbl));
         getSupportActionBar().hide();
@@ -202,56 +197,6 @@ public class BrowserVSActivity extends ActionBarActivity {
                 getString(R.string.enter_pin_signature_device_msg), false, null);
     }
 
-    private void showMessage(Integer statusCode, String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        showProgress(false, true);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(this,
-                        android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
-    }
-
     private void sendResult(int result, String message) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(ContextVS.MESSAGE_KEY, message);
@@ -308,7 +253,6 @@ public class BrowserVSActivity extends ActionBarActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putString(ContextVS.URL_KEY, viewerURL);
         outState.putSerializable(ContextVS.TYPEVS_KEY, operationType);
     }

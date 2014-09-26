@@ -51,13 +51,13 @@
         console.log("sendCertAuthority")
         var webAppMessage = sendCertAuthorityEditor.get();
         webAppMessage.statusCode = ResponseVS.SC_PROCESSING
-        var objectId = Math.random().toString(36).substring(7)
-        window[objectId] = {setClientToolMessage: function(appMessage) {
+        webAppMessage.objectId = Math.random().toString(36).substring(7)
+        window[webAppMessage.objectId] = function(appMessage) {
             console.log("sendCertAuthority - message: " + appMessage);
             var appMessageJSON = toJSON(appMessage)
             showMessageVS(appMessageJSON.message, "sendCertAuthority - status: " + appMessageJSON.statusCode)
-        }}
-        webAppMessage.callerCallback = objectId
+        }
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
+
 </asset:script>

@@ -237,13 +237,13 @@
             console.log("showDepositDialog")
             //e.detail.isSelected
             if('fromGroupToMember' == e.detail.item.id) {
-                this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER, this.groupvs.name,
+                this.$.depositForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER, this.groupvs.name,
                         this.groupvs.IBAN , this.groupvs.id)
             } else if('fromGroupToMemberGroup' == e.detail.item.id) {
-                this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
+                this.$.depositForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
                         this.groupvs.IBAN, this.groupvs.id)
             } else if('fromGroupToAllMember' == e.detail.item.id) {
-                this.$.depositForm.init(Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
+                this.$.depositForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
                         this.groupvs.IBAN, this.groupvs.id)
             }
             this.page = 1;

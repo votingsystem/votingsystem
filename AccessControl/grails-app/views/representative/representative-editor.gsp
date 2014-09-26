@@ -93,18 +93,12 @@
                     return
                 }
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.filePath = this.selectedImagePath
-                webAppMessage.signedContent = {representativeInfo:this.$.textEditor.getData(), operation:Operation.REPRESENTATIVE_DATA}
+                webAppMessage.signedContent = {representativeInfo:this.$.textEditor.getData(),
+                    operation:Operation.REPRESENTATIVE_DATA}
                 webAppMessage.serviceURL = "${createLink( controller:'representative', absolute:true)}"
                 webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("newRepresentativeCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '<g:message code="newRepresentativeERRORCaption"/>'
@@ -113,8 +107,7 @@
                         caption = '<g:message code="newRepresentativeOKCaption"/>';
                     }
                     showMessageVS(msg, caption)
-                }.bind(this)}
-
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
             messagedialog:function() {

@@ -37,7 +37,12 @@ class TestingController {
 
 
     def index() {
-        Map testMap = [date:DateUtils.getDateFromShortString("2014/05/01")]
+        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
+        UserVS userVS
+        UserVS.withTransaction {
+            userVS = UserVS.get(2L)
+        }
+        Map testMap = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
         render testMap as JSON;
     }
 
@@ -47,7 +52,8 @@ class TestingController {
                         DOLLAR:[WILDTAG:[total:new BigDecimal(1454), timeLimited:new BigDecimal(400.5)]]]
         Map balanceFrom = [EUR:[HIDROGENO:new BigDecimal(1080.5), OXIGENO:new BigDecimal(350)], DOLLAR:[WILDTAG:new BigDecimal(6000)],
                            YEN:[WILDTAG1:new BigDecimal(8000)]]
-        Map result = transactionVSService.balanceCash(balanceTo, balanceFrom)
+
+        Map result = transactionVSService.balancesCash(balanceTo, balanceFrom)
         Map allResults = [balanceTo:balanceTo, balanceFrom:balanceFrom, result:result]
         render allResults as JSON
     }

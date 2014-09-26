@@ -1,7 +1,5 @@
 package org.votingsystem.android.callable;
 
-import android.util.Log;
-
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -15,8 +13,6 @@ import org.votingsystem.util.HttpHelper;
 
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
 * @author jgzornoza

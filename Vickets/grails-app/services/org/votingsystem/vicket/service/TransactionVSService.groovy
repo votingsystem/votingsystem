@@ -54,12 +54,12 @@ class TransactionVSService {
         }
         TypeVS transactionType = TypeVS.valueOf(messageJSON.operation)
         switch(transactionType) {
-            case TypeVS.VICKET_DEPOSIT_FROM_BANKVS:
+            case TypeVS.TRANSACTIONVS_FROM_BANKVS:
                 return transactionVS_BankVSService.processDeposit(messageSMIMEReq, messageJSON, locale)
                 break;
-            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
-            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
-            case TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+            case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
+            case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
+            case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
                 return transactionVS_GroupVSService.processDeposit(messageSMIMEReq, messageJSON, locale)
                 break;
             default:
@@ -258,26 +258,26 @@ class TransactionVSService {
         return result
     }
 
-    public Map<String, BigDecimal> balanceCash(Map<String, Map> balancesTo, Map<String, BigDecimal> balancesFrom) {
-        Map<String, Map> balanceCash = getSubBalanceFromMap(balancesTo, 'total');
+    public Map<String, BigDecimal> balancesCash(Map<String, Map> balancesTo, Map<String, BigDecimal> balancesFrom) {
+        Map<String, Map> balancesCash = getSubBalanceFromMap(balancesTo, 'total');
         for(Map.Entry<String, Map> currency : balancesFrom.entrySet()) {
-            if(balanceCash [currency.getKey()]) {
+            if(balancesCash [currency.getKey()]) {
                 for(Map.Entry<String, BigDecimal> tagEntry : currency.getValue().entrySet()) {
-                    if(balanceCash[currency.getKey()][tagEntry.getKey()]) {
-                        BigDecimal balanceCashTagAmount = balanceCash[currency.getKey()][tagEntry.getKey()]
-                        balanceCash[currency.getKey()][tagEntry.getKey()] = balanceCashTagAmount.subtract(tagEntry.getValue())
-                    } else balanceCash[currency.getKey()][tagEntry.getKey()] = new BigDecimal(tagEntry.getValue()).negate()
+                    if(balancesCash[currency.getKey()][tagEntry.getKey()]) {
+                        BigDecimal balancesCashTagAmount = balancesCash[currency.getKey()][tagEntry.getKey()]
+                        balancesCash[currency.getKey()][tagEntry.getKey()] = balancesCashTagAmount.subtract(tagEntry.getValue())
+                    } else balancesCash[currency.getKey()][tagEntry.getKey()] = new BigDecimal(tagEntry.getValue()).negate()
                 }
             } else {
-                balanceCash[(currency.getKey())] = [:]
-                balanceCash[(currency.getKey())].putAll(currency.getValue())
-                Set<Map.Entry<String, BigDecimal>> tagEntries = balanceCash[(currency.getKey())].entrySet()
+                balancesCash[(currency.getKey())] = [:]
+                balancesCash[(currency.getKey())].putAll(currency.getValue())
+                Set<Map.Entry<String, BigDecimal>> tagEntries = balancesCash[(currency.getKey())].entrySet()
                 tagEntries.each { tagEntry ->
                     tagEntry.setValue(tagEntry.getValue().negate())
                 }
             }
         }
-        return balanceCash
+        return balancesCash
     }
 
     @Transactional
@@ -345,13 +345,13 @@ class TransactionVSService {
             case 'FROM_BANKVS':
                 typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
                 break;
-            case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':
+            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
                 typeDescription = messageSource.getMessage('vicketDepositFromGroupToMember', null, locale);
                 break;
-            case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP':
+            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
                 typeDescription = messageSource.getMessage('vicketDepositFromGroupToMemberGroup', null, locale);
                 break;
-            case 'VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS':
+            case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
                 typeDescription = messageSource.getMessage('vicketDepositFromGroupToAllMembers', null, locale);
                 break;
             default: typeDescription = transactionType

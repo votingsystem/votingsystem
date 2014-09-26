@@ -13,31 +13,31 @@ public class VicketServer extends ActorVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public static final String TAG = "VicketServer";
+    public static final String TAG = VicketServer.class.getSimpleName();
 
 
-    public String getDepositURL() {
-        return getServerURL() + "/transaction/deposit";
+    public String getTransactionVSServiceURL() {
+        return getServerURL() + "/transactionVS/deposit";
     }
 
     public String getVicketRequestServiceURL() {
-        return getServerURL() + "/model/request";
+        return getServerURL() + "/vicket/request";
     }
 
     public String getVicketDepositServiceURL() {
-        return getServerURL() + "/model/deposit";
+        return getServerURL() + "/vicket/deposit";
     }
 
     public String getVicketBatchCancellationServiceURL() {
-        return getServerURL() + "/model/cancelBatch";
+        return getServerURL() + "/vicket/cancelBatch";
     }
 
     public String getVicketCancelServiceURL() {
-        return getServerURL() + "/model/cancel";
+        return getServerURL() + "/vicket/cancel";
     }
 
     public String getVicketBatchServiceURL() {
-        return getServerURL() + "/transaction/vicketBatch";
+        return getServerURL() + "/transactionVS/vicketBatch";
     }
 
 

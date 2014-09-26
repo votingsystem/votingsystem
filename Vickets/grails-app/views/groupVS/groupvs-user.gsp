@@ -99,60 +99,33 @@
             activateUser : function(e) {
                 console.log("activateUser")
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_ACTIVATE)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                 webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'activateUser',absolute:true)}"
-
                 webAppMessage.signedMessageSubject = "<g:message code="activateGroupUserMessageSubject"/>" + " '" +
                         this.subscriptionData.groupvs.name + "'"
                 webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_ACTIVATE,
                     groupvs:{name:this.subscriptionData.groupvs.name, id:this.subscriptionData.groupvs.id},
                     uservs:{name:this.subscriptionData.uservs.name, NIF:this.subscriptionData.uservs.NIF}}
                 webAppMessage.contentType = 'application/x-pkcs7-signature'
-                var objectId = Math.random().toString(36).substring(7)
-                webAppMessage.callerCallback = objectId
-                window[objectId] = {setClientToolMessage: function(appMessage) {
+                webAppMessage.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     if(appMessageJSON != null) {
                         var caption = '<g:message code="activateUserERRORLbl"/>'
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        if (ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "<g:message code='activateUserOKLbl'/>"
                             this.opened = false
-                            this.fire('core-signal', {name: "refresh-uservs-list", data: {uservs:this.userId}});
+                            this.fire('core-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}});
                         }
                         showMessageVS(appMessageJSON.message, caption)
-                    }}.bind(this)}
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
+                    }
+                }.bind(this))
                 VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             },
             initCancellation : function(e) {
                 this.$.reasonDialog.toggle();
             },
             makeDeposit : function(e) {
-                console.log("makeDeposit")
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_USER_DEPOSIT)
-                webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-                webAppMessage.serviceURL = "${createLink(controller:'transactionVS', action:'deposit',absolute:true)}/" + this.subscriptionData.groupvs.id
-                webAppMessage.signedMessageSubject = "<g:message code="makeUserGroupDepositMessageSubject"/>" + " '" + this.subscriptionData.groupvs.name + "'"
-                webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_USER_DEPOSIT,
-                    groupvsName:this.subscriptionData.groupvs.name , id:this.subscriptionData.groupvs.id}
-                webAppMessage.contentType = 'application/x-pkcs7-signature'
-                var objectId = Math.random().toString(36).substring(7)
-                window[objectId] = {setClientToolMessage: function(appMessage) {
-                    console.log("makeDepositCallback - message: " + appMessage);
-                    var appMessageJSON = JSON.parse(appMessage)
-                    if(appMessageJSON != null) {
-                        var caption = '<g:message code="makeDepositERRORLbl"/>'
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = "<g:message code='makeDepositOKLbl'/>"
-                        }
-                        var msg = appMessageJSON.message
-                        showMessageVS(msg, caption) }}}
-                webAppMessage.callerCallback = objectId
-                webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
-                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+                console.log("makeDeposit - TODO - ")
             },
             ajaxResponse:function() {
                 this.isActive = false

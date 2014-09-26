@@ -152,6 +152,7 @@
         <service android:name=".service.WebSocketService"  android:exported="false"/>
         <service android:name=".service.VoteService"  android:exported="false"/>
         <service android:name=".service.VicketService"  android:exported="false"/>
+        <service android:name=".service.TransactionVSService"  android:exported="false"/>
 
     </application>
 </manifest>

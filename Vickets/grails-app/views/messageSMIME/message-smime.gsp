@@ -117,17 +117,17 @@
                 this.signedDocumentStr = JSON.stringify(this.signedDocument)
                 console.log(this.tagName + " - signedDocumentChanged - signedDocument: " + this.signedDocumentStr)
                 switch (this.signedDocument.operation) {
-                    case 'VICKET_DEPOSIT_FROM_BANKVS':
+                    case 'TRANSACTIONVS_FROM_BANKVS':
                         this.caption = "<g:message code="depositFromBankVSLbl"/>"
                         break;
-                    case 'VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS':
+                    case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false
                         this.caption = "<g:message code="vicketDepositFromGroupToAllMembers"/>"
                         break;
-                    case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER':
+                    case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
                         this.caption = "<g:message code="vicketDepositFromGroupToMember"/>"
                         break;
-                    case 'VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP':
+                    case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
                         this.caption = "<g:message code="vicketDepositFromGroupToMemberGroup"/>"
                         break;
                     case 'VICKET_INIT_PERIOD':

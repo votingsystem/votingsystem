@@ -182,19 +182,19 @@
         submitForm: function () {
             this.removeErrorStyle(this.$.formDataDiv)
             switch(this.operation) {
-                case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
+                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
                     if(this.$.receptorBox.getUserList().length == 0){
                         this.setMessage(500, "<g:message code='receptorMissingErrorLbl'/>")
                         return false
                     }
                     break;
-                case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
+                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
                     if(this.$.receptorBox.getUserList().length == 0){
                         this.setMessage(500, "<g:message code='receptorMissingErrorLbl'/>")
                         return false
                     }
                     break;
-                case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                case Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
                     break;
             }
             if(!this.$.amount.validity.valid) {
@@ -262,17 +262,17 @@
             this.isDepositFromGroupToAllMembers = false
             this.$.timeLimitedCheckBox.checked = false
             switch(operation) {
-                case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER:
+                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
                     this.operationMsg = "<g:message code='vicketDepositFromGroupToMember'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorMsg"/>'
                     this.$.receptorBox.multiSelection = false
                     break;
-                case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP:
+                case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
                     this.operationMsg = "<g:message code='vicketDepositFromGroupToMemberGroup'/>"
                     this.selectReceptorMsg = '<g:message code="selectReceptorsMsg"/>'
                     this.$.receptorBox.multiSelection = true
                     break;
-                case Operation.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS:
+                case Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
                     this.isDepositFromGroupToAllMembers = true
                     this.operationMsg = "<g:message code='vicketDepositFromGroupToAllMembers'/>"
                     this.selectReceptorMsg = '<g:message code="depositToAllGroupMembersMsg"/>'

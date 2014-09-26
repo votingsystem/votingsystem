@@ -55,7 +55,6 @@
     <string name="pdf_signed_by_lbl">Firmado electrónicamente por</string>
     
     <string name="CONTROL_CENTER_ASSOCIATION_SMIME">Asociando Centro de Control </string>
-    <string name="CONTROL_CENTER_STATE_CHANGE_SMIME">Cambiando estado de Centro de Control</string>
     <string name="CONTROL_CENTER_CONNECTION_ERROR_MSG">Problemas conectando con el centro de control. Por favor, inténtelo mas tarde</string>
     <string name="BACKUP_REQUEST">Solicitud de copia de seguridad</string>
     <string name="MANIFEST_PUBLISHING">Publicación de documento para recoger firmas</string>

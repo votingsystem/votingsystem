@@ -12,8 +12,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
+
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
@@ -40,6 +40,7 @@ import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.File;
@@ -397,6 +398,27 @@ public class AppContextVS extends Application {
     public VicketServer getVicketServer() {
         return vicketServer;
     }
+
+    //HTTP request -> this must be called from 'appropiated' threads
+    public ResponseVS updateVicketServer() {
+        ResponseVS responseVS = null;
+        try {
+            responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(getVicketServerURL()),
+                    ContentTypeVS.JSON);
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            String message = ex.getMessage();
+            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
+            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
+                    message);
+        }
+        responseVS.setData(vicketServer);
+        return responseVS;
+    }
+
 
     public void setVicketServer(VicketServer vicketServer) {
         serverMap.put(vicketServer.getServerURL(), vicketServer);

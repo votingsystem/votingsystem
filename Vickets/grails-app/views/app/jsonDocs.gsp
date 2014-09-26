@@ -37,9 +37,9 @@
     //date -> 'yyyy/MM/dd HH:mm:ss'
     var depositFromBankVS = new JSONEditor(document.querySelector("#depositFromBankVS"));
     var signedContent
-    var jsonDepositFromBankVS = {operation:"VICKET_DEPOSIT_FROM_BANKVS",
+    var jsonDepositFromBankVS = {operation:"TRANSACTIONVS_FROM_BANKVS",
         signedMessageSubject:"Deposit from BankVS",
-        signedContent:{operation:"VICKET_DEPOSIT_FROM_BANKVS", bankIBAN:"ES1877777777450000000050",
+        signedContent:{operation:"TRANSACTIONVS_FROM_BANKVS", bankIBAN:"ES1877777777450000000050",
             fromUser: "ClientBankVS App1 App2", currency: "EUR",
             fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"],
             amount:"30000", tags:[{name:"HIDROGENO"}], isTimeLimited:true, subject:"BankVS deposit" },
@@ -68,7 +68,7 @@
 
 
     var depositEditor = new JSONEditor(document.querySelector("#depositEditor"));
-    var jsonDepositEditor = {  "operation": "VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER", "amount": "10", "fromUser":
+    var jsonDepositEditor = {  "operation": "TRANSACTIONVS_FROM_GROUP_TO_MEMBER", "amount": "10", "fromUser":
         "Cheques comida &apos;proyecto Vickets&apos;", "subject": "Transacción 'sábado' \"21 junio\" a 20C",
         "fromUserIBAN": "ES8978788989450000000004", "toUserIBAN":  [ "ES9478788989450000000011"], "currency": "EUR",
         "validTo": "2014/06/23 00:00:00"}

@@ -33,6 +33,7 @@ import android.widget.TextView;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContentTypeVS;
@@ -61,9 +62,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private EventVS eventVS;
     private AppContextVS contextVS;
     private Map<Integer, EditText> fieldsMap;
-    private View progressContainer;
-    private FrameLayout mainLayout;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String broadCastId = null;
 
 
@@ -86,7 +84,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) signAndSendButton.setEnabled(true);
-                showProgress(false, true);
+                ((ActivityVS)getActivity()).showProgress(false, true);
             }
         }
     };
@@ -111,7 +109,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 JSONObject signatureContent = eventVS.getSignatureContentJSON();
                 startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
             }
-            showProgress(true, true);
+            ((ActivityVS)getActivity()).showProgress(true, true);
             signAndSendButton.setEnabled(false);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
@@ -157,14 +155,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                         null, false, null);
             }
         });
-        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha(0);
         setHasOptionsMenu(true);
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
         if(savedInstanceState != null && savedInstanceState.getBoolean(
-                ContextVS.LOADING_KEY, false)) showProgress(true, true);
+                ContextVS.LOADING_KEY, false)) ((ActivityVS)getActivity()).showProgress(true, true);
         broadCastId = EventVSFragment.class.getSimpleName() + "_" + eventVS.getId();
         return rootView;
     }
@@ -212,47 +207,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         if(eventVS != null && eventVS.getSubject() != null &&
                 eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
             showMessage(null, getActivity().getString(R.string.subject_lbl), eventVS.getSubject());
-        }
-    }
-
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_out));
-            }
-            progressContainer.setVisibility(View.VISIBLE);
-            //eventContainer.setVisibility(View.INVISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
-                //        this, android.R.anim.fade_in));
-            }
-            progressContainer.setVisibility(View.GONE);
-            //eventContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
         }
     }
 
@@ -343,7 +297,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        showProgress(false, true);
+        ((ActivityVS)getActivity()).showProgress(false, true);
     }
 
     @Override public void onResume() {
@@ -363,7 +317,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
     }
 }
 

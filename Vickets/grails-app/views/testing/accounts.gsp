@@ -23,7 +23,8 @@
         var encodedRefererURL = encodeURIComponent(window.location.href)
         var encodedReceptor = encodeURIComponent('<g:message code="receptorTestWebAccountLbl"/>')
         var uriData = "${createLink(controller:'app', action:'androidClient')}?operation=TRANSACTIONVS&amount=20&currencyCode=EUR" +
-            "&tagVS=HIDROGENO&IBAN=" + encodedIBAN + "&subject=" + encodedSubject + "&receptor=" + encodedReceptor + "&refererURL=" + encodedRefererURL
+            "&tagVS=HIDROGENO&IBAN=" + encodedIBAN + "&subject=" + encodedSubject + "&toUser=" + encodedReceptor +
+            "&toUserIBAN=ES8978788989450000000004&refererURL=" + encodedRefererURL
         window.location.href = uriData.replace("\n","")
         return false
     }

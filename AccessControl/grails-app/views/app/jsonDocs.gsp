@@ -40,14 +40,14 @@
         console.log("publishControlCenter")
         var webAppMessage = publishControlCenterEditor.get();
         webAppMessage.statusCode = ResponseVS.SC_PROCESSING
-        var objectId = Math.random().toString(36).substring(7)
-        window[objectId] = {setClientToolMessage: function(appMessage) {
+        webAppMessage.objectId = Math.random().toString(36).substring(7)
+        window[webAppMessage.objectId] = function(appMessage) {
             console.log("publishControlCenter - message: " + appMessage);
             var appMessageJSON = toJSON(appMessage)
             showMessageVS(appMessageJSON.message, "publishControlCenter - status: " + appMessageJSON.statusCode)
-        }}
-        webAppMessage.callerCallback = objectId
+        }
         VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
     }
+
 </asset:script>
 <asset:deferredScripts/>

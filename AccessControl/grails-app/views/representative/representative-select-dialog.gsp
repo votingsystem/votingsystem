@@ -187,18 +187,13 @@
                         representativeOperation = Operation.REPRESENTATIVE_SELECTION
                     }
                     var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, representativeOperation)
-                    webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-                    webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
                     webAppMessage.signedContent = {operation:representativeOperation,
                         representativeNif:this.representative.nif,
                         representativeName:this.representativeFullName,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value}
-                    webAppMessage.urlTimeStampServer="${grailsApplication.config.VotingSystem.urlTimeStampServer}"
                     webAppMessage.serviceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
                     webAppMessage.signedMessageSubject = '<g:message code="representativeDelegationMsgSubject"/>'
-
-                    var objectId = Math.random().toString(36).substring(7)
-                    window[objectId] = {setClientToolMessage: function(appMessage) {
+                    webAppMessage.setCallback(function(appMessage) {
                         console.log("selectRepresentativeCallback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
                         var caption = '<g:message code="operationERRORCaption"/>'
@@ -220,8 +215,7 @@
                                     "<g:message code='downloadReceiptMsg'/>".format(appMessageJSON.URL)
                         }
                         showMessageVS(msg, caption)
-                    }.bind(this)}
-                    webAppMessage.callerCallback = objectId
+                    }.bind(this))
                     VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
                 }
             },

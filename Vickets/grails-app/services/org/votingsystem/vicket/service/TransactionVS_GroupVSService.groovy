@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -52,8 +53,8 @@ class TransactionVS_GroupVSService {
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
             tag = VicketTagVS.findWhere(name:messageJSON.tags[0].name)
-            if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0].name}'")
-        } else throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
+            if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0].name}'")
+        } else throw new ExceptionVS("Invalid number of tags: '${messageJSON.tags}'")
 
         BigDecimal amount = new BigDecimal(messageJSON.amount)
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
@@ -64,7 +65,7 @@ class TransactionVS_GroupVSService {
                     reason:accountFromMovements.getMessage(), message:accountFromMovements.getMessage(),
                     metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
-        if(operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS) {
+        if(operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS) {
             return processDepositForAllMembers(messageSMIMEReq, messageJSON, accountFromMovements.data, validTo ,
                     currency, groupVS, tag, locale)
         } else {
@@ -87,12 +88,12 @@ class TransactionVS_GroupVSService {
 
             String metaInfMsg
             TransactionVS.Type transactionVSType
-            if(operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER) {
-                transactionVSType = TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER
+            if(operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER) {
+                transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_MEMBER
                 msg = messageSource.getMessage('vicketDepositFromGroupToMemberOKMsg',
                         ["${messageJSON.amount} ${currency.getCurrencyCode()}", receptorList.iterator().next().nif].toArray(), locale)
-            } else if (operationType == TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP) {
-                transactionVSType = TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_MEMBER_GROUP
+            } else if (operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP) {
+                transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP
                 msg = messageSource.getMessage('vicketDepositFromGroupToMemberGroupOKMsg',
                         ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
             }
@@ -130,7 +131,7 @@ class TransactionVS_GroupVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         String msg;
         String metaInfMsg
-        TypeVS operationType = TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS
+        TypeVS operationType = TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS
 
         def subscriptionList = SubscriptionVS.createCriteria().list(offset: 0) {
             eq("groupVS", groupVS)
@@ -141,7 +142,7 @@ class TransactionVS_GroupVSService {
         BigDecimal numUsersBigDecimal = new BigDecimal(subscriptionList.totalCount)
         BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
 
-        TransactionVS.Type transactionVSType = TransactionVS.Type.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS
+        TransactionVS.Type transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS
         msg = messageSource.getMessage('vicketDepositFromGroupToAllMembersGroupOKMsg',
                 ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
         TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
@@ -156,9 +157,9 @@ class TransactionVS_GroupVSService {
             messageJSON.toUserAmount = userPart.toString()
             SMIMEMessageWrapper receipt = signatureVSService.getSMIMEMessage(systemService.getSystemUser().getNif(),
                     it.userVS.getNif(),
-                    messageJSON.toString(), TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS.toString(), null)
+                    messageJSON.toString(), TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS.toString(), null)
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:messageSMIMEReq,
-                    type:TypeVS.VICKET_DEPOSIT_FROM_GROUP_TO_ALL_MEMBERS, content:receipt.getBytes()).save()
+                    type:TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, content:receipt.getBytes()).save()
 
             TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
                     transactionParent, userPart, it.userVS, it.userVS.IBAN).save()
