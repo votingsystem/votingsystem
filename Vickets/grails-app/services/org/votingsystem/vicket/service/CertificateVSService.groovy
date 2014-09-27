@@ -13,10 +13,10 @@ class CertificateVSService {
 
     private static final CLASS_NAME = CertificateVSService.class.getSimpleName()
 
-    def userVSService
     def signatureVSService
     def messageSource
     def grailsLinkGenerator
+    def systemService
 
     /*
      * Método para poder añadir certificados de confianza.

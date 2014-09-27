@@ -12,7 +12,7 @@ public class GroupVS extends UserVS implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
     public void beforeInsert() {
-        if(getType() == null) setType(Type.GROUP);
+        setType(Type.GROUP);
     }
 
 }

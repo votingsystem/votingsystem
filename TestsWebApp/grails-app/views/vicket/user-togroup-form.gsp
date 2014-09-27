@@ -54,7 +54,7 @@
                         <div style="margin:0 10px 0 0;">
                             <label class="" style=""><g:message code="vicketServerLbl"/></label>
                             <input type="url" id="vicketServerURL"  class="form-control" style=""
-                                   value="http://vickets/Vickets/" placeholder="<g:message code="vicketServerURLMsg"/>"/>
+                                   value="http://vickets:8086/Vickets/" placeholder="<g:message code="vicketServerURLMsg"/>"/>
                         </div>
                     </div>
                     <div style=float:right;">
