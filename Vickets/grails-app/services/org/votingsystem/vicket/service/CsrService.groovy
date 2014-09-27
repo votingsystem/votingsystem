@@ -27,18 +27,6 @@ class CsrService {
 	def messageSource
     def signatureVSService
 
-
-    private Map checkSubject(String subjectDN) {
-        // OU=DigitalCurrency,OU=CURRENCY:euro,OU=AMOUNT:10,CN=vicketProviderURL:http://vickets/Vickets
-        String currency
-        String amount
-        String vicketProviderURL
-        if (subjectDN.contains("CURRENCY:")) currency = subjectDN.split("CURRENCY:")[1].split(",")[0];
-        if (subjectDN.contains("AMOUNT:")) amount = subjectDN.split("AMOUNT:")[1].split(",")[0];
-        if (subjectDN.contains("vicketProviderURL:")) vicketProviderURL = subjectDN.split("vicketProviderURL:")[1].split(",")[0];
-        return [vicketProviderURL:vicketProviderURL,amount:amount,currency:currency]
-    }
-
     public synchronized ResponseVS signVicketCsr (byte[] csrPEMBytes, String vicketAmount,
            Currency vicketCurrency, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -58,26 +46,26 @@ class CsrService {
             }
         }
         Map subjectDataMap = Vicket.checkSubject(info.subject.toString());
-        // X500Principal subject = new X500Principal("CN=vicketProviderURL:" + vicketProviderURL +"AMOUNT=" + amount + "CURRENCY=" + currency + ", OU=DigitalCurrency");
+        // X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +"AMOUNT=" + amount + "CURRENCY=" + currency + ", OU=DigitalCurrency");
         if(!certAttributeJSON) throw new ExceptionVS(messageSource.getMessage(
                 'csrMissingDERTaggedObjectErrorMsg', null, locale))
-        String vicketProviderURL = StringUtils.checkURL(certAttributeJSON.vicketProviderURL)
+        String vicketServerURL = StringUtils.checkURL(certAttributeJSON.vicketServerURL)
         String hashCertVSBase64 = certAttributeJSON.hashCertVS
         String amount = certAttributeJSON.amount
         String currency = certAttributeJSON.currency
         if(!currency.equals(subjectDataMap.get("currency")) || !amount.equals(subjectDataMap.get("amount")) ||
-                !vicketProviderURL.equals(subjectDataMap.get("vicketProviderURL"))) throw new ExceptionVS(
+                !vicketServerURL.equals(subjectDataMap.get("vicketServerURL"))) throw new ExceptionVS(
                 messageSource.getMessage('csrVicketSubjectDNErrorMsg',
-                        ["${vicketProviderURL} ${amount} ${currency}",
-                         "${subjectDataMap.get("vicketProviderURL")} ${subjectDataMap.get("amount")} ${subjectDataMap.get("currency")}"].toArray(), locale))
+                        ["${vicketServerURL} ${amount} ${currency}",
+                         "${subjectDataMap.get("vicketServerURL")} ${subjectDataMap.get("amount")} ${subjectDataMap.get("currency")}"].toArray(), locale))
 
         if(!vicketAmount.equals(amount) || !vicketCurrency.getCurrencyCode().equals(currency)) throw new ExceptionVS(
                 messageSource.getMessage('csrVicketValueErrorMsg',
                         ["${vicketAmount} ${vicketCurrency.getCurrencyCode()}", "${amount} ${currency}"].toArray(), locale))
-        if (!serverURL.equals(vicketProviderURL))  throw new ExceptionVS(messageSource.getMessage(
-                "serverMismatchErrorMsg", [serverURL, vicketProviderURL].toArray(), locale));
+        if (!serverURL.equals(vicketServerURL))  throw new ExceptionVS(messageSource.getMessage(
+                "serverMismatchErrorMsg", [serverURL, vicketServerURL].toArray(), locale));
         if (!hashCertVSBase64) throw new ExceptionVS(messageSource.getMessage("csrMissingHashCertVSErrorMsg",
-                [serverURL, vicketProviderURL].toArray(), locale));
+                [serverURL, vicketServerURL].toArray(), locale));
         //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
         DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod()
@@ -87,7 +75,7 @@ class CsrService {
         else {
             Vicket vicket = new Vicket(serialNumber:issuedCert.getSerialNumber().longValue(),
                     content:issuedCert.getEncoded(), state:Vicket.State.OK, hashCertVS:hashCertVSBase64,
-                    vicketProviderURL: vicketProviderURL, amount:new BigDecimal(amount),
+                    vicketServerURL: vicketServerURL, amount:new BigDecimal(amount),
                     currencyCode:vicketCurrency.getCurrencyCode(),
                     authorityCertificateVS:signatureVSService.getServerCertificateVS(),
                     validFrom:timePeriod.getDateFrom(), validTo: timePeriod.getDateTo()).save()

@@ -221,7 +221,7 @@ public class VoteVS implements Serializable {
         this.timeStampToken = timeStampToken;
     }
 
-    @Transient public void genVote() throws NoSuchAlgorithmException {
+    public void genVote() throws NoSuchAlgorithmException {
         logger.debug(" --- genVote ---");
         originHashAccessRequest = UUID.randomUUID().toString();
         hashAccessRequestBase64 = CMSUtils.getHashBase64(originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
@@ -267,7 +267,7 @@ public class VoteVS implements Serializable {
         return voteVS;
     }
 
-    @Transient public HashMap getVoteDataMap() {
+    public HashMap getVoteDataMap() {
         logger.debug("getVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
@@ -280,7 +280,7 @@ public class VoteVS implements Serializable {
         return new HashMap(map);
     }
 
-    @Transient public HashMap getAccessRequestDataMap() {
+    public HashMap getAccessRequestDataMap() {
         logger.debug("getAccessRequestDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.ACCESS_REQUEST.toString());
@@ -291,7 +291,7 @@ public class VoteVS implements Serializable {
         return new HashMap(map);
     }
 
-    @Transient public HashMap getCancelVoteDataMap() {
+    public HashMap getCancelVoteDataMap() {
         logger.debug("getCancelVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.CANCEL_VOTE.toString());
@@ -304,7 +304,7 @@ public class VoteVS implements Serializable {
         return dataMap;
     }
 
-    @Transient public Map getDataMap() {
+    public Map getDataMap() {
         logger.debug("getDataMap");
         Map resultMap = new HashMap();
         if(optionSelected != null) {

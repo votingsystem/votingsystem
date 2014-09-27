@@ -17,7 +17,7 @@ public class EventVSElection extends EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Transient public FieldEventVS checkOptionId(Long opcionId) {
+    public FieldEventVS checkOptionId(Long opcionId) {
         if(opcionId == null) return null;
         for(FieldEventVS opcion: getFieldsEventVS()) {
             if(opcionId.longValue() == opcion.getId().longValue()) return opcion;

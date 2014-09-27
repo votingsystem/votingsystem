@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -39,7 +41,7 @@ public class UserVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-	@Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
+	@Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type = Type.USER;
     @Column(name="nif") private String nif;
 
     @Column(name="IBAN") private String IBAN;
@@ -94,7 +96,7 @@ public class UserVS implements Serializable {
     @Transient private transient X509Certificate certificate;
     @Transient private transient CertificateVS certificateVS;
     @Transient private transient CertificateVS certificateCA;
-
+    @Transient private transient JSONObject metaInfJSON;
     @Transient private transient TimeStampToken timeStampToken;
     @Transient private transient SignerInformation signerInformation;
     @Transient private KeyStore keyStore;
@@ -341,32 +343,32 @@ public class UserVS implements Serializable {
         this.tagVSSet = tagVSSet;
     }
 
-    @Transient public String getSignatureBase64() {
+    public String getSignatureBase64() {
         if (signerInformation.getSignature() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getSignature());
     }
 
-    @Transient public String getSignatureHex() {
+    public String getSignatureHex() {
         if (signerInformation.getSignature() == null) return null;
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         return hexConverter.marshal(getSignatureBase64().getBytes());
     }
 
-    @Transient public String getEncryptiontId() {
+    public String getEncryptiontId() {
         if(signerInformation == null) return null;
         else return CMSUtils.getEncryptiontId(signerInformation.getEncryptionAlgOID()); 
     }
 
-    @Transient public Date getSignatureDate() {
+    public Date getSignatureDate() {
         if(timeStampToken == null) return null;
         return timeStampToken.getTimeStampInfo().getGenTime();
     }
 
-    @Transient public String getDigestId() {
+    public String getDigestId() {
         if(signerInformation == null) return null;
         else return CMSUtils.getDigestId(signerInformation.getDigestAlgOID()); }
 
-    @Transient public String getContentDigestHex() {
+    public String getContentDigestHex() {
         if (signerInformation.getContentDigest() == null) return null;
         return new String(Hex.encode(signerInformation.getContentDigest()));
     }
@@ -375,13 +377,18 @@ public class UserVS implements Serializable {
         this.signerInformation = signer;
     }
 
-    @Transient public String getContentDigestBase64() {
+    public String getContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getContentDigest());
     }
 
-    @Transient public static String getServerInfoURL(String serverURL, Long userId) {
+    public static String getServerInfoURL(String serverURL, Long userId) {
         return serverURL + "/userVS/" + userId;
+    }
+
+    public JSONObject getMetaInfJSON() {
+        if(metaInfJSON == null) metaInfJSON = (JSONObject) JSONSerializer.toJSON(metaInf);
+        return metaInfJSON;
     }
 
     public static UserVS getUserVS (X509Certificate certificate) {

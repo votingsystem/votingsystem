@@ -114,7 +114,7 @@ public class EventVS implements Serializable {
     @Transient private Boolean signed;
     @Transient private VoteVS voteVS;
 
-    @Transient public Type getType() {
+    public Type getType() {
         return type;
     }
 
@@ -122,7 +122,7 @@ public class EventVS implements Serializable {
         this.type = type;
     }
 
-    @Transient public Integer getNumSignaturesCollected() {
+    public Integer getNumSignaturesCollected() {
         return numSignaturesCollected;
     }
 
@@ -130,7 +130,7 @@ public class EventVS implements Serializable {
         this.numSignaturesCollected = numSignaturesCollected;
     }
 
-    @Transient public VoteVS getVoteVS() {
+    public VoteVS getVoteVS() {
         return voteVS;
     }
 
@@ -138,7 +138,7 @@ public class EventVS implements Serializable {
         this.voteVS = voteVS;
     }
 
-    @Transient public Integer getNumVotesCollected() {
+    public Integer getNumVotesCollected() {
         return numVotesCollected;
     }
 
@@ -320,16 +320,16 @@ public class EventVS implements Serializable {
         }
     }
 
-    @Transient public String[] getTags() {
+    public String[] getTags() {
         return tags;
     }
 
-    @Transient public Date getDateFinish() {
+    public Date getDateFinish() {
 		if(dateCanceled != null) return dateCanceled;
 		else return dateFinish;
 	}
 
-    @Transient public boolean isActive(Date selectedDate) {
+    public boolean isActive(Date selectedDate) {
         if(selectedDate == null) return false;
         boolean result = false;
         if (selectedDate.after(dateBegin) && selectedDate.before(dateFinish)) result = true;
@@ -337,7 +337,7 @@ public class EventVS implements Serializable {
         return result;
     }
 
-    @Transient public String getDateBeginStr() {
+    public String getDateBeginStr() {
         return dateBeginStr;
     }
 
@@ -346,7 +346,7 @@ public class EventVS implements Serializable {
         this.dateBegin = DateUtils.getDateFromString(dateBeginStr);
     }
 
-    @Transient public String getDateFinishStr() {
+    public String getDateFinishStr() {
         return dateFinishStr;
     }
 
@@ -355,7 +355,7 @@ public class EventVS implements Serializable {
         this.dateFinish = DateUtils.getDateFromString(dateFinishStr);
     }
 
-    @Transient public Map getDataMap() {
+    public Map getDataMap() {
         logger.debug("getDataMap");
         Map map = new HashMap();
         map.put("subject", subject);
@@ -415,7 +415,7 @@ public class EventVS implements Serializable {
         return null;
     }
 
-    @Transient public HashMap getChangeEventDataMap(String serverURL, State state) {
+    public HashMap getChangeEventDataMap(String serverURL, State state) {
         logger.debug("getCancelEventDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.EVENT_CANCELLATION.toString());

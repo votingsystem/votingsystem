@@ -48,13 +48,7 @@ class SubscriptionVSService {
         JSONObject deviceData = CertUtil.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
         boolean isNewUser = false
 		if (!userVSDB) {
-            userVS.nif = validatedNIF.toUpperCase()
-            userVS.type = UserVS.Type.USER
-			userVS.save();
-            userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
             userVSDB = userVS.save()
-            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
-                    balance:BigDecimal.ZERO, IBAN:userVS.getIBAN(), tag:systemService.getWildTag()).save()
 			certificate = saveUserCertificate(userVS, deviceData);
             isNewUser = true
 			log.debug "checkUser ### NEW UserVS '${userVSDB.nif}' CertificateVS id '${certificate.id}'"
@@ -140,7 +134,7 @@ class SubscriptionVSService {
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "groupNotFound"), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
 
-        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
+        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !systemService.isUserAdmin(
                 messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                  TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), locale)
@@ -168,6 +162,16 @@ class SubscriptionVSService {
         return responseVS
     }
 
+    public UserVSAccount checkUserVSAccount(UserVS userVS){
+        UserVSAccount userAccount = UserVSAccount.findWhere(userVS:userVS)
+        if(!userAccount) {
+            userVS.setIBAN(IbanVSUtil.getInstance().getIBAN(userVS.id))
+            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:userVS,
+                    balance:BigDecimal.ZERO, IBAN:userVS.getIBAN(), tag:systemService.getWildTag()).save()
+        }
+        return userAccount
+    }
+
     @Transactional
     public ResponseVS activateUser(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -192,7 +196,7 @@ class SubscriptionVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, groupNotFound), statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin(
+        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !systemService.isUserAdmin(
                 messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                      TypeVS.VICKET_GROUP_USER_ACTIVATE.toString(), groupVS.name].toArray(), locale)
@@ -209,6 +213,7 @@ class SubscriptionVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "groupUserNotPending"))
         }
+        checkUserVSAccount(userToActivate)
         subscription.setState(SubscriptionVS.State.ACTIVE)
         subscription.dateActivated = Calendar.getInstance().getTime()
         messageSMIMEReq.setSubscriptionVS(subscription)

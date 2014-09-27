@@ -6,6 +6,7 @@ import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
@@ -37,13 +38,10 @@ class TestingController {
 
 
     def index() {
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
-        UserVS userVS
-        UserVS.withTransaction {
-            userVS = UserVS.get(2L)
-        }
-        Map testMap = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
-        render testMap as JSON;
+        //systemService.getSystemUser().save()
+        systemService.updateAdmins()
+        render  "OK"
+        return false
     }
 
     def balance() {
@@ -137,4 +135,5 @@ class TestingController {
     def webView() {}
 
     def polymer() {}
+
 }

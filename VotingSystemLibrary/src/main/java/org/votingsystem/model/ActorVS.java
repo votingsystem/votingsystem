@@ -235,7 +235,7 @@ public class ActorVS implements Serializable {
         this.controlCenters = controlCenters;
     }
 
-    @Transient public String getRootCAServiceURL() {
+    public String getRootCAServiceURL() {
         return serverURL + "/certificateVS/addCertificateAuthority";
     }
 
@@ -243,31 +243,31 @@ public class ActorVS implements Serializable {
         return serverURL + "/certificateVS/addCertificateAuthority";
     }
 
-    @Transient public String getServerInfoURL() {
+    public String getServerInfoURL() {
         return serverURL + "/serverInfo";
     }
 
-    @Transient public String getMultiSignedMessageTestServiceURL() {
+    public String getMultiSignedMessageTestServiceURL() {
         return serverURL + "/encryptor/getMultiSignedMessage";
     }
 
-    @Transient public static String getServerInfoURL(String serverURL) {
+    public static String getServerInfoURL(String serverURL) {
         return serverURL + "/serverInfo";
     }
 
-    @Transient public String getUserCertServiceURL() {
+    public String getUserCertServiceURL() {
         return getServerURL() + "/userVS";
     }
 
-    @Transient public String getMessageVSInboxURL() {
+    public String getMessageVSInboxURL() {
         return getServerURL() + "/messageVS/inbox";
     }
 
-    @Transient public String getUserBaseInitServiceURL() {
+    public String getUserBaseInitServiceURL() {
         return getServerURL() + "/userVS/prepareUserBaseData";
     }
 
-    @Transient public String getReceiptViewerURL() {
+    public String getReceiptViewerURL() {
         return getServerURL() + "/messageSMIME/contentViewer";
     }
 
@@ -275,11 +275,11 @@ public class ActorVS implements Serializable {
         return serverURL + "/messageSMIME/contentViewer";
     }
 
-    @Transient public String getGroupURL(Long groupId) {
+    public String getGroupURL(Long groupId) {
         return getServerURL() + "/groupVS/" + String.valueOf(groupId);
     }
 
-    @Transient public Map getDataMap() {
+    public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();
         map.put("id", id);

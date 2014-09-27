@@ -96,15 +96,15 @@ public class CertificationRequestVS implements java.io.Serializable {
     }
 
     public static CertificationRequestVS getVicketRequest(int keySize, String keyName,
-              String signatureMechanism, String provider, String vicketProviderURL, String hashCertVS,
+              String signatureMechanism, String provider, String vicketServerURL, String hashCertVS,
               String amount, String currency) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
-        X500Principal subject = new X500Principal("CN=vicketProviderURL:" + vicketProviderURL +
+        X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
                 ", OU=AMOUNT:" + amount + ", OU=CURRENCY:" + currency +", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
-        delegationDataMap.put("vicketProviderURL", vicketProviderURL);
+        delegationDataMap.put("vicketServerURL", vicketServerURL);
         delegationDataMap.put("hashCertVS", hashCertVS);
         delegationDataMap.put("amount", amount);
         delegationDataMap.put("currency", currency);

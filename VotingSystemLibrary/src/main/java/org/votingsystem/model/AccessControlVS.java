@@ -35,88 +35,88 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return Type.ACCESS_CONTROL;
     }
 
-    @Transient public String getAccessServiceURL() {
+    public String getAccessServiceURL() {
         return getServerURL() + "/accessRequestVS";
     }
 
-    @Transient public String getAnonymousDelegationRequestServiceURL() {
+    public String getAnonymousDelegationRequestServiceURL() {
         return getServerURL() + "/representative/anonymousDelegationRequest";
     }
 
-    @Transient public String getAnonymousDelegationServiceURL() {
+    public String getAnonymousDelegationServiceURL() {
         return getServerURL() + "/representative/anonymousDelegation";
     }
 
-    @Transient public String getDelegationServiceURL() {
+    public String getDelegationServiceURL() {
         return getServerURL() + "/representative/delegation";
     }
 
-    @Transient public String getBackupServiceURL() {
+    public String getBackupServiceURL() {
         return getServerURL() + "/backupVS";
     }
 
-    @Transient public String getDownloadServiceURL(String param) {
+    public String getDownloadServiceURL(String param) {
         return getServerURL() + "/backupVS/download/" + param;
     }
 
-    @Transient public String getPublishManifestURL() {
+    public String getPublishManifestURL() {
         return getServerURL() + "/eventVSManifest";
     }
 
 
-    @Transient public String getPublishClaimURL() {
+    public String getPublishClaimURL() {
         return getServerURL() + "/eventVSClaim";
     }
 
-    @Transient public String getPublishElectionURL() {
+    public String getPublishElectionURL() {
         return getServerURL() + "/eventVSElection";
     }
 
-    @Transient public String getManifestServiceURL(String eventId) {
+    public String getManifestServiceURL(String eventId) {
         return getServerURL() + "/eventVSManifestCollector/" + eventId;
     }
 
-    @Transient public String getClaimServiceURL() {
+    public String getClaimServiceURL() {
         return getServerURL() + "/eventVSClaimCollector";
     }
 
-    @Transient public String getEventURL(String eventId) {
+    public String getEventURL(String eventId) {
         return getServerURL() + "/eventVS/" + eventId;
     }
 
-    @Transient public String getCancelEventServiceURL() {
+    public String getCancelEventServiceURL() {
         return getServerURL() + "/eventVS/cancelled";
     }
 
-    @Transient public String getServerSubscriptionServiceURL() {
+    public String getServerSubscriptionServiceURL() {
         return getServerURL() + "/subscriptionVS";
     }
 
-    @Transient public String getRepresentativeServiceURL() {
+    public String getRepresentativeServiceURL() {
         return getServerURL() + "/representative";
     }
 
-    @Transient public String getControlCenterCheckServiceURL(String controlCenterServerURL) {
+    public String getControlCenterCheckServiceURL(String controlCenterServerURL) {
         return getServerURL() + "/subscriptionVS/checkControlCenter?serverURL=" + controlCenterServerURL;
     }
 
-    @Transient public String getVoteCancellerServiceURL() {
+    public String getVoteCancellerServiceURL() {
         return getServerURL() + "/voteVSCanceller";
     }
 
-    @Transient public String getVoteServiceURL() {
+    public String getVoteServiceURL() {
         return getServerURL() + "/voteVS";
     }
 
-    @Transient public String getProceduresPageURL() {
+    public String getProceduresPageURL() {
         return getServerURL() + "/app/admin?menu=admin";
     }
 
-    @Transient public String getVotingPageURL() {
+    public String getVotingPageURL() {
         return getServerURL() + "/eventVSElection/index?menu=user";
     }
 
-    @Transient public String getSelectRepresentativePageURL() {
+    public String getSelectRepresentativePageURL() {
         return getServerURL() + "/representative/index?menu=user";
     }
 

@@ -33,7 +33,7 @@ public class Vicket implements Serializable  {
 
     @Column(name="hashCertVS") private String hashCertVS;
     @Column(name="originHashCertVS") private String originHashCertVS;
-    @Column(name="vicketProviderURL") private String vicketProviderURL;
+    @Column(name="vicketServerURL") private String vicketServerURL;
     @Column(name="reason") private String reason;
 
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
@@ -82,12 +82,12 @@ public class Vicket implements Serializable  {
         this.amount = amount;
     }
 
-    public String getVicketProviderURL() {
-        return vicketProviderURL;
+    public String getVicketServerURL() {
+        return vicketServerURL;
     }
 
-    public void setVicketProviderURL(String vicketProviderURL) {
-        this.vicketProviderURL = vicketProviderURL;
+    public void setVicketServerURL(String vicketServerURL) {
+        this.vicketServerURL = vicketServerURL;
     }
 
     public String getOriginHashCertVS() {
@@ -214,14 +214,14 @@ public class Vicket implements Serializable  {
     public static Map checkSubject(String subjectDN) {
         String currency = null;
         String amount = null;
-        String vicketProviderURL = null;
+        String vicketServerURL = null;
         if (subjectDN.contains("CURRENCY:")) currency = subjectDN.split("CURRENCY:")[1].split(",")[0];
         if (subjectDN.contains("AMOUNT:")) amount = subjectDN.split("AMOUNT:")[1].split(",")[0];
-        if (subjectDN.contains("vicketProviderURL:")) vicketProviderURL = subjectDN.split("vicketProviderURL:")[1].split(",")[0];
+        if (subjectDN.contains("vicketServerURL:")) vicketServerURL = subjectDN.split("vicketServerURL:")[1].split(",")[0];
         Map resultMap = new HashMap();
         resultMap.put("currency", currency);
         resultMap.put("amount", amount);
-        resultMap.put("vicketProviderURL", vicketProviderURL);
+        resultMap.put("vicketServerURL", vicketServerURL);
         return resultMap;
     }
 

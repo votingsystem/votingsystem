@@ -41,67 +41,63 @@ public class ImageVS implements java.io.Serializable {
      }
 
 
-	public void setId(Long id) {
+	 public void setId(Long id) {
 		this.id = id;
 	}
 	
-	public Date getDateCreated() {
+	 public Date getDateCreated() {
 		return dateCreated;
 	}
 
 
-	public void setDateCreated(Date dateCreated) {
+	 public void setDateCreated(Date dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 
 
-	public Date getLastUpdated() {
+	 public Date getLastUpdated() {
 		return lastUpdated;
 	}
 
 
-	public void setLastUpdated(Date lastUpdated) {
+	 public void setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
 
-	public UserVS getUserVS() {
+	 public UserVS getUserVS() {
 		return userVS;
 	}
 
 
-	public void setUserVS(UserVS userVS) {
+	 public void setUserVS(UserVS userVS) {
 		this.userVS = userVS;
 	}
 
 
-	public Type getType() {
+	 public Type getType() {
 		return type;
 	}
 
 
-	public void setType(Type type) {
+	 public void setType(Type type) {
 		this.type = type;
 	}
 
 
-	public byte[] getFileBytes() {
+	 public byte[] getFileBytes() {
 		return fileBytes;
 	}
 
-
-	public void setFileBytes(byte[] fileBytes) {
+	 public void setFileBytes(byte[] fileBytes) {
 		this.fileBytes = fileBytes;
 	}
 
-
-	public MessageSMIME getMessageSMIME() {
+     public MessageSMIME getMessageSMIME() {
 		return messageSMIME;
 	}
 
-
-	public void setMessageSMIME(MessageSMIME messageSMIME) {
+	 public void setMessageSMIME(MessageSMIME messageSMIME) {
 		this.messageSMIME = messageSMIME;
 	}
-
 
 }

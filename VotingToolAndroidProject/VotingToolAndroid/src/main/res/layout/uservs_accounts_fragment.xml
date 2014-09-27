@@ -7,7 +7,7 @@
     <TextView android:id="@+id/last_request_date"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:layout_weight="1"
         android:textColor="@color/event_subject"
         android:layout_marginBottom="15dip"
@@ -22,7 +22,7 @@
         android:layout_weight="1"/>
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/accounts_list_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:layout_weight="1"/>
 </LinearLayout>

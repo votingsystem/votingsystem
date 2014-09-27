@@ -16,7 +16,7 @@
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
         </style>
         <div layout vertical>
-            <div horizontal layout center center-justified style="margin: 0 0 10px 0;">
+            <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
                 <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
                 <div flex></div>
                 <div style="font-size: 0.8em;color:#888; margin:0 0 0 10px;">{{numMovements}}</div>
@@ -40,7 +40,7 @@
                     </div>
                 </template>
 
-                <div layout horizontal>
+                <div id="rowTotal" layout horizontal style="display: none;">
                     <div class="dateCreated" style=""></div>
                     <div class="subjectColumn" style="text-align: right;font-weight: bold;">
                         <g:message code="totalLbl"/>:
@@ -54,7 +54,7 @@
     <script>
         Polymer('transactionvs-list-balance', {
             caption:"<g:message code="expensesLbl"/>",
-            numMovements:"",
+            numMovements:0 + " <g:message code="movementsLbl"/>",
             publish: {
                 balances: {value: {}},
                 transactionList: {value: []}
@@ -76,14 +76,15 @@
                 this.numMovements = this.transactionList.length + " <g:message code="movementsLbl"/>"
             },
             balancesChanged:function() {
+                this.transactionTotal = 0
                 if(this.balances != null && this.balances["EUR"]) {
-                    transactionTotal = 0
                     Object.keys(this.balances["EUR"]).forEach(function(entry) {
                         if(this.balances["EUR"][entry].total != null) {
-                            transactionTotal = addNumbers(transactionTotal, this.balances["EUR"][entry].total)
-                        } else transactionTotal = addNumbers(transactionTotal, this.balances["EUR"][entry])
+                            this.transactionTotal = addNumbers(this.transactionTotal, this.balances["EUR"][entry].total)
+                        } else this.transactionTotal = addNumbers(this.transactionTotal, this.balances["EUR"][entry])
                     }.bind(this))
-                    this.transactionTotal = new Number(transactionTotal).toFixed(2) + " EUR"
+                    this.transactionTotal = new Number(this.transactionTotal).toFixed(2) + " EUR"
+                    this.$.rowTotal.style.display = 'block'
                 }
             }
         });

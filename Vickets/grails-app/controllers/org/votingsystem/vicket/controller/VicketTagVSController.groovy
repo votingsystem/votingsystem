@@ -3,7 +3,6 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
-import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS

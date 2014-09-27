@@ -34,7 +34,7 @@ class GroupVSService {
         log.debug("cancelGroup '${groupVS.id}' - signer: ${userSigner?.nif}")
         String msg = null
         ResponseVS responseVS = null
-        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin()) {
+        if(!groupVS.getRepresentative().nif.equals(userSigner.nif) && !systemService.isUserAdmin(userSigner.nif)) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                              TypeVS.VICKET_GROUP_CANCEL.toString(), groupVS.name].toArray(), locale)
             log.error "cancelGroup - ${msg}"
@@ -62,7 +62,8 @@ class GroupVSService {
         log.debug(methodName);
         String msg = null
         ResponseVS responseVS = null
-        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) && !userVSService.isUserAdmin()) {
+        if(!groupVS.getRepresentative().nif.equals(messageSMIMEReq.userVS.nif) &&
+                !systemService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutGroupPrivilegesErrorMsg', [userSigner.getNif(),
                  TypeVS.VICKET_GROUP_EDIT.toString(), groupVS.name].toArray(), locale)
             log.error "editGroup - ${msg}"

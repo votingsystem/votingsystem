@@ -81,8 +81,8 @@ public class CommentVS implements Comparable {
 		return mensajeMimeId;
 	}
 
-	@Override public int compareTo(Object comentario) {
-		return dateCreated.compareTo(((CommentVS)comentario).dateCreated);
+	@Override public int compareTo(Object comment) {
+		return dateCreated.compareTo(((CommentVS)comment).dateCreated);
 	}
 
 }

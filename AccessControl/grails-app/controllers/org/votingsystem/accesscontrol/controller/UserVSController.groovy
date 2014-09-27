@@ -1,6 +1,5 @@
 package org.votingsystem.accesscontrol.controller
 
-import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.RepresentationDocumentVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS

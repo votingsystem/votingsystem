@@ -61,7 +61,6 @@ public class UserVSAccountsFragment extends Fragment {
     private TextView last_request_date;
     private TextView time_remaining_info;
     private ListView accounts_list_view;
-    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private Menu fragmentMenu;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -322,7 +321,6 @@ public class UserVSAccountsFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ContextVS.LOADING_KEY, progressVisible.get());
         outState.putSerializable(ContextVS.TRANSACTION_KEY, transactionVS);
     }
 

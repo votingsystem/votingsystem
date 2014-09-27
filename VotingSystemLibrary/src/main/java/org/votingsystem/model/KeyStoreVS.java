@@ -35,21 +35,21 @@ public class KeyStoreVS implements Serializable {
     @Transient private String password;
     @Transient private String rootKeyAlias;
 
-   public KeyStoreVS() { }
+    public KeyStoreVS() { }
 
-   public Long getId() {
+    public Long getId() {
        return this.id;
    }
 
-   public void setId(Long id) {
+    public void setId(Long id) {
        this.id = id;
    }
 
-   public byte[] getBytes() {
+    public byte[] getBytes() {
        return this.bytes;
    }
 
-   public void setBytes(byte[] bytes) {
+    public void setBytes(byte[] bytes) {
        this.bytes = bytes;
    }
 

@@ -95,14 +95,14 @@ public class TimeStampVS {
 		this.reason = reason;
 	}
 
-    @Transient public TimeStampToken getTimeStampToken() throws
+    public TimeStampToken getTimeStampToken() throws
             TSPException, IOException, CMSException {
         if(tokenBytes == null) return null;
         return new TimeStampToken(
                 new CMSSignedData(tokenBytes));
     }
 
-    @Transient public TimeStampRequest getTimeStampRequest() throws IOException {
+    public TimeStampRequest getTimeStampRequest() throws IOException {
         if(timeStampRequestBytes == null) return null;
         return new TimeStampRequest(timeStampRequestBytes);
     }

@@ -14,6 +14,7 @@ class UserVSController {
     def transactionVSService
     def groupVSService
     def userVSService
+    def bankVSService
 
     def index() {
         def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
@@ -38,7 +39,7 @@ class UserVSController {
                     resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
                     view = '/groupVS/groupvs'
                 } else if(uservs instanceof BankVS) {
-                    resultMap = [uservsMap:userVSService.getBankVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
+                    resultMap = [uservsMap:bankVSService.getDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
                     view = 'userVS'
                 } else {
                     resultMap = [uservsMap:userVSService.getUserVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
@@ -275,7 +276,7 @@ class UserVSController {
             if(!messageSMIMEReq) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
             }
-            responseVS = userVSService.saveBankVS(messageSMIMEReq, request.getLocale())
+            responseVS = bankVSService.saveBankVS(messageSMIMEReq, request.getLocale())
             return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
         }
     }

@@ -29,58 +29,6 @@ class UserVSService {
     def transactionVSService
     def systemService
 
-    public ResponseVS saveBankVS(MessageSMIME messageSMIMEReq, Locale locale) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        UserVS userSigner = messageSMIMEReq.getUserVS()
-        log.debug("${methodName} - signer: ${userSigner?.nif}")
-        String msg = null
-        def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage()?.getSignedContent())
-        IbanVSUtil.validate(messageJSON.bankIBAN)
-        if (!messageJSON.info || (TypeVS.BANKVS_NEW != TypeVS.valueOf(messageJSON.operation)) ||
-                !messageJSON.certChainPEM) {
-            msg = messageSource.getMessage('paramsErrorMsg', null, locale)
-            log.error "${methodName} - PARAMS ERROR - ${msg} - messageJSON: ${messageJSON}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, reason:msg,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName), statusCode:ResponseVS.SC_ERROR_REQUEST)
-        }
-        if(!isUserAdmin(userSigner.getNif())) {
-            msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg', [userSigner.getNif(),
-                    TypeVS.BANKVS_NEW.toString()].toArray(), locale)
-            log.error "${methodName} - ${msg}"
-            return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
-        }
-        Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
-        ResponseVS responseVS = signatureVSService.validateCertificates(new ArrayList(certChain))
-        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-        X509Certificate x509Certificate = certChain.iterator().next();
-        BankVS bankVS = BankVS.getUserVS(x509Certificate)
-        String validatedNIF = org.votingsystem.util.NifUtils.validate(bankVS.getNif())
-        def bankVSDB = BankVS.findWhere(nif:validatedNIF)
-        if(!bankVSDB) {
-            bankVS.description = messageJSON.info
-            bankVSDB = bankVS.save()
-            bankVSDB.setIBAN(IbanVSUtil.getInstance().getIBAN(bankVSDB.id))
-            log.debug("${methodName} - NEW bankVS.id: '${bankVSDB.id}'")
-        } else {
-            log.debug("${methodName} - updating bankVS.id: '${bankVSDB.id}'")
-            bankVSDB.description = messageJSON.info
-            bankVSDB.setCertificateCA(bankVS.getCertificateCA())
-            bankVSDB.setCertificate(bankVS.getCertificate())
-            bankVSDB.setTimeStampToken(bankVS.getTimeStampToken())
-        }
-        CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(bankVSDB, null)
-        new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
-                type: UserVSAccount.Type.EXTERNAL, IBAN:messageJSON.bankIBAN, tag:systemService.getWildTag()).save()
-        bankVSDB.save()
-        msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
-        String metaInfMsg = MetaInfMsg.getOKMsg(methodName, "bankVS_${bankVSDB.id}_certificateVS_${certificateVS.id}")
-        String bankVSURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${bankVSDB.id}"
-        log.debug("${metaInfMsg}")
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.BANKVS_NEW, message:msg, metaInf:metaInfMsg,
-            data:[message:msg, URL:bankVSURL, statusCode:ResponseVS.SC_OK], contentType:ContentTypeVS.JSON)
-    }
-
     /*
      * Método para poder añadir usuarios a partir de un certificado en formato PEM
      */
@@ -219,13 +167,6 @@ class UserVSService {
         resultMap.transactionList = transactionListJSON
         return resultMap
     }*/
-
-    @Transactional
-    public Map getBankVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){
-        Map resultMap = getUserVSDataMap(userVS, false)
-        resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)
-        return resultMap
-    }
 
     @Transactional
     public Map getUserVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){

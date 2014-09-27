@@ -35,7 +35,7 @@ public class ControlCenterVS extends ActorVS implements Serializable {
         return Type.CONTROL_CENTER;
     }
 
-    @Transient public String getVoteServiceURL() {
+    public String getVoteServiceURL() {
         return getServerURL() + "/voteVS";
     }
 

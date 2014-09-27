@@ -173,7 +173,7 @@ public class MessageSMIME implements Serializable {
 		this.smimeMessage = smimeMessage;
 	}
 
-    @Transient public Set<UserVS> getSigners() {
+    public Set<UserVS> getSigners() {
 		return signers;
 	}
 
@@ -181,7 +181,7 @@ public class MessageSMIME implements Serializable {
 		this.signers = signers;
 	}
 
-    @Transient public UserVS getAnonymousSigner() {
+    public UserVS getAnonymousSigner() {
         return anonymousSigner;
     }
 

@@ -58,10 +58,6 @@ public class Vicket extends ReceiptContainer {
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                     ContextVS.PROVIDER, vicketServerURL, hashCertVSBase64, amount.toString(),
                     this.currencyCode);
-
-
-            //public static CertificationRequestVS getVicketRequest(int keySize, String keyName, String signatureMechanism, String provider, String vicketProviderURL, String hashCertVS, String amount)
-
         } catch(Exception ex) {
             ex.printStackTrace();
         }
