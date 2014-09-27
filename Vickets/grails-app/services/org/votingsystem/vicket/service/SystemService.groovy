@@ -70,7 +70,7 @@ class SystemService {
         }
         getSystemUser().getMetaInfJSON().put("adminsDNI", adminsArray)
         getSystemUser().setMetaInf(getSystemUser().getMetaInfJSON().toString())
-        getSystemUser().save(flush:true)
+        getSystemUser().save()
         log.debug("$methodName - adminsDNI: '${getSystemUser().getMetaInfJSON().adminsDNI}'")
         return systemUser.getMetaInfJSON().adminsDNI
     }

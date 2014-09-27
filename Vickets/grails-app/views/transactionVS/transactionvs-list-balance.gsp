@@ -71,7 +71,7 @@
                 return (tranctionvs.validTo != null)
             },
             viewTransaction: function(e) {
-                console.log(this.tagName + " - viewTransaction")
+                console.log(this.tagName + " - viewTransaction === transaction: " + JSON.stringify(e.target.templateInstance.model.transaction))
                 this.fire("transactionviewer", e.target.templateInstance.model.transaction)
             },
             transactionListChanged:function() {

@@ -21,7 +21,9 @@
         <div layout vertical center center-justified >
                 <div layout horizontal class="pageWidth">
                     <template if="{{subpage != null || subcert != null}}">
-                        <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                        <div style="margin: 20px 0 0 0;" title="<g:message code="backLbl"/>" >
+                            <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                        </div>
                     </template>
 
                     <h3 flex>

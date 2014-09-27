@@ -15,12 +15,8 @@
             background: #f9f9f9;
             padding:10px 20px 10px 20px;
         }
-        .timeStampMsg {
-            color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;
-        }
-        .IBANLink{
-            text-decoration: underline; color: #0000ee; cursor: pointer;
-        }
+        .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
+        .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
         <div layout vertical style="margin: 0px auto; max-width:800px;">
 
@@ -112,10 +108,6 @@
                     this.isClientToolConnected = true
                 }.bind(this))
             },
-            attached: function () {
-                console.log(this.tagName + " - attached")
-                this.fire('attached', null);
-            },
             getFromUserName: function (transactionvs) {
                 var result
                 if(transactionvs.fromUserVS) {
@@ -148,7 +140,7 @@
                         this.isReceptorVisible = false
                         this.caption = "<g:message code="transactionVSFromGroupToAllMembers"/>"
                         break;
-                    case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
+                    case 'FROM_GROUP_TO_MEMBER':
                         this.caption = "<g:message code="transactionVSFromGroupToMember"/>"
                         break;
                     case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
@@ -167,8 +159,10 @@
 
                 }
             },
-
-            showToUserInfo:function(e) {
+       // {"fromUserVS":{"nif":null,"name":"Grupo sab 29 - 16:44","type":"GROUP","id":7,"sender":{"fromUserIBAN":"ES0878788989450000000007","fromUser":null}},
+       // "dateCreated":"27 sep 2014 21:16","validTo":"29 sep 2014 00:00","id":5,"subject":"Asunto sábado españa - 21:16","type":"FROM_GROUP_TO_MEMBER","amount":"200.00",
+       // "currency":"EUR","messageSMIMEURL":"http://vickets:8086/Vickets/messageSMIME/35","numChildTransactions":1,"tags":[{"id":3,"name":"HIDROGENO"}]}
+        showToUserInfo:function(e) {
                 var groupURL = "${createLink(uri:'/groupVS')}/" + e.target.templateInstance.model.transactionvs.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },

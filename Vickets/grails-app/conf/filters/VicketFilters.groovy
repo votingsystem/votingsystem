@@ -37,7 +37,7 @@ class VicketFilters {
                     log.debug "request.contentType: " + request.contentType
                     log.debug "getRemoteHost: " + request.getRemoteHost()
                     log.debug "Request: " + request.getRequestURI()  + " - RemoteAddr: " + request.getRemoteAddr()
-                    log.debug "User agent: " + request.getHeader("User-Agent")
+                    log.debug "User agent: " + request.getHeader("User-Agent") + " - Locale: " + request.locale
                     log.debug "-----------------------------------------------------------------------------------"
                 }
                 if(!params.int("max")) params.max = 20

@@ -132,7 +132,7 @@ class TransactionVSService {
     }
 
     public Map getTransactionMap(TransactionVS transaction) {
-        return getTransactionMap(transaction, null)
+        return getTransactionMap(transaction, systemService.getDefaultLocale())
     }
 
     @Transactional
@@ -162,20 +162,33 @@ class TransactionVSService {
     @Transactional
     public PagedResultList getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('fromUserVS', fromUserVS)
-            isNull("transactionParent")
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+            if(fromUserVS instanceof GroupVS) {
+                or {
+                    and{
+                        eq('fromUserVS', fromUserVS)
+                        isNotNull("transactionParent")
+                        between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+                        not { inList("type", [TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS] ) }
+                    }
+                    and {
+                        eq('fromUserVS', fromUserVS)
+                        isNull("transactionParent")
+                        between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+                        inList("type", [TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS] )
+                    }
+                }
+            } else {
+                eq('fromUserVS', fromUserVS)
+                isNotNull("transactionParent")
+                between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+            }
         }
         return transactionList
     }
 
     @Transactional
     public Map getTransactionFromListWithBalances(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
-        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('fromUserVS', fromUserVS)
-            isNull("transactionParent")
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-        }
+        def transactionList = getTransactionFromList(fromUserVS, timePeriod)
         def transactionFromList = []
         Map<String, Map> balancesMap = [:]
         transactionList.each { transaction ->
@@ -204,10 +217,7 @@ class TransactionVSService {
 
     @Transactional
     public Map getTransactionToListWithBalances(UserVS toUserVS, DateUtils.TimePeriod timePeriod) {
-        List<TransactionVS> transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('toUserVS', toUserVS)
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-        }
+        List<TransactionVS> transactionList = getTransactionToList(toUserVS, timePeriod)
         def transactionToList = []
         Map<String, Map> balancesMap = [:]
         for(TransactionVS transaction : transactionList) {

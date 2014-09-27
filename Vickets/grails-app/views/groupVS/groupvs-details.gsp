@@ -28,7 +28,7 @@
     <div class="pageContentDiv" style="max-width: 1000px; min-width:800px; margin:0px auto 0px auto;"  cross-fade>
         <div layout horizontal center center-justified>
             <template if="{{subpage}}">
-                <div title="<g:message code="backLbl"/>">
+                <div style="margin: 20px 0 0 0;" title="<g:message code="backLbl"/>" >
                     <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </div>
             </template>

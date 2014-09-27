@@ -89,7 +89,7 @@
                 </div>
                 <div>
                     <transactionvs-list-balance id="balanceFromItem"  transactionList="{{balance.transactionFromList}}"
-                          balances="{{balance.balancesFrom}}"></transactionvs-list-balance>
+                          balances="{{balance.balancesFrom}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                 </div>
             </div>
         </div>
