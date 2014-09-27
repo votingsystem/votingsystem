@@ -30,7 +30,7 @@ class UserVSService {
     def systemService
 
     /*
-     * Método para poder añadir usuarios a partir de un certificado en formato PEM
+     * Add users from PEM certs
      */
     @Transactional
     public ResponseVS saveUser(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -151,56 +151,8 @@ class UserVSService {
                 description:userVS.description, certificateList:certificateList]
     }
 
-
-    /*@Transactional
-    public Map getBankVSDataMap(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
-        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            eq('fromUserVS', bankVS)
-            if(timePeriod) gt('dateCreated', timePeriod.getDateFrom())
-            isNotNull('transactionParent')
-        }
-        def transactionListJSON = []
-        transactionList.each { transaction ->
-            transactionListJSON.add(transactionVSService.getTransactionMap(transaction))
-        }
-        Map resultMap = getUserVSDataMap(bankVS)
-        resultMap.transactionList = transactionListJSON
-        return resultMap
-    }*/
-
     @Transactional
-    public Map getUserVSDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale){
-        Map resultMap = getUserVSDataMap(userVS, false)
-        def subscriptions = SubscriptionVS.findAllWhere(userVS:userVS, state: SubscriptionVS.State.ACTIVE)
-        List subscriptionList = []
-        subscriptions.each { it->
-            subscriptionList.add([id:it.id, groupVS:[id:it.groupVS.id, name:it.groupVS.name]])
-        }
-        resultMap.subscriptionVSList = subscriptionList
-        resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)
-        return resultMap
-    }
-
-    @Transactional
-    public Map getDetailedDataMap(UserVS userVS, DateUtils.TimePeriod timePeriod){
-        Map resultMap = getUserVSDataMap(userVS, false)
-
-        def transactionFromListJSON = []
-        transactionVSService.getTransactionFromList(userVS, timePeriod).each { transaction ->
-            transactionFromListJSON.add(transactionVSService.getTransactionMap(transaction))
-        }
-
-        def transactionToListJSON = []
-        transactionVSService.getTransactionToList(userVS, timePeriod).each { transaction ->
-            transactionToListJSON.add(transactionVSService.getTransactionMap(transaction))
-        }
-        resultMap.transactionFromList = transactionFromListJSON
-        resultMap.transactionToList = transactionToListJSON
-        return resultMap
-    }
-
-    @Transactional
-    public Map getDetailedDataMapWithBalances(UserVS userVS, DateUtils.TimePeriod timePeriod){
+    public Map getDataWithBalancesMap(UserVS userVS, DateUtils.TimePeriod timePeriod){
         Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
         resultMap.userVS = getUserVSDataMap(userVS, false)
 

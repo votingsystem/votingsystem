@@ -9,8 +9,7 @@ import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.util.DateUtils
 
 class UserVSController {
-	
-	def subscriptionVSService
+
     def transactionVSService
     def groupVSService
     def userVSService
@@ -39,10 +38,10 @@ class UserVSController {
                     resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
                     view = '/groupVS/groupvs'
                 } else if(uservs instanceof BankVS) {
-                    resultMap = [uservsMap:bankVSService.getDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
+                    resultMap = [uservsMap:bankVSService.getDataWithBalancesMap(uservs, currentWeekPeriod)]
                     view = 'userVS'
                 } else {
-                    resultMap = [uservsMap:userVSService.getUserVSDetailedDataMap(uservs, currentWeekPeriod, params, request.locale)]
+                    resultMap = [uservsMap:userVSService.getDataWithBalancesMap(uservs, currentWeekPeriod)]
                     view = 'userVS'
                 }
             }
@@ -226,7 +225,7 @@ class UserVSController {
             calendar.set(Calendar.DAY_OF_MONTH, params.int('day'))
         }
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        Map responseMap = userVSService.getDetailedDataMapWithBalances(userVS, timePeriod)
+        Map responseMap = userVSService.getDataWithBalancesMap(userVS, timePeriod)
         //X509Certificate cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         return [responseVS:new ResponseVS(statusCode:  ResponseVS.SC_OK, data:responseMap,
                 contentType: ContentTypeVS.JSON, type: TypeVS.VICKET_USER_INFO)]

@@ -88,14 +88,7 @@ class BankVSService {
                 data:[message:msg, URL:bankVSURL, statusCode:ResponseVS.SC_OK], contentType:ContentTypeVS.JSON)
     }
 
-    @Transactional
-    public Map getDetailedDataMap(BankVS bankVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale) {
-        Map resultMap = userVSService.getUserVSDataMap(bankVS, false)
-        resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(bankVS, timePeriod, params, locale)
-        return resultMap
-    }
-
-    public Map getDetailedDataMapWithBalances(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
+    public Map getDataWithBalancesMap(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
         Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
         resultMap.userVS = userVSService.getUserVSDataMap(bankVS, false)
         Map transactionsWithBalancesMap = transactionVSService.getTransactionFromListWithBalances(bankVS, timePeriod)

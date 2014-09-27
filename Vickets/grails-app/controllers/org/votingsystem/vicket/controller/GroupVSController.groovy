@@ -28,7 +28,7 @@ class GroupVSController {
             GroupVS.withTransaction {
                 result = GroupVS.get(params.long('id'))
             }
-            if(result) resultMap = groupVSService.getDetailedDataMap(result, DateUtils.getCurrentWeekPeriod())
+            if(result) resultMap = groupVSService.getDataWithBalancesMap(result, DateUtils.getCurrentWeekPeriod())
             else {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_NOT_FOUND,
                         message: message(code: 'itemNotFoundMsg', args:[params.long('id')]))]

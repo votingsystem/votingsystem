@@ -118,7 +118,7 @@ class TransactionVSController {
             }
             DateUtils.TimePeriod.Lapse lapse =  DateUtils.TimePeriod.Lapse.valueOf(params.timePeriod.toUpperCase())
             DateUtils.TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(request.locale).getTime(), lapse)
-            Map resultMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, request.locale)
+            Map resultMap = transactionVSService.getDataWithBalancesMap(userVS, timePeriod)
             render resultMap as JSON
         } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 message: message(code: 'requestWithErrors'))]

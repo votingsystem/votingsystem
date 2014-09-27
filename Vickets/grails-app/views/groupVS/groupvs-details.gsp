@@ -79,12 +79,12 @@
 
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                        <div style="text-align: center;" groupvsId-data="{{groupvs.id}}">{{groupvs.name}}</div>
+                        <div style="text-align: center;" groupvsId-data="{{groupvs.userVS.id}}">{{groupvs.userVS.name}}</div>
                     </div>
-                    <div id="tagsDiv" style="padding:7px 0px 0px 7px; display:{{groupvs.tags.length > 0?'block':'none'}}">
+                    <div id="tagsDiv" style="padding:7px 0px 0px 7px; display:{{groupvs.userVS.tags.length > 0?'block':'none'}}">
                         <div style="font-size: 0.9em; font-weight: bold;color:#888;"><g:message code='tagsLbl'/></div>
                         <div layout horizontal>
-                            <template repeat="{{tag in groupvs.tags}}">
+                            <template repeat="{{tag in groupvs.userVS.tags}}">
                                 <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
                             </template>
                         </div>
@@ -92,18 +92,18 @@
                 </div>
                 <div layout horizontal>
                     <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
-                        <b><g:message code="representativeLbl"/>: </b>{{groupvs.representative.firstName}} {{groupvs.representative.lastName}}
+                        <b><g:message code="representativeLbl"/>: </b>{{groupvs.userVS.representative.firstName}} {{groupvs.userVS.representative.lastName}}
                     </div>
                     <div flex></div>
                     <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
-                        <b><g:message code="IBANLbl"/>: </b>{{groupvs.IBAN}}
+                        <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="eventContentDiv" style="">
-            <votingsystem-html-echo html="{{groupvs.description}}"></votingsystem-html-echo>
+            <votingsystem-html-echo html="{{groupvs.userVS.description}}"></votingsystem-html-echo>
         </div>
 
         <div style="margin: 25px 0 0 0; min-height: 300px;">
@@ -152,9 +152,10 @@
             console.log("messagedialog signal - cancelgroup: " + detail)
             if('cancel_group' == detail) {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_CANCEL)
-                webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + this.groupvs.id
+                webAppMessage.serviceURL = "${createLink(controller:'groupVS', action:'cancel',absolute:true)}/" + this.groupvs.userVS.id
                 webAppMessage.signedMessageSubject = "<g:message code="cancelGroupVSSignedMessageSubject"/>"
-                webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:this.groupvs.name, id:this.groupvs.id}
+                webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_CANCEL, groupvsName:this.groupvs.userVS.name,
+                    id:this.groupvs.userVS.id}
                 webAppMessage.contentType = 'application/x-pkcs7-signature'
                 webAppMessage.setCallback(function(appMessage) {
                     this.appMessageJSON = JSON.parse(appMessage)
@@ -180,10 +181,10 @@
         },
         subscribeToGroup: function () {
             console.log("subscribeToGroup")
-            var groupvsRepresentative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
-            var groupVSData = {id:this.groupvs.id, name:this.groupvs.name , representative:groupvsRepresentative}
+            var groupvsRepresentative = {id:this.groupvs.userVS.representative.id, nif:this.groupvs.userVS.representative.nif}
+            var groupVSData = {id:this.groupvs.userVS.id, name:this.groupvs.userVS.name , representative:groupvsRepresentative}
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VICKET_GROUP_SUBSCRIBE)
-            webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}/" + this.groupvs.id + "/subscribe"
+            webAppMessage.serviceURL = "${createLink( controller:'groupVS', absolute:true)}/" + this.groupvs.userVS.id + "/subscribe"
             webAppMessage.signedMessageSubject = "<g:message code="subscribeToVicketGroupMsg"/>"
             webAppMessage.signedContent = {operation:Operation.VICKET_GROUP_SUBSCRIBE, groupvs:groupVSData}
             webAppMessage.contentType = 'application/x-pkcs7-signature'
@@ -199,21 +200,21 @@
             VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
         },
         groupvsChanged:function() {
-            if(("admin" == menuType || "superadmin" == menuType) && 'ACTIVE' == this.groupvs.state) this.isAdminView = true
+            if(("admin" == menuType || "superadmin" == menuType) && 'ACTIVE' == this.groupvs.userVS.state) this.isAdminView = true
             else {
                 this.isAdminView = false
-                if("user" == menuType && 'ACTIVE' == this.groupvs.state) this.isUserView = true
+                if("user" == menuType && 'ACTIVE' == this.groupvs.userVS.state) this.isUserView = true
                 else this.isUserView = false
             }
             this.$.groupTabs.groupvs = this.groupvs
-            if('ACTIVE' == this.groupvs.state) {
+            if('ACTIVE' == this.groupvs.userVS.state) {
 
-            } else if('PENDING' == this.groupvs.state) {
+            } else if('PENDING' == this.groupvs.userVS.state) {
                 this.$.pageHeader.style.color = "#fba131"
                 this.$.messagePanel.classList.add("groupvsPendingBox");
                 this.$.messagePanel.innerHTML = "<g:message code="groupvsPendingLbl"/>"
                 this.$.messagePanel.style.display = 'block'
-            } else if('CANCELLED' == this.groupvs.state) {
+            } else if('CANCELLED' == this.groupvs.userVS.state) {
                 this.$.pageHeader.style.color = "#6c0404"
                 this.$.messagePanel.classList.add("groupvsClosedBox");
                 this.$.messagePanel.innerHTML = "<g:message code="groupvsClosedLbl"/>"
@@ -224,10 +225,10 @@
         configGroup:function(e) {
             //e.detail.isSelected = false
             if('cancelGroup' == e.detail.item.id) {
-                showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.name),
+                showMessageVS("<g:message code="cancelGroupVSDialogMsg"/>".format(this.groupvs.userVS.name),
                         "<g:message code="confirmOperationMsg"/>", 'cancel_group', true)
             }else if('editGroup' == e.detail.item.id) {
-                var editorURL = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.id + "?menu=admin"
+                var editorURL = "${createLink( controller:'groupVS', action:'edit', absolute:true)}/" + this.groupvs.userVS.id + "?menu=admin"
                 this.fire('core-signal', {name: "innerpage", data: editorURL});
             }
             this.$.configGroupDropDown.selected = ""
@@ -237,25 +238,25 @@
             console.log("showTransactionVSDialog")
             //e.detail.isSelected
             if('fromGroupToMember' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER, this.groupvs.name,
-                        this.groupvs.IBAN , this.groupvs.id)
+                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER, this.groupvs.userVS.name,
+                        this.groupvs.userVS.IBAN , this.groupvs.userVS.id)
             } else if('fromGroupToMemberGroup' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
-                        this.groupvs.IBAN, this.groupvs.id)
+                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.userVS.name,
+                        this.groupvs.userVS.IBAN, this.groupvs.userVS.id)
             } else if('fromGroupToAllMember' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
-                        this.groupvs.IBAN, this.groupvs.id)
+                this.$.transactionvsForm.init(Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.userVS.name,
+                        this.groupvs.userVS.IBAN, this.groupvs.userVS.id)
             }
             this.page = 1;
             this.$.selectTransactionVSDropDown.selected = ""
             this.$.selectTransactionVSDropDown.selectedItem = null
         },
         back:function() {
-            this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.id});
+            this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.userVS.id});
         },
         showUserDetails:function(e, detail, sender) {
             console.log(this.tagName + " - showUserDetails")
-            this.$.userDescription.show("${createLink(controller: 'groupVS')}/" + this.groupvs.id + "/user", detail)
+            this.$.userDescription.show("${createLink(controller: 'groupVS')}/" + this.groupvs.userVS.id + "/user", detail)
         }
     })
 </script>

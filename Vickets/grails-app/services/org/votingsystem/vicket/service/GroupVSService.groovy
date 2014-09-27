@@ -204,25 +204,7 @@ class GroupVSService {
 	}
 
     @Transactional
-    public Map getDetailedDataMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
-        Map resultMap = getGroupVSDataMap(groupVS)
-
-        def transactionFromListJSON = []
-        transactionVSService.getTransactionFromList(groupVS, timePeriod).each { transaction ->
-            transactionFromListJSON.add(transactionVSService.getTransactionMap(transaction))
-        }
-
-        def transactionToListJSON = []
-        transactionVSService.getTransactionToList(groupVS, timePeriod).each { transaction ->
-            transactionToListJSON.add(transactionVSService.getTransactionMap(transaction))
-        }
-        resultMap.transactionFromList = transactionFromListJSON
-        resultMap.transactionToList = transactionToListJSON
-        return resultMap
-    }
-
-    @Transactional
-    public Map getDetailedDataMapWithBalances(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
+    public Map getDataWithBalancesMap(GroupVS groupVS, DateUtils.TimePeriod timePeriod){
         Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
         resultMap.userVS = getGroupVSDataMap(groupVS)
 

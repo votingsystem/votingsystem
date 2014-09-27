@@ -217,7 +217,7 @@ class BalanceService {
     private Map genBalanceForBankVS(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("$methodName - id '${bankVS.id}'")
-        Map dataMap = bankVSService.getDetailedDataMapWithBalances(bankVS, timePeriod)
+        Map dataMap = bankVSService.getDataWithBalancesMap(bankVS, timePeriod)
         if(bankVS.state == UserVS.State.ACTIVE) {
 
         } else {}
@@ -227,21 +227,14 @@ class BalanceService {
     private Map genBalanceForGroupVS(GroupVS groupvs, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("$methodName - id '${groupvs.id}' -  $timePeriod")
-        Map dataMap = groupVSService.getDetailedDataMapWithBalances(groupvs, timePeriod)
-        //Now we calculate balances for each tag and make the beginning of period adjustment
-
-        if(groupvs.state == UserVS.State.ACTIVE) {
-
-        } else {}
+        Map dataMap = groupVSService.getDataWithBalancesMap(groupvs, timePeriod)
         return dataMap
     }
 
     private Map genBalanceForUserVS(UserVS uservs, DateUtils.TimePeriod timePeriod) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug("$methodName - id '${uservs.id}' - timePeriod: '$timePeriod'")
-        Map dataMap = userVSService.getDetailedDataMapWithBalances(uservs, timePeriod)
-        if(uservs.state == UserVS.State.ACTIVE) {
-        } else {}
+        Map dataMap = userVSService.getDataWithBalancesMap(uservs, timePeriod)
         return dataMap
     }
 

@@ -136,30 +136,6 @@ class TransactionVSService {
     }
 
     @Transactional
-    public Map getUserVSTransactionVSMap(UserVS userVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale) {
-        PagedResultList userVSTransactions = TransactionVS.createCriteria().list(
-                sort:'dateCreated', order:'asc', offset:params?.offset, max:params?.max) {
-            or {
-                and{
-                    isNull('transactionParent')
-                    eq("fromUserVS", userVS)
-                }
-                eq("toUserVS", userVS)
-            }
-            and { between('dateCreated', timePeriod.getDateFrom(), timePeriod.getDateTo()) }
-        }
-        List userTransactionVSList = []
-        userVSTransactions.each { it ->
-            userTransactionVSList.add(getTransactionMap(it, locale))
-        }
-        String name = userVS.name
-        if(!name) name = "${userVS.firstName} ${userVS.lastName}"
-        Map userVSMap = [nif:userVS?.nif, name:name]
-        return [offset: params.offset, queryRecordCount: userVSTransactions.size(),
-                numTotalRecords:userVSTransactions.totalCount,  userVS: userVSMap, transactionVSList:userTransactionVSList]
-    }
-
-    @Transactional
     public PagedResultList getTransactionFromList(UserVS fromUserVS, DateUtils.TimePeriod timePeriod) {
         def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
             if(fromUserVS instanceof GroupVS) {
@@ -326,13 +302,6 @@ class TransactionVSService {
             def childTransactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
                 eq('transactionParent', transaction)
             }
-            /*if(!childTransactionListDB.isEmpty()) {
-                List childTransactionList = []
-                childTransactionListDB.each {childTransaction ->
-                    childTransactionList.add(getTransactionMap(childTransaction))
-                }
-                transactionMap.childTransactions = childTransactionList
-            }*/
             transactionMap.numChildTransactions = childTransactionListDB.totalCount
         }
 
