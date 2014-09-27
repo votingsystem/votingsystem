@@ -220,7 +220,7 @@
             } else tagList.push({id:1, name:'WILDTAG'}); //No tags, receptor can expend money with any tag
 
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
-            webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:"transactionvs", absolute:true)}"
+            webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:" ", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 isTimeLimited:this.$.timeLimitedCheckBox.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,

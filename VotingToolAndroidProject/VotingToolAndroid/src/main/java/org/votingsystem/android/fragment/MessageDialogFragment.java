@@ -47,8 +47,8 @@ public class MessageDialogFragment extends DialogFragment {
         AlertDialog dialog = builder.create();
         dialog.setView(view);
         if(statusCode > 0) {
-            if(ResponseVS.SC_OK == statusCode) dialog.setIcon(R.drawable.accept_22);
-            else dialog.setIcon(R.drawable.cancel_22);
+            if(ResponseVS.SC_OK == statusCode) dialog.setIcon(R.drawable.fa_check_32);
+            else dialog.setIcon(R.drawable.fa_times_32);
         }
         return dialog;
     }

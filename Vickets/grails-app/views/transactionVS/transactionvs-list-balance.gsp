@@ -40,13 +40,15 @@
                     </div>
                 </template>
 
-                <div id="rowTotal" layout horizontal style="display: none;">
-                    <div class="dateCreated" style=""></div>
-                    <div class="subjectColumn" style="text-align: right;font-weight: bold;">
-                        <g:message code="totalLbl"/>:
+                <div id="rowTotal" style="display: none;">
+                    <div layout horizontal>
+                        <div class="dateCreated" style=""></div>
+                        <div class="subjectColumn" style="text-align: right;font-weight: bold;">
+                            <g:message code="totalLbl"/>:
+                        </div>
+                        <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionTotal}}</div>
+                        <div class="tagColumn" style=""></div>
                     </div>
-                    <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionTotal}}</div>
-                    <div class="tagColumn" style=""></div>
                 </div>
             </div>
         </div>

@@ -164,7 +164,7 @@ public class UserVSAccountsFragment extends Fragment {
             transactionVS = TransactionVS.parse((Uri) getArguments().getParcelable(
                     ContextVS.URI_KEY));
             Log.d(TAG + ".onStart(...)", transactionVS.toString());
-            BigDecimal cashAvailable = null;
+            BigDecimal cashAvailable = BigDecimal.ZERO;
             try {
                 cashAvailable = contextVS.getUserVSTransactionVSListInfo().getAvailableForTagVS(
                         transactionVS.getCurrencyCode(), transactionVS.getTagVS().getName());
@@ -175,7 +175,12 @@ public class UserVSAccountsFragment extends Fragment {
                             transactionVS.getCurrencyCode(), transactionVS.getToUserVS().getName(),
                             transactionVS.getSubject()), false, null);
             } else {
-                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.insufficient_cash_caption),
+                String caption = null;
+                if(transactionVS.getTagVS() != null){
+                    caption = getString(R.string.insufficient_cash_for_tagvs_caption,
+                            transactionVS.getTagVS().getName());
+                } else caption = getString(R.string.insufficient_cash_caption);
+                ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, caption,
                         getString(R.string.insufficient_cash_msg, transactionVS.getCurrencyCode(),
                                 transactionVS.getAmount().toString(), cashAvailable));
             }

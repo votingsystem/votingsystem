@@ -20,7 +20,7 @@
         <div layout vertical>
             <div layout horizontal center center-justified>
                 <votingsystem-button style="margin: 0px 0px 0px 5px;">TransactionVS </votingsystem-button>
-                - http://vickets:8086/Vickets/transaction/deposit
+                - http://vickets:8086/Vickets/transaction
             </div>
             <div id="transactionvsEditor" style="width: 500px; height: 300px;"></div>
         </div>
@@ -43,7 +43,7 @@
             fromUser: "ClientBankVS App1 App2", currency: "EUR",
             fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"],
             amount:"30000", tags:[{name:"HIDROGENO"}], isTimeLimited:true, subject:"BankVS transactionvs" },
-        serviceURL:"${createLink( controller:'transactionVS', action:"deposit", absolute:true)}",
+        serviceURL:"${createLink( controller:'transactionVS', action:" ", absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
         urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
         }

@@ -9,10 +9,12 @@
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
-            <div id="" style="border: 1px solid #6c0404; width: 450px;margin:auto; padding: 15px;">
+            <div id="" style="width: 450px;margin:auto; padding: 15px;">
                 <div layout horizontal>
                     <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
-                    <div style="font-weight: bold;color:#888;">IBAN: {{subscriptionData.uservs.IBAN}}</div>
+                    <template if="{{subscriptionData.uservs.IBAN}}">
+                        <div style="font-weight: bold;color:#888;">IBAN: {{subscriptionData.uservs.IBAN}}</div>
+                    </template>
                 </div>
 
                 <div id="nameDiv" style="font-size: 1.2em;font-weight: bold; margin:5px 0px 5px 0px;">{{subscriptionData.uservs.name}}</div>

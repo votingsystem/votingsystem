@@ -118,17 +118,23 @@
             return amount.toFixed(2)
         },
         getTimeLimitedForTagMsg: function(currency, tag) {
-            var tagAlreadyExpended = this.balance.balancesFrom[currency][tag]
-            tagAlreadyExpended = tagAlreadyExpended == null? 0 : tagAlreadyExpended
+            var expendedFromTag = 0
+            if(this.balance.balancesFrom[currency] != null && this.balance.balancesFrom[currency][tag] != null) {
+                expendedFromTag = this.balance.balancesFrom[currency][tag]
+            }
+            expendedFromTag = expendedFromTag == null? 0 : expendedFromTag
             var tagToExpend = this.balance.balancesTo[currency][tag].timeLimited
-            var tagCash = tagToExpend - tagAlreadyExpended
+            var tagCash = tagToExpend - expendedFromTag
             return "<g:message code="timeLimitedForTagMsg"/>".format(tagCash, currency, tag)
         },
         getPercentageForTagMsg: function(currency, tag) {
-            var tagAlreadyExpended = this.balance.balancesFrom[currency][tag]
-            tagAlreadyExpended = tagAlreadyExpended == null? 0 : tagAlreadyExpended
+            var expendedFromTag = 0
+            if(this.balance.balancesFrom[currency] != null && this.balance.balancesFrom[currency][tag] != null) {
+                expendedFromTag = this.balance.balancesFrom[currency][tag]
+            }
+            expendedFromTag = expendedFromTag == null? 0 : expendedFromTag
             var tagToExpend = this.balance.balancesTo[currency][tag].timeLimited
-            var pertecentageExpended = tagAlreadyExpended * 100 / tagToExpend
+            var pertecentageExpended = expendedFromTag * 100 / tagToExpend
             //console.log("pertecentageExpended: " + pertecentageExpended)
             return pertecentageExpended.toFixed(0)
         },

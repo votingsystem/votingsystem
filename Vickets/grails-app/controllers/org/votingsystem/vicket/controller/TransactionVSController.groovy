@@ -251,7 +251,7 @@ class TransactionVSController {
      * Servicio que recibe los asignaciones de los usuarios en documentos SMIME
      *
      * @httpMethod [POST]
-     * @serviceURL [/transactionVS/deposit]
+     * @serviceURL [/transactionVS]
      * @requestContentType [application/x-pkcs7-signature] Obligatorio.
      *                     documento SMIME firmado con un model emitido por el sistema.
      * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
