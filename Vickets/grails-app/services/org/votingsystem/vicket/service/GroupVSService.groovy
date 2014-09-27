@@ -24,6 +24,7 @@ class GroupVSService {
     def signatureVSService
     def subscriptionVSService
     def transactionVSService
+    def systemService
 
 
 	public void init() { }
@@ -125,7 +126,7 @@ class GroupVSService {
                 else log.error("Tag '${tag}' not found ")
             }
         }
-
+        subscriptionVSService.checkUserVSAccount(userSigner)
         groupVS = new GroupVS(name:messageJSON.groupvsName.trim(), state:UserVS.State.ACTIVE, representative:userSigner,
                 description:messageJSON.groupvsInfo,tagVSSet:tagSet).save()
         groupVS.setIBAN(IbanVSUtil.getInstance().getIBAN(groupVS.id))

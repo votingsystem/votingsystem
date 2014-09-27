@@ -27,7 +27,7 @@
         <div layout horizontal center center-justified style="position: relative; display: block;" >
             <div id="caption" flex style="color: #6c0404; font-weight: bold; font-size: 1.2em; text-align: center;
                 margin:10px 0 10px 0;">
-                {{caption}} - {{balance.name}}
+                {{caption}} - {{userVSName}}
             </div>
             <div style="font-size: 0.8em; color: #888; font-weight: normal; right:0px;top:0px; float: right; vertical-align: top;">
                 {{description}}
@@ -153,6 +153,7 @@
             this.balance = balance
             var caption = "<g:message code="balanceDetailCaption"/>"
             this.description = "NIF:" + this.balance.userVS.nif + " - IBAN: " + this.balance.userVS.IBAN
+            this.userVSName = this.balance.userVS.name
             if('SYSTEM' == this.balance.userVS.type) {
                 this.caption = caption.format("<g:message code="systemLbl"/>")
                 this.description = "IBAN: " + this.balance.userVS.IBAN
@@ -167,7 +168,7 @@
                 this.balance.userVS.nif = ""
             }
             else if('USER' == this.balance.userVS.type) {
-                this.balance.name = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
+                this.userVSName = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
                 this.caption = caption.format("<g:message code="userLbl"/>")
             }
 

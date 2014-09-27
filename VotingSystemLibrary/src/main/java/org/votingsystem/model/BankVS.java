@@ -15,7 +15,7 @@ public class BankVS extends UserVS implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
     public void beforeInsert() {
-        if(getType() == null) setType(Type.BANKVS);
+        setType(Type.BANKVS);
     }
 
     public static BankVS getUserVS (X509Certificate certificate) {

@@ -9,6 +9,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.NifUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.LoggerVS
@@ -39,8 +40,8 @@ class TestingController {
 
     def index() {
         //systemService.getSystemUser().save()
-        systemService.updateAdmins()
-        render  "OK"
+
+        render  NifUtils.getNif(111222)
         return false
     }
 

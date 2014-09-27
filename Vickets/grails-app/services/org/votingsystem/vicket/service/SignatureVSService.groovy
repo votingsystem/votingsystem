@@ -418,7 +418,7 @@ class  SignatureVSService {
 	}
 
 	public ResponseVS validateVicketCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
-        log.debug("validateVicketCerts")
+        log.debug("validateVicketCerts - TODO")
 	}
 
 

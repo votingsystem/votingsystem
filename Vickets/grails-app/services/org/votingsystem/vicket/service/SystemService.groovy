@@ -24,6 +24,7 @@ class SystemService {
     private Locale defaultLocale
     def grailsApplication
     def subscriptionVSService
+    def signatureVSService
 
     @Transactional
     public synchronized Map init() throws Exception {
@@ -37,7 +38,6 @@ class SystemService {
             wildTag = new VicketTagVS(name:VicketTagVS.WILDTAG).save()
             new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
                     balance:BigDecimal.ZERO, IBAN:systemUser.getIBAN(), tag:wildTag).save()
-
         }
         updateAdmins()
         return [systemUser:systemUser]
@@ -58,7 +58,10 @@ class SystemService {
             log.debug("$methodName - checking admin cert '${adminCert.absolutePath}'")
             X509Certificate x509AdminCert = CertUtil.fromPEMToX509Cert(FileUtils.getBytesFromFile(adminCert))
             UserVS userVS = UserVS.getUserVS(x509AdminCert)
-            ResponseVS responseVS = subscriptionVSService.checkUser(userVS, getDefaultLocale())
+            ResponseVS responseVS = signatureVSService.verifyUserCertificate(userVS)
+            if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS("$updateAdmins - Problems verifying " +
+                    "admin certificate - '${responseVS.getMessage()}'")
+            responseVS = subscriptionVSService.checkUser(userVS, getDefaultLocale())
             if(ResponseVS.SC_OK != responseVS.statusCode) throw new ExceptionVS("Problems updating admin cert " +
                     "'${adminCert.absolutePath}'")
             userVS = responseVS.userVS
@@ -68,7 +71,6 @@ class SystemService {
         getSystemUser().getMetaInfJSON().put("adminsDNI", adminsArray)
         getSystemUser().setMetaInf(getSystemUser().getMetaInfJSON().toString())
         getSystemUser().save(flush:true)
-
         log.debug("$methodName - adminsDNI: '${getSystemUser().getMetaInfJSON().adminsDNI}'")
         return systemUser.getMetaInfJSON().adminsDNI
     }

@@ -77,8 +77,7 @@ class BankVSService {
         }
         CertificateVS certificateVS = subscriptionVSService.saveUserCertificate(bankVSDB, null)
         new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:bankVSDB, balance:BigDecimal.ZERO,
-                type: UserVSAccount.Type.EXTERNAL, IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id),
-                tag:systemService.getWildTag()).save()
+                IBAN:IbanVSUtil.getInstance().getIBAN(bankVSDB.id), tag:systemService.getWildTag()).save()
         bankVSDB.save()
         msg = messageSource.getMessage('newBankVSOKMsg', [x509Certificate.subjectDN].toArray(), locale)
         String metaInfMsg = MetaInfMsg.getOKMsg(CLASS_NAME, methodName,
@@ -90,9 +89,9 @@ class BankVSService {
     }
 
     @Transactional
-    public Map getDetailedDataMap(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
+    public Map getDetailedDataMap(BankVS bankVS, DateUtils.TimePeriod timePeriod, Map params, Locale locale) {
         Map resultMap = userVSService.getUserVSDataMap(bankVS, false)
-        resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(userVS, timePeriod, params, locale)
+        resultMap.transactionVSMap = transactionVSService.getUserVSTransactionVSMap(bankVS, timePeriod, params, locale)
         return resultMap
     }
 
