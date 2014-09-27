@@ -24,9 +24,9 @@ class SystemService {
                     name:grailsApplication.config.VotingSystem.serverName).save()
             systemUser.setIBAN(IbanVSUtil.getInstance().getIBAN(systemUser.id))
             systemUser.save()
-            wildTag = VicketTagVS(name:VicketTagVS.WILDTAG).save()
-            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser, balance:BigDecimal.ZERO,
-                    IBAN:systemUser.getIBAN(), tag:wildTag).save()
+            wildTag = new VicketTagVS(name:VicketTagVS.WILDTAG).save()
+            new UserVSAccount(currencyCode: Currency.getInstance('EUR').getCurrencyCode(), userVS:systemUser,
+                    balance:BigDecimal.ZERO, IBAN:systemUser.getIBAN(), tag:wildTag).save()
 
         }
         return [systemUser:systemUser]

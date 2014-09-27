@@ -89,11 +89,11 @@ class TransactionVS_GroupVSService {
             String metaInfMsg
             TransactionVS.Type transactionVSType
             if(operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER) {
-                transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_MEMBER
+                transactionVSType = TransactionVS.Type.FROM_GROUP_TO_MEMBER
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberOKMsg',
                         ["${messageJSON.amount} ${currency.getCurrencyCode()}", receptorList.iterator().next().nif].toArray(), locale)
             } else if (operationType == TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP) {
-                transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP
+                transactionVSType = TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP
                 msg = messageSource.getMessage('transactionVSFromGroupToMemberGroupOKMsg',
                         ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
             }
@@ -142,7 +142,7 @@ class TransactionVS_GroupVSService {
         BigDecimal numUsersBigDecimal = new BigDecimal(subscriptionList.totalCount)
         BigDecimal userPart = amount.divide(numUsersBigDecimal, 2, RoundingMode.FLOOR)
 
-        TransactionVS.Type transactionVSType = TransactionVS.Type.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS
+        TransactionVS.Type transactionVSType = TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS
         msg = messageSource.getMessage('transactionVSFromGroupToAllMembersGroupOKMsg',
                 ["${messageJSON.amount} ${currency.getCurrencyCode()}"].toArray(), locale)
         TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,
