@@ -367,7 +367,7 @@
     <string name="delete_vicket_lbl">Borrar Vicket</string>
     <string name="share_vicket_lbl">Compartir Vicket</string>
     <string name="vicket_user_info_lbl">Información del usuario</string>
-    <string name="request_button">Retirar efectivo</string>
+    <string name="request_button">Retirar dinero</string>
     <string name="uservs_accountvs_info_missing_caption">Faltan los datos del usuario</string>
     <string name="uservs_accountvs_info_missing"><![CDATA[No ha actualizado los datos de la semana]]></string>
     <string name="update_signers_info_lbl">Actualizar datos</string>
@@ -379,7 +379,7 @@
     <string name="vicket_last_request_info_lbl"><![CDATA[Ultima actualización el <u><b>\'%1$s\'</b></u>]]></string>
     <string name="time_remaining_info_lbl"><![CDATA[Lo que no gastes antes del <b>\'%1$s\'</b> se repartirá
         entre el resto de usuarios]]></string>
-    <string name="cash_request_dialog_caption">Retirar efectivo</string>
+    <string name="cash_request_dialog_caption">Retirar diner0</string>
     <string name="cash_send_dialog_caption">Realizar pago</string>
     <string name="cash_dialog_msg"><![CDATA[Seleccione un importe inferior a <b>\'%1$s\'</b> %2$ss]]></string>
     <string name="min_withdrawal_msg">El importe debe ser mayor que cero</string>
@@ -387,13 +387,13 @@
     <string name="vicket_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$ss en efectivo]]></string>
     <string name="transactionvs_send_pin_msg"><![CDATA[Va a realizar un pago de <b>\'%1$s\'</b> %2$s. a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
-    <string name="vicket_request_ok_caption">Retirada de efectivo con éxito</string>
-    <string name="vicket_request_error_caption">Error retirando efectivo</string>
-    <string name="vicket_request_ok_msg"><![CDATA[Su efectivo se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
-    <string name="insufficient_cash_for_tagvs_caption">Efectivo insuficiente para \'%1$s\'</string>
-    <string name="insufficient_cash_caption">Efectivo insuficiente</string>
+    <string name="vicket_request_ok_caption">Retirada de dinero con éxito</string>
+    <string name="vicket_request_error_caption">Error retirando dinero</string>
+    <string name="vicket_request_ok_msg"><![CDATA[Su disponible se ha incrementado en <b>\'%1$s\' %2$ss</b>]]></string>
+    <string name="insufficient_cash_for_tagvs_caption">Disponible insuficiente para \'%1$s\'</string>
+    <string name="insufficient_cash_caption">Disponible insuficiente</string>
     <string name="insufficient_cash_msg"><![CDATA[Importe solicitado <b>\'%2$s\' %1$ss</b><br/>
-    Efectivo disponible <b>\'%3$s\' %1$ss</b>]]></string>
+    Disponible <b>\'%3$s\' %1$ss</b>]]></string>
     <string name="vicket_send_ok_caption">Pago realizado con éxito</string>
     <string name="vicket_send_ok_msg"><![CDATA[Ha realizado un pago de <b>\'%1$s\' %2$ss</b> bajo el
     concepto de <b>\'%3$s\'</b> a <b>\'%4$s\'</b>]]></string>

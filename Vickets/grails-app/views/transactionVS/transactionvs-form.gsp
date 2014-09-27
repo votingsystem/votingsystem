@@ -6,7 +6,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-checkbox', file: 'paper-checkbox.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicketTagVS/tagvs-select-dialog']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-search-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector-dialog']"/>">
 
 <polymer-element name="transactionvs-form" attributes="subpage">
 <template>
@@ -20,7 +20,7 @@
         }
         .container{
             margin: 0 auto;
-            max-width: 500px;
+            max-width: 550px;
         }
         </style>
         <div class="container">
@@ -69,12 +69,18 @@
 
                 <div  layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
                     font-size: 1.1em; padding: 5px;display: block;}}">
-                    <div>{{selectedTagMsg}}</div>
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
-                        <div style="font-size: 0.9em;display: {{selectedTags.length == 0? 'block':'none'}};">
-                            <g:message code="transactionvsWithTagAdvertMsg"/>
+                        <div layout horizontal style="font-size: 0.8em;">
+                            <div style="max-width: 400px;display: {{selectedTags.length == 0? 'block':'none'}};">
+                                <g:message code="transactionvsWithTagAdvertMsg"/>
+                            </div>
+                            <div style="max-width: 400px;">{{selectedTagMsg}}</div>
+                            <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                                <i class="fa fa-tag" style="margin:0 7px 0 3px;"></i> <g:message code="addTagLbl"/>
+                            </votingsystem-button>
                         </div>
-                        <div layout horizontal center center-justified style="font-weight:bold;display: {{selectedTags.length == 0? 'none':'block'}};">
+                        <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em;
+                            display: {{selectedTags.length == 0? 'none':'block'}};">
                             <g:message code="selectedTagsLbl"/>
                             <template repeat="{{tag in selectedTags}}">
                                 <a class="btn btn-default" data-tagId='{{tag.id}}' on-click="{{removeTag}}"
@@ -83,15 +89,14 @@
                             </template>
                         </div>
                     </div>
-                    <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                        <i class="fa fa-tag" style="margin:0 7px 0 3px;"></i> <g:message code="addTagLbl"/>
-                    </votingsystem-button>
                 </div>
                 <div style="display:{{isTransactionVSFromGroupToAllMembers ? 'none':'block'}}">
                     <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
                         <i class="fa fa-user" style="margin:0 7px 0 3px;"></i> {{selectReceptorMsg}}
                     </votingsystem-button>
-                    <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                    <div style="margin:10px 0 0 0;">
+                        <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                    </div>
                 </div>
                 <div flex>
                 </div>
@@ -104,7 +109,7 @@
             </div>
         </div>
 
-        <uservs-search-dialog id="searchDialog"></uservs-search-dialog>
+        <uservs-selector-dialog id="searchDialog"></uservs-selector-dialog>
     <div>
         <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
             <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"

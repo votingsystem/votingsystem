@@ -24,7 +24,7 @@
             -moz-transform: rotate(20deg);
         }
     </style>
-    <core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" response="{{uservs}}" handleAs="json"
+    <core-ajax id="ajax" on-core-response="{{ajaxResponse}}" response="{{uservs}}" handleAs="json"
                method="get" contentType="json"></core-ajax>
 
     <template if="{{uservs.name}}">
@@ -133,6 +133,9 @@
             console.log(this.tagName + " - setType")
             if('BANKVS' == this.uservs.type) this.uservsType = "<g:message code="bankVSLbl"/>"
             if('USER' == this.uservs.type) this.uservsType = "<g:message code="userLbl"/>"
+        },
+        uservsChanged:function() {
+            //console.log(this.tagName + " - uservsChanged - uservs: " + JSON.stringify(this.uservs))
         },
         blockUser:function() {
             console.log(this.tagName + " - blockUser")

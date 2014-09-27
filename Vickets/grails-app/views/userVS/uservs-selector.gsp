@@ -1,9 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-input', file: 'paper-input.html')}">>
 
-<polymer-element name="uservs-search" attributes="url isSelector">
+<polymer-element name="uservs-selector" attributes="url isSelector">
     <template>
         <style>
             /*Android browser doesn't fetch this properties from vickets.css*/
@@ -16,18 +15,9 @@
                 padding:5px 0px 5px 0px;
                 width: 100%;
             }
-            .tableHeadervs div {
-                text-align:center;
-            }
-            .rowvs {
-                border-bottom: 1px solid #ccc;
-                padding: 10px 0px 10px 0px;
-                width: 100%;
-            }
-            .rowvs div {
-                text-align:center;
-                cursor: pointer;
-            }
+            .tableHeadervs div { text-align:center; }
+            .rowvs { border-bottom: 1px solid #ccc; padding: 10px 0px 10px 0px;  width: 100%; }
+            .rowvs div { text-align:center; cursor: pointer;  }
         </style>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="json"></core-ajax>
@@ -52,13 +42,9 @@
                 <g:message code="emptyUserSearchResultMsg"/>
             </div>
         </div>
-        <votingsystem-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>"
-                             style="">
-            <uservs-data id="uservsData" uservs="${uservsMap as grails.converters.JSON}"></uservs-data>
-        </votingsystem-dialog>
     </template>
     <script>
-        Polymer('uservs-search', {
+        Polymer('uservs-selector', {
             isSelector:false,
             ready: function() {
                 this.url = this.url || '';
@@ -66,12 +52,8 @@
             },
             urlChanged:function(e) {},
             showUserDetails:function(e) {
-                if(this.isSelector) {
-                    this.fire("user-clicked", e.target.templateInstance.model.uservs)
-                    this.fire('core-signal', {name: "user-clicked", data: e.target.templateInstance.model.uservs});
-                }
-                this.$.uservsData.uservs = e.target.templateInstance.model.uservs
-                this.$.xDialog.opened = true
+                this.fire("user-clicked", e.target.templateInstance.model.uservs)
+                this.fire('core-signal', {name: "user-clicked", data: e.target.templateInstance.model.uservs});
             },
             reset: function() {
                 this.userVSList = []

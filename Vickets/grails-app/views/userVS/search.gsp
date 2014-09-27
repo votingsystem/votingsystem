@@ -4,7 +4,7 @@
     <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
-    <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-search.gsp']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector.gsp']"/>">
 </head>
 <body>
 <div class="pageContentDiv">
@@ -22,7 +22,7 @@
         </div>
         <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
-        <uservs-search id="uservsTable" style="width:800px; margin:10px 0px 0px 0px;"></uservs-search>
+        <uservs-selector id="userVSSelector" style="width:800px; margin:10px 0px 0px 0px;"></uservs-selector>
     </div>
 
 </div>
@@ -47,7 +47,7 @@
     function processSearch() {
         var textToSearch = document.querySelector("#userSearchInput").value
         if(textToSearch.trim() == "") return
-        document.querySelector("#uservsTable").url = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
+        document.querySelector("#userVSSelector").url = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
     }
 </asset:script>
 <asset:deferredScripts/>

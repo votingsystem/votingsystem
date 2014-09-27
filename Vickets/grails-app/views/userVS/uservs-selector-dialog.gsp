@@ -1,8 +1,8 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-search']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector']"/>">
 
-<polymer-element name="uservs-search-dialog" attributes="transactionvsURL opened">
+<polymer-element name="uservs-selector-dialog" attributes="transactionvsURL opened">
     <template>
         <votingsystem-dialog id="xDialog" class="uservsSearchDialog" title="<g:message code="userSearchLbl"/>"
                              on-core-overlay-open="{{onCoreOverlayOpen}}" style="overflow: auto;">
@@ -29,14 +29,14 @@
                                 <i class="fa fa-search" style="margin:0 7px 0 3px;"></i> <g:message code="userSearchLbl"/>
                             </votingsystem-button>
                         </div>
-                        <uservs-search id="userSearchList" isSelector="true"></uservs-search>
+                        <uservs-selector id="userVSSelector" isSelector="true"></uservs-selector>
                     </div>
                 </div>
             </div>
         </votingsystem-dialog>
     </template>
     <script>
-        Polymer('uservs-search-dialog', {
+        Polymer('uservs-selector-dialog', {
             ready: function() {
                 console.log(this.tagName + " - " + this.id + " - ready")
                 this.$.userSearchInput.onkeypress = function(event){
@@ -55,10 +55,10 @@
                 this.$.userSearchInput.value = ""
                 this.$.amount.value = ""
                 this.$.transactionvsSubject.value = ""
-                this.$.userSearchList.url = ""
+                this.$.userVSSelector.url = ""
                 this.setMessage(200, null)
                 this.$.receptorBox.removeUsers()
-                this.$.userSearchList.reset()
+                this.$.userVSSelector.reset()
                 this.$.tagDialog.reset()
             },
             show: function() {
@@ -71,7 +71,7 @@
                 var targetURL
                 if(this.groupId != null) targetURL = "${createLink(controller: 'userVS', action: 'searchGroup')}?searchText=" + textToSearch + "&groupId=" + this.groupId
                 else targetURL = "${createLink(controller: 'userVS', action: 'search')}?searchText=" + textToSearch
-                this.$.userSearchList.url = targetURL
+                this.$.userVSSelector.url = targetURL
             },
             close: function() {
                 this.$.xDialog.opened = false

@@ -119,7 +119,8 @@
             this.$.ajax.url = ""
         },
         responseDataChanged:function () {
-            this.searchedTagList = this.responseData.tagRecords
+            if(this.responseData != null) this.searchedTagList = this.responseData.tagRecords
+            else this.searchedTagList = []
         },
 
         searchTag: function() {
