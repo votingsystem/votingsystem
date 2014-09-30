@@ -13,7 +13,6 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
 
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -34,7 +33,7 @@ import java.util.Map;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVSActivity extends ActivityVS {
+public class BrowserVSActivity extends ActivityBase {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
@@ -61,7 +60,7 @@ public class BrowserVSActivity extends ActivityVS {
             if(responseVS != null && TypeVS.MESSAGEVS_GET == responseVS.getTypeVS()) {
                 String jsCommand = "javascript:updateMessageVSList('" +
                         responseVS.getMessageJSON().toString() + "')";
-                runOnUiThread(new Runnable() { @Override public void run() { showProgress(false, true); } });
+                runOnUiThread(new Runnable() { @Override public void run() { refreshingStateChanged(false); } });
                 webView.loadUrl(jsCommand);
             } else if(responseVS.getOperation() != null) {
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {
@@ -83,7 +82,7 @@ public class BrowserVSActivity extends ActivityVS {
             Intent startIntent = new Intent(this, SignAndSendService.class);
             startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            showProgress(true, true);
+            refreshingStateChanged(true);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -97,7 +96,6 @@ public class BrowserVSActivity extends ActivityVS {
         contextVS = (AppContextVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
-        initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //getSupportActionBar().setTitle(getString(R.string.browswevs_lbl));
         getSupportActionBar().hide();
@@ -114,7 +112,7 @@ public class BrowserVSActivity extends ActivityVS {
         Log.d(TAG + ".viewerURL(...)", " - viewerURL: " + viewerURL);
         webView = (WebView) findViewById(R.id.browservs_content);
         WebSettings webSettings = webView.getSettings();
-        showProgress(true, true);
+        refreshingStateChanged(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webView.setClickable(true);
@@ -124,7 +122,7 @@ public class BrowserVSActivity extends ActivityVS {
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 if(jsCommand != null) webView.loadUrl(jsCommand);
-                showProgress(false, true);
+                refreshingStateChanged(false);
             }
         });
         webView.loadUrl(viewerURL);
@@ -170,7 +168,7 @@ public class BrowserVSActivity extends ActivityVS {
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
-        runOnUiThread(new Runnable() { @Override public void run() { showProgress(true, true); } });
+        runOnUiThread(new Runnable() { @Override public void run() { refreshingStateChanged(true); } });
         startService(startIntent);
     }
 
@@ -207,7 +205,7 @@ public class BrowserVSActivity extends ActivityVS {
         JSONObject messageJSON = new JSONObject(resultMap);
         String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
         webView.loadUrl(jsCommand);
-        showProgress(false, true);
+        refreshingStateChanged(false);
     }
 
 
@@ -216,7 +214,7 @@ public class BrowserVSActivity extends ActivityVS {
                 " - callbackFunction: " + callbackFunction);
         String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
         webView.loadUrl(jsCommand);
-        showProgress(false, true);
+        refreshingStateChanged(false);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

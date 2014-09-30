@@ -25,7 +25,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     public static final String TAG = "AccessControlVS";
     
     private EventVS eventVS;
-    private Set<ControlCenterVS> controlCenter;
+    private ControlCenterVS controlCenter;
 
     public AccessControlVS() {}
 
@@ -54,14 +54,13 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return Type.CONTROL_CENTER;
     }
 
-    public Set<ControlCenterVS> getControlCenters() {
+    public ControlCenterVS getControlCenter() {
         return controlCenter;
     }
 
-    public void setControlCenters(Set<ControlCenterVS> controlCenter) {
+    public void setControlCenter(ControlCenterVS controlCenter) {
         this.controlCenter = controlCenter;
     }
-
 
     public String getEventVSManifestCollectorURL (Long manifestId) {
         return getServerURL() + "/eventVSManifestCollector/" + manifestId;
@@ -163,22 +162,17 @@ public class AccessControlVS extends ActorVS implements Serializable {
         JSONObject jsonObject = null;
         JSONArray jsonArray;
         AccessControlVS actorVS = new AccessControlVS();
-        if (actorVSJSON.getJSONArray("controlCenters") != null) {
-            Set<ControlCenterVS> controlCenters = new HashSet<ControlCenterVS>();
-            jsonArray = actorVSJSON.getJSONArray("controlCenters");
-            for (int i = 0; i< jsonArray.length(); i++) {
-                jsonObject = jsonArray.getJSONObject(i);
-                ControlCenterVS controlCenter = new ControlCenterVS();
-                controlCenter.setName(jsonObject.getString("name"));
-                controlCenter.setServerURL(jsonObject.getString("serverURL"));
-                controlCenter.setId(jsonObject.getLong("id"));
-                controlCenter.setDateCreated(DateUtils.getDateFromString(jsonObject.getString("dateCreated")));
-                if (jsonObject.getString("state") != null) {
-                    controlCenter.setState(State.valueOf(jsonObject.getString("state")));
-                }
-                controlCenters.add(controlCenter);
+        if (actorVSJSON.getJSONObject("controlCenter") != null) {
+            jsonObject = actorVSJSON.getJSONObject("controlCenter");
+            ControlCenterVS controlCenter = new ControlCenterVS();
+            controlCenter.setName(jsonObject.getString("name"));
+            controlCenter.setServerURL(jsonObject.getString("serverURL"));
+            controlCenter.setId(jsonObject.getLong("id"));
+            controlCenter.setDateCreated(DateUtils.getDateFromString(jsonObject.getString("dateCreated")));
+            if (jsonObject.getString("state") != null) {
+                controlCenter.setState(State.valueOf(jsonObject.getString("state")));
             }
-            ((AccessControlVS)actorVS).setControlCenters(controlCenters);
+            ((AccessControlVS)actorVS).setControlCenter(controlCenter);
         }
         if (actorVSJSON.has("urlBlog"))
             actorVS.setUrlBlog(actorVSJSON.getString("urlBlog"));

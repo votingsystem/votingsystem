@@ -299,10 +299,7 @@ class TransactionVSService {
         }
 
         if(transaction.transactionParent == null) {
-            def childTransactionListDB = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-                eq('transactionParent', transaction)
-            }
-            transactionMap.numChildTransactions = childTransactionListDB.totalCount
+            transactionMap.numChildTransactions = TransactionVS.countByTransactionParent(transaction)
         }
 
         if(transaction.tag) {

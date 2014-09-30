@@ -119,7 +119,7 @@ public class RepresentativeService extends IntentService {
                     int numRowsCreated = getContentResolver().bulkInsert(
                             UserContentProvider.CONTENT_URI,contentValuesList.toArray(
                             new ContentValues[contentValuesList.size()]));
-                    Log.d(TAG + ".onHandleIntent(...)", "inserted: " + numRowsCreated +" rows");
+                    Log.d(TAG + ".requestRepresentatives(...)", "inserted: " + numRowsCreated +" rows");
                 } else { //To notify ContentProvider Listeners
                     getContentResolver().insert(UserContentProvider.CONTENT_URI, null);
                 }

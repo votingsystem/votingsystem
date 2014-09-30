@@ -40,9 +40,9 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.HttpHelper;
 
 
-public class EventVSStatisticsFragment extends Fragment {
+public class EventVSStatsFragment extends Fragment {
 	
-	public static final String TAG = EventVSStatisticsFragment.class.getSimpleName();
+	public static final String TAG = EventVSStatsFragment.class.getSimpleName();
 
     private View rootView;
     private EventVS eventVS;
@@ -50,8 +50,8 @@ public class EventVSStatisticsFragment extends Fragment {
     private String htmlContent;
     private String baseURL;
 
-    public static EventVSStatisticsFragment newInstance(Long eventId) {
-        EventVSStatisticsFragment fragment = new EventVSStatisticsFragment();
+    public static EventVSStatsFragment newInstance(Long eventId) {
+        EventVSStatsFragment fragment = new EventVSStatsFragment();
         Bundle args = new Bundle();
         args.putLong(ContextVS.ITEM_ID_KEY, eventId);
         fragment.setArguments(args);
@@ -85,7 +85,7 @@ public class EventVSStatisticsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).showProgress(true, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(true);
             htmlContent = savedInstanceState.getString(ContextVS.MESSAGE_KEY);
             baseURL = savedInstanceState.getString(ContextVS.URL_KEY);
             if(htmlContent != null && baseURL != null) loadHTMLContent(baseURL, htmlContent);
@@ -122,7 +122,7 @@ public class EventVSStatisticsFragment extends Fragment {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webview.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                ((ActivityVS)getActivity()).showProgress(false, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(false);
             }
         });
         webview.loadUrl(serverURL);
@@ -141,7 +141,7 @@ public class EventVSStatisticsFragment extends Fragment {
         public GetDataTask(ContentTypeVS contentType) { }
 
         @Override protected void onPreExecute() {
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
@@ -162,7 +162,7 @@ public class EventVSStatisticsFragment extends Fragment {
                 ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(),
                         getString(R.string.operation_error_msg), responseVS.getMessage());
             }
-            ((ActivityVS)getActivity()).showProgress(false, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }
     }
 }

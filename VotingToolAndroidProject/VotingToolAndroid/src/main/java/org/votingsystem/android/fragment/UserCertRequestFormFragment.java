@@ -32,7 +32,7 @@ import android.widget.TextView.OnEditorActionListener;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
-import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.activity.EventsVSActivity;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.model.ContextVS;
@@ -108,7 +108,7 @@ public class UserCertRequestFormFragment extends Fragment {
             public void onClick(View v) {
                 //finish();
                 Intent intent = new Intent(getActivity().getApplicationContext(),
-                        NavigationDrawer.class);
+                        EventsVSActivity.class);
                 startActivity(intent);
             }
         });
@@ -168,7 +168,7 @@ public class UserCertRequestFormFragment extends Fragment {
 	    	case android.R.id.home:
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", "home");
 	    		Intent intent = new Intent(getActivity().getApplicationContext(),
-                        NavigationDrawer.class);
+                        EventsVSActivity.class);
 	    		startActivity(intent);
 	    		return true;
 	    	default:
@@ -207,7 +207,7 @@ public class UserCertRequestFormFragment extends Fragment {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        ((ActivityVS)getActivity()).showProgress(false, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
     }
 
     private boolean validateForm () {
@@ -280,7 +280,7 @@ public class UserCertRequestFormFragment extends Fragment {
         startIntent.putExtra(EMAIL_KEY, email);
         startIntent.putExtra(CALLER_KEY, broadCastId);
         getActivity().startService(startIntent);
-        ((ActivityVS)getActivity()).showProgress(true, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
     }
 
 }

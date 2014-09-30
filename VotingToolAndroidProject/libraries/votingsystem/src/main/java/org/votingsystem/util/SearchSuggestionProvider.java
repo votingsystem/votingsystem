@@ -31,7 +31,7 @@ public class SearchSuggestionProvider extends SearchRecentSuggestionsProvider {
      * Manifest file, and any time you instantiate a 
      * {@link android.provider.SearchRecentSuggestions} helper class. 
      */
-    public final static String AUTHORITY = "org.sistemavotacion.util.SuggestionProvider";
+    public final static String AUTHORITY = "org.sistemavotacion.util.SearchSuggestionProvider";
     /**
      * These flags determine the operating mode of the suggestions provider.  This value should 
      * not change from run to run, because when it does change, your suggestions database may 

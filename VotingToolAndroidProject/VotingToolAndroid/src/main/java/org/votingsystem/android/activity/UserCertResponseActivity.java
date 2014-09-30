@@ -134,7 +134,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
         goAppButton.setVisibility(View.GONE);
         goAppButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
+            	Intent intent = new Intent(getBaseContext(), EventsVSActivity.class);
             	startActivity(intent);
             }
         });
@@ -229,7 +229,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:  
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(this, NavigationDrawer.class);
+	    		Intent intent = new Intent(this, EventsVSActivity.class);
 	    		startActivity(intent);            
 	    		return true;        
 	    	default:            

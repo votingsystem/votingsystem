@@ -41,7 +41,7 @@ class TestingController {
     def index() {
         //systemService.getSystemUser().save()
 
-        render  NifUtils.getNif(111222)
+        render(view:'comments', model: [])
         return false
     }
 

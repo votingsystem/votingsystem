@@ -31,7 +31,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
-import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
+import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -80,7 +80,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) signAndSendButton.setEnabled(true);
-                ((ActivityVS)getActivity()).showProgress(false, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(false);
             }
         }
     };
@@ -105,7 +105,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 JSONObject signatureContent = eventVS.getSignatureContentJSON();
                 startIntent.putExtra(ContextVS.MESSAGE_KEY, signatureContent.toString());
             }
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             signAndSendButton.setEnabled(false);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
@@ -155,7 +155,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
         if(savedInstanceState != null && savedInstanceState.getBoolean(
-                ContextVS.LOADING_KEY, false)) ((ActivityVS)getActivity()).showProgress(true, true);
+                ContextVS.LOADING_KEY, false)) ((ActivityVS)getActivity()).refreshingStateChanged(true);
         broadCastId = EventVSFragment.class.getSimpleName() + "_" + eventVS.getId();
         return rootView;
     }
@@ -177,7 +177,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventVSStatisticsPagerActivity.class);
+                        EventVSStatsPagerActivity.class);
                 intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
                 intent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
                 intent.putExtra(ContextVS.EVENT_STATE_KEY, eventVS.getState());
@@ -293,7 +293,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        ((ActivityVS)getActivity()).showProgress(false, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
     }
 
     @Override public void onResume() {

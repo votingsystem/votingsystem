@@ -26,7 +26,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
-import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.model.ContextVS;
@@ -44,7 +44,6 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -126,7 +125,7 @@ public class UserVSAccountsFragment extends Fragment {
                 default: ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
             }
-            ((ActivityVS)getActivity()).showProgress(false, false);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }
         }
     };
@@ -247,6 +246,11 @@ public class UserVSAccountsFragment extends Fragment {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);
                 return true;
+            case R.id.open_vicket_grid:
+                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, VicketGridFragment.class.getName());
+                startActivity(intent);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -259,7 +263,7 @@ public class UserVSAccountsFragment extends Fragment {
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -273,7 +277,7 @@ public class UserVSAccountsFragment extends Fragment {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-            ((NavigationDrawer)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -287,7 +291,7 @@ public class UserVSAccountsFragment extends Fragment {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-            ((NavigationDrawer)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -301,7 +305,7 @@ public class UserVSAccountsFragment extends Fragment {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();

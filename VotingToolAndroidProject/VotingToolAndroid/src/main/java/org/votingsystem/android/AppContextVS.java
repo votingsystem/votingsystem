@@ -19,6 +19,7 @@ import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
+import org.votingsystem.android.service.VotingAppService;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -85,6 +86,7 @@ public class AppContextVS extends Application {
 
     private State state = State.WITHOUT_CSR;
     private String vicketServerURL;
+    private String accessControlURL;
     private String webSocketSessionId = null;
     private String webSocketUserId = null;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
@@ -108,8 +110,12 @@ public class AppContextVS extends Application {
         return serverMap.get(serverURL);
     }
 
+    @Override public void onTerminate() {
+        Log.d(TAG + ".onTerminate(...)", "");
+        super.onTerminate();
+    }
 
-	@Override public void onCreate() {
+    @Override public void onCreate() {
         //System.setProperty("android.os.Build.ID", android.os.Build.ID);
         Log.d(TAG + ".onCreate()", "");
         try {
@@ -128,6 +134,13 @@ public class AppContextVS extends Application {
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
             vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
+            accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
+            if(accessControl == null) {
+                Intent startIntent = new Intent(getApplicationContext(), VotingAppService.class);
+                startIntent.putExtra(ContextVS.URL_KEY, accessControlURL);
+                startService(startIntent);
+            }
+            setInitialized(true);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -144,6 +157,10 @@ public class AppContextVS extends Application {
 
     public String getVicketServerURL() {
         return vicketServerURL;
+    }
+
+    public String getAccessControlURL() {
+        return accessControlURL;
     }
 
     public String getHostID() {

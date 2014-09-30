@@ -19,7 +19,6 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import org.json.JSONObject;
@@ -50,7 +49,7 @@ import java.util.UUID;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RepresentativeDelegationActivity extends ActivityVS {
+public class RepresentativeDelegationActivity extends ActivityBase {
 	
 	public static final String TAG = RepresentativeDelegationActivity.class.getSimpleName();
 
@@ -84,7 +83,7 @@ public class RepresentativeDelegationActivity extends ActivityVS {
                             responseVS.getNotificationMessage(), (String) responseVS.getData(),
                             typeVS);
                     newFragment.show(getSupportFragmentManager(), MessageDialogFragment.TAG);
-                    showProgress(false, true);
+                    refreshingStateChanged(false);
                     return;
                 } catch(Exception ex) {
                     ex.printStackTrace();
@@ -131,7 +130,7 @@ public class RepresentativeDelegationActivity extends ActivityVS {
 
 
             startIntent.putExtra(ContextVS.USER_KEY, representative);
-            showProgress(true, true);
+            refreshingStateChanged(true);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -145,7 +144,6 @@ public class RepresentativeDelegationActivity extends ActivityVS {
         contextVS = (AppContextVS) getApplicationContext();
         representative = (UserVS) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
-        initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
         acceptButton = (Button) findViewById(R.id.accept_button);
         anonymousCheckBox = (CheckBox) findViewById(R.id.anonymous_delegation_checkbox);
         publicCheckBox = (CheckBox) findViewById(R.id.public_delegation_checkbox);
@@ -168,10 +166,10 @@ public class RepresentativeDelegationActivity extends ActivityVS {
         webView.loadUrl("file:///android_asset/" + editorFileName);
         webView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                showProgress(false, true);
+                refreshingStateChanged(false);
             }
         });
-        showProgress(true, true);
+        refreshingStateChanged(true);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));

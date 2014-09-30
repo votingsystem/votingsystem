@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/reload"
-        votingSystem:showAsAction="ifRoom"
+        votingSystem:showAsAction="never"
         android:icon="@drawable/navigation_refresh"
         android:title="@string/update_lbl">
     </item>

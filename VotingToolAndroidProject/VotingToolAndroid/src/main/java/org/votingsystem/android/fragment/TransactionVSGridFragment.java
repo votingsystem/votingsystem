@@ -81,7 +81,7 @@ public class TransactionVSGridFragment extends Fragment
                 case VICKET_USER_INFO:
                     break;
             }
-            ((ActivityVS)getActivity()).showProgress(false, false);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }
         }
     };
@@ -94,7 +94,7 @@ public class TransactionVSGridFragment extends Fragment
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -151,7 +151,7 @@ public class TransactionVSGridFragment extends Fragment
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).showProgress(true, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(true);
         }
     }
 
@@ -220,7 +220,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        ((ActivityVS)getActivity()).showProgress(false, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
         if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
         firstVisiblePosition = null;
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);

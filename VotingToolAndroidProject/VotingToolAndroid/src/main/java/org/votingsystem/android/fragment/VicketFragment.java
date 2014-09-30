@@ -79,7 +79,7 @@ public class VicketFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchVicketCancellation();
             else {
-                ((ActivityVS)getActivity()).showProgress(false, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(false);
                 ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getNotificationMessage());
             }
@@ -94,7 +94,7 @@ public class VicketFragment extends Fragment {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_CANCEL);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             startIntent.putExtra(ContextVS.ITEM_ID_KEY, cursorPosition);
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -258,7 +258,7 @@ public class VicketFragment extends Fragment {
 
         public VicketDownloader() { }
 
-        @Override protected void onPreExecute() {((ActivityVS)getActivity()).showProgress(true, true); }
+        @Override protected void onPreExecute() {((ActivityVS)getActivity()).refreshingStateChanged(true); }
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String vicketURL = urls[0];
@@ -282,7 +282,7 @@ public class VicketFragment extends Fragment {
                 ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                         responseVS.getMessage());
             }
-            ((ActivityVS)getActivity()).showProgress(false, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }
     }
 

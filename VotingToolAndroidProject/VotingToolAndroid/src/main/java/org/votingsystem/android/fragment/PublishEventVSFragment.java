@@ -31,7 +31,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
-import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.activity.EventsVSActivity;
 import org.votingsystem.android.service.SignAndSendService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
@@ -99,7 +99,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                     return;
                 }
-                ((ActivityVS)getActivity()).showProgress(false, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(false);
                 GroupPosition selectedSubsystem = null;
                 if(ResponseVS.SC_OK == responseStatusCode) {
                     caption = getString(R.string.operation_ok_msg);
@@ -124,7 +124,7 @@ public class PublishEventVSFragment extends Fragment {
                             new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             Intent intent = new Intent(getActivity().getApplicationContext(),
-                                    NavigationDrawer.class);
+                                    EventsVSActivity.class);
                             intent.putExtra(NavigatorDrawerOptionsAdapter.GROUP_POSITION_KEY,
                                     groupPosition.getPosition());
                             startActivity(intent);
@@ -243,9 +243,9 @@ public class PublishEventVSFragment extends Fragment {
                     ContentTypeVS.JSON_SIGNED);
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
             startIntent.putExtra(ContextVS.MESSAGE_KEY, eventVS.toJSON().toString());
-            ((ActivityVS)getActivity()).showProgressMessage(getActivity().getString(
+            ((ActivityVS)getActivity()).showRefreshMessage(getActivity().getString(
                     R.string.publishing_document_msg));
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -272,14 +272,10 @@ public class PublishEventVSFragment extends Fragment {
                 optionContainer = (LinearLayout) rootView.findViewById(R.id.optionContainer);
                 optionCaption = (TextView) rootView.findViewById(R.id.eventFieldsCaption);
                 controlCenterSetSpinner = (Spinner) rootView.findViewById(R.id.controlCenterSetSpinner);
-                Set<ControlCenterVS> controlCenterSet =
-                        contextVS.getAccessControl().getControlCenters();
                 List<String> controlCenterNameList = new ArrayList<String>();
                 controlCenterNameList.add(getActivity().getString(R.string.select_control_center_lbl));
-                for(ControlCenterVS controlCenter : controlCenterSet) {
-                    controlCenterNameList.add(controlCenter.getName());
-                    controlCenterList.add(controlCenter);
-                }
+                controlCenterNameList.add(contextVS.getAccessControl().getControlCenter().getName());
+                controlCenterList.add(contextVS.getAccessControl().getControlCenter());
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
                         android.R.layout.simple_spinner_item, controlCenterNameList);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -336,7 +332,7 @@ public class PublishEventVSFragment extends Fragment {
         editorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(EditorFragment.TAG);
         if(savedInstanceState != null) {
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).showProgress(true, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(true);
             optionList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
             for(String optionContent:optionList) {
                 addEventOption(optionContent);

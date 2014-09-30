@@ -1,26 +1,34 @@
 package org.votingsystem.android.activity;
 
+import android.app.SearchManager;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
+import org.votingsystem.android.fragment.TransactionVSGridFragment;
+import org.votingsystem.android.fragment.UserVSAccountsFragment;
 import org.votingsystem.android.fragment.VicketFragment;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.util.DateUtils;
+
+import java.util.Calendar;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VicketPagerActivity extends ActionBarActivity {
+public class VicketPagerActivity extends ActivityBase {
 
     public static final String TAG = VicketPagerActivity.class.getSimpleName();
 
@@ -33,18 +41,17 @@ public class VicketPagerActivity extends ActionBarActivity {
         contextVS = (AppContextVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, null, null,
-                null);
+        cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, null, null, null);
         cursor.moveToPosition(cursorPosition);
         mViewPager.setCurrentItem(cursorPosition);
-        getSupportActionBar().setLogo(R.drawable.fa_money_32);
+        getSupportActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.fa_money_32));
         getSupportActionBar().setTitle(getString(R.string.vicket_lbl));
     }
 
@@ -71,23 +78,83 @@ public class VicketPagerActivity extends ActionBarActivity {
 
     class VicketPagerAdapter extends FragmentStatePagerAdapter {
 
-        private Cursor cursor;
+        final String TAG = VicketPagerAdapter.class.getSimpleName();
 
-        public VicketPagerAdapter(FragmentManager fm) {
-            super(fm);
-            cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,
-                    null, null, null, null);
+        private NavigatorDrawerOptionsAdapter.ChildPosition selectedChild = null;
+        private NavigatorDrawerOptionsAdapter.GroupPosition selectedGroup =
+                NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS;
+
+        private String searchQuery = null;
+
+        public VicketPagerAdapter(FragmentManager fragmentManager) {
+            super(fragmentManager);
         }
 
-        @Override public Fragment getItem(int i) {
-            Log.d(TAG + ".VicketPagerAdapter.getItem(...) ", " - item: " + i);
-            cursor.moveToPosition(i);
-            return VicketFragment.newInstance(cursor.getPosition());
+        @Override public Fragment getItem(int position) {
+            NavigatorDrawerOptionsAdapter.ChildPosition childPosition = selectedGroup.getChildList().get(position);
+            Fragment selectedFragment = null;
+            switch(childPosition) {
+                case VICKET_USER_INFO:
+                    selectedFragment = new UserVSAccountsFragment();
+                    break;
+                case VICKET_LIST:
+                    selectedFragment = new TransactionVSGridFragment();
+                    break;
+            }
+            Bundle args = new Bundle();
+            args.putString(SearchManager.QUERY, searchQuery);
+            selectedFragment.setArguments(args);
+            Log.d(TAG + ".getItem(...) ", "position:" + position + " - args: " + args +
+                    " - selectedFragment.getClass(): " + ((Object)selectedFragment).getClass());
+            return selectedFragment;
+        }
+
+        public String getSelectedChildDescription(AppContextVS context) {
+            switch(selectedChild) {
+                case VICKET_USER_INFO:
+                    DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
+                    String periodLbl = context.getString(R.string.week_lapse_lbl, DateUtils.getDate_Es(
+                            timePeriod.getDateFrom()), DateUtils.getDate_Es(timePeriod.getDateTo()));
+                    return periodLbl;
+                case VICKET_LIST:
+                    return context.getString(R.string.vickets_list_lbl);
+                default:
+                    return context.getString(R.string.unknown_event_state_lbl);
+            }
+        }
+
+        public String getSelectedGroupDescription(AppContextVS context) {
+            return selectedGroup.getDescription(context);
+        }
+
+        public void setSearchQuery(String searchQuery) {
+            this.searchQuery = searchQuery;
+        }
+
+        public void selectItem(Integer groupPosition, Integer childPosition) {
+            selectedChild = selectedGroup.getChildList().get(childPosition);
+        }
+
+        public void updateChildPosition(int childPosition) {
+            selectedChild = selectedGroup.getChildList().get(childPosition);
+        }
+
+        public int getSelectedChildPosition() {
+            return selectedGroup.getChildList().indexOf(selectedChild);
+        }
+
+        public int getSelectedGroupPosition() {
+            return selectedGroup.getPosition();
+        }
+
+        public Drawable getLogo(AppContextVS context) {
+            return context.getResources().getDrawable(selectedGroup.getLogo());
         }
 
         @Override public int getCount() {
-            return cursor.getCount();
+            return selectedGroup.getChildList().size();
         }
+
 
     }
 

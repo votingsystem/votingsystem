@@ -9,26 +9,11 @@
 
     <group android:id="@+id/general_items">
         <item
-            android:id="@+id/get_cert"
-            android:orderInCategory="1"
-            android:showAsAction="never"
-            android:icon="@android:drawable/btn_plus"
-            android:title="@string/request_certificate_menu"/>
-        <item
             android:id="@+id/publish_document"
             android:orderInCategory="2"
             android:showAsAction="never"
             android:icon="@drawable/view_detailed_22"
             android:title="@string/publish_poll_lbl"/>
-    </group>
-
-
-    <group android:id="@+id/dev_items">
-        <item android:id="@+id/open_vicket_grid"
-            android:orderInCategory="1"
-            android:showAsAction="never"
-            android:icon="@android:drawable/btn_plus"
-            android:title="@string/open_vicket_grid_menu"/>
     </group>
 
     <item

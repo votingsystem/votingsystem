@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EditorFragment;
@@ -32,7 +31,7 @@ import org.votingsystem.model.OperationVS;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class FragmentContainerActivity extends ActivityVS {
+public class FragmentContainerActivity extends ActivityBase {
 
 	public static final String TAG = FragmentContainerActivity.class.getSimpleName();
 
@@ -43,7 +42,6 @@ public class FragmentContainerActivity extends ActivityVS {
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.generic_fragment_container_activity);
-        initActivityVS((FrameLayout) findViewById(R.id.fragment_container), findViewById(R.id.progressContainer));
         // if we're being restored from a previous state should return or else
         // we could end up with overlapping fragments.
         if (savedInstanceState != null) {
@@ -93,6 +91,8 @@ public class FragmentContainerActivity extends ActivityVS {
         if (fragment != null) fragment.processOperation(operationVS);
 
     }
+
+
 
     /*@Override public void onBackPressed() {
         EditorFragment fragment = (EditorFragment)getSupportFragmentManager().

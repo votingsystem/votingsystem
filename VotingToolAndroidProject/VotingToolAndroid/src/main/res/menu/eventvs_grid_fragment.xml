@@ -4,7 +4,7 @@
     <item
         android:id="@+id/reload"
         votingSystem:showAsAction="ifRoom"
-        android:icon="@drawable/navigation_refresh"
+        android:icon="@drawable/ic_popup_sync_1"
         android:title="@string/update_lbl">
     </item>
 

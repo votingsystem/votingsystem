@@ -54,7 +54,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RepresentativeGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
@@ -63,7 +62,6 @@ public class RepresentativeGridFragment extends Fragment
 
     private View rootView;
     private GridView gridView;
-    private AtomicBoolean hasHTTPConnection = new AtomicBoolean(true);
     private RepresentativeListAdapter adapter = null;
     private String queryStr = null;
     private AppContextVS contextVS = null;
@@ -81,18 +79,16 @@ public class RepresentativeGridFragment extends Fragment
         TypeVS operationType = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchSignAndSendService();
         else {
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode) {
-                hasHTTPConnection.set(false);
-            }
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseStatusCode)  showHTTPError();
             ResponseVS responseVS = (ResponseVS) intent.getSerializableExtra(
                     ContextVS.RESPONSEVS_KEY);
             String caption = intent.getStringExtra(ContextVS.CAPTION_KEY);
             String message = intent.getStringExtra(ContextVS.MESSAGE_KEY);
             if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                ((ActivityVS)getActivity()).showProgress(false, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(false);
                 ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getNotificationMessage());
-            } else   ((ActivityVS)getActivity()).showMessage(responseStatusCode, caption, message);
+                       responseVS.getNotificationMessage());
+            } else ((ActivityVS)getActivity()).showMessage(responseStatusCode, caption, message);
         }
         }
     };
@@ -114,7 +110,7 @@ public class RepresentativeGridFragment extends Fragment
             signedContentDataMap.put("operation", TypeVS.REPRESENTATIVE_REVOKE.toString());
             signedContentDataMap.put("UUID", UUID.randomUUID().toString());
             startIntent.putExtra(ContextVS.MESSAGE_KEY, new JSONObject(signedContentDataMap).toString());
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -136,7 +132,10 @@ public class RepresentativeGridFragment extends Fragment
         contextVS = (AppContextVS) getActivity().getApplicationContext();
         broadCastId = RepresentativeGridFragment.class.getSimpleName();
         loaderId = NavigatorDrawerOptionsAdapter.GroupPosition.REPRESENTATIVES.getLoaderId(0);
-        queryStr = getArguments().getString(SearchManager.QUERY);
+        Bundle data = getArguments();
+        if (data != null && data.containsKey(SearchManager.QUERY)) {
+            queryStr = data.getString(SearchManager.QUERY);
+        }
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
@@ -172,9 +171,8 @@ public class RepresentativeGridFragment extends Fragment
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            hasHTTPConnection.set(savedInstanceState.getBoolean(ContextVS.RESPONSE_STATUS_KEY,true));
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).showProgress(true, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(true);
         }
     }
 
@@ -190,34 +188,37 @@ public class RepresentativeGridFragment extends Fragment
         if (gridView.getAdapter() == null || gridView.getAdapter().getCount() == 0) return ;
         /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
-        if(loadMore && !  ((ActivityVS)getActivity()).isProgressVisible() && offset <
+        if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset <
                 UserContentProvider.getNumTotalRepresentatives() &&
                 totalItemCount < UserContentProvider.getNumTotalRepresentatives()) {
             Log.d(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
                     " - visibleItemCount:" + visibleItemCount + " - totalItemCount:" + totalItemCount);
             firstVisiblePosition = firstVisibleItem;
-            loadHttpItems(new Long(totalItemCount));
+            fetchItems(new Long(totalItemCount));
         }
     }
 
-    private void loadHttpItems(Long offset) {
-        Log.d(TAG +  ".loadHttpItems(...)", "offset: " + offset + " - hasHTTPConnection: " +
-                hasHTTPConnection.get());
-        if(!hasHTTPConnection.get()) {
-            ((ActivityVS)getActivity()).showProgress(false, true);
-            if(gridView.getAdapter().getCount() == 0)
-                rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
-        }
-        else {
-            ((ActivityVS)getActivity()).showProgress(true, true);
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    RepresentativeService.class);
-            startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
-                    getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);
-            getActivity().startService(startIntent);
-        }
+    public Long getOffset() {
+        return this.offset;
+    }
+
+    private void showHTTPError() {
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        if(gridView.getAdapter().getCount() == 0)
+            rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+    }
+
+    public void fetchItems(Long offset) {
+        Log.d(TAG +  ".fetchItems(...)", "offset: " + offset);
+        if(((ActivityVS)getActivity()).isRefreshing()) return;
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                RepresentativeService.class);
+        startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
+                getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);
+        getActivity().startService(startIntent);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -231,9 +232,9 @@ public class RepresentativeGridFragment extends Fragment
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
             case R.id.reload:
-                hasHTTPConnection.set(true);
-                rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-                getLoaderManager().restartLoader(loaderId, null, this);
+                fetchItems(offset);
+                //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
+                //getLoaderManager().restartLoader(loaderId, null, this);
                 return true;
             case R.id.cancel_anonymouys_representatioin:
                 return true;
@@ -288,9 +289,9 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
         if(UserContentProvider.getNumTotalRepresentatives() == null)
-            loadHttpItems(offset);
+            fetchItems(offset);
         else {
-            ((ActivityVS)getActivity()).showProgress(false, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             firstVisiblePosition = null;
             ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
@@ -356,7 +357,6 @@ public class RepresentativeGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putBoolean(ContextVS.RESPONSE_STATUS_KEY, hasHTTPConnection.get());
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 

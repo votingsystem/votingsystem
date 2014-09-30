@@ -126,6 +126,7 @@ public class EventVSService extends IntentService {
                                 EventVS.State.TERMINATED;
                         checkDates(eventVS);
                         ContentValues values = new ContentValues(5);
+                        values.put(EventVSContentProvider.SQL_INSERT_OR_REPLACE, true );
                         values.put(EventVSContentProvider.ID_COL, eventVS.getId());
                         values.put(EventVSContentProvider.URL_COL, eventVS.getURL());
                         values.put(EventVSContentProvider.JSON_DATA_COL, eventVS.toJSON().toString());

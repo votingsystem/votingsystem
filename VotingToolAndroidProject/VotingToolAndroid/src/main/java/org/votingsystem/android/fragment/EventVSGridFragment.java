@@ -44,7 +44,6 @@ import org.votingsystem.model.ResponseVS;
 
 import java.text.Collator;
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -55,7 +54,6 @@ public class EventVSGridFragment extends Fragment
 
     public static final String TAG = EventVSGridFragment.class.getSimpleName();
 
-    private AtomicBoolean hasHTTPConnection = new AtomicBoolean(true);
     private View rootView;
     //private TextView searchTextView;
     private GridView gridView;
@@ -76,9 +74,7 @@ public class EventVSGridFragment extends Fragment
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
-                hasHTTPConnection.set(false);
-            }
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
             ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                     responseVS.getNotificationMessage());
         }
@@ -105,13 +101,10 @@ public class EventVSGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        if (getArguments() != null) {
-            eventState = (EventVS.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
-            groupPosition = (GroupPosition) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-            childPosition = (ChildPosition)getArguments().getSerializable(ContextVS.CHILD_POSITION_KEY);
-            queryStr = getArguments().getString(SearchManager.QUERY);
-
-        }
+        eventState = (EventVS.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
+        groupPosition = (GroupPosition) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
+        childPosition = (ChildPosition)getArguments().getSerializable(ContextVS.CHILD_POSITION_KEY);
+        queryStr = getArguments().getString(SearchManager.QUERY);
         loaderId = groupPosition.getLoaderId(childPosition.getPosition());
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
@@ -166,9 +159,8 @@ public class EventVSGridFragment extends Fragment
             Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            hasHTTPConnection.set(savedInstanceState.getBoolean(ContextVS.RESPONSE_STATUS_KEY,true));
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).showProgress(true, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(true);
         }
     }
 
@@ -191,10 +183,10 @@ public class EventVSGridFragment extends Fragment
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
         Long numTotalEvents = EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(),
                 eventState);
-        if(numTotalEvents == null) loadHttpItems(offset);
+        if(numTotalEvents == null) fetchItems(offset);
         else {
             int cursorCount = ((CursorAdapter)gridView.getAdapter()).getCursor().getCount();
-            if(loadMore && !  ((ActivityVS)getActivity()).isProgressVisible() && offset < numTotalEvents &&
+            if(loadMore && !  ((ActivityVS)getActivity()).isRefreshing() && offset < numTotalEvents &&
                     cursorCount < numTotalEvents) {
                 Log.d(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
                         " - visibleItemCount: " + visibleItemCount + " - totalItemCount: " +
@@ -202,31 +194,42 @@ public class EventVSGridFragment extends Fragment
                         " - cursorCount: " + cursorCount + " - groupPosition: " + groupPosition +
                         " - eventState: " + eventState);
                 firstVisiblePosition = firstVisibleItem;
-                loadHttpItems(new Long(totalItemCount));
+                fetchItems(new Long(totalItemCount));
             }
         }
     }
 
-    private void loadHttpItems(Long offset) {
-        Log.d(TAG +  ".loadHttpItems(...)", "offset: " + offset + " - hasHTTPConnection: " +
-                hasHTTPConnection.get() + " - progressVisible: " + ((ActivityVS)getActivity()).isProgressVisible() +
+    public Long getOffset() {
+        return this.offset;
+    }
+
+    private void showHTTPError() {
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        if(gridView.getAdapter().getCount() == 0)
+            rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+    }
+
+    public void fetchItems(Long offset) {
+        Log.d(TAG +  ".fetchItems(...)", "offset: " + offset + " - progressVisible: " +
+                ((ActivityVS)getActivity()).isRefreshing() +
                 " - groupPosition: " + groupPosition + " - eventState: " + eventState);
-        if(((ActivityVS)getActivity()).isProgressVisible()) return;
-        if(!hasHTTPConnection.get()) {
-            ((ActivityVS)getActivity()).showProgress(false, true);
-            if(gridView.getAdapter().getCount() == 0)
-                rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
-        }
-        else {
-            ((ActivityVS)getActivity()).showProgress(true, true);
-            Intent startIntent = new Intent(getActivity().getApplicationContext(),
-                    EventVSService.class);
-            startIntent.putExtra(ContextVS.STATE_KEY, eventState);
-            startIntent.putExtra(ContextVS.OFFSET_KEY, offset);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, groupPosition.getTypeVS());
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            getActivity().startService(startIntent);
-        }
+        if(((ActivityVS)getActivity()).isRefreshing()) return;
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                EventVSService.class);
+        startIntent.putExtra(ContextVS.STATE_KEY, eventState);
+        startIntent.putExtra(ContextVS.OFFSET_KEY, offset);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, groupPosition.getTypeVS());
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        getActivity().startService(startIntent);
+    }
+
+    public void fetchItems(EventVS.State eventState, GroupPosition groupPosition) {
+        this.offset = 0L;
+        this.eventState = eventState;
+        this.groupPosition = groupPosition;
+        getLoaderManager().restartLoader(loaderId, null, this);
+        ((CursorAdapter)gridView.getAdapter()).notifyDataSetChanged();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -234,7 +237,6 @@ public class EventVSGridFragment extends Fragment
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putBoolean(ContextVS.RESPONSE_STATUS_KEY, hasHTTPConnection.get());
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
@@ -249,8 +251,7 @@ public class EventVSGridFragment extends Fragment
                 " - eventState: " + eventState);
         switch (item.getItemId()) {
             case R.id.reload:
-                hasHTTPConnection.set(true);
-                loadHttpItems(offset);
+                fetchItems(offset);
                 //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
                 //gridView.invalidateViews();
                 //getLoaderManager().restartLoader(loaderId, null, this);
@@ -290,9 +291,9 @@ public class EventVSGridFragment extends Fragment
                 " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
         if(EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(), eventState) == null)
-            loadHttpItems(offset);
+            fetchItems(offset);
         else {
-            ((ActivityVS)getActivity()).showProgress(false, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             else cursor.moveToFirst();
             firstVisiblePosition = null;
@@ -319,13 +320,6 @@ public class EventVSGridFragment extends Fragment
             Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
-    }
-
-    @Override public void onStop() {
-        gridView.setOnScrollListener(null);
-        getLoaderManager().destroyLoader(loaderId);
-        super.onStop();
-        Log.d(TAG +  ".onStop()", " - onStop - ");
     }
 
     @Override public void onDestroy() {

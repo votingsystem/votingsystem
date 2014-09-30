@@ -21,7 +21,7 @@ import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -69,22 +69,22 @@ public class VicketService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         contextVS = (AppContextVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
-        TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
+        TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         Uri uriData =  arguments.getParcelable(ContextVS.URI_KEY);;
         BigDecimal amount = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
         String currencyCode = (String) arguments.getSerializable(ContextVS.CURRENCY_KEY);
         ResponseVS responseVS = null;
-        switch(operationType) {
+        switch(operation) {
             case VICKET_USER_INFO:
                 responseVS = updateUserInfo();
-                responseVS.setTypeVS(operationType);
+                responseVS.setTypeVS(operation);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.sendBroadcast(responseVS);
                 break;
             case VICKET_REQUEST:
                 responseVS = vicketRequest(amount, currencyCode);
-                responseVS.setTypeVS(operationType);
+                responseVS.setTypeVS(operation);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.showNotification(responseVS);
                 contextVS.sendBroadcast(responseVS);
@@ -97,7 +97,7 @@ public class VicketService extends IntentService {
                 String IBAN = uriData.getQueryParameter("IBAN");
                 String tagVS = uriData.getQueryParameter("tagVS");
                 responseVS = vicketSend(amount, currencyCode, subject, receptor, IBAN, tagVS);
-                responseVS.setTypeVS(operationType);
+                responseVS.setTypeVS(operation);
                 responseVS.setServiceCaller(serviceCaller);
                 contextVS.showNotification(responseVS);
                 contextVS.sendBroadcast(responseVS);
@@ -132,7 +132,7 @@ public class VicketService extends IntentService {
                             SMIMEMessageWrapper signedMessage = responseVS.getSmimeMessage();
                             Log.d(TAG + ".cancelVicket(...)", "error JSON response: " + signedMessage.getSignedContent());
                             JSONObject jsonResponse = new JSONObject(signedMessage.getSignedContent());
-                            TypeVS operation = TypeVS.valueOf(jsonResponse.getString("operation"));
+                            operation = TypeVS.valueOf(jsonResponse.getString("operation"));
                             if(TypeVS.VICKET_CANCEL == operation) {
                                 vicket.setCancellationReceipt(responseVS.getSmimeMessage());
                                 vicket.setState(Vicket.State.LAPSED);
@@ -144,9 +144,7 @@ public class VicketService extends IntentService {
                             }
                         }
                     }
-                    responseVS.setServiceCaller(serviceCaller);
-                    contextVS.showNotification(responseVS);
-                    contextVS.sendBroadcast(responseVS);
+                    broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS, contextVS));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -155,7 +153,7 @@ public class VicketService extends IntentService {
     }
 
     private ResponseVS cancelVicket(Vicket vicket) {
-        ResponseVS responseVS = getVicketServer();
+        ResponseVS responseVS = contextVS.getHTTPVicketServer();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         VicketServer vicketServer = (VicketServer) responseVS.getData();
         Map vicketCancellationDataMap = new HashMap();
@@ -224,7 +222,7 @@ public class VicketService extends IntentService {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyCode,
                         requestAmount.toString(), available.toString()));
             }
-            responseVS = getVicketServer();
+            responseVS = contextVS.getHTTPVicketServer();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             VicketServer vicketServer = (VicketServer) responseVS.getData();
 
@@ -353,7 +351,7 @@ public class VicketService extends IntentService {
     }
 
     private ResponseVS vicketRequest(BigDecimal requestAmount, String currencyCode) {
-        ResponseVS responseVS = getVicketServer();
+        ResponseVS responseVS = contextVS.getHTTPVicketServer();;
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         VicketServer vicketServer = (VicketServer) responseVS.getData();
         Map<String, Vicket> vicketsMap = new HashMap<String, Vicket>();
@@ -477,7 +475,7 @@ public class VicketService extends IntentService {
 
     private ResponseVS updateUserInfo() {
         Log.d(TAG + ".updateUserInfo(...)", "updateUserInfo");
-        ResponseVS responseVS = getVicketServer();
+        ResponseVS  responseVS = contextVS.getHTTPVicketServer();;
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         VicketServer vicketServer = (VicketServer) responseVS.getData();
         Map mapToSend = new HashMap();
@@ -513,30 +511,9 @@ public class VicketService extends IntentService {
         }
     }
 
-    private ResponseVS getVicketServer() {
-        ResponseVS responseVS = null;
-        VicketServer vicketServer = contextVS.getVicketServer();
-        if(vicketServer != null) {
-            responseVS = new ResponseVS(ResponseVS.SC_OK);
-            responseVS.setData(vicketServer);
-        } else {
-            try {
-                responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(contextVS.getVicketServerURL()),
-                        ContentTypeVS.JSON);
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                    contextVS.setVicketServer(vicketServer);
-                }
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                String message = ex.getMessage();
-                if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-                responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
-                        message);
-            }
-        }
-        responseVS.setData(vicketServer);
-        return responseVS;
-    }
 
+    private void broadCastResponse(ResponseVS responseVS) {
+        contextVS.showNotification(responseVS);
+        contextVS.sendBroadcast(responseVS);
+    }
 }

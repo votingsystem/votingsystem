@@ -408,6 +408,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                     break;
                 case Status.INIT_ACCESS_CONTROL:
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        ContextVS.getInstance().setDefaultServer(statusFromResponse.getData())
                         publishEvent(simulationData.getEventVS());
                     } else finishSimulation(statusFromResponse);
                     break;

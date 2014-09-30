@@ -64,6 +64,7 @@ class TimeStampService {
                     signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
                 }
             }
+            ContextVS.getInstance().setTimeStampServerCert(x509TimeStampServerCert)
             if(x509TimeStampServerCert) {
                 timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                         ContextVS.PROVIDER).build(x509TimeStampServerCert)

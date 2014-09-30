@@ -14,7 +14,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
-import org.votingsystem.android.fragment.EventVSStatisticsFragment;
+import org.votingsystem.android.fragment.EventVSStatsFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
@@ -24,9 +24,9 @@ import org.votingsystem.util.DateUtils;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSStatisticsPagerActivity extends ActionBarActivity {
+public class EventVSStatsPagerActivity extends ActionBarActivity {
 
-    public static final String TAG = EventVSStatisticsPagerActivity.class.getSimpleName();
+    public static final String TAG = EventVSStatsPagerActivity.class.getSimpleName();
 
     private AppContextVS contextVS;
     private Cursor cursor = null;
@@ -201,7 +201,7 @@ public class EventVSStatisticsPagerActivity extends ActionBarActivity {
             Log.d(TAG + ".EventVSPagerAdapter.getItem(...) ", "item: " + i);
             cursor.moveToPosition(i);
             Long eventId = cursor.getLong(cursor.getColumnIndex(EventVSContentProvider.ID_COL));
-            return EventVSStatisticsFragment.newInstance(eventId);
+            return EventVSStatsFragment.newInstance(eventId);
         }
 
         @Override public int getCount() {

@@ -19,10 +19,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
@@ -47,7 +47,7 @@ import java.io.FileDescriptor;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class NewRepresentativeActivity extends ActivityVS {
+public class NewRepresentativeActivity extends ActivityBase {
 	
 	public static final String TAG = NewRepresentativeActivity.class.getSimpleName();
 
@@ -93,7 +93,7 @@ public class NewRepresentativeActivity extends ActivityVS {
                         NewRepresentativeActivity.this.onBackPressed();
                     }
                 } else if(TypeVS.NEW_REPRESENTATIVE == broadcastType) {
-                    showProgress(false, true);
+                    refreshingStateChanged(false);
                     showMessage(responseStatusCode, caption, message);
                     if(ResponseVS.SC_OK != responseStatusCode) {
                         editorFragment.setEditable(true);
@@ -112,7 +112,7 @@ public class NewRepresentativeActivity extends ActivityVS {
                                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
                         printRepresentativeData(representative);
                     }
-                    showProgress(false, true);
+                    refreshingStateChanged(false);
                 }
             }
         }
@@ -133,7 +133,7 @@ public class NewRepresentativeActivity extends ActivityVS {
             startIntent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, signedMessageSubject);
             startIntent.putExtra(ContextVS.MESSAGE_KEY, editorContent);
             startIntent.putExtra(ContextVS.URI_KEY, representativeImageUri);
-            showProgress(true, true);
+            refreshingStateChanged(true);
             startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -151,7 +151,6 @@ public class NewRepresentativeActivity extends ActivityVS {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         editorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(
                 EditorFragment.TAG);
-        initActivityVS((FrameLayout) findViewById(R.id.mainLayout), findViewById(R.id.progressContainer));
         imageCaption = (TextView) findViewById(R.id.representative_image_caption);
         imageCaption.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -181,7 +180,7 @@ public class NewRepresentativeActivity extends ActivityVS {
             if(representativeImageUri != null) {
                 setRepresentativeImage(representativeImageUri, representativeImageName);
             }
-            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) showProgress(true, true);
+            if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false)) refreshingStateChanged(true);
         }
     }
 
@@ -200,9 +199,8 @@ public class NewRepresentativeActivity extends ActivityVS {
     }
 
     private void loadRepresentativeData(String representativeNif) {
-        TextView progressMessage = (TextView) findViewById(R.id.progressMessage);
-        progressMessage.setText(getString(R.string.loading_data_msg));
-        showProgress(true, true);
+        Toast.makeText(this, getString(R.string.loading_data_msg), Toast.LENGTH_SHORT).show();
+        refreshingStateChanged(true);
         Intent startIntent = new Intent(this, RepresentativeService.class);
         startIntent.putExtra(ContextVS.NIF_KEY, representativeNif);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
@@ -356,10 +354,5 @@ public class NewRepresentativeActivity extends ActivityVS {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
-
-    @Override protected void onStop() {
-        super.onStop();
-    	Log.d(TAG + ".onStop()", "onStop");
-    };
 
 }

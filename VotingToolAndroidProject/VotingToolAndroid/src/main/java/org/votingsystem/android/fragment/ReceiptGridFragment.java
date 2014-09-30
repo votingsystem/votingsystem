@@ -106,7 +106,7 @@ public class ReceiptGridFragment extends Fragment implements
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount());
-        ((ActivityVS)getActivity()).showProgress(false, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);

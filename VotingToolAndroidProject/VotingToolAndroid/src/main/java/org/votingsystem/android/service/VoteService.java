@@ -208,7 +208,7 @@ public class VoteService extends IntentService {
         if(message != null) builder.setContentText(message);
         if(notificationIcon != null) builder.setSmallIcon(notificationIcon);
         //Intent clickIntent = new Intent(Intent.ACTION_MAIN);
-        //clickIntent.setClassName(this, NavigationDrawer.class.getName());
+        //clickIntent.setClassName(this, EventsVSActivity.class.getName());
         //PendingIntent pIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
         //builder.setContentIntent(pIntent);
         Notification note =  builder.build();

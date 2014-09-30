@@ -32,7 +32,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ActivityVS;
-import org.votingsystem.android.activity.EventVSStatisticsPagerActivity;
+import org.votingsystem.android.activity.EventVSStatsPagerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.service.VoteService;
 import org.votingsystem.model.ContextVS;
@@ -124,7 +124,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
             startIntent.putExtra(ContextVS.VOTE_KEY, vote);
             if(operation == TypeVS.CANCEL_VOTE) cancelVoteButton.setEnabled(false);
             else setOptionButtonsEnabled(false);
-            ((ActivityVS)getActivity()).showProgress(true, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -192,7 +192,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         switch (item.getItemId()) {
             case R.id.eventInfo:
                 Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventVSStatisticsPagerActivity.class);
+                        EventVSStatsPagerActivity.class);
                 intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
                 intent.putExtra(ContextVS.TYPEVS_KEY, eventVS.getTypeVS());
                 intent.putExtra(ContextVS.EVENT_STATE_KEY, eventVS.getState());
@@ -332,7 +332,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        ((ActivityVS)getActivity()).showProgress(false, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
     }
 
     @Override public void onDestroy() {
@@ -350,7 +350,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         super.onActivityCreated(bundle);
         if(bundle != null) {
             if(bundle.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).showProgress(true, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(true);
             vote = (VoteVS) bundle.getSerializable(ContextVS.VOTE_KEY);
         }
         if(vote != null && vote.getVoteReceipt() != null) setReceiptScreen(vote);

@@ -78,7 +78,7 @@ public class VicketGridFragment extends Fragment
                 case VICKET_USER_INFO:
                     break;
             }
-            ((ActivityVS)getActivity()).showProgress(false, false);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }
         }
     };
@@ -109,6 +109,7 @@ public class VicketGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
+
         ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.vicket_lbl), null,
                 R.drawable.fa_money_32);
         rootView = inflater.inflate(R.layout.generic_grid_fragment, container, false);
@@ -127,7 +128,7 @@ public class VicketGridFragment extends Fragment
             }
         });
         gridView.setOnScrollListener(this);
-        ((ActivityVS)getActivity()).showProgress(true, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
         return rootView;
     }
 
@@ -141,7 +142,7 @@ public class VicketGridFragment extends Fragment
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
             if(savedInstanceState.getBoolean(ContextVS.LOADING_KEY, false))
-                ((ActivityVS)getActivity()).showProgress(true, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(true);
         }
     }
 
@@ -192,7 +193,7 @@ public class VicketGridFragment extends Fragment
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        ((ActivityVS)getActivity()).showProgress(false, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(false);
         if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
         firstVisiblePosition = null;
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);

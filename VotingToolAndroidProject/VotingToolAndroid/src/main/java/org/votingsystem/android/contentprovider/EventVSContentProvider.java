@@ -25,6 +25,9 @@ public class EventVSContentProvider extends ContentProvider {
 
     public static final String TAG = EventVSContentProvider.class.getSimpleName();
 
+    //from http://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
+    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
+
     private static final int DATABASE_VERSION = 1;
     private static final String DB_NAME = "voting_system_eventvs.db";
     static final String TABLE_NAME = "eventvs";
@@ -174,11 +177,20 @@ public class EventVSContentProvider extends ContentProvider {
         // NOTE Argument checking code omitted. Check your parameters! Check that
         // your row addition request succeeded!
         Uri newUri = null;
+        boolean replace = false;
         if(values != null) {
             long rowId = -1;
             values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
             values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-            rowId = database.insert(TABLE_NAME, null, values);
+            if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
+                replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
+                values.remove( SQL_INSERT_OR_REPLACE );
+            }
+            if ( replace ) {
+                rowId = database.replace(TABLE_NAME, null, values);
+            } else {
+                rowId = database.insert(TABLE_NAME, null, values);
+            }
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
         // Notify any listeners and return the URI of the new row.

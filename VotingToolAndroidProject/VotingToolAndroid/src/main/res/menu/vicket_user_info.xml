@@ -1,11 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-
     <item android:id="@+id/update_signers_info"
         android:orderInCategory="1"
         android:showAsAction="never"
         android:title="@string/update_signers_info_lbl"/>
 
+    <group android:id="@+id/dev_items">
+        <item android:id="@+id/open_vicket_grid"
+            android:orderInCategory="1"
+            android:showAsAction="never"
+            android:icon="@android:drawable/btn_plus"
+            android:title="@string/open_vicket_grid_menu"/>
+    </group>
 
     <item android:id="@+id/vickets_menu_user_item"
         android:orderInCategory="2"

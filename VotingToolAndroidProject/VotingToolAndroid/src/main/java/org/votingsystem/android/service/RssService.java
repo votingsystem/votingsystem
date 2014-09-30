@@ -22,7 +22,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.activity.EventsVSActivity;
 import org.votingsystem.android.contentprovider.RssContentProvider;
 import org.votingsystem.model.ContextVS;
 
@@ -58,7 +58,7 @@ public class RssService extends Service  implements Runnable {
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         Intent clickIntent = new Intent(Intent.ACTION_MAIN);
-        clickIntent.setClassName(this, NavigationDrawer.class.getName());
+        clickIntent.setClassName(this, EventsVSActivity.class.getName());
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, clickIntent, 0);
         Notification note = new NotificationCompat.Builder(this)
                 .setContentTitle(getString(R.string.rss_service_lbl))

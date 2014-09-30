@@ -19,8 +19,8 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.FragmentContainerActivity;
-import org.votingsystem.android.activity.MainActivity;
-import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.activity.IntentFilterActivity;
+import org.votingsystem.android.activity.RepresentativesActivity;
 import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.fragment.UserVSAccountsFragment;
 import org.votingsystem.model.AccessControlVS;
@@ -69,26 +69,25 @@ public class VotingAppService extends Service implements Runnable {
     private void processOperation (String accessControlURL, OperationVS operationVS) {
         Log.d(TAG + ".processOperation(...)", "accessControlURL: " + accessControlURL);
         ResponseVS responseVS = null;
-        appContextVS.setInitialized(true);
         try {
             responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(appContextVS.getVicketServerURL()),
                     ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                VicketServer vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                appContextVS.setVicketServer(vicketServer);
+                appContextVS.setVicketServer((VicketServer) ActorVS.parse(
+                        new JSONObject(responseVS.getMessage())));
             }
         } catch(Exception ex) {
             ex.printStackTrace();
         }
 
-        responseVS = HttpHelper.getData(AccessControlVS.
-                getServerInfoURL(accessControlURL), ContentTypeVS.JSON);
+        responseVS = HttpHelper.getData(AccessControlVS.getServerInfoURL(accessControlURL),
+                ContentTypeVS.JSON);
         SharedPreferences pref = getSharedPreferences(
                 ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         lastCheckedTime = new GregorianCalendar();
         lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY, 0));
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            Intent intent = new Intent(getBaseContext(), MainActivity.class);
+            Intent intent = new Intent(getBaseContext(), IntentFilterActivity.class);
             responseVS.setCaption(getString(R.string.connection_error_msg));
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())
                 responseVS.setNotificationMessage(getString(R.string.conn_timeout_msg));
@@ -137,7 +136,7 @@ public class VotingAppService extends Service implements Runnable {
                             intent = new Intent(getBaseContext(), UserCertResponseActivity.class);
                             break;
                         case WITH_CERTIFICATE:
-                            intent = new Intent(getBaseContext(), NavigationDrawer.class);
+                            intent = new Intent(getBaseContext(), RepresentativesActivity.class);
                             break;
                     }
                     if(intent != null) {

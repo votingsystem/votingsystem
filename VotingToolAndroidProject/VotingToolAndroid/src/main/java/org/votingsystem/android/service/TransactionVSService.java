@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -72,22 +73,11 @@ public class TransactionVSService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                responseVS.setIconId(R.drawable.fa_check_32);
-                responseVS.setCaption(getString(R.string.ok_lbl));
-
-            } else {
-                responseVS.setIconId(R.drawable.fa_times_32);
-                responseVS.setCaption(getString(R.string.error_lbl));
-            }
-            responseVS.setServiceCaller(serviceCaller);
-            responseVS.setTypeVS(operation);
-            broadCastResponse(responseVS);
+            broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS, contextVS));
         }
     }
 
     private void broadCastResponse(ResponseVS responseVS) {
-        responseVS.setServiceCaller(serviceCaller);
         contextVS.showNotification(responseVS);
         contextVS.sendBroadcast(responseVS);
     }

@@ -74,7 +74,7 @@ public class ReceiptFragment extends Fragment {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
                     getActivity().onBackPressed();
                 }
-                ((ActivityVS)getActivity()).showProgress(false, true);
+                ((ActivityVS)getActivity()).refreshingStateChanged(false);
                 ((ActivityVS)getActivity()).showMessage(responseVS.getStatusCode(),
                         responseVS.getCaption(), responseVS.getNotificationMessage());
             }
@@ -87,7 +87,7 @@ public class ReceiptFragment extends Fragment {
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.VOTE_KEY, vote);
-        ((ActivityVS)getActivity()).showProgress(true, true);
+        ((ActivityVS)getActivity()).refreshingStateChanged(true);
         getActivity().startService(startIntent);
     }
 
@@ -428,7 +428,7 @@ public class ReceiptFragment extends Fragment {
         public ReceiptDownloader() { }
 
         @Override protected void onPreExecute() {
-            ((ActivityVS)getActivity()).showProgress(true, true); }
+            ((ActivityVS)getActivity()).refreshingStateChanged(true); }
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String receiptURL = urls[0];
@@ -456,7 +456,7 @@ public class ReceiptFragment extends Fragment {
                 ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                         responseVS.getMessage());
             }
-            ((ActivityVS)getActivity()).showProgress(false, true);
+            ((ActivityVS)getActivity()).refreshingStateChanged(false);
         }
     }
 
