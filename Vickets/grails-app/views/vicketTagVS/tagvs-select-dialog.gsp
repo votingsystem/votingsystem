@@ -60,7 +60,7 @@
                     <input id="tagSearchInput" class="form-control" required autofocus
                            title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
                     <votingsystem-button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-search" style="margin:0 7px 0 3px;"></i>  {{messages.tagSearchLbl}}
+                        <i class="fa fa-search" style="margin:0 5px 0 2px;"></i>  {{messages.tagSearchLbl}}
                     </votingsystem-button>
                 </div>
             </div>
@@ -83,7 +83,7 @@
             <div layout horizontal style="margin:20px 0 0 0;">
                 <div flex></div>
                 <votingsystem-button on-click="{{processTags}}">
-                    <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> {{messages.acceptLbl}}
+                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> {{messages.acceptLbl}}
                 </votingsystem-button>
             </div>
             </div>

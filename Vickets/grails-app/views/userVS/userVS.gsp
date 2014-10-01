@@ -13,7 +13,7 @@
         <li class="active"><g:message code="usersvsPageLbl"/></li>
     </ol>
     <div class="pageContentDiv" style="max-width: 1000px; padding: 20px;">
-        <uservs-data id="userData" uservs="${uservsMap as grails.converters.JSON}"></uservs-data>
+        <uservs-data id="userData" userVSData="${uservsMap as grails.converters.JSON}"></uservs-data>
     </div>
 </div>
 

@@ -62,6 +62,17 @@ class VicketTagVSController {
         }
     }
 
+    def list () {
+        def listDB
+        VicketTagVS.withTransaction {
+            listDB = VicketTagVS.findAll()
+        }
+        List resultList = []
+        listDB.each { it -> resultList.add(id:it.id, name:it.name) }
+        Map result = [tagRecords:resultList, numTotalTags:listDB.size()]
+        render result as JSON
+    }
+
     def test () {
         def listDB
         VicketTagVS.withTransaction {

@@ -86,6 +86,11 @@ public class TransactionVSGridFragment extends Fragment
         }
     };
 
+    public static Fragment newInstance(Bundle args) {
+        TransactionVSGridFragment fragment = new TransactionVSGridFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     private void launchUpdateUserInfoService() {
         Log.d(TAG + ".launchUpdateUserInfoService(...) ", "");

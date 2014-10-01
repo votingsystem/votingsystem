@@ -41,7 +41,7 @@ class TestingController {
     def index() {
         //systemService.getSystemUser().save()
 
-        render(view:'comments', model: [])
+
         return false
     }
 

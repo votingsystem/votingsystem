@@ -1,23 +1,18 @@
 package org.votingsystem.android.service;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.ObjectUtils;
 
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
-import static org.votingsystem.model.ContextVS.CSR_REQUEST_ID_KEY;
 import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
 import static org.votingsystem.model.ContextVS.EMAIL_KEY;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
@@ -30,7 +25,6 @@ import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.SURNAME_KEY;
 import static org.votingsystem.model.ContextVS.State;
-import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 /**
  * @author jgzornoza
@@ -67,8 +61,8 @@ public class UserCertRequestService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 PrefUtils.putCsrRequest(this, requestId, certificationRequest);
-                contextVS.setPin(pin);
-                contextVS.setState(State.WITH_CSR, null);
+                PrefUtils.setPin(this.getApplicationContext(), pin);
+                PrefUtils.putAppCertState(this, contextVS.getAccessControl().getServerURL(), State.WITH_CSR, null);
             }
             String caption = null;
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

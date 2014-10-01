@@ -58,7 +58,7 @@
             },
             groupvsChanged:function() {
                 console.log(this.tagName + " - groupvsChanged")
-                if(this.groupvs != null && this.groupvs.userVS.id != null) {
+                if(this.groupvs != null && this.groupvs.userVS != null) {
                     if(this.groupvs.transactionFromList == null) {
                         this.$.ajax.url = "${createLink(controller: 'groupVS')}/" + this.groupvs.userVS.id
                     }

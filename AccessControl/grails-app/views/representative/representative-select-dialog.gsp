@@ -89,7 +89,7 @@
                         <div flex></div>
                         <div style="margin:10px 0px 10px 0px;">
                             <votingsystem-button on-click="{{showConfirm}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
+                                <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
                             </votingsystem-button>
                         </div>
                     </div>
@@ -100,12 +100,12 @@
                         <div flex></div>
                         <div style="margin:10px 0px 10px 0px;">
                             <votingsystem-button on-click="{{submit}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
+                                <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
                             </votingsystem-button>
                         </div>
                         <div style="margin:10px 0px 10px 0px;">
                             <votingsystem-button on-click="{{cancel}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-times" style="margin:0 7px 0 3px;"></i> <g:message code="cancelLbl"/>
+                                <i class="fa fa-times" style="margin:0 5px 0 2px;"></i> <g:message code="cancelLbl"/>
                             </votingsystem-button>
                         </div>
                     </div>

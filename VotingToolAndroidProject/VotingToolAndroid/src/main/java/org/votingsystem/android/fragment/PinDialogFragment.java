@@ -39,6 +39,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.CertResponseActivity;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -165,7 +166,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
-            String storedPasswordHash = contextVS.getStoredPasswordHash();
+            String storedPasswordHash = PrefUtils.getStoredPasswordHash(contextVS);
             if(storedPasswordHash != null) {
                 String passwordHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
                 if(!passwordHash.equals(storedPasswordHash)) {

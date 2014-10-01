@@ -25,7 +25,7 @@
         android:paddingRight="4dp"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textColor="#ffffffff"
+        android:textColor="@color/drawer_list_header"
         android:textSize="18sp"
         android:fontFamily="sans-serif"
         android:drawablePadding="4dp"

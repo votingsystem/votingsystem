@@ -130,7 +130,8 @@ class VicketAddUsersToGroupSimulationService {
     private void getGroupData() {
         ResponseVS responseVS = HttpHelper.getInstance().getData(vicketServer.getGroupURL(simulationData.getGroupId()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            JSONObject groupDataJSON = new JSONObject(responseVS.getMessage())
+            JSONObject dataJSON = new JSONObject(responseVS.getMessage())
+            JSONObject groupDataJSON =  dataJSON.getJSONObject("userVS")
             JSONObject representativeDataJSON = groupDataJSON.getJSONObject("representative")
             //{"operation":,"groupvs":{"id":4,"name":"NombreGrupo","representative":{"id":2,"nif":"07553172H"}}}
             requestSubscribeData = new JSONObject([operation:"VICKET_GROUP_SUBSCRIBE"])

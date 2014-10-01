@@ -59,12 +59,12 @@
                             <div horizontal layout>
                                 <template repeat="{{tag in getMapKeys(balance.balancesCash[currency])}}">
                                     <div style="margin:0 0 0 80px;">
-                                        <div>{{tag}}: {{balance.balancesCash[currency][tag] | formatAmount}}</div>
+                                        <div>{{tag | tagDescription}}: {{balance.balancesCash[currency][tag] | formatAmount}}</div>
                                         <div>
                                             <template if="{{isTimeLimited(currency, tag)}}">
                                                 <core-tooltip large label="{{getTimeLimitedForTagMsg(currency, tag)}}" position="right">
                                                     <div horizontal layout center center-justified style="vertical-align: top;">
-                                                        <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 70px;"></paper-progress>
+                                                        <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 100px;"></paper-progress>
                                                         <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
                                                     </div>
                                                 </core-tooltip>
@@ -117,6 +117,12 @@
         formatAmount: function(amount) {
             return amount.toFixed(2)
         },
+        tagDescription: function(tagName) {
+            switch (tagName) {
+                case 'WILDTAG': return "<g:message code="wildTagLbl"/>".toUpperCase()
+                default: return tagName
+            }
+        },
         getTimeLimitedForTagMsg: function(currency, tag) {
             var expendedFromTag = 0
             if(this.balance.balancesFrom[currency] != null && this.balance.balancesFrom[currency][tag] != null) {
@@ -125,7 +131,7 @@
             expendedFromTag = expendedFromTag == null? 0 : expendedFromTag
             var tagToExpend = this.balance.balancesTo[currency][tag].timeLimited
             var tagCash = tagToExpend - expendedFromTag
-            return "<g:message code="timeLimitedForTagMsg"/>".format(tagCash, currency, tag)
+            return "<g:message code="timeLimitedForTagMsg"/>".format(tagCash, currency,  this.tagDescription(tag))
         },
         getPercentageForTagMsg: function(currency, tag) {
             var expendedFromTag = 0
@@ -178,16 +184,18 @@
                 this.caption = caption.format("<g:message code="userLbl"/>")
             }
 
-            var balancesToMap = this.balance.balancesTo == null ? {}: this.balance.balancesTo.EUR || {}
-            var balancesFromMap = this.balance.balancesFrom == null ? {}: this.balance.balancesFrom.EUR || {}
-            var balancesCashMap = this.balance.balancesCash == null ? {}: this.balance.balancesCash.EUR || {}
+            if('SYSTEM' != this.balance.userVS.type) {
+                var balancesToMap = this.balance.balancesTo == null ? {}: this.balance.balancesTo.EUR || {}
+                var balancesFromMap = this.balance.balancesFrom == null ? {}: this.balance.balancesFrom.EUR || {}
+                var balancesCashMap = this.balance.balancesCash == null ? {}: this.balance.balancesCash.EUR || {}
 
-            var chartSeries = calculateUserBalanceSeries(balancesToMap, balancesFromMap, balancesCashMap)
-            if(chartSeries.length === 0) {
-                this.$.userBalanceChartDiv.style.display = 'none'
-            } else {
-                //we know the order serie -> incomes, expenses, available, time limited available
-                this.$.balanceChart.series = chartSeries
+                var chartSeries = calculateUserBalanceSeries(balancesToMap, balancesFromMap, balancesCashMap)
+                if(chartSeries.length === 0) {
+                    this.$.userBalanceChartDiv.style.display = 'none'
+                } else {
+                    //we know the order serie -> incomes, expenses, available, time limited available
+                    this.$.balanceChart.series = chartSeries
+                }
             }
         },
         viewTransaction: function(e) {

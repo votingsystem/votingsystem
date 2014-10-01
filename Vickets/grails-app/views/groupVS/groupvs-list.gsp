@@ -74,7 +74,7 @@
             },
             showGroupDetails :  function(e) {
                 console.log(this.tagName + " - showGroupDetails")
-                this.$.groupDetails.groupvs = e.target.templateInstance.model.groupvs;
+                this.$.groupDetails.groupvs = {userVS:e.target.templateInstance.model.groupvs} ;
                 this.page = 1;
             },
             getRepresentativeName:function(groupvs) {

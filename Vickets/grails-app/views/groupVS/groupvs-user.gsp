@@ -22,17 +22,18 @@
                     <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
             </div>
             <template if="{{isClientToolConnected}}">
-                <div layout horizontal center center-justified style="margin:10px 0 0 0;">
+                <div layout horizontal center center-justified style="margin:10px 0 0 0; font-size: 1em;">
                     <votingsystem-button id="activateUserButton" type="button" on-click="{{groupVSUserLastOperations}}"
-                         style="margin:0 0 0 10px;display:{{isActive?'none':'block'}}"><g:message code="groupVSUserLastOperationsLbl"/>
+                         style="margin:0 0 0 10px;display:{{isActive?'none':'block'}}">
+                        <i class="fa fa-list" style="margin:0 5px 0 2px;"></i> <g:message code="groupVSUserLastOperationsLbl"/>
                     </votingsystem-button>
                     <votingsystem-button id="activateUserButton" type="button" on-click="{{activateUser}}"
                          style="margin:0 0 0 10px;display:{{isActive?'none':'block'}}">
-                        <i class="fa fa-thumbs-o-up" style="margin:0 7px 0 3px;"></i> <g:message code="activateUserLbl"/>
+                        <i class="fa fa-thumbs-o-up" style="margin:0 5px 0 2px;"></i> <g:message code="activateUserLbl"/>
                     </votingsystem-button>
                     <votingsystem-button id="deActivateUserButton" on-click="{{initCancellation}}"
                          style="margin:0 0 0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
-                        <i class="fa fa-thumbs-o-down" style="margin:0 7px 0 3px;"></i> <g:message code="deActivateUserLbl"/>
+                        <i class="fa fa-thumbs-o-down" style="margin:0 5px 0 2px;"></i> <g:message code="deActivateUserLbl"/>
                     </votingsystem-button>
                 </div>
             </template>

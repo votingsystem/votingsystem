@@ -148,7 +148,7 @@
                 balances: {value: {}}
             },
             ready: function() {},
-            getTagDescription: function(tagName) {
+            tagDescription: function(tagName) {
                 switch (tagName) {
                     case 'WILDTAG': return "<g:message code="wildTagLbl"/>".toUpperCase()
                     default: return tagName

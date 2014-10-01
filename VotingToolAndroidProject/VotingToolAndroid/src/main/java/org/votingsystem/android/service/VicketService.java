@@ -21,6 +21,7 @@ import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedMapSender;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -216,7 +217,7 @@ public class VicketService extends IntentService {
         Integer iconId = R.drawable.cancel_22;
         Map <Long,Vicket> sendedVicketsMap = new HashMap<Long, Vicket>();
         try {
-            UserVSTransactionVSListInfo userInfo = contextVS.getUserVSTransactionVSListInfo();
+            UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
             BigDecimal available = userInfo.getAvailableForTagVS(currencyCode, tagVS);
             if(available.compareTo(requestAmount) < 0) {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyCode,
@@ -494,7 +495,7 @@ public class VicketService extends IntentService {
                 String responseStr = responseVS.getMessage();
                 UserVSTransactionVSListInfo userInfo = UserVSTransactionVSListInfo.parse(
                         new JSONObject(responseStr));
-                contextVS.setUserVSTransactionVSListInfo(userInfo,
+                PrefUtils.putUserVSTransactionVSListInfo(contextVS, userInfo,
                         DateUtils.getWeekPeriod(Calendar.getInstance()));
                 TransactionVSContentProvider.updateUserVSTransactionVSList(contextVS, userInfo);
             } else {

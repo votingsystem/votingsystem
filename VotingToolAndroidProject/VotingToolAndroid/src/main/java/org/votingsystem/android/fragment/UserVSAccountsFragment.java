@@ -29,6 +29,7 @@ import org.votingsystem.android.activity.ActivityVS;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
@@ -138,6 +139,12 @@ public class UserVSAccountsFragment extends Fragment {
         return fragment;
     }
 
+    public static Fragment newInstance(Bundle args) {
+        UserVSAccountsFragment fragment = new UserVSAccountsFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,7 +172,7 @@ public class UserVSAccountsFragment extends Fragment {
             Log.d(TAG + ".onStart(...)", transactionVS.toString());
             BigDecimal cashAvailable = BigDecimal.ZERO;
             try {
-                cashAvailable = contextVS.getUserVSTransactionVSListInfo().getAvailableForTagVS(
+                cashAvailable = PrefUtils.getUserVSTransactionVSListInfo(contextVS).getAvailableForTagVS(
                         transactionVS.getCurrencyCode(), transactionVS.getTagVS().getName());
             } catch(Exception ex) {ex.printStackTrace();}
             if(cashAvailable != null && cashAvailable.compareTo(transactionVS.getAmount()) == 1) {
@@ -186,7 +193,7 @@ public class UserVSAccountsFragment extends Fragment {
         }
     }
     private void loadUserInfo(DateUtils.TimePeriod timePeriod) {
-        Date lastCheckedTime = contextVS.getVicketAccountLastChecked();
+        Date lastCheckedTime = PrefUtils.getLastVicketAccountCheckTime(getActivity());
         if(lastCheckedTime == null) {
             ((ActivityVS)getActivity()).showMessage(ResponseVS.SC_ERROR, getString(R.string.uservs_accountvs_info_missing_caption),
                     getString(R.string.uservs_accountvs_info_missing));
@@ -197,10 +204,10 @@ public class UserVSAccountsFragment extends Fragment {
                     DateUtils.getLongDate_Es(lastCheckedTime))));
             time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
                     DateUtils.getLongDate_Es(timePeriod.getDateTo()))));
-            UserVSTransactionVSListInfo userInfo = contextVS.getUserVSTransactionVSListInfo();
+            UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
             if(userInfo != null) {
-                Map<String, TagVS> tagVSBalancesMap = contextVS.getUserVSTransactionVSListInfo().
-                        getTagVSBalancesMap(Currency.getInstance("EUR").getCurrencyCode());
+                Map<String, TagVS> tagVSBalancesMap = userInfo.getTagVSBalancesMap(
+                        Currency.getInstance("EUR").getCurrencyCode());
                 if(tagVSBalancesMap != null) {
                     String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
                     AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(contextVS,
@@ -259,6 +266,7 @@ public class UserVSAccountsFragment extends Fragment {
     private void sendUserInfoRequest() {
         Log.d(TAG + ".sendUserInfoRequest(...) ", "");
         try {
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_USER_INFO);
@@ -272,6 +280,7 @@ public class UserVSAccountsFragment extends Fragment {
 
     private void sendVicketRequest() {
         try {
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_REQUEST);
@@ -286,6 +295,7 @@ public class UserVSAccountsFragment extends Fragment {
 
     private void sendVicket() {
         try {
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     VicketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VICKET_SEND);
@@ -300,6 +310,7 @@ public class UserVSAccountsFragment extends Fragment {
 
     private void sendTransactionVS() {
         try {
+            ((ActivityVS)getActivity()).refreshingStateChanged(true);
             Intent startIntent = new Intent(getActivity().getApplicationContext(),
                     TransactionVSService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);

@@ -49,7 +49,8 @@ public class VicketPagerActivity extends ActivityBase {
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         Log.d(TAG + ".onCreate(...) ", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
-        VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager());
+        VicketPagerAdapter pagerAdapter = new VicketPagerAdapter(getSupportFragmentManager(),
+                getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
         cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, null, null, null);
         cursor.moveToPosition(cursorPosition);
@@ -104,9 +105,11 @@ public class VicketPagerActivity extends ActivityBase {
                 NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS;
 
         private String searchQuery = null;
+        private Bundle args = new Bundle();
 
-        public VicketPagerAdapter(FragmentManager fragmentManager) {
+        public VicketPagerAdapter(FragmentManager fragmentManager, Bundle args) {
             super(fragmentManager);
+            this.args = args;
         }
 
         @Override public Fragment getItem(int position) {
@@ -120,7 +123,6 @@ public class VicketPagerActivity extends ActivityBase {
                     selectedFragment = new TransactionVSGridFragment();
                     break;
             }
-            Bundle args = new Bundle();
             args.putString(SearchManager.QUERY, searchQuery);
             selectedFragment.setArguments(args);
             Log.d(TAG + ".getItem(...) ", "position:" + position + " - args: " + args +

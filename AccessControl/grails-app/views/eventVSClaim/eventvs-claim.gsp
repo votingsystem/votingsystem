@@ -93,7 +93,7 @@
             <div layout horizontal center center-justified style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
                 <div flex></div>
                 <votingsystem-button on-click="{{submitClaim}}" style="margin: 0px 0px 0px 5px;">
-                    <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="signLbl"/>
+                    <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="signLbl"/>
                 </votingsystem-button>
             </div>
         </div>

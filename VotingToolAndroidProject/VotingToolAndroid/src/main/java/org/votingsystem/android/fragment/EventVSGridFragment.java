@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.android.service.EventVSService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.ChildPosition;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
@@ -43,12 +45,14 @@ import org.votingsystem.model.ResponseVS;
 import java.text.Collator;
 import java.util.Comparator;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSGridFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
+public class EventVSGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TAG = EventVSGridFragment.class.getSimpleName();
 
@@ -104,6 +108,7 @@ public class EventVSGridFragment extends Fragment
         childPosition = (ChildPosition)getArguments().getSerializable(ContextVS.CHILD_POSITION_KEY);
         queryStr = getArguments().getString(SearchManager.QUERY);
         loaderId = groupPosition.getLoaderId(childPosition.getPosition());
+        PrefUtils.registerOnSharedPreferenceChangeListener(contextVS, this);
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
@@ -172,10 +177,14 @@ public class EventVSGridFragment extends Fragment
 
     @Override public void onScroll(AbsListView view,  int firstVisibleItem,
                                    int visibleItemCount, int totalItemCount) {
-        Log.d(TAG +  ".onScroll(...)", "firstVisibleItem: " + firstVisibleItem +
+        LOGD(TAG + ".onScroll(...)", "firstVisibleItem: " + firstVisibleItem +
                 " - visibleItemCount: " + visibleItemCount + " - visibleItemCount: " +
                 visibleItemCount + " - groupPosition: " + groupPosition + " - eventState: " +
                 eventState);
+        if(contextVS.getAccessControl() == null) {
+            LOGD(TAG +  ".onScroll(...)", "Missing Access Control. Waiting for data");
+            return;
+        }
         if (totalItemCount == 0 || firstVisibleItem == 0) return ;
         /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
@@ -283,7 +292,8 @@ public class EventVSGridFragment extends Fragment
                 getNumTotal(groupPosition.getTypeVS(), eventState) +
                 " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        if(EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(), eventState) == null)
+        if(EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(), eventState) == null &&
+                contextVS.getAccessControl() != null)
             fetchItems(offset);
         else {
             ((ActivityVS)getActivity()).refreshingStateChanged(false);
@@ -318,8 +328,19 @@ public class EventVSGridFragment extends Fragment
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", "onDestroy");
+        PrefUtils.unregisterOnSharedPreferenceChangeListener(contextVS, this);
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
+        if(ContextVS.ACCESS_CONTROL_URL_KEY == key) {
+            Long numTotalEvents = EventVSContentProvider.getNumTotal(groupPosition.getTypeVS(),
+                    eventState);
+            if(numTotalEvents == null) fetchItems(eventState, groupPosition);
+        }
     }
 
     public class EventListAdapter  extends CursorAdapter {

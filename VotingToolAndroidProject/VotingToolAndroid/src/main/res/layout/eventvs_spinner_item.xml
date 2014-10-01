@@ -25,7 +25,7 @@
         android:paddingRight="4dp"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textColor="#8affffff"
+        android:textColor="@color/drawer_list_header"
         android:textSize="16sp"
         android:drawablePadding="6dp"
         android:drawableRight="@drawable/spinner_triangle_sub" />

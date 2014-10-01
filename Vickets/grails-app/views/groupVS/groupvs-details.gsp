@@ -17,7 +17,7 @@
 <template>
     <style shim-shadowdom>
         body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
-        .optionsIcon {margin:0 7px 0 3px; color:#6c0404;}
+        .optionsIcon {margin:0 5px 0 2px; color:#6c0404;}
     </style>
     <g:include view="/include/styles.gsp"/>
     <core-signals on-core-signal-messagedialog-accept="{{messagedialog}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
@@ -28,7 +28,7 @@
     <div class="pageContentDiv" style="max-width: 1000px; min-width:800px; margin:0px auto 0px auto;"  cross-fade>
         <div layout horizontal center center-justified>
             <template if="{{subpage}}">
-                <div style="margin: 20px 0 0 0;" title="<g:message code="backLbl"/>" >
+                <div style="margin: 20px 20px 0 0;" title="<g:message code="backLbl"/>" >
                     <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </div>
             </template>
@@ -68,13 +68,15 @@
                     </div>
                 </div>
 
-                <div layout horizontal center center-justified style="margin:10px 0px 0px 30px;display:{{isUserView?'block':'none'}}">
-                    <votingsystem-button on-click="{{subscribeToGroup}}">
-                        <g:message code="subscribeGroupVSLbl"/> <i class="fa fa-sign-in"></i>
-                    </votingsystem-button>
-                    <votingsystem-button on-click="{{subscribeToGroup}}">
-                        <g:message code="makeTransactionVSLbl"/> <i class="fa fa-money"></i>
-                    </votingsystem-button>
+                <div style="display:{{isUserView?'block':'none'}}">
+                    <div layout horizontal center center-justified style="margin:10px 0px 0px 30px;">
+                        <votingsystem-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
+                            <i class="fa fa-sign-in" style="margin:0 5px 0 2px;"></i> <g:message code="subscribeGroupVSLbl"/>
+                        </votingsystem-button>
+                        <votingsystem-button on-click="{{subscribeToGroup}}">
+                            <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
+                        </votingsystem-button>
+                    </div>
                 </div>
 
                 <div layout horizontal center center-justified>

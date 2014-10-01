@@ -28,8 +28,7 @@ public class TransactionVS  implements Serializable {
 
 
     public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, FROM_BANKVS, FROM_USERVS,
-        TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP, TRANSACTIONVS_FROM_GROUP_TO_MEMBER,
-        TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD;}
+        FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -272,9 +271,9 @@ public class TransactionVS  implements Serializable {
         switch(type) {
             case VICKET_CANCELLATION:
                 return context.getString(R.string.vicket_cancellation);
-            case TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
-            case TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
-            case TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
+            case FROM_GROUP_TO_ALL_MEMBERS:
+            case FROM_GROUP_TO_MEMBER:
+            case FROM_GROUP_TO_MEMBER_GROUP:
                 return context.getString(R.string.account_input);
             case VICKET_REQUEST:
                 return context.getString(R.string.account_output);

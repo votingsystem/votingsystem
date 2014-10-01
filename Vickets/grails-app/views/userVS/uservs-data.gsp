@@ -9,22 +9,12 @@
     <g:include view="/include/styles.gsp"/>
     <style no-shim>
         .uservsCancelled {
-            background: #ff0000;
-            opacity:0.5;
-            left:20%;
-            top:-60px;
-            font-size: 1.8em;
-            font-weight: bold;
-            color:#f9f9f9;
-            text-align: center;
-            text-transform:uppercase;
-            transform:rotate(20deg);
-            -ms-transform:rotate(20deg);
-            -webkit-transform:rotate(20deg);
-            -moz-transform: rotate(20deg);
+            background: #ff0000; opacity:0.5; left:20%; top:-60px; font-size: 1.8em; font-weight: bold;
+            color:#f9f9f9; text-align: center; text-transform:uppercase; transform:rotate(20deg);
+            -ms-transform:rotate(20deg); -webkit-transform:rotate(20deg); -moz-transform: rotate(20deg);
         }
     </style>
-    <core-ajax id="ajax" on-core-response="{{ajaxResponse}}" response="{{uservs}}" handleAs="json"
+    <core-ajax id="ajax" on-core-response="{{ajaxResponse}}" handleAs="json"
                method="get" contentType="json"></core-ajax>
 
     <template if="{{uservs.name}}">
@@ -51,14 +41,14 @@
                 <div>
                     <votingsystem-button id="sendMessageVSButton" type="submit" on-click="{{showMessageVSDialog}}"
                                          style="margin:10px 20px 0px 0px;">
-                        <i class="fa fa-envelope-square" style="margin:0 7px 0 3px;"></i> <g:message code="sendMessageVSLbl"/>
+                        <i class="fa fa-envelope-square" style="margin:0 5px 0 2px;"></i> <g:message code="sendMessageVSLbl"/>
                     </votingsystem-button>
                 </div>
 
                 <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
                     <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{makeTransactionVS}}"
                                          style="margin:10px 20px 0px 0px;">
-                        <i class="fa fa-money" style="margin:0 7px 0 3px;"></i> <g:message code="makeTransactionVSLbl"/>
+                        <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
                     </votingsystem-button>
                 </div>
                 <div style="display: {{'superadmin' == menuType ? 'block':'none'}}">
@@ -121,7 +111,7 @@
         isClientToolConnected:false,
         sendMessageTemplateMsg:"<g:message code="uservsMessageVSLbl"/>",
         publish: {
-            uservs: {}
+            userVSData: {}
         },
         ready: function() {
             this.menuType = menuType
@@ -134,8 +124,13 @@
             if('BANKVS' == this.uservs.type) this.uservsType = "<g:message code="bankVSLbl"/>"
             if('USER' == this.uservs.type) this.uservsType = "<g:message code="userLbl"/>"
         },
-        uservsChanged:function() {
-            //console.log(this.tagName + " - uservsChanged - uservs: " + JSON.stringify(this.uservs))
+        userVSDataChanged:function() {
+            console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify(this.userVSData))
+            this.uservs = this.userVSData.userVS
+        },
+        ajaxResponse:function() {
+            console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))
+            this.uservs = this.userVSData.userVS
         },
         blockUser:function() {
             console.log(this.tagName + " - blockUser")
@@ -146,7 +141,9 @@
         showByIBAN:function(IBAN) {
             var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + IBAN
             if(this.$.ajax.url != serviceURL) {
+                console.log(this.tagName + " - showByIBAN - url: " + serviceURL)
                 this.$.ajax.url = serviceURL
+                this.$.ajax.go()
             }
         },
         showMessageVSDialog: function () {

@@ -26,7 +26,6 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtil;
@@ -105,8 +104,8 @@ public class CertResponseActivity extends ActionBarActivity {
                         Context.MODE_PRIVATE);
                 outputStream.write(userDataBytes);
                 outputStream.close();
-
-                appContextVS.setState(State.WITH_CERTIFICATE, user.getNif());
+                PrefUtils.putAppCertState(appContextVS, appContextVS.getAccessControl().getServerURL(),
+                        State.WITH_CERTIFICATE, user.getNif());
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 PrefUtils.putSessionUserVS(this, user);
                 insertPinButton.setVisibility(View.GONE);

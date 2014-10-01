@@ -42,7 +42,7 @@
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div style="margin:10px 0px 10px 0px;">
                         <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkReceiptLbl"/>
+                            <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkReceiptLbl"/>
                         </votingsystem-button>
                     </div>
                     <div flex></div>

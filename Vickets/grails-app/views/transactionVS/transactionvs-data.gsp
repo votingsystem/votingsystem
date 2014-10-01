@@ -82,12 +82,13 @@
                 <div flex></div>
                 <div style="margin:10px 0px 10px 0px;">
                     <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-certificate" style="margin:0 7px 0 3px;"></i>  <g:message code="checkSignatureLbl"/>
+                        <i class="fa fa-certificate" style="margin:0 5px 0 2px;"></i>  <g:message code="checkSignatureLbl"/>
                     </votingsystem-button>
                 </div>
             </div>
         </template>
-        <votingsystem-dialog id="xDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>">
+        <votingsystem-dialog style="position: absolute; width: 500px; height:800px; margin: 100px 200px;"
+                 id="uservsDataDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>">
             <uservs-data id="uservsData"></uservs-data>
         </votingsystem-dialog>
     </template>
@@ -175,9 +176,8 @@
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showToUserIBAN:function(e) {
-                console.log(this.tagName + " - showToUserIBAN - " + e)
-                this.$.uservsData.showByIBAN(this.transactionvs.toUserVS.IBAN)
-                this.$.xDialog.opened = true
+                var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + this.transactionvs.toUserVS.IBAN
+                window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)

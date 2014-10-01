@@ -16,6 +16,7 @@ import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.util.DateUtils;
@@ -255,7 +256,7 @@ public class TransactionVSContentProvider extends ContentProvider {
             addTransaction(contextVS, transactionVS,
                     DateUtils.getDirPath(userInfo.getTimePeriod().getDateFrom()));
         }
-        contextVS.updateVicketAccountLastChecked();
+        PrefUtils.putLastVicketAccountCheckTime(contextVS);
     }
 
     public static Uri addTransaction(AppContextVS contextVS, TransactionVS transactionVS,

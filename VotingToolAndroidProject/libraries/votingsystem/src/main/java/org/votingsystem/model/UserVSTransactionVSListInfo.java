@@ -80,7 +80,11 @@ public class UserVSTransactionVSListInfo {
     public BigDecimal getAvailableForTagVS(String currencyCode, String tagStr) throws ExceptionVS {
         if(balancesCashMap.containsKey(currencyCode)) {
             Map<String, TagVS> currencyMap = balancesCashMap.get(currencyCode);
-            if(currencyMap.containsKey(tagStr)) return currencyMap.get(tagStr).getTotal();
+            BigDecimal cash = BigDecimal.ZERO;
+            if(currencyMap.containsKey(TagVS.WILDTAG)) cash = cash.add(
+                    currencyMap.get(TagVS.WILDTAG).getTotal());
+            if(currencyMap.containsKey(tagStr)) cash = cash.add(currencyMap.get(tagStr).getTotal());
+            return cash;
         }
         throw new ExceptionVS("User has not account for tag '" + tagStr + "' with currency '" + currencyCode +"'");
     }

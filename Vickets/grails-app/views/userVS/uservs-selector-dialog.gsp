@@ -26,7 +26,7 @@
                             <input id="userSearchInput" type="text" style="width:200px;" class="form-control"
                                    placeholder="<g:message code="enterReceptorDataMsg"/>">
                             <votingsystem-button on-click="{{searchUser}}" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-search" style="margin:0 7px 0 3px;"></i> <g:message code="userSearchLbl"/>
+                                <i class="fa fa-search" style="margin:0 5px 0 2px;"></i> <g:message code="userSearchLbl"/>
                             </votingsystem-button>
                         </div>
                         <uservs-selector id="userVSSelector" isSelector="true"></uservs-selector>

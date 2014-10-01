@@ -4,7 +4,6 @@ import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -20,32 +19,27 @@ import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.service.VotingAppService;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ControlCenterVS;
-import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.model.VicketServer;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
-import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -56,32 +50,27 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.model.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
-import static org.votingsystem.model.ContextVS.NIF_KEY;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
-import static org.votingsystem.model.ContextVS.STATE_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
-import static org.votingsystem.model.ContextVS.USER_DATA_FILE_NAME;
-import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AppContextVS extends Application {
+public class AppContextVS extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TAG = AppContextVS.class.getSimpleName();
 
@@ -96,29 +85,11 @@ public class AppContextVS extends Application {
     private VicketServer vicketServer;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
-    private OperationVS operationVS = null;
-    private UserVSTransactionVSListInfo userVSTransactionVSListInfo;
     private boolean initialized = false;
-
-    public void setServer(ActorVS actorVS) {
-        if(serverMap.get(actorVS.getServerURL()) == null) {
-            serverMap.put(actorVS.getServerURL(), actorVS);
-        } else Log.d(TAG + ".setServer(...)", "ActorVS with URL '" + actorVS.getServerURL() +
-                "' already in context");
-    }
-
-    public ActorVS getServer(String serverURL) {
-        return serverMap.get(serverURL);
-    }
-
-    @Override public void onTerminate() {
-        Log.d(TAG + ".onTerminate(...)", "");
-        super.onTerminate();
-    }
 
     @Override public void onCreate() {
         //System.setProperty("android.os.Build.ID", android.os.Build.ID);
-        Log.d(TAG + ".onCreate()", "");
+        LOGD(TAG + ".onCreate()", "");
         try {
             /*java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
@@ -128,8 +99,8 @@ public class AppContextVS extends Application {
             while (aliases.hasMoreElements()) {
                 String alias = (String) aliases.nextElement();
                 X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
-                Log.d(TAG, "Subject DN: " + cert.getSubjectX500Principal().toString());
-                Log.d(TAG, "Issuer DN: " + cert.getIssuerDN().getName());
+                LOGD(TAG, "Subject DN: " + cert.getSubjectX500Principal().toString());
+                LOGD(TAG, "Issuer DN: " + cert.getIssuerDN().getName());
             }*/
             VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Properties props = new Properties();
@@ -141,25 +112,44 @@ public class AppContextVS extends Application {
                 startIntent.putExtra(ContextVS.URL_KEY, accessControlURL);
                 startService(startIntent);
             }
+            PrefUtils.registerOnSharedPreferenceChangeListener(this, this);
+            state = PrefUtils.getAppCertState(this, accessControlURL);
+            userVS = PrefUtils.getSessionUserVS(this);
             setInitialized(true);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
 	}
 
-    public boolean isInitialized() {
-        return this.initialized;
-    }
-
     public void finish() {
         stopService(new Intent(getApplicationContext(), VotingAppService.class));
         UIUtils.killApp(true);
+    }
+
+    public boolean isInitialized() {
+        return this.initialized;
     }
 
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
     }
 
+    public void setServer(ActorVS actorVS) {
+        if(serverMap.get(actorVS.getServerURL()) == null) {
+            serverMap.put(actorVS.getServerURL(), actorVS);
+        } else LOGD(TAG + ".setServer(...)", "ActorVS with URL '" + actorVS.getServerURL() +
+                "' already in context");
+    }
+
+    public ActorVS getServer(String serverURL) {
+        return serverMap.get(serverURL);
+    }
+
+    @Override public void onTerminate() {
+        LOGD(TAG + ".onTerminate(...)", "");
+        super.onTerminate();
+        PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
+    }
 
     public String getVicketServerURL() {
         return vicketServerURL;
@@ -173,41 +163,18 @@ public class AppContextVS extends Application {
         return android.os.Build.ID;
     }
 
-    public OperationVS getOperationVS() {
-        return operationVS;
-    }
-
-    public void setOperationVS(OperationVS operationVS) {
-        if(operationVS == null) Log.d(TAG + ".setOperationVS(...)", "- removing pending operationVS");
-        else Log.d(TAG + ".setOperationVS(...)", "- operationVS: " + operationVS.getTypeVS());
-        this.operationVS = operationVS;
-    }
-
-    public void setState(State state, String nif) {
-        Log.d(TAG + ".setState(...)", STATE_KEY + "_" + accessControl.getServerURL() +
-                " - state: " + state.toString());
-        SharedPreferences settings = getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(STATE_KEY + "_" + accessControl.getServerURL() , state.toString());
-        if(nif != null) editor.putString(NIF_KEY, nif);
-        if(State.WITH_CERTIFICATE == state) loadUser();
-        editor.commit();
-        this.state = state;
-    }
-
     public State getState() {
         return state;
     }
 
     public X509Certificate getCert(String serverURL) {
-        Log.d(TAG + ".getCert(...)", " - getCert - serverURL: " + serverURL);
+        LOGD(TAG + ".getCert(...)", " - getCert - serverURL: " + serverURL);
         if(serverURL == null) return null;
         return certsMap.get(serverURL);
     }
 
     public void putCert(String serverURL, X509Certificate cert) {
-        Log.d(TAG + ".putCert(...)", " serverURL: " + serverURL);
+        LOGD(TAG + ".putCert(...)", " serverURL: " + serverURL);
         certsMap.put(serverURL, cert);
     }
 
@@ -225,61 +192,8 @@ public class AppContextVS extends Application {
     }
 
     public void setAccessControlVS(AccessControlVS accessControl) {
-        Log.d(TAG + ".setAccessControlURL() ", " - setAccessControlURL: " +
-                accessControl.getServerURL());
-        SharedPreferences settings = getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String stateStr = settings.getString(
-                STATE_KEY + "_" + accessControl.getServerURL(), State.WITHOUT_CSR.toString());
-        state = State.valueOf(stateStr);
+        LOGD(TAG + ".setAccessControlURL() ", "setAccessControlURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
-        loadUser();
-    }
-
-    public void loadUser() {
-        try {
-            File representativeDataFile = new File(getFilesDir(), USER_DATA_FILE_NAME);
-            if(representativeDataFile.exists()) {
-                byte[] serializedUserData = FileUtils.getBytesFromFile(
-                        representativeDataFile);
-                userVS = (UserVS) ObjectUtils.deSerializeObject(serializedUserData);
-            } else Log.d(TAG + ".loadUser(...)", "user data not found");
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void updateVicketAccountLastChecked() {
-        SharedPreferences settings = getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putLong(ContextVS.VICKET_ACCOUNT_LAST_CHECKED_KEY,
-        Calendar.getInstance().getTimeInMillis());
-        editor.commit();
-    }
-
-    public UserVSTransactionVSListInfo getUserVSTransactionVSListInfo() throws Exception {
-        if(userVSTransactionVSListInfo == null) {
-            Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
-            String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getDirPath(currentMonday.getTime());
-            SharedPreferences pref = getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
-                    Context.MODE_PRIVATE);
-            String userInfoStr = pref.getString(editorKey, null);
-            userVSTransactionVSListInfo = UserVSTransactionVSListInfo.parse(new JSONObject(userInfoStr));
-        }
-        return userVSTransactionVSListInfo;
-    }
-
-    public void setUserVSTransactionVSListInfo(UserVSTransactionVSListInfo userInfo,
-               DateUtils.TimePeriod timePeriod) throws Exception {
-        SharedPreferences settings = getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getDirPath(timePeriod.getDateFrom());
-        Log.d(TAG + ".setUserVSTransactionVSListInfo(...)", "editorKey: " + editorKey);
-        editor.putString(editorKey, userInfo.toJSON().toString());
-        editor.commit();
-        this.userVSTransactionVSListInfo = userInfo;
     }
 
     public List<Vicket> getVicketList(String currencyCode) {
@@ -289,7 +203,7 @@ public class AppContextVS extends Application {
         String weekLapseId = getCurrentWeekLapseId();
         Cursor cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,null, selection,
                 new String[]{weekLapseId, Vicket.State.OK.toString(), currencyCode}, null);
-        Log.d(TAG + ".getCurrencyData(...)", "VicketContentProvider - cursor.getCount(): " + cursor.getCount());
+        LOGD(TAG + ".getCurrencyData(...)", "VicketContentProvider - cursor.getCount(): " + cursor.getCount());
         List<Vicket> vicketList = new ArrayList<Vicket>();
         while(cursor.moveToNext()) {
             Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(cursor.getBlob(
@@ -309,35 +223,6 @@ public class AppContextVS extends Application {
             transactionList.add(transactionVS);
         }
         return vicketList;
-    }
-
-    public Date getVicketAccountLastChecked() {
-        SharedPreferences pref = getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
-                Context.MODE_PRIVATE);
-        GregorianCalendar lastCheckedTime = new GregorianCalendar();
-        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.VICKET_ACCOUNT_LAST_CHECKED_KEY, 0));
-
-        Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
-
-        if(lastCheckedTime.getTime().after(currentLapseCalendar.getTime())) {
-            return lastCheckedTime.getTime();
-        } else return null;
-    }
-
-    public void setPin(String pin) throws NoSuchAlgorithmException {
-        SharedPreferences settings = getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        String hashPin = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
-        editor.putString(ContextVS.PIN_KEY, hashPin);
-        editor.commit();
-    }
-
-    public String getStoredPasswordHash() throws NoSuchAlgorithmException,
-            VotingSystemKeyStoreException {
-        SharedPreferences settings = getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        return settings.getString(ContextVS.PIN_KEY, null);
     }
 
     public String getCurrentWeekLapseId() {
@@ -365,7 +250,7 @@ public class AppContextVS extends Application {
             JSONObject arrayItem = encryptedDataArray.getJSONObject(i);
             Long serialNumber = Long.valueOf((String) arrayItem.get("serialNumber"));
             if(serialNumber == cryptoTokenCert.getSerialNumber().longValue()) {
-                Log.d(TAG + ".decryptMessageVS(...) ", "Cert matched - serialNumber: " + serialNumber);
+                LOGD(TAG + ".decryptMessageVS(...) ", "Cert matched - serialNumber: " + serialNumber);
                 encryptedData = (String) arrayItem.get("encryptedData");
             }
         }
@@ -391,7 +276,7 @@ public class AppContextVS extends Application {
         ResponseVS responseVS = null;
         try {
             String userVS = getUserVS().getNif();
-            Log.d(TAG + ".signMessage(...) ", "subject: " + subject);
+            LOGD(TAG + ".signMessage(...) ", "subject: " + subject);
             KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     (X509Certificate) keyEntry.getCertificateChain()[0],
@@ -416,6 +301,11 @@ public class AppContextVS extends Application {
 
     public ControlCenterVS getControlCenter() {
         return controlCenter;
+    }
+
+    public void setVicketServer(VicketServer vicketServer) {
+        serverMap.put(vicketServer.getServerURL(), vicketServer);
+        this.vicketServer = vicketServer;
     }
 
     public VicketServer getVicketServer() {
@@ -446,13 +336,6 @@ public class AppContextVS extends Application {
         return responseVS;
     }
 
-
-    public void setVicketServer(VicketServer vicketServer) {
-        serverMap.put(vicketServer.getServerURL(), vicketServer);
-        this.vicketServer = vicketServer;
-    }
-
-
     public void showNotification(ResponseVS responseVS){
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
@@ -472,7 +355,7 @@ public class AppContextVS extends Application {
     }
 
     public void sendBroadcast(ResponseVS responseVS) {
-        Log.d(TAG + ".sendBroadcast(...) ", "statusCode: " + responseVS.getStatusCode() +
+        LOGD(TAG + ".sendBroadcast(...) ", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
         Intent intent = new Intent(responseVS.getServiceCaller());
@@ -508,7 +391,7 @@ public class AppContextVS extends Application {
                     }
                     break;
             }
-        } else  Log.d(TAG + ".sendBroadcast(...) ", "broadcast response with null type!!!");
+        } else  LOGD(TAG + ".sendBroadcast(...) ", "broadcast response with null type!!!");
     }
 
     public String getWebSocketSessionId() {
@@ -525,5 +408,14 @@ public class AppContextVS extends Application {
 
     public void setWebSocketUserId(String webSocketUserId) {
         this.webSocketUserId = webSocketUserId;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
+        if(ContextVS.STATE_KEY == key) {
+            if(accessControl != null) this.state =
+                    PrefUtils.getAppCertState(this, accessControl.getServerURL());
+        }
     }
 }

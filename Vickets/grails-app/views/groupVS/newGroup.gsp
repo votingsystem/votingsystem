@@ -40,7 +40,7 @@
                         </paper-input>
                     </div>
                     <votingsystem-button type="button" onclick="showTagDialog()">
-                        <g:message code="addTagLbl" /> <i class="fa fa-tag"></i></votingsystem-button>
+                        <i class="fa fa-tag"></i> <g:message code="addTagLbl" /></votingsystem-button>
                 </div>
                 <div id="tagsDiv" style="padding:5px 0px 5px 30px; display:none;">
                     <div layout horizontal center>
@@ -49,7 +49,7 @@
                         </div>
                         <template id="selectedTags" is="auto-binding" repeat="{{tag in selectedTags}}">
                             <a class="btn btn-default" on-click="{{removeTag}}" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">
-                                {{tag.name}} <i class="fa fa-minus"></i></a>
+                                <i class="fa fa-minus"></i> {{tag.name}}</a>
                         </template>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
             <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                 <div style="position:absolute; right:0;">
                     <votingsystem-button onclick="submitForm()" style="margin: 0px 0px 0px 5px;">
-                        <g:message code="newGroupVSLbl"/> <i class="fa fa-check"></i>
+                        <i class="fa fa-check"></i> <g:message code="newGroupVSLbl"/>
                     </votingsystem-button>
                 </div>
             </div>

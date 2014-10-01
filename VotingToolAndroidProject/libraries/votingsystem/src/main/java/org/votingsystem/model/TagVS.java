@@ -101,11 +101,15 @@ public class TagVS  implements Serializable {
         while(tagIterator.hasNext()) {
             String tagStr = (String) tagIterator.next();
             Object tagData = jsonData.get(tagStr);
-            if(tagData instanceof String || tagData instanceof Double) {
+            if(tagData instanceof String || tagData instanceof Double || tagData instanceof Integer) {
                 result.put(tagStr, new TagVS(tagStr, new BigDecimal(tagData.toString()), null));
             } else {
-                BigDecimal tagTotal = new BigDecimal(((JSONObject)tagData).getString("total"));
-                BigDecimal tagTimeLimited = new BigDecimal(((JSONObject)tagData).getString("timeLimited"));
+                BigDecimal tagTotal = null;
+                BigDecimal tagTimeLimited = null;
+                if(((JSONObject)tagData).has("total")) tagTotal =
+                        new BigDecimal(((JSONObject)tagData).getString("total"));
+                if(((JSONObject)tagData).has("timeLimited"))  tagTimeLimited =
+                        new BigDecimal(((JSONObject)tagData).getString("timeLimited"));
                 result.put(tagStr, new TagVS(tagStr, tagTotal, tagTimeLimited));
             }
         }

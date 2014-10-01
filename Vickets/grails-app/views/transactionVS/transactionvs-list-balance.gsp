@@ -28,7 +28,7 @@
                         <div class="subjectColumn">{{transaction.subject}}</div>
                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                         <div layout horizontal center center-justified class="tagColumn">
-                            <div flex horizontal layout center center-justified>{{transaction.tags[0].name}}</div>
+                            <div flex horizontal layout center center-justified>{{transaction.tags[0].name | tagDescription}}</div>
                             <div style="margin:0 0 0 5px; width: 10px;">
                                 <div style="display:{{ isTimeLimited(transaction) ? 'block':'none'}}">
                                     <core-tooltip large label="<g:message code="timeLimitedAdviceMsg"/>" position="top">
@@ -61,6 +61,12 @@
                 balances: {value: {}},
                 transactionList: {value: []}
             },
+            tagDescription: function(tagName) {
+                switch (tagName) {
+                    case 'WILDTAG': return "<g:message code="wildTagLbl"/>".toUpperCase()
+                    default: return tagName
+                }
+            },
             ready: function() {
                 console.log(this.tagName + " - ready - transactionList: " + this.transactionList.length)
             },
@@ -71,7 +77,6 @@
                 return (tranctionvs.validTo != null)
             },
             viewTransaction: function(e) {
-                console.log(this.tagName + " - viewTransaction === transaction: " + JSON.stringify(e.target.templateInstance.model.transaction))
                 this.fire("transactionviewer", e.target.templateInstance.model.transaction)
             },
             transactionListChanged:function() {

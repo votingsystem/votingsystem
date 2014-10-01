@@ -75,7 +75,7 @@
                             </div>
                             <div style="max-width: 400px;">{{selectedTagMsg}}</div>
                             <votingsystem-button on-click="{{showTagDialog}}" style="font-size: 0.9em;margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
-                                <i class="fa fa-tag" style="margin:0 7px 0 3px;"></i> <g:message code="addTagLbl"/>
+                                <i class="fa fa-tag" style="margin:0 5px 0 2px;"></i> <g:message code="addTagLbl"/>
                             </votingsystem-button>
                         </div>
                         <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em;
@@ -91,7 +91,7 @@
                 </div>
                 <div style="display:{{isTransactionVSFromGroupToAllMembers ? 'none':'block'}}">
                     <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
-                        <i class="fa fa-user" style="margin:0 7px 0 3px;"></i> {{selectReceptorMsg}}
+                        <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> {{selectReceptorMsg}}
                     </votingsystem-button>
                     <div style="margin:10px 0 0 0;">
                         <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
@@ -102,7 +102,7 @@
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
                     <votingsystem-button on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">
-                        <i class="fa fa-check" style="margin:0 7px 0 3px;"></i> <g:message code="acceptLbl"/>
+                        <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> <g:message code="acceptLbl"/>
                     </votingsystem-button>
                 </div>
             </div>

@@ -26,7 +26,7 @@
                 this.isClientToolConnected = window['isClientToolConnected']
             },
             transactionvsChanged:function() {
-                this.transactionvsURL = ""
+                //this.transactionvsURL = ""
                 this.$.transactionViewer.signedDocument = this.transactionvs.signedContentMap
                 this.$.transactionViewer.timeStampDate = this.transactionvs.timeStampDate
                 this.$.transactionViewer.smimeMessage = this.transactionvs.smimeMessage
@@ -34,7 +34,7 @@
                 this.$.xDialog.opened = true
             },
             show: function(transactionvsURL) {
-                this.isProcessing = true
+                if(this.transactionvsURL != transactionvsURL) this.isProcessing = true
                 this.transactionvsURL = transactionvsURL
                 console.log(this.tagName + " - show - transactionvsURL:" + this.transactionvsURL)
                 this.$.xDialog.opened = true
