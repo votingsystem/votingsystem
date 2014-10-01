@@ -41,7 +41,7 @@ public class SignersInfoDialogFragment extends DialogFragment {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View mainLayout = inflater.inflate(
-                R.layout.signers_info_dialog_fragment, null);
+                R.layout.signers_info_dialog, null);
         LinearLayout containerView = (LinearLayout) mainLayout.findViewById(R.id.signers_container);
         byte[] smimeMessageBytes = getArguments().getByteArray(ContextVS.MESSAGE_KEY);
         SMIMEMessageWrapper smimeMessage = null;

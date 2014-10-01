@@ -9,6 +9,7 @@ import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertificationRequestVS;
@@ -61,20 +62,12 @@ public class UserCertRequestService extends IntentService {
                     givenName, surname);
 
             byte[] csrBytes = certificationRequest.getCsrPEM();
-            SharedPreferences settings = getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
-            editor.putString(ContextVS.CSR_KEY, new String(serializedCertificationRequest, "UTF-8"));
-            editor.commit();
-
             responseVS = HttpHelper.sendData(csrBytes, null,
                     contextVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
-                editor.putLong(CSR_REQUEST_ID_KEY, requestId);
+                PrefUtils.putCsrRequest(this, requestId, certificationRequest);
                 contextVS.setPin(pin);
-                editor.commit();
                 contextVS.setState(State.WITH_CSR, null);
             }
             String caption = null;

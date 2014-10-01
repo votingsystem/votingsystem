@@ -22,38 +22,6 @@ public class UserVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public State getState() {
-        return state;
-    }
-
-    public void setState(State state) {
-        this.state = state;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public Map<String, X509Certificate> getCertificateMap() {
-        return certificateMap;
-    }
-
-    public void setCertificateMap(Map<String, X509Certificate> certificateMap) {
-        this.certificateMap = certificateMap;
-    }
-
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
@@ -73,6 +41,7 @@ public class UserVS implements Serializable {
     private String name;
     private String fullName;
     private String organization;
+    private String deviceId;
     private String email;
     private String phone;
     private String reason;
@@ -89,10 +58,10 @@ public class UserVS implements Serializable {
     private CertificateVS certificateCA;
 
 
-    public static UserVS getUserVS (X509Certificate certificate) {
+    public static UserVS getUserVS (X509Certificate x509Cert) {
         UserVS userVS = new UserVS();
-        userVS.setCertificate(certificate);
-        String subjectDN = certificate.getSubjectDN().getName();
+        userVS.setCertificate(x509Cert);
+        String subjectDN = x509Cert.getSubjectDN().getName();
         if (subjectDN.contains("C="))
             userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
         if (subjectDN.contains("SERIALNUMBER="))
@@ -103,6 +72,15 @@ public class UserVS implements Serializable {
             userVS.setName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
         if (subjectDN.contains("CN="))
             userVS.setCn(subjectDN.split("CN=")[1]);
+
+        try {
+            JSONObject deviceData = CertUtil.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
+            if(deviceData != null) {
+                if(deviceData.has("email")) userVS.setEmail(deviceData.getString("email"));
+                if(deviceData.has("mobilePhone")) userVS.setPhone(deviceData.getString("mobilePhone"));
+                if(deviceData.has("deviceId")) userVS.setDeviceId(deviceData.getString("deviceId"));
+            }
+        } catch(Exception ex) {ex.printStackTrace();}
         return userVS;
     }
 
@@ -265,7 +243,8 @@ public class UserVS implements Serializable {
     }
 
     public String getName() {
-        return name;
+        if(name == null) return firstName + " " + lastName;
+        else return name;
     }
 
     public String getLastName() {
@@ -291,6 +270,46 @@ public class UserVS implements Serializable {
 
     public void setNumRepresentations(Long numRepresentations) {
         this.numRepresentations = numRepresentations;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public Map<String, X509Certificate> getCertificateMap() {
+        return certificateMap;
+    }
+
+    public void setCertificateMap(Map<String, X509Certificate> certificateMap) {
+        this.certificateMap = certificateMap;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 
     public static UserVS parse(JSONObject userJSON) throws Exception {
@@ -344,6 +363,11 @@ public class UserVS implements Serializable {
             }
             jsonData.put("certificateList", jsonArrayData);
         }
+        JSONObject deviceData = new JSONObject();
+        deviceData.put("phone", getPhone());
+        deviceData.put("email", getEmail());
+        deviceData.put("deviceId", getDeviceId());
+        jsonData.put("deviceData", deviceData);
         jsonData.put("numRepresentations", numRepresentations);
         jsonData.put("name", name);
         jsonData.put("firstName", firstName);

@@ -21,9 +21,10 @@ import android.widget.TextView;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.CertRequestFormFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
-import org.votingsystem.android.fragment.UserCertRequestFormFragment;
+import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -52,9 +53,9 @@ import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class UserCertResponseActivity extends ActionBarActivity {
+public class CertResponseActivity extends ActionBarActivity {
 	
-	public static final String TAG = UserCertResponseActivity.class.getSimpleName();
+	public static final String TAG = CertResponseActivity.class.getSimpleName();
 	
 	
 	private ProgressDialog progressDialog = null;
@@ -86,13 +87,9 @@ public class UserCertResponseActivity extends ActionBarActivity {
             try {
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
                 keyStore.load(null);
-
-                SharedPreferences settings = getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-                String csrRequest = settings.getString(ContextVS.CSR_KEY, null);
                 CertificationRequestVS certificationRequest = (CertificationRequestVS)
-                        ObjectUtils.deSerializeObject(csrRequest.getBytes());
+                        ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest(this).getBytes());
                 PrivateKey privateKey = certificationRequest.getPrivateKey();
-
                 Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
                         csrSigned.getBytes());
                 X509Certificate userCert = certificates.iterator().next();
@@ -111,6 +108,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
 
                 appContextVS.setState(State.WITH_CERTIFICATE, user.getNif());
                 setMessage(getString(R.string.request_cert_result_activity_ok));
+                PrefUtils.putSessionUserVS(this, user);
                 insertPinButton.setVisibility(View.GONE);
                 requestCertButton.setVisibility(View.GONE);
             } catch (Exception ex) {
@@ -123,9 +121,9 @@ public class UserCertResponseActivity extends ActionBarActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.user_cert_response_activity);
+        setContentView(R.layout.cert_request_form_response);
         appContextVS = (AppContextVS) getApplicationContext();
-        broadCastId = UserCertResponseActivity.class.getSimpleName();
+        broadCastId = CertResponseActivity.class.getSimpleName();
         Log.d(TAG + ".onCreate(...) ", "state: " + appContextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
@@ -158,7 +156,7 @@ public class UserCertResponseActivity extends ActionBarActivity {
 			    	case WITH_CSR:
 			    	case WITH_CERTIFICATE:
 			    		intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-                        intent.putExtra(FRAGMENT_KEY, UserCertRequestFormFragment.class.getName());
+                        intent.putExtra(FRAGMENT_KEY, CertRequestFormFragment.class.getName());
 			    		break;
           	  	}
           	  	if(intent != null) {
@@ -227,10 +225,8 @@ public class UserCertResponseActivity extends ActionBarActivity {
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
 		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
 		switch (item.getItemId()) {        
-	    	case android.R.id.home:  
-	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(this, EventsVSActivity.class);
-	    		startActivity(intent);            
+	    	case android.R.id.home:
+                super.onBackPressed();
 	    		return true;        
 	    	default:            
 	    		return super.onOptionsItemSelected(item);    

@@ -18,22 +18,24 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import org.votingsystem.android.R;
-import org.votingsystem.android.activity.ActivityVS;
+import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.android.activity.EventsVSActivity;
-import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.service.UserCertRequestService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -41,6 +43,7 @@ import org.votingsystem.util.NifUtils;
 
 import java.text.Normalizer;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.model.ContextVS.CALLER_KEY;
 import static org.votingsystem.model.ContextVS.DEVICE_ID_KEY;
@@ -55,11 +58,14 @@ import static org.votingsystem.model.ContextVS.SURNAME_KEY;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class UserCertRequestFormFragment extends Fragment {
+public class CertRequestFormFragment extends Fragment {
 
-	public static final String TAG = UserCertRequestFormFragment.class.getSimpleName();
+	public static final String TAG = CertRequestFormFragment.class.getSimpleName();
 
-    private String broadCastId = UserCertRequestFormFragment.class.getSimpleName();
+    private String broadCastId = CertRequestFormFragment.class.getSimpleName();
+    private View progressContainer;
+    private FrameLayout mainLayout;
+    private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String givenname = null;
     private String surname = null;
     private String email = null;
@@ -81,7 +87,7 @@ public class UserCertRequestFormFragment extends Fragment {
             else {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     Intent resultIntent = new Intent(getActivity().getApplicationContext(),
-                            UserCertResponseActivity.class);
+                            CertResponseActivity.class);
                     startActivity(resultIntent);
                 } else showMessage(responseVS.getStatusCode(), responseVS.getCaption(),
                         responseVS.getMessage());
@@ -101,7 +107,10 @@ public class UserCertRequestFormFragment extends Fragment {
            Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "progressVisible: ");
         super.onCreate(savedInstanceState);
-        View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.cert_request_form, container, false);
+        mainLayout = (FrameLayout)rootView.findViewById(R.id.mainLayout);
+        progressContainer = rootView.findViewById(R.id.progressContainer);
+        mainLayout.getForeground().setAlpha(0);
         getActivity().setTitle(getString(R.string.request_certificate_form_lbl));
         Button cancelButton = (Button) rootView.findViewById(R.id.cancel_lbl);
         cancelButton.setOnClickListener(new OnClickListener() {
@@ -166,10 +175,7 @@ public class UserCertRequestFormFragment extends Fragment {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
-	    		Log.d(TAG + ".onOptionsItemSelected(...) ", "home");
-	    		Intent intent = new Intent(getActivity().getApplicationContext(),
-                        EventsVSActivity.class);
-	    		startActivity(intent);
+                getActivity().onBackPressed();
 	    		return true;
 	    	default:
 	    		return super.onOptionsItemSelected(item);
@@ -207,7 +213,7 @@ public class UserCertRequestFormFragment extends Fragment {
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
-        ((ActivityVS)getActivity()).refreshingStateChanged(false);
+        showProgress(false, true);
     }
 
     private boolean validateForm () {
@@ -280,7 +286,36 @@ public class UserCertRequestFormFragment extends Fragment {
         startIntent.putExtra(EMAIL_KEY, email);
         startIntent.putExtra(CALLER_KEY, broadCastId);
         getActivity().startService(startIntent);
-        ((ActivityVS)getActivity()).refreshingStateChanged(true);
+        showProgress(true, true);
+    }
+
+    public void showProgress(boolean showProgress, boolean animate) {
+        if (progressVisible.get() == showProgress)  return;
+        progressVisible.set(showProgress);
+        if (progressVisible.get() && progressContainer != null) {
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity(), android.R.anim.fade_in));
+            progressContainer.setVisibility(View.VISIBLE);
+            mainLayout.getForeground().setAlpha(150); // dim
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to disable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        } else {
+            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                    getActivity(), android.R.anim.fade_out));
+            progressContainer.setVisibility(View.GONE);
+            mainLayout.getForeground().setAlpha(0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });
+        }
     }
 
 }

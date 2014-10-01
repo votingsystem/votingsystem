@@ -35,7 +35,7 @@ public class MessageDialogFragment extends DialogFragment {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.message_dialog_fragment, null);
+        View view = inflater.inflate(R.layout.message_dialog, null);
         int statusCode = getArguments().getInt(ContextVS.RESPONSE_STATUS_KEY, -1);
         String caption = getArguments().getString(ContextVS.CAPTION_KEY);
         String message = getArguments().getString(ContextVS.MESSAGE_KEY);

@@ -18,10 +18,10 @@ import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
+import org.votingsystem.android.activity.CertResponseActivity;
+import org.votingsystem.android.activity.EventsVSActivity;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.IntentFilterActivity;
-import org.votingsystem.android.activity.RepresentativesActivity;
-import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.fragment.UserVSAccountsFragment;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
@@ -133,10 +133,10 @@ public class VotingAppService extends Service implements Runnable {
                             intent = new Intent(getBaseContext(), CertRequestActivity.class);
                             break;
                         case WITH_CSR:
-                            intent = new Intent(getBaseContext(), UserCertResponseActivity.class);
+                            intent = new Intent(getBaseContext(), CertResponseActivity.class);
                             break;
                         case WITH_CERTIFICATE:
-                            intent = new Intent(getBaseContext(), RepresentativesActivity.class);
+                            intent = new Intent(getBaseContext(), EventsVSActivity.class);
                             break;
                     }
                     if(intent != null) {

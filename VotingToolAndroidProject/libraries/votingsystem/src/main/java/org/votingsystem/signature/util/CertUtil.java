@@ -2,8 +2,13 @@ package org.votingsystem.signature.util;
 
 import android.util.Log;
 
+import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1Set;
+import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x500.X500Name;
@@ -25,6 +30,7 @@ import org.bouncycastle2.x509.X509V1CertificateGenerator;
 import org.bouncycastle2.x509.X509V3CertificateGenerator;
 import org.bouncycastle2.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.SubjectKeyIdentifierStructure;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -331,5 +337,25 @@ public class CertUtil {
         X509Certificate cert = certificateChain.iterator().next();
         return cert;
     }
-    
+
+    public static JSONObject getCertExtensionData(X509Certificate x509Certificate,
+              String extensionOID) throws Exception {
+        JSONObject result = null;
+        byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
+        if(extensionValue == null) return null;
+        DERObject derObject =  toDERObject(extensionValue);
+        if (derObject instanceof DEROctetString) {
+            DEROctetString derOctetString = (DEROctetString)derObject;
+            DERTaggedObject derTaggedObject = (DERTaggedObject)toDERObject(derOctetString.getOctets());
+            result = new JSONObject(((DERUTF8String)derTaggedObject.getObject()).getString());
+        }
+        return result;
+    }
+
+    public static DERObject toDERObject(byte[] data) throws IOException, IOException {
+        ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+        ASN1InputStream DIS = new ASN1InputStream(inStream);
+        return DIS.readObject();
+    }
+
 }

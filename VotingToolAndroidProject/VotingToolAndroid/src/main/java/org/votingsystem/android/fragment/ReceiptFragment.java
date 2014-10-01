@@ -128,7 +128,7 @@ public class ReceiptFragment extends Fragment {
         broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        View rootView = inflater.inflate(R.layout.receipt_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.message_smime, container, false);
         LinearLayout receiptDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.receipt_data_container);
         receipt_content = (TextView)rootView.findViewById(R.id.receipt_content);

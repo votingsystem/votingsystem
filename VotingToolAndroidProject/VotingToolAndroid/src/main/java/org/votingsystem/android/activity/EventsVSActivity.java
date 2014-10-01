@@ -26,8 +26,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -44,9 +42,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EventVSGridFragment;
-import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.PublishEventVSFragment;
-import org.votingsystem.android.fragment.VicketGridFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.UIUtils;
@@ -58,7 +54,6 @@ import org.votingsystem.util.ScreenUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 
@@ -120,12 +115,12 @@ public class EventsVSActivity extends ActivityBase {
         contextVS = (AppContextVS) getApplicationContext();
         EventVSGridFragment fragment = new EventVSGridFragment();
         weakRefToFragment = new WeakReference<EventVSGridFragment>(fragment);
-
-        Bundle args = new Bundle();
+        Bundle args = getIntent().getExtras();
+        if(args == null) args = new Bundle();
         args.putSerializable(ContextVS.TYPEVS_KEY, NavigatorDrawerOptionsAdapter.GroupPosition.VOTING);
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVS.State.ACTIVE);
         args.putSerializable(ContextVS.CHILD_POSITION_KEY, NavigatorDrawerOptionsAdapter.ChildPosition.OPEN);
-
+        fragment.setArguments(getIntent().getExtras());
         fragment.setArguments(args);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
@@ -211,7 +206,7 @@ public class EventsVSActivity extends ActivityBase {
         Log.d(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
         this.mainMenu = menu;
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.navigation_drawer, menu);
+        inflater.inflate(R.menu.activity_eventsvs, menu);
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ||
         //        Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { }
         double diagonalInches = ScreenUtils.getDiagonalInches(getWindowManager().getDefaultDisplay());
@@ -236,26 +231,6 @@ public class EventsVSActivity extends ActivityBase {
                 intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_PUBLISHING);
                 startActivity(intent);
                 //showPublishDialog();
-                return true;
-            case R.id.vickets_menu_user_item:
-                intent = new Intent(this, BrowserVSActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuUserURL());
-                startActivity(intent);
-                return true;
-            case R.id.connect_to_service:
-                if(contextVS.getWebSocketSessionId() == null) {
-                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
-                            R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
-                } else {toggleWebSocketServiceConnection();}
-                return true;
-            case R.id.admin_vickets_menu_item:
-                intent = new Intent(this, BrowserVSActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuAdminURL());
-                startActivity(intent);
-                return true;
-            case R.id.close_app:
-                 //finish();
-                 UIUtils.killApp(true);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

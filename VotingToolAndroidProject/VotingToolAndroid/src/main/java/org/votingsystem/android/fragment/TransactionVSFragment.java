@@ -97,7 +97,7 @@ public class TransactionVSFragment extends Fragment {
         broadCastId = TransactionVSFragment.class.getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        View rootView = inflater.inflate(R.layout.transactionvs_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.transactionvs, container, false);
         to_user = (TextView)rootView.findViewById(R.id.to_user);
         from_user = (TextView)rootView.findViewById(R.id.from_user);
         receipt = (TextView)rootView.findViewById(R.id.receipt);

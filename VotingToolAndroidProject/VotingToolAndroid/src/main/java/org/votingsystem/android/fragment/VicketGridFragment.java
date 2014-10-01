@@ -20,7 +20,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -109,10 +108,9 @@ public class VicketGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-
         ((FragmentContainerActivity)getActivity()).setTitle(getString(R.string.vicket_lbl), null,
                 R.drawable.fa_money_32);
-        rootView = inflater.inflate(R.layout.generic_grid_fragment, container, false);
+        rootView = inflater.inflate(R.layout.generic_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new VicketListAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);
@@ -160,17 +158,6 @@ public class VicketGridFragment extends Fragment
         menuInflater.inflate(R.menu.vicket_user_info, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
-    }
-
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
-                " - ItemId: " + item.getItemId());
-        switch (item.getItemId()) {
-            case R.id.reload:
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {

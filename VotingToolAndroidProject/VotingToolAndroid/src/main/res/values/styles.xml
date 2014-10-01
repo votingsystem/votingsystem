@@ -37,13 +37,12 @@
 
     <style name="HeaderBar" />
 
-    <style name="ThemeVS" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/ActionBarVS</item>
+    <style name="ThemeVS" parent="@style/Theme.AppCompat.Light">
+        <!--<item name="android:actionBarStyle">@style/ActionBarVS</item>-->
     </style>
 
     <style name="ActionBarVS" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">#ba0011</item>
-        <item name="android:textColor">@color/navdrawer_background</item>
     </style>
 
 </resources>

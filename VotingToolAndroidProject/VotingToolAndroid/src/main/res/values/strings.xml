@@ -468,5 +468,7 @@
     <string name="placeholder_lorem_ipsum">lorem ipsum ...</string>
     <string name="navdrawer_item_settings">Ajustes</string>
     <string name="user_cert_lbl">Certificado de usuario</string>
+    <string name="debug_tests">Pruebas depuración</string>
+    <string name="cert_request_lbl">Solicitud de certificado</string>
 
 </resources>

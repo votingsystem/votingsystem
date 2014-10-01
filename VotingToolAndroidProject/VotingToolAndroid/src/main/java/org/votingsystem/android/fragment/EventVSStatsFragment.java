@@ -74,7 +74,7 @@ public class EventVSStatsFragment extends Fragment {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        rootView = inflater.inflate(R.layout.eventvs_statistics_fragment, container, false);
+        rootView = inflater.inflate(R.layout.eventvs_stats, container, false);
         setHasOptionsMenu(true);
         return rootView;
     }

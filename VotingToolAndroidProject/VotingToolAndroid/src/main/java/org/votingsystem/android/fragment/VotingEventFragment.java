@@ -153,7 +153,7 @@ public class VotingEventFragment extends Fragment implements View.OnClickListene
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
+        rootView = inflater.inflate(R.layout.eventvs_vote, container, false);
         saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
         cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
         setHasOptionsMenu(true);

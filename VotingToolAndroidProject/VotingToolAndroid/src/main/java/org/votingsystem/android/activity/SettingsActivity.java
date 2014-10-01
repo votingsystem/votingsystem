@@ -25,6 +25,8 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.model.ContextVS;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
@@ -38,7 +40,7 @@ public class SettingsActivity extends PreferenceActivity
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setIcon(R.drawable.ic_drawer_settings);
+        getActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.ic_drawer_settings));
         getActionBar().setTitle(R.string.navdrawer_item_settings);
     }
 
@@ -60,7 +62,9 @@ public class SettingsActivity extends PreferenceActivity
         Preference button = (Preference)findPreference("requestCertButton");
         button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override public boolean onPreferenceClick(Preference arg0) {
-                startActivity(new Intent(SettingsActivity.this, CertRequestActivity.class));
+                Intent intent = new Intent(SettingsActivity.this, CertRequestActivity.class);
+                intent.putExtra(ContextVS.OPERATIONVS_KEY, "");
+                startActivity(intent);
                 return true;
             }
         });
@@ -68,7 +72,7 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override protected void onDestroy() {
         super.onDestroy();
-        PrefUtils.unrgisterOnSharedPreferenceChangeListener(this, this);
+        PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
     }
 
     private void setupSimplePreferencesScreen() {

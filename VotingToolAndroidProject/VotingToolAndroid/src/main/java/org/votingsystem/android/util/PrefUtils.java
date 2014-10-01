@@ -20,10 +20,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.util.ObjectUtils;
+
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
+import static org.votingsystem.model.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 
 /**
  * Utilities and constants related to app preferences.
@@ -37,25 +43,11 @@ public class PrefUtils {
      */
     public static final String PREF_DATA_BOOTSTRAP_DONE = "pref_data_bootstrap_done";
 
-
     /**
      * Boolean indicating whether we should attempt to sign in on startup (default true).
      */
     public static final String PREF_USER_REFUSED_SIGN_IN = "pref_user_refused_sign_in";
 
-    /**
-     * Boolean indicating whether the debug build warning was already shown.
-     */
-    public static final String PREF_DEBUG_BUILD_WARNING_SHOWN = "pref_debug_build_warning_shown";
-
-    /** Boolean indicating whether user has answered if they are local or remote. */
-    public static final String PREF_ANSWERED_LOCAL_OR_REMOTE = "pref_answered_local_or_remote";
-
-    /** Boolean indicating whether the user dismissed the I/O extended card. */
-    public static final String PREF_DISMISSED_IO_EXTENDED_CARD = "pref_dismissed_io_extended_card";
-
-    /** Boolean indicating whether the user has enabled BLE on the Nearby screen. */
-    public static final String PREF_BLE_ENABLED = "pref_ble_enabled";
 
     /** Long indicating when a sync was last ATTEMPTED (not necessarily succeeded) */
     public static final String PREF_LAST_SYNC_ATTEMPTED = "pref_last_sync_attempted";
@@ -63,8 +55,6 @@ public class PrefUtils {
     /** Long indicating when a sync last SUCCEEDED */
     public static final String PREF_LAST_SYNC_SUCCEEDED = "pref_last_sync_succeeded";
 
-    /** Sync interval that's currently configured */
-    public static final String PREF_CUR_SYNC_INTERVAL = "pref_cur_sync_interval";
 
     public static TimeZone getDisplayTimeZone(Context context) {
         return TimeZone.getDefault();
@@ -80,7 +70,6 @@ public class PrefUtils {
         return sp.getBoolean(PREF_DATA_BOOTSTRAP_DONE, false);
     }
 
-
     public static void markUserRefusedSignIn(final Context context) {
         markUserRefusedSignIn(context, true);
     }
@@ -93,46 +82,6 @@ public class PrefUtils {
     public static boolean hasUserRefusedSignIn(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_USER_REFUSED_SIGN_IN, false);
-    }
-
-    public static boolean wasDebugWarningShown(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_DEBUG_BUILD_WARNING_SHOWN, false);
-    }
-
-    public static void markDebugWarningShown(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_DEBUG_BUILD_WARNING_SHOWN, true).commit();
-    }
-
-    public static boolean hasAnsweredLocalOrRemote(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_ANSWERED_LOCAL_OR_REMOTE, false);
-    }
-
-    public static void markAnsweredLocalOrRemote(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_ANSWERED_LOCAL_OR_REMOTE, true).commit();
-    }
-
-    public static boolean hasDismissedIOExtendedCard(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_DISMISSED_IO_EXTENDED_CARD, false);
-    }
-
-    public static void markDismissedIOExtendedCard(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_DISMISSED_IO_EXTENDED_CARD, true).commit();
-    }
-
-    public static boolean hasEnabledBle(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_BLE_ENABLED, false);
-    }
-
-    public static void setBleStatus(final Context context, boolean status) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_BLE_ENABLED, status).commit();
     }
 
     public static long getLastSyncAttemptedTime(final Context context) {
@@ -155,25 +104,52 @@ public class PrefUtils {
         sp.edit().putLong(PREF_LAST_SYNC_SUCCEEDED, Calendar.getInstance().getTimeInMillis()).commit();
     }
 
-    public static long getCurSyncInterval(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getLong(PREF_CUR_SYNC_INTERVAL, 0L);
-    }
-
-    public static void setCurSyncInterval(final Context context, long interval) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putLong(PREF_CUR_SYNC_INTERVAL, interval).commit();
-    }
-
     public static void registerOnSharedPreferenceChangeListener(final Context context,
             SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.registerOnSharedPreferenceChangeListener(listener);
     }
 
-    public static void unrgisterOnSharedPreferenceChangeListener(final Context context,
+    public static void unregisterOnSharedPreferenceChangeListener(final Context context,
             SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.unregisterOnSharedPreferenceChangeListener(listener);
+    }
+
+    public static String getCsrRequest(final Context context) {
+        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        return settings.getString(ContextVS.CSR_KEY, null);
+    }
+
+    public static void putCsrRequest(final Context context, Long requestId,
+             CertificationRequestVS certificationRequest) {
+        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
+        editor.putLong(ContextVS.CSR_REQUEST_ID_KEY, requestId);
+        try {
+            editor.putString(ContextVS.CSR_KEY, new String(serializedCertificationRequest, "UTF-8"));
+        } catch(Exception ex) {ex.printStackTrace();}
+        editor.commit();
+    }
+
+    public static void putSessionUserVS(final Context context, UserVS userVS) {
+        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        byte[] serializedUserVS = ObjectUtils.serializeObject(userVS);
+        try {
+            editor.putString(ContextVS.USER_KEY, new String(serializedUserVS, "UTF-8"));
+            editor.commit();
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static UserVS getSessionUserVS(final Context context) {
+        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        String serializedUserVS = settings.getString(ContextVS.USER_KEY, null);
+        if(serializedUserVS != null) {
+            UserVS userVS = (UserVS) ObjectUtils.deSerializeObject(serializedUserVS.getBytes());
+            return userVS;
+        }
+        return null;
     }
 }

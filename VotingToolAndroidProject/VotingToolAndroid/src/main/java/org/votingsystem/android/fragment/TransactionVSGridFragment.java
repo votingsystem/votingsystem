@@ -123,7 +123,7 @@ public class TransactionVSGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.generic_grid_fragment, container, false);
+        rootView = inflater.inflate(R.layout.generic_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new TransactionVSListAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);
@@ -188,8 +188,6 @@ public class TransactionVSGridFragment extends Fragment
         Log.d(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
-            case R.id.reload:
-                return true;
             case R.id.update_signers_info:
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.update_user_info_pin_msg), false, TypeVS.VICKET_USER_INFO);

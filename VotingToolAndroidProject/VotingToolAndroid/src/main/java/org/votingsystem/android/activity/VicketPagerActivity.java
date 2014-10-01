@@ -1,6 +1,7 @@
 package org.votingsystem.android.activity;
 
 import android.app.SearchManager;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -16,13 +17,14 @@ import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
 import org.votingsystem.android.fragment.UserVSAccountsFragment;
-import org.votingsystem.android.fragment.VicketFragment;
 import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.util.Calendar;
+
+import static org.votingsystem.android.util.LogUtils.LOGD;
 
 /**
  * @author jgzornoza
@@ -39,7 +41,8 @@ public class VicketPagerActivity extends ActivityBase {
         Log.d(TAG + ".onCreate(...) ", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         contextVS = (AppContextVS) getApplicationContext();
-        setContentView(R.layout.pager_activity);
+        setContentView(R.layout.activity_vickets);
+        getLPreviewUtils().trySetActionBar();
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -67,13 +70,29 @@ public class VicketPagerActivity extends ActivityBase {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        Intent intent = null;
         switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
+            case R.id.admin_vickets_menu_item:
+                intent = new Intent(this, BrowserVSActivity.class);
+                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuAdminURL());
+                startActivity(intent);
+                return true;
+            case R.id.vickets_menu_user_item:
+                intent = new Intent(this, BrowserVSActivity.class);
+                intent.putExtra(ContextVS.URL_KEY, contextVS.getVicketServer().getMenuUserURL());
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override protected int getSelfNavDrawerItem() {
+        return NAVDRAWER_ITEM_VICKETS;// we only have a nav drawer if we are in top-level
+    }
+
+    @Override public void requestDataRefresh() {
+        LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
     }
 
     class VicketPagerAdapter extends FragmentStatePagerAdapter {

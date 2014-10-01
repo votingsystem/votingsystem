@@ -15,27 +15,25 @@
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/menu_search"
-        android:icon="@drawable/ic_action_search"
-        android:title="@string/search_label"
-        android:orderInCategory="1"
-        android:showAsAction="always" />
-
-    <item android:id="@+id/menu_refresh"
-        android:title="@string/update_lbl"
-        android:orderInCategory="1"
-        android:showAsAction="never" />
-
+    <item android:id="@+id/connect_to_service"
+        android:orderInCategory="4"
+        android:showAsAction="never"
+        android:title="@string/connect_to_service_lbl"/>
 
     <item android:id="@+id/menu_debug"
-        android:visible="false"
         android:title="@string/description_debug"
-        android:orderInCategory="101"
+        android:orderInCategory="18"
         android:showAsAction="never" />
 
     <item android:id="@+id/menu_about"
         android:title="@string/title_about"
-        android:orderInCategory="99"
+        android:orderInCategory="19"
         android:showAsAction="never" />
+
+    <item
+        android:id="@+id/close_app"
+        android:orderInCategory="20"
+        android:showAsAction="never"
+        android:title="@string/close_app_lbl"/>
 
 </menu>

@@ -126,7 +126,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        View rootView = inflater.inflate(R.layout.eventvs_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.eventvs, container, false);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         String subject = eventVS.getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)

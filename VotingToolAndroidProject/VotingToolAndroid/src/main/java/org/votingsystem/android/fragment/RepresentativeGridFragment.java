@@ -143,7 +143,7 @@ public class RepresentativeGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.representative_grid_fragment, container, false);
+        rootView = inflater.inflate(R.layout.representative_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);
@@ -231,11 +231,11 @@ public class RepresentativeGridFragment extends Fragment
         Log.d(TAG +  ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
-            case R.id.reload:
+            /*case R.id.reload:
                 fetchItems(offset);
                 //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
                 //getLoaderManager().restartLoader(loaderId, null, this);
-                return true;
+                return true;*/
             case R.id.cancel_anonymouys_representatioin:
                 return true;
             case R.id.new_representative:

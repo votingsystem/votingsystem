@@ -18,8 +18,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -127,7 +125,7 @@ public class EventVSGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.eventvs_grid_fragment, container, false);
+        rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
         mAdapter = new EventListAdapter(getActivity().getApplicationContext(), null,false);
@@ -240,23 +238,18 @@ public class EventVSGridFragment extends Fragment
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG +  ".onCreateOptionsMenu(...)", "onCreateOptionsMenu - onCreateOptionsMenu");
-        if(menu.findItem(R.id.reload) == null) inflater.inflate(R.menu.eventvs_grid_fragment, menu);
-    }
-
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG +  ".onOptionsItemSelected(..)", " - Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId() + " - groupPosition: " + groupPosition +
                 " - eventState: " + eventState);
         switch (item.getItemId()) {
-            case R.id.reload:
+            /*case R.id.reload:
                 fetchItems(offset);
                 //rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
                 //gridView.invalidateViews();
                 //getLoaderManager().restartLoader(loaderId, null, this);
                 //((CursorAdapter)gridView.getAdapter()).notifyDataSetChanged();
-                return true;
+                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }

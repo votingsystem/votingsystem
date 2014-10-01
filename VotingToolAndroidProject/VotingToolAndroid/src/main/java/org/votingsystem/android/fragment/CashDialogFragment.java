@@ -34,7 +34,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
-import org.votingsystem.android.activity.UserCertResponseActivity;
+import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.android.ui.HorizontalNumberPicker;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -104,7 +104,7 @@ public class CashDialogFragment extends DialogFragment {
                     switch(appState) {
                         case WITH_CSR:
                             intent = new Intent(getActivity().getApplicationContext(),
-                                    UserCertResponseActivity.class);
+                                    CertResponseActivity.class);
                             break;
                         case WITHOUT_CSR:
                             intent = new Intent(getActivity().getApplicationContext(),

@@ -104,7 +104,7 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.message_dialog_fragment, null);
+        View view = inflater.inflate(R.layout.message_dialog, null);
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity()).setTitle(
                 getString(R.string.show_timestamp_info_lbl));
         TextView messageTextView = (TextView)view.findViewById(R.id.message);

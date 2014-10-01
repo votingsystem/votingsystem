@@ -20,6 +20,7 @@ import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
 import org.votingsystem.android.service.VotingAppService;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
@@ -148,6 +149,11 @@ public class AppContextVS extends Application {
 
     public boolean isInitialized() {
         return this.initialized;
+    }
+
+    public void finish() {
+        stopService(new Intent(getApplicationContext(), VotingAppService.class));
+        UIUtils.killApp(true);
     }
 
     public void setInitialized(boolean initialized) {

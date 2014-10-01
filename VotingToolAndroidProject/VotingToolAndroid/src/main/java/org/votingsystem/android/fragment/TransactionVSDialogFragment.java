@@ -40,7 +40,7 @@ import android.widget.TextView;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
-import org.votingsystem.android.activity.UserCertResponseActivity;
+import org.votingsystem.android.activity.CertResponseActivity;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -103,7 +103,7 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
                     switch(appState) {
                         case WITH_CSR:
                             intent = new Intent(getActivity().getApplicationContext(),
-                                    UserCertResponseActivity.class);
+                                    CertResponseActivity.class);
                             break;
                         case WITHOUT_CSR:
                             intent = new Intent(getActivity().getApplicationContext(),
@@ -115,7 +115,7 @@ public class TransactionVSDialogFragment extends DialogFragment implements OnKey
             }).setNegativeButton(R.string.cancel_lbl, null);
             return builder.create();
         } else {
-            View view = inflater.inflate(R.layout.transactionvs_dialog_fragment, null);
+            View view = inflater.inflate(R.layout.transactionvs_dialog, null);
             msgTextView = (TextView) view.findViewById(R.id.msg);
             userPinEditText = (EditText)view.findViewById(R.id.user_pin);
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(

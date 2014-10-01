@@ -144,7 +144,7 @@ public class UserVSAccountsFragment extends Fragment {
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         contextVS = (AppContextVS) getActivity().getApplicationContext();
-        rootView = inflater.inflate(R.layout.uservs_accounts_fragment, container, false);
+        rootView = inflater.inflate(R.layout.uservs_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         time_remaining_info = (TextView)rootView.findViewById(R.id.time_remaining_info);
         accounts_list_view = (ListView) rootView.findViewById(R.id.accounts_list_view);

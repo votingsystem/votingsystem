@@ -109,7 +109,7 @@ public class VicketFragment extends Fragment {
         broadCastId = VicketFragment.class.getSimpleName() + "_" + cursorPosition;
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        View rootView = inflater.inflate(R.layout.vicket_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.vicket, container, false);
         LinearLayout vicketDataContainer = (LinearLayout) rootView.
                 findViewById(R.id.vicket_data_container);
         vicket_content = (TextView)rootView.findViewById(R.id.vicket_content);

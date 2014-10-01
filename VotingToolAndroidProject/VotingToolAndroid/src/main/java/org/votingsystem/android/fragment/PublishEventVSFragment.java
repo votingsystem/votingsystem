@@ -260,15 +260,15 @@ public class PublishEventVSFragment extends Fragment {
         formType = (TypeVS)getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         switch(formType) {
             case CLAIM_PUBLISHING:
-                rootView = inflater.inflate(R.layout.publish_claim_fragment, container, false);
+                rootView = inflater.inflate(R.layout.publish_claim, container, false);
                 optionContainer = (LinearLayout) rootView.findViewById(R.id.optionContainer);
                 optionCaption = (TextView) rootView.findViewById(R.id.eventFieldsCaption);
                 break;
             case MANIFEST_PUBLISHING:
-                rootView = inflater.inflate(R.layout.publish_manifest_fragment, container, false);
+                rootView = inflater.inflate(R.layout.publish_manifest, container, false);
                 break;
             case VOTING_PUBLISHING:
-                rootView = inflater.inflate(R.layout.publish_election_fragment, container, false);
+                rootView = inflater.inflate(R.layout.publish_election, container, false);
                 optionContainer = (LinearLayout) rootView.findViewById(R.id.optionContainer);
                 optionCaption = (TextView) rootView.findViewById(R.id.eventFieldsCaption);
                 controlCenterSetSpinner = (Spinner) rootView.findViewById(R.id.controlCenterSetSpinner);

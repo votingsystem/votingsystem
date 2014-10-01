@@ -20,6 +20,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -41,12 +42,24 @@ public class DebugActionRunnerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_debug_action_runner, null);
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.debug_action_runner, null);
         mLogArea = (TextView) rootView.findViewById(R.id.logArea);
         ViewGroup tests = (ViewGroup) rootView.findViewById(R.id.debug_action_list);
         tests.addView(createTestAction(new ForceSyncNowAction()));
         tests.addView(createTestAction(new SimulateBadgeScannedAction()));
+        setHasOptionsMenu(true);
         return rootView;
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     protected View createTestAction(final DebugAction test) {

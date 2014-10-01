@@ -52,7 +52,7 @@ public class ReceiptGridFragment extends Fragment implements
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
-        rootView = inflater.inflate(R.layout.receipt_grid_fragment, container, false);
+        rootView = inflater.inflate(R.layout.message_smime_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         adapter = new ReceiptGridAdapter(getActivity().getApplicationContext(), null,false);
         gridView.setAdapter(adapter);

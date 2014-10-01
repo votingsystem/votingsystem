@@ -41,6 +41,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,7 @@ import android.widget.Toast;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
+import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.ui.debug.DebugActionRunnerActivity;
 import org.votingsystem.android.ui.widget.MultiSwipeRefreshLayout;
@@ -68,6 +70,7 @@ import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.StringUtils;
 
 import java.io.IOException;
@@ -98,7 +101,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     // Navigation drawer:
     private DrawerLayout mDrawerLayout;
     private LPreviewUtilsBase.ActionBarDrawerToggleWrapper mDrawerToggle;
-
+    private AppContextVS contextVS = null;
     // allows access to L-Preview APIs through an abstract interface so we can compile with
     // both the L Preview SDK and with the API 19 SDK
     private LPreviewUtilsBase mLPreviewUtils;
@@ -181,11 +184,12 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
 
     // A Runnable that we should execute when the navigation drawer finishes its closing animation
     private Runnable mDeferredOnDrawerClosedRunnable;
-
+    private AtomicBoolean isCancelled = new AtomicBoolean(false);
     private int mThemedStatusBarColor;
     private int mProgressBarTopWhenActionBarShown;
     private static final TypeEvaluator ARGB_EVALUATOR = new ArgbEvaluator();
 
+    private String broadCastId = ActivityBase.class.getSimpleName();
     /*private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override public void onReceive(Context context, Intent intent) {
@@ -226,6 +230,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        contextVS = (AppContextVS) getApplicationContext();
         // Check if the EULA has been accepted; if not, show it.
         /*if (!PrefUtils.isTosAccepted(this)) {
             Intent intent = new Intent(this, WelcomeActivity.class);
@@ -481,21 +486,25 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         TextView email = (TextView) chosenAccountView.findViewById(R.id.profile_email_text);
         mExpandAccountBoxIndicator = (ImageView) findViewById(R.id.expand_account_box_indicator);
 
-        nameTextView.setText("Account Name");
-        email.setText("email@votingsystem.org");
-
-        chosenAccountView.setEnabled(true);
-        mExpandAccountBoxIndicator.setVisibility(View.VISIBLE);
-        chosenAccountView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mAccountBoxExpanded = !mAccountBoxExpanded;
-                setupAccountBoxToggle();
-            }
-        });
-        setupAccountBoxToggle();
+        UserVS sessionUserVS = PrefUtils.getSessionUserVS(this);
+        if(sessionUserVS != null) {
+            nameTextView.setText(sessionUserVS.getName());
+            email.setText(sessionUserVS.getEmail());
+            chosenAccountView.setEnabled(true);
+            mExpandAccountBoxIndicator.setVisibility(View.VISIBLE);
+            chosenAccountView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mAccountBoxExpanded = !mAccountBoxExpanded;
+                    setupAccountBoxToggle();
+                }
+            });
+            setupAccountBoxToggle();
+        } else {
+            mAccountListContainer.setVisibility(View.GONE);
+            findViewById(R.id.chosen_account_view).setVisibility(View.GONE);
+        }
     }
-
 
     protected void onAccountChangeRequested() {
         // override if you want to be notified when another account has been selected account has changed
@@ -574,6 +583,12 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_base, menu);
+        MenuItem debugItem = menu.findItem(R.id.menu_debug);
+        if (debugItem != null) {
+            debugItem.setVisible(BuildConfig.DEBUG);
+        }
         this.mainMenu = menu;
         return super.onCreateOptionsMenu(menu);
     }
@@ -585,6 +600,12 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
             return true;
         }
         switch (id) {
+            case R.id.connect_to_service:
+                if(contextVS.getWebSocketSessionId() == null) {
+                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
+                            R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
+                } else {toggleWebSocketServiceConnection();}
+                return true;
             case R.id.menu_about:
                 HelpUtils.showAbout(this);
                 return true;
@@ -593,9 +614,10 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
                     startActivity(new Intent(this, DebugActionRunnerActivity.class));
                 }
                 return true;
-            case R.id.menu_refresh:
-                requestDataRefresh();
-                break;
+            case R.id.close_app:
+                isCancelled.set(true);
+                finish();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1034,6 +1056,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         super.onDestroy();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         sp.unregisterOnSharedPreferenceChangeListener(this);
+        if(isCancelled.get()) ((AppContextVS)getApplicationContext()).finish();
     }
 
     private SyncStatusObserver mSyncStatusObserver = new SyncStatusObserver() {
