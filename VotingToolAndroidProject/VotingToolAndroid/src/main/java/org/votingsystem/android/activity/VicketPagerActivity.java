@@ -105,11 +105,11 @@ public class VicketPagerActivity extends ActivityBase {
                 NavigatorDrawerOptionsAdapter.GroupPosition.VICKETS;
 
         private String searchQuery = null;
-        private Bundle args = new Bundle();
+        private Bundle args;
 
         public VicketPagerAdapter(FragmentManager fragmentManager, Bundle args) {
             super(fragmentManager);
-            this.args = args;
+            this.args = (args != null)? args:new Bundle();
         }
 
         @Override public Fragment getItem(int position) {

@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.android.ui.debug.actions.ForceSyncNowAction;
+import org.votingsystem.android.ui.debug.actions.PrefsAction;
 import org.votingsystem.android.ui.debug.actions.SimulateBadgeScannedAction;
 
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
@@ -47,6 +48,7 @@ public class DebugActionRunnerFragment extends Fragment {
         ViewGroup tests = (ViewGroup) rootView.findViewById(R.id.debug_action_list);
         tests.addView(createTestAction(new ForceSyncNowAction()));
         tests.addView(createTestAction(new SimulateBadgeScannedAction()));
+        tests.addView(createTestAction(new PrefsAction()));
         setHasOptionsMenu(true);
         return rootView;
     }

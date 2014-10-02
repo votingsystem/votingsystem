@@ -53,6 +53,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     private TextView msgTextView;
     private EditText userPinEditText;
     private Boolean withPasswordConfirm = null;
+    private Boolean withHashValidation = null;
     private String dialogCaller = null;
     private String firstPin = null;
 
@@ -73,17 +74,30 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         pinDialog.show(fragmentManager, PinDialogFragment.TAG);
     }
 
+    public static void showPinScreenWithoutHashValidation(FragmentManager fragmentManager,
+              String broadCastId, String msg) {
+        PinDialogFragment pinDialog = new PinDialogFragment();
+        pinDialog.setArguments(getArguments(msg, true, false, false, broadCastId, null));
+        pinDialog.show(fragmentManager, PinDialogFragment.TAG);
+    }
+
+    private static Bundle getArguments(String msg, boolean isWithPasswordConfirm,
+           boolean isWithCertValidation, boolean isWithHashValidation, String broadCastId, TypeVS type) {
+        Bundle result = new Bundle();
+        result.putString(ContextVS.MESSAGE_KEY, msg);
+        result.putString(ContextVS.CALLER_KEY, broadCastId);
+        result.putBoolean(ContextVS.PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
+        result.putBoolean(ContextVS.CERT_VALIDATION_KEY, isWithCertValidation);
+        result.putBoolean(ContextVS.HASH_VALIDATION_KEY, isWithHashValidation);
+        result.putSerializable(ContextVS.TYPEVS_KEY, type);
+        return result;
+    }
 
     public static PinDialogFragment newInstance(String msg, boolean isWithPasswordConfirm,
-            boolean isWithCertValidation, String caller, TypeVS type) {
+            boolean isWithCertValidation, String broadCastId, TypeVS type) {
         PinDialogFragment dialog = new PinDialogFragment();
-        Bundle args = new Bundle();
-        args.putString(ContextVS.MESSAGE_KEY, msg);
-        args.putString(ContextVS.CALLER_KEY, caller);
-        args.putBoolean(ContextVS.PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
-        args.putBoolean(ContextVS.CERT_VALIDATION_KEY, isWithCertValidation);
-        args.putSerializable(ContextVS.TYPEVS_KEY, type);
-        dialog.setArguments(args);
+        dialog.setArguments(getArguments(msg, isWithPasswordConfirm, isWithCertValidation, true,
+                broadCastId, type));
         return dialog;
     }
 
@@ -135,6 +149,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 msgTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
             }
             withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
+            withHashValidation = getArguments().getBoolean(ContextVS.HASH_VALIDATION_KEY);
             dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
             builder.setView(view).setOnKeyListener(this);
             return builder.create();
@@ -167,7 +182,8 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
         try {
             String storedPasswordHash = PrefUtils.getStoredPasswordHash(contextVS);
-            if(storedPasswordHash != null) {
+            if(storedPasswordHash != null &&
+                    (withHashValidation == null || withHashValidation == true)) {
                 String passwordHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
                 if(!passwordHash.equals(storedPasswordHash)) {
                     msgTextView.setVisibility(View.VISIBLE);

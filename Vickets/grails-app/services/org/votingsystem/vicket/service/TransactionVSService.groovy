@@ -233,22 +233,21 @@ class TransactionVSService {
         }
     }
 
-    private Map<String, Map> getSubBalanceFromMap(Map<String, Map> detailedBalance, String subBalanceParam) {
-        Map<String, Map> detailedBalanceMap = JSONSerializer.toJSON(detailedBalance);
-        Set<Map.Entry<String, Map>> tagEntries = detailedBalanceMap.entrySet()
-        Map<String, Map> result = [:]
-        for(Map.Entry<String, Map> entry : tagEntries) {
-            Map<String, BigDecimal> tagDataMap = [:]
-            for(Map.Entry<String, Map> mapEntry : entry.getValue().entrySet()) {
-                tagDataMap[mapEntry.getKey()] = mapEntry.getValue().total
+
+    private Map<String, Map> filterBalanceTo(Map<String, Map> balanceTo) {
+        Map result = [:]
+        for(String currency : balanceTo.keySet()) {
+            Map currencyMap = [:]
+            balanceTo[currency].each { tagEntry ->
+                currencyMap[(tagEntry.key)]= tagEntry.value.total
             }
-            result[(entry.getKey())] = tagDataMap
+            result[(currency)] = currencyMap
         }
         return result
     }
 
     public Map<String, BigDecimal> balancesCash(Map<String, Map> balancesTo, Map<String, BigDecimal> balancesFrom) {
-        Map<String, Map> balancesCash = getSubBalanceFromMap(balancesTo, 'total');
+        Map<String, Map> balancesCash = filterBalanceTo(balancesTo);
         for(Map.Entry<String, Map> currency : balancesFrom.entrySet()) {
             if(balancesCash [currency.getKey()]) {
                 for(Map.Entry<String, BigDecimal> tagEntry : currency.getValue().entrySet()) {

@@ -81,6 +81,7 @@ import static org.votingsystem.android.util.LogUtils.LOGD;
 import static org.votingsystem.android.util.LogUtils.LOGE;
 import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
+import static org.votingsystem.model.ContextVS.USER_KEY;
 
 
 /**
@@ -440,8 +441,9 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
-        //populateNavDrawer();
-        //invalidateOptionsMenu();
+        if(USER_KEY.equals(key)) {
+            setupAccountBox();
+        }
     }
 
     @Override

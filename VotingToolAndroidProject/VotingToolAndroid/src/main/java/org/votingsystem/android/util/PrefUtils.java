@@ -73,12 +73,14 @@ public class PrefUtils {
     }
 
     public static void markDataBootstrapDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putBoolean(PREF_DATA_BOOTSTRAP_DONE, true).commit();
     }
 
     public static boolean isDataBootstrapDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return sp.getBoolean(PREF_DATA_BOOTSTRAP_DONE, false);
     }
 
@@ -87,44 +89,52 @@ public class PrefUtils {
     }
 
     public static void markUserRefusedSignIn(final Context context, final boolean refused) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putBoolean(PREF_USER_REFUSED_SIGN_IN, refused).apply();
     }
 
     public static boolean hasUserRefusedSignIn(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return sp.getBoolean(PREF_USER_REFUSED_SIGN_IN, false);
     }
 
     public static long getLastSyncAttemptedTime(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return sp.getLong(PREF_LAST_SYNC_ATTEMPTED, 0L);
     }
 
     public static void markSyncAttemptedNow(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putLong(PREF_LAST_SYNC_ATTEMPTED, Calendar.getInstance().getTimeInMillis()).commit();
     }
 
     public static long getLastSyncSucceededTime(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return sp.getLong(PREF_LAST_SYNC_SUCCEEDED, 0L);
     }
 
     public static void markSyncSucceededNow(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putLong(PREF_LAST_SYNC_SUCCEEDED, Calendar.getInstance().getTimeInMillis()).commit();
     }
 
     public static void registerOnSharedPreferenceChangeListener(final Context context,
-            SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.OnSharedPreferenceChangeListener listener) {
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.registerOnSharedPreferenceChangeListener(listener);
     }
 
     public static void unregisterOnSharedPreferenceChangeListener(final Context context,
             SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sp = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
@@ -168,7 +178,8 @@ public class PrefUtils {
     }
 
     public static String getCsrRequest(final Context context) {
-        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return settings.getString(ContextVS.CSR_KEY, null);
     }
 
@@ -181,7 +192,7 @@ public class PrefUtils {
     }
 
     public static void putAppCertState(final Context context, String accessControlURL, State state, String nif) {
-        LOGD(TAG + ".setState(...)", STATE_KEY + "_" + accessControlURL +  " - state: " + state.toString());
+        LOGD(TAG + ".putAppCertState(...)", STATE_KEY + "_" + accessControlURL +  " - state: " + state.toString());
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -212,7 +223,8 @@ public class PrefUtils {
 
     public static void putCsrRequest(final Context context, Long requestId,
              CertificationRequestVS certificationRequest) {
-        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
         editor.putLong(ContextVS.CSR_REQUEST_ID_KEY, requestId);
@@ -223,7 +235,8 @@ public class PrefUtils {
     }
 
     public static void putSessionUserVS(final Context context, UserVS userVS) {
-        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         byte[] serializedUserVS = ObjectUtils.serializeObject(userVS);
         try {
@@ -233,7 +246,8 @@ public class PrefUtils {
     }
 
     public static UserVS getSessionUserVS(final Context context) {
-        SharedPreferences settings = context.getSharedPreferences(VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences settings = context.getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serializedUserVS = settings.getString(ContextVS.USER_KEY, null);
         if(serializedUserVS != null) {
             UserVS userVS = (UserVS) ObjectUtils.deSerializeObject(serializedUserVS.getBytes());
@@ -241,4 +255,5 @@ public class PrefUtils {
         }
         return null;
     }
+
 }

@@ -26,8 +26,10 @@ import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
@@ -74,11 +76,11 @@ public class CertResponseActivity extends ActionBarActivity {
         @Override public void onReceive(Context context, Intent intent) {
             Log.d(TAG + ".broadcastReceiver.onReceive(...)",
                     "intent.getExtras(): " + intent.getExtras());
-            if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore();
+            if(intent.getStringExtra(PIN_KEY) != null) updateKeyStore(intent.getStringExtra(PIN_KEY));
         }
     };
 
-    private void updateKeyStore () {
+    private void updateKeyStore (String pin) {
         Log.d(TAG + ".updateKeyStore(...)", "");
         if (csrSigned == null) {
             setMessage(getString(R.string.cert_install_error_msg));
@@ -88,6 +90,13 @@ public class CertResponseActivity extends ActionBarActivity {
                 keyStore.load(null);
                 CertificationRequestVS certificationRequest = (CertificationRequestVS)
                         ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest(this).getBytes());
+
+                String passwordHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+                if(!passwordHash.equals(certificationRequest.getHashPin())) {
+                    showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                            getString(R.string.pin_error_msg));
+                    return;
+                }
                 PrivateKey privateKey = certificationRequest.getPrivateKey();
                 Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
                         csrSigned.getBytes());
@@ -106,6 +115,7 @@ public class CertResponseActivity extends ActionBarActivity {
                 outputStream.close();
                 PrefUtils.putAppCertState(appContextVS, appContextVS.getAccessControl().getServerURL(),
                         State.WITH_CERTIFICATE, user.getNif());
+                PrefUtils.setPin(appContextVS, pin);
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 PrefUtils.putSessionUserVS(this, user);
                 insertPinButton.setVisibility(View.GONE);
@@ -139,9 +149,9 @@ public class CertResponseActivity extends ActionBarActivity {
         insertPinButton.setVisibility(View.GONE);
         insertPinButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                PinDialogFragment.showPinScreenWithoutCertValidation(
+                PinDialogFragment.showPinScreenWithoutHashValidation(
                         getSupportFragmentManager(), broadCastId,
-                        getString(R.string.enter_pin_import_cert_msg), false, null);
+                        getString(R.string.enter_pin_import_cert_msg));
             }
         });
         requestCertButton = (Button) findViewById(R.id.request_cert_button);

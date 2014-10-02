@@ -66,6 +66,7 @@ public class ContextVS {
     public static final String MESSAGE_BYTES_KEY = "MESSAGE_BYTES_KEY";
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
     public static final String CERT_VALIDATION_KEY = "CERT_VALIDATION_KEY";
+    public static final String HASH_VALIDATION_KEY = "HASH_VALIDATION_KEY";
     public static final String TYPEVS_KEY = "TYPEVS_KEY";
     public static final String VALUE_KEY = "VALUE_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";

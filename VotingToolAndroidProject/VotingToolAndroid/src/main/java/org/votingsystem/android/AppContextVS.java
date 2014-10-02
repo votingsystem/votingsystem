@@ -63,8 +63,10 @@ import static org.votingsystem.model.ContextVS.KEY_SIZE;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
+import static org.votingsystem.model.ContextVS.STATE_KEY;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.USER_KEY;
 
 /**
  * @author jgzornoza
@@ -192,8 +194,9 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     }
 
     public void setAccessControlVS(AccessControlVS accessControl) {
-        LOGD(TAG + ".setAccessControlURL() ", "setAccessControlURL: " + accessControl.getServerURL());
+        LOGD(TAG + ".setAccessControlVS() ", "serverURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
+        state = PrefUtils.getAppCertState(this, this.accessControl.getServerURL());
     }
 
     public List<Vicket> getVicketList(String currencyCode) {
@@ -413,9 +416,15 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         LOGD(TAG, "onSharedPreferenceChanged - key: " + key);
-        if(ContextVS.STATE_KEY == key) {
-            if(accessControl != null) this.state =
-                    PrefUtils.getAppCertState(this, accessControl.getServerURL());
+        if(accessControl != null) {
+            String accessControlStateKey = STATE_KEY + "_" + accessControl.getServerURL();
+            if(accessControlStateKey.equals(key)) {
+               this.state = PrefUtils.getAppCertState(this, accessControl.getServerURL());
+            }
         }
+        if(USER_KEY.equals(key)) {
+            userVS = PrefUtils.getSessionUserVS(this);
+        }
+
     }
 }

@@ -8,7 +8,9 @@ import android.util.Log;
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
 
@@ -60,8 +62,8 @@ public class UserCertRequestService extends IntentService {
                     contextVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
+                certificationRequest.setHashPin(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
                 PrefUtils.putCsrRequest(this, requestId, certificationRequest);
-                PrefUtils.setPin(this.getApplicationContext(), pin);
                 PrefUtils.putAppCertState(this, contextVS.getAccessControl().getServerURL(), State.WITH_CSR, null);
             }
             String caption = null;

@@ -38,7 +38,7 @@ function enterTagsMapData(allTagsMap, tagBalanceMapParam) {
     return allTagsMap
 }
 
-function getSubBalanceFromMap(detailedBalanceMap, subBalanceParam) {
+function filterMap(detailedBalanceMap, subBalanceParam) {
     if(detailedBalanceMap == null) return null
     var result = {}
     Object.keys(detailedBalanceMap).forEach(function(tag) {
@@ -57,8 +57,8 @@ function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanc
         })
     }
 
-    enterTagsMapData(allTagsMap, getSubBalanceFromMap(detailedBalanceToMap, 'total'))
-    enterTagsMapData(allTagsMap, getSubBalanceFromMap(detailedBalanceToMap, 'timeLimited'))
+    enterTagsMapData(allTagsMap, filterMap(detailedBalanceToMap, 'total'))
+    enterTagsMapData(allTagsMap, filterMap(detailedBalanceToMap, 'timeLimited'))
     enterTagsMapData(allTagsMap, balanceCash)
     enterTagsMapData(allTagsMap, balanceFromMap)
 

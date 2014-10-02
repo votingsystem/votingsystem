@@ -45,6 +45,7 @@ public class CertificationRequestVS implements java.io.Serializable {
 	public static final String TAG = "CertificationRequestVS";
     private transient PKCS10CertificationRequest csr;
     private transient SignedMailGenerator signedMailGenerator;
+    private String hashPin;
     private KeyPair keyPair;
     private String signatureMechanism;
     private X509Certificate certificate;
@@ -236,4 +237,11 @@ public class CertificationRequestVS implements java.io.Serializable {
         return csr;
     }
 
+    public String getHashPin() {
+        return hashPin;
+    }
+
+    public void setHashPin(String hashPin) {
+        this.hashPin = hashPin;
+    }
 }

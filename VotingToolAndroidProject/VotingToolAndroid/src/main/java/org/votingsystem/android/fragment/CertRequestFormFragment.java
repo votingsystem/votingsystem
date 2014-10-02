@@ -195,9 +195,8 @@ public class CertRequestFormFragment extends Fragment {
                     surname, nif, phone, email))).setPositiveButton(getString(
                     R.string.continue_lbl), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    PinDialogFragment.showPinScreenWithoutCertValidation(getFragmentManager(),
-                            broadCastId, getString(R.string.keyguard_password_enter_first_pin_code),
-                            true, null);
+                    PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
+                            broadCastId, getString(R.string.keyguard_password_enter_first_pin_code));
                 }
             }).setNegativeButton(getString(R.string.cancel_lbl), null).show();
             //to avoid avoid dissapear on screen orientation change
