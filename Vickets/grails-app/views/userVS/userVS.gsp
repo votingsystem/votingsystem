@@ -7,7 +7,7 @@
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-data']"/>">
 </head>
 <body>
-<div class="pageContentDiv" style="max-width: 1000px; padding:0px 30px 0px 30px;">
+<div class="pageContentDiv" style="max-width: 1000px; padding:0px 0px 0px 0px;">
     <ol class="breadcrumbVS">
         <li><a href="${grailsApplication.config.grails.serverURL}"><g:message code="homeLbl"/></a></li>
         <li class="active"><g:message code="usersvsPageLbl"/></li>

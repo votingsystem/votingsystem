@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.iban4j.CountryCode
 import org.iban4j.Iban
+import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -37,11 +38,13 @@ class TestingController {
     def systemService
     def groupVSService
 
+    def transactionVS_UserVSService
+
 
     def index() {
         //systemService.getSystemUser().save()
-
-
+        Locale locale = LocaleContextHolder.getLocale();
+        render transactionVS_UserVSService.test() + " --###"
         return false
     }
 

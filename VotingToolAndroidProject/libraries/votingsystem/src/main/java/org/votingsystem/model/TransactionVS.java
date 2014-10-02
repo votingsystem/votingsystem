@@ -3,10 +3,13 @@ package org.votingsystem.model;
 import android.content.Context;
 import android.net.Uri;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.lib.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ExceptionVS;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,7 +19,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author jgzornoza
@@ -25,6 +31,14 @@ import java.util.List;
 public class TransactionVS  implements Serializable {
 
     public static final long serialVersionUID = 1L;
+
+    public List<String> getToUserIBAN() {
+        return toUserIBAN;
+    }
+
+    public void setToUserIBAN(List<String> toUserIBAN) {
+        this.toUserIBAN = toUserIBAN;
+    }
 
 
     public enum Type { VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, FROM_BANKVS, FROM_USERVS,
@@ -49,6 +63,7 @@ public class TransactionVS  implements Serializable {
     private UserVS fromUserVS;
     private UserVS sender;
     private UserVS toUserVS;
+    private List<String> toUserIBAN;
 
     private List<Vicket> vickets;
     private List<TagVS> tagVSList;
@@ -323,6 +338,40 @@ public class TransactionVS  implements Serializable {
         return transactionVS;
     }
 
+    public static TransactionVS parse(OperationVS operationVS) throws JSONException, ExceptionVS {
+        TransactionVS transactionVS = new TransactionVS();
+        JSONObject documentToSign = operationVS.getDocumentToSignJSON();
+        transactionVS.setAmount(new BigDecimal(documentToSign.getDouble("amount")));
+        JSONArray tagArray = documentToSign.getJSONArray("tags");
+        TagVS tagVS = null;
+        if(tagArray != null && tagArray.length() > 0) {
+            tagVS = new TagVS(((JSONObject)tagArray.get(0)).getString("name"));
+        } else tagVS = new TagVS(TagVS.WILDTAG);
+        transactionVS.setTagVSList(Arrays.asList(tagVS));
+        transactionVS.setCurrencyCode(documentToSign.getString("currency"));
+        transactionVS.setSubject(documentToSign.getString("subject"));
+
+        JSONArray receptorsArray = documentToSign.getJSONArray("toUserIBAN");
+        List<String> toUserIBAN = new ArrayList<String>();
+        for(int i = 0;  i < receptorsArray.length(); i++) {
+            toUserIBAN.add((String) receptorsArray.get(i));
+        }
+        transactionVS.setToUserIBAN(toUserIBAN);
+        UserVS toUserVS = new UserVS();
+        toUserVS.setName(documentToSign.getString("toUser"));
+        if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS_FROM_USERVS) {
+            if(toUserIBAN.size() != 1) throw new ExceptionVS("TRANSACTIONVS_FROM_USERVS must have " +
+                    "'one' receptor and it has '" + toUserIBAN.size() + "'");
+            toUserVS.setIBAN(toUserIBAN.iterator().next());
+        }
+        transactionVS.setToUserVS(toUserVS);
+        UserVS fromUserVS = new UserVS();
+        fromUserVS.setName(documentToSign.getString("fromUser"));
+        fromUserVS.setIBAN(documentToSign.getString("fromUserIBAN"));
+        transactionVS.setFromUserVS(fromUserVS);
+        return transactionVS;
+    }
+
     public static TransactionVS parse(JSONObject jsonData) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setId(jsonData.getLong("id"));
@@ -351,6 +400,20 @@ public class TransactionVS  implements Serializable {
         transactionVS.setMessageSMIMEURL(jsonData.getString("messageSMIMEURL"));
         if(jsonData.has("tags")) transactionVS.setTagVSList(TagVS.parse(jsonData.getJSONArray("tags"))); ;
         return transactionVS;
+    }
+
+    public JSONObject transactionFromUserVSJSON(String fromUserIBAN) throws Exception {
+        Map mapToSend = new HashMap();
+        mapToSend.put("operation", TypeVS.TRANSACTIONVS_FROM_USERVS.toString());
+        mapToSend.put("fromUserIBAN", fromUserIBAN);
+        mapToSend.put("subject", subject);
+        mapToSend.put("toUser", toUserVS.getName());
+        mapToSend.put("toUserIBAN", Arrays.asList(toUserVS.getIBAN()));
+        mapToSend.put("tags", Arrays.asList(getTagVS().getName()));
+        mapToSend.put("amount", amount.toString());
+        mapToSend.put("currency", currencyCode);
+        mapToSend.put("UUID", UUID.randomUUID().toString());
+        return new JSONObject(mapToSend);
     }
 
     public JSONObject toJSON() throws Exception {

@@ -154,9 +154,7 @@ public class VicketService extends IntentService {
     }
 
     private ResponseVS cancelVicket(Vicket vicket) {
-        ResponseVS responseVS = contextVS.getHTTPVicketServer();
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        VicketServer vicketServer = (VicketServer) responseVS.getData();
+        VicketServer vicketServer = contextVS.getVicketServer();
         Map vicketCancellationDataMap = new HashMap();
         vicketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
         vicketCancellationDataMap.put("operation", TypeVS.VICKET_CANCEL.toString());
@@ -170,7 +168,7 @@ public class VicketService extends IntentService {
                 textToSing, ContentTypeVS.JSON_SIGNED,
                 getString(R.string.vicket_cancellation_msg_subject), vicketServer.getCertificate(),
                 (AppContextVS)getApplicationContext());
-        responseVS = signedSender.call();
+        ResponseVS responseVS = signedSender.call();
         return responseVS;
     }
 
@@ -223,9 +221,7 @@ public class VicketService extends IntentService {
                 throw new Exception(getString(R.string.insufficient_cash_msg, currencyCode,
                         requestAmount.toString(), available.toString()));
             }
-            responseVS = contextVS.getHTTPVicketServer();
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            VicketServer vicketServer = (VicketServer) responseVS.getData();
+            VicketServer vicketServer = contextVS.getVicketServer();
 
             BigDecimal vicketAmount = new BigDecimal(10);
             int numVickets = requestAmount.divide(vicketAmount).intValue();
@@ -352,13 +348,12 @@ public class VicketService extends IntentService {
     }
 
     private ResponseVS vicketRequest(BigDecimal requestAmount, String currencyCode) {
-        ResponseVS responseVS = contextVS.getHTTPVicketServer();;
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        VicketServer vicketServer = (VicketServer) responseVS.getData();
+        VicketServer vicketServer = contextVS.getVicketServer();
         Map<String, Vicket> vicketsMap = new HashMap<String, Vicket>();
         String caption = null;
         String message = null;
         int iconId = R.drawable.cancel_22;
+        ResponseVS responseVS = null;
         try {
             BigDecimal numVickets = requestAmount.divide(new BigDecimal(10));
             BigDecimal vicketsValue = new BigDecimal(10);
@@ -476,14 +471,13 @@ public class VicketService extends IntentService {
 
     private ResponseVS updateUserInfo() {
         Log.d(TAG + ".updateUserInfo(...)", "updateUserInfo");
-        ResponseVS  responseVS = contextVS.getHTTPVicketServer();;
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        VicketServer vicketServer = (VicketServer) responseVS.getData();
+        VicketServer vicketServer = contextVS.getVicketServer();
         Map mapToSend = new HashMap();
         mapToSend.put("NIF", contextVS.getUserVS().getNif());
         mapToSend.put("operation", TypeVS.VICKET_USER_INFO.toString());
         mapToSend.put("UUID", UUID.randomUUID().toString());
         String msgSubject = getString(R.string.vicket_user_info_request_msg_subject);
+        ResponseVS responseVS = null;
         try {
             JSONObject userInfoRequestJSON = new JSONObject(mapToSend);
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),

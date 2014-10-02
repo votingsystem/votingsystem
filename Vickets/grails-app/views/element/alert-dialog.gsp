@@ -6,11 +6,11 @@
 
 <polymer-element name="alert-dialog">
     <template>
+        <g:include view="/include/styles.gsp"/>
         <votingsystem-dialog id="xDialog" class="votingsystemMessageDialog" style="max-width: 600px;"
                  on-core-overlay-open="{{onCoreOverlayOpen}}" on-closed="{{close}}">
             <style no-shim></style>
             <div>
-
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <votingsystem-html-echo html="{{message}}"></votingsystem-html-echo>
                 </div>
@@ -29,6 +29,7 @@
     </template>
     <script>
         Polymer('alert-dialog', {
+            uriData:null,
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
                 console.log(this.tagName + " - ready")
@@ -44,15 +45,27 @@
                 this.isConfirmMessage = isConfirmMessage
                 this.$.xDialog.opened = true
             },
+            sendAndroidURIMessage:function(encodedData) {
+                this.uriData = "${createLink(controller:'app', action:'androidClient', absolute:'true')}?operationvs="+ encodedData
+                this.isConfirmMessage = true
+                this.message = "<g:message code='selectAndroidAppMsg'/>"
+                this.$.xDialog.title = "<g:message code="messageLbl"/>"
+                this.$.xDialog.opened = true
+            },
             accept: function() {
+                if(this.uriData != null) {
+                    window.location.href = this.uriData.replace("\n","")
+                }
                 this.close()
                 this.fire('core-signal', {name: "messagedialog-accept", data: this.callerId});
             },
             close: function() {
                 console.log(this.tagName + " - close")
+                this.$.xDialog.opened = false
                 this.fire('core-signal', {name: "messagedialog-closed", data: this.callerId});
                 this.message = null
                 this.callerId = null
+                this.uriData = null
                 this.isConfirmMessage = false
             }
         });

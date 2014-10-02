@@ -79,10 +79,10 @@ public class LoginAndAuthHelper {
         mCallbacksRef = new WeakReference<Callbacks>(callbacks);
         mAppContext = activity.getApplicationContext();
         mAccountName = accountName;
-        if (PrefUtils.hasUserRefusedSignIn(activity)) {
+        /*if (PrefUtils.hasUserRefusedSignIn(activity)) {
             // If we know the user refused sign-in, let's not annoy them.
             sCanShowSignInUi = sCanShowAuthUi = false;
-        }
+        }*/
     }
 
     public boolean isStarted() {

@@ -22,6 +22,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static org.votingsystem.android.util.LogUtils.LOGD;
+
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -66,6 +68,10 @@ public class EventVSService extends IntentService {
             EventVS.State eventState = (EventVS.State) arguments.getSerializable(ContextVS.STATE_KEY);
             TypeVS eventType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
+            if(contextVS.getAccessControl() == null) {
+                LOGD(TAG, "AccessControl not initialized");
+                return;
+            }
             String serviceURL = contextVS.getAccessControl().getEventVSURL(
                     eventState, EventVS.getURLPart(eventType),
                     ContextVS.EVENTS_PAGE_SIZE, offset);

@@ -27,7 +27,7 @@
 
             <div layout horizontal center center-justified style="">
                 <template if="{{subpage}}">
-                    <div style="margin: 20px 0 0 0;" title="<g:message code="backLbl"/>" >
+                    <div style="margin: 0 0 0 0;" title="<g:message code="backLbl"/>" >
                         <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                     </div>
                 </template>
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <div layout vertical id="formDataDiv" style="padding: 15px 20px 0px 20px; height: 100%;">
+            <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
 
                 <div layout horizontal center center-justified>
                     <div style="margin: 0 10px 0 0;"><paper-checkbox id="timeLimitedCheckBox"></paper-checkbox></div>
@@ -62,15 +62,15 @@
                     <input type="text" id="amount" class="form-control" style="width:150px;margin:0 0 10px 0;" pattern="^[0-9]*$" required
                            title="<g:message code="amountLbl"/>"
                            placeholder="<g:message code="amountLbl"/> (EUR)"/>
-                    <input type="text" id="transactionvsSubject" class="form-control" style="width:350px;" required
-                           title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/> (EUR)"/>
+                    <input type="text" id="transactionvsSubject" class="form-control" style="" required
+                           title="<g:message code="subjectLbl"/>" placeholder="<g:message code="subjectLbl"/>"/>
                 </div>
 
                 <div  layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
                     font-size: 1.1em; padding: 5px;display: block;}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
-                        <div layout horizontal style="font-size: 0.8em;">
-                            <div style="max-width: 400px;display: {{selectedTags.length == 0? 'block':'none'}};">
+                        <div layout horizontal style="font-size: 0.8em; display: inline-block;">
+                            <div style="display: {{selectedTags.length == 0? 'block':'none'}};">
                                 <g:message code="transactionvsWithTagAdvertMsg"/>
                             </div>
                             <div style="max-width: 400px;">{{selectedTagMsg}}</div>
@@ -89,7 +89,7 @@
                         </div>
                     </div>
                 </div>
-                <div style="display:{{isTransactionVSFromGroupToAllMembers ? 'none':'block'}}">
+                <div style="display:{{isWithUserSelector ? 'none':'block'}}">
                     <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
                         <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> {{selectReceptorMsg}}
                     </votingsystem-button>
@@ -122,12 +122,13 @@
         maxNumberTags:1,
         fromUserName:null,
         fromUserIBAN:null,
+        toUserName:null,
         groupId:null,
         selectedTags: [],
         subpage:false,
         ready: function() {
             console.log(this.tagName + " - " + this.id)
-            this.isTransactionVSFromGroupToAllMembers = false
+            this.isWithUserSelector = false
 
             document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
                 this.$.receptorBox.addUser(e.detail)
@@ -161,7 +162,7 @@
         reset: function() {
             console.log(this.id + " - reset")
             this.removeErrorStyle(this.$.formDataDiv)
-            this.isTransactionVSFromGroupToAllMembers = false
+            this.isWithUserSelector = false
             this.$.amount.value = ""
             this.$.transactionvsSubject.value = ""
             this.setMessage(200, null)
@@ -228,7 +229,8 @@
             webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 isTimeLimited:this.$.timeLimitedCheckBox.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,
-                amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN}
+                amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN,
+                toUser:this.toUserName}
             webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption
@@ -257,13 +259,14 @@
         back:function() {
             this.fire('operation-finished')
         },
-        init:function(operation, fromUser, fromIBAN, targetGroupId) {
+        init:function(operation, userName, userIBAN, targetGroupId) {
             console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage)
             this.operation = operation
-            this.fromUserName = fromUser
-            this.fromUserIBAN = fromIBAN
+            this.fromUserName = userName
+            this.fromUserIBAN = userIBAN
             this.groupId = targetGroupId
-            this.isTransactionVSFromGroupToAllMembers = false
+            this.isWithUserSelector = true
+            this.toUserName = null
             this.$.timeLimitedCheckBox.checked = false
             switch(operation) {
                 case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
@@ -277,11 +280,31 @@
                     this.$.receptorBox.multiSelection = true
                     break;
                 case Operation.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
-                    this.isTransactionVSFromGroupToAllMembers = true
+                    this.isWithUserSelector = false
                     this.operationMsg = "<g:message code='transactionVSFromGroupToAllMembers'/>"
                     this.selectReceptorMsg = '<g:message code="transactionvsToAllGroupMembersMsg"/>'
                     break;
+                case Operation.TRANSACTIONVS_FROM_USERVS:
+                    console.log("== TRANSACTIONVS_FROM_USERVS - isClientToolConnected: " + window['isClientToolConnected'] +
+                        " - isAndroid: " + isAndroid())
+                    this.operationMsg = "<g:message code='transactionVSFromUserVS'/>"
+                    this.fromUserName = null
+                    this.fromUserIBAN = null
+                    this.toUserName = userName
+                    this.$.receptorBox.uservsList[0] = {name:userName, IBAN:userIBAN}
+
+                    break;
             }
+
+            /*var encodedIBAN = encodeURIComponent("")
+             var encodedSubject = encodeURIComponent(transactionSubject)
+             var encodedRefererURL = encodeURIComponent(window.location.href)
+             var encodedReceptor = encodeURIComponent('<g:message code="receptorTestWebAccountLbl"/>')
+             var uriData = "${createLink(controller:'app', action:'androidClient')}?operation=TRANSACTIONVS&amount=20&currencyCode=EUR" +
+             "&tagVS=HIDROGENO&IBAN=" + encodedIBAN + "&subject=" + encodedSubject + "&toUser=" + encodedReceptor +
+             "&toUserIBAN=ES8978788989450000000004&refererURL=" + encodedRefererURL
+             window.location.href = uriData.replace("\n","")*/
+
             this.selectedTags = []
             return this.caption
         }

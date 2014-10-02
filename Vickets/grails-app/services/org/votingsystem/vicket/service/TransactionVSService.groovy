@@ -36,6 +36,7 @@ class TransactionVSService {
     def webSocketService
     def transactionVS_GroupVSService
     def transactionVS_BankVSService
+    def transactionVS_UserVSService
 
     public void addTransactionListener (String listenerId) {
         listenerSet.add(listenerId)
@@ -56,15 +57,12 @@ class TransactionVSService {
         switch(transactionType) {
             case TypeVS.TRANSACTIONVS_FROM_BANKVS:
                 return transactionVS_BankVSService.processTransactionVS(messageSMIMEReq, messageJSON, locale)
-                break;
             case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
             case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:
             case TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:
                 return transactionVS_GroupVSService.processTransactionVS(messageSMIMEReq, messageJSON, locale)
-                break;
             case TypeVS.TRANSACTIONVS_FROM_USERVS:
-                log.debug("${methodName} - TRANSACTIONVS_FROM_USERVS - TODO - ");
-                //break;
+                return transactionVS_UserVSService.processTransactionVS(messageSMIMEReq, messageJSON)
             default:
                 msg = messageSource.getMessage('unknownTransactionErrorMsg', [transactionType.toString()].toArray(), locale)
                 log.debug("${methodName} - ${msg}");

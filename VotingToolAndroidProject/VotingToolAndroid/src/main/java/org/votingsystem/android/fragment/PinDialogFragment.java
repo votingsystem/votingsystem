@@ -188,6 +188,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 if(!passwordHash.equals(storedPasswordHash)) {
                     msgTextView.setVisibility(View.VISIBLE);
                     msgTextView.setText(getString(R.string.pin_error_msg));
+                    userPinEditText.setText("");
                     return;
                 }
             }

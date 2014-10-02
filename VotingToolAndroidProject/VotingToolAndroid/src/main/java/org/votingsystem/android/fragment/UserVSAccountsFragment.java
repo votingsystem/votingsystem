@@ -31,6 +31,7 @@ import org.votingsystem.android.service.TransactionVSService;
 import org.votingsystem.android.service.VicketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
@@ -62,6 +63,7 @@ public class UserVSAccountsFragment extends Fragment {
     private TextView time_remaining_info;
     private ListView accounts_list_view;
     private Menu fragmentMenu;
+    private String IBAN;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -169,11 +171,21 @@ public class UserVSAccountsFragment extends Fragment {
         if(getArguments().getParcelable(ContextVS.URI_KEY) != null) {
             transactionVS = TransactionVS.parse((Uri) getArguments().getParcelable(
                     ContextVS.URI_KEY));
+        }
+        if(getArguments().getSerializable(ContextVS.OPERATIONVS_KEY) != null) {
+            OperationVS operationVS = (OperationVS)getArguments().getSerializable(ContextVS.OPERATIONVS_KEY);
+            try {
+                transactionVS = TransactionVS.parse(operationVS);
+            } catch (Exception ex) {ex.printStackTrace();}
+        }
+        if(transactionVS != null){
             Log.d(TAG + ".onStart(...)", transactionVS.toString());
             BigDecimal cashAvailable = BigDecimal.ZERO;
             try {
-                cashAvailable = PrefUtils.getUserVSTransactionVSListInfo(contextVS).getAvailableForTagVS(
-                        transactionVS.getCurrencyCode(), transactionVS.getTagVS().getName());
+                UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
+                IBAN = userInfo.getUserVS().getIBAN();
+                cashAvailable = userInfo.getAvailableForTagVS(transactionVS.getCurrencyCode(),
+                        transactionVS.getTagVS().getName());
             } catch(Exception ex) {ex.printStackTrace();}
             if(cashAvailable != null && cashAvailable.compareTo(transactionVS.getAmount()) == 1) {
                 TransactionVSDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
@@ -315,6 +327,7 @@ public class UserVSAccountsFragment extends Fragment {
                     TransactionVSService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.TRANSACTIONVS);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(ContextVS.IBAN_KEY, IBAN);
             startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionVS);
             ((ActivityVS)getActivity()).refreshingStateChanged(true);
             getActivity().startService(startIntent);

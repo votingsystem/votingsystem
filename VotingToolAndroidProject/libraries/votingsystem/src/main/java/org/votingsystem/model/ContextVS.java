@@ -43,6 +43,7 @@ public class ContextVS {
 
 
     //Intent keys
+    public static final String BOOTSTRAP_DONE = "BOOTSTRAP_DONE";
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";
     public static final String PIN_KEY = "PIN";
@@ -155,5 +156,6 @@ public class ContextVS {
 
 
     public static final Charset US_ASCII = Charset.forName("US-ASCII");
+
 
 }

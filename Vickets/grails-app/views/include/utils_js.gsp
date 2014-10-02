@@ -106,4 +106,7 @@
             window._originalAlert(text);
         }
     }
+    window.sendAndroidURIMessage = function(encodedData) {
+        document.querySelector("#_votingsystemMessageDialog").sendAndroidURIMessage(encodedData)
+    }
 </script>

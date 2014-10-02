@@ -18,7 +18,8 @@ import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.activity.MessageActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.android.contentprovider.VicketContentProvider;
-import org.votingsystem.android.service.VotingAppService;
+import org.votingsystem.android.service.BootStrapService;
+import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.model.AccessControlVS;
@@ -37,7 +38,6 @@ import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
 import java.io.IOException;
@@ -77,8 +77,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     public static final String TAG = AppContextVS.class.getSimpleName();
 
     private State state = State.WITHOUT_CSR;
-    private String vicketServerURL;
-    private String accessControlURL;
     private String webSocketSessionId = null;
     private String webSocketUserId = null;
     private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
@@ -87,11 +85,9 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private VicketServer vicketServer;
     private UserVS userVS;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
-    private boolean initialized = false;
 
     @Override public void onCreate() {
         //System.setProperty("android.os.Build.ID", android.os.Build.ID);
-        LOGD(TAG + ".onCreate()", "");
         try {
             /*java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
@@ -105,35 +101,30 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 LOGD(TAG, "Issuer DN: " + cert.getIssuerDN().getName());
             }*/
             VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+            PrefUtils.init(this);
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
-            vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
-            accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
-            if(accessControl == null) {
-                Intent startIntent = new Intent(getApplicationContext(), VotingAppService.class);
-                startIntent.putExtra(ContextVS.URL_KEY, accessControlURL);
+            String vicketServerURL = props.getProperty(ContextVS.VICKET_SERVER_URL);
+            String accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
+            LOGD(TAG + ".onCreate()", "accessControlURL: " + accessControlURL + " - vicketServerURL: " +
+                    vicketServerURL);
+            if(accessControl == null || vicketServer == null) {
+                Intent startIntent = new Intent(this, BootStrapService.class);
+                startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
+                startIntent.putExtra(ContextVS.VICKET_SERVER_URL, vicketServerURL);
                 startService(startIntent);
             }
             PrefUtils.registerOnSharedPreferenceChangeListener(this, this);
             state = PrefUtils.getAppCertState(this, accessControlURL);
             userVS = PrefUtils.getSessionUserVS(this);
-            setInitialized(true);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
 	}
 
     public void finish() {
-        stopService(new Intent(getApplicationContext(), VotingAppService.class));
+        stopService(new Intent(getApplicationContext(), WebSocketService.class));
         UIUtils.killApp(true);
-    }
-
-    public boolean isInitialized() {
-        return this.initialized;
-    }
-
-    public void setInitialized(boolean initialized) {
-        this.initialized = initialized;
     }
 
     public void setServer(ActorVS actorVS) {
@@ -151,14 +142,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
         LOGD(TAG + ".onTerminate(...)", "");
         super.onTerminate();
         PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
-    }
-
-    public String getVicketServerURL() {
-        return vicketServerURL;
-    }
-
-    public String getAccessControlURL() {
-        return accessControlURL;
     }
 
     public String getHostID() {
@@ -313,30 +296,6 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public VicketServer getVicketServer() {
         return vicketServer;
-    }
-
-    //HTTP request -> this must be called from 'appropiated' threads
-    public ResponseVS getHTTPVicketServer() {
-        ResponseVS responseVS = null;
-        try {
-            if(vicketServer != null)  {
-                responseVS = new ResponseVS(ResponseVS.SC_OK);
-            } else {
-                responseVS = HttpHelper.getData(ActorVS.getServerInfoURL(getVicketServerURL()),
-                        ContentTypeVS.JSON);
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    vicketServer = (VicketServer) ActorVS.parse(new JSONObject(responseVS.getMessage()));
-                }
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            String message = ex.getMessage();
-            if(message == null || message.isEmpty()) message = getString(R.string.exception_lbl);
-            responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
-                    message);
-        }
-        responseVS.setData(vicketServer);
-        return responseVS;
     }
 
     public void showNotification(ResponseVS responseVS){

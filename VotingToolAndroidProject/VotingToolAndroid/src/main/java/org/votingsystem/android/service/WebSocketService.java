@@ -62,7 +62,7 @@ public class WebSocketService extends Service {
     @Override public void onCreate(){
         contextVS = (AppContextVS) getApplicationContext();
         handler = new Handler();
-        Log.i(TAG + ".onCreate(...) ", "VotingAppService created");
+        Log.i(TAG + ".onCreate(...) ", "WebSocketService created");
     }
 
     @Override public void onDestroy(){

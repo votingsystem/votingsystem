@@ -17,11 +17,6 @@ import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 
 /**
  * @author jgzornoza
@@ -40,6 +35,7 @@ public class TransactionVSService extends IntentService {
         contextVS = (AppContextVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
+        String fromUserIBAN = arguments.getString(ContextVS.IBAN_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
         Log.d(TAG + ".onHandleIntent(...) ", " - transactionVS: " + transactionVS.toString()  );
@@ -47,25 +43,13 @@ public class TransactionVSService extends IntentService {
         String caption = null;
         String message = null;
         try {
-            Map mapToSend = new HashMap();
-            mapToSend.put("operation", TypeVS.TRANSACTIONVS_FROM_USERVS.toString());
-            mapToSend.put("subject", transactionVS.getSubject());
-            mapToSend.put("toUser", transactionVS.getToUserVS().getName());
-            mapToSend.put("toUserIBAN", Arrays.asList(transactionVS.getToUserVS().getIBAN()));
-            mapToSend.put("tags", Arrays.asList(transactionVS.getTagVS().getName()));
-            mapToSend.put("amount", transactionVS.getAmount().toString());
-            mapToSend.put("currency", transactionVS.getCurrencyCode());
-            mapToSend.put("UUID", UUID.randomUUID().toString());
-            responseVS = contextVS.getHTTPVicketServer();
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                VicketServer vicketServer = (VicketServer) responseVS.getData();
-                SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
-                        contextVS.getUserVS().getNif(), transactionVS.getToUserVS().getIBAN(),
-                        vicketServer.getTransactionVSServiceURL(), new JSONObject(mapToSend).toString(),
-                        ContentTypeVS.JSON_SIGNED, getString(R.string.transactionvs_from_uservs_msg_subject), null, contextVS);
-                responseVS = smimeSignedSender.call();
-
-            }
+            JSONObject transactionVSJSON = transactionVS.transactionFromUserVSJSON(fromUserIBAN);
+            VicketServer vicketServer = contextVS.getVicketServer();
+            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
+                    contextVS.getUserVS().getNif(), transactionVS.getToUserVS().getIBAN(),
+                    vicketServer.getTransactionVSServiceURL(), transactionVSJSON.toString(),
+                    ContentTypeVS.JSON_SIGNED, getString(R.string.transactionvs_from_uservs_msg_subject), null, contextVS);
+            responseVS = smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();
             message = ex.getMessage();

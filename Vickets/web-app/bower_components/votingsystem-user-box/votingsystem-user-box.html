@@ -34,10 +34,12 @@
     </template>
     <script>
         Polymer('votingsystem-user-box', {
+            publish: {
+                uservsList: {value: []}
+            },
             ready:function() {
                 this.messages = this.$.i18nVS.getMessages()
                 this.multiSelection = this.multiSelection || true
-                this.uservsList = []
             },
             addUser:function(userToAdd) {
                 var isNewUser = true

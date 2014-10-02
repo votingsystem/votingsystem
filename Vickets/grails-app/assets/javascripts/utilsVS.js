@@ -18,6 +18,7 @@ var Operation = {
     TRANSACTIONVS_FROM_GROUP_TO_MEMBER:"TRANSACTIONVS_FROM_GROUP_TO_MEMBER",
     TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP:"TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP",
     TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS:"TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS",
+    TRANSACTIONVS_FROM_USERVS:"TRANSACTIONVS_FROM_USERVS",
     CERT_CA_NEW:"CERT_CA_NEW",
     CERT_USER_NEW:"CERT_USER_NEW",
     CERT_EDIT:"CERT_EDIT"
@@ -351,6 +352,11 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
         console.log("setJSONMessageToSignatureClient - clientTool: " + clientTool)
     } catch(e) {
         console.log(e)
+        if(isAndroid ()) {
+            var encodedData = window.btoa(JSON.stringify(messageJSON));
+            window.sendAndroidURIMessage(encodedData)
+            return
+        }
         window.alert(e)
         return
     }

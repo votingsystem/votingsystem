@@ -35,7 +35,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -78,7 +77,6 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.android.util.LogUtils.LOGD;
-import static org.votingsystem.android.util.LogUtils.LOGE;
 import static org.votingsystem.android.util.LogUtils.LOGW;
 import static org.votingsystem.android.util.LogUtils.makeLogTag;
 import static org.votingsystem.model.ContextVS.USER_KEY;
@@ -803,25 +801,15 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
      */
     private void performDataBootstrap() {
         final Context appContext = getApplicationContext();
-        LOGD(TAG, "Starting data bootstrap background thread.");
+        LOGD(TAG, "Starting activity bootstrap background thread.");
         mDataBootstrapThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 LOGD(TAG, "Starting data bootstrap process.");
-                try {
-                    // Load data from bootstrap raw resource
+                try {// Load data from bootstrap raw resource
                     String bootstrapJson = StringUtils.parseResource(appContext, R.raw.bootstrap_data);
-                    PrefUtils.markSyncSucceededNow(appContext);
-                    PrefUtils.markDataBootstrapDone(appContext);
-
                 } catch (IOException ex) {
-                    // This is serious -- if this happens, the app won't work :-(
-                    // This is unlikely to happen in production, but IF it does, we apply
-                    // this workaround as a fallback: we pretend we managed to do the bootstrap
-                    // and hope that a remote sync will work.
-                    LOGE(TAG, "*** ERROR DURING BOOTSTRAP! Problem in bootstrap data?");
-                    LOGE(TAG, "Applying fallback -- marking boostrap as done; sync might fix problem.");
-                    PrefUtils.markDataBootstrapDone(appContext);
+                    ex.printStackTrace();
                 }
                 mDataBootstrapThread = null;
             }
@@ -841,13 +829,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
         return "default acccount";
     }
 
-    private void promptAddAccount() {
-        Intent intent = new Intent(Settings.ACTION_ADD_ACCOUNT);
-        intent.putExtra(Settings.EXTRA_ACCOUNT_TYPES, new String[]{"com.google"});
-        startActivity(intent);
-        finish();
-    }
-
     private void startLoginProcess() {
         LOGD(TAG, "Starting login process.");
         String accountName = getDefaultAccount();
@@ -857,7 +838,6 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
             return;
         }
         LOGD(TAG, "Starting login process with account " + accountName);
-
 //        mLoginAndAuthHelper = new LoginAndAuthHelper(this, this, accountName);
 //        mLoginAndAuthHelper.start();
     }
@@ -1056,8 +1036,7 @@ public abstract class ActivityBase extends ActionBarActivity implements LoginAnd
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        sp.unregisterOnSharedPreferenceChangeListener(this);
+        PrefUtils.unregisterOnSharedPreferenceChangeListener(this, this);
         if(isCancelled.get()) ((AppContextVS)getApplicationContext()).finish();
     }
 
