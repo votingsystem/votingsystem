@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -8,6 +9,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertExtensionCheckerVS;
+import org.votingsystem.signature.util.CertUtil;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
@@ -407,7 +409,16 @@ public class UserVS implements Serializable {
         return userVS;
     }
 
-    public static UserVS populate (Map userVSDataMap) {
+    public void beforeInsert(){
+        if(nif != null) {
+            this.nif = nif.toUpperCase();
+        }
+        if(name == null) {
+            this.name = (firstName == null? "":firstName + " " + lastName == null? "":lastName).trim();
+        }
+    }
+
+    public static UserVS parse (Map userVSDataMap) {
         UserVS userVS = new UserVS();
         if(userVSDataMap.containsKey("id")) userVS.setId(((Integer) userVSDataMap.get("id")).longValue());
         if(userVSDataMap.containsKey("nif")) userVS.setNif((String) userVSDataMap.get("nif"));
@@ -427,13 +438,31 @@ public class UserVS implements Serializable {
         return userVS;
     }
 
-    public void beforeInsert(){
-        if(nif != null) {
-            this.nif = nif.toUpperCase();
+    public JSONObject toJSON() throws Exception {
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("id", id);
+        jsonData.put("URL", url);
+        jsonData.put("nif", nif);
+        jsonData.put("IBAN", IBAN);
+        if(state != null) jsonData.put("state", state.toString());
+        if(type != null) jsonData.put("type", type.toString());
+        if(reason != null) jsonData.put("reason", reason);
+        if(certificate != null) {
+            JSONArray jsonArrayData = new JSONArray();
+            JSONObject jsonCertData = new JSONObject();
+            jsonCertData.put("serialNumber", certificate.getSerialNumber());
+            jsonCertData.put("pemCert", new String(CertUtil.getPEMEncoded(certificate), "UTF-8"));
+            jsonArrayData.add(jsonCertData);
+            jsonData.put("certificateList", jsonArrayData);
         }
-        if(name == null) {
-            this.name = (firstName == null? "":firstName + " " + lastName == null? "":lastName).trim();
-        }
+        JSONObject deviceData = new JSONObject();
+        deviceData.put("phone", getPhone());
+        deviceData.put("email", getEmail());
+        jsonData.put("deviceData", deviceData);
+        jsonData.put("name", name);
+        jsonData.put("firstName", firstName);
+        jsonData.put("lastName", lastName);
+        jsonData.put("description", description);
+        return jsonData;
     }
-
 }

@@ -2,9 +2,9 @@ package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
 import org.springframework.format.annotation.NumberFormat;
-import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.*;
+import org.votingsystem.signature.util.CMSUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,6 +23,14 @@ public class Vicket implements Serializable  {
     private static Logger log = Logger.getLogger(Vicket.class);
 
     public static final long serialVersionUID = 1L;
+
+    public CertificationRequestVS getCertificationRequest() {
+        return certificationRequest;
+    }
+
+    public void setCertificationRequest(CertificationRequestVS certificationRequest) {
+        this.certificationRequest = certificationRequest;
+    }
 
     public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
@@ -57,6 +65,25 @@ public class Vicket implements Serializable  {
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+
+    @Transient private CertificationRequestVS certificationRequest;
+
+    public Vicket() {}
+
+    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, TypeVS typeVS) {
+        this.amount = amount;
+        this.vicketServerURL = vicketServerURL;
+        this.currencyCode = currencyCode;
+        try {
+            setOriginHashCertVS(UUID.randomUUID().toString());
+            setHashCertVS(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
+            certificationRequest = CertificationRequestVS.getVicketRequest(
+                    ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
+                    ContextVS.PROVIDER, vicketServerURL, hashCertVS, amount.toString(), this.currencyCode);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public Long getId() {
         return id;

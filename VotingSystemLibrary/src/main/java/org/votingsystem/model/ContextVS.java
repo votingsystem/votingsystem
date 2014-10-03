@@ -1,5 +1,8 @@
 package org.votingsystem.model;
 
+import groovy.util.ConfigObject;
+import groovy.util.ConfigSlurper;
+
 import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
 import org.apache.log4j.Logger;
@@ -167,6 +170,7 @@ public class ContextVS {
     private ControlCenterVS controlCenter;
     private ActorVS defaultServer;
     private static ContextVS INSTANCE;
+    private groovy.util.ConfigObject config;
 
     private ContextVS(){
         try {
@@ -264,7 +268,7 @@ public class ContextVS {
     }
 
 
-    public static ContextVS getInstance() { 
+    public static ContextVS getInstance() {
         if(INSTANCE == null)  INSTANCE = new ContextVS();
         return INSTANCE; 
     }
@@ -276,6 +280,26 @@ public class ContextVS {
         } catch (IOException ex) {
            logger.error(ex.getMessage(), ex);
         }
+    }
+
+    public void initTestEnvironment(String logProperties, InputStream configPropertiesStream) throws Exception {
+        try {
+            Properties props = new Properties();
+            props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(logProperties));
+            PropertyConfigurator.configure(props);
+            props.load(configPropertiesStream);
+            ConfigSlurper configSlurper = new ConfigSlurper();
+            this.config = configSlurper.parse(props);
+            VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public byte[] getResourceBytes(String name) throws IOException {
+        InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+        return FileUtils.getBytesFromInputStream(input);
     }
 
     public void initTestEnvironment(String appDir) throws Exception {
@@ -303,6 +327,8 @@ public class ContextVS {
             logger.error (ex.getMessage(), ex);
         }
     }
+
+    public ConfigObject getConfig() {return config;}
 
     public X509Certificate getRootCACert() {
         return rootCACert;

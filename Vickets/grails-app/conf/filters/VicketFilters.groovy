@@ -83,6 +83,7 @@ class VicketFilters {
                                         fileMap.get(key)?.getBytes(), request.getLocale())
                                 if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.messageBytes
                                 break;
+                            case ContentTypeVS.JSON_SIGNED:
                             case ContentTypeVS.SIGNED:
                                 try {
                                     smimeMessageReq = new SMIMEMessageWrapper(

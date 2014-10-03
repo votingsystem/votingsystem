@@ -42,7 +42,7 @@ class TimeStampService {
                 ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
                         ContentTypeVS.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage())).save();
+                    timeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage())).save();
                     Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
                     x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
                     signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes
@@ -58,7 +58,7 @@ class TimeStampService {
                 } else {
                     ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
                             ContentTypeVS.JSON);
-                    timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+                    timeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
                     Map timeStampServerDataMap = saveTimeStampServerCert(timeStampServer)
                     x509TimeStampServerCert = timeStampServerDataMap?.x509TimeStampServerCert
                     signingCertPEMBytes = timeStampServerDataMap?.signingCertPEMBytes

@@ -1,4 +1,4 @@
-package org.votingsystem.vicket.model;
+package org.votingsystem.vicket.util;
 
 /**
  * @author jgzornoza

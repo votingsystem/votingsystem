@@ -209,8 +209,9 @@ public class ResponseVS<T> implements Parcelable {
         return typeVS;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
+    public ResponseVS setTypeVS(TypeVS typeVS) {
         this.typeVS = typeVS;
+        return this;
     }
 
     public T getData() {
@@ -265,8 +266,9 @@ public class ResponseVS<T> implements Parcelable {
         return iconId;
     }
 
-    public void setIconId(Integer iconId) {
+    public ResponseVS setIconId(Integer iconId) {
         this.iconId = iconId;
+        return this;
     }
 
     public String getCaption() {
@@ -274,8 +276,9 @@ public class ResponseVS<T> implements Parcelable {
         else return caption;
     }
 
-    public void setCaption(String caption) {
+    public ResponseVS setCaption(String caption) {
         this.caption = caption;
+        return this;
     }
 
     public String getServiceCaller() {

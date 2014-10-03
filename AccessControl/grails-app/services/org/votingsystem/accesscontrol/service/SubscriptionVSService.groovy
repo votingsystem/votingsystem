@@ -113,7 +113,7 @@ class SubscriptionVSService {
         }
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),ContentTypeVS.JSON)
         if (ResponseVS.SC_OK == responseVS.statusCode) {
-            ActorVS actorVS = ActorVS.populate(JSON.parse(responseVS.message))
+            ActorVS actorVS = ActorVS.parse(JSON.parse(responseVS.message))
             if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) {
                 msg = messageSource.getMessage('actorNotControlCenterMsg', [actorVS.serverURL].toArray(), locale)
                 log.error("checkControlCenter - ERROR - ${msg}")

@@ -1,11 +1,10 @@
-package org.votingsystem.vicket.model;
+package org.votingsystem.vicket.util;
 
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.vicket.model.UserVSAccount;
 import org.votingsystem.model.VicketTagVS;
-import org.votingsystem.vicket.util.ApplicationContextHolder;
 
 import java.math.BigDecimal;
 import java.util.*;

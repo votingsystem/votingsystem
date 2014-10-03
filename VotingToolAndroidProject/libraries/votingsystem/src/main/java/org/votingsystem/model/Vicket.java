@@ -1,12 +1,17 @@
 package org.votingsystem.model;
 
+import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -181,4 +186,39 @@ public class Vicket extends ReceiptContainer {
     public void setTransaction(TransactionVS transaction) {
         this.transaction = transaction;
     }
+
+    public static JSONObject getUserVSAccountInfoRequest(String nif) {
+        Map mapToSend = new HashMap();
+        mapToSend.put("NIF", nif);
+        mapToSend.put("operation", TypeVS.VICKET_USER_INFO.toString());
+        mapToSend.put("UUID", UUID.randomUUID().toString());
+        return new JSONObject(mapToSend);
+    }
+
+    public JSONObject getCancellationRequest() {
+        Map dataMap = new HashMap();
+        dataMap.put("UUID", UUID.randomUUID().toString());
+        dataMap.put("operation", TypeVS.VICKET_CANCEL.toString());
+        dataMap.put("hashCertVSBase64", getHashCertVSBase64());
+        dataMap.put("originHashCertVS", getOriginHashCertVS());
+        dataMap.put("vicketCertSerialNumber", getCertificationRequest().
+                getCertificate().getSerialNumber().longValue());
+        return new JSONObject(dataMap);
+    }
+
+    public JSONObject getTransactionRequest(String toUserName,
+            String toUserIBAN, String tag, Boolean isTimeLimited) {
+        Map dataMap = new HashMap();
+        dataMap.put("receptor", toUserName);
+        dataMap.put("operation", TypeVS.VICKET.toString());
+        dataMap.put("subject", subject);
+        dataMap.put("IBAN", toUserIBAN);
+        dataMap.put("tagVS", tag);
+        dataMap.put("currency", currencyCode);
+        dataMap.put("amount", amount.toString());
+        if(isTimeLimited != null) dataMap.put("isTimeLimited", isTimeLimited.booleanValue());
+        dataMap.put("UUID", UUID.randomUUID().toString());
+        return new JSONObject(dataMap);
+    }
+
 }

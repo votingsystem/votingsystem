@@ -226,16 +226,12 @@ public class RepresentativeService extends IntentService {
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, encryptedCSRBytes);
-
             //request signed with user certificate (data signed without representative data)
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
                     contextVS.getAccessControl().getNameNormalized(),
                     requestJSON.toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
-                    representativeDataFileName, ContentTypeVS.JSON_SIGNED,
-                    contextVS.getAccessControl().getCertificate(),
-                    anonymousDelegation.getCertificationRequest().getPublicKey(),
-                    anonymousDelegation.getCertificationRequest().getPrivateKey(),
+                    representativeDataFileName,
                     (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {

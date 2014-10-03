@@ -110,7 +110,7 @@ class VicketAddUsersToGroupSimulationService {
         log.debug("initializeServer ### Enter INITIALIZE_SERVER status")
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            vicketServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+            vicketServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
             if(vicketServer.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != vicketServer.getEnvironmentVS()) {
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR, "SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
                         vicketServer.getEnvironmentVS());
@@ -118,7 +118,7 @@ class VicketAddUsersToGroupSimulationService {
                 responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                         vicketServer.getTimeStampServerURL()),ContentTypeVS.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+                    ActorVS timeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
                     ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());
                 }
             }

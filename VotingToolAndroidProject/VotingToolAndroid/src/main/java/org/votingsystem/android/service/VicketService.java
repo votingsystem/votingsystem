@@ -30,6 +30,7 @@ import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.model.Vicket;
+import org.votingsystem.model.VicketBatch;
 import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
@@ -75,43 +76,28 @@ public class VicketService extends IntentService {
         Uri uriData =  arguments.getParcelable(ContextVS.URI_KEY);;
         BigDecimal amount = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
         String currencyCode = (String) arguments.getSerializable(ContextVS.CURRENCY_KEY);
+        TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
         ResponseVS responseVS = null;
-        switch(operation) {
-            case VICKET_USER_INFO:
-                responseVS = updateUserInfo();
-                responseVS.setTypeVS(operation);
-                responseVS.setServiceCaller(serviceCaller);
-                contextVS.sendBroadcast(responseVS);
-                break;
-            case VICKET_REQUEST:
-                responseVS = vicketRequest(amount, currencyCode);
-                responseVS.setTypeVS(operation);
-                responseVS.setServiceCaller(serviceCaller);
-                contextVS.showNotification(responseVS);
-                contextVS.sendBroadcast(responseVS);
-                break;
-            case VICKET_SEND:
-                amount = new BigDecimal(uriData.getQueryParameter("amount"));
-                currencyCode = uriData.getQueryParameter("currency");
-                String subject = uriData.getQueryParameter("subject");
-                String receptor = uriData.getQueryParameter("receptor");
-                String IBAN = uriData.getQueryParameter("IBAN");
-                String tagVS = uriData.getQueryParameter("tagVS");
-                responseVS = vicketSend(amount, currencyCode, subject, receptor, IBAN, tagVS);
-                responseVS.setTypeVS(operation);
-                responseVS.setServiceCaller(serviceCaller);
-                contextVS.showNotification(responseVS);
-                contextVS.sendBroadcast(responseVS);
-                break;
-            case VICKET_CANCEL:
-                Integer vicketCursorPosition = arguments.getInt(ContextVS.ITEM_ID_KEY);
-                Cursor cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,
-                        null, null, null, null);
-                cursor.moveToPosition(vicketCursorPosition);
-                byte[] serializedVicket = cursor.getBlob(cursor.getColumnIndex(
-                        VicketContentProvider.SERIALIZED_OBJECT_COL));
-                Long vicketId = cursor.getLong(cursor.getColumnIndex(VicketContentProvider.ID_COL));
-                try {
+        try {
+            switch(operation) {
+                case VICKET_USER_INFO:
+                    responseVS = updateUserInfo();
+                    break;
+                case VICKET_REQUEST:
+                    responseVS = vicketRequest(new VicketBatch(transactionVS.getAmount(), transactionVS.getAmount(),
+                            transactionVS.getCurrencyCode(), contextVS.getVicketServer()));
+                    break;
+                case VICKET_SEND:
+                    responseVS = requestAndSendVicket(transactionVS);
+                    break;
+                case VICKET_CANCEL:
+                    Integer vicketCursorPosition = arguments.getInt(ContextVS.ITEM_ID_KEY);
+                    Cursor cursor = getContentResolver().query(VicketContentProvider.CONTENT_URI,
+                            null, null, null, null);
+                    cursor.moveToPosition(vicketCursorPosition);
+                    byte[] serializedVicket = cursor.getBlob(cursor.getColumnIndex(
+                            VicketContentProvider.SERIALIZED_OBJECT_COL));
+                    Long vicketId = cursor.getLong(cursor.getColumnIndex(VicketContentProvider.ID_COL));
                     Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(serializedVicket);
                     vicket.setLocalId(vicketCursorPosition.longValue());
                     responseVS = cancelVicket(vicket);
@@ -145,31 +131,24 @@ public class VicketService extends IntentService {
                             }
                         }
                     }
-                    broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS, contextVS));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                break;
+                    break;
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+        } finally {
+            broadCastResponse(Utils.getBroadcastResponse(operation, serviceCaller, responseVS, contextVS));
         }
     }
 
     private ResponseVS cancelVicket(Vicket vicket) {
         VicketServer vicketServer = contextVS.getVicketServer();
-        Map vicketCancellationDataMap = new HashMap();
-        vicketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
-        vicketCancellationDataMap.put("operation", TypeVS.VICKET_CANCEL.toString());
-        vicketCancellationDataMap.put("hashCertVSBase64", vicket.getHashCertVSBase64());
-        vicketCancellationDataMap.put("originHashCertVS", vicket.getOriginHashCertVS());
-        vicketCancellationDataMap.put("vicketCertSerialNumber", vicket.getCertificationRequest().
-                getCertificate().getSerialNumber().longValue());
-        String textToSing = new JSONObject(vicketCancellationDataMap).toString();
         SMIMESignedSender signedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
                 vicketServer.getNameNormalized(), vicketServer.getVicketCancelServiceURL(),
-                textToSing, ContentTypeVS.JSON_SIGNED,
+                vicket.getCancellationRequest().toString(), ContentTypeVS.JSON_SIGNED,
                 getString(R.string.vicket_cancellation_msg_subject), vicketServer.getCertificate(),
                 (AppContextVS)getApplicationContext());
-        ResponseVS responseVS = signedSender.call();
-        return responseVS;
+        return signedSender.call();
     }
 
     private ResponseVS cancelVickets(Collection<Vicket> sendedVickets) {
@@ -179,15 +158,8 @@ public class VicketService extends IntentService {
         try {
             List<String> cancellationList = new ArrayList<String>();
             for(Vicket vicket : sendedVickets) {
-                Map vicketCancellationDataMap = new HashMap();
-                vicketCancellationDataMap.put("UUID", UUID.randomUUID().toString());
-                vicketCancellationDataMap.put("operation", TypeVS.VICKET_CANCEL.toString());
-                vicketCancellationDataMap.put("hashCertVSBase64", vicket.getHashCertVSBase64());
-                vicketCancellationDataMap.put("originHashCertVS", vicket.getOriginHashCertVS());
-                vicketCancellationDataMap.put("vicketCertSerialNumber", vicket.getCertificationRequest().
-                        getCertificate().getSerialNumber().longValue());
-                String textToSing = new JSONObject(vicketCancellationDataMap).toString();
-                responseVS = contextVS.signMessage(vicketServer.getNameNormalized(), textToSing,
+                responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
+                        vicket.getCancellationRequest().toString(),
                         getString(R.string.vicket_cancellation_msg_subject));
                 cancellationList.add(new String(Base64.encode(responseVS.getSmimeMessage().getBytes())));
             }
@@ -206,8 +178,16 @@ public class VicketService extends IntentService {
         }
     }
 
-    private ResponseVS vicketSend(BigDecimal requestAmount, String currencyCode,
-              String subject, String receptor, String IBAN, String tagVS) {
+    private ResponseVS requestAndSendVicket(TransactionVS transactionVS) throws Exception {
+        //Request Vickets (anonymous certificate)
+        ResponseVS responseVS = vicketRequest(new VicketBatch(transactionVS.getAmount(), transactionVS.getAmount(),
+                transactionVS.getCurrencyCode(), contextVS.getVicketServer()));
+        return responseVS;
+    }
+
+
+    private ResponseVS sendVicketFromWallet(BigDecimal requestAmount, String currencyCode,
+              String subject, String toUserName, String toUserIBAN, String tagVS) {
         ResponseVS responseVS = null;
         String message = null;
         String caption = null;
@@ -229,22 +209,12 @@ public class VicketService extends IntentService {
             for(int i = 0; i < numVickets; i++) {
                 vicketsToSend.add(contextVS.getVicketList(Currency.getInstance("EUR").getCurrencyCode()).remove(0));
             }
-            Map mapToSend = new HashMap();
-            mapToSend.put("receptor", receptor);
-            mapToSend.put("operation", TypeVS.VICKET.toString());
-            mapToSend.put("subject", subject);
-            mapToSend.put("IBAN", IBAN);
-            mapToSend.put("tagVS", tagVS);
-            mapToSend.put("currency", currencyCode);
-            mapToSend.put("amount", requestAmount);
-
             List<String> smimeVicketList = new ArrayList<String>();
 
             for(Vicket vicket : vicketsToSend) {
-                mapToSend.put("UUID", UUID.randomUUID().toString());
-                String textToSign = new JSONObject(mapToSend).toString();
+                String textToSign = vicket.getTransactionRequest(toUserName, toUserIBAN, tagVS, null).toString();
                 SMIMEMessageWrapper smimeMessage = vicket.getCertificationRequest().genMimeMessage(
-                        vicket.getHashCertVSBase64(), StringUtils.getNormalized(receptor),
+                        vicket.getHashCertVSBase64(), StringUtils.getNormalized(toUserName),
                         textToSign, subject, null);
 
                 smimeMessage.getSigner().getCertificate().getSerialNumber();
@@ -261,6 +231,7 @@ public class VicketService extends IntentService {
                     getCertificationRequest().getKeyPair();
             String publicKeyStr = new String(Base64.encode(keyPair.getPublic().getEncoded()));
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                Map mapToSend = new HashMap();
                 mapToSend.put("amount", requestAmount.toString());
                 mapToSend.put("currency", currencyCode);
                 mapToSend.put("operation", TypeVS.VICKET_SEND.toString());
@@ -338,82 +309,33 @@ public class VicketService extends IntentService {
                 iconId = R.drawable.fa_money_24;
                 caption = getString(R.string.vicket_send_ok_caption);
                 message = getString(R.string.vicket_send_ok_msg, requestAmount.toString(),
-                        currencyCode, subject, receptor);
+                        currencyCode, subject, toUserName);
             }
-            responseVS.setIconId(iconId);
-            responseVS.setCaption(caption);
-            responseVS.setNotificationMessage(message);
+            responseVS.setIconId(iconId).setCaption(caption).setNotificationMessage(message);
             return responseVS;
         }
     }
 
-    private ResponseVS vicketRequest(BigDecimal requestAmount, String currencyCode) {
-        VicketServer vicketServer = contextVS.getVicketServer();
-        Map<String, Vicket> vicketsMap = new HashMap<String, Vicket>();
+    private ResponseVS vicketRequest(VicketBatch vicketBatch) {
+        VicketServer vicketServer = vicketBatch.getVicketServer();
         String caption = null;
         String message = null;
         int iconId = R.drawable.cancel_22;
         ResponseVS responseVS = null;
         try {
-            BigDecimal numVickets = requestAmount.divide(new BigDecimal(10));
-            BigDecimal vicketsValue = new BigDecimal(10);
-            List<Vicket> vicketList = new ArrayList<Vicket>();
-            for(int i = 0; i < numVickets.intValue(); i++) {
-                Vicket vicket = new Vicket(vicketServer.getServerURL(),
-                        vicketsValue, currencyCode, TypeVS.VICKET);
-                vicketList.add(vicket);
-                vicketsMap.put(vicket.getHashCertVSBase64(), vicket);
-            }
-
             String messageSubject = getString(R.string.vicket_request_msg_subject);
             String fromUser = contextVS.getUserVS().getNif();
-
-            Map requestVicketMap = new HashMap();
-            requestVicketMap.put("numVickets", numVickets.intValue());
-            requestVicketMap.put("vicketValue", vicketsValue.intValue());
-
-            List vicketsMapList = new ArrayList();
-            vicketsMapList.add(requestVicketMap);
-
-            Map smimeContentMap = new HashMap();
-            smimeContentMap.put("totalAmount", requestAmount.toString());
-            smimeContentMap.put("currency", currencyCode);
-            smimeContentMap.put("vickets", vicketsMapList);
-            smimeContentMap.put("UUID", UUID.randomUUID().toString());
-            smimeContentMap.put("serverURL", contextVS.getVicketServer().getServerURL());
-            smimeContentMap.put("operation", TypeVS.VICKET_REQUEST.toString());
-            JSONObject requestJSON = new JSONObject(smimeContentMap);
-
             String requestDataFileName = ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED.getName();
 
-            List<Map> vicketCSRList = new ArrayList<Map>();
-            for(Vicket vicket : vicketList) {
-                Map csrVicketMap = new HashMap();
-                csrVicketMap.put("currency", currencyCode);
-                csrVicketMap.put("vicketValue", vicketsValue);
-                csrVicketMap.put("csr", new String(vicket.getCertificationRequest().getCsrPEM(), "UTF-8"));
-                vicketCSRList.add(csrVicketMap);
-            }
-            Map csrRequestMap = new HashMap();
-            csrRequestMap.put("vicketCSR", vicketCSRList);
-            JSONObject csrRequestJSON = new JSONObject(csrRequestMap);
-
-            byte[] encryptedCSRBytes = Encryptor.encryptMessage(csrRequestJSON.toString().getBytes(),
-                    vicketServer.getCertificate());
-            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
-            mapToSend.put(csrFileName, encryptedCSRBytes);
+            mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
+                    vicketBatch.getVicketCSRRequest().toString().getBytes());
 
-            KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
-                    vicketServer.getNameNormalized(),
-                    requestJSON.toString(), mapToSend, messageSubject, null,
-                    vicketServer.getVicketRequestServiceURL(),
-                    requestDataFileName, ContentTypeVS.JSON_SIGNED,
-                    vicketServer.getCertificate(),
-                    keyEntry.getCertificate().getPublicKey(), keyEntry.getPrivateKey(),
-                    (AppContextVS)getApplicationContext());
+                    vicketServer.getNameNormalized(), vicketBatch.getRequestJSON().toString(),
+                    mapToSend, messageSubject, null, vicketServer.getVicketRequestServiceURL(),
+                    requestDataFileName, (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject issuedVicketsJSON = new JSONObject(new String(
@@ -424,33 +346,20 @@ public class VicketService extends IntentService {
                     TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
                     TransactionVSContentProvider.addTransaction(contextVS, transaction, null);
                 }
-
                 JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
                 Log.d(TAG + "vicketRequest(...)", "Num IssuedVickets: " + issuedVicketsArray.length());
-                if(issuedVicketsArray.length() != vicketList.size()) {
+                if(issuedVicketsArray.length() != vicketBatch.getVicketsMap().values().size()) {
                     Log.e(TAG + "vicketRequest(...)", "ERROR - Num vickets requested: " +
-                            vicketList.size() + " - num. vickets received: " +
+                            vicketBatch.getVicketsMap().values().size() + " - num. vickets received: " +
                             issuedVicketsArray.length());
                 }
                 for(int i = 0; i < issuedVicketsArray.length(); i++) {
-                    Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
-                            issuedVicketsArray.getString(i).getBytes());
-                    if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
-                    X509Certificate x509Certificate = certificates.iterator().next();
-                    byte[] vicketExtensionValue = x509Certificate.getExtensionValue(ContextVS.VICKET_OID);
-                    DERTaggedObject vicketCertDataDER = (DERTaggedObject)
-                            X509ExtensionUtil.fromExtensionValue(vicketExtensionValue);
-                    JSONObject vicketCertData = new JSONObject(((DERUTF8String)
-                            vicketCertDataDER.getObject()).toString());
-                    String hashCertVS = vicketCertData.getString("hashCertVS");
-                    Vicket vicket = vicketsMap.get(hashCertVS);
-                    vicket.setState(Vicket.State.OK);
-                    vicket.getCertificationRequest().initSigner(issuedVicketsArray.getString(i).getBytes());
+                    vicketBatch.initVicket(issuedVicketsArray.getString(i));
                 }
-                VicketContentProvider.insertVickets(contextVS, vicketsMap.values());
+                VicketContentProvider.insertVickets(contextVS, vicketBatch.getVicketsMap().values());
                 caption = getString(R.string.vicket_request_ok_caption);
-                message = getString(R.string.vicket_request_ok_msg, requestAmount.toString(),
-                        currencyCode);
+                message = getString(R.string.vicket_request_ok_msg, vicketBatch.getRequestAmount(),
+                        vicketBatch.getCurrencyCode());
                 iconId = R.drawable.fa_money_24;
             } else {
                 caption = getString(R.string.vicket_request_error_caption);
@@ -462,9 +371,7 @@ public class VicketService extends IntentService {
             responseVS = ResponseVS.getExceptionResponse(getString(R.string.exception_lbl),
                     message);
         } finally {
-            responseVS.setIconId(iconId);
-            responseVS.setCaption(caption);
-            responseVS.setNotificationMessage(message);
+            responseVS.setIconId(iconId).setCaption(caption).setNotificationMessage(message);
             return responseVS;
         }
     }
@@ -472,14 +379,11 @@ public class VicketService extends IntentService {
     private ResponseVS updateUserInfo() {
         Log.d(TAG + ".updateUserInfo(...)", "updateUserInfo");
         VicketServer vicketServer = contextVS.getVicketServer();
-        Map mapToSend = new HashMap();
-        mapToSend.put("NIF", contextVS.getUserVS().getNif());
-        mapToSend.put("operation", TypeVS.VICKET_USER_INFO.toString());
-        mapToSend.put("UUID", UUID.randomUUID().toString());
         String msgSubject = getString(R.string.vicket_user_info_request_msg_subject);
         ResponseVS responseVS = null;
         try {
-            JSONObject userInfoRequestJSON = new JSONObject(mapToSend);
+            JSONObject userInfoRequestJSON = Vicket.getUserVSAccountInfoRequest(
+                    contextVS.getUserVS().getNif());
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(contextVS.getUserVS().getNif(),
                     vicketServer.getNameNormalized(), vicketServer.getUserInfoServiceURL(),
                     userInfoRequestJSON.toString(), ContentTypeVS.JSON_SIGNED,

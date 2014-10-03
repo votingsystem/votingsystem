@@ -40,7 +40,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
         ResponseVS responseVS = null;
 		responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            ActorVS actorVS = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+            ActorVS actorVS = ActorVS.parse(new JSONObject(responseVS.getMessage()));
             if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
                 return new ResponseVS(ResponseVS.SC_ERROR, "SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
                         actorVS.getEnvironmentVS());
@@ -67,7 +67,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                             actorVS.getTimeStampServerURL()),ContentTypeVS.JSON);
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-                    ActorVS timeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+                    ActorVS timeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
                     ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());
                     break;
 

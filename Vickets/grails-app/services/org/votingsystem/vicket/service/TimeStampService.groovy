@@ -77,7 +77,7 @@ class TimeStampService {
             X509Certificate x509TimeStampServerCert = null
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 ActorVS.withTransaction{
-                    ActorVS newTimeStampServer = ActorVS.populate(new JSONObject(responseVS.getMessage()));
+                    ActorVS newTimeStampServer = ActorVS.parse(new JSONObject(responseVS.getMessage()));
                     if(timeStampServer.serverURL.equals(newTimeStampServer.getServerURL())) {
                         if(!timeStampServer.id) {
                             newTimeStampServer.save();

@@ -39,11 +39,10 @@ class SignatureVSService {
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
 		String password = grailsApplication.config.VotingSystem.signKeysPassword
-		signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStoreFile), 
-			keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
 		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
+        signedMailGenerator = new SignedMailGenerator(keyStore, keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
 		byte[] pemCertsArray
 		for (int i = 0; i < chain.length; i++) {
 			log.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"

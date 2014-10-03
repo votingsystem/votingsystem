@@ -81,7 +81,7 @@ class SubscriptionVSService {
                     ContentTypeVS.JSON)
 			if (ResponseVS.SC_OK == responseVS.statusCode) {
 				try {
-					accessControl = new AccessControlVS(ActorVS.populate(JSON.parse(responseVS.message)))
+					accessControl = new AccessControlVS(ActorVS.parse(JSON.parse(responseVS.message)))
 					accessControl.save()
 				} catch(Exception ex) {
 					log.error(ex.getMessage(), ex)

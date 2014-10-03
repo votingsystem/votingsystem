@@ -35,7 +35,7 @@ class UserVSController {
             String view = null
             if(uservs) {
                 if(uservs instanceof GroupVS) {
-                    resultMap = [groupvsMap:groupVSService.getGroupVSDataMap(uservs)]
+                    resultMap = [groupvsMap:groupVSService.getDataMap(uservs, currentWeekPeriod)]
                     view = '/groupVS/groupvs'
                 } else if(uservs instanceof BankVS) {
                     resultMap = [uservsMap:bankVSService.getDataWithBalancesMap(uservs, currentWeekPeriod)]
@@ -44,8 +44,7 @@ class UserVSController {
                     resultMap = [uservsMap:userVSService.getDataWithBalancesMap(uservs, currentWeekPeriod)]
                     view = 'userVS'
                 }
-            }
-            else {
+            } else {
                 return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)]
             }
             if(request.contentType?.contains("json")) {

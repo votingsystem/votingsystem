@@ -13,7 +13,7 @@ import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
-import org.votingsystem.vicket.model.VicketBatchRequest
+import org.votingsystem.vicket.model.VicketBatch
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
 
@@ -151,7 +151,7 @@ class VicketService {
                 contentType: ContentTypeVS.JSON_SIGNED)
     }
 
-    public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, VicketBatchRequest batchRequest, Locale locale) {
+    public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, VicketBatch batchRequest, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate

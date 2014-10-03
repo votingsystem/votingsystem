@@ -85,6 +85,7 @@ class AccessControlFilters {
                                     params[fileName] = responseVS.messageBytes
                                 }
                                 break;
+                            case ContentTypeVS.JSON_SIGNED:
                             case ContentTypeVS.SIGNED:
                                 try {
                                     smimeMessageReq = new SMIMEMessageWrapper(

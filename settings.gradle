@@ -1,3 +1,5 @@
 include "VotingSystemLibrary", "ClientTool", "TimeStampServer", "AccessControl",
-        "ControlCenter", "Vickets", "TestsWebApp"
+        "ControlCenter", "Vickets", "Tests", "TestsWebApp"
+
+include 'Tests'
 

@@ -9,7 +9,7 @@ import org.votingsystem.model.*
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
-import org.votingsystem.vicket.model.VicketBatchRequest
+import org.votingsystem.vicket.model.VicketBatch
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.codehaus.groovy.runtime.StackTraceUtils
@@ -138,9 +138,9 @@ class TransactionVSController {
         if(!params.requestBytes) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        VicketBatchRequest batchRequest;
-        VicketBatchRequest.withTransaction {
-            batchRequest = new VicketBatchRequest(state:BatchRequest.State.OK, content:params.requestBytes,
+        VicketBatch batchRequest;
+        VicketBatch.withTransaction {
+            batchRequest = new VicketBatch(state:BatchRequest.State.OK, content:params.requestBytes,
                     type: TypeVS.VICKET_REQUEST).save()
         }
         def requestJSON = JSON.parse(new String(params.requestBytes, ContextVS.UTF_8))
@@ -212,7 +212,7 @@ class TransactionVSController {
         }
     }
 
-    private void cancelVicketBatchTransactionVS(List<ResponseVS> responseList, VicketBatchRequest batchRequest, TypeVS typeVS,
+    private void cancelVicketBatchTransactionVS(List<ResponseVS> responseList, VicketBatch batchRequest, TypeVS typeVS,
               String reason, String metaInf) {
         log.error("cancelVicketBatchTransactionVS - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
         for(ResponseVS responseVS: responseList) {
@@ -230,7 +230,7 @@ class TransactionVSController {
         batchRequest.save()
     }
 
-    private void cancelVicketBatchRequest(List<ResponseVS> responseList, VicketBatchRequest batchRequest, TypeVS typeVS,
+    private void cancelVicketBatchRequest(List<ResponseVS> responseList, VicketBatch batchRequest, TypeVS typeVS,
                String reason, String metaInf) {
         log.error("cancelVicketBatch - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
         for(ResponseVS responseVS: responseList) {

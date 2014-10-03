@@ -3,10 +3,8 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.orm.PagedResultList
 import grails.transaction.Transactional
-import net.sf.json.JSONSerializer
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.votingsystem.model.*
-import org.votingsystem.vicket.model.CoreSignal
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
@@ -16,7 +14,7 @@ import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.util.MetaInfMsg
 import java.math.RoundingMode
-import org.votingsystem.vicket.model.CoreSignal
+import org.votingsystem.vicket.util.CoreSignal
 
 /**
 * @author jgzornoza

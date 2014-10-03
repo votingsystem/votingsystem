@@ -107,7 +107,7 @@ class TransactionVSSimulationService {
             String userURL = "${simulationData.getServerURL()}/userVS/${simulationData.getReceptorId()}"
             responseVS = HttpHelper.getInstance().getData(userURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                UserVS userVS = UserVS.populate(new JSONObject(responseVS.getMessage()));
+                UserVS userVS = UserVS.parse(new JSONObject(responseVS.getMessage()));
                 ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(), ActorVS.Type.VICKETS);
                 responseVS = serverInitializer.call();
                 vicketServer = responseVS.getData();

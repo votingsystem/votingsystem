@@ -442,12 +442,12 @@ public class EventVS implements Serializable {
             if(eventMap.containsKey("controlCenter")) {
                 Map controlCenterMap = (Map) eventMap.get("controlCenter");
                 controlCenterMap.put("serverType", ActorVS.Type.CONTROL_CENTER);
-                eventVS.setControlCenterVS((ControlCenterVS) ActorVS.populate(controlCenterMap));
+                eventVS.setControlCenterVS((ControlCenterVS) ActorVS.parse(controlCenterMap));
             }
             if(eventMap.containsKey("accessControl")) {
                 Map accessControlMap = (Map) eventMap.get("accessControl");
                 accessControlMap.put("serverType", ActorVS.Type.ACCESS_CONTROL);
-                eventVS.setAccessControlVS((AccessControlVS) ActorVS.populate(accessControlMap));
+                eventVS.setAccessControlVS((AccessControlVS) ActorVS.parse(accessControlMap));
             }
             if(eventMap.containsKey("subject")) eventVS.setSubject((String) eventMap.get("subject"));
             if(eventMap.containsKey("voteVS")) {
@@ -472,7 +472,7 @@ public class EventVS implements Serializable {
                 if(userVSData instanceof String) {
                     UserVS userVS = new UserVS();
                     userVS.setName((String) eventMap.get("userVS"));
-                } else eventVS.setUserVS(UserVS.populate((Map) userVSData));
+                } else eventVS.setUserVS(UserVS.parse((Map) userVSData));
             }
             if (eventMap.containsKey("backupAvailable")) {
                 eventVS.setBackupAvailable((Boolean) eventMap.get("backupAvailable"));

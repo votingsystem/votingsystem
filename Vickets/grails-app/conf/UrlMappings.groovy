@@ -222,8 +222,8 @@ class UrlMappings {
             }
         }
 
-        "/model/request" {
-            controller = "model"
+        "/vicket/request" {
+            controller = "vicket"
             action = [POST:"processRequestFileMap"]
         }
 

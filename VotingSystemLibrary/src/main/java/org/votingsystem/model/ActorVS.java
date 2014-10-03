@@ -298,7 +298,7 @@ public class ActorVS implements Serializable {
         return map;
     }
 
-    public static ActorVS populate(Map actorVSMap) throws Exception {
+    public static ActorVS parse(Map actorVSMap) throws Exception {
         ActorVS actorVS = null;
         Type serverType = null;
         if(actorVSMap.get("serverType") != null && !"null".equals(actorVSMap.get("serverType").toString())) {
@@ -306,7 +306,7 @@ public class ActorVS implements Serializable {
             if(serverTypeObject instanceof String) serverType = Type.valueOf((String) serverTypeObject);
             else if(serverTypeObject instanceof Type) serverType = (Type) serverTypeObject;
         }
-        log.debug("populate - serverType: " + serverType);
+        log.debug("parse - serverType: " + serverType);
         switch (serverType) {
             case CONTROL_CENTER:
                 actorVS = new ControlCenterVS();

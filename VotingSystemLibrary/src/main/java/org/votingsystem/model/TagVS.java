@@ -28,6 +28,10 @@ public class TagVS implements java.io.Serializable {
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
     public TagVS() { }
+
+    public TagVS(String name) {
+        this.name = name;
+    }
    
     public Long getId() {
         return this.id;

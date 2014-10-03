@@ -60,7 +60,7 @@ class TransactionVS_UserVSService {
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
             tag = VicketTagVS.findWhere(name:messageJSON.tags[0])
-            if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0].name}'")
+            if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0]}'")
         } else throw new ExceptionVS("Invalid number of tags: '${messageJSON.tags}'")
         //Check cash available for user
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =

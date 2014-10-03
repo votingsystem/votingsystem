@@ -79,7 +79,28 @@ public class CertificationRequestVS {
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
-    
+
+    public static CertificationRequestVS getVicketRequest(int keySize, String keyName,
+              String signatureMechanism, String provider, String vicketServerURL, String hashCertVS,
+              String amount, String currency) throws NoSuchAlgorithmException,
+            NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
+        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
+                ", OU=AMOUNT:" + amount + ", OU=CURRENCY:" + currency +", OU=DigitalCurrency");
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        Map delegationDataMap = new HashMap<String, String>();
+        delegationDataMap.put("vicketServerURL", vicketServerURL);
+        delegationDataMap.put("hashCertVS", hashCertVS);
+        delegationDataMap.put("amount", amount);
+        delegationDataMap.put("currency", currency);
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.VICKET_TAG,
+                new DERUTF8String(jsonObject.toString())));
+        PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
+                keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
+        return new CertificationRequestVS(keyPair, csr, signatureMechanism);
+    }
+
     public void initSigner (byte[] signedCsr) throws Exception {
         Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
         logger.debug("initSigner - Num certs: " + certificates.size());
