@@ -20,9 +20,10 @@ import org.votingsystem.util.HttpHelper
 
 Logger logger = TestHelper.init(VicketRequest.class)
 
-String keyStorePath = ContextVS.getInstance().getConfig().keyStorePathAuthority
-String keyAlias = ContextVS.getInstance().config.signKeysAlias
-String password = ContextVS.getInstance().config.signKeysPassword
+String keyStorePath = ContextVS.getInstance().getConfig().userVSKeyStorePath
+String keyAlias = ContextVS.getInstance().config.userVSKeysAlias
+String password = ContextVS.getInstance().config.userVSKeysPassword
+
 
 SignatureVSService signatureVSService = new SignatureVSService(keyStorePath, keyAlias, password)
 UserVS fromUserVS = signatureVSService.getUserVS()
@@ -55,7 +56,7 @@ try {
     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
         JSONObject issuedVicketsJSON = JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"));
         JSONArray transactionsArray = issuedVicketsJSON.getJSONArray("transactionList");
-        for(int i = 0; i < transactionsArray.length(); i++) {
+        for(int i = 0; i < transactionsArray.size(); i++) {
             TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
         }
         JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
@@ -65,12 +66,12 @@ try {
                     vicketBatch.getVicketsMap().values().size() + " - num. vickets received: " +
                     issuedVicketsArray.size());
         }
-        for(int i = 0; i < issuedVicketsArray.length(); i++) {
+        for(int i = 0; i < issuedVicketsArray.size(); i++) {
             vicketBatch.initVicket(issuedVicketsArray.getString(i));
         }
 
     } else {
-        logger.error(" ====== " + responseVS.getMessage())
+        logger.error(" --- ERROR --- " + responseVS.getMessage())
     }
 } catch(Exception ex) {
     ex.printStackTrace();

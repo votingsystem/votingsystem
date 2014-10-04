@@ -1,6 +1,8 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import org.apache.log4j.Logger
+import org.apache.log4j.RollingFileAppender
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
@@ -15,12 +17,41 @@ import org.votingsystem.vicket.model.VicketBatch
 
 class VicketController {
 
+    private static Logger requestslog = Logger.getLogger("vicketsRequestLog");
+    private static Logger vicketsIssuedlog = Logger.getLogger("vicketsIssuedLog");
+
+
     def vicketService
     def csrService
     def userVSService
     def transactionVSService
 
-    def request() {}
+
+    def request() {
+        if(request.contentType?.contains("json")) {
+            RollingFileAppender appender = requestslog.getAppender("VicketsRequest")
+            File reportsFile = new File(appender.file)
+            //testfile.eachLine{ line ->}
+            def messageJSON = JSON.parse("{" + reportsFile.text + "}")
+            render messageJSON as JSON
+            return false
+        } else {
+            render(view:'request')
+        }
+    }
+
+    def issued() {
+        if(request.contentType?.contains("json")) {
+            RollingFileAppender appender = vicketsIssuedlog.getAppender("VicketsIssued")
+            File reportsFile = new File(appender.file)
+            //testfile.eachLine{ line ->}
+            def messageJSON = JSON.parse("{" + reportsFile.text + "}")
+            render messageJSON as JSON
+            return false
+        } else {
+            render(view:'issued')
+        }
+    }
 
     def cancel() {
         MessageSMIME messageSMIMEReq = request.messageSMIMEReq

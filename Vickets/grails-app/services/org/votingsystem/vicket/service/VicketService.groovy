@@ -18,6 +18,7 @@ import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketBatch
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.util.IbanVSUtil
+import org.votingsystem.vicket.util.LoggerVS
 
 import java.security.cert.X509Certificate
 
@@ -165,7 +166,7 @@ class VicketService {
 
     public ResponseVS processVicketRequest(VicketBatch vicketBatchRequest) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        UserVS fromUserVS = vicketBatchRequest.messageSMIME.getSmimeMessage().signerVS
+        UserVS fromUserVS = vicketBatchRequest.messageSMIME.userVS
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         //Check cash available for user
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
@@ -178,16 +179,14 @@ class VicketService {
                     metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
         vicketBatchRequest = csrService.signVicketBatchRequest(vicketBatchRequest)
-        TransactionVS userTransaction = new TransactionVS(amount:vicketBatchRequest.requestAmount,
-                state:TransactionVS.State.OK, currency:vicketBatchRequest.currencyCode,
-                subject: messageSource.getMessage('vicketRequest', null, LocaleContextHolder.locale),
-                messageSMIME: vicketBatchRequest.messageSMIME, fromUserVS: fromUserVS,
-                type:TransactionVS.Type.VICKET_REQUEST).save()
-
+        TransactionVS userTransaction = vicketBatchRequest.getTransactionVS(
+                messageSource.getMessage('vicketRequest', null, LocaleContextHolder.locale)).save()
+        LoggerVS.logVicketRequest(userTransaction.id, fromUserVS.nif, userTransaction.currencyCode, userTransaction.amount,
+                userTransaction.tag, userTransaction.dateCreated)
         Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
         Map resultMap = [transactionList:[transactionMap], issuedVickets:vicketBatchRequest.getIssuedVicketListPEM()]
-        return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
-                type:TypeVS.VICKET_REQUEST, messageBytes:"${resultMap as JSON}".getBytes());
+        return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data:resultMap,
+                type:TypeVS.VICKET_REQUEST);
     }
 
 }

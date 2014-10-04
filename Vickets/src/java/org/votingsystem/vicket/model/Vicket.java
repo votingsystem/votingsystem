@@ -30,14 +30,6 @@ public class Vicket implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public VicketTagVS getTag() {
-        return tag;
-    }
-
-    public void setTag(VicketTagVS tag) {
-        this.tag = tag;
-    }
-
     public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -289,6 +281,14 @@ public class Vicket implements Serializable  {
 
     public void setCertificationRequest(CertificationRequestVS certificationRequest) {
         this.certificationRequest = certificationRequest;
+    }
+
+    public VicketTagVS getTag() {
+        return tag;
+    }
+
+    public void setTag(VicketTagVS tag) {
+        this.tag = tag;
     }
 
     public static CertSubject getCertSubject(String subjectDN) {

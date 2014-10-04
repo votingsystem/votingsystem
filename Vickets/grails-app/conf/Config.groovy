@@ -140,15 +140,15 @@ log4j = {
 
         rollingFile name:"VicketServerReports", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
-                file:"./Vickets/reports/VicketServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"./Vickets/ServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketTransactionsReports", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
-                file:"./Vickets/reports/VicketTransactionsReports.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"./Vickets/TransactionsVS.log", datePattern: '\'_\'yyyy-MM-dd'
 
-        rollingFile name:"VicketRequests", threshold:org.apache.log4j.Level.INFO,
+        rollingFile name:"VicketsRequest", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
-                file:"./Vickets/VicketRequests.log", datePattern: '\'_\'yyyy-MM-dd'
+                file:"./Vickets/VicketsRequest.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketsIssued", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
@@ -178,7 +178,7 @@ log4j = {
 
             info  additivity: false, VicketServerReports: 'reportsLog'
             info  additivity: false, VicketTransactionsReports: 'transactionsLog'
-            info  additivity: false, VicketRequests: 'vicketRequestsLog'
+            info  additivity: false, VicketsRequests: 'vicketsRequestLog'
             info  additivity: false, VicketsIssued: 'vicketsIssuedLog'
 
             error   'org.codehaus.groovy.grails.web.servlet',  //  controllers

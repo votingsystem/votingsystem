@@ -69,6 +69,8 @@ public class VicketBatch extends BatchRequest implements Serializable  {
             BigDecimal vicketValue = new BigDecimal(vicketRequestJSON.getString("vicketValue"));
             String currencyCode = vicketRequestJSON.getString("currencyCode");
             String csrTagVS = vicketRequestJSON.getString("tagVS");
+            if(!this.tagVS.equals(csrTagVS)) throw new ExceptionVS("Request is for tag '" + this.tagVS +
+                    "' and request number '" + i + "' is for tag '" + csrTagVS + "'");
             PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(
                     vicketRequestJSON.getString("csr").getBytes());
             CertificationRequestInfo info = csr.getCertificationRequestInfo();
@@ -96,7 +98,7 @@ public class VicketBatch extends BatchRequest implements Serializable  {
                     throw new ExceptionVS( "Vicket CSR request number '" + i + "' with ERRORS. Subject: '" + info.getSubject().toString() +
                     "'. Signed attributes: '" + certAttributeJSON.toString() + "'");
             if(vicketValue.compareTo(signedVicketValue) != 0 || !currencyCode.equals(signedCurrencyCode) ||
-                    !signedTagVS.equals(this.tagVS)) throw new ExceptionVS(
+                    !signedTagVS.equals(csrTagVS)) throw new ExceptionVS(
                     "Vicket CSR request number '" + i + "' with ERRORS. JSON request: '" + vicketRequestJSON.toString() +
                     "'. Signed attributes: '" + certAttributeJSON.toString() + "'");
             if (!signedVicketServerURL.equals(localServer))  throw new ExceptionVS("Vicket signed server URL '" +
@@ -240,5 +242,22 @@ public class VicketBatch extends BatchRequest implements Serializable  {
 
     public void setTag(VicketTagVS tag) {
         this.tag = tag;
+        for(Vicket vicket : vicketsMap.values()) {
+            vicket.setTag(tag);
+        }
     }
+
+    public TransactionVS getTransactionVS(String subject) {
+        TransactionVS transaction = new TransactionVS();
+        transaction.setAmount(requestAmount);
+        transaction.setState(TransactionVS.State.OK);
+        transaction.setCurrencyCode(currencyCode);
+        transaction.setTag(tag);
+        transaction.setSubject(subject);
+        transaction.setMessageSMIME(messageSMIME);
+        transaction.setType(TransactionVS.Type.VICKET_REQUEST);
+        transaction.setFromUserVS(messageSMIME.getUserVS());
+        return transaction;
+    }
+
 }

@@ -27,7 +27,6 @@ class CsrService {
 
     private static final CLASS_NAME = CsrService.class.getSimpleName()
 
-    public static final String ORGANIZATIONAL_UNIT = "Vickets"
     private LinkGenerator grailsLinkGenerator
 	def grailsApplication
 	def messageSource
@@ -41,12 +40,12 @@ class CsrService {
         try {
             for(Vicket vicket:vicketCollection) {
                 X509Certificate x509AnonymousCert = signatureVSService.signCSR(
-                        vicket.getCsr(), ORGANIZATIONAL_UNIT, timePeriod.getDateFrom(), timePeriod.getDateTo())
+                        vicket.getCsr(), null, timePeriod.getDateFrom(), timePeriod.getDateTo())
                 vicket.loadCertData(x509AnonymousCert, timePeriod, authorityCertificateVS).save()
                 LoggerVS.logVicketIssued(vicket.id, vicket.currencyCode, vicket.amount, vicket.tag,
                         timePeriod.getDateFrom(), timePeriod.getDateTo())
             }
-            return VicketBatch;
+            return vicketBatchRequest;
         } catch(Exception ex) {
             cancelVickets(vicketBatchRequest.vicketsMap.values(), ex.getMessage())
             throw new ExceptionVS(messageSource.getMessage('vicketRequestDataError', null,

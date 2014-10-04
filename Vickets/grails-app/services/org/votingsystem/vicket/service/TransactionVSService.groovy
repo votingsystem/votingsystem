@@ -279,7 +279,7 @@ class TransactionVSService {
         transactionMap.dateCreated = transaction.dateCreated
         if(transaction.validTo) transactionMap.validTo = transaction.validTo
         transactionMap.id = transaction.id
-        transactionMap.description = getTransactionTypeDescription(transaction.getType().toString(), LocaleContextHolder.locale)
+        transactionMap.description = getTransactionTypeDescription(transaction.getType().toString())
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount.setScale(2, RoundingMode.FLOOR).toString()
@@ -301,29 +301,29 @@ class TransactionVSService {
         return transactionMap
     }
 
-    public String getTransactionTypeDescription(String transactionType, Locale locale) {
+    public String getTransactionTypeDescription(String transactionType) {
         String typeDescription
         switch(transactionType) {
             case 'VICKET_REQUEST':
-                typeDescription = messageSource.getMessage('vicketRequestLbl', null, locale);
+                typeDescription = messageSource.getMessage('vicketRequestLbl', null, LocaleContextHolder.locale);
                 break;
             case 'VICKET_SEND':
-                typeDescription = messageSource.getMessage('vicketSendLbl', null, locale);
+                typeDescription = messageSource.getMessage('vicketSendLbl', null, LocaleContextHolder.locale);
                 break;
             case 'VICKET_CANCELLATION':
-                typeDescription = messageSource.getMessage('vicketCancellationLbl', null, locale);
+                typeDescription = messageSource.getMessage('vicketCancellationLbl', null, LocaleContextHolder.locale);
                 break;
             case 'FROM_BANKVS':
-                typeDescription = messageSource.getMessage('bankVSInputLbl', null, locale);
+                typeDescription = messageSource.getMessage('bankVSInputLbl', null, LocaleContextHolder.locale);
                 break;
             case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
-                typeDescription = messageSource.getMessage('transactionVSFromGroupToMember', null, locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToMember', null, LocaleContextHolder.locale);
                 break;
             case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
-                typeDescription = messageSource.getMessage('transactionVSFromGroupToMemberGroup', null, locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToMemberGroup', null, LocaleContextHolder.locale);
                 break;
             case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
-                typeDescription = messageSource.getMessage('transactionVSFromGroupToAllMembers', null, locale);
+                typeDescription = messageSource.getMessage('transactionVSFromGroupToAllMembers', null, LocaleContextHolder.locale);
                 break;
             default: typeDescription = transactionType
         }
