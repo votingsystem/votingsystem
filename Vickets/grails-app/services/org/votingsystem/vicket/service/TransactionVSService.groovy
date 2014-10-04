@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.orm.PagedResultList
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
+import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.*
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.smime.SMIMEMessage
@@ -125,10 +126,6 @@ class TransactionVSService {
                 }
             }
         } else log.error("TransactionVS '${transactionVS.id}' with state ${transactionVS.state}")
-    }
-
-    public Map getTransactionMap(TransactionVS transaction) {
-        return getTransactionMap(transaction, systemService.getDefaultLocale())
     }
 
     @Transactional
@@ -265,7 +262,7 @@ class TransactionVSService {
     }
 
     @Transactional
-    public Map getTransactionMap(TransactionVS transaction, Locale locale) {
+    public Map getTransactionMap(TransactionVS transaction) {
         Map transactionMap = [:]
         if(transaction.fromUserVS) {
             transactionMap.fromUserVS = [nif:transaction.fromUserVS.nif, name:transaction.fromUserVS.name,
@@ -282,7 +279,7 @@ class TransactionVSService {
         transactionMap.dateCreated = transaction.dateCreated
         if(transaction.validTo) transactionMap.validTo = transaction.validTo
         transactionMap.id = transaction.id
-        if(locale) transactionMap.description = getTransactionTypeDescription(transaction.getType().toString(), locale)
+        transactionMap.description = getTransactionTypeDescription(transaction.getType().toString(), LocaleContextHolder.locale)
         transactionMap.subject = transaction.subject
         transactionMap.type = transaction.getType().toString()
         transactionMap.amount = transaction.amount.setScale(2, RoundingMode.FLOOR).toString()

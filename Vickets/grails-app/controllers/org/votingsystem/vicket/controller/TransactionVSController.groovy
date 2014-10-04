@@ -35,7 +35,7 @@ class TransactionVSController {
             }
             if(result) {
                 receipt = new String(result.messageSMIME.content, "UTF-8")
-                resultMap = transactionVSService.getTransactionMap(result, request.locale)
+                resultMap = transactionVSService.getTransactionMap(result)
                 resultMap.receipt = receipt
             }
         }
@@ -90,7 +90,7 @@ class TransactionVSController {
             }
             def resultList = []
             transactionList.each {transactionItem ->
-                resultList.add(transactionVSService.getTransactionMap(transactionItem, request.locale))
+                resultList.add(transactionVSService.getTransactionMap(transactionItem))
             }
             def resultMap = [transactionRecords:resultList, queryRecordCount: totalTransactions,
                              numTotalTransactions:totalTransactions ]

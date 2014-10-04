@@ -3,6 +3,7 @@ package org.votingsystem.model;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.ExceptionVS;
@@ -28,18 +29,21 @@ public class VicketBatch {
     private BigDecimal vicketsValue;
     private String currencyCode;
     private List<Map> vicketCSRList;
+    private String tagVS;
 
     public VicketBatch(BigDecimal requestAmount, BigDecimal vicketsValue,
-               String currencyCode, VicketServer vicketServer) throws Exception {
+               String currencyCode, String tagVS, VicketServer vicketServer) throws Exception {
         this.setRequestAmount(requestAmount);
         this.setVicketServer(vicketServer);
         this.setCurrencyCode(currencyCode);
         this.vicketsValue = vicketsValue;
-        this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, vicketServer);
+        this.tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
+        this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, tagVS, vicketServer);
         vicketCSRList = new ArrayList<Map>();
         for(Vicket vicket : vicketsMap.values()) {
             Map csrVicketMap = new HashMap();
-            csrVicketMap.put("currency", currencyCode);
+            csrVicketMap.put("currencyCode", currencyCode);
+            csrVicketMap.put("tagVS", tagVS);
             csrVicketMap.put("vicketValue", vicketsValue.toString());
             csrVicketMap.put("csr", new String(vicket.getCertificationRequest().getCsrPEM(), "UTF-8"));
             vicketCSRList.add(csrVicketMap);
@@ -87,46 +91,31 @@ public class VicketBatch {
     }
 
     public static Map<String, Vicket> getVicketBatch(BigDecimal requestAmount,
-             BigDecimal vicketsValue, String currencyCode, VicketServer vicketServer) {
+             BigDecimal vicketsValue, String currencyCode, String tagVS, VicketServer vicketServer) {
         Map<String, Vicket> vicketsMap = new HashMap<String, Vicket>();
         BigDecimal numVickets = requestAmount.divide(vicketsValue);
-        List<Vicket> vicketList = new ArrayList<Vicket>();
         for(int i = 0; i < numVickets.intValue(); i++) {
             Vicket vicket = new Vicket(vicketServer.getServerURL(),
-                    vicketsValue, currencyCode, TypeVS.VICKET);
-            vicketList.add(vicket);
+                    vicketsValue, currencyCode, tagVS, TypeVS.VICKET);
             vicketsMap.put(vicket.getHashCertVSBase64(), vicket);
         }
         return vicketsMap;
     }
 
-    public JSONObject getRequestJSON() {
-        Map requestVicketMap = new HashMap();
-        requestVicketMap.put("numVickets", vicketsMap.values().size());
-        requestVicketMap.put("vicketValue", vicketsValue.intValue());
-
-        List vicketsMapList = new ArrayList();
-        vicketsMapList.add(requestVicketMap);
-
+    public JSONObject getRequestDataToSignJSON() {
         Map smimeContentMap = new HashMap();
-        smimeContentMap.put("totalAmount", requestAmount.toString());
-        smimeContentMap.put("currency", currencyCode);
-        smimeContentMap.put("vickets", vicketsMapList);
-        smimeContentMap.put("UUID", UUID.randomUUID().toString());
-        smimeContentMap.put("serverURL", vicketServer.getServerURL());
         smimeContentMap.put("operation", TypeVS.VICKET_REQUEST.toString());
+        smimeContentMap.put("serverURL", vicketServer.getServerURL());
+        smimeContentMap.put("totalAmount", requestAmount.toString());
+        smimeContentMap.put("currencyCode", currencyCode);
+        smimeContentMap.put("tagVS", tagVS);
+        smimeContentMap.put("UUID", UUID.randomUUID().toString());
         JSONObject requestJSON = new JSONObject(smimeContentMap);
         return requestJSON;
     }
 
     public List<Map> getVicketCSRList () {
         return vicketCSRList;
-    }
-
-    public JSONObject getVicketCSRRequest() {
-        Map csrRequestMap = new HashMap();
-        csrRequestMap.put("vicketCSR", vicketCSRList);
-        return new JSONObject(csrRequestMap);
     }
 
     public Vicket initVicket(String signedCsr) throws Exception {
@@ -147,4 +136,11 @@ public class VicketBatch {
         return vicket;
     }
 
+    public String getTagVS() {
+        return tagVS;
+    }
+
+    public void setTagVS(String tagVS) {
+        this.tagVS = tagVS;
+    }
 }

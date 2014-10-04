@@ -23,6 +23,7 @@ import org.votingsystem.android.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
@@ -69,6 +70,8 @@ public class VicketService extends IntentService {
         Uri uriData =  arguments.getParcelable(ContextVS.URI_KEY);;
         BigDecimal amount = (BigDecimal) arguments.getSerializable(ContextVS.VALUE_KEY);
         String currencyCode = (String) arguments.getSerializable(ContextVS.CURRENCY_KEY);
+        String tagVS = (String) arguments.getSerializable(ContextVS.TAG_KEY);
+        tagVS = tagVS == null? TagVS.WILDTAG:tagVS;
         TransactionVS transactionVS = (TransactionVS) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
         ResponseVS responseVS = null;
         try {
@@ -78,10 +81,12 @@ public class VicketService extends IntentService {
                     break;
                 case VICKET_REQUEST:
                     responseVS = vicketRequest(new VicketBatch(transactionVS.getAmount(), transactionVS.getAmount(),
-                            transactionVS.getCurrencyCode(), contextVS.getVicketServer()));
+                            transactionVS.getCurrencyCode(), tagVS, contextVS.getVicketServer()));
                     break;
                 case VICKET_SEND:
-                    responseVS = requestAndSendVicket(transactionVS);
+                    VicketBatch vicketBatch = new VicketBatch(transactionVS.getAmount(), transactionVS.getAmount(),
+                            transactionVS.getCurrencyCode(), tagVS, contextVS.getVicketServer());
+                    responseVS = requestAndSendVicket(vicketBatch);
                     break;
                 case VICKET_CANCEL:
                     Integer vicketCursorPosition = arguments.getInt(ContextVS.ITEM_ID_KEY);
@@ -171,10 +176,9 @@ public class VicketService extends IntentService {
         }
     }
 
-    private ResponseVS requestAndSendVicket(TransactionVS transactionVS) throws Exception {
+    private ResponseVS requestAndSendVicket(VicketBatch vicketBatch) throws Exception {
         //Request Vickets (anonymous certificate)
-        ResponseVS responseVS = vicketRequest(new VicketBatch(transactionVS.getAmount(), transactionVS.getAmount(),
-                transactionVS.getCurrencyCode(), contextVS.getVicketServer()));
+        ResponseVS responseVS = vicketRequest(vicketBatch);
         return responseVS;
     }
 
@@ -320,13 +324,12 @@ public class VicketService extends IntentService {
             String fromUser = contextVS.getUserVS().getNif();
             String requestDataFileName = ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED.getName();
-
             Map<String, Object> mapToSend = new HashMap<String, Object>();
+            JSONArray vicketCSRList = new JSONArray(vicketBatch.getVicketCSRList());
             mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
-                    vicketBatch.getVicketCSRRequest().toString().getBytes());
-
+                    vicketCSRList.toString().getBytes());
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
-                    vicketServer.getNameNormalized(), vicketBatch.getRequestJSON().toString(),
+                    vicketServer.getNameNormalized(), vicketBatch.getRequestDataToSignJSON().toString(),
                     mapToSend, messageSubject, null, vicketServer.getVicketRequestServiceURL(),
                     requestDataFileName, (AppContextVS)getApplicationContext());
             responseVS = signedMapSender.call();

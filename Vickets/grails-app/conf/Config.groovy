@@ -139,13 +139,20 @@ log4j = {
                 file:"${System.getProperty("user.home")}/VotingSystem/logs/VicketServer.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketServerReports", threshold:org.apache.log4j.Level.INFO,
-                layout:pattern(conversionPattern: '%m%n'),
+                layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
                 file:"./Vickets/reports/VicketServerReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
         rollingFile name:"VicketTransactionsReports", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
                 file:"./Vickets/reports/VicketTransactionsReports.log", datePattern: '\'_\'yyyy-MM-dd'
 
+        rollingFile name:"VicketRequests", threshold:org.apache.log4j.Level.INFO,
+                layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
+                file:"./Vickets/VicketRequests.log", datePattern: '\'_\'yyyy-MM-dd'
+
+        rollingFile name:"VicketsIssued", threshold:org.apache.log4j.Level.INFO,
+                layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
+                file:"./Vickets/VicketsIssued.log", datePattern: '\'_\'yyyy-MM-dd'
 
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
             subject: mail.error.subject, threshold: Level.ERROR,
@@ -170,8 +177,9 @@ log4j = {
             //debug   'org.apache'
 
             info  additivity: false, VicketServerReports: 'reportsLog'
-
             info  additivity: false, VicketTransactionsReports: 'transactionsLog'
+            info  additivity: false, VicketRequests: 'vicketRequestsLog'
+            info  additivity: false, VicketsIssued: 'vicketsIssuedLog'
 
             error   'org.codehaus.groovy.grails.web.servlet',  //  controllers
                     'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -192,6 +200,7 @@ log4j = {
 
         production {
             info  additivity: false, VicketServerReports: 'reportsLog'
+            info  additivity: false, VicketTransactionsReports: 'transactionsLog'
 
             debug   'org.votingsystem','filters', 'grails.app'
             //debug   'org.springframework.security'

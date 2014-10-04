@@ -9,6 +9,7 @@ import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.util.DeviceUtils;
@@ -98,17 +99,20 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getVicketRequest(int keySize, String keyName,
               String signatureMechanism, String provider, String vicketServerURL, String hashCertVS,
-              String amount, String currency) throws NoSuchAlgorithmException,
+              String amount, String currency, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
         X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
-                ", OU=AMOUNT:" + amount + ", OU=CURRENCY:" + currency +", OU=DigitalCurrency");
+                ", OU=VICKET_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
+                ", OU=TAGVS:" + tagVS + ", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
         delegationDataMap.put("vicketServerURL", vicketServerURL);
         delegationDataMap.put("hashCertVS", hashCertVS);
-        delegationDataMap.put("amount", amount);
-        delegationDataMap.put("currency", currency);
+        delegationDataMap.put("vicketValue", amount);
+        delegationDataMap.put("currencyCode", currency);
+        delegationDataMap.put("tagVS", tagVS);
         JSONObject jsonObject = new JSONObject(delegationDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.VICKET_TAG,
                 new DERUTF8String(jsonObject.toString())));

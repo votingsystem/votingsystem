@@ -63,7 +63,7 @@ class VicketFilters {
                         String[] keySplitted = key.split(":")
                         String fileName = keySplitted[0]
                         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(keySplitted[1])
-                        log.debug "---- filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
+                        log.debug "- filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
                         if(contentTypeVS == null) {
                             return printOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                                     messageSource.getMessage('unknownContentType', [keySplitted[1]].toArray(),
@@ -93,6 +93,10 @@ class VicketFilters {
                                     return printOutputStream(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                                         messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
                                 }
+                                break;
+                            case ContentTypeVS.JSON:
+                            case ContentTypeVS.TEXT:
+                                params[fileName] = fileMap.get(key)?.getBytes()
                                 break;
                         }
                         if(smimeMessageReq) {

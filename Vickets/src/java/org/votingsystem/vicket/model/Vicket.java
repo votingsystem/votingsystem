@@ -1,14 +1,20 @@
 package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CMSUtils;
+import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -24,12 +30,12 @@ public class Vicket implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public CertificationRequestVS getCertificationRequest() {
-        return certificationRequest;
+    public VicketTagVS getTag() {
+        return tag;
     }
 
-    public void setCertificationRequest(CertificationRequestVS certificationRequest) {
-        this.certificationRequest = certificationRequest;
+    public void setTag(VicketTagVS tag) {
+        this.tag = tag;
     }
 
     public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
@@ -55,6 +61,9 @@ public class Vicket implements Serializable  {
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="tag", nullable=false) private VicketTagVS tag;
+
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="transactionParent") private TransactionVS transactionParent;
 
     @OneToOne private MessageSMIME cancelMessage;
@@ -67,22 +76,58 @@ public class Vicket implements Serializable  {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
     @Transient private CertificationRequestVS certificationRequest;
+    @Transient private PKCS10CertificationRequest csr;
+    @Transient private X509Certificate x509AnonymousCert;
 
     public Vicket() {}
 
-    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, TypeVS typeVS) {
+    public Vicket(PKCS10CertificationRequest csr, BigDecimal vicketValue, String currencyCode, String hashCertVS,
+                  String vicketServerURL) {
+        this.csr = csr;
+        this.amount = vicketValue;
+        this.currencyCode = currencyCode;
+        this.hashCertVS = hashCertVS;
+        this.vicketServerURL = vicketServerURL;
+    }
+
+    public PKCS10CertificationRequest getCsr() {
+        return csr;
+    }
+
+    public void setCsr(PKCS10CertificationRequest csr) {
+        this.csr = csr;
+    }
+
+    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, VicketTagVS tag) {
         this.amount = amount;
         this.vicketServerURL = vicketServerURL;
         this.currencyCode = currencyCode;
+        this.tag = tag;
         try {
             setOriginHashCertVS(UUID.randomUUID().toString());
             setHashCertVS(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
             certificationRequest = CertificationRequestVS.getVicketRequest(
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
-                    ContextVS.PROVIDER, vicketServerURL, hashCertVS, amount.toString(), this.currencyCode);
+                    ContextVS.PROVIDER, vicketServerURL, hashCertVS, amount.toString(), this.currencyCode, tag.getName());
         } catch(Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public Vicket loadCertData(X509Certificate x509AnonymousCert, DateUtils.TimePeriod timePeriod,
+            CertificateVS authorityCertificateVS) throws CertificateEncodingException {
+        this.x509AnonymousCert = x509AnonymousCert;
+        this.serialNumber = x509AnonymousCert.getSerialNumber().longValue();
+        this.content = x509AnonymousCert.getEncoded();
+        this.state = Vicket.State.OK;
+        this.validFrom = timePeriod.getDateFrom();
+        this.validTo = timePeriod.getDateTo();
+        this.authorityCertificateVS = authorityCertificateVS;
+        return this;
+    }
+
+    public byte[] getIssuedCertPEM() throws IOException {
+        return CertUtil.getPEMEncoded(x509AnonymousCert);
     }
 
     public Long getId() {
@@ -238,18 +283,42 @@ public class Vicket implements Serializable  {
         this.userVS = userVS;
     }
 
-    public static Map checkSubject(String subjectDN) {
-        String currency = null;
-        String amount = null;
-        String vicketServerURL = null;
-        if (subjectDN.contains("CURRENCY:")) currency = subjectDN.split("CURRENCY:")[1].split(",")[0];
-        if (subjectDN.contains("AMOUNT:")) amount = subjectDN.split("AMOUNT:")[1].split(",")[0];
-        if (subjectDN.contains("vicketServerURL:")) vicketServerURL = subjectDN.split("vicketServerURL:")[1].split(",")[0];
-        Map resultMap = new HashMap();
-        resultMap.put("currency", currency);
-        resultMap.put("amount", amount);
-        resultMap.put("vicketServerURL", vicketServerURL);
-        return resultMap;
+    public CertificationRequestVS getCertificationRequest() {
+        return certificationRequest;
+    }
+
+    public void setCertificationRequest(CertificationRequestVS certificationRequest) {
+        this.certificationRequest = certificationRequest;
+    }
+
+    public static CertSubject getCertSubject(String subjectDN) {
+        return new CertSubject(subjectDN);
+    }
+
+    public Map getCSRDataMap() throws Exception {
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("currencyCode", currencyCode);
+        result.put("tagVS", tag.getName());
+        result.put("vicketValue", amount.toString());
+        result.put("csr", new String(certificationRequest.getCsrPEM(), "UTF-8"));
+        return result;
+    }
+
+    public static class CertSubject {
+        String currencyCode;
+        String vicketValue;
+        String vicketServerURL;
+        String tagVS;
+        public CertSubject(String subjectDN) {
+            if (subjectDN.contains("CURRENCY_CODE:")) currencyCode = subjectDN.split("CURRENCY_CODE:")[1].split(",")[0];
+            if (subjectDN.contains("VICKET_VALUE:")) vicketValue = subjectDN.split("VICKET_VALUE:")[1].split(",")[0];
+            if (subjectDN.contains("TAGVS:")) tagVS = subjectDN.split("TAGVS:")[1].split(",")[0];
+            if (subjectDN.contains("vicketServerURL:")) vicketServerURL = subjectDN.split("vicketServerURL:")[1].split(",")[0];
+        }
+        public String getCurrencyCode() {return this.currencyCode;}
+        public String getVicketValue() {return this.vicketValue;}
+        public String getVicketServerURL() {return this.vicketServerURL;}
+        public String gettagVS() {return this.tagVS;}
     }
 
 }

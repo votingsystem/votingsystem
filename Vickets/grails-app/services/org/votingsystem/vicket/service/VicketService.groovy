@@ -13,6 +13,7 @@ import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketBatch
 import org.votingsystem.util.MetaInfMsg
@@ -34,51 +35,7 @@ class VicketService {
     def signatureVSService
     def userVSService
     def csrService
-
-	public ResponseVS processRequest(MessageSMIME messageSMIMEReq, Locale locale) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        UserVS signer = messageSMIMEReq.userVS
-        def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-        String vicketServerURL = StringUtils.checkURL(messageJSON.serverURL)
-        String serverURL = grailsApplication.config.grails.serverURL
-        if(!serverURL.equals(vicketServerURL)) throw new ExceptionVS(messageSource.getMessage("serverMismatchErrorMsg",
-                [serverURL, vicketServerURL].toArray(), locale));
-        TypeVS operation = TypeVS.valueOf(messageJSON.operation)
-        if(TypeVS.VICKET_REQUEST != operation) throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
-                [TypeVS.VICKET_REQUEST.toString(), operation.toString()].toArray(), locale));
-        Currency requestCurrency = Currency.getInstance(messageJSON.currency)
-        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
-        String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
-
-        throw new Exception("TODO - check wallet for cash - TODO - LocaleContextHolder: $LocaleContextHolder.locale")
-
-        //Map userInfoMap = transactionVSService.getUserVSVicketTransactionVSMap(signer, timePeriod)
-        Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.getCurrencyCode())
-        if(!currencyMap) throw new ExceptionVS(messageSource.getMessage("currencyMissingErrorMsg",
-                [requestCurrency.getCurrencyCode()].toArray(), locale));
-        BigDecimal currencyAvailable = ((BigDecimal)currencyMap.totalInputs).add(
-                ((BigDecimal)currencyMap.totalOutputs).negate())
-        BigDecimal totalAmount = new BigDecimal(messageJSON.totalAmount)
-        if(currencyAvailable.compareTo(totalAmount) < 0) throw new ExceptionVS(
-                messageSource.getMessage("vicketRequestAvailableErrorMsg",
-                [totalAmount, currencyAvailable,requestCurrency.getCurrencyCode()].toArray(), locale));
-        Integer numTotalVickets = 0
-        def vicketsArray = messageJSON.vickets
-        BigDecimal vicketsAmount = new BigDecimal(0)
-        vicketsArray.each {
-            Integer numVickets = it.numVickets
-            Integer vicketsValue = it.vicketValue
-            numTotalVickets = numTotalVickets + it.numVickets
-            vicketsAmount = vicketsAmount.add(new BigDecimal(numVickets * vicketsValue))
-            log.debug("$methodName - batch of '${numVickets}' vickets of '${vicketsValue}' euros")
-        }
-        log.debug("$methodName - numTotalVickets: ${numTotalVickets} - vicketsAmount: ${vicketsAmount}")
-        if(totalAmount.compareTo(vicketsAmount) != 0) throw new ExceptionVS(messageSource.getMessage(
-                "vicketRequestAmountErrorMsg", [totalAmount, vicketsAmount].toArray(), locale));
-        Map resultMap = [amount:totalAmount, currency:requestCurrency, userInfoMap:userInfoMap]
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, data:resultMap, type:TypeVS.VICKET_REQUEST,)
-    }
+    def walletVSService
 
     public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -206,27 +163,31 @@ class VicketService {
         return resultResponseVS
     }
 
-    public ResponseVS processVicketRequest(MessageSMIME messageSMIMEReq, byte[] csrRequest, Locale locale) {
+    public ResponseVS processVicketRequest(VicketBatch vicketBatchRequest) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("$methodName");
-        //To avoid circular references issues
-        ResponseVS responseVS = processRequest(messageSMIMEReq, locale)
-        if (ResponseVS.SC_OK == responseVS.statusCode) {
-            ResponseVS vicketGenBatchResponse = csrService.signVicketBatchRequest(csrRequest,
-                    responseVS.data.amount, responseVS.data.currency, locale)
-            if (ResponseVS.SC_OK == vicketGenBatchResponse.statusCode) {
-                UserVS userVS = messageSMIMEReq.userVS
-                TransactionVS userTransaction = new TransactionVS(amount:responseVS.data.amount,
-                        state:TransactionVS.State.OK, currency:responseVS.data.currency,
-                        subject: messageSource.getMessage('vicketRequest', null, locale), messageSMIME: messageSMIMEReq,
-                        fromUserVS: userVS, toUserVS: userVS, type:TransactionVS.Type.VICKET_REQUEST).save()
+        UserVS fromUserVS = vicketBatchRequest.messageSMIME.getSmimeMessage().signerVS
+        DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
+        //Check cash available for user
+        ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
+                walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatchRequest.getTag(),
+                vicketBatchRequest.getRequestAmount(), vicketBatchRequest.getCurrencyCode())
+        if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) {
+            log.error "${methodName} - ${accountFromMovements.getMessage()}"
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
+                    reason:accountFromMovements.getMessage(), message:accountFromMovements.getMessage(),
+                    metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
+        }
+        vicketBatchRequest = csrService.signVicketBatchRequest(vicketBatchRequest)
+        TransactionVS userTransaction = new TransactionVS(amount:vicketBatchRequest.requestAmount,
+                state:TransactionVS.State.OK, currency:vicketBatchRequest.currencyCode,
+                subject: messageSource.getMessage('vicketRequest', null, LocaleContextHolder.locale),
+                messageSMIME: vicketBatchRequest.messageSMIME, fromUserVS: fromUserVS,
+                type:TransactionVS.Type.VICKET_REQUEST).save()
 
-                Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
-                Map resultMap = [transactionList:[transactionMap], issuedVickets:vicketGenBatchResponse.data]
-                return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON_ENCRYPTED,
-                        type:TypeVS.VICKET_REQUEST, messageBytes:"${resultMap as JSON}".getBytes());
-            } else return vicketGenBatchResponse
-        } else return responseVS
+        Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
+        Map resultMap = [transactionList:[transactionMap], issuedVickets:vicketBatchRequest.getIssuedVicketListPEM()]
+        return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
+                type:TypeVS.VICKET_REQUEST, messageBytes:"${resultMap as JSON}".getBytes());
     }
 
 }

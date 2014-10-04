@@ -9,6 +9,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketServer
+import org.votingsystem.model.VicketTagVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.model.TransactionVS
 import org.votingsystem.test.model.VicketBatch
@@ -35,18 +36,19 @@ ContextVS.getInstance().setDefaultServer(vicketServer)
 
 BigDecimal transactionAmount = new BigDecimal(10)
 String curencyCode = "EUR"
-VicketBatch vicketBatch = new VicketBatch(transactionAmount, transactionAmount, curencyCode,
+VicketTagVS tag = new VicketTagVS("HIDROGENO")
+VicketBatch vicketBatch = new VicketBatch(transactionAmount, transactionAmount, curencyCode, tag,
         ContextVS.getInstance().getVicketServer())
 
 ResponseVS responseVS = null;
 try {
     String messageSubject = "TEST_VICKET_REQUEST_DATA_MSG_SUBJECT";
 
+    JSONArray vicketCSRRequest = (JSONArray) JSONSerializer.toJSON(vicketBatch.getVicketCSRList());
     Map<String, Object> mapToSend = new HashMap<String, Object>();
-    mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
-            vicketBatch.getVicketCSRRequest().toString().getBytes());
+    mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(), vicketCSRRequest.toString().getBytes());
     SMIMEMessage smimeMessage = signatureVSService.getTimestampedSignedMimeMessage(fromUserVS.nif,
-            vicketServer.getNameNormalized(), vicketBatch.getRequestJSON().toString(), messageSubject)
+            vicketServer.getNameNormalized(), vicketBatch.getRequestDataToSignJSON().toString(), messageSubject)
     mapToSend.put(ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
             smimeMessage.getBytes());
     responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, vicketServer.getVicketRequestServiceURL());
@@ -68,7 +70,7 @@ try {
         }
 
     } else {
-        logger.error(responseVS.getMessage())
+        logger.error(" ====== " + responseVS.getMessage())
     }
 } catch(Exception ex) {
     ex.printStackTrace();

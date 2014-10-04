@@ -49,7 +49,8 @@ public class Vicket extends ReceiptContainer {
     private String url;
     private String vicketServerURL;
 
-    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, TypeVS typeVS) {
+    public Vicket(String vicketServerURL, BigDecimal amount, String currencyCode, String tagVS,
+              TypeVS typeVS) {
         this.amount = amount;
         setTypeVS(typeVS);
         this.vicketServerURL = vicketServerURL;
@@ -60,7 +61,7 @@ public class Vicket extends ReceiptContainer {
             certificationRequest = CertificationRequestVS.getVicketRequest(
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                     ContextVS.PROVIDER, vicketServerURL, hashCertVSBase64, amount.toString(),
-                    this.currencyCode);
+                    this.currencyCode, tagVS);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

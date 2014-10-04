@@ -99,6 +99,7 @@ class AccessControlFilters {
                             case ContentTypeVS.JSON_SIGNED:
                                 smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(fileMap.get(key).getBytes()));
                                 break;
+                            case ContentTypeVS.JSON:
                             case ContentTypeVS.TEXT:
                                 params[fileName] = fileMap.get(key).getBytes()
                                 break;

@@ -19,6 +19,9 @@ public class LoggerVS {
 
     private static Logger reportslog = Logger.getLogger("reportsLog");
     private static Logger transactionslog = Logger.getLogger("transactionsLog");
+    private static Logger vicketsIssuedlog = Logger.getLogger("'vicketsIssuedLog");
+    private static Logger vicketRequestslog = Logger.getLogger("vicketRequestsLog");
+
 
     public static void logReportVS(Map dataMap) {
         dataMap.put("date", Calendar.getInstance().getTime());
@@ -55,6 +58,30 @@ public class LoggerVS {
         dataMap.put("dateCreated", dateCreated);
         dataMap.put("isParent", isParent);
         transactionslog.info(new JSON(dataMap).toString(false) + ",");
+    }
+
+    public static void logVicketRequest(long id, String fromUser, String currency, BigDecimal amount,
+            VicketTagVS tag, Date dateCreated) {
+        Map<String,Object> dataMap = new HashMap();
+        dataMap.put("id", id);
+        dataMap.put("fromUser", fromUser);
+        dataMap.put("currency", currency);
+        dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
+        if(tag != null) dataMap.put("tag", tag.getName());
+        dataMap.put("dateCreated", dateCreated);
+        vicketRequestslog.info(new JSON(dataMap).toString(false) + ",");
+    }
+
+    public static void logVicketIssued(long id, String currency, BigDecimal amount,
+                VicketTagVS tag, Date dateCreated, Date validTo) {
+        Map<String,Object> dataMap = new HashMap();
+        dataMap.put("id", id);
+        dataMap.put("currency", currency);
+        dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
+        if(tag != null) dataMap.put("tag", tag.getName());
+        dataMap.put("dateCreated", dateCreated);
+        dataMap.put("validTo", validTo);
+        vicketsIssuedlog.info(new JSON(dataMap).toString(false) + ",");
     }
 
 }
