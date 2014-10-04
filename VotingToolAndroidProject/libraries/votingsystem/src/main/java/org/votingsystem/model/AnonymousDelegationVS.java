@@ -1,7 +1,7 @@
 package org.votingsystem.model;
 
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
 import java.io.ByteArrayInputStream;
@@ -24,7 +24,7 @@ public class AnonymousDelegationVS extends ReceiptContainer {
     public static final String TAG = "AnonymousDelegationVS";
 
     private Long localId = -1L;
-    private transient SMIMEMessageWrapper delegationReceipt;
+    private transient SMIMEMessage delegationReceipt;
     private transient byte[] delegationReceiptBytes;
     private String originHashCertVS;
     private String hashCertVSBase64;
@@ -36,10 +36,10 @@ public class AnonymousDelegationVS extends ReceiptContainer {
     private Date validFrom;
     private Date validTo;
 
-    public SMIMEMessageWrapper getCancelVoteReceipt() {
+    public SMIMEMessage getCancelVoteReceipt() {
         if(delegationReceipt == null && delegationReceiptBytes != null) {
             try {
-                delegationReceipt = new SMIMEMessageWrapper(null,
+                delegationReceipt = new SMIMEMessage(null,
                         new ByteArrayInputStream(delegationReceiptBytes), null);
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -92,14 +92,14 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         this.localId = localId;
     }
 
-    @Override public SMIMEMessageWrapper getReceipt() {
+    @Override public SMIMEMessage getReceipt() {
         return delegationReceipt;
     }
 
     @Override public String getMessageId() {
         String result = null;
         try {
-            SMIMEMessageWrapper receipt = getReceipt();
+            SMIMEMessage receipt = getReceipt();
             String[] headers = receipt.getHeader("Message-ID");
             if(headers != null && headers.length >0) return headers[0];
         } catch(Exception ex) {
@@ -139,7 +139,7 @@ public class AnonymousDelegationVS extends ReceiptContainer {
         delegationReceiptBytes = (byte[]) s.readObject();
     }
 
-    public void setDelegationReceipt(SMIMEMessageWrapper delegationReceipt) {
+    public void setDelegationReceipt(SMIMEMessage delegationReceipt) {
         this.delegationReceipt = delegationReceipt;
     }
 }

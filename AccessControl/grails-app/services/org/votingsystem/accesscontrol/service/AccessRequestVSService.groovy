@@ -2,9 +2,8 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 
@@ -25,7 +24,7 @@ class AccessRequestVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		UserVS signerVS = messageSMIMEReq.getUserVS()
-		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		String msg
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if (!messageJSON.eventId || !messageJSON.eventURL && !messageJSON.hashAccessRequestBase64 &&

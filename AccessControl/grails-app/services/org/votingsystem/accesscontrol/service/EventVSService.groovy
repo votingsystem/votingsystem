@@ -3,7 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
@@ -99,7 +99,7 @@ class EventVSService {
 	}
 	
 	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq, Locale locale) {
-		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		UserVS signer = messageSMIMEReq.userVS
 		EventVS eventVS
 		String msg
@@ -130,7 +130,7 @@ class EventVSService {
 						 msg = messageSource.getMessage('eventDeleted', [messageJSON?.eventId].toArray(), locale)
 						 break;
 				}
-				SMIMEMessageWrapper smimeMessageResp
+				SMIMEMessage smimeMessageResp
 				String fromUser = grailsApplication.config.VotingSystem.serverName
 				String toUser = null
 				String subject = messageSource.getMessage(

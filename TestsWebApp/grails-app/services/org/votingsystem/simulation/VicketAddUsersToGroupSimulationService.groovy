@@ -6,11 +6,8 @@ import org.vickets.simulation.model.SimulationData
 import org.vickets.simulation.model.UserBaseSimulationData
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.simulation.callable.ServerInitializer
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -18,8 +15,6 @@ import org.votingsystem.util.StringUtils
 
 import java.lang.management.ManagementFactory
 import java.security.KeyStore
-import java.security.cert.Certificate
-import java.security.cert.X509Certificate
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
@@ -164,7 +159,7 @@ class VicketAddUsersToGroupSimulationService {
                 requestSubscribeData.put("UUID", UUID.randomUUID().toString())
                 SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                         ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
-                SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
+                SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userNif, toUser,
                         requestSubscribeData.toString(), subject);
                 SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
                         vicketServer.getSubscribeUserToGroupURL(simulationData.getGroupId()),

@@ -1,6 +1,6 @@
 package org.votingsystem.model;
 
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 /**
 * @author jgzornoza
@@ -11,7 +11,7 @@ public class EncryptedBundleVS {
 	public enum Type {SMIME_MESSAGE, TEXT, FILE}
 
 	private byte[] encryptedMessageBytes;
-	private SMIMEMessageWrapper decryptedSMIMEMessage;
+	private SMIMEMessage decryptedSMIMEMessage;
 	private byte[] decryptedMessageBytes;
 	private String message;
 	private Type type;
@@ -26,11 +26,11 @@ public class EncryptedBundleVS {
 		this.decryptedMessageBytes = decryptedMessageBytes;
 	}
 
-	public SMIMEMessageWrapper getDecryptedSMIMEMessage() {
+	public SMIMEMessage getDecryptedSMIMEMessage() {
 		return decryptedSMIMEMessage;
 	}
 	
-	public void setDecryptedSMIMEMessage(SMIMEMessageWrapper decryptedSMIMEMessage) {
+	public void setDecryptedSMIMEMessage(SMIMEMessage decryptedSMIMEMessage) {
 		this.decryptedSMIMEMessage = decryptedSMIMEMessage;
 	}
 	

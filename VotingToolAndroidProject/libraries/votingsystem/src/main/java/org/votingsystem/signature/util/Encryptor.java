@@ -26,7 +26,7 @@ import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EncryptedBundleVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -76,7 +76,7 @@ public class Encryptor {
 
 	private  Encryptor() {	}
 	
-	public static byte[] encryptSMIME(SMIMEMessageWrapper msgToEncrypt, 
+	public static byte[] encryptSMIME(SMIMEMessage msgToEncrypt,
 			X509Certificate receiverCert) throws Exception {
 		Log.d(TAG + ".encryptSMIMEFile(...) ", " #### encryptSMIMEFile ");
     	/* Create the encrypter */
@@ -187,13 +187,13 @@ public class Encryptor {
     /**
     * Method to decrypt SMIME signed messages
     */
-   public static SMIMEMessageWrapper decryptSMIMEMessage(
+   public static SMIMEMessage decryptSMIMEMessage(
            byte[] encryptedMessageBytes, PublicKey  publicKey, 
             PrivateKey receiverPrivateKey) throws Exception {
 	   Log.d(TAG + ".decryptSMIMEMessage(...) ", "decryptSMIMEMessage(...) ");
 	   InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, publicKey, receiverPrivateKey));
-        return new SMIMEMessageWrapper(null, inputStream, null);
+        return new SMIMEMessage(null, inputStream, null);
    }
    
    /**
@@ -353,11 +353,11 @@ public class Encryptor {
 				encryptedBundleVS.setDecryptedMessageBytes(messageBytes);
 				break;
 			case SMIME_MESSAGE:
-				SMIMEMessageWrapper smimeMessageWrapper = decryptSMIMEMessage(
+				SMIMEMessage smimeMessage = decryptSMIMEMessage(
 						encryptedBundleVS.getEncryptedMessageBytes(),
                         publicKey, receiverPrivateKey);
 				encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
-				encryptedBundleVS.setDecryptedSMIMEMessage(smimeMessageWrapper);
+				encryptedBundleVS.setDecryptedSMIMEMessage(smimeMessage);
 				break;
 			case TEXT:
 				messageBytes = decryptFile(encryptedBundleVS.getEncryptedMessageBytes(),

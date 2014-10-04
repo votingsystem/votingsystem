@@ -27,7 +27,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +43,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
     private Stage stage;
     private TextArea textArea;
     private Button signButton;
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private HBox signedDocumentButtonsBox;
     private TextField serviceURLTextField;
     private TextField messageSubjectTextField;
@@ -183,7 +183,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
         }
     }
 
-    public void saveMessage (SMIMEMessageWrapper smimeMessage) {
+    public void saveMessage (SMIMEMessage smimeMessage) {
         try {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showSaveDialog(getScene().getWindow());

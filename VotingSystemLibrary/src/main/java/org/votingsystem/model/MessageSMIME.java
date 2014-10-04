@@ -1,7 +1,7 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 import javax.persistence.*;
 import java.io.ByteArrayInputStream;
@@ -64,7 +64,7 @@ public class MessageSMIME implements Serializable {
     @Column(name="lastUpdated", length=23, insertable=true)
     private Date lastUpdated;
 
-    @Transient private transient SMIMEMessageWrapper smimeMessage;
+    @Transient private transient SMIMEMessage smimeMessage;
     @Transient private transient Set<UserVS> signers;
     @Transient private transient UserVS anonymousSigner;
 
@@ -162,14 +162,14 @@ public class MessageSMIME implements Serializable {
 		this.base64ContentDigest = base64ContentDigest;
 	}
 
-    @Transient public SMIMEMessageWrapper getSmimeMessage() throws Exception {
+    @Transient public SMIMEMessage getSmimeMessage() throws Exception {
 		if(smimeMessage == null && content != null) {
-			smimeMessage = new SMIMEMessageWrapper(new ByteArrayInputStream(content));
+			smimeMessage = new SMIMEMessage(new ByteArrayInputStream(content));
 		}
 		return smimeMessage;
 	}
 
-	public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
+	public void setSmimeMessage(SMIMEMessage smimeMessage) {
 		this.smimeMessage = smimeMessage;
 	}
 

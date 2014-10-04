@@ -6,7 +6,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -34,7 +34,7 @@ class EventVSElectionService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		ResponseVS responseVS
-		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		String msg
         AccessControlVS accessControl = subscriptionVSService.checkAccessControl(
                 smimeMessageReq.getHeader("serverURL")[0])
@@ -185,7 +185,7 @@ class EventVSElectionService {
 	}
 	
 	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq, Locale locale) {
-		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		UserVS signer = messageSMIMEReq.userVS
 		EventVS eventVS
 		String msg
@@ -227,7 +227,7 @@ class EventVSElectionService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = eventVS.accessControlVS.serverURL
         String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.
+        SMIMEMessage smimeMessageResp = signatureVSService.
                 getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
         MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
                 smimeParent:messageSMIMEReq, eventVS:eventVS, content:smimeMessageResp.getBytes())

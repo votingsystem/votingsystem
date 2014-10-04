@@ -5,8 +5,9 @@ import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
+import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -36,7 +37,7 @@ class VicketService {
 
 	public ResponseVS processRequest(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
         String vicketServerURL = StringUtils.checkURL(messageJSON.serverURL)
@@ -50,7 +51,7 @@ class VicketService {
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         String dirPath = DateUtils.getDirPath(timePeriod.getDateFrom())
 
-        throw new Exception("TODO - check wallet for cash - TODO")
+        throw new Exception("TODO - check wallet for cash - TODO - LocaleContextHolder: $LocaleContextHolder.locale")
 
         //Map userInfoMap = transactionVSService.getUserVSVicketTransactionVSMap(signer, timePeriod)
         Map currencyMap = userInfoMap.get(dirPath).get(requestCurrency.getCurrencyCode())
@@ -81,7 +82,7 @@ class VicketService {
 
     public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
         def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if(TypeVS.VICKET_CANCEL != TypeVS.valueOf(requestJSON.operation))
@@ -97,7 +98,7 @@ class VicketService {
             String toUser = smimeMessageReq.getFrom().toString()
             String subject = messageSource.getMessage('cancelVicketReceiptSubject', null, locale)
             vicket.setState(Vicket.State.CANCELLED)
-            SMIMEMessageWrapper receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                     smimeMessageReq, subject)
             MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                     content:receipt.getBytes()).save()
@@ -137,13 +138,13 @@ class VicketService {
 
     public ResponseVS cancelTransactionVS(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         //messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         log.debug(smimeMessageReq.getSignedContent())
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = smimeMessageReq.getFrom().toString()
         String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                 smimeMessageReq, subject)
         MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                 content:smimeMessageResp.getBytes()).save()
@@ -153,7 +154,7 @@ class VicketService {
 
     public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, VicketBatch batchRequest, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         String msg;
         ResponseVS resultResponseVS;
@@ -179,7 +180,7 @@ class VicketService {
             vicket.save()
             messageSMIMEReq.setType(TypeVS.VICKET);
             messageSMIMEReq.save()
-            SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
+            SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                     smimeMessageReq, subject)
             MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                     content:smimeMessageResp.getBytes()).save()

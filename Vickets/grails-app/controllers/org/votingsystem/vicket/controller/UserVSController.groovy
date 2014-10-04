@@ -4,7 +4,7 @@ import grails.converters.JSON
 import org.springframework.dao.DataAccessException
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.util.DateUtils
 
@@ -209,7 +209,7 @@ class UserVSController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
         UserVS userVS = messageSMIMEReq.getUserVS()
         if(!messageJSON.NIF.equals(userVS.getNif())) {

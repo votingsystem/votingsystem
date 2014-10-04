@@ -48,9 +48,9 @@ import java.util.*;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SMIMEMessageWrapper extends MimeMessage {
+public class SMIMEMessage extends MimeMessage {
 
-    private static Logger logger = Logger.getLogger(SMIMEMessageWrapper.class);
+    private static Logger logger = Logger.getLogger(SMIMEMessage.class);
 
     public static final String CONTENT_TYPE_VS = "CONTENT_TYPE_VS";
 
@@ -65,14 +65,14 @@ public class SMIMEMessageWrapper extends MimeMessage {
     private boolean isValidSignature = false;
     private TimeStampToken timeStampToken = null;
 
-    public SMIMEMessageWrapper(Session session) throws MessagingException {
+    public SMIMEMessage(Session session) throws MessagingException {
         super(session);
-        logger.debug("SMIMEMessageWrapper(Session session)");
+        logger.debug("SMIMEMessage(Session session)");
         String fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + ".p7m");
     }
 
-    public SMIMEMessageWrapper (SMIMESigned simeSigned) throws Exception {
+    public SMIMEMessage(SMIMESigned simeSigned) throws Exception {
         super(ContextVS.MAIL_SESSION);
         this.smimeSigned = simeSigned;
         smimeSigned = new SMIMESigned(this);
@@ -82,7 +82,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         this.isValidSignature = checkSignature();
     }
 
-    public SMIMEMessageWrapper (InputStream inputStream) throws Exception {
+    public SMIMEMessage(InputStream inputStream) throws Exception {
         super(ContextVS.MAIL_SESSION, inputStream);
         init();
     }

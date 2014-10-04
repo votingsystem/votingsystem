@@ -18,7 +18,7 @@ import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.Store;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGenerator;
 import org.votingsystem.signature.smime.SimpleSignerInfoGeneratorBuilder;
 import org.votingsystem.signature.util.CertUtil;
@@ -298,7 +298,7 @@ public class DNIeContentSigner implements ContentSigner {
 
     }
 
-    public static SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
+    public static SMIMEMessage genMimeMessage(String fromUser, String toUser, String textToSign,
                      char[] password, String subject, Header... headers) throws Exception {
         if (subject == null) subject = "";
         if (textToSign == null) textToSign = "";
@@ -336,7 +336,7 @@ public class DNIeContentSigner implements ContentSigner {
         Address toUserAddress = null;
         if(toUser != null) toUserAddress = new InternetAddress(toUser.replace(" ", ""));
 
-        SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
+        SMIMEMessage body = new SMIMEMessage(session);
         if (headers != null) {
             for(Header header : headers) {
                 if (header != null) body.setHeader(header.getName(), header.getValue());

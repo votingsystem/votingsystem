@@ -6,7 +6,7 @@ import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
@@ -43,7 +43,7 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         String testJSONstr = getTestJSON(requestNIF);
 
         String toUser = "MultiSignController";
-        SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
+        SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(
                 requestNIF, toUser, testJSONstr, msgSubject, null);
         SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
@@ -51,7 +51,7 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         ResponseVS senderResponse = sender.call();
         if(ResponseVS.SC_OK == senderResponse.getStatusCode()) {
             byte[] multiSigendResponseBytes = senderResponse.getMessageBytes();
-            SMIMEMessageWrapper smimeResponse = new SMIMEMessageWrapper(new ByteArrayInputStream(multiSigendResponseBytes));
+            SMIMEMessage smimeResponse = new SMIMEMessage(new ByteArrayInputStream(multiSigendResponseBytes));
             logger.debug("- smimeResponse.isValidSignature(): " + smimeResponse.isValidSignature());
         } else senderResponse.appendMessage(" - from: " + requestNIF);
         return senderResponse;

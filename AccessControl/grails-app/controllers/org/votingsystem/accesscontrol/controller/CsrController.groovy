@@ -2,10 +2,9 @@ package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.KeyStoreUtil
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
 
@@ -111,7 +110,7 @@ class CsrController {
 		List<String> admins = grailsApplication.config.VotingSystem.adminsDNI
 		UserVS userVS = messageSMIME.getUserVS()
 		def docValidacionJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
-		SMIMEMessageWrapper smimeMessageReq = messageSMIME.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIME.getSmimeMessage()
 		if (admins.contains(userVS.nif) || userVS.nif.equals(docValidacionJSON.nif)) {
 			DeviceVS dispositivo = DeviceVS.findWhere(deviceId: docValidacionJSON.deviceId)
 			if (!dispositivo?.userVS) {

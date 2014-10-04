@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.callable.ClaimSignedSender
 import org.votingsystem.simulation.callable.ServerInitializer
@@ -175,7 +175,7 @@ class ClaimSimulationService {
 		Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
 		signedMailGenerator = new SignedMailGenerator(
 			privateKey, chain, ContextVS.DNIe_SIGN_MECHANISM);
-		SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
+		SMIMEMessage smimeDocument = signedMailGenerator.genMimeMessage(
 				ContextVS.getInstance().getUserTest().getEmail(),
 				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
@@ -187,7 +187,7 @@ class ClaimSimulationService {
 			try {
 				byte[] responseBytes = responseVS.getMessageBytes();
 				ContextVS.getInstance().copyFile(responseBytes, "/claimSimulation", "ClaimPublishedReceipt")
-				SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(
+				SMIMEMessage dnieMimeMessage = new SMIMEMessage(
 						new ByteArrayInputStream(responseBytes));
 				dnieMimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
                 EventVS eventToSign = EventVS.populate(new JSONObject(dnieMimeMessage.getSignedContent()));
@@ -285,7 +285,7 @@ class ClaimSimulationService {
         String msgSubject = messageSource.getMessage("cancelEventMsgSubject", [eventVS.getId()].toArray(), locale);
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(ContextVS.getInstance().getUserTest().getKeyStore(),
                 ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(), ContextVS.getInstance().VOTE_SIGN_MECHANISM);
-        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(ContextVS.getInstance().getUserTest().getEmail(),
+        SMIMEMessage smimeDocument = signedMailGenerator.genMimeMessage(ContextVS.getInstance().getUserTest().getEmail(),
                 ContextVS.getInstance().getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),

@@ -4,7 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.vicket.model.UserVSAccount
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.util.MetaInfMsg
@@ -138,7 +138,7 @@ class GroupVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userSigner.getNif()
         String subject = messageSource.getMessage('newGroupVSReceiptSubject', null, locale)
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getSMIMEMessage(fromUser, toUser,
+        SMIMEMessage smimeMessageResp = signatureVSService.getSMIMEMessage(fromUser, toUser,
                 messageSMIMEReq.getSmimeMessage()?.getSignedContent(), subject, null)
         log.debug("${metaInf}")
         new MessageSMIME(type:TypeVS.RECEIPT, metaInf:metaInf, smimeParent:messageSMIMEReq, content:smimeMessageResp.getBytes()).save()

@@ -8,11 +8,10 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
-import org.votingsystem.util.ApplicationContextHolder as ACH
 
 import java.security.KeyStore
 import java.security.cert.X509Certificate
@@ -25,7 +24,7 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
     
     private static Logger logger = Logger.getLogger(ClaimSignedSender.class);
     
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private String nif;
     private String submitClaimsURL = null;
     private Long eventId = null;

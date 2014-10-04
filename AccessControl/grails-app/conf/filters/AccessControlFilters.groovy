@@ -70,7 +70,7 @@ class AccessControlFilters {
                                     request.getLocale())))
                         }
                         ResponseVS responseVS = null
-                        SMIMEMessageWrapper smimeMessageReq = null
+                        SMIMEMessage smimeMessageReq = null
                         switch(contentTypeVS) {
                             case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                             case ContentTypeVS.SIGNED_AND_ENCRYPTED:
@@ -88,7 +88,7 @@ class AccessControlFilters {
                             case ContentTypeVS.JSON_SIGNED:
                             case ContentTypeVS.SIGNED:
                                 try {
-                                    smimeMessageReq = new SMIMEMessageWrapper(
+                                    smimeMessageReq = new SMIMEMessage(
                                             new ByteArrayInputStream(fileMap.get(key)?.getBytes()));
                                 } catch(Exception ex) {
                                     log.error(ex.getMessage(), ex)
@@ -97,7 +97,7 @@ class AccessControlFilters {
                                 }
                                 break;
                             case ContentTypeVS.JSON_SIGNED:
-                                smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(fileMap.get(key).getBytes()));
+                                smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(fileMap.get(key).getBytes()));
                                 break;
                             case ContentTypeVS.TEXT:
                                 params[fileName] = fileMap.get(key).getBytes()
@@ -164,7 +164,7 @@ class AccessControlFilters {
                         case ContentTypeVS.VOTE:
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
-                            responseVS = processSMIMERequest(new SMIMEMessageWrapper(
+                            responseVS = processSMIMERequest(new SMIMEMessage(
                                     new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
@@ -295,7 +295,7 @@ class AccessControlFilters {
         return outputStream.toByteArray();
     }
 
-    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType,
+    private ResponseVS processSMIMERequest(SMIMEMessage smimeMessageReq, ContentTypeVS contenType,
             Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
             log.debug "processSMIMERequest - isValidSignature"

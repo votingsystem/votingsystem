@@ -6,7 +6,7 @@ import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.votingsystem.model.*
 import org.votingsystem.vicket.model.UserVSAccount
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.AlertVS
 import org.votingsystem.vicket.model.TransactionVS
@@ -42,7 +42,7 @@ class TransactionVSService {
 
     public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         String msg;
         def messageJSON = JSON.parse(messageSMIMEReq.getSmimeMessage().getSignedContent())
         if(messageJSON.toUserIBAN instanceof JSONArray) {

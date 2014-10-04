@@ -1,16 +1,11 @@
 package org.votingsystem.vicket.model;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
 import javax.persistence.*;
-import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 

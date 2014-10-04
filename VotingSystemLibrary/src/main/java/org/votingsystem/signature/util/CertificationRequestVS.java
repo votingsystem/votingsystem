@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 
 import javax.mail.Header;
@@ -111,7 +111,7 @@ public class CertificationRequestVS {
         signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts, signatureMechanism);
     }
     
-    public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 
+    public SMIMEMessage genMimeMessage(String fromUser, String toUser,
             String textToSign, String subject, Header header) throws Exception {
         if (signedMailGenerator == null) throw new Exception (" --- SignedMailGenerator null --- ");
         return signedMailGenerator.genMimeMessage(fromUser, toUser, textToSign, subject);

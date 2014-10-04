@@ -23,7 +23,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VicketServer;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
@@ -114,7 +114,7 @@ public class WebSocketService extends Service {
         ResponseVS responseVS = contextVS.signMessage(vicketServer.getNameNormalized(),
                 requestJSON.toString(), msgSubject);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        SMIMEMessageWrapper smimeMessage = null;
+        SMIMEMessage smimeMessage = null;
         try {
             MessageTimeStamper timeStamper = new MessageTimeStamper(responseVS.getSmimeMessage(),
                     contextVS);
@@ -139,7 +139,7 @@ public class WebSocketService extends Service {
     }
 
     public JSONObject getMessageJSON(TypeVS operation, String message, Map data,
-        SMIMEMessageWrapper smimeMessage) {
+        SMIMEMessage smimeMessage) {
         Map messageToServiceMap = new HashMap();
         messageToServiceMap.put("locale", contextVS.getResources().getConfiguration().locale.getLanguage());
         messageToServiceMap.put("operation", operation.toString());

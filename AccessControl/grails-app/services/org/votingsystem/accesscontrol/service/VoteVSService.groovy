@@ -4,15 +4,13 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
-import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
-import java.security.cert.X509Certificate
 
 @Transactional
 class VoteVSService {
@@ -28,7 +26,7 @@ class VoteVSService {
 		String localServerURL = grailsApplication.config.grails.serverURL
 		String msg
 		try {
-			SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+			SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 			CertificateVS voteVSCertificate = smimeMessageReq.getVoteVS().getCertificateVS()
 			FieldEventVS optionSelected = eventVS.checkOptionId(smimeMessageReq.getVoteVS().getOptionSelected().getId())
 			if (!optionSelected) {
@@ -42,7 +40,7 @@ class VoteVSService {
 			String toUser = eventVS.controlCenterVS.serverURL
 			String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
 			smimeMessageReq.setMessageID("${localServerURL}/messageSMIME/${messageSMIMEReq.id}")
-			SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+			SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
 				fromUser,toUser, smimeMessageReq, subject)
 			messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTE
 			messageSMIMEReq.content = smimeMessageResp.getBytes()
@@ -85,7 +83,7 @@ class VoteVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
 		UserVS signer = messageSMIME.getUserVS();
-		SMIMEMessageWrapper smimeMessage = messageSMIME.getSmimeMessage();
+		SMIMEMessage smimeMessage = messageSMIME.getSmimeMessage();
 		log.debug ("$methodName")
 		MessageSMIME messageSMIMEResp;
 		EventVSElection eventVSElection;
@@ -122,7 +120,7 @@ class VoteVSService {
         String toUser = eventVSElection.controlCenterVS.serverURL
         String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
         smimeMessage.setMessageID("${grailsApplication.config.grails.serverURL}/messageSMIME/${messageSMIME.id}")
-        SMIMEMessageWrapper smimeMessageReq = signatureVSService.getMultiSignedMimeMessage(
+        SMIMEMessage smimeMessageReq = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, smimeMessage, subject)
         messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIME, eventVS:eventVSElection)
         String controlCenterURL = eventVSElection.controlCenterVS.serverURL
@@ -131,7 +129,7 @@ class VoteVSService {
         ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageReq.getBytes(),
                 ContentTypeVS.JSON_SIGNED, voteCancellerURL)
         if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
-            SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(new ByteArrayInputStream(
+            SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(
                     responseVSControlCenter.message.getBytes()))
             if(!smimeMessageReq.contentDigestStr.equals(smimeMessageResp.contentDigestStr)) {
                 msg = messageSource.getMessage('controlCenterCommunicationErrorMsg', [responseVS.message].toArray(), locale)

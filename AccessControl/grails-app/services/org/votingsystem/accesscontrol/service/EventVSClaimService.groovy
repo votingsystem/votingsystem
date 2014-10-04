@@ -4,7 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 
@@ -71,7 +71,7 @@ class EventVSClaimService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = signerVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimEventValidated', null, locale)
-        SMIMEMessageWrapper smimeMessage = signatureVSService.getSMIMEMessage(
+        SMIMEMessage smimeMessage = signatureVSService.getSMIMEMessage(
                 fromUser, toUser,  messageJSON.toString(), subject, null)
         MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
                 eventVS:eventVS, content:smimeMessage.getBytes())

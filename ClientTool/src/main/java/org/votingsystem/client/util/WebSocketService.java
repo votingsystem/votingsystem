@@ -15,7 +15,7 @@ import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.signature.util.KeyStoreUtil;
 
@@ -219,7 +219,7 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
-    public static JSONObject getMessageJSON(TypeVS operation, String message, Map data, SMIMEMessageWrapper smimeMessage) {
+    public static JSONObject getMessageJSON(TypeVS operation, String message, Map data, SMIMEMessage smimeMessage) {
         Map messageToServiceMap = new HashMap<>();
         messageToServiceMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
         messageToServiceMap.put("operation", operation.toString());
@@ -258,7 +258,7 @@ public class WebSocketService extends Service<ResponseVS> {
             ResponseVS responseVS = null;
             try {
                 JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
-                SMIMEMessageWrapper smimeMessage = ContentSignerHelper.genMimeMessage(null, targetServer.getNameNormalized(),
+                SMIMEMessage smimeMessage = ContentSignerHelper.genMimeMessage(null, targetServer.getNameNormalized(),
                         documentToSignJSON.toString(), password.toCharArray(), ContextVS.getMessage("initAuthenticatedSessionMsgSubject"), null);
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();

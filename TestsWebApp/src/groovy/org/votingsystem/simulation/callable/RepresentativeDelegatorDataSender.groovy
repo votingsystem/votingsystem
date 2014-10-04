@@ -7,7 +7,7 @@ import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
@@ -50,7 +50,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
 
         String msgSubject = ApplicationContextHolder.getInstance().getMessage("representativeDelegationMsgSubject", null);
                 
-        SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
+        SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(
                 userNIF, toUser, delegationDataJSON, msgSubject, null);        
         
         X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();

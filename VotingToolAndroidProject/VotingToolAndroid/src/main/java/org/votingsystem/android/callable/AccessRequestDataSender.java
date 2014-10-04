@@ -7,7 +7,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
@@ -30,13 +30,13 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     
 	public static final String TAG = AccessRequestDataSender.class.getSimpleName();
 
-    private SMIMEMessageWrapper accessRequest;
+    private SMIMEMessage accessRequest;
     private CertificationRequestVS certificationRequest;
     private X509Certificate destinationCert = null;
     private String serviceURL = null;
     private AppContextVS contextVS = null;
 
-    public AccessRequestDataSender(SMIMEMessageWrapper accessRequest, VoteVS vote,
+    public AccessRequestDataSender(SMIMEMessage accessRequest, VoteVS vote,
             X509Certificate destinationCert, String serviceURL,
             AppContextVS context) throws Exception {
         this.accessRequest = accessRequest;

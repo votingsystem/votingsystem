@@ -4,7 +4,7 @@ import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
 
@@ -450,7 +450,7 @@ class RepresentativeService {
 	
     ResponseVS saveRepresentativeData(MessageSMIME messageSMIMEReq, 
 		byte[] imageBytes, Locale locale) {
-		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		log.debug("saveRepresentativeData - userVS: ${userVS.nif}")
 		String msg
@@ -586,7 +586,7 @@ class RepresentativeService {
 	
 	ResponseVS processVotingHistoryRequest(MessageSMIME messageSMIMEReq, Locale locale) {
 		log.debug("processVotingHistoryRequest")
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		def messageJSON
 		String msg
@@ -657,7 +657,7 @@ class RepresentativeService {
 	
 	ResponseVS processRevoke(MessageSMIME messageSMIMEReq, Locale locale) {
 		String msg = null;
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage();
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage();
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processRevoke - user ${userVS.nif}")
 		try{
@@ -729,7 +729,7 @@ class RepresentativeService {
 			String subject = messageSource.getMessage(
 					'unsubscribeRepresentativeValidationSubject', null, locale)
 
-			SMIMEMessageWrapper smimeMessageResp = signatureVSService.
+			SMIMEMessage smimeMessageResp = signatureVSService.
 				getMultiSignedMimeMessage(fromUser, toUser, smimeMessage, subject)
 				
 			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq,
@@ -756,7 +756,7 @@ class RepresentativeService {
 	//"representativeName":"...","selectedDate":"2013-05-20 09:50:33","email":"...","UUID":"..."}
 	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq, Locale locale) {
 		String msg = null
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processAccreditationsRequest - userVS '{userVS.nif}'")
 		RepresentationDocumentVS representationDocument = null

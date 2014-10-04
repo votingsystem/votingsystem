@@ -6,10 +6,9 @@ import org.vickets.simulation.model.SimulationData
 import org.vickets.simulation.model.UserBaseSimulationData
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.callable.ServerInitializer
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -139,7 +138,7 @@ class TransactionVSSimulationService {
                     typeVS:TypeVS.TRANSACTIONVS_FROM_BANKVS, IBAN:"ESkk bbbb gggg xxcc cccc cccc"]
             String signatureContentStr = new JSONObject(signatureContentMap).toString()
             log.debug("makeTransactionVS ${signatureContentStr}")
-            SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(userNif,
+            SMIMEMessage smimeDocument = signedMailGenerator.genMimeMessage(userNif,
                     vicketServer.getNameNormalized(),signatureContentStr , msgSubject);
             SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, vicketServer.getTransactionVSServiceURL(),
                     vicketServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);

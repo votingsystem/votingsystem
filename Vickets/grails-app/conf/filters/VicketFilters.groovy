@@ -70,7 +70,7 @@ class VicketFilters {
                                             request.getLocale())))
                         }
                         ResponseVS responseVS = null
-                        SMIMEMessageWrapper smimeMessageReq = null
+                        SMIMEMessage smimeMessageReq = null
                         switch(contentTypeVS) {
                             case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                             case ContentTypeVS.SIGNED_AND_ENCRYPTED:
@@ -86,7 +86,7 @@ class VicketFilters {
                             case ContentTypeVS.JSON_SIGNED:
                             case ContentTypeVS.SIGNED:
                                 try {
-                                    smimeMessageReq = new SMIMEMessageWrapper(
+                                    smimeMessageReq = new SMIMEMessage(
                                             new ByteArrayInputStream(fileMap.get(key)?.getBytes()));
                                 } catch(Exception ex) {
                                     log.error(ex.getMessage(), ex)
@@ -142,7 +142,7 @@ class VicketFilters {
                             break;
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
-                            responseVS = signatureVSService.processSMIMERequest(new SMIMEMessageWrapper(
+                            responseVS = signatureVSService.processSMIMERequest(new SMIMEMessage(
                                     new ByteArrayInputStream(requestBytes)), contentTypeVS, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;

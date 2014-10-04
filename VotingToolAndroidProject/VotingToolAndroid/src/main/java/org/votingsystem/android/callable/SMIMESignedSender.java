@@ -6,7 +6,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
@@ -27,7 +27,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
 
     public static final String TAG = SMIMESignedSender.class.getSimpleName();
 
-    private SMIMEMessageWrapper smimeMessage = null;
+    private SMIMEMessage smimeMessage = null;
     private X509Certificate receiverCert = null;
     private AppContextVS contextVS = null;
     private String serviceURL = null;
@@ -74,7 +74,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             responseVS  = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(responseVS.getContentType() != null && responseVS.getContentType().isEncrypted()) {
                 if(responseVS.getContentType().isSigned()) {
-                    SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
+                    SMIMEMessage signedMessage = Encryptor.decryptSMIMEMessage(
                             responseVS.getMessageBytes(), keyEntry.getCertificate().getPublicKey(),
                             keyEntry.getPrivateKey());
                     responseVS.setSmimeMessage(signedMessage);
@@ -94,7 +94,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         } finally {return responseVS;}
     }
 
-    public SMIMEMessageWrapper getSMIMEMessage() {
+    public SMIMEMessage getSMIMEMessage() {
         return smimeMessage;
     }
 

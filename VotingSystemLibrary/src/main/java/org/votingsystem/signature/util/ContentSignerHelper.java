@@ -3,10 +3,9 @@ package org.votingsystem.signature.util;
 import iaik.pkcs.pkcs11.Mechanism;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.dnie.DNIePDFContentSigner;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 
 import javax.mail.Header;
@@ -25,7 +24,7 @@ public class ContentSignerHelper {
 
     public enum CryptoToken {DNIe, JKS_KEYSTORE}
 
-    public static SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
+    public static SMIMEMessage genMimeMessage(String fromUser, String toUser, String textToSign,
              char[] password, String subject, Header... headers) throws Exception {
         String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
         logger.debug("genMimeMessage - CryptoToken: " + cryptoTokenStr);

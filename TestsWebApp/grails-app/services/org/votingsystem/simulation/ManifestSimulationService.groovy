@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.callable.ManifestSignedSender
 import org.votingsystem.simulation.callable.ServerInitializer
@@ -290,7 +290,7 @@ class ManifestSimulationService {
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                 ContextVS.getInstance().getUserTest().getKeyStore(), ContextVS.END_ENTITY_ALIAS,
                 ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
-        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
+        SMIMEMessage smimeDocument = signedMailGenerator.genMimeMessage(
                 ContextVS.getInstance().getUserTest().getEmail(),
                 ContextVS.getInstance().getAccessControl().getNameNormalized(),
                 cancelDataStr, msgSubject,  null);

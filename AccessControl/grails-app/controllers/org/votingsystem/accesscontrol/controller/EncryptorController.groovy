@@ -3,8 +3,7 @@ package org.votingsystem.accesscontrol.controller
 import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.signature.smime.SMIMEMessage
 
 import java.security.KeyFactory
 import java.security.PublicKey
@@ -56,12 +55,12 @@ class EncryptorController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
 		response.contentType = ContentTypeVS.SIGNED
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		
 		String fromUser = "EncryptorController"
 		String toUser = "MultiSignatureTestClient"
 		String subject = "Multisigned response"
-		SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+		SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
 			fromUser, toUser, smimeMessage, subject)
 
 		
@@ -83,7 +82,7 @@ class EncryptorController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		//Date dateFinish = DateUtils.getDateFromString("2014-01-01 00:00:00")
 		def msgJSON = JSON.parse(smimeMessage.getSignedContent())

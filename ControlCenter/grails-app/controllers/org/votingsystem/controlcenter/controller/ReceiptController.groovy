@@ -2,7 +2,7 @@ package org.votingsystem.controlcenter.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.TypeVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 
 /**
@@ -22,7 +22,7 @@ class ReceiptController {
         def signedContentJSON
         if(params.messageSMIME) {
             smimeMessageStr = new String(params.messageSMIME.content, "UTF-8")
-            SMIMEMessageWrapper smimeMessage = params.messageSMIME.getSmimeMessage()
+            SMIMEMessage smimeMessage = params.messageSMIME.getSmimeMessage()
             if(smimeMessage.getTimeStampToken() != null) {
                 timeStampDate = DateUtils.getLongDate_Es(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
             }

@@ -7,7 +7,7 @@ import com.sun.syndication.feed.synd.SyndFeedImpl
 import com.sun.syndication.io.SyndFeedOutput
 import grails.converters.JSON
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 
@@ -40,7 +40,7 @@ class SubscriptionVSController {
 		if(!messageSMIME) {
             return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
-		SMIMEMessageWrapper smimeMessageReq = messageSMIME.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIME.getSmimeMessage()
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 		if (messageJSON.serverURL) {
             String serverURL = StringUtils.checkURL(messageJSON.serverURL)

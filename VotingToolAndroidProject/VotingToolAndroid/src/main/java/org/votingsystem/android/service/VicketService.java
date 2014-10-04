@@ -8,10 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.util.encoders.Base64;
-import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.android.AppContextVS;
@@ -32,8 +29,7 @@ import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.model.VicketBatch;
 import org.votingsystem.model.VicketServer;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -44,8 +40,6 @@ import org.votingsystem.util.TimestampException;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -54,7 +48,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author jgzornoza
@@ -116,7 +109,7 @@ public class VicketService extends IntentService {
                         responseVS.setNotificationMessage(getString(R.string.vicket_cancellation_error_msg_subject));
                         responseVS.setIconId(R.drawable.cancel_22);
                         if(responseVS.getContentType() == ContentTypeVS.JSON_SIGNED) {
-                            SMIMEMessageWrapper signedMessage = responseVS.getSmimeMessage();
+                            SMIMEMessage signedMessage = responseVS.getSmimeMessage();
                             Log.d(TAG + ".cancelVicket(...)", "error JSON response: " + signedMessage.getSignedContent());
                             JSONObject jsonResponse = new JSONObject(signedMessage.getSignedContent());
                             operation = TypeVS.valueOf(jsonResponse.getString("operation"));
@@ -213,7 +206,7 @@ public class VicketService extends IntentService {
 
             for(Vicket vicket : vicketsToSend) {
                 String textToSign = vicket.getTransactionRequest(toUserName, toUserIBAN, tagVS, null).toString();
-                SMIMEMessageWrapper smimeMessage = vicket.getCertificationRequest().genMimeMessage(
+                SMIMEMessage smimeMessage = vicket.getCertificationRequest().genMimeMessage(
                         vicket.getHashCertVSBase64(), StringUtils.getNormalized(toUserName),
                         textToSign, subject, null);
 
@@ -248,7 +241,7 @@ public class VicketService extends IntentService {
                         JSONArray jsonArray = jsonResponse.getJSONArray("vickets");
                         Date dateCreated = null;
                         for(int i = 0; i < jsonArray.length(); i ++) {
-                            SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null,
+                            SMIMEMessage smimeMessage = new SMIMEMessage(null,
                                     new ByteArrayInputStream(Base64.decode(jsonArray.getString(i))), null);
                             dateCreated = smimeMessage.getSigner().getTimeStampToken().
                                     getTimeStampInfo().getGenTime();
@@ -285,7 +278,7 @@ public class VicketService extends IntentService {
                 try {
                     JSONObject responseJSON = new JSONObject(new String(decryptedMessageBytes, ContextVS.UTF_8));
                     String base64EncodedVicketRepeated = responseJSON.getString("messageSMIME");
-                    SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null,
+                    SMIMEMessage smimeMessage = new SMIMEMessage(null,
                             new ByteArrayInputStream(Base64.decode(base64EncodedVicketRepeated)), null);
                     Long repeatedCertSerialNumber = smimeMessage.getSigner().getCertificate().
                             getSerialNumber().longValue();

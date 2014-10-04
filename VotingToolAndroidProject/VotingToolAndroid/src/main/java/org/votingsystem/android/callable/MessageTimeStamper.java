@@ -8,7 +8,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.cert.X509Certificate;
@@ -22,20 +22,20 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     
 	public static final String TAG = MessageTimeStamper.class.getSimpleName();
     
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
     private AppContextVS contextVS;
     private String timeStampServiceURL;
       
-    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage,
+    public MessageTimeStamper (SMIMEMessage smimeMessage,
             AppContextVS context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
         this.contextVS = context;
     }
 
-    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage, String timeStampServiceURL,
+    public MessageTimeStamper (SMIMEMessage smimeMessage, String timeStampServiceURL,
                AppContextVS context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
@@ -81,7 +81,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         return timeStampToken;
     }
         
-    public SMIMEMessageWrapper getSmimeMessage() {
+    public SMIMEMessage getSmimeMessage() {
         return smimeMessage;
     }
 

@@ -4,7 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
@@ -33,7 +33,7 @@ class RepresentativeDelegationService {
 		//def future = callAsync {}
 		//return future.get(30, TimeUnit.SECONDS)
 		MessageSMIME messageSMIME = null
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		RepresentationDocumentVS representationDocument = null
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		String msg = null
@@ -73,7 +73,7 @@ class RepresentativeDelegationService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, smimeMessage, subject)
         MessageSMIME messageSMIMEResp = new MessageSMIME( smimeMessage:smimeMessageResp,
                 type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes()).save();
@@ -106,7 +106,7 @@ class RepresentativeDelegationService {
 
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
         ResponseVS responseVS = checkUserDelegationStatus(userVS, locale)
@@ -148,7 +148,7 @@ class RepresentativeDelegationService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName)
         MessageSMIME messageSMIME = null
-        SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
         X509Certificate x509UserCert =  messageSMIMEReq.getAnonymousSigner().getCertificate()
         String msg = null
         CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
@@ -167,7 +167,7 @@ class RepresentativeDelegationService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = certificateVS.hashCertVSBase64
         String subject = messageSource.getMessage('representativeSelectValidationSubject', null, locale)
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, smimeMessage, subject)
         MessageSMIME messageSMIMEResp = new MessageSMIME(smimeMessage:smimeMessageResp,
                 type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes()).save()
@@ -184,7 +184,7 @@ class RepresentativeDelegationService {
     }
 
     public ResponseVS cancelAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
-        SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
         UserVS userVS = messageSMIMEReq.getUserVS()
         String msg
         MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
@@ -218,7 +218,7 @@ class RepresentativeDelegationService {
 	//"representativeName":"...","selectedDate":"2013-05-20 09:50:33","email":"...","UUID":"..."}
 	ResponseVS processAccreditationsRequest(MessageSMIME messageSMIMEReq, Locale locale) {
 		String msg = null
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS();
 		log.debug("processAccreditationsRequest - userVS '{userVS.nif}'")
 		RepresentationDocumentVS representationDocument = null

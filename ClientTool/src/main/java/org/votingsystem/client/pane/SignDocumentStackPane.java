@@ -25,7 +25,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.ContentSignerHelper;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
@@ -61,7 +61,7 @@ public class SignDocumentStackPane extends StackPane {
     private String toUser;
     private String textToSign;
     private String messageSubject;
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private ProgressBar progressBar;
     private Region progressRegion;
     private VBox progressBox;
@@ -175,7 +175,7 @@ public class SignDocumentStackPane extends StackPane {
     }
 
     public void processOperation(Operation operation, String toUser, String textToSign, String subject,
-             SMIMEMessageWrapper smimeMessage, String serviceURL) {
+             SMIMEMessage smimeMessage, String serviceURL) {
         this.operation = operation;
         this.smimeMessage = smimeMessage;
         this.toUser = toUser;

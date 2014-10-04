@@ -8,7 +8,7 @@ import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VoteVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertificationRequestVS
 import org.votingsystem.util.ApplicationContextHolder
@@ -44,7 +44,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     PASSWORD.toCharArray(), DNIe_SIGN_MECHANISM);
             String accessRequestStr = new JSON(voteVS.getAccessRequestDataMap()).toString();
 
-            SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS.getNif(),
+            SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userVS.getNif(),
                     ContextVS.getInstance().getAccessControl().getNameNormalized(), accessRequestStr, msgSubject, null);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
             ResponseVS responseVS = accessRequestDataSender.call();
@@ -62,7 +62,7 @@ public class VoteSender implements Callable<ResponseVS> {
                         ContextVS.getInstance().getControlCenter().getX509Certificate());
                 responseVS = sender.call();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    SMIMEMessageWrapper voteReceipt = responseVS.getSmimeMessage();
+                    SMIMEMessage voteReceipt = responseVS.getSmimeMessage();
                     voteVS.setReceipt(voteReceipt);
                     //_ TODO _ validate receipt
                 }

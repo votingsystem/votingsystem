@@ -3,7 +3,7 @@ package org.votingsystem.model;
 import android.content.Context;
 
 import org.votingsystem.android.lib.R;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
@@ -16,7 +16,7 @@ import java.util.Date;
 public class ReceiptContainer implements Serializable {
 
     private Long localId = -1L;
-    private transient SMIMEMessageWrapper receipt;
+    private transient SMIMEMessage receipt;
     private byte[] receiptBytes;
     private TypeVS typeVS;
     private String subject;
@@ -72,7 +72,7 @@ public class ReceiptContainer implements Serializable {
     public void setReceiptBytes(byte[] receiptBytes) throws Exception {
         this.receiptBytes = receiptBytes;
         if(receiptBytes != null) {
-            receipt = new SMIMEMessageWrapper(null, new ByteArrayInputStream(receiptBytes), null);
+            receipt = new SMIMEMessage(null, new ByteArrayInputStream(receiptBytes), null);
             subject = receipt.getSubject();
         }
     }
@@ -90,10 +90,10 @@ public class ReceiptContainer implements Serializable {
         return result;
     }
 
-    public SMIMEMessageWrapper getReceipt() throws Exception {
+    public SMIMEMessage getReceipt() throws Exception {
         if(receipt == null && receiptBytes != null) {
             try {
-                receipt = new SMIMEMessageWrapper(
+                receipt = new SMIMEMessage(
                         null, new ByteArrayInputStream(receiptBytes), null);
             } catch (Exception ex) {
                 ex.printStackTrace();

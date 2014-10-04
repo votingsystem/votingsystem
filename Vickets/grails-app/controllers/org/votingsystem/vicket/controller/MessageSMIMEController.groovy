@@ -5,8 +5,7 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.util.AsciiDocUtil
 
@@ -83,7 +82,7 @@ class MessageSMIMEController {
         def signedContentJSON
         if(params.messageSMIME) {
             smimeMessageStr = new String(params.messageSMIME.content, "UTF-8")
-            SMIMEMessageWrapper smimeMessage = params.messageSMIME.getSmimeMessage()
+            SMIMEMessage smimeMessage = params.messageSMIME.getSmimeMessage()
             if(smimeMessage.getTimeStampToken() != null) {
                 timeStampDate = DateUtils.getLongDate_Es(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
             }

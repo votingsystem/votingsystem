@@ -7,7 +7,7 @@ import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
@@ -23,7 +23,7 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     
     private static Logger logger = Logger.getLogger(TimeStamperTestSender.class);
     
-    private SMIMEMessageWrapper documentSMIME;
+    private SMIMEMessage documentSMIME;
     private String requestNIF;
     private String timestampServerURL;
 

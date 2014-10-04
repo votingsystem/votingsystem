@@ -23,7 +23,7 @@ import org.votingsystem.model.ControlCenterVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
@@ -104,7 +104,7 @@ public class VoteService extends IntentService {
                         break;
                     case CANCEL_VOTE:
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            SMIMEMessageWrapper cancelReceipt = responseVS.getSmimeMessage();
+                            SMIMEMessage cancelReceipt = responseVS.getSmimeMessage();
                             vote.setCancelVoteReceipt(cancelReceipt);
                             message = getString(R.string.cancel_vote_result_msg,
                                     vote.getEventVS().getSubject());

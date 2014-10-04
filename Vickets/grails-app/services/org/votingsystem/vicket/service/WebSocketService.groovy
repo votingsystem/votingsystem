@@ -1,13 +1,12 @@
 package org.votingsystem.vicket.service
 
-import grails.converters.JSON
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.vicket.websocket.SessionVS
@@ -111,7 +110,7 @@ class WebSocketService {
                     break;
                 case TypeVS.INIT_VALIDATED_SESSION:
                     SignatureVSService signatureVSService = grailsApplication.mainContext.getBean("signatureVSService")
-                    SMIMEMessageWrapper smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(
+                    SMIMEMessage smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(
                             messageJSON.smimeMessage.decodeBase64()))
                     messageJSON.remove("smimeMessage")
                     ResponseVS responseVS = signatureVSService.processSMIMERequest(smimeMessageReq, null, locale)

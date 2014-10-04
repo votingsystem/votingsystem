@@ -86,11 +86,11 @@ import static org.votingsystem.model.ContextVS.PROVIDER;
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
+public class SMIMEMessage extends MimeMessage implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-	public static final String TAG = "SMIMEMessageWrapper";
+	public static final String TAG = "SMIMEMessage";
 	
     static {
         MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
@@ -121,7 +121,7 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
     private UserVS signerVS;
     private VoteVS voteVS;
     
-    public SMIMEMessageWrapper(Session session) throws MessagingException {
+    public SMIMEMessage(Session session) throws MessagingException {
         super(session);
         fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + ContentTypeVS.SIGNED.getExtension());
@@ -129,7 +129,7 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
                 ContentTypeVS.SIGNED.getExtension();
     }
 
-    public SMIMEMessageWrapper (Session session, InputStream inputStream, String fileName) 
+    public SMIMEMessage(Session session, InputStream inputStream, String fileName)
             throws IOException, MessagingException, CMSException, SMIMEException, Exception {
         super(session, inputStream);
         //Properties props = System.getProperties();
@@ -204,7 +204,7 @@ public class SMIMEMessageWrapper extends MimeMessage implements Serializable {
     }
     
     public void save() throws Exception {
-    	Log.d("SMIMEMessageWrapper", "save");
+    	Log.d("SMIMEMessage", "save");
         super.saveChanges();
         initSMIMEMessage();
     }

@@ -19,7 +19,7 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
@@ -193,7 +193,7 @@ public class SignAndSendService extends IntentService {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setOperation(operationVS);
             } else {
-                SMIMEMessageWrapper smimeMessage = responseVS.getSmimeMessage();
+                SMIMEMessage smimeMessage = responseVS.getSmimeMessage();
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                         targetServer.getTimeStampServiceURL(), contextVS);
                 responseVS = timeStamper.call();

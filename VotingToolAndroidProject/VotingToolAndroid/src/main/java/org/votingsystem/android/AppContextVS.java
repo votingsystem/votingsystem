@@ -33,7 +33,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.Vicket;
 import org.votingsystem.model.VicketServer;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
@@ -267,7 +267,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     (X509Certificate) keyEntry.getCertificateChain()[0],
                     SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS, toUser,
+            SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userVS, toUser,
                     textToSign, subject);
             //we can't timestamp here because of android.os.NetworkOnMainThreadException
             responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);

@@ -6,8 +6,8 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import org.json.JSONObject;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.android.lib.R;
+import org.votingsystem.signature.smime.SMIMEMessage;
+
 import java.io.ByteArrayInputStream;
 
 
@@ -52,7 +52,7 @@ public class ResponseVS<T> implements Parcelable {
     private String url;
     private T data;
     private TypeVS typeVS;
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private byte[] smimeMessageBytes;
     private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private byte[] messageBytes;
@@ -86,7 +86,7 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
-              TypeVS typeVS, SMIMEMessageWrapper smimeMessage) {
+              TypeVS typeVS, SMIMEMessage smimeMessage) {
         this.statusCode = statusCode;
         this.serviceCaller = serviceCaller;
         this.caption = caption;
@@ -96,7 +96,7 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
-            TypeVS typeVS, SMIMEMessageWrapper smimeMessage, Integer iconId) {
+            TypeVS typeVS, SMIMEMessage smimeMessage, Integer iconId) {
         this.statusCode = statusCode;
         this.serviceCaller = serviceCaller;
         this.caption = caption;
@@ -118,7 +118,7 @@ public class ResponseVS<T> implements Parcelable {
         this.messageBytes = messageBytes;
     }
 
-    public ResponseVS(int statusCode, SMIMEMessageWrapper smimeMessage) {
+    public ResponseVS(int statusCode, SMIMEMessage smimeMessage) {
         this.statusCode = statusCode;
         this.smimeMessage = smimeMessage;
     }
@@ -230,10 +230,10 @@ public class ResponseVS<T> implements Parcelable {
 		this.messageBytes = messageBytes;
 	}
 
-    public SMIMEMessageWrapper getSmimeMessage() {
+    public SMIMEMessage getSmimeMessage() {
         if(smimeMessage == null && smimeMessageBytes != null) {
             try {
-                smimeMessage = new SMIMEMessageWrapper(null,
+                smimeMessage = new SMIMEMessage(null,
                         new ByteArrayInputStream(smimeMessageBytes), null);
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -242,7 +242,7 @@ public class ResponseVS<T> implements Parcelable {
         return smimeMessage;
     }
 
-	public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
+	public void setSmimeMessage(SMIMEMessage smimeMessage) {
 		this.smimeMessage = smimeMessage;
 	}
 

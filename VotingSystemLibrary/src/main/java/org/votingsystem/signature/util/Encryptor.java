@@ -10,7 +10,7 @@ import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -28,7 +28,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Locale;
 
 /**
  * @author jgzornoza
@@ -151,7 +150,7 @@ public class Encryptor {
      */
     public ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         //If the message isn't recreated there can be problems with multipart boundaries. TODO
-        SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(new ByteArrayInputStream(bytesToEncrypt));
+        SMIMEMessage msgToEncrypt = new SMIMEMessage(new ByteArrayInputStream(bytesToEncrypt));
         SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
         encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert).setProvider("BC"));
 			/* Encrypt the message */
@@ -184,7 +183,7 @@ public class Encryptor {
      * Method to decrypt SMIME signed messages
      */
     public ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes) throws Exception {
-        SMIMEMessageWrapper smimeMessageReq = null;
+        SMIMEMessage smimeMessageReq = null;
         MimeMessage msg = new MimeMessage(ContextVS.MAIL_SESSION, new ByteArrayInputStream(encryptedMessageBytes));
         //String encryptedMessageBytesStr = new String(encryptedMessageBytes);
         //logger.debug("- decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
@@ -214,7 +213,7 @@ public class Encryptor {
         }
         byte[] messageContentBytes =  recipientInfo.getContent(recipient);
         //logger.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
-        smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(messageContentBytes));
+        smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(messageContentBytes));
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
         responseVS.setSmimeMessage(smimeMessageReq);
         return responseVS;
@@ -307,7 +306,7 @@ public class Encryptor {
         }
     }
 
-    public static byte[] encryptSMIME(SMIMEMessageWrapper msgToEncrypt, 
+    public static byte[] encryptSMIME(SMIMEMessage msgToEncrypt,
                     X509Certificate receiverCert) throws Exception {
         /* Create the encrypter */
         SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
@@ -344,13 +343,13 @@ public class Encryptor {
     /**
     * Method to decrypt SMIME signed messages
     */
-   public static SMIMEMessageWrapper decryptSMIMEMessage(
+   public static SMIMEMessage decryptSMIMEMessage(
            byte[] encryptedMessageBytes, PublicKey  publicKey, 
             PrivateKey receiverPrivateKey) throws Exception {
         logger.debug("decryptSMIMEMessage(...) ");
         InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, publicKey, receiverPrivateKey));
-        return new SMIMEMessageWrapper(inputStream);
+        return new SMIMEMessage(inputStream);
    }
 
     /**

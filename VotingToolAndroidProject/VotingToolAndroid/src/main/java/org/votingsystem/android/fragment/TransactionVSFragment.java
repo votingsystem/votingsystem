@@ -28,7 +28,7 @@ import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
@@ -47,7 +47,7 @@ public class TransactionVSFragment extends Fragment {
     private TextView to_user;
     private TextView from_user;
     private TextView receipt;
-    private SMIMEMessageWrapper messageSMIME;
+    private SMIMEMessage messageSMIME;
     private String broadCastId = null;
     private AppContextVS contextVS;
 

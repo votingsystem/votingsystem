@@ -4,18 +4,13 @@ import android.util.Log;
 
 import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -32,7 +27,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
 
     public static final String TAG = SignedMapSender.class.getSimpleName();
 
-    private SMIMEMessageWrapper smimeMessage = null;
+    private SMIMEMessage smimeMessage = null;
     private AppContextVS contextVS = null;
     private String fromUser = null;
     private String toUser = null;

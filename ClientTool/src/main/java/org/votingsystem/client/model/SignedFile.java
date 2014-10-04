@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.PDFDocumentVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.FileUtils;
 
 import java.io.ByteArrayInputStream;
@@ -30,7 +30,7 @@ public class SignedFile {
     private String name = null;
     private Map operationDocument = null;
     private TimeStampToken timeStampToken = null;
-    private SMIMEMessageWrapper smimeMessageWraper = null;
+    private SMIMEMessage smimeMessageWraper = null;
     private boolean signatureVerified = false;
     private PdfPKCS7 pdfPKCS7 = null;
     private PDFDocumentVS pdfDocument = null;
@@ -74,12 +74,12 @@ public class SignedFile {
             }
             
         } else if(name.toLowerCase().endsWith(".p7s")){
-            smimeMessageWraper = new SMIMEMessageWrapper(new ByteArrayInputStream(signedFileBytes));
+            smimeMessageWraper = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
             signatureVerified = smimeMessageWraper.isValidSignature();
             if(signatureVerified) timeStampToken = smimeMessageWraper.getSigner().getTimeStampToken();
         } else {
-            logger.error("#### file type unknown -> " + name + " trying with SMIMEMessageWrapper");
-            smimeMessageWraper = new SMIMEMessageWrapper(new ByteArrayInputStream(signedFileBytes));
+            logger.error("#### file type unknown -> " + name + " trying with SMIMEMessage");
+            smimeMessageWraper = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
             signatureVerified = smimeMessageWraper.isValidSignature();
         }
     }
@@ -117,7 +117,7 @@ public class SignedFile {
         return name;
     }
 
-    public SMIMEMessageWrapper getSMIMEMessageWraper() {
+    public SMIMEMessage getSMIMEMessageWraper() {
         return smimeMessageWraper;
     }
     

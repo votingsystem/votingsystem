@@ -3,7 +3,7 @@ package org.votingsystem.timestamp.service
 import grails.transaction.Transactional
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtil
 
@@ -44,15 +44,15 @@ class TimeStampTestService {
     }
 
     public ResponseVS validateMessage(byte[] messageContentBytes, Locale locale) {
-        SMIMEMessageWrapper messageWrapper = new SMIMEMessageWrapper(new ByteArrayInputStream(messageContentBytes));
-        Set<UserVS> signersVS = messageWrapper.getSigners();
+        SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(messageContentBytes));
+        Set<UserVS> signersVS = smimeMessage.getSigners();
         if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
                 messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
         Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
         UserVS anonymousSigner = null
         CertExtensionCheckerVS extensionChecker
-        String signerNIF = messageWrapper.getSigner().getNif()
+        String signerNIF = smimeMessage.getSigner().getNif()
         for(UserVS userVS: signersVS) {
             try {
                 if(userVS.getTimeStampToken() != null) {
@@ -84,7 +84,7 @@ class TimeStampTestService {
                 return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR)
             }
         }
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:messageWrapper)
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessage)
     }
 
 }

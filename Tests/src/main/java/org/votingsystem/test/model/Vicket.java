@@ -3,7 +3,7 @@ package org.votingsystem.test.model;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
@@ -27,8 +27,8 @@ public class Vicket implements Serializable  {
     public enum State { OK, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     private TransactionVS transaction;
-    private transient SMIMEMessageWrapper receipt;
-    private transient SMIMEMessageWrapper cancellationReceipt;
+    private transient SMIMEMessage receipt;
+    private transient SMIMEMessage cancellationReceipt;
     private CertificationRequestVS certificationRequest;
     private byte[] receiptBytes;
     private byte[] cancellationReceiptBytes;

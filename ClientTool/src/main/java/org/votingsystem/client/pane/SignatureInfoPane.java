@@ -18,7 +18,7 @@ import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 
 import java.io.File;
@@ -32,11 +32,11 @@ public class SignatureInfoPane extends GridPane {
     private static Logger logger = Logger.getLogger(SignatureInfoPane.class);
 
     private UserVS signer;
-    private SMIMEMessageWrapper signedMessage;
+    private SMIMEMessage signedMessage;
     private SignedFile signedFile;
     private String signatureAlgorithmValue = null;
 
-    public SignatureInfoPane(UserVS signer, SMIMEMessageWrapper signedMessage) throws Exception {
+    public SignatureInfoPane(UserVS signer, SMIMEMessage signedMessage) throws Exception {
         this.signer = signer;
         this.signedMessage = signedMessage;
         signatureAlgorithmValue = signer.getEncryptiontId() + " - " + signer.getDigestId();

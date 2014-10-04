@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.callable.VoteSender
@@ -188,11 +188,11 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 			ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
 		Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
 		signedMailGenerator = new SignedMailGenerator(privateKey, chain, ContextVS.DNIe_SIGN_MECHANISM);
-		SMIMEMessageWrapper smimeDocument1 = signedMailGenerator.genMimeMessage(
+		SMIMEMessage smimeDocument1 = signedMailGenerator.genMimeMessage(
 				ContextVS.getInstance().getUserTest().getEmail(),
 				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);*/
-        SMIMEMessageWrapper smimeDocument = signatureVSService.getSMIMEMessage(grailsApplication.config.VotingSystem.systemMail,
+        SMIMEMessage smimeDocument = signatureVSService.getSMIMEMessage(grailsApplication.config.VotingSystem.systemMail,
                 ContextVS.getInstance().getAccessControl().getNameNormalized(), eventStr, msgSubject)
         SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishElection,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
@@ -201,7 +201,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] responseBytes = responseVS.getMessageBytes();
             ContextVS.getInstance().copyFile(responseBytes,"/electionSimulation", "ElectionPublishedReceipt")
-            SMIMEMessageWrapper smimeDocumentReceipt = new SMIMEMessageWrapper(new ByteArrayInputStream(responseBytes));
+            SMIMEMessage smimeDocumentReceipt = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
             this.eventVS = EventVSElection.populate(new JSONObject(smimeDocumentReceipt.getSignedContent()))
             //smimeDocumentReceipt.verify(ContextVS.getInstance().getSessionPKIXParameters());
 		}
@@ -291,7 +291,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                     } else {
                         String voteErrorMsg = "VOTING ERROR - nif: " + nifFrom + " - msg: " + responseVS.getMessage();
                         log.error(voteErrorMsg);
-                        SMIMEMessageWrapper voteWithErrors = responseVS.getSmimeMessage();
+                        SMIMEMessage voteWithErrors = responseVS.getSmimeMessage();
                         if(voteWithErrors != null) {
                             File outputFile = new File(ContextVS.ERROR_DIR + File.separator + "VoteError_" + nifFrom);
                             voteWithErrors.writeTo(new FileOutputStream(outputFile));
@@ -326,7 +326,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                 [eventVS.getId()].toArray(), locale);
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(ContextVS.getInstance().getUserTest().getKeyStore(),
                 ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
-        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage( ContextVS.getInstance().getUserTest().getEmail(),
+        SMIMEMessage smimeDocument = signedMailGenerator.genMimeMessage( ContextVS.getInstance().getUserTest().getEmail(),
                 ContextVS.getInstance().getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),

@@ -1,22 +1,18 @@
 package org.votingsystem.vicket.service
 
-import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.context.i18n.LocaleContextHolder
-import org.votingsystem.model.GroupVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketTagVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
-
-import java.math.RoundingMode
 
 //@Transactional
 class TransactionVS_UserVSService {
@@ -32,7 +28,7 @@ class TransactionVS_UserVSService {
   //  @Transactional
     private ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, JSONObject messageJSON) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS fromUserVS = messageSMIMEReq.userVS
         UserVS toUserVS
         log.debug("====== $methodName - messageJSON: $messageJSON")

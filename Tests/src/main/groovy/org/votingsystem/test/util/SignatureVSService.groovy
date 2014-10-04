@@ -5,7 +5,7 @@ import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
@@ -88,12 +88,12 @@ class SignatureVSService {
 		return resultFile
 	}
 
-    public SMIMEMessageWrapper getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
+    public SMIMEMessage getTimestampedSignedMimeMessage (String fromUser,String toUser,String textToSign,String subject,
                            Header... headers) {
         logger.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessageWrapper smimeMessage = getSignedMailGenerator().genMimeMessage(
+        SMIMEMessage smimeMessage = getSignedMailGenerator().genMimeMessage(
                 fromUser, toUser, textToSign, subject, headers)
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${ContextVS.getInstance().config.urlTimeStampServer}/timeStamp")
@@ -102,16 +102,16 @@ class SignatureVSService {
         return timeStamper.getSmimeMessage();
     }
 		
-	public SMIMEMessageWrapper getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header... headers) {
+	public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header... headers) {
 		logger.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessageWrapper mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, headers)
+        SMIMEMessage mimeMessage = getSignedMailGenerator().genMimeMessage(fromUser, toUser, textToSign, subject, headers)
 		return mimeMessage
 	}
 		
-	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (
-		String fromUser, String toUser,	final SMIMEMessageWrapper smimeMessage, String subject) {
+	public synchronized SMIMEMessage getMultiSignedMimeMessage (
+		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
 		logger.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
 		if(fromUser) {
 			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
@@ -121,7 +121,7 @@ class SignatureVSService {
 			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 			smimeMessage.setHeader("To", toUser)
 		}
-		SMIMEMessageWrapper multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
+		SMIMEMessage multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
 		return multiSignedMessage
 	}
 

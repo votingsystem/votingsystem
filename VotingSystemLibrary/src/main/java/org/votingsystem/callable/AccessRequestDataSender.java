@@ -7,9 +7,8 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.cert.X509Certificate;
@@ -28,11 +27,11 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     private static Logger logger = Logger.getLogger(AccessRequestDataSender.class);
 
     private VoteVS voteVS;
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private CertificationRequestVS certificationRequest;
     private X509Certificate destinationCert;
 
-    public AccessRequestDataSender(SMIMEMessageWrapper smimeMessage, VoteVS voteVS) throws Exception {
+    public AccessRequestDataSender(SMIMEMessage smimeMessage, VoteVS voteVS) throws Exception {
         this.smimeMessage = smimeMessage;
         this.voteVS = voteVS;
         this.destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();

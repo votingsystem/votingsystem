@@ -14,7 +14,7 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 
 import java.io.ByteArrayInputStream;
@@ -44,9 +44,9 @@ public class SignersInfoDialogFragment extends DialogFragment {
                 R.layout.signers_info_dialog, null);
         LinearLayout containerView = (LinearLayout) mainLayout.findViewById(R.id.signers_container);
         byte[] smimeMessageBytes = getArguments().getByteArray(ContextVS.MESSAGE_KEY);
-        SMIMEMessageWrapper smimeMessage = null;
+        SMIMEMessage smimeMessage = null;
         try {
-            smimeMessage = new SMIMEMessageWrapper(null,
+            smimeMessage = new SMIMEMessage(null,
                     new ByteArrayInputStream(smimeMessageBytes), null);
         } catch(Exception ex) {
             ex.printStackTrace();

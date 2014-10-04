@@ -17,7 +17,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.cert.X509Certificate;
@@ -32,12 +32,12 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     
     private static Logger logger = Logger.getLogger(MessageTimeStamper.class);
     
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
     private String timeStampServerURL;
       
-    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage, String timeStampServerURL) throws Exception {
+    public MessageTimeStamper (SMIMEMessage smimeMessage, String timeStampServerURL) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
         this.timeStampServerURL = timeStampServerURL;
@@ -87,7 +87,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         return digestToken;
     }
     
-    public SMIMEMessageWrapper getSmimeMessage() {
+    public SMIMEMessage getSmimeMessage() {
         return smimeMessage;
     }
 

@@ -2,21 +2,15 @@ package org.votingsystem.simulation.callable
 
 import grails.converters.JSON
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.signature.smime.SignedMailGenerator
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.HttpHelper
-import org.votingsystem.util.ApplicationContextHolder as ACH
 
-import java.security.KeyStore
-import java.security.PrivateKey
-import java.security.cert.Certificate
 import java.security.cert.X509Certificate
 import java.util.concurrent.Callable
 /**
@@ -88,7 +82,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
             logger.debug("Control Center isn't associated -> Matching serverURL: " + serverURL);
             Map mapToSign = ActorVS.getAssociationDocumentMap(serverURL);
             String msgSubject = ApplicationContextHolder.getInstance().getMessage("associateControlCenterMsgSubject");
-            SMIMEMessageWrapper smimeDocument = ContextVS.getInstance().genTestSMIMEMessage(
+            SMIMEMessage smimeDocument = ContextVS.getInstance().genTestSMIMEMessage(
                     ContextVS.getInstance().getAccessControl().getNameNormalized(), "${mapToSign as JSON}", msgSubject);
             SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument,
                     ContextVS.getInstance().getAccessControl().getServerSubscriptionServiceURL(),

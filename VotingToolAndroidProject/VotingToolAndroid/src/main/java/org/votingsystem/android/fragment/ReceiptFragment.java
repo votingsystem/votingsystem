@@ -42,7 +42,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TransactionVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
@@ -99,7 +99,7 @@ public class ReceiptFragment extends Fragment {
     private TextView receiptSubject;
     private TextView receipt_content;
     private TextView receipt;
-    private SMIMEMessageWrapper selectedReceiptSMIME;
+    private SMIMEMessage selectedReceiptSMIME;
     private String broadCastId = null;
 
 

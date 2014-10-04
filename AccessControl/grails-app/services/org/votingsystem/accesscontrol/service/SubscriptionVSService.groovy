@@ -2,7 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
@@ -155,7 +155,7 @@ class SubscriptionVSService {
     public ResponseVS associateControlCenter (MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         String msg = null;
         if(!userVSService.isUserAdmin(messageSMIMEReq.userVS.nif)) {
             msg = messageSource.getMessage('userWithoutPrivilegesErrorMsg',

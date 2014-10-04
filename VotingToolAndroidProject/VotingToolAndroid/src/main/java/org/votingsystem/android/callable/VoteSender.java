@@ -9,7 +9,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
@@ -55,7 +55,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
 
             JSONObject accessRequestJSON = new JSONObject(vote.getAccessRequestDataMap());
-            SMIMEMessageWrapper accessRequest = signedMailGenerator.genMimeMessage(
+            SMIMEMessage accessRequest = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControl().getNameNormalized(),
                     accessRequestJSON.toString(), subject);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(accessRequest,
@@ -66,7 +66,7 @@ public class VoteSender implements Callable<ResponseVS> {
             JSONObject voteJSON = new JSONObject(vote.getVoteDataMap());
             CertificationRequestVS certificationRequest =
                     accessRequestDataSender.getCertificationRequest();
-            SMIMEMessageWrapper signedVote = certificationRequest.genMimeMessage(
+            SMIMEMessage signedVote = certificationRequest.genMimeMessage(
                     vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getNameNormalized(),
                     voteJSON.toString(), contextVS.getString(R.string.vote_msg_subject), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, contextVS);
@@ -80,7 +80,7 @@ public class VoteSender implements Callable<ResponseVS> {
                     vote.getEventVS().getControlCenter().getCertificate());
             responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE,serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
+                SMIMEMessage voteReceipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
                         certificationRequest.getKeyPair().getPrivate());
                 try {

@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 
 import javax.persistence.*;
@@ -55,7 +55,7 @@ public class VoteVS implements Serializable {
     @Transient private X509Certificate x509Certificate;
     @Transient private TimeStampToken timeStampToken;
     @Transient private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
-    @Transient private SMIMEMessageWrapper receipt;
+    @Transient private SMIMEMessage receipt;
     @Transient private boolean isValid = false;
 
     public VoteVS () {}
@@ -185,9 +185,9 @@ public class VoteVS implements Serializable {
 
     public void setValid(boolean isValid) { this.isValid = isValid; }
 
-    public SMIMEMessageWrapper getReceipt() { return receipt; }
+    public SMIMEMessage getReceipt() { return receipt; }
 
-    public void setReceipt(SMIMEMessageWrapper receipt) { this.receipt = receipt; }
+    public void setReceipt(SMIMEMessage receipt) { this.receipt = receipt; }
 
     public void setServerCerts(Set<X509Certificate> serverCerts) { this.serverCerts = serverCerts; }
 

@@ -4,7 +4,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
 
@@ -31,9 +31,9 @@ public class TransactionVS  implements Serializable {
     private String subject;
     private BigDecimal amount = null;
 
-    private transient SMIMEMessageWrapper messageSMIME;
+    private transient SMIMEMessage messageSMIME;
     private byte[] messageSMIMEBytes;
-    private transient SMIMEMessageWrapper cancellationSMIME;
+    private transient SMIMEMessage cancellationSMIME;
     private byte[] cancellationSMIMEBytes;
 
     private TransactionVS transactionParent;
@@ -168,10 +168,10 @@ public class TransactionVS  implements Serializable {
         this.tagVSList = tagVSList;
     }
 
-    public SMIMEMessageWrapper getMessageSMIME() {
+    public SMIMEMessage getMessageSMIME() {
         if(messageSMIME == null && messageSMIMEBytes != null) {
             try {
-                messageSMIME = new SMIMEMessageWrapper(new ByteArrayInputStream(messageSMIMEBytes));
+                messageSMIME = new SMIMEMessage(new ByteArrayInputStream(messageSMIMEBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
@@ -179,14 +179,14 @@ public class TransactionVS  implements Serializable {
         return messageSMIME;
     }
 
-    public void setMessageSMIME(SMIMEMessageWrapper messageSMIME) {
+    public void setMessageSMIME(SMIMEMessage messageSMIME) {
         this.messageSMIME = messageSMIME;
     }
 
-    public SMIMEMessageWrapper getCancellationSMIME() {
+    public SMIMEMessage getCancellationSMIME() {
         if(cancellationSMIME == null && cancellationSMIMEBytes != null) {
             try {
-                cancellationSMIME = new SMIMEMessageWrapper(new ByteArrayInputStream(cancellationSMIMEBytes));
+                cancellationSMIME = new SMIMEMessage(new ByteArrayInputStream(cancellationSMIMEBytes));
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
@@ -194,7 +194,7 @@ public class TransactionVS  implements Serializable {
         return cancellationSMIME;
     }
 
-    public void setCancellationSMIME(SMIMEMessageWrapper cancellationSMIME) {
+    public void setCancellationSMIME(SMIMEMessage cancellationSMIME) {
         this.cancellationSMIME = cancellationSMIME;
     }
 

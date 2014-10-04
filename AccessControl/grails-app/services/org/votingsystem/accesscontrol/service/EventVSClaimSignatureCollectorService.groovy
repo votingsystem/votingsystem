@@ -3,7 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 
 class EventVSClaimSignatureCollectorService {
 
@@ -14,7 +14,7 @@ class EventVSClaimSignatureCollectorService {
     ResponseVS save (MessageSMIME messageSMIMEReq, Locale locale) {
         log.debug("save")
         def msg
-        SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
         def messageJSON = JSON.parse(smimeMessage.getSignedContent())
         UserVS userVS = messageSMIMEReq.getUserVS()
         ResponseVS responseVS = checkClaimJSONData(messageJSON, locale)
@@ -53,7 +53,7 @@ class EventVSClaimSignatureCollectorService {
         String toUser = userVS.getNif()
         String subject = messageSource.getMessage('mime.subject.claimSignatureValidated', null, locale)
 
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.
+        SMIMEMessage smimeMessageResp = signatureVSService.
             getMultiSignedMimeMessage (fromUser, toUser, smimeMessage, subject)
         MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
             smimeParent:messageSMIMEReq, eventVS:eventVSClaim, content:smimeMessageResp.getBytes())

@@ -34,7 +34,7 @@ import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.Vicket;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
@@ -57,7 +57,7 @@ public class VicketFragment extends Fragment {
     private TextView vicket_cancellation_date;
 
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
-    private SMIMEMessageWrapper selectedVicketSMIME;
+    private SMIMEMessage selectedVicketSMIME;
     private String broadCastId = null;
     private String userCertInfo;
     private Button cancel_button;

@@ -2,15 +2,13 @@ package org.votingsystem.model;
 
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,8 +34,8 @@ public class Vicket extends ReceiptContainer {
 
     private Long localId = -1L;
     private TransactionVS transaction;
-    private transient SMIMEMessageWrapper receipt;
-    private transient SMIMEMessageWrapper cancellationReceipt;
+    private transient SMIMEMessage receipt;
+    private transient SMIMEMessage cancellationReceipt;
     private CertificationRequestVS certificationRequest;
     private byte[] receiptBytes;
     private byte[] cancellationReceiptBytes;
@@ -100,15 +98,15 @@ public class Vicket extends ReceiptContainer {
         this.localId = localId;
     }
 
-    @Override public SMIMEMessageWrapper getReceipt() throws Exception {
+    @Override public SMIMEMessage getReceipt() throws Exception {
         if(receipt == null && receiptBytes != null) receipt =
-                new SMIMEMessageWrapper(null, new ByteArrayInputStream(receiptBytes), null);
+                new SMIMEMessage(null, new ByteArrayInputStream(receiptBytes), null);
         return receipt;
     }
 
-    public SMIMEMessageWrapper getCancellationReceipt() throws Exception {
+    public SMIMEMessage getCancellationReceipt() throws Exception {
         if(cancellationReceipt == null && cancellationReceiptBytes != null) cancellationReceipt =
-                new SMIMEMessageWrapper(null, new ByteArrayInputStream(cancellationReceiptBytes), null);
+                new SMIMEMessage(null, new ByteArrayInputStream(cancellationReceiptBytes), null);
         return cancellationReceipt;
     }
 
@@ -121,7 +119,7 @@ public class Vicket extends ReceiptContainer {
         this.cancellationReceiptBytes = receiptBytes;
     }
 
-    public void setCancellationReceipt(SMIMEMessageWrapper receipt) {
+    public void setCancellationReceipt(SMIMEMessage receipt) {
         try {
             this.cancellationReceiptBytes = receipt.getBytes();
             this.cancellationReceipt = receipt;
@@ -144,7 +142,7 @@ public class Vicket extends ReceiptContainer {
     @Override public String getMessageId() {
         String result = null;
         try {
-            SMIMEMessageWrapper receipt = getReceipt();
+            SMIMEMessage receipt = getReceipt();
             if(receipt == null) return null;
             String[] headers = receipt.getHeader("Message-ID");
             if(headers != null && headers.length >0) return headers[0];

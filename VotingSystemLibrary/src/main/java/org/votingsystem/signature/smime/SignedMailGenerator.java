@@ -107,7 +107,7 @@ public class SignedMailGenerator {
         smimeSignedGenerator.addCertificates(certs);
     }
 
-    public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 
+    public SMIMEMessage genMimeMessage(String fromUser, String toUser,
             String textToSign, String subject, Header... headers) throws Exception {
         if (subject == null) throw new IllegalArgumentException("Subject null");
         if (textToSign == null) throw new IllegalArgumentException("Content null");
@@ -115,7 +115,7 @@ public class SignedMailGenerator {
         msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
                 msg,ContextVS.DEFAULT_SIGNED_FILE_NAME);
-        SMIMEMessageWrapper body = new SMIMEMessageWrapper(ContextVS.MAIL_SESSION);
+        SMIMEMessage body = new SMIMEMessage(ContextVS.MAIL_SESSION);
         if (headers != null) {
         	for(Header header : headers) {
         		 if (header != null) body.setHeader(header.getName(), header.getValue());
@@ -135,8 +135,8 @@ public class SignedMailGenerator {
         return body;
     }
      
-     public synchronized SMIMEMessageWrapper genMultiSignedMessage(
-    		 SMIMEMessageWrapper smimeMessage, String mailSubject) throws Exception {
+     public synchronized SMIMEMessage genMultiSignedMessage(
+    		 SMIMEMessage smimeMessage, String mailSubject) throws Exception {
  		 MimeMultipart mimeMultipart = (MimeMultipart)smimeMessage.getContent();
  		 MimeBodyPart bodyPart = (MimeBodyPart) mimeMultipart.getBodyPart(0);    	 
     	 SMIMESignedGenerator smimeSignedGenerator = new SMIMESignedGenerator();

@@ -9,7 +9,7 @@ import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 
 import java.io.ByteArrayInputStream;
@@ -37,9 +37,9 @@ public class VoteVS extends ReceiptContainer {
 	public static final String TAG = "VoteVS";
     
     private Long localId = -1L;
-    private transient SMIMEMessageWrapper voteReceipt;
+    private transient SMIMEMessage voteReceipt;
     private transient byte[] voteReceiptBytes;
-    private transient SMIMEMessageWrapper cancelVoteReceipt;
+    private transient SMIMEMessage cancelVoteReceipt;
     private transient byte[] cancelVoteReceiptBytes;
     private transient TimeStampToken timeStampToken;
     private X509Certificate x509Certificate;
@@ -157,10 +157,10 @@ public class VoteVS extends ReceiptContainer {
         this.eventVS = eventVS;
     }
 
-	public SMIMEMessageWrapper getCancelVoteReceipt() {
+	public SMIMEMessage getCancelVoteReceipt() {
         if(cancelVoteReceipt == null && cancelVoteReceiptBytes != null) {
             try {
-                cancelVoteReceipt = new SMIMEMessageWrapper(null,
+                cancelVoteReceipt = new SMIMEMessage(null,
                         new ByteArrayInputStream(cancelVoteReceiptBytes), null);
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -169,14 +169,14 @@ public class VoteVS extends ReceiptContainer {
         return cancelVoteReceipt;
 	}
 
-	public void setCancelVoteReceipt(SMIMEMessageWrapper cancelVoteReceipt) {
+	public void setCancelVoteReceipt(SMIMEMessage cancelVoteReceipt) {
 		this.cancelVoteReceipt = cancelVoteReceipt;
 	}
 
-    public SMIMEMessageWrapper getVoteReceipt() {
+    public SMIMEMessage getVoteReceipt() {
         if(voteReceipt == null && voteReceiptBytes != null) {
             try {
-                voteReceipt = new SMIMEMessageWrapper(null,
+                voteReceipt = new SMIMEMessage(null,
                         new ByteArrayInputStream(voteReceiptBytes), null);
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -185,7 +185,7 @@ public class VoteVS extends ReceiptContainer {
         return voteReceipt;
     }
 
-    public void setVoteReceipt(SMIMEMessageWrapper voteReceipt) throws Exception {
+    public void setVoteReceipt(SMIMEMessage voteReceipt) throws Exception {
         JSONObject receiptContentJSON = new JSONObject(voteReceipt.getSignedContent());
         JSONObject receiptOptionSelected = receiptContentJSON.getJSONObject("optionSelected");
         if(optionSelected.getId() != receiptOptionSelected.getLong("id") ||
@@ -405,7 +405,7 @@ public class VoteVS extends ReceiptContainer {
         return voteVS;
     }
 
-    public SMIMEMessageWrapper getReceipt() {
+    public SMIMEMessage getReceipt() {
         switch(getTypeVS()) {
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
@@ -418,7 +418,7 @@ public class VoteVS extends ReceiptContainer {
 
     public String getMessageId() {
         String result = null;
-        SMIMEMessageWrapper receipt = getReceipt();
+        SMIMEMessage receipt = getReceipt();
         if(receipt != null) {
             try {
                 String[] headers = receipt.getHeader("Message-ID");

@@ -10,7 +10,7 @@ import org.bouncycastle.util.encoders.Base64
 import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertExtensionCheckerVS
@@ -192,7 +192,7 @@ class  SignatureVSService {
         return trustedCerts;
     }
 
-	public SMIMEMessageWrapper getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
+	public SMIMEMessage getSMIMEMessage (String fromUser,String toUser,String textToSign,String subject, Header header) {
 		log.debug "getSMIMEMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
 		if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
@@ -204,7 +204,7 @@ class  SignatureVSService {
         log.debug "getTimestampedSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
         if(fromUser) fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
         if(toUser) toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-        SMIMEMessageWrapper smimeMessage = getSignedMailGenerator().genMimeMessage(
+        SMIMEMessage smimeMessage = getSignedMailGenerator().genMimeMessage(
                 fromUser, toUser, textToSign, subject, headers)
         MessageTimeStamper timeStamper = new MessageTimeStamper(
                 smimeMessage, "${grailsApplication.config.VotingSystem.urlTimeStampServer}/timeStamp")
@@ -216,8 +216,8 @@ class  SignatureVSService {
         return responseVS;
     }
 		
-	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (
-		String fromUser, String toUser,	final SMIMEMessageWrapper smimeMessage, String subject) {
+	public synchronized SMIMEMessage getMultiSignedMimeMessage (
+		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) {
 		log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
 		if(fromUser) {
 			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
@@ -227,22 +227,22 @@ class  SignatureVSService {
 			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 			smimeMessage.setHeader("To", toUser)
 		}
-		SMIMEMessageWrapper multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
+		SMIMEMessage multiSignedMessage = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
 		return multiSignedMessage
 	}
 
     @Transactional
-	public ResponseVS validateSMIME(SMIMEMessageWrapper messageWrapper, Locale locale) {
+	public ResponseVS validateSMIME(SMIMEMessage smimeMessage, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessage.getContentDigestStr())
 		if(messageSMIME) {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
-				[messageWrapper.getContentDigestStr()].toArray(), locale)
+				[smimeMessage.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIME - ${message} - messageSMIME.id: ${messageSMIME.id}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message,
                     metaInf: MetaInfMsg.getErrorMsg(methodName, "hashRepeated"))
 		}
-		return validateSignersCerts(messageWrapper, locale)
+		return validateSignersCerts(smimeMessage, locale)
 	}
 
     public ResponseVS verifyUserCertificate(UserVS userVS) {
@@ -262,16 +262,16 @@ class  SignatureVSService {
         return validationResponse
     }
 
-	public ResponseVS validateSignersCerts(SMIMEMessageWrapper messageWrapper, Locale locale) {
+	public ResponseVS validateSignersCerts(SMIMEMessage smimeMessage, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-		Set<UserVS> signersVS = messageWrapper.getSigners();
+		Set<UserVS> signersVS = smimeMessage.getSigners();
 		if(signersVS.isEmpty()) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 			messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale))
 		Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
         UserVS anonymousSigner = null
         CertExtensionCheckerVS extensionChecker
-        String signerNIF = org.votingsystem.util.NifUtils.validate(messageWrapper.getSigner().getNif())
+        String signerNIF = org.votingsystem.util.NifUtils.validate(smimeMessage.getSigner().getNif())
 		for(UserVS userVS: signersVS) {
 			try {
                 if(userVS.getTimeStampToken() != null) {
@@ -319,7 +319,7 @@ class  SignatureVSService {
                         metaInf: MetaInfMsg.getExceptionMsg(methodName, ex))
 			}
 		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:messageWrapper,
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessage,
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
                 extensionChecker:extensionChecker])
 	}
@@ -329,7 +329,7 @@ class  SignatureVSService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         JSONObject messageVSJSON = (JSONObject) JSONSerializer.toJSON(new String(messageVSBytes, "UTF-8"));
 
-        SMIMEMessageWrapper smimeSender = new SMIMEMessageWrapper(new ByteArrayInputStream(
+        SMIMEMessage smimeSender = new SMIMEMessage(new ByteArrayInputStream(
                 Base64.decode(messageVSJSON.smimeMessage.getBytes())))
         ResponseVS responseVS = processSMIMERequest(smimeSender, contenType, locale)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
@@ -367,7 +367,7 @@ class  SignatureVSService {
     }
 
     @Transactional
-    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType, Locale locale) {
+    private ResponseVS processSMIMERequest(SMIMEMessage smimeMessageReq, ContentTypeVS contenType, Locale locale) {
         if (smimeMessageReq?.isValidSignature()) {
             log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = null;
@@ -404,20 +404,20 @@ class  SignatureVSService {
         }
     }
 
-	public ResponseVS validateSMIMEVicket(SMIMEMessageWrapper messageWrapper, Locale locale) {
+	public ResponseVS validateSMIMEVicket(SMIMEMessage smimeMessage, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessage.getContentDigestStr())
 		if(messageSMIME) {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
-				[messageWrapper.getContentDigestStr()].toArray(), locale)
+				[smimeMessage.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIMEVicket - ${msg} - messageSMIME.id: ${messageSMIME.id}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, 'base64ContentDigest'))
 		}
-		return validateVicketCerts(messageWrapper, locale)
+		return validateVicketCerts(smimeMessage, locale)
 	}
 
-	public ResponseVS validateVicketCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
+	public ResponseVS validateVicketCerts(SMIMEMessage smimeMessageReq, Locale locale) {
         log.debug("validateVicketCerts - TODO")
 	}
 

@@ -3,18 +3,14 @@ package org.votingsystem.simulation.callable
 import org.apache.log4j.Logger
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.callable.RepresentativeDataSender
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
-import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 
 import java.security.KeyStore
@@ -53,7 +49,7 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 END_ENTITY_ALIAS, PASSWORD.toCharArray(), DNIe_SIGN_MECHANISM);
         String subject = ApplicationContextHolder.getInstance().getMessage("representativeRequestMsgSubject", null);
-        SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
+        SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(
                 representativeNIF, toUser, representativeDataStr, subject , null);
         RepresentativeDataSender representativeDataSender = new RepresentativeDataSender(smimeMessage, imageFile,
                 ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());

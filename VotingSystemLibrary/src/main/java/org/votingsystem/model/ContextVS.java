@@ -10,7 +10,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -282,10 +282,10 @@ public class ContextVS {
         }
     }
 
-    public void initTestEnvironment(String logProperties, InputStream configPropertiesStream) throws Exception {
+    public void initTestEnvironment(InputStream logPropertiesStream, InputStream configPropertiesStream) throws Exception {
         try {
             Properties props = new Properties();
-            props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(logProperties));
+            props.load(logPropertiesStream);
             PropertyConfigurator.configure(props);
             props.load(configPropertiesStream);
             ConfigSlurper configSlurper = new ConfigSlurper();
@@ -348,7 +348,7 @@ public class ContextVS {
         return keyStore;
     }
 
-    public SMIMEMessageWrapper genTestSMIMEMessage (String toUser, String textToSign,
+    public SMIMEMessage genTestSMIMEMessage (String toUser, String textToSign,
             String subject) throws Exception {
         KeyStore keyStore = userTest.getKeyStore();
         PrivateKey privateKey = (PrivateKey)keyStore.getKey(END_ENTITY_ALIAS, PASSWORD.toCharArray());

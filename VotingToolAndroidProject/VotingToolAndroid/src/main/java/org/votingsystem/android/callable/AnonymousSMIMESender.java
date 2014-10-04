@@ -6,7 +6,7 @@ import org.votingsystem.android.AppContextVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
@@ -55,7 +55,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         Log.d(TAG + ".call()", "");
         ResponseVS responseVS = null;
         try {
-            SMIMEMessageWrapper signedMessage = certificationRequest.genMimeMessage(fromUser, toUser,
+            SMIMEMessage signedMessage = certificationRequest.genMimeMessage(fromUser, toUser,
                     textToSign, subject, header);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedMessage, contextVS);
             responseVS = timeStamper.call();
@@ -67,7 +67,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
             byte[] messageToSend = Encryptor.encryptSMIME(signedMessage, receiverCert);
             responseVS = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessageWrapper receipt = Encryptor.decryptSMIMEMessage(
+                SMIMEMessage receipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
                         certificationRequest.getKeyPair().getPrivate());
                 responseVS.setSmimeMessage(receipt);

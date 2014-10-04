@@ -34,7 +34,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSRepresentativesInfo;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.DateUtils;
@@ -259,7 +259,7 @@ public class RepresentativeService extends IntentService {
                 responseVS = anonymousSender.call();
                 //Encryptor.encryptMessage(base64EncodedKey, userCert);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    SMIMEMessageWrapper delegationReceipt = Encryptor.decryptSMIMEMessage(
+                    SMIMEMessage delegationReceipt = Encryptor.decryptSMIMEMessage(
                             responseVS.getMessageBytes(),
                             anonymousDelegation.getCertificationRequest().getKeyPair().getPublic(),
                             anonymousDelegation.getCertificationRequest().getKeyPair().getPrivate());
@@ -343,7 +343,7 @@ public class RepresentativeService extends IntentService {
             KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-            SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS,
+            SMIMEMessage smimeMessage = signedMailGenerator.genMimeMessage(userVS,
                     contextVS.getAccessControl().getNameNormalized(),contentToSign, messageSubject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
                     (AppContextVS)getApplicationContext());

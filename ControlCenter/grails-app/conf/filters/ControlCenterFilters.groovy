@@ -79,7 +79,7 @@ class ControlCenterFilters {
                         case ContentTypeVS.VOTE:
                         case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
-                            responseVS = processSMIMERequest(new SMIMEMessageWrapper(
+                            responseVS = processSMIMERequest(new SMIMEMessage(
                                     new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
@@ -203,7 +203,7 @@ class ControlCenterFilters {
         return outputStream.toByteArray();
     }
 
-    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType,
+    private ResponseVS processSMIMERequest(SMIMEMessage smimeMessageReq, ContentTypeVS contenType,
            Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
             log.debug "processSMIMERequest - isValidSignature"

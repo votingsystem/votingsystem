@@ -4,7 +4,7 @@ import org.apache.log4j.Logger
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.smime.ValidationResult
 import org.votingsystem.simulation.SignatureVSService
@@ -52,7 +52,7 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(messageBytes, ContentTypeVS.SIGNED,
                 ContextVS.getInstance().getAccessControl().getVoteCancellerServiceURL())
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(
+            SMIMEMessage mimeMessage = new SMIMEMessage(
                     new ByteArrayInputStream(responseVS.getMessageBytes()));
             ValidationResult validationResult = mimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
             if (!validationResult.isValidSignature()) {

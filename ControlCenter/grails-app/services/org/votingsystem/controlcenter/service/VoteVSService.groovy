@@ -3,9 +3,8 @@ package org.votingsystem.controlcenter.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
-import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
@@ -56,7 +55,7 @@ class VoteVSService {
         String subject = messageSource.getMessage('voteValidatedByAccessControlMsg', null, locale)
         messageSMIMEReq.getSmimeMessage().setMessageID("${localServerURL}/messageSMIME/${messageSMIMEReq.id}")
 
-        SMIMEMessageWrapper smimeVoteValidation = signatureVSService.getMultiSignedMimeMessage(
+        SMIMEMessage smimeVoteValidation = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, messageSMIMEReq.getSmimeMessage(), subject)
         messageSMIMEReq.type = TypeVS.CONTROL_CENTER_VALIDATED_VOTE
         messageSMIMEReq.content = smimeVoteValidation.getBytes()
@@ -68,8 +67,8 @@ class VoteVSService {
                 ContentTypeVS.VOTE, eventVS.accessControlVS.getVoteServiceURL())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             //ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes, locale)
-            //SMIMEMessageWrapper smimeMessageResp = validatedVoteResponse.getSmimeMessage();
-            SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(new ByteArrayInputStream(responseVS.messageBytes))
+            //SMIMEMessage smimeMessageResp = validatedVoteResponse.getSmimeMessage();
+            SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(responseVS.messageBytes))
             if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
                 log.error("validateVote - ERROR digest sent: " + signedVoteDigest +
                         " - digest received: " + smimeMessageResp.getContentDigestStr())
@@ -106,7 +105,7 @@ class VoteVSService {
 	public synchronized ResponseVS processCancel (MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         log.debug(methodName);
-		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         def cancelDataJSON = JSON.parse(smimeMessageReq.getSignedContent())
         def originHashCertVote = cancelDataJSON.originHashCertVote
         def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
@@ -128,7 +127,7 @@ class VoteVSService {
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = messageSMIMEReq.getUserVS()?.getNif()
         String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
-        SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+        SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
                 fromUser, toUser, smimeMessageReq, subject)
         MessageSMIME messageSMIMEResp = new MessageSMIME(content:smimeMessageResp.getBytes(),
                 smimeParent:messageSMIMEReq, eventVS:eventVS, type:TypeVS.RECEIPT).save()

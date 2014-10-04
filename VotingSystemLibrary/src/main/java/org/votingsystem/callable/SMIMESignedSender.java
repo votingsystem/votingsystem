@@ -3,7 +3,7 @@ package org.votingsystem.callable;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
@@ -22,13 +22,13 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
 
     private String urlToSendDocument;
     private String timeStampServerURL;
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private X509Certificate destinationCert = null;
     private KeyPair keypair;
     private ContentTypeVS cotentType;
     private String[] headers = null;
     
-    public SMIMESignedSender(SMIMEMessageWrapper smimeMessage, String urlToSendDocument, String timeStampServerURL,
+    public SMIMESignedSender(SMIMEMessage smimeMessage, String urlToSendDocument, String timeStampServerURL,
             ContentTypeVS cotentType, KeyPair keypair, X509Certificate destinationCert, String... headers) {
         this.smimeMessage = smimeMessage;
         this.urlToSendDocument = urlToSendDocument;
@@ -53,7 +53,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         ContentTypeVS responseContentType = responseVS.getContentType();
         try {
             if(responseContentType != null && responseContentType.isSignedAndEncrypted()) {
-                SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
+                SMIMEMessage signedMessage = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), keypair.getPublic(), keypair.getPrivate());
                 responseVS.setSmimeMessage(signedMessage);
             } else if(responseContentType != null && responseContentType.isEncrypted()) {
@@ -62,7 +62,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 responseVS.setMessageBytes(decryptedBytes);
             } else if(responseContentType != null && ResponseVS.SC_OK == responseVS.getStatusCode() &&
                     (responseContentType == ContentTypeVS.VOTE || responseContentType == ContentTypeVS.JSON_SIGNED)) {
-                responseVS.setSmimeMessage(new SMIMEMessageWrapper(new ByteArrayInputStream(responseVS.getMessageBytes())));
+                responseVS.setSmimeMessage(new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes())));
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);

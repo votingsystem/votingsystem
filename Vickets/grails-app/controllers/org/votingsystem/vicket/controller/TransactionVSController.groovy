@@ -10,7 +10,7 @@ import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketBatch
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.codehaus.groovy.runtime.StackTraceUtils
 import java.security.KeyFactory
@@ -152,7 +152,7 @@ class TransactionVSController {
         byte[] bytesResponse
         List<ResponseVS> responseList = new ArrayList<ResponseVS>()
         for(int i = 0; i < vicketsArray.size(); i++) {
-            SMIMEMessageWrapper smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(
+            SMIMEMessage smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(
                     Base64.decode(vicketsArray.getString(i).getBytes())))
             ResponseVS signatureResponse = signatureVSService.processSMIMERequest(smimeMessageReq, ContentTypeVS.VICKET,
                     request.getLocale())

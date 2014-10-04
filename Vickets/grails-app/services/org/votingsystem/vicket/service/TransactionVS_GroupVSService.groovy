@@ -5,7 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.MetaInfMsg
@@ -25,7 +25,7 @@ class TransactionVS_GroupVSService {
     @Transactional
     private ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, JSONObject messageJSON, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS messageSigner = messageSMIMEReq.userVS
         List<UserVS> receptorList = []
         GroupVS groupVS = GroupVS.findWhere(IBAN:messageJSON.fromUserIBAN, representative:messageSigner)
@@ -155,7 +155,7 @@ class TransactionVS_GroupVSService {
             messageJSON.toUser = it.userVS.getNif()
             messageJSON.numUsers = subscriptionList.totalCount
             messageJSON.toUserAmount = userPart.toString()
-            SMIMEMessageWrapper receipt = signatureVSService.getSMIMEMessage(systemService.getSystemUser().getNif(),
+            SMIMEMessage receipt = signatureVSService.getSMIMEMessage(systemService.getSystemUser().getNif(),
                     it.userVS.getNif(),
                     messageJSON.toString(), TypeVS.TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS.toString(), null)
             MessageSMIME messageSMIMEReceipt = new MessageSMIME(smimeParent:messageSMIMEReq,

@@ -3,7 +3,7 @@ package org.votingsystem.model;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.File;
 import java.io.Serializable;
@@ -46,7 +46,7 @@ public class ResponseVS<T> implements Serializable {
     private String reason;
     private String metaInf;
     private String url;
-    private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessage smimeMessage;
     private EventVS eventVS;
     private T data;
     private TypeVS type;
@@ -194,11 +194,11 @@ public class ResponseVS<T> implements Serializable {
         this.messageBytes = messageBytes;
     }
 
-    public SMIMEMessageWrapper getSmimeMessage() {
+    public SMIMEMessage getSmimeMessage() {
         return smimeMessage;
     }
 
-    public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
+    public void setSmimeMessage(SMIMEMessage smimeMessage) {
         this.smimeMessage = smimeMessage;
     }
 

@@ -3,8 +3,7 @@ package org.votingsystem.controlcenter.controller
 import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.signature.smime.SMIMEMessage
 
 import java.security.KeyFactory
 import java.security.PublicKey
@@ -59,12 +58,12 @@ class EncryptorController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
         response.contentType = ContentTypeVS.SIGNED.getName()
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
+		SMIMEMessage smimeMessage = messageSMIMEReq.getSmimeMessage()
 		
 		String fromUser = "EncryptorController"
 		String toUser = "MultiSignatureTestClient"
 		String subject = "Multisigned response"
-		SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
+		SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
 			fromUser, toUser, smimeMessage, subject)
 		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST, content:smimeMessageResp.getBytes())
         return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, type:TypeVS.TEST)]

@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
@@ -23,13 +23,13 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
     private static Logger logger = Logger.getLogger(
             RepresentativeDataSender.class);
     
-    private SMIMEMessageWrapper representativeDataSmimeMessage;
+    private SMIMEMessage representativeDataSmimeMessage;
     private X509Certificate accesRequestServerCert = null;
     
     private File selectedImage;
     private String urlToSendDocument;
     
-    public RepresentativeDataSender(SMIMEMessageWrapper representativeDataSmimeMessage, File selectedImage,
+    public RepresentativeDataSender(SMIMEMessage representativeDataSmimeMessage, File selectedImage,
             String urlToSendDocument) throws Exception {
         this.urlToSendDocument = urlToSendDocument;
         this.selectedImage = selectedImage;

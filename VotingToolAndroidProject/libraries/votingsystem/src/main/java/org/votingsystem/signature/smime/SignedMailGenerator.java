@@ -88,7 +88,7 @@ public class SignedMailGenerator {
         smimeSignedGenerator.addCertificates(certs);
     }
     
-    public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
+    public SMIMEMessage genMimeMessage(String fromUser, String toUser, String textToSign,
             String subject, Header... headers) throws Exception {
         if (subject == null) subject = "";
         if (textToSign == null) textToSign = "";
@@ -96,7 +96,7 @@ public class SignedMailGenerator {
         msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,
                 ContextVS.DEFAULT_SIGNED_FILE_NAME);
-        SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
+        SMIMEMessage body = new SMIMEMessage(session);
         if (headers != null) {
             for(Header header : headers) {
                 if (header != null) body.setHeader(header.getName(), header.getValue());
@@ -117,7 +117,7 @@ public class SignedMailGenerator {
     }
    
      public MimeMultipart genMimeMultipart(MimeBodyPart body, 
-             SMIMEMessageWrapper dnieMimeMessage, String provider) throws Exception {
+             SMIMEMessage dnieMimeMessage, String provider) throws Exception {
          smimeSignedGenerator.addSigners(dnieMimeMessage.getSmimeSigned().getSignerInfos());
          smimeSignedGenerator.addAttributeCertificates(dnieMimeMessage.getSmimeSigned().getAttributeCertificates());
          smimeSignedGenerator.addCertificates(dnieMimeMessage.getSmimeSigned().getCertificates());
