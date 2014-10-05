@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VotingSystemApp extends Application implements DecompressBackupPane.Listener, AppHostVS, WebSocketListener {
+public class VotingSystemApp extends Application implements DecompressBackupPane.Listener, WebSocketListener {
 
     private static Logger logger = Logger.getLogger(VotingSystemApp.class);
 
@@ -140,7 +140,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
         this.primaryStage = primaryStage;
-        ContextVS.initSignatureClient(this, "log4jClientTool.properties", "clientToolMessages.properties", locale);
+        ContextVS.initSignatureClient("log4jClientTool.properties", "clientToolMessages.properties", locale);
         browserVS = new BrowserVS();
         new Thread(new Runnable() {
             @Override public void run() {
@@ -478,10 +478,6 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 messageDialog.showMessage(message);
             }
         });
-    }
-
-    @Override public void sendMessageToHost(OperationVS operation) {
-        logger.debug("### sendMessageToHost");
     }
 
     @Override public void consumeWebSocketMessage(JSONObject messageJSON) {

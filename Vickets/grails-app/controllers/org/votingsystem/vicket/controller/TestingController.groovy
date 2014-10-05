@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.VicketTagVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.LoggerVS
@@ -34,8 +35,8 @@ class TestingController {
 
 
     def index() {
-
-        render "OK issued"
+        LoggerVS.logTransactionVS([hola:"prueba"])
+        render "Transaction logged"
         return false
     }
 

@@ -7,6 +7,11 @@ import org.codehaus.groovy.grails.plugins.GrailsPluginManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
+import org.votingsystem.util.ApplicationVS;
+import org.votingsystem.vicket.model.AlertVS;
+import org.votingsystem.vicket.model.TransactionVS;
+import org.votingsystem.vicket.service.TransactionVSService;
+
 import javax.servlet.ServletContext;
 import java.util.Locale;
 
@@ -14,7 +19,7 @@ import java.util.Locale;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ApplicationContextHolder implements ApplicationContextAware {
+public class ApplicationContextHolder implements ApplicationContextAware, ApplicationVS {
 
     private static Logger logger = Logger.getLogger(ApplicationContextHolder.class);
 
@@ -76,6 +81,12 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         return msg;
     }
 
-    //String environmentStr = (String) ((GrailsApplication)getBean("grailsApplication")).getConfig().getProperty("VotingSystemEnvironment");
+    public void updateBalances(TransactionVS transactionVS) {
+        ((TransactionVSService)getBean("transactionVSService")).updateBalances(transactionVS);
+    }
+
+    public void alert(AlertVS alertVS) {
+        ((TransactionVSService) ApplicationContextHolder.getBean("transactionVSService")).alert(alertVS);
+    }
 
 }

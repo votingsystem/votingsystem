@@ -1,11 +1,9 @@
 package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VicketTagVS;
-import org.votingsystem.vicket.service.TransactionVSService;
-import org.votingsystem.vicket.util.ApplicationContextHolder;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -131,8 +129,8 @@ public class UserVSAccount implements Serializable {
     public void afterInsert() {
         if(balance.compareTo(BigDecimal.ZERO) < 0) {
             AlertVS alert = new AlertVS("UserVSAccount_id_" + this.id + "_negativeBalance_" + this.balance.toString());
-            ((TransactionVSService) ApplicationContextHolder.getBean("transactionVSService")).alert(alert);
+            ContextVS.getInstance().alert(alert);
         }
-
     }
+
 }

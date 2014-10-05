@@ -1,8 +1,7 @@
-package org.votingsystem.test.model;
+package org.votingsystem.vicket.model;
 
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-
 import org.votingsystem.model.*;
 import org.votingsystem.util.DateUtils;
 
@@ -18,6 +17,8 @@ import static javax.persistence.GenerationType.IDENTITY;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@Entity
+@Table(name="TransactionVS")
 public class TransactionVS  implements Serializable {
 
     private static Logger log = Logger.getLogger(TransactionVS.class);
@@ -29,36 +30,44 @@ public class TransactionVS  implements Serializable {
 
     public enum State { OK, REPEATED, CANCELLED;}
 
-    private Long id;
+    @Id @GeneratedValue(strategy=IDENTITY)
+    @Column(name="id", unique=true, nullable=false) private Long id;
 
-    private String subject;
+    @Column(name="subject") private String subject;
 
-    private String currencyCode;
+    @Column(name="currency", nullable=false) private String currencyCode;
 
-    private VicketTagVS tag;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="tag", nullable=false) private VicketTagVS tag;
 
-    private MessageSMIME messageSMIME;
+    @Column(name="amount") private BigDecimal amount = null;
+    @OneToOne private MessageSMIME messageSMIME;
 
-    private MessageSMIME cancellationSMIME;
+    @OneToOne private MessageSMIME cancellationSMIME;
 
-    private TransactionVS transactionParent;
-    private BigDecimal amount;
-    private UserVS fromUserVS;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="transactionParent") private TransactionVS transactionParent;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
 
     //This is for Transactions From BankVS, and not anonymous transactions
-    private String fromUserIBAN;
-    private String fromUser;
+    @Column(name="fromUserIBAN") private String fromUserIBAN;
+    @Column(name="fromUser") private String fromUser;
 
-    private String toUserIBAN;
-    private UserVS toUserVS;
-    private Type type;
-    private State state;
+    @Column(name="toUserIBAN") private String toUserIBAN;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="toUserVS") private UserVS toUserVS;
 
-    private Date validTo;
-    private Date dateCreated;
-    private Date lastUpdated;
+    @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
 
+    @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+
+    @Transient private Map<UserVSAccount, BigDecimal> accountFromMovements;
 
     public Long getId() {
         return id;
@@ -196,27 +205,6 @@ public class TransactionVS  implements Serializable {
         this.fromUser = fromUser;
     }
 
-    public static TransactionVS generateTriggeredTransaction(TransactionVS transactionParent, BigDecimal amount,
-                                                             UserVS toUser, String toUserIBAN) {
-        TransactionVS result = new TransactionVS();
-        result.amount = amount;
-        result.messageSMIME = transactionParent.messageSMIME;
-        result.fromUserVS = transactionParent.fromUserVS;
-        result.fromUser = transactionParent.fromUser;
-        result.fromUserIBAN = transactionParent.fromUserIBAN;
-        result.state = transactionParent.state;
-        result.validTo = transactionParent.validTo;
-        result.subject = transactionParent.subject;
-        result.currencyCode = transactionParent.currencyCode;
-        result.type = transactionParent.type;
-        result.tag = transactionParent.tag;
-        result.transactionParent = transactionParent;
-        result.toUserVS = toUser;
-        result.toUserIBAN = toUserIBAN;
-        return result;
-    }
-
-
     public VicketTagVS getTag() {
         return tag;
     }
@@ -224,7 +212,6 @@ public class TransactionVS  implements Serializable {
     public void setTag(VicketTagVS tag) {
         this.tag = tag;
     }
-
 
     public static TransactionVS parse(JSONObject jsonData) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
@@ -252,5 +239,37 @@ public class TransactionVS  implements Serializable {
         transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));
         return transactionVS;
+    }
+
+    public static TransactionVS generateTriggeredTransaction(TransactionVS transactionParent, BigDecimal amount,
+             UserVS toUser, String toUserIBAN) {
+        TransactionVS result = new TransactionVS();
+        result.amount = amount;
+        result.messageSMIME = transactionParent.messageSMIME;
+        result.fromUserVS = transactionParent.fromUserVS;
+        result.fromUser = transactionParent.fromUser;
+        result.fromUserIBAN = transactionParent.fromUserIBAN;
+        result.state = transactionParent.state;
+        result.validTo = transactionParent.validTo;
+        result.subject = transactionParent.subject;
+        result.currencyCode = transactionParent.currencyCode;
+        result.type = transactionParent.type;
+        result.tag = transactionParent.tag;
+        result.transactionParent = transactionParent;
+        result.toUserVS = toUser;
+        result.toUserIBAN = toUserIBAN;
+        return result;
+    }
+
+    public Map<UserVSAccount, BigDecimal> getAccountFromMovements() {
+        return accountFromMovements;
+    }
+
+    public void setAccountFromMovements(Map<UserVSAccount, BigDecimal> accountFromMovements) {
+        this.accountFromMovements = accountFromMovements;
+    }
+
+    public void afterInsert() {
+        ContextVS.getInstance().updateBalances(this);
     }
 }

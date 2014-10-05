@@ -16,6 +16,8 @@ import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.*;
+import org.votingsystem.vicket.model.AlertVS;
+import org.votingsystem.vicket.model.TransactionVS;
 
 import javax.mail.Session;
 import javax.security.auth.x500.X500PrivateCredential;
@@ -161,7 +163,7 @@ public class ContextVS {
     private Map<String, ResponseVS> hashCertVSDataMap;
     private Collection<X509Certificate> votingSystemSSLCerts;
     private Set<TrustAnchor> votingSystemSSLTrustAnchors;
-    private AppHostVS appHost;
+    private ApplicationVS applicationVS;
     private static Properties appProperties;
     private static Properties settings;
     private UserVS userVS;
@@ -184,10 +186,9 @@ public class ContextVS {
         }
     }
 
-    private ContextVS(AppHostVS appHost, String logPropertiesFile, String localizatedMessagesFileName, String locale) {
+    private ContextVS(String logPropertiesFile, String localizatedMessagesFileName, String locale) {
         java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.INFO, "logPropertiesFile: " +
                 logPropertiesFile + " - localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
-        this.appHost = appHost;
         try {
             initDirs(System.getProperty("user.home"));
             if(logPropertiesFile != null) {
@@ -239,22 +240,22 @@ public class ContextVS {
         new File(ERROR_DIR).mkdirs();
     }
 
-    public static void init (AppHostVS appHost, String logPropertiesFile,
-                     String localizatedMessagesFileName, String locale) throws Exception {
+    public static void init (String logPropertiesFile, String localizatedMessagesFileName, String locale) throws Exception {
         VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-        INSTANCE = new ContextVS(appHost, logPropertiesFile, localizatedMessagesFileName, locale);
+        INSTANCE = new ContextVS(logPropertiesFile, localizatedMessagesFileName, locale);
     }
 
-    public static void init () throws Exception {
+    public static void init (ApplicationVS applicationVS) throws Exception {
         INSTANCE = new ContextVS();
+        INSTANCE.applicationVS = applicationVS;
         VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
 
-    public static void initSignatureClient (AppHostVS appHost, String logPropertiesFile,
+    public static void initSignatureClient (String logPropertiesFile,
             String localizatedMessagesFileName, String locale){
         try {
             logger.debug("------------- initSignatureClient ----------------- ");
-            init(appHost, logPropertiesFile,localizatedMessagesFileName, locale);
+            init(logPropertiesFile,localizatedMessagesFileName, locale);
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + CERT_RAIZ_PATH));
             OSValidator.initClassPath();
@@ -357,15 +358,12 @@ public class ContextVS {
         return signedMailGenerator.genMimeMessage(userTest.getEmail(),toUser, textToSign, subject);
     }
 
-    public void sendMessageToHost(OperationVS operation) { appHost.sendMessageToHost(operation); }
-
     public void setSessionUser(UserVS userVS) {
         logger.debug("setSessionUser - nif: " + userVS.getNif());
         this.userVS = userVS;
     }
 
     public UserVS getSessionUser() { return userVS; }
-
 
     private Properties getSettings() {
         FileInputStream input = null;
@@ -463,9 +461,11 @@ public class ContextVS {
         return keyStore;
     }
 
-    public AppHostVS getAppHost() { return appHost;  }
+    public void alert(AlertVS alertVS) {
+        applicationVS.alert(alertVS);
+    }
 
-    public void setAppHost(AppHostVS appHost) { this.appHost = appHost;  }
+    public void updateBalances(TransactionVS transactionVS) { applicationVS.updateBalances(transactionVS);  }
 
     public X509Certificate getTimeStampServerCert() throws ExceptionVS {
         if(timeStampCACert != null) return timeStampCACert;

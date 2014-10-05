@@ -1,6 +1,7 @@
 import grails.converters.JSON
 import grails.util.Metadata
 import org.votingsystem.model.ContextVS
+import org.votingsystem.vicket.util.ApplicationContextHolder
 
 class BootStrap {
 
@@ -13,7 +14,7 @@ class BootStrap {
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) { return it?.format("dd MMM yyyy' 'HH:mm") }
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
-        ContextVS.init()
+        ContextVS.init(ApplicationContextHolder.getInstance())
         systemService.init()
         filesService.init()
         signatureVSService.init();

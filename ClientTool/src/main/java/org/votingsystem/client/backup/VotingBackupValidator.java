@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
+public class VotingBackupValidator implements Callable<ResponseVS> {
     
     private static Logger logger = Logger.getLogger(VotingBackupValidator.class);
 
@@ -43,7 +43,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
     
     public VotingBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
-            ContextVS.init(null, "log4jClientTool.properties", "clientToolMessages.properties", "es");
+            ContextVS.init("log4jClientTool.properties", "clientToolMessages.properties", "es");
         }
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
@@ -391,10 +391,6 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
         VotingBackupValidator dirBackupValidator = new VotingBackupValidator("./Descargas/VotosEvento_4", null);
         dirBackupValidator.call();
         System.exit(0);
-    }
-
-    @Override public void sendMessageToHost(OperationVS operation) {
-        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
 }

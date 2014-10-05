@@ -1,12 +1,14 @@
 package org.votingsystem.vicket.model;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.bouncycastle.util.encoders.Base64;
-import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
@@ -22,7 +24,8 @@ public class VicketTransactionBatch {
 
     List<Vicket> vicketList;
 
-    public VicketTransactionBatch(JSONArray vicketsArray) throws Exception {
+    public VicketTransactionBatch(String vicketsArrayStr) throws Exception {
+        JSONArray vicketsArray = (JSONArray) JSONSerializer.toJSON(vicketsArrayStr);
         vicketList = new ArrayList<Vicket>();
         for(int i = 0; i < vicketsArray.size(); i++) {
             SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(

@@ -7,7 +7,6 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.springframework.format.annotation.NumberFormat;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
@@ -51,7 +50,7 @@ public class Vicket implements Serializable  {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="subject") private String subject;
-    @NumberFormat(style= NumberFormat.Style.CURRENCY) private BigDecimal amount = null;
+    @Column(name="amount") private BigDecimal amount = null;
     @Column(name="currency", nullable=false) private String currencyCode;
     @Column(name="isTimeLimited") private Boolean isTimeLimited = Boolean.FALSE;
 
@@ -428,7 +427,7 @@ public class Vicket implements Serializable  {
         dataMap.put("subject", subject);
         dataMap.put("toUserName", toUserName);
         dataMap.put("toUserIBAN", toUserIBAN);
-        dataMap.put("tagVS", tag);
+        dataMap.put("tagVS", tag.getName());
         dataMap.put("amount", amount.toString());
         dataMap.put("currencyCode", currencyCode);
         if(isTimeLimited != null) dataMap.put("isTimeLimited", isTimeLimited.booleanValue());

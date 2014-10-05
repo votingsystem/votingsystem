@@ -12,13 +12,13 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketServer
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.test.model.TransactionVS
-import org.votingsystem.test.model.Vicket
-import org.votingsystem.test.model.VicketRequestBatch
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
+import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.Vicket
+import org.votingsystem.vicket.model.VicketRequestBatch
 
 
 Logger logger = TestHelper.init(VicketRequest.class)

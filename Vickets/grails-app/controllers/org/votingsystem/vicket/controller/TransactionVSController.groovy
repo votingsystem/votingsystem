@@ -133,7 +133,7 @@ class TransactionVSController {
         if(!request.JSON) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = vicketService.processVicketTransaction(new VicketTransactionBatch(request.JSON))
+        ResponseVS responseVS = vicketService.processVicketTransaction(new VicketTransactionBatch(request.JSON.toString()))
         return [responseVS:responseVS]
     }
 
