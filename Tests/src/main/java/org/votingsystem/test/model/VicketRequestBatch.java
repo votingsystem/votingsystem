@@ -1,4 +1,5 @@
-package org.votingsystem.vicket.model;
+package org.votingsystem.test.model;
+
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -6,14 +7,12 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.ExceptionVS;
-import org.votingsystem.util.StringUtils;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -26,29 +25,26 @@ import java.util.*;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Entity
-@DiscriminatorValue("VicketBatch")
-public class VicketBatch extends BatchRequest implements Serializable  {
+public class VicketRequestBatch extends BatchRequest implements Serializable  {
 
-    private static Logger logger = Logger.getLogger(VicketBatch.class);
+    private static Logger logger = Logger.getLogger(VicketRequestBatch.class);
 
     public static final long serialVersionUID = 1L;
 
-    @OneToOne private MessageSMIME messageSMIME;
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="tag", nullable=false) private VicketTagVS tag;
+    private MessageSMIME messageSMIME;
+    private VicketTagVS tag;
 
-    @Transient private Map<String, Vicket> vicketsMap;
-    @Transient private VicketServer vicketServer;
-    @Transient private BigDecimal requestAmount;
-    @Transient private BigDecimal vicketsValue;
-    @Transient private String currencyCode;
-    @Transient private List<Map> vicketCSRList;
-    @Transient private String tagVS;
+    private Map<String, Vicket> vicketsMap;
+    private VicketServer vicketServer;
+    private BigDecimal requestAmount;
+    private BigDecimal vicketsValue;
+    private String currencyCode;
+    private List<Map> vicketCSRList;
+    private String tagVS;
 
-    public VicketBatch() {}
+    public VicketRequestBatch() {}
 
-    public VicketBatch(byte[] vicketBatchRequest, MessageSMIME messageSMIME, String localServer) throws Exception {
+    public VicketRequestBatch(byte[] vicketBatchRequest, MessageSMIME messageSMIME, String localServer) throws Exception {
         this.messageSMIME = messageSMIME;
         SMIMEMessage smimeMessage = messageSMIME.getSmimeMessage();
         JSONObject vicketRequest = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
@@ -73,47 +69,22 @@ public class VicketBatch extends BatchRequest implements Serializable  {
                     "' and request number '" + i + "' is for tag '" + csrTagVS + "'");
             PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(
                     vicketRequestJSON.getString("csr").getBytes());
-            CertificationRequestInfo info = csr.getCertificationRequestInfo();
-            Enumeration csrAttributes = info.getAttributes().getObjects();
-            JSONObject certAttributeJSON = null;
-            while(csrAttributes.hasMoreElements()) {
-                DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-                switch(attribute.getTagNo()) {
-                    case ContextVS.VICKET_TAG:
-                        String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
-                        certAttributeJSON = (JSONObject) JSONSerializer.toJSON(certAttributeJSONStr);
-                        break;
-                }
-            }
-            Vicket.CertSubject certSubject = Vicket.getCertSubject(info.getSubject().toString());
-            if(certAttributeJSON == null) throw new ExceptionVS("VICKET CSR REQUEST WITHOUT SIGNED ATTRIBUTES");
-            String signedVicketServerURL = StringUtils.checkURL(certAttributeJSON.getString("vicketServerURL"));
-            String hashCertVSBase64 = certAttributeJSON.getString("hashCertVS");
-            BigDecimal signedVicketValue = new BigDecimal(certAttributeJSON.getString("vicketValue"));
-            String signedCurrencyCode = certAttributeJSON.getString("currencyCode");
-            String signedTagVS = certAttributeJSON.getString("tagVS");
-            if(!signedCurrencyCode.equals(certSubject.getCurrencyCode()) || !signedVicketValue.toString().equals(
-                    certSubject.getVicketValue()) || !signedVicketServerURL.equals(certSubject.getVicketServerURL())
-                    || !signedTagVS.equals(certSubject.gettagVS()))
-                    throw new ExceptionVS( "Vicket CSR request number '" + i + "' with ERRORS. Subject: '" + info.getSubject().toString() +
-                    "'. Signed attributes: '" + certAttributeJSON.toString() + "'");
-            if(vicketValue.compareTo(signedVicketValue) != 0 || !currencyCode.equals(signedCurrencyCode) ||
-                    !signedTagVS.equals(csrTagVS)) throw new ExceptionVS(
+            Vicket vicket = new Vicket(csr);
+            if(vicketValue.compareTo(vicket.getAmount()) != 0 || !currencyCode.equals(vicket.getCurrencyCode()) ||
+                    !csrTagVS.equals(vicket.getSignedTagVS())) throw new ExceptionVS(
                     "Vicket CSR request number '" + i + "' with ERRORS. JSON request: '" + vicketRequestJSON.toString() +
-                    "'. Signed attributes: '" + certAttributeJSON.toString() + "'");
-            if (!signedVicketServerURL.equals(localServer))  throw new ExceptionVS("Vicket signed server URL '" +
-                    signedVicketServerURL + "' doesn't match local server URL '" + localServer + "'");
-            if (hashCertVSBase64 == null) throw new ExceptionVS("Missing hashCertVS on vicket request number '" + i + "' ");
-            csrRequestAmount = csrRequestAmount.add(signedVicketValue);
-            vicketsMap.put(hashCertVSBase64, new Vicket(csr, signedVicketValue, signedCurrencyCode,
-                    hashCertVSBase64, signedVicketServerURL));
+                            "'. Cert extension data: '" + vicket.getCertExtensionData().toString() + "'");
+            if (!localServer.equals(vicket.getVicketServerURL()))  throw new ExceptionVS("Vicket signed server URL '" +
+                    vicket.getVicketServerURL() + "' doesn't match local server URL '" + localServer + "'");
+            csrRequestAmount = csrRequestAmount.add(vicket.getAmount());
+            vicketsMap.put(vicket.getHashCertVS(), vicket);
         }
         if(requestAmount.compareTo(csrRequestAmount) != 0) throw new ExceptionVS("Vicket batch request with errors. " +
             "Amount signed '" + requestAmount.toString() + "' - total amount in CSRs '" + csrRequestAmount.toString() + "'");
     }
 
-    public VicketBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, VicketTagVS tag,
-           VicketServer vicketServer) throws Exception {
+    public VicketRequestBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, VicketTagVS tag,
+                              VicketServer vicketServer) throws Exception {
         this.setRequestAmount(requestAmount);
         this.setVicketServer(vicketServer);
         this.setCurrencyCode(currencyCode);
@@ -216,12 +187,8 @@ public class VicketBatch extends BatchRequest implements Serializable  {
         if(certificates.isEmpty()) throw new ExceptionVS(
                 "Unable to init Vicket. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
-        byte[] vicketExtensionValue = x509Certificate.getExtensionValue(ContextVS.VICKET_OID);
-        DERTaggedObject vicketCertDataDER = (DERTaggedObject)
-                X509ExtensionUtil.fromExtensionValue(vicketExtensionValue);
-        JSONObject vicketCertData = (JSONObject) JSONSerializer.toJSON(((DERUTF8String)
-                vicketCertDataDER.getObject()).toString());
-        String hashCertVS = vicketCertData.getString("hashCertVS");
+        JSONObject certExtensionData = CertUtil.getCertExtensionData(x509Certificate, ContextVS.VICKET_OID);
+        String hashCertVS = certExtensionData.getString("hashCertVS");
         Vicket vicket = vicketsMap.get(hashCertVS);
         vicket.setState(Vicket.State.OK);
         vicket.getCertificationRequest().initSigner(signedCsr.getBytes());

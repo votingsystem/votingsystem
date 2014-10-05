@@ -5,7 +5,6 @@ import groovy.io.FileType
 import org.apache.log4j.Logger
 import org.apache.log4j.RollingFileAppender
 import org.votingsystem.groovy.util.RequestUtils
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.util.DateUtils

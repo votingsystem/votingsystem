@@ -4,20 +4,12 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.iban4j.CountryCode
 import org.iban4j.Iban
-import org.springframework.context.i18n.LocaleContextHolder
-import org.votingsystem.model.GroupVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.NifUtils
 import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.LoggerVS
 import org.votingsystem.vicket.util.WebViewWrapper
 import org.votingsystem.vicket.websocket.SessionVSHelper
-
-import java.text.NumberFormat
 
 /**
  * @infoController TestingController
@@ -42,9 +34,8 @@ class TestingController {
 
 
     def index() {
-        //systemService.getSystemUser().save()
-        Locale locale = LocaleContextHolder.getLocale();
-        render transactionVS_UserVSService.test() + " --###"
+
+        render "OK issued"
         return false
     }
 

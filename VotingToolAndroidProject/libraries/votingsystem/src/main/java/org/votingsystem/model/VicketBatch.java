@@ -3,7 +3,6 @@ package org.votingsystem.model;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.ExceptionVS;
@@ -97,7 +96,7 @@ public class VicketBatch {
         for(int i = 0; i < numVickets.intValue(); i++) {
             Vicket vicket = new Vicket(vicketServer.getServerURL(),
                     vicketsValue, currencyCode, tagVS, TypeVS.VICKET);
-            vicketsMap.put(vicket.getHashCertVSBase64(), vicket);
+            vicketsMap.put(vicket.getHashCertVS(), vicket);
         }
         return vicketsMap;
     }

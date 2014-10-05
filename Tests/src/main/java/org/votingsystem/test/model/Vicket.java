@@ -1,12 +1,21 @@
 package org.votingsystem.test.model;
 
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.*;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.MetaInfMsg;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,25 +28,28 @@ import static javax.persistence.GenerationType.IDENTITY;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+
 public class Vicket implements Serializable  {
 
     private static Logger log = Logger.getLogger(Vicket.class);
 
     public static final long serialVersionUID = 1L;
 
-    public VicketTagVS getTag() {
-        return tag;
+    public Boolean getIsTimeLimited() {
+        return isTimeLimited;
     }
 
-    public void setTag(VicketTagVS tag) {
-        this.tag = tag;
+    public void setIsTimeLimited(Boolean isTimeLimited) {
+        this.isTimeLimited = isTimeLimited;
     }
 
     public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     private Long id;
+    private String subject;
     private BigDecimal amount = null;
     private String currencyCode;
+    private Boolean isTimeLimited = Boolean.FALSE;
 
     private String hashCertVS;
     private String originHashCertVS;
@@ -48,13 +60,9 @@ public class Vicket implements Serializable  {
     private byte[] content;
     private State state;
 
-    private UserVS userVS;
-
+    private UserVS toUserVS;
     private CertificateVS authorityCertificateVS;
-
     private VicketTagVS tag;
-
-    private TransactionVS transactionParent;
 
     private MessageSMIME cancelMessage;
     private MessageSMIME messageSMIME;
@@ -68,16 +76,118 @@ public class Vicket implements Serializable  {
     private CertificationRequestVS certificationRequest;
     private PKCS10CertificationRequest csr;
     private X509Certificate x509AnonymousCert;
+    private SMIMEMessage smimeMessage;
+    private String signedTagVS;
+    private String toUserIBAN;
+    private String toUserName;
 
     public Vicket() {}
 
-    public Vicket(PKCS10CertificationRequest csr, BigDecimal vicketValue, String currencyCode, String hashCertVS,
-                  String vicketServerURL) {
+    public Vicket(SMIMEMessage smimeMessage) throws ExceptionVS, IOException {
+        this.smimeMessage = smimeMessage;
+        x509AnonymousCert = smimeMessage.getCertWithCertExtension();
+        JSONObject certExtensionData = CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
+        initCertData(certExtensionData, smimeMessage.getCertWithCertExtension().getSubjectDN().toString());
+        validateSignedData();
+    }
+
+    public Vicket(PKCS10CertificationRequest csr) throws ExceptionVS {
         this.csr = csr;
-        this.amount = vicketValue;
-        this.currencyCode = currencyCode;
-        this.hashCertVS = hashCertVS;
-        this.vicketServerURL = vicketServerURL;
+        CertificationRequestInfo info = csr.getCertificationRequestInfo();
+        Enumeration csrAttributes = info.getAttributes().getObjects();
+        JSONObject certExtensionData = null;
+        while(csrAttributes.hasMoreElements()) {
+            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
+            switch(attribute.getTagNo()) {
+                case ContextVS.VICKET_TAG:
+                    String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
+                    certExtensionData = (JSONObject) JSONSerializer.toJSON(certAttributeJSONStr);
+                    break;
+            }
+        }
+        initCertData(certExtensionData, info.getSubject().toString());
+    }
+
+    public Vicket initCertData(JSONObject certExtensionData, String subjectDN) throws ExceptionVS {
+        if(certExtensionData == null) throw new ExceptionVS("Vicket without cert extension data");
+        if(!certExtensionData.has("hashCertVS"))  throw new ExceptionVS("Vicket without cert hash");
+        Vicket.CertSubject certSubject = Vicket.getCertSubject(subjectDN);
+        vicketServerURL = certExtensionData.getString("vicketServerURL");
+        hashCertVS = certExtensionData.getString("hashCertVS");
+        if(hashCertVS == null) throw new ExceptionVS("Vicket without hash");
+        amount = new BigDecimal(certExtensionData.getString("vicketValue"));
+        currencyCode = certExtensionData.getString("currencyCode");
+        signedTagVS = certExtensionData.getString("tagVS");
+        if(!certSubject.getVicketServerURL().equals(vicketServerURL) ||
+                certSubject.getVicketValue().compareTo(amount) != 0 ||
+                !certSubject.getCurrencyCode().equals(currencyCode) ||
+                !certSubject.gettagVS().equals(signedTagVS)) throw new ExceptionVS("Vicket with errors. SubjectDN: '" +
+                subjectDN + "' - cert extension data: '" + certExtensionData.toString() + "'");
+        return this;
+    }
+
+    public Vicket checkRequestWithDB(Vicket vicketRequest) throws ExceptionVS {
+        if(!vicketRequest.getVicketServerURL().equals(vicketServerURL))  throw new ExceptionVS("checkRequestWithDB_vicketServerURL");
+        if(!vicketRequest.getHashCertVS().equals(hashCertVS))  throw new ExceptionVS("checkRequestWithDB_hashCertVS");
+        if(!vicketRequest.getCurrencyCode().equals(currencyCode))  throw new ExceptionVS("checkRequestWithDB_currencyCode");
+        if(!vicketRequest.getSignedTagVS().equals(tag.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
+        if(vicketRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
+        this.smimeMessage = vicketRequest.getSMIMEMessage();
+        this.x509AnonymousCert = vicketRequest.x509AnonymousCert;
+        return this;
+    }
+
+    public void validateSignedData() throws ExceptionVS {
+        JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
+        BigDecimal toUserVSAmount = new BigDecimal(messageJSON.getString("amount"));
+        TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
+        if(TypeVS.VICKET != operation) throw new ExceptionVS("Error - Vicket with invalid operation '" + operation.toString() + "'");
+        if(amount.compareTo(toUserVSAmount) != 0) throw new ExceptionVS("Error - Vicket with value of '" + amount +
+                "' has signed amount  '" + toUserVSAmount + "'");
+        if(!currencyCode.equals(messageJSON.getString("currencyCode"))) throw new ExceptionVS("Error - Vicket with currencyCode '" +
+                currencyCode + "' has signed currencyCode  '" + messageJSON.getString("currencyCode"));
+        if(!signedTagVS.equals(messageJSON.getString("tagVS"))) throw new ExceptionVS("Error - Vicket with tag '" +
+                signedTagVS + "' has signed tag  '" + messageJSON.getString("tagVS"));
+        Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
+        if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS("Error - Vicket valid to '" +
+                x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
+        subject = messageJSON.getString("subject");
+        toUserIBAN = messageJSON.getString("toUserIBAN");
+        toUserName = messageJSON.getString("toUserName");
+        if(messageJSON.has("isTimeLimited")) isTimeLimited = messageJSON.getBoolean("isTimeLimited");
+    }
+
+
+    public String getToUserIBAN() {
+        return toUserIBAN;
+    }
+
+    public String getToUserName() {
+        return toUserName;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getSignedTagVS() {
+        return signedTagVS;
+    }
+
+    public JSONObject getCertExtensionData() throws IOException {
+        return CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
+    }
+
+    public SMIMEMessage getSMIMEMessage() {
+        return smimeMessage;
+    }
+
+    public X509Certificate getX509AnonymousCert() {
+        return x509AnonymousCert;
     }
 
     public PKCS10CertificationRequest getCsr() {
@@ -236,10 +346,10 @@ public class Vicket implements Serializable  {
         return state;
     }
 
-    public void setState(State state) {
+    public Vicket setState(State state) {
         this.state = state;
+        return this;
     }
-
 
     public String getReason() {
         return reason;
@@ -257,20 +367,12 @@ public class Vicket implements Serializable  {
         this.currencyCode = currencyCode;
     }
 
-    public TransactionVS getTransactionParent() {
-        return transactionParent;
+    public UserVS getToUserVS() {
+        return toUserVS;
     }
 
-    public void setTransactionParent(TransactionVS transactionParent) {
-        this.transactionParent = transactionParent;
-    }
-
-    public UserVS getUserVS() {
-        return userVS;
-    }
-
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setToUserVS(UserVS userVS) {
+        this.toUserVS = userVS;
     }
 
     public CertificationRequestVS getCertificationRequest() {
@@ -281,8 +383,35 @@ public class Vicket implements Serializable  {
         this.certificationRequest = certificationRequest;
     }
 
+    public VicketTagVS getTag() {
+        return tag;
+    }
+
+    public void setTag(VicketTagVS tag) {
+        this.tag = tag;
+    }
+
     public static CertSubject getCertSubject(String subjectDN) {
         return new CertSubject(subjectDN);
+    }
+
+
+    public JSONObject getTransactionRequest(String toUserName, String toUserIBAN, String subject, Boolean isTimeLimited) {
+        this.toUserName = toUserName;
+        this.toUserIBAN = toUserIBAN;
+        this.subject = subject;
+        this.isTimeLimited = isTimeLimited;
+        Map dataMap = new HashMap();
+        dataMap.put("operation", TypeVS.VICKET.toString());
+        dataMap.put("subject", subject);
+        dataMap.put("toUserName", toUserName);
+        dataMap.put("toUserIBAN", toUserIBAN);
+        dataMap.put("tagVS", tag.getName());
+        dataMap.put("amount", amount.toString());
+        dataMap.put("currencyCode", currencyCode);
+        if(isTimeLimited != null) dataMap.put("isTimeLimited", isTimeLimited.booleanValue());
+        dataMap.put("UUID", UUID.randomUUID().toString());
+        return (JSONObject) JSONSerializer.toJSON(dataMap);
     }
 
     public Map getCSRDataMap() throws Exception {
@@ -296,17 +425,17 @@ public class Vicket implements Serializable  {
 
     public static class CertSubject {
         String currencyCode;
-        String vicketValue;
+        BigDecimal vicketValue;
         String vicketServerURL;
         String tagVS;
         public CertSubject(String subjectDN) {
             if (subjectDN.contains("CURRENCY_CODE:")) currencyCode = subjectDN.split("CURRENCY_CODE:")[1].split(",")[0];
-            if (subjectDN.contains("VICKET_VALUE:")) vicketValue = subjectDN.split("VICKET_VALUE:")[1].split(",")[0];
+            if (subjectDN.contains("VICKET_VALUE:")) vicketValue = new BigDecimal(subjectDN.split("VICKET_VALUE:")[1].split(",")[0]);
             if (subjectDN.contains("TAGVS:")) tagVS = subjectDN.split("TAGVS:")[1].split(",")[0];
             if (subjectDN.contains("vicketServerURL:")) vicketServerURL = subjectDN.split("vicketServerURL:")[1].split(",")[0];
         }
         public String getCurrencyCode() {return this.currencyCode;}
-        public String getVicketValue() {return this.vicketValue;}
+        public BigDecimal getVicketValue() {return this.vicketValue;}
         public String getVicketServerURL() {return this.vicketServerURL;}
         public String gettagVS() {return this.tagVS;}
     }

@@ -6,8 +6,8 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.vicket.model.TransactionVS
 
 @Transactional
 class TransactionVS_BankVSService {

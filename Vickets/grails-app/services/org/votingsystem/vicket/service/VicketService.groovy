@@ -6,20 +6,24 @@ import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.x509.extension.X509ExtensionUtil
 import org.springframework.context.i18n.LocaleContextHolder
+import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
+import org.votingsystem.signature.util.CertExtensionCheckerVS
+import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.StringUtils
+import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.model.Vicket
-import org.votingsystem.vicket.model.VicketBatch
-import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.vicket.model.VicketRequestBatch
+import org.votingsystem.vicket.model.VicketTransactionBatch
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
 
+import java.security.cert.CertPathValidatorException
 import java.security.cert.X509Certificate
 
 /**
@@ -37,6 +41,8 @@ class VicketService {
     def userVSService
     def csrService
     def walletVSService
+    def timeStampService
+    def systemService
 
     public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq, Locale locale) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -110,81 +116,106 @@ class VicketService {
                 contentType: ContentTypeVS.JSON_SIGNED)
     }
 
-    public ResponseVS processTransactionVS(MessageSMIME messageSMIMEReq, VicketBatch batchRequest, Locale locale) {
+    public ResponseVS processVicketTransaction(VicketTransactionBatch vicketBatch) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        X509Certificate vicketX509Cert = messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
-        String msg;
-        ResponseVS resultResponseVS;
-        IbanVSUtil.validate(toUser);
-
-        String fromUser = grailsApplication.config.VotingSystem.serverName
-        String toUser = smimeMessageReq.getFrom().toString()
-        String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
-
-        String hashCertVS = null;
-        byte[] vicketExtensionValue = vicketX509Cert.getExtensionValue(ContextVS.VICKET_OID);
-        if(vicketExtensionValue != null) {
-            DERTaggedObject vicketCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(vicketExtensionValue);
-            def vicketCertData = JSON.parse(((DERUTF8String) vicketCertDataDER.getObject()).toString());
-            hashCertVS = vicketCertData.hashCertVS
+        List<Vicket> validatedVicketList = new ArrayList<Vicket>()
+        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        for(Vicket vicket : vicketBatch.getVicketList()) {
+            try {
+                UserVS toUserVS = UserVS.findWhere(IBAN:vicket.getToUserIBAN())
+                if(!toUserVS) throw new ExceptionVS("Error - Vicket with id '${vicket?.id}' has wrong receptor IBAN '" +
+                        vicket.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
+                vicket.setToUserVS(toUserVS)
+                validatedVicketList.add(validateVicket(vicket));
+            } catch(Exception ex) {
+                String msg = "Error validating Vicket with id '${vicket?.id}' and hash '${vicket?.hashCertVS}'";
+                if(ex instanceof ExceptionVS) throw ex
+                else throw new ExceptionVS("Error validating Vicket with id '${vicket?.id}' and hash '${vicket?.hashCertVS}'",
+                        MetaInfMsg.getErrorMsg(methodName, 'vicketExpended'), ex)
+            }
         }
-        Vicket vicket = Vicket.findWhere(serialNumber:vicketX509Cert.serialNumber.longValue(),
-                hashCertVS:hashCertVS)
-        if(!vicket) throw new ExceptionVS(messageSource.getMessage("vicketNotFoundErrorMsg", null, locale))
-        if(Vicket.State.OK == vicket.state) {
-            vicket.setMessageSMIME(messageSMIMEReq)
-            vicket.state = Vicket.State.EXPENDED
-            vicket.save()
-            messageSMIMEReq.setType(TypeVS.VICKET);
-            messageSMIMEReq.save()
-            SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
-                    smimeMessageReq, subject)
-            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
-                    content:smimeMessageResp.getBytes()).save()
-
-            TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
-                    subject:messageSource.getMessage('sendVicketTransactionSubject', null, locale),
-                    state:TransactionVS.State.OK, currency:vicket.currencyCode, type:TransactionVS.Type.VICKET_SEND).save()
-
-            Map dataMap = [vicketReceipt:messageSMIMEResp, vicket:vicket]
-            messageSMIMEReq.setType(TypeVS.VICKET)
-            resultResponseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VICKET, data:dataMap)
-        } else if (Vicket.State.EXPENDED == vicket.state) {
-            log.error("processTransactionVS - model '${vicket.id}' state ${vicket.state}")
-            Map dataMap = [message:messageSource.getMessage("vicketExpendedErrorMsg", null, locale),
-                           messageSMIME:new String(Base64.encode(vicket.messageSMIME.content))]
-            resultResponseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST_REPEATED,
-                    type:TypeVS.ERROR, messageBytes: "${dataMap as JSON}".getBytes(), data:dataMap,
-                    contentType:ContentTypeVS.JSON, reason:dataMap.message,
-                    metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "vicketExpendedError"))
+        List responseList = []
+        for(Vicket vicket: validatedVicketList) {
+            MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:vicket.getSMIMEMessage(), type:TypeVS.VICKET).save()
+            Date validTo = null
+            if(vicket.isTimeLimited == true) validTo = timePeriod.getDateTo()
+            TransactionVS transactionVS = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIME,
+                    state:TransactionVS.State.OK, validTo: validTo, subject:vicket.getSubject(),
+                    type:TransactionVS.Type.VICKET_SEND, currencyCode: vicket.getCurrencyCode(), tag:vicket.getTag()).save()
+            vicket.setState(Vicket.State.EXPENDED).setTransactionVS(transactionVS).save()
+            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(systemService.getSystemUser(),
+                    vicket.getHashCertVS(), vicket.getSMIMEMessage(), vicket.getSubject())
+            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIME,
+                    smimeMessage:receipt).save()
+            String receiptStr = new String(Base64.encode(receipt.getBytes()), "UTF-8")
+            responseList.add([(vicket.getHashCertVS()):receiptStr])
         }
-        if(batchRequest) messageSMIMEReq.batchRequest = batchRequest
-        messageSMIMEReq.save()
-        return resultResponseVS
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: responseList)
     }
 
-    public ResponseVS processVicketRequest(VicketBatch vicketBatchRequest) {
+    public Vicket validateVicket(Vicket vicket) throws ExceptionVS {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        UserVS fromUserVS = vicketBatchRequest.messageSMIME.userVS
+        SMIMEMessage smimeMessage = vicket.getSMIMEMessage()
+        Vicket vicketDB =  Vicket.findWhere(serialNumber:vicket.getX509AnonymousCert().serialNumber.longValue(),
+                hashCertVS:vicket.getHashCertVS())
+        if(!vicketDB) throw new ExceptionVS(messageSource.getMessage('hashCertVSVicketInvalidErrorMsg',
+                [vicket.getHashCertVS()].toArray(), LocaleContextHolder.locale),
+                MetaInfMsg.getErrorMsg(methodName, 'vicketDBMissing'))
+        vicket = vicketDB.checkRequestWithDB(vicket)
+        if(vicket.state == Vicket.State.EXPENDED) {
+            throw new ExceptionVS(messageSource.getMessage('vicketExpendedErrorMsg',
+                    [vicket.getHashCertVS()].toArray(), LocaleContextHolder.locale),
+                    MetaInfMsg.getErrorMsg(methodName, 'vicketExpended'))
+        } else if(vicket.state == Vicket.State.OK) {
+            Set<UserVS> signersVS = smimeMessage.getSigners();
+            if (signersVS.isEmpty()) throw new ExceptionVS(messageSource.getMessage('documentWithoutSignersErrorMsg',
+                    null, LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, 'vicketExpended'))
+            UserVS userVS = smimeMessage.getSigner(); //anonymous signer
+            CertExtensionCheckerVS extensionChecker
+            if (userVS.getTimeStampToken() != null) {
+                ResponseVS timestampValidationResp = timeStampService.validateToken(
+                        userVS.getTimeStampToken(), LocaleContextHolder.locale)
+                log.debug("$methodName - timestampValidationResp - " +
+                        "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
+                if (ResponseVS.SC_OK != timestampValidationResp.statusCode) {
+                    throw new ExceptionVS(timestampValidationResp.getMessage(),
+                            MetaInfMsg.getErrorMsg(methodName, 'timestampError'))
+                }
+            } else throw new ExceptionVS(messageSource.getMessage('documentWithoutTimeStampErrorMsg', null,
+                    LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
+            ResponseVS validationResponse = CertUtil.verifyCertificate(signatureVSService.getVicketAnchors(),
+                    false, [userVS.getCertificate()])
+            X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+            extensionChecker = validationResponse.data.extensionChecker
+            //if (extensionChecker.isAnonymousSigner()) { }
+        } else  throw new ExceptionVS(messageSource.getMessage('vicketStateErrorMsg',
+                [vicket.id, vicket.state.toString()].toArray(), LocaleContextHolder.locale),
+                MetaInfMsg.getErrorMsg(methodName, 'vicketStateError'))
+        vicket.setAuthorityCertificateVS(signatureVSService.getServerCertificateVS())
+        return vicket
+    }
+
+    public ResponseVS processVicketRequest(VicketRequestBatch vicketBatch) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        UserVS fromUserVS = vicketBatch.messageSMIME.userVS
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         //Check cash available for user
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
-                walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatchRequest.getTag(),
-                vicketBatchRequest.getRequestAmount(), vicketBatchRequest.getCurrencyCode())
+                walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatch.getTag(),
+                vicketBatch.getRequestAmount(), vicketBatch.getCurrencyCode())
         if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) {
             log.error "${methodName} - ${accountFromMovements.getMessage()}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
                     reason:accountFromMovements.getMessage(), message:accountFromMovements.getMessage(),
                     metaInf: MetaInfMsg.getErrorMsg(CLASS_NAME, methodName, "lowBalance"))
         }
-        vicketBatchRequest = csrService.signVicketBatchRequest(vicketBatchRequest)
-        TransactionVS userTransaction = vicketBatchRequest.getTransactionVS(
+        vicketBatch = csrService.signVicketBatchRequest(vicketBatch)
+        TransactionVS userTransaction = vicketBatch.getTransactionVS(
                 messageSource.getMessage('vicketRequest', null, LocaleContextHolder.locale)).save()
         LoggerVS.logVicketRequest(userTransaction.id, fromUserVS.nif, userTransaction.currencyCode, userTransaction.amount,
                 userTransaction.tag, userTransaction.dateCreated)
         Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
-        Map resultMap = [transactionList:[transactionMap], issuedVickets:vicketBatchRequest.getIssuedVicketListPEM()]
+        Map resultMap = [transactionList:[transactionMap], issuedVickets:vicketBatch.getIssuedVicketListPEM()]
         return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data:resultMap,
                 type:TypeVS.VICKET_REQUEST);
     }

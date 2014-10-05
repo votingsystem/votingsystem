@@ -42,7 +42,7 @@
         <mapping class="org.votingsystem.vicket.model.TransactionVS" />
         <mapping class="org.votingsystem.vicket.model.UserVSAccount" />
         <mapping class="org.votingsystem.vicket.model.Vicket" />
-        <mapping class="org.votingsystem.vicket.model.VicketBatch" />
+        <mapping class="org.votingsystem.vicket.model.VicketRequestBatch" />
 
     </session-factory>
 </hibernate-configuration>

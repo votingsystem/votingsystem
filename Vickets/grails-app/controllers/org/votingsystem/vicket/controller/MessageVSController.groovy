@@ -1,12 +1,7 @@
 package org.votingsystem.vicket.controller
 
-import grails.converters.JSON
-import net.sf.json.JSONObject
-import net.sf.json.JSONSerializer
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.MessageVS
 
 /**

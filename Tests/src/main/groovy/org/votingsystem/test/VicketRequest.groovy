@@ -4,6 +4,7 @@ import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
+import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
@@ -12,10 +13,12 @@ import org.votingsystem.model.VicketServer
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.test.model.TransactionVS
-import org.votingsystem.test.model.VicketBatch
+import org.votingsystem.test.model.Vicket
+import org.votingsystem.test.model.VicketRequestBatch
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
 import org.votingsystem.util.HttpHelper
+import org.votingsystem.util.StringUtils
 
 
 Logger logger = TestHelper.init(VicketRequest.class)
@@ -38,7 +41,7 @@ ContextVS.getInstance().setDefaultServer(vicketServer)
 BigDecimal transactionAmount = new BigDecimal(10)
 String curencyCode = "EUR"
 VicketTagVS tag = new VicketTagVS("HIDROGENO")
-VicketBatch vicketBatch = new VicketBatch(transactionAmount, transactionAmount, curencyCode, tag,
+VicketRequestBatch vicketBatch = new VicketRequestBatch(transactionAmount, transactionAmount, curencyCode, tag,
         ContextVS.getInstance().getVicketServer())
 
 ResponseVS responseVS = null;
@@ -69,6 +72,30 @@ try {
         for(int i = 0; i < issuedVicketsArray.size(); i++) {
             vicketBatch.initVicket(issuedVicketsArray.getString(i));
         }
+        //we have al the Vickets initialized, now we can make de transactions
+        List<String> vicketTransactionBatch = new ArrayList<String>();
+        for(Vicket vicket:vicketBatch.vicketsMap.values()) {
+            JSONObject transactionRequest = vicket.getTransactionRequest("Blim Bllim Blim", "ES6778788989450000000012",
+                    "First Vicket Transaction", false)
+
+            smimeMessage = vicket.getCertificationRequest().genMimeMessage(
+                    vicket.getHashCertVS(), StringUtils.getNormalized(vicket.getToUserName()),
+                    transactionRequest.toString(), vicket.getSubject(), null);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, vicketServer.getTimeStampServiceURL())
+            responseVS = timeStamper.call();
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                logger.error(responseVS.getMessage());
+                System.exit(0)
+            }
+            smimeMessage = timeStamper.getSmimeMessage();
+            String smimeMessageStr = new String(org.bouncycastle.util.encoders.Base64.encode(smimeMessage.getBytes()), "UTF-8")
+            vicketTransactionBatch.add(smimeMessageStr)
+        }
+        JSONArray vicketTransactionBatchJSON = JSONSerializer.toJSON(vicketTransactionBatch)
+        responseVS = HttpHelper.getInstance().sendData(vicketTransactionBatchJSON.toString().getBytes(),
+                ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
+        logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
+        logger.debug(responseVS.getMessage())
 
     } else {
         logger.error(" --- ERROR --- " + responseVS.getMessage())

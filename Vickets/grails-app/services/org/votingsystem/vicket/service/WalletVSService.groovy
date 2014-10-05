@@ -2,9 +2,9 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.VicketTagVS
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.UserVSAccount
-import org.votingsystem.model.VicketTagVS
 import org.votingsystem.vicket.util.WalletVS
 
 /**

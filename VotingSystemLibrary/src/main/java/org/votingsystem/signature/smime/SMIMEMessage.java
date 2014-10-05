@@ -18,6 +18,7 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -25,6 +26,7 @@ import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 
 import javax.mail.BodyPart;
@@ -57,13 +59,14 @@ public class SMIMEMessage extends MimeMessage {
     //"application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7m";
     private ContentTypeVS contentTypeVS ;
     private String signedContent;
-    private SMIMESigned smimeSigned = null;
+    private SMIMESigned smimeSigned;
 
-    private Set<UserVS> signers = null;
+    private Set<UserVS> signers;
     private UserVS signerVS;
     private VoteVS voteVS;
+    private X509Certificate certWithCertExtension;
     private boolean isValidSignature = false;
-    private TimeStampToken timeStampToken = null;
+    private TimeStampToken timeStampToken;
 
     public SMIMEMessage(Session session) throws MessagingException {
         super(session);
@@ -106,30 +109,13 @@ public class SMIMEMessage extends MimeMessage {
                     if (part instanceof String) {
                         stringBuilder.append((String)part);
                     } else if (part instanceof ByteArrayInputStream) {
-                        ByteArrayInputStream contentStream = (ByteArrayInputStream)cont;
-                        ByteArrayOutputStream output = new ByteArrayOutputStream();
-                        byte[] buf =new byte[4096];
-                        int len;
-                        while((len = contentStream.read(buf)) > 0){
-                            output.write(buf,0,len);
-                        }
-                        output.close();
-                        contentStream.close();
-                        stringBuilder.append(new String(output.toByteArray()));
+                        stringBuilder.append(new String(FileUtils.getBytesFromInputStream(
+                                (ByteArrayInputStream) cont), "UTF-8"));
                     }  else  new ExceptionVS(" TODO - get content from part instanceof -> " + part.getClass());
                 }
                 signedContent = stringBuilder.toString();
             } else if (cont instanceof ByteArrayInputStream) {
-                ByteArrayInputStream contentStream = (ByteArrayInputStream)cont;
-                ByteArrayOutputStream output = new ByteArrayOutputStream();
-                byte[] buf =new byte[2048];
-                int len;
-                while((len = contentStream.read(buf)) > 0){
-                    output.write(buf,0,len);
-                }
-                output.close();
-                contentStream.close();
-                signedContent = new String(output.toByteArray(), "UTF-8");
+                signedContent = new String(FileUtils.getBytesFromInputStream((ByteArrayInputStream) cont), "UTF-8");
             }
         } else throw new ExceptionVS("TODO - content instanceof String -> " + getContent());
         this.isValidSignature = checkSignature();
@@ -229,11 +215,15 @@ public class SMIMEMessage extends MimeMessage {
             if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                 JSONObject voteJSON = (JSONObject) JSONSerializer.toJSON(signedContent);
                 voteVS = VoteVS.getInstance(voteJSON, cert, timeStampToken);
+            } else if (cert.getExtensionValue(ContextVS.VICKET_OID) != null) {
+                certWithCertExtension = cert;
             } else {signerCerts.add(cert);}
         }
         if(voteVS != null) voteVS.setServerCerts(signerCerts);
         return true;
     }
+
+    public X509Certificate getCertWithCertExtension() {return certWithCertExtension;}
 
     public ValidationResult verify(PKIXParameters params) throws Exception {
         SignedMailValidator validator = new SignedMailValidator(this, params);

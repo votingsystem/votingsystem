@@ -211,7 +211,7 @@ public class VicketService extends IntentService {
             for(Vicket vicket : vicketsToSend) {
                 String textToSign = vicket.getTransactionRequest(toUserName, toUserIBAN, tagVS, null).toString();
                 SMIMEMessage smimeMessage = vicket.getCertificationRequest().genMimeMessage(
-                        vicket.getHashCertVSBase64(), StringUtils.getNormalized(toUserName),
+                        vicket.getHashCertVS(), StringUtils.getNormalized(toUserName),
                         textToSign, subject, null);
 
                 smimeMessage.getSigner().getCertificate().getSerialNumber();
@@ -236,7 +236,7 @@ public class VicketService extends IntentService {
                 mapToSend.put("publicKey", publicKeyStr);
                 String textToSign = new JSONObject(mapToSend).toString();
                 responseVS = HttpHelper.sendData(textToSign.getBytes(), ContentTypeVS.JSON,
-                        vicketServer.getVicketBatchServiceURL());
+                        vicketServer.getVicketTransactionServiceURL());
                 if(responseVS.getContentType()!= null && responseVS.getContentType().isEncrypted()) {
                     decryptedMessageBytes = Encryptor.decryptCMS(keyPair.getPrivate(),
                             responseVS.getMessageBytes());

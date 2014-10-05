@@ -214,8 +214,9 @@ public class ResponseVS<T> implements Serializable {
 		return userVS;
 	}
 
-	public void setUserVS(UserVS userVS) {
+	public ResponseVS setUserVS(UserVS userVS) {
 		this.userVS = userVS;
+        return this;
 	}
 
     public <E> StatusVS<E> getStatus() {

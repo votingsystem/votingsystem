@@ -30,6 +30,8 @@ import org.bouncycastle2.x509.X509V1CertificateGenerator;
 import org.bouncycastle2.x509.X509V3CertificateGenerator;
 import org.bouncycastle2.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.SubjectKeyIdentifierStructure;
+import org.bouncycastle2.x509.extension.X509ExtensionUtil;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
@@ -339,17 +341,11 @@ public class CertUtil {
     }
 
     public static JSONObject getCertExtensionData(X509Certificate x509Certificate,
-              String extensionOID) throws Exception {
-        JSONObject result = null;
+                      String extensionOID) throws IOException, JSONException {
         byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
         if(extensionValue == null) return null;
-        DERObject derObject =  toDERObject(extensionValue);
-        if (derObject instanceof DEROctetString) {
-            DEROctetString derOctetString = (DEROctetString)derObject;
-            DERTaggedObject derTaggedObject = (DERTaggedObject)toDERObject(derOctetString.getOctets());
-            result = new JSONObject(((DERUTF8String)derTaggedObject.getObject()).getString());
-        }
-        return result;
+        DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
+        return new JSONObject(((DERUTF8String)derTaggedObject.getObject()).getString());
     }
 
     public static DERObject toDERObject(byte[] data) throws IOException, IOException {

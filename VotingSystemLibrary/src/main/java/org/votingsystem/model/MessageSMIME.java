@@ -233,6 +233,8 @@ public class MessageSMIME implements Serializable {
         try {
             setSignedContent(getSmimeMessage().getSignedContent());
             setMessageSubject(getSmimeMessage().getSubject());
+            setContent(getSmimeMessage().getBytes());
+            setBase64ContentDigest(getSmimeMessage().getContentDigestStr());
         }catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
         }

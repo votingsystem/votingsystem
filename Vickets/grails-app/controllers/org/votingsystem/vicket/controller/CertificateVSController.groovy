@@ -3,8 +3,6 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.vicket.util.ApplicationContextHolder
-import org.votingsystem.util.HttpHelper
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate

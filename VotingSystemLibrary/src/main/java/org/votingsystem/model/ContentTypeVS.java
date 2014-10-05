@@ -57,7 +57,7 @@ public enum ContentTypeVS {
 
     VOTE("application/vote;application/pkcs7-signature;", "vote"),
 
-    VICKET("application/model;application/pkcs7-signature;application/pkcs7-mime", "model"),
+    VICKET("application/model;application/pkcs7-signature;", "vs"),
 
     X509_CA("application/x509-ca-cert", "crt"),
     X509_USER("application/x509-user-cert", "crt");

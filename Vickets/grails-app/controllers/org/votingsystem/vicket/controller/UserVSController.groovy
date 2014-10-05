@@ -5,8 +5,8 @@ import org.springframework.dao.DataAccessException
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.util.DateUtils
+import org.votingsystem.vicket.model.UserVSAccount
 
 class UserVSController {
 

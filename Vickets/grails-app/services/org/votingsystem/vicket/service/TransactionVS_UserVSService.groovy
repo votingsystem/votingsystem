@@ -2,11 +2,7 @@ package org.votingsystem.vicket.service
 
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.context.i18n.LocaleContextHolder
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS

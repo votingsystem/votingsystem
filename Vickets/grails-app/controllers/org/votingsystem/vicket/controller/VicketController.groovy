@@ -6,14 +6,9 @@ import org.apache.log4j.RollingFileAppender
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.VicketTagVS
-import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.vicket.model.VicketBatch
+import org.votingsystem.model.*
+import org.votingsystem.util.ExceptionVS
+import org.votingsystem.vicket.model.VicketRequestBatch
 
 class VicketController {
 
@@ -22,7 +17,6 @@ class VicketController {
 
 
     def vicketService
-    def csrService
     def userVSService
     def transactionVSService
 
@@ -87,7 +81,7 @@ class VicketController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
 
-        VicketBatch vicketBatch = new VicketBatch(params[ContextVS.CSR_FILE_NAME], messageSMIMEReq,
+        VicketRequestBatch vicketBatch = new VicketRequestBatch(params[ContextVS.CSR_FILE_NAME], messageSMIMEReq,
                 grailsApplication.config.grails.serverURL)
         if(!vicketBatch.tag) {
             VicketTagVS.withTransaction {
@@ -106,6 +100,8 @@ class VicketController {
         Throwable rootCause = StackTraceUtils.extractRootCause(exception)
         log.error "Exception occurred. ${rootCause.getMessage()}", exception
         String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
+        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
+                metaInf = ((ExceptionVS)exception).getMetInf()
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
                 metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
     }

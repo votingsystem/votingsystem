@@ -40,7 +40,7 @@ public class Vicket extends ReceiptContainer {
     private byte[] receiptBytes;
     private byte[] cancellationReceiptBytes;
     private String originHashCertVS;
-    private String hashCertVSBase64;
+    private String hashCertVS;
     private BigDecimal amount;
     private String subject;
     private State state;
@@ -57,10 +57,10 @@ public class Vicket extends ReceiptContainer {
         this.currencyCode = currencyCode;
         try {
             setOriginHashCertVS(UUID.randomUUID().toString());
-            setHashCertVSBase64(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
+            setHashCertVS(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
             certificationRequest = CertificationRequestVS.getVicketRequest(
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
-                    ContextVS.PROVIDER, vicketServerURL, hashCertVSBase64, amount.toString(),
+                    ContextVS.PROVIDER, vicketServerURL, hashCertVS, amount.toString(),
                     this.currencyCode, tagVS);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -161,12 +161,12 @@ public class Vicket extends ReceiptContainer {
         this.originHashCertVS = originHashCertVS;
     }
 
-    public String getHashCertVSBase64() {
-        return hashCertVSBase64;
+    public String getHashCertVS() {
+        return hashCertVS;
     }
 
-    public void setHashCertVSBase64(String hashCertVSBase64) {
-        this.hashCertVSBase64 = hashCertVSBase64;
+    public void setHashCertVS(String hashCertVS) {
+        this.hashCertVS = hashCertVS;
     }
 
     public BigDecimal getAmount() {
@@ -198,7 +198,7 @@ public class Vicket extends ReceiptContainer {
         Map dataMap = new HashMap();
         dataMap.put("UUID", UUID.randomUUID().toString());
         dataMap.put("operation", TypeVS.VICKET_CANCEL.toString());
-        dataMap.put("hashCertVSBase64", getHashCertVSBase64());
+        dataMap.put("hashCertVS", getHashCertVS());
         dataMap.put("originHashCertVS", getOriginHashCertVS());
         dataMap.put("vicketCertSerialNumber", getCertificationRequest().
                 getCertificate().getSerialNumber().longValue());
@@ -208,13 +208,13 @@ public class Vicket extends ReceiptContainer {
     public JSONObject getTransactionRequest(String toUserName,
             String toUserIBAN, String tag, Boolean isTimeLimited) {
         Map dataMap = new HashMap();
-        dataMap.put("receptor", toUserName);
         dataMap.put("operation", TypeVS.VICKET.toString());
         dataMap.put("subject", subject);
-        dataMap.put("IBAN", toUserIBAN);
+        dataMap.put("toUser", toUserName);
+        dataMap.put("toUserIBAN", toUserIBAN);
         dataMap.put("tagVS", tag);
-        dataMap.put("currency", currencyCode);
         dataMap.put("amount", amount.toString());
+        dataMap.put("currencyCode", currencyCode);
         if(isTimeLimited != null) dataMap.put("isTimeLimited", isTimeLimited.booleanValue());
         dataMap.put("UUID", UUID.randomUUID().toString());
         return new JSONObject(dataMap);

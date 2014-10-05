@@ -5,10 +5,8 @@ import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.NifUtils
-import org.votingsystem.vicket.model.UserVSAccount
-import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.util.NifUtils
 
 import java.security.cert.X509Certificate
 

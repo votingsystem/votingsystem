@@ -6,16 +6,17 @@ import grails.transaction.Transactional
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.*
-import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.AlertVS
 import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.UserVSAccount
+import org.votingsystem.vicket.util.CoreSignal
 import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.vicket.util.LoggerVS
-import org.votingsystem.util.MetaInfMsg
+
 import java.math.RoundingMode
-import org.votingsystem.vicket.util.CoreSignal
 
 /**
 * @author jgzornoza

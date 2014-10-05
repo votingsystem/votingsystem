@@ -3,16 +3,9 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.hibernate.ScrollableResults
-import org.votingsystem.model.GroupVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
-import org.votingsystem.model.BankVS
-import org.votingsystem.model.VicketTagVS
+import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 
 //@Transactional

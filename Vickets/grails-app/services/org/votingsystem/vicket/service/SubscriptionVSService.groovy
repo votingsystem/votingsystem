@@ -4,10 +4,10 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.vicket.util.IbanVSUtil
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.vicket.model.UserVSAccount
+import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.security.cert.X509Certificate
 

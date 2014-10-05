@@ -3,22 +3,18 @@ package org.votingsystem.vicket.controller
 import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.dao.DataAccessException
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.*
+import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
-import org.votingsystem.vicket.model.VicketBatch
-import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.util.DateUtils
-import org.codehaus.groovy.runtime.StackTraceUtils
-import java.security.KeyFactory
-import java.security.PublicKey
-import java.security.spec.X509EncodedKeySpec
+import org.votingsystem.vicket.model.VicketTransactionBatch
 
 class TransactionVSController {
-
 
     def userVSService
     def transactionVSService
@@ -128,123 +124,17 @@ class TransactionVSController {
      * Servicio que recibe una transacción compuesta por un lote de Vickets
      *
      * @httpMethod [POST]
-     * @serviceURL [/transactionVS/vicketBatch]
+     * @serviceURL [/transactionVS/vicket]
      * @requestContentType Documento JSON con la extructura https://github.com/votingsystem/votingsystem/wiki/Lote-de-Vickets
      * @responseContentType [application/pkcs7-mime]. Documento JSON cifrado en el que figuran los recibos de los model recibidos.
      * @return
      */
-    def vicketBatch() {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        if(!params.requestBytes) {
+    def vicket() {
+        if(!request.JSON) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        VicketBatch batchRequest;
-        VicketBatch.withTransaction {
-            batchRequest = new VicketBatch(state:BatchRequest.State.OK, content:params.requestBytes,
-                    type: TypeVS.VICKET_REQUEST).save()
-        }
-        def requestJSON = JSON.parse(new String(params.requestBytes, ContextVS.UTF_8))
-        byte[] decodedPK = Base64.decode(requestJSON.publicKey);
-        PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
-        //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
-        JSONArray vicketsArray = requestJSON.vickets
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK)
-        byte[] bytesResponse
-        List<ResponseVS> responseList = new ArrayList<ResponseVS>()
-        for(int i = 0; i < vicketsArray.size(); i++) {
-            SMIMEMessage smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.decode(vicketsArray.getString(i).getBytes())))
-            ResponseVS signatureResponse = signatureVSService.processSMIMERequest(smimeMessageReq, ContentTypeVS.VICKET,
-                    request.getLocale())
-            if(ResponseVS.SC_OK == signatureResponse.getStatusCode()) {
-                responseList.add(signatureResponse);
-            } else {
-                responseVS = signatureResponse
-                break;
-            }
-        }
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            String msg = message(code: "vicketBatchErrorMsg") + "--- ${responseVS.getMessage()}"
-            String metaInfMsg = MetaInfMsg.getErrorMsg(methodName, "vicketBatchError")
-            cancelVicketBatchRequest(responseList, batchRequest, TypeVS.ERROR, msg, metaInfMsg)
-            return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    type: TypeVS.ERROR, metaInf: metaInfMsg, contentType: ContentTypeVS.MULTIPART_ENCRYPTED,
-                    messageBytes: msg.getBytes())]
-        } else {
-            List<ResponseVS> transactionvsResponseList = new ArrayList<ResponseVS>()
-            for(ResponseVS response : responseList) {
-                ResponseVS transactionvsResponse = vicketService.processTransactionVS(
-                        response.data, batchRequest, request.locale)
-                if(ResponseVS.SC_OK == transactionvsResponse.getStatusCode()) {
-                    transactionvsResponseList.add(transactionvsResponse);
-                } else {
-                    responseVS = transactionvsResponse
-                    break;
-                }
-            }
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                    String metaInfMsg = MetaInfMsg.getErrorMsg(methodName, TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED.toString())
-                    cancelVicketBatchRequest(responseList, batchRequest, TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED,
-                            responseVS.data.message, metaInfMsg)
-                    cancelVicketBatchTransactionVS(transactionvsResponseList, batchRequest,TypeVS.VICKET_REQUEST_WITH_ITEMS_REPEATED,
-                            responseVS.data.message, metaInfMsg)
-                    return [receiverPublicKey:receiverPublic, responseVS:responseVS];
-                } else {
-                    String msg = message(code: "vicketBatchErrorMsg") + " ${responseVS.getMessage()}"
-                    cancelVicketBatchRequest(responseList, batchRequest, TypeVS.VICKET_BATCH_ERROR, msg)
-                    cancelVicketBatchTransactionVS(transactionvsResponseList, batchRequest,TypeVS.VICKET_BATCH_ERROR, msg)
-                    return [receiverPublicKey:receiverPublic,  responseVS:new ResponseVS(
-                            statusCode:responseVS.getStatusCode(), type:TypeVS.VICKET_BATCH_ERROR,
-                            contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: msg.getBytes())]
-                }
-            } else {
-                List<String> vicketReceiptList = new ArrayList<String>()
-                for(ResponseVS response: transactionvsResponseList) {
-                    //Map dataMap = [vicketReceipt:messageSMIMEResp, model:model]
-                    vicketReceiptList.add(new String(Base64.encode(((MessageSMIME)response.getData().vicketReceipt).content)))
-                }
-                Map responseMap = [vickets:vicketReceiptList]
-                byte[] responseBytes = "${responseMap as JSON}".getBytes()
-                return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK,
-                        contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: responseBytes)]
-            }
-        }
-    }
-
-    private void cancelVicketBatchTransactionVS(List<ResponseVS> responseList, VicketBatch batchRequest, TypeVS typeVS,
-              String reason, String metaInf) {
-        log.error("cancelVicketBatchTransactionVS - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
-        for(ResponseVS responseVS: responseList) {
-            if(responseVS.data instanceof Map) {
-                ((MessageSMIME)responseVS.data.vicketReceipt).type = typeVS
-                ((MessageSMIME)responseVS.data.vicketReceipt).reason = reason
-                ((MessageSMIME)responseVS.data.vicketReceipt).save()
-                ((Vicket)responseVS.data.vicket).setState(Vicket.State.OK)
-                ((Vicket)responseVS.data.vicket).save()
-            } else log.error("cancelVicketBatch unknown data type ${responseVS.data.getClass().getName()}")
-        }
-        batchRequest.setType(typeVS)
-        batchRequest.setState(BatchRequest.State.ERROR)
-        batchRequest.setReason(reason)
-        batchRequest.save()
-    }
-
-    private void cancelVicketBatchRequest(List<ResponseVS> responseList, VicketBatch batchRequest, TypeVS typeVS,
-               String reason, String metaInf) {
-        log.error("cancelVicketBatch - batchRequest: '${batchRequest.id}' - reason: ${reason} - type: ${typeVS}")
-        for(ResponseVS responseVS: responseList) {
-            if(responseVS.data instanceof MessageSMIME) {
-                ((MessageSMIME)responseVS.data).batchRequest = batchRequest
-                ((MessageSMIME)responseVS.data).type = typeVS
-                ((MessageSMIME)responseVS.data).reason = reason
-                ((MessageSMIME)responseVS.data).save()
-            } else log.error("cancelVicketBatch unknown data type ${responseVS.data.getClass().getName()}")
-        }
-        batchRequest.setType(typeVS)
-        batchRequest.setState(BatchRequest.State.ERROR)
-        batchRequest.setReason(reason)
-        batchRequest.save()
+        ResponseVS responseVS = vicketService.processVicketTransaction(new VicketTransactionBatch(request.JSON))
+        return [responseVS:responseVS]
     }
 
     /**

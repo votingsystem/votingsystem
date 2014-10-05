@@ -6,6 +6,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
+
 import java.security.cert.X509Certificate
 
 //@Transactional

@@ -7,6 +7,7 @@ import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.util.encoders.Base64
+import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
@@ -18,8 +19,9 @@ import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
-import org.votingsystem.vicket.model.MessageVS
 import org.votingsystem.util.MetaInfMsg
+import org.votingsystem.vicket.model.MessageVS
+import org.votingsystem.vicket.model.Vicket
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
@@ -39,6 +41,7 @@ class  SignatureVSService {
 	
 	private SignedMailGenerator signedMailGenerator;
     private static Set<TrustAnchor> trustAnchors;
+    private static Set<TrustAnchor> vicketAnchors;
 	private KeyStore trustedCertsKeyStore
     private Set<X509Certificate> trustedCerts
 	private static HashMap<Long, CertificateVS> trustedCertsHashMap
@@ -66,6 +69,8 @@ class  SignatureVSService {
 		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
 		byte[] pemCertsArray
         localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
+        vicketAnchors = new HashSet<TrustAnchor>();
+        vicketAnchors.add(new TrustAnchor(localServerCertSigner, null));
 		for (int i = 0; i < chain.length; i++) {
             checkAuthorityCertDB(chain[i])
 			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
@@ -109,6 +114,10 @@ class  SignatureVSService {
             log.debug "$methodName - $certData - $msg"
         }
         return certificateVS
+    }
+
+    public Set<TrustAnchor> getVicketAnchors() {
+        return vicketAnchors;
     }
 
     public X509Certificate getServerCert() {
@@ -295,10 +304,8 @@ class  SignatureVSService {
                 if(extensionChecker.isAnonymousSigner()) {
                     log.debug("validateSignersCerts - is anonymous signer")
                     anonymousSigner = userVS
-                    responseVS = new ResponseVS(ResponseVS.SC_OK)
-                    responseVS.setUserVS(anonymousSigner)
+                    responseVS = new ResponseVS(ResponseVS.SC_OK).setUserVS(anonymousSigner)
                 } else {
-
                     responseVS = subscriptionVSService.checkUser(userVS, locale)
                     if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
                     if(responseVS.userVS.nif.equals(signerNIF)) checkedSigner = responseVS.userVS;
@@ -372,9 +379,7 @@ class  SignatureVSService {
             log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = null;
             switch(contenType) {
-                /*case ContentTypeVS.VICKET:
-                    certValidationResponse = validateSMIMEVicket(smimeMessageReq, locale)
-                    break;*/
+                //case ContentTypeVS.VICKET: break;
                 default:
                     certValidationResponse = validateSMIME(smimeMessageReq, locale);
             }
@@ -383,8 +388,7 @@ class  SignatureVSService {
             MessageSMIME messageSMIME
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
                 messageSMIME = new MessageSMIME(reason:certValidationResponse.message, type:TypeVS.SIGNATURE_ERROR,
-                        metaInf:certValidationResponse.metaInf ,content:smimeMessageReq.getBytes())
-                messageSMIME.save()
+                        metaInf:certValidationResponse.metaInf ,content:smimeMessageReq.getBytes()).save()
                 log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
                         " - message: ${certValidationResponse.message}"
                 return certValidationResponse
@@ -393,8 +397,7 @@ class  SignatureVSService {
                         anonymousSigner:certValidationResponse.data?.anonymousSigner,
                         userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
                         eventVS:certValidationResponse.eventVS, type:typeVS,
-                        content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr())
-                messageSMIME.save()
+                        content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr()).save()
             }
             return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
         } else if(smimeMessageReq) {
@@ -403,24 +406,6 @@ class  SignatureVSService {
                     message:messageSource.getMessage('signatureErrorMsg', null, locale))
         }
     }
-
-	public ResponseVS validateSMIMEVicket(SMIMEMessage smimeMessage, Locale locale) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-		MessageSMIME messageSMIME = MessageSMIME.findWhere(base64ContentDigest:smimeMessage.getContentDigestStr())
-		if(messageSMIME) {
-			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
-				[smimeMessage.getContentDigestStr()].toArray(), locale)
-			log.error("validateSMIMEVicket - ${msg} - messageSMIME.id: ${messageSMIME.id}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
-                    metaInf:MetaInfMsg.getErrorMsg(methodName, 'base64ContentDigest'))
-		}
-		return validateVicketCerts(smimeMessage, locale)
-	}
-
-	public ResponseVS validateVicketCerts(SMIMEMessage smimeMessageReq, Locale locale) {
-        log.debug("validateVicketCerts - TODO")
-	}
-
 
     public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
         log.debug("encryptToCMS")

@@ -2,11 +2,9 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
-import org.votingsystem.model.ContextVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 
