@@ -40,7 +40,6 @@ class  SignatureVSService {
 	private SignedMailGenerator signedMailGenerator;
     private static Set<TrustAnchor> trustAnchors;
     private static Set<TrustAnchor> vicketAnchors;
-	private KeyStore trustedCertsKeyStore
     private Set<X509Certificate> trustedCerts
 	private static HashMap<Long, CertificateVS> trustedCertsHashMap
 	private X509Certificate localServerCertSigner;

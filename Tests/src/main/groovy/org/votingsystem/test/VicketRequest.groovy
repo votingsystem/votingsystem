@@ -4,6 +4,7 @@ import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
+import org.slf4j.*;
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
@@ -15,6 +16,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
@@ -82,8 +84,8 @@ try {
             JSONObject transactionRequest = vicket.getTransactionRequest("Blim Bllim Blim", "ES6778788989450000000012",
                     "First Vicket Transaction", false)
 
-            smimeMessage = vicket.getCertificationRequest().genMimeMessage(
-                    vicket.getHashCertVS(), StringUtils.getNormalized(vicket.getToUserName()),
+            smimeMessage = vicket.getCertificationRequest().genMimeMessage(vicket.getHashCertVS(),
+                    StringUtils.getNormalized(vicket.getToUserName()),
                     transactionRequest.toString(), vicket.getSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, vicketServer.getTimeStampServiceURL())
             responseVS = timeStamper.call();
@@ -105,16 +107,14 @@ try {
             String hashCertVS = receiptData.keySet().iterator().next()
             Vicket vicket = vicketBatch.getVicketsMap().get(hashCertVS)
             String receiptStr = new String(Base64.getDecoder().decode(receiptData.getString(hashCertVS).getBytes()), "UTF-8")
-            X509Certificate vicketCert = vicket.getCertificationRequest().getCertificate()
-            //ResponseVS validationResponse = CertUtil.verifyCertificate(signatureVSService.getVicketAnchors(), false, [userVS.getCertificate()])
-            SMIMEMessage smimeSender = new SMIMEMessage(new ByteArrayInputStream(receiptStr.getBytes()))
-
-            Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
-            trustAnchors.add(new TrustAnchor(vicketServer.getX509Certificate(), null));
-            smimeMessage.validateX509Certs(trustAnchors)
-            String signatureHashCertVS = Vicket.getHashCertVS(smimeMessage.getCertWithCertExtension());
-
-            logger.debug("signatureHashCertVS: " + signatureHashCertVS + " - vicket hashCertVS: " + vicket.getHashCertVS())
+            SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(receiptStr.getBytes()))
+            for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
+                CertUtil.verifyCertificate(vicketServer.getTrustAnchors(), false, Arrays.asList(cert));
+                logger.debug("Cert validated: " + cert.getSubjectDN().toString());
+            }
+            String signatureHashCertVS = CertUtil.getHashCertVS(smimeMessage.getCertWithCertExtension(), ContextVS.VICKET_OID);
+            if(!signatureHashCertVS.equals(vicket.getHashCertVS())) throw new ExceptionVS ("signatureHashCertVS: " +
+                    signatureHashCertVS + " - vicket hashCertVS: " + vicket.getHashCertVS())
         }
 
     } else {

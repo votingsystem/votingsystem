@@ -94,32 +94,45 @@ class TransactionVSService {
         alertVS.save()
     }
 
+    private UserVSAccount updateUserVSAccountTo(TransactionVS transactionVS) {
+        UserVSAccount accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
+                currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
+        if(!accountTo) {//new user account for tag
+            accountTo = new UserVSAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
+                    currencyCode:transactionVS.currencyCode, tag:transactionVS.tag, userVS:transactionVS.toUserVS).save()
+            log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
+                    "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")
+        } else {
+            accountTo.balance = accountTo.balance.add(transactionVS.amount)
+            accountTo.save()
+        }
+        return accountTo
+    }
+
+    private void updateUserVSAccountFrom(TransactionVS transactionVS) {
+        transactionVS.accountFromMovements.each { userAccountFrom, amount->
+            userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
+            userAccountFrom.save()
+        }
+    }
+
     public void updateBalances(TransactionVS transactionVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(transactionVS.state == TransactionVS.State.OK) {
             if(transactionVS.type == TransactionVS.Type.VICKET_INIT_PERIOD) {
 
+            } else if(transactionVS.type == TransactionVS.Type.VICKET_REQUEST) {
+                updateUserVSAccountFrom(transactionVS)
+                systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
+            } else if(transactionVS.type == TransactionVS.Type.VICKET_SEND) {
+                updateUserVSAccountTo(transactionVS)
+                systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
             } else {
                 if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
-                    if(transactionVS.type != TransactionVS.Type.FROM_BANKVS) {
-                        transactionVS.accountFromMovements.each { userAccountFrom, amount->
-                            userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
-                            userAccountFrom.save()
-                        }
-                    }
+                    if(transactionVS.type != TransactionVS.Type.FROM_BANKVS) updateUserVSAccountFrom(transactionVS)
                     systemService.updateTagBalance(transactionVS.amount,transactionVS.currencyCode, transactionVS.tag)
                 } else {
-                    UserVSAccount accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
-                            currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
-                    if(!accountTo) {//new user account for tag
-                        accountTo = new UserVSAccount(IBAN:transactionVS.toUserIBAN, balance:transactionVS.amount,
-                                currencyCode:transactionVS.currencyCode, tag:transactionVS.tag, userVS:transactionVS.toUserVS).save()
-                        log.debug("New UserVSAccount '${accountTo.id}' for IBAN '${transactionVS.toUserIBAN}' - " +
-                                "tag '${accountTo.tag?.name}' - amount '${accountTo.balance}'")
-                    } else {
-                        accountTo.balance = accountTo.balance.add(transactionVS.amount)
-                        accountTo.save()
-                    }
+                    updateUserVSAccountTo(transactionVS)
                     systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
                     notifyListeners(transactionVS)
                     log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionVS.amount} ${transactionVS.currencyCode} " +

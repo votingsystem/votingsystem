@@ -18,6 +18,14 @@ class UrlMappings {
             }
         }
 
+        "/balance/userVS/$userId/db" {
+            controller = "balance"
+            action = "db"
+            constraints {
+                userId(matches:/\d*/)
+            }
+        }
+
         "/balance/userVS/$userId/$year/$month/$day" {
             controller = "balance"
             action = "userVS"

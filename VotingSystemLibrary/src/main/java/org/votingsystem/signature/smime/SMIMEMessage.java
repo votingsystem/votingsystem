@@ -134,12 +134,6 @@ public class SMIMEMessage extends MimeMessage {
         init();
     }
 
-    public void validateX509Certs(Set<TrustAnchor> trustAnchors) throws Exception {
-        for(UserVS signer: signers) {
-            CertUtil.verifyCertificate(trustAnchors, false,Arrays.asList(signer.getCertificate()));
-        }
-    }
-
     public void setMessageID(String messageId) throws MessagingException {
         setHeader("Message-ID", messageId);
     }
@@ -232,6 +226,14 @@ public class SMIMEMessage extends MimeMessage {
     }
 
     public X509Certificate getCertWithCertExtension() {return certWithCertExtension;}
+
+    public Set<X509Certificate> getSignersCerts() {
+        Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
+        for(UserVS userVS : signers) {
+            signerCerts.add(userVS.getCertificate());
+        }
+        return signerCerts;
+    }
 
     public ValidationResult verify(PKIXParameters params) throws Exception {
         SignedMailValidator validator = new SignedMailValidator(this, params);

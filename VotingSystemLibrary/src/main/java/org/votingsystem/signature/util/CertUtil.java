@@ -397,6 +397,12 @@ public class CertUtil {
 		}
 	}
 
+    public static DERObject toDERObject(byte[] data) throws IOException, IOException {
+        ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+        ASN1InputStream DIS = new ASN1InputStream(inStream);
+        return DIS.readObject();
+    }
+
     public static JSONObject getCertExtensionData(X509Certificate x509Certificate, String extensionOID) throws IOException {
         byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
         if(extensionValue == null) return null;
@@ -404,10 +410,9 @@ public class CertUtil {
         return (JSONObject) JSONSerializer.toJSON(((DERUTF8String)derTaggedObject.getObject()).getString());
     }
 
-    public static DERObject toDERObject(byte[] data) throws IOException, IOException {
-        ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-        ASN1InputStream DIS = new ASN1InputStream(inStream);
-        return DIS.readObject();
+    public static String getHashCertVS(X509Certificate x50Cert, String oid) throws IOException {
+        JSONObject jsonObject =  CertUtil.getCertExtensionData(x50Cert, oid);
+        return jsonObject.getString("hashCertVS");
     }
 
 }

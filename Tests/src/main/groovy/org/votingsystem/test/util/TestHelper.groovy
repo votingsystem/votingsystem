@@ -5,7 +5,6 @@ import org.apache.log4j.Logger
 import org.votingsystem.model.*
 import org.votingsystem.util.HttpHelper
 
-import java.util.logging.LogManager
 
 /**
  * @author jgzornoza

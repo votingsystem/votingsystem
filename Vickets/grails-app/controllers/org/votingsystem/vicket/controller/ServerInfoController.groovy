@@ -28,9 +28,9 @@ class ServerInfoController {
 	 */
 	def index() {
         HashMap serverInfo = new HashMap()
-        X509Certificate serverCert = signatureVSService.getServerCert()
-        byte[] serverCertPEMBytes = CertUtil.getPEMEncoded (serverCert)
-        serverInfo.certChainPEM = new String(serverCertPEMBytes)
+        File certChainFile = grailsApplication.mainContext.getResource(
+                grailsApplication.config.VotingSystem.certChainPath).getFile();
+        serverInfo.certChainPEM = certChainFile.text
         serverInfo.certChainURL = "${createLink(controller: 'serverInfo', action:'certChain', absolute:true)}"
         serverInfo.name = grailsApplication.config.VotingSystem.serverName
         serverInfo.serverType = ActorVS.Type.VICKETS.toString()

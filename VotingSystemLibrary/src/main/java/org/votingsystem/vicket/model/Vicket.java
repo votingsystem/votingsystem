@@ -145,7 +145,8 @@ public class Vicket implements Serializable  {
         if(!vicketRequest.getSignedTagVS().equals(tag.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
         if(vicketRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
         this.smimeMessage = vicketRequest.getSMIMEMessage();
-        this.x509AnonymousCert = vicketRequest.x509AnonymousCert;
+        this.x509AnonymousCert = vicketRequest.getX509AnonymousCert();
+        this.toUserVS = vicketRequest.getToUserVS();
         return this;
     }
 
@@ -167,12 +168,6 @@ public class Vicket implements Serializable  {
         toUserIBAN = messageJSON.getString("toUserIBAN");
         toUserName = messageJSON.getString("toUserName");
         if(messageJSON.has("isTimeLimited")) isTimeLimited = messageJSON.getBoolean("isTimeLimited");
-    }
-
-    public Set<TrustAnchor> getTrustAnchors() {
-        Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
-        trustAnchors.add(new TrustAnchor(x509AnonymousCert, null));
-        return trustAnchors;
     }
 
     public void initSigner(byte[] csrBytes) throws Exception {
@@ -203,12 +198,6 @@ public class Vicket implements Serializable  {
     public JSONObject getCertExtensionData() throws IOException {
         return CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
     }
-
-    public static String getHashCertVS(X509Certificate x50Cert) throws IOException {
-        JSONObject jsonObject =  CertUtil.getCertExtensionData(x50Cert, ContextVS.VICKET_OID);
-        return jsonObject.getString("hashCertVS");
-    }
-
 
     public SMIMEMessage getSMIMEMessage() {
         return smimeMessage;
