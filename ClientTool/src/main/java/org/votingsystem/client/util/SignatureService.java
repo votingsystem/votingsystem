@@ -1,6 +1,5 @@
 package org.votingsystem.client.util;
 
-import com.itextpdf.text.pdf.PdfReader;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -102,12 +101,6 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
                             responseVS = processCancelAnonymousDelegation(operationVS.getTargetServer(), operationVS);
-                            break;
-                        case MANIFEST_PUBLISHING:
-                            responseVS = publishManifest(operationVS.getTargetServer(), operationVS);
-                            break;
-                        case MANIFEST_SIGN:
-                            responseVS = signManifest(operationVS);
                             break;
                         case CLAIM_PUBLISHING:
                         case VOTING_PUBLISHING:
@@ -255,20 +248,6 @@ public class SignatureService extends Service<ResponseVS> {
             }
         }
 
-        //we know this is done in a background thread
-        private ResponseVS signManifest(OperationVS operationVS) throws Exception {
-            ResponseVS responseVS = HttpHelper.getInstance().getData(operationVS.getDocumentURL(), ContentTypeVS.PDF);
-            if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            byte[] pdfDocumentBytes = responseVS.getMessageBytes();
-            PdfReader readerManifesto = new PdfReader(pdfDocumentBytes);
-            String reason = null;
-            String location = null;
-            PDFSignedSender pdfSignedSender = new PDFSignedSender(operationVS.getServiceURL(),
-                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                    reason, location, password.toCharArray(), readerManifesto, null, null,
-                    ContextVS.getInstance().getAccessControl().getX509Certificate());
-            return pdfSignedSender.call();
-        }
 
         //we know this is done in a background thread
         private ResponseVS sendMessageVS(ActorVS targetServer, OperationVS operationVS) throws Exception {
@@ -361,33 +340,6 @@ public class SignatureService extends Service<ResponseVS> {
             return responseVS;
         }
 
-        //we know this is done in a background thread
-        private ResponseVS publishManifest(ActorVS targetServer, OperationVS operationVS) throws Exception {
-            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToSignMap());
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(jsonObject.toString().getBytes(),
-                    ContentTypeVS.JSON, operationVS.getServiceURL(), "eventId");
-            byte [] pdfDocumentBytes = null;
-            updateProgress(60, 100);
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                pdfDocumentBytes = responseVS.getMessageBytes();
-                String eventId = ((List<String>)responseVS.getData()).iterator().next();
-                String serviceURL = operationVS.getServiceURL() +  "/" + eventId;
-                operationVS.setServiceURL(serviceURL);
-            } else {
-                return new ResponseVS(responseVS.getStatusCode(), ContextVS.getInstance().getMessage(
-                        "errorDownloadingDocument") + " - " + responseVS.getMessage());
-            }
-            PdfReader readerManifest = new PdfReader(pdfDocumentBytes);
-
-            String reason = null;
-            String location = null;
-            PDFSignedSender pdfSignedSender = new PDFSignedSender(operationVS.getServiceURL(),
-                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                    reason, location, password.toCharArray(), readerManifest, null, null,
-                    ContextVS.getInstance().getAccessControl().getX509Certificate());
-            responseVS = pdfSignedSender.call();
-            return responseVS;
-        }
 
         //we know this is done in a background thread
         private ResponseVS processCancelAnonymousDelegation(ActorVS targetServer, OperationVS operationVS) throws Exception {

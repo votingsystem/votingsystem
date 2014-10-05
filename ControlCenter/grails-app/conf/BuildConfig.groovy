@@ -65,7 +65,6 @@ grails.project.dependency.resolution = {
                 //'org.apache.geronimo.specs:geronimo-javamail_1.4_spec:1.7.1',
                 'javax.mail:mail:1.4.7',
                 'org.hibernate:hibernate-search:4.2.0.Final',
-                'com.itextpdf:itextpdf:5.1.3',
                 'org.xhtmlrenderer:core-renderer:R8',
                 'org.rometools:rome-modules:1.0',
         ) {excludes "slf4j-api", "log4j", "commons-logging", "xalan",  "xml-apis", "groovy","commons-io"}

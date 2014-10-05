@@ -1,6 +1,5 @@
 package org.votingsystem.client.util;
 
-import com.itextpdf.text.pdf.PdfPKCS7;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.SignerInformationVerifier;
@@ -267,39 +266,4 @@ public class DocumentVSValidator {
         return new ResponseVS(ResponseVS.SC_OK);
     }
 
-    public static ResponseVS validateManifestSignature(SignedFile signedFile, KeyStore trustedKeyStore, Date dateInit,
-            Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
-        if(!signedFile.isValidSignature()) {
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
-                    signedFile.getName()));
-        }
-        UserVS signer = signedFile.getPdfDocument().getUserVS();
-        try {
-            SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().build(
-                    timeStampServerCert);
-            signer.getTimeStampToken().validate(timeStampSignerInfoVerifier);
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("timestampValidationErrorMsg",
-                    signedFile.getName()));
-        }
-        PdfPKCS7 pdfPKCS7 = signedFile.getPdfPKCS7();
-        Calendar signDate = pdfPKCS7.getSignDate();
-        X509Certificate[] signCertificateChain = (X509Certificate[])pdfPKCS7.getSignCertificateChain();
-        Object[] fails = PdfPKCS7.verifyCertificates(signCertificateChain, trustedKeyStore, null, signDate);
-        if(fails != null) {
-            logger.error("signature fail");
-            for(Object object:fails) {
-                logger.error("signature fail - " + object);
-            }
-            for(X509Certificate cert:signCertificateChain) {
-                String notAfter = DateUtils.getDateStr(cert.getNotAfter());
-                String notBefore = DateUtils.getDateStr(cert.getNotBefore());
-                logger.debug("pdf checkSignature - fails - Cert:" + cert.getSubjectDN()
-                        + " - NotBefore: " + notBefore + " - NotAfter:" + notAfter);
-            }
-            return new ResponseVS (ResponseVS.SC_ERROR_REQUEST);
-        }
-        return new ResponseVS (ResponseVS.SC_OK);
-    }
 }

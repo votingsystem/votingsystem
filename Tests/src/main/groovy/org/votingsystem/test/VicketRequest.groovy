@@ -91,11 +91,14 @@ try {
             String smimeMessageStr = new String(org.bouncycastle.util.encoders.Base64.encode(smimeMessage.getBytes()), "UTF-8")
             vicketTransactionBatch.add(smimeMessageStr)
         }
-        JSONArray vicketTransactionBatchJSON = JSONSerializer.toJSON(vicketTransactionBatch)
-        responseVS = HttpHelper.getInstance().sendData(vicketTransactionBatchJSON.toString().getBytes(),
+        JSONArray transactionBatchJSON = JSONSerializer.toJSON(vicketTransactionBatch)
+        responseVS = HttpHelper.getInstance().sendData(transactionBatchJSON.toString().getBytes(),
                 ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
         logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
-        logger.debug(responseVS.getMessage())
+        JSONArray transactionBatchResponseJSON = JSONSerializer.toJSON(responseVS.getMessage())
+        for(int i = 0; i < transactionBatchResponseJSON.size(); i++) {
+
+        }
 
     } else {
         logger.error(" --- ERROR --- " + responseVS.getMessage())

@@ -153,7 +153,7 @@ log4j = {
     environments {
 
         development{
-            debug   'org.votingsystem','filters', 'grails.app', 'com.itextpdf.text.*'
+            debug   'org.votingsystem','filters', 'grails.app'
             //debug   'org.springframework.security'
             //debug   'org.hibernate'
             //debug   'org.apache'

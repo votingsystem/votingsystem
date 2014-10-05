@@ -1,8 +1,6 @@
 package org.votingsystem.client.model;
 
-import com.itextpdf.text.pdf.AcroFields;
-import com.itextpdf.text.pdf.PdfPKCS7;
-import com.itextpdf.text.pdf.PdfReader;
+
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -30,9 +28,8 @@ public class SignedFile {
     private String name = null;
     private Map operationDocument = null;
     private TimeStampToken timeStampToken = null;
-    private SMIMEMessage smimeMessageWraper = null;
+    private SMIMEMessage smimeMessage = null;
     private boolean signatureVerified = false;
-    private PdfPKCS7 pdfPKCS7 = null;
     private PDFDocumentVS pdfDocument = null;
 
 
@@ -47,45 +44,8 @@ public class SignedFile {
     }
 
     private void init(byte[] signedFileBytes, String name) throws Exception {
-        this.name = name;
-        this.signedFileBytes = signedFileBytes;
-        if(name.toLowerCase().endsWith(".pdf")) {
-            pdfDocument = new PDFDocumentVS();
-            PdfReader reader = new PdfReader(signedFileBytes);
-            AcroFields acroFields = reader.getAcroFields();
-            ArrayList<String> names = acroFields.getSignatureNames();
-            for (String sigName : names) {
-                logger.debug(" - PDF SignedFile - covers whole document: " +
-                        acroFields.signatureCoversWholeDocument(sigName));
-                pdfPKCS7 = acroFields.verifySignature(sigName, "BC");
-                timeStampToken = pdfPKCS7.getTimeStampToken();
-                X509Certificate signingCert = pdfPKCS7.getSigningCertificate();
-                UserVS userVS  = UserVS.getUserVS(signingCert);
-                pdfDocument.setUserVS(userVS);
-                userVS.setTimeStampToken(timeStampToken);
-                pdfDocument.setTimeStampToken(timeStampToken);
-                if(!pdfPKCS7.verify()) {
-                    signatureVerified = false;
-                    pdfDocument.setState(PDFDocumentVS.State.ERROR);
-                } else {
-                    signatureVerified = true;
-                    pdfDocument.setState(PDFDocumentVS.State.VALIDATED);
-                }
-            }
-            
-        } else if(name.toLowerCase().endsWith(".p7s")){
-            smimeMessageWraper = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
-            signatureVerified = smimeMessageWraper.isValidSignature();
-            if(signatureVerified) timeStampToken = smimeMessageWraper.getSigner().getTimeStampToken();
-        } else {
-            logger.error("#### file type unknown -> " + name + " trying with SMIMEMessage");
-            smimeMessageWraper = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
-            signatureVerified = smimeMessageWraper.isValidSignature();
-        }
-    }
-
-    public PdfPKCS7 getPdfPKCS7() {
-        return pdfPKCS7;
+        smimeMessage = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
+        signatureVerified = smimeMessage.isValidSignature();
     }
 
     public PDFDocumentVS getPdfDocument() {
@@ -118,11 +78,11 @@ public class SignedFile {
     }
 
     public SMIMEMessage getSMIMEMessageWraper() {
-        return smimeMessageWraper;
+        return smimeMessage;
     }
     
     public JSONObject getContent() throws Exception {
-        JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(smimeMessageWraper.getSignedContent());
+        JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
         return contentJSON;
     }    
     
@@ -140,7 +100,7 @@ public class SignedFile {
     }
     
     public boolean isSMIME() {
-        if(smimeMessageWraper != null) return true;
+        if(smimeMessage != null) return true;
         if(signedFileBytes == null) return false;
         if(name.toLowerCase().endsWith(".p7m") && signatureVerified) return true;
         else return false;
@@ -148,7 +108,7 @@ public class SignedFile {
     
     public String getSignerNif() {
         if(isPDF()) return pdfDocument.getUserVS().getNif();
-        else return smimeMessageWraper.getSigner().getNif();
+        else return smimeMessage.getSigner().getNif();
     }
     
     public byte[] getFileBytes() {
@@ -168,8 +128,8 @@ public class SignedFile {
     }
 
     public Long getSelectedOptionId() {
-        if(smimeMessageWraper == null) return null;
-        String signedContent = smimeMessageWraper.getSignedContent();
+        if(smimeMessage == null) return null;
+        String signedContent = smimeMessage.getSignedContent();
         Object content = JSONSerializer.toJSON(signedContent);
         if(content instanceof JSONObject) {
             JSONObject contentJSON = (JSONObject)content;
@@ -183,8 +143,8 @@ public class SignedFile {
     }
     
     public Long getSignerCertSerialNumber() {
-        if(smimeMessageWraper == null) return null;
-        UserVS userVS = smimeMessageWraper.getSigner();
+        if(smimeMessage == null) return null;
+        UserVS userVS = smimeMessage.getSigner();
         return userVS.getCertificate().getSerialNumber().longValue();
     }
 

@@ -43,15 +43,6 @@ public class SignatureInfoPane extends GridPane {
         initComponents();
     }
 
-    public SignatureInfoPane(SignedFile signedFile) throws Exception {
-        this.signedFile = signedFile;
-        this.signer = signedFile.getPdfDocument().getUserVS();
-        /*signatureAlgorithmValue = signedFile.getPdfPKCS7().getDigestEncryptionAlgorithmOid() + " - " +
-                signedFile.getPdfPKCS7().getDigestAlgorithm();*/
-        signatureAlgorithmValue = signedFile.getPdfPKCS7().getDigestAlgorithm();
-        initComponents();
-    }
-
     private void initComponents() {
         Label signatureAlgorithmLabel = new Label(ContextVS.getMessage("signatureAlgorithmLbl") + ": ");
         signatureAlgorithmLabel.setStyle("-fx-font-weight: bold;");

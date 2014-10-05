@@ -258,10 +258,6 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
                         VotingBackupValidator votingBackupValidator = new VotingBackupValidator(
                                 decompressedBackupBaseDir, validatorListener);
                         return votingBackupValidator.call();
-                    case MANIFEST_EVENT:
-                        ManifestBackupValidator manifestBackupValidator = new ManifestBackupValidator(
-                                decompressedBackupBaseDir, validatorListener);
-                        return manifestBackupValidator.call();
                     case CLAIM_EVENT:
                         ClaimBackupValidator claimBackupValidator = new ClaimBackupValidator(
                                 decompressedBackupBaseDir, validatorListener);

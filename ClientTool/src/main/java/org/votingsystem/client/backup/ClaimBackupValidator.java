@@ -36,7 +36,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
     
     public ClaimBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
-            ContextVS.init(null, "log4jClientTool.properties", "clientToolMessages.properties", "es");
+            ContextVS.init("log4jClientTool.properties", "clientToolMessages.properties", "es");
         }
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;

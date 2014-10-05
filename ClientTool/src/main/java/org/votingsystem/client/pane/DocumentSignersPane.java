@@ -48,28 +48,16 @@ public class DocumentSignersPane extends GridPane {
 
         Tab newTab = null;
         try {
-            if(signedFile.isPDF()) {
-                SignatureInfoPane signatureInfoPane = new SignatureInfoPane(signedFile);
+            Set<UserVS> signersVS = signedFile.getSMIMEMessageWraper().getSigners();
+            logger.debug("Num. signers: " + signersVS.size());
+            for (UserVS signerVS:signersVS) {
+                SignatureInfoPane signerVSPanel = new SignatureInfoPane(signerVS, signedFile.getSMIMEMessageWraper());
                 String tabName = ContextVS.getMessage("signerLbl");
-                if(signedFile.getPdfDocument().getUserVS() != null)
-                    tabName = signedFile.getPdfDocument().getUserVS().getNif();
+                if(signerVS.getNif() != null) tabName = signerVS.getNif();
                 newTab = new Tab();
                 newTab.setText(tabName);
-                newTab.setContent(signatureInfoPane);
+                newTab.setContent(signerVSPanel);
                 tabPane.getTabs().add(newTab);
-                tabPane.getSelectionModel().select(newTab);
-            } else {
-                Set<UserVS> signersVS = signedFile.getSMIMEMessageWraper().getSigners();
-                logger.debug("Num. signers: " + signersVS.size());
-                for (UserVS signerVS:signersVS) {
-                    SignatureInfoPane signerVSPanel = new SignatureInfoPane(signerVS, signedFile.getSMIMEMessageWraper());
-                    String tabName = ContextVS.getMessage("signerLbl");
-                    if(signerVS.getNif() != null) tabName = signerVS.getNif();
-                    newTab = new Tab();
-                    newTab.setText(tabName);
-                    newTab.setContent(signerVSPanel);
-                    tabPane.getTabs().add(newTab);
-                }
             }
             add(tabPane, 0, 0);
             setHgrow(tabPane, Priority.ALWAYS);
