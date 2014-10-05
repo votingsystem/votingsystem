@@ -12,6 +12,7 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketServer
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.signature.smime.SMIMEMessage
+import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
 import org.votingsystem.util.HttpHelper
@@ -19,6 +20,9 @@ import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketRequestBatch
+
+import java.security.cert.TrustAnchor
+import java.security.cert.X509Certificate
 
 
 Logger logger = TestHelper.init(VicketRequest.class)
@@ -95,9 +99,22 @@ try {
         responseVS = HttpHelper.getInstance().sendData(transactionBatchJSON.toString().getBytes(),
                 ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
         logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
-        JSONArray transactionBatchResponseJSON = JSONSerializer.toJSON(responseVS.getMessage())
+        JSONArray transactionBatchResponseJSON = JSONArray.fromObject(responseVS.getMessage())
         for(int i = 0; i < transactionBatchResponseJSON.size(); i++) {
+            JSONObject receiptData = transactionBatchResponseJSON.get(i)
+            String hashCertVS = receiptData.keySet().iterator().next()
+            Vicket vicket = vicketBatch.getVicketsMap().get(hashCertVS)
+            String receiptStr = new String(Base64.getDecoder().decode(receiptData.getString(hashCertVS).getBytes()), "UTF-8")
+            X509Certificate vicketCert = vicket.getCertificationRequest().getCertificate()
+            //ResponseVS validationResponse = CertUtil.verifyCertificate(signatureVSService.getVicketAnchors(), false, [userVS.getCertificate()])
+            SMIMEMessage smimeSender = new SMIMEMessage(new ByteArrayInputStream(receiptStr.getBytes()))
 
+            Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
+            trustAnchors.add(new TrustAnchor(vicketServer.getX509Certificate(), null));
+            smimeMessage.validateX509Certs(trustAnchors)
+            String signatureHashCertVS = Vicket.getHashCertVS(smimeMessage.getCertWithCertExtension());
+
+            logger.debug("signatureHashCertVS: " + signatureHashCertVS + " - vicket hashCertVS: " + vicket.getHashCertVS())
         }
 
     } else {

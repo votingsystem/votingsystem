@@ -23,6 +23,7 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
+import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.ExceptionVS;
@@ -43,6 +44,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -130,6 +132,12 @@ public class SMIMEMessage extends MimeMessage {
     public void updateChanges() throws Exception {
         super.saveChanges();
         init();
+    }
+
+    public void validateX509Certs(Set<TrustAnchor> trustAnchors) throws Exception {
+        for(UserVS signer: signers) {
+            CertUtil.verifyCertificate(trustAnchors, false,Arrays.asList(signer.getCertificate()));
+        }
     }
 
     public void setMessageID(String messageId) throws MessagingException {

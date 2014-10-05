@@ -1,12 +1,7 @@
 package org.votingsystem.vicket.service
 
 import grails.converters.JSON
-import org.bouncycastle.asn1.DERTaggedObject
-import org.bouncycastle.asn1.DERUTF8String
-import org.bouncycastle.util.encoders.Base64
-import org.bouncycastle.x509.extension.X509ExtensionUtil
 import org.springframework.context.i18n.LocaleContextHolder
-import org.springframework.dao.DataAccessException
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
@@ -15,15 +10,8 @@ import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
-import org.votingsystem.vicket.model.TransactionVS
-import org.votingsystem.vicket.model.UserVSAccount
-import org.votingsystem.vicket.model.Vicket
-import org.votingsystem.vicket.model.VicketRequestBatch
-import org.votingsystem.vicket.model.VicketTransactionBatch
-import org.votingsystem.vicket.util.IbanVSUtil
+import org.votingsystem.vicket.model.*
 import org.votingsystem.vicket.util.LoggerVS
-
-import java.security.cert.CertPathValidatorException
 import java.security.cert.X509Certificate
 
 /**
@@ -147,8 +135,7 @@ class VicketService {
                     vicket.getHashCertVS(), vicket.getSMIMEMessage(), vicket.getSubject())
             MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIME,
                     smimeMessage:receipt).save()
-            String receiptStr = new String(Base64.encode(receipt.getBytes()), "UTF-8")
-            responseList.add([(vicket.getHashCertVS()):receiptStr])
+            responseList.add([(vicket.getHashCertVS()):Base64.getEncoder().encodeToString(receipt.getBytes())])
         }
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: responseList)
     }

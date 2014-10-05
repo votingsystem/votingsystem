@@ -192,7 +192,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         X509Certificate x509Certificate = certificates.iterator().next();
         JSONObject certExtensionData = CertUtil.getCertExtensionData(x509Certificate, ContextVS.VICKET_OID);
         Vicket vicket = vicketsMap.get(certExtensionData.getString("hashCertVS")).setState(Vicket.State.OK);
-        vicket.getCertificationRequest().initSigner(signedCsr.getBytes());
+        vicket.initSigner(signedCsr.getBytes());
         return vicket;
     }
 

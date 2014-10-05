@@ -2,13 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
-import org.votingsystem.model.BankVS
-import org.votingsystem.model.CertificateVS
-import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.MessageSMIME
-import org.votingsystem.model.ResponseVS
-import org.votingsystem.model.TypeVS
-import org.votingsystem.model.UserVS
+import org.votingsystem.model.*
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg

@@ -4,12 +4,12 @@ import grails.transaction.Transactional
 import net.sf.json.JSONArray
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.model.VicketTagVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
 import org.votingsystem.vicket.model.UserVSAccount
-import org.votingsystem.model.VicketTagVS
 import org.votingsystem.vicket.util.IbanVSUtil
 
 import java.security.cert.X509Certificate

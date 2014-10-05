@@ -7,7 +7,6 @@ import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.util.encoders.Base64
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
@@ -21,7 +20,6 @@ import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.MessageVS
-import org.votingsystem.vicket.model.Vicket
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import static javax.persistence.GenerationType.IDENTITY;
@@ -168,6 +169,16 @@ public class Vicket implements Serializable  {
         if(messageJSON.has("isTimeLimited")) isTimeLimited = messageJSON.getBoolean("isTimeLimited");
     }
 
+    public Set<TrustAnchor> getTrustAnchors() {
+        Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
+        trustAnchors.add(new TrustAnchor(x509AnonymousCert, null));
+        return trustAnchors;
+    }
+
+    public void initSigner(byte[] csrBytes) throws Exception {
+        certificationRequest.initSigner(csrBytes);
+        x509AnonymousCert = certificationRequest.getCertificate();
+    }
 
     public String getToUserIBAN() {
         return toUserIBAN;
@@ -192,6 +203,12 @@ public class Vicket implements Serializable  {
     public JSONObject getCertExtensionData() throws IOException {
         return CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
     }
+
+    public static String getHashCertVS(X509Certificate x50Cert) throws IOException {
+        JSONObject jsonObject =  CertUtil.getCertExtensionData(x50Cert, ContextVS.VICKET_OID);
+        return jsonObject.getString("hashCertVS");
+    }
+
 
     public SMIMEMessage getSMIMEMessage() {
         return smimeMessage;
