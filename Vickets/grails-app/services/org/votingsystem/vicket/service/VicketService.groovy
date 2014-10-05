@@ -143,7 +143,7 @@ class VicketService {
                     state:TransactionVS.State.OK, validTo: validTo, subject:vicket.getSubject(),
                     type:TransactionVS.Type.VICKET_SEND, currencyCode: vicket.getCurrencyCode(), tag:vicket.getTag()).save()
             vicket.setState(Vicket.State.EXPENDED).setTransactionVS(transactionVS).save()
-            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(systemService.getSystemUser(),
+            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(systemService.getSystemUser().getName(),
                     vicket.getHashCertVS(), vicket.getSMIMEMessage(), vicket.getSubject())
             MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIME,
                     smimeMessage:receipt).save()
