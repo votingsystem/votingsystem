@@ -83,7 +83,10 @@
             return result? result.toUpperCase() + transactionTypeLbl : transactionTypeLbl
         },
         showTransactionDetails: function(e) {
-            this.$.transactionViewer.show(e.target.templateInstance.model.transaction.messageSMIMEURL)
+            var messageSMIMEURL = e.target.templateInstance.model.transaction.messageSMIMEURL
+            if(messageSMIMEURL == null) messageSMIMEURL = "${createLink( controller:'messageSMIME', action:"transactionVS")}/" +
+                    e.target.templateInstance.model.transaction.id
+            this.$.transactionViewer.show(messageSMIMEURL)
         },
         newRecordChanged: function(e) {
             console.log("newRecordChanged: " + this.newRecord)

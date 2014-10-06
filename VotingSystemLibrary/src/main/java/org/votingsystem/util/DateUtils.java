@@ -98,6 +98,11 @@ public class DateUtils {
         return formatter.format(date);
     }
 
+    public static String getDateWithoutYear (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM HH:mm");
+        return formatter.format(date);
+    }
+
     public static String getLongDate_Es (Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
         return formatter.format(date);

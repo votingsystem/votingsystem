@@ -43,10 +43,12 @@
                     if (event.keyCode == 13)  this.searchUser()
                 }.bind(this)
 
-                document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
-                    console.log(this.tagName + " - user-clicked - closing dialog")
-                    this.$.xDialog.opened = false
-                }.bind(this));
+                if(document.querySelector("#coreSignals")) {
+                    document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
+                        console.log(this.tagName + " - user-clicked - closing dialog")
+                        this.$.xDialog.opened = false
+                    }.bind(this));
+                }
             },
             reset: function() {
                 console.log(this.id + " - reset")

@@ -78,7 +78,6 @@ class UserVSAccountService {
                 }
             } else {
                 for(String tag: accountsMap[currency].keySet()) {
-                    log.debug("==============tag: $tag - " + accountsMap[currency][tag])
                     BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
                     if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with tag '$tag' '$currency'" +
                             " - accounts: '$accountsMap' - balance '$balancesMap'")

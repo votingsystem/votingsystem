@@ -7,6 +7,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.util.AsciiDocUtil
 
 /**
@@ -28,13 +29,13 @@ class MessageSMIMEController {
      * @return El message solicitado.
      */
     def index() {
-        def messageSMIME
-        MessageSMIME.withTransaction{
-            messageSMIME = MessageSMIME.get(params.long('id'))
+        def messageSMIME = request.messageSMIME
+        if(!messageSMIME) {
+            MessageSMIME.withTransaction{ messageSMIME = MessageSMIME.get(params.long('id')) }
         }
         if (messageSMIME) {
             if(ContentTypeVS.TEXT != request.contentTypeVS) {
-                params.messageSMIME = messageSMIME
+                request.messageSMIME = messageSMIME
                 forward(action:"contentViewer")
                 return false
             } else {
@@ -74,27 +75,40 @@ class MessageSMIMEController {
                 message(code: 'messageSMIMENotFound', args:[params.requestMessageId]))]
     }
 
+
+    def transactionVS() {
+        TransactionVS transactionVS = null
+        TransactionVS.withTransaction {
+            transactionVS = TransactionVS.get(params.long('id'))
+        }
+        if(transactionVS) {
+            request.messageSMIME = transactionVS.messageSMIME
+            forward(action:"index")
+        } else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'transactionVSNotFound', args:[params.id]))]
+    }
+
     def contentViewer() {
         String viewer = "message-smime"
         String smimeMessageStr
         String timeStampDate
         boolean isAsciiDoc = false
         def signedContentJSON
-        if(params.messageSMIME) {
-            smimeMessageStr = new String(params.messageSMIME.content, "UTF-8")
-            SMIMEMessage smimeMessage = params.messageSMIME.getSmimeMessage()
+        if(request.messageSMIME) {
+            smimeMessageStr = new String(request.messageSMIME.content, "UTF-8")
+            SMIMEMessage smimeMessage = request.messageSMIME.getSmimeMessage()
             if(smimeMessage.getTimeStampToken() != null) {
                 timeStampDate = DateUtils.getLongDate_Es(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
             }
             if(smimeMessage.getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
                 signedContentJSON = JSON.parse(AsciiDocUtil.getMetaInfVS(
-                        params.messageSMIME.getSmimeMessage()?.getSignedContent()))
-                signedContentJSON.asciiDoc = params.messageSMIME.getSmimeMessage()?.getSignedContent()
-                signedContentJSON.asciiDocHTML = AsciiDocUtil.getHTML(params.messageSMIME.getSmimeMessage()?.getSignedContent())
+                        request.messageSMIME.getSmimeMessage()?.getSignedContent()))
+                signedContentJSON.asciiDoc = request.messageSMIME.getSmimeMessage()?.getSignedContent()
+                signedContentJSON.asciiDocHTML = AsciiDocUtil.getHTML(request.messageSMIME.getSmimeMessage()?.getSignedContent())
             } else {
-                signedContentJSON = JSON.parse(params.messageSMIME.getSmimeMessage()?.getSignedContent())
+                signedContentJSON = JSON.parse(request.messageSMIME.getSmimeMessage()?.getSignedContent())
             }
-            if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS = userVSService.getUserVSBasicDataMap(params.messageSMIME.userVS)
+            if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS = userVSService.getUserVSBasicDataMap(request.messageSMIME.userVS)
             params.operation = signedContentJSON.operation
         }
         /*if(params.operation) {

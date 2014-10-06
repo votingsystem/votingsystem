@@ -15,7 +15,12 @@
                 series:{}
             },
             options: {
-                chart: {},
+                chart: {
+                    spacingBottom: 30,
+                    spacingTop: 30,
+                    spacingLeft: 50,
+                    spacingRight: 30
+                },
                 title: {},
                 xAxis: { categories: [] },
                 yAxis: {
@@ -25,11 +30,12 @@
                 },
                 tooltip: {
                     formatter: function () {
-                        return '<b>' + this.x + '</b><br/>' +
+                        return '<div style="display: inline-block;"><b>' + this.x + '</b><br/>' +
                                 this.series.name + ': ' + this.y + '<br/>' +
-                                'Total: ' + this.point.stackTotal;
+                                'Total: ' + this.point.stackTotal + "</div>";
                     }
                 },
+                legend:{ align: 'center', itemDistance:100, floating: false },
                 plotOptions: {
                     column: {
                         stacking: 'normal',

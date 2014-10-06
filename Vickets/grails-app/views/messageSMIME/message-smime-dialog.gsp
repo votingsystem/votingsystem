@@ -27,6 +27,7 @@
             },
             transactionvsChanged:function() {
                 //this.transactionvsURL = ""
+                if(this.transactionvs == null) return
                 this.$.transactionViewer.signedDocument = this.transactionvs.signedContentMap
                 this.$.transactionViewer.timeStampDate = this.transactionvs.timeStampDate
                 this.$.transactionViewer.smimeMessage = this.transactionvs.smimeMessage

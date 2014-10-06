@@ -116,7 +116,7 @@
 
                 switch (this.signedDocument.operation) {
                     case 'TRANSACTIONVS_FROM_BANKVS':
-                        this.caption = "<g:message code="transactionvsFromBankVSLbl"/>"
+                        this.caption = "<g:message code="transactionVSFromBankVS"/>"
                         break;
                     case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false

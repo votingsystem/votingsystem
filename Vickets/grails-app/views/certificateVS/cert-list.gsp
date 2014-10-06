@@ -7,6 +7,7 @@
 
 <polymer-element name="cert-list" attributes="url menuType">
     <template>
+        <g:include view="/include/styles.gsp"/>
         <style no-shim>
             .view { :host {position: relative;} }
             .certDiv {
@@ -14,7 +15,7 @@
                 height: 140px;
                 padding: 10px;
                 border:1px solid #ccc;
-                background-color: #fefefe;
+                background-color: #f9f9f9;
                 margin: 10px 5px 5px 10px;
                 -moz-border-radius: 5px; border-radius: 5px;
                 cursor: pointer;
@@ -32,7 +33,8 @@
             <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>
-                        <select id="certTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;" on-change="{{certTypeSelect}}">
+                        <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
+                                max-width: 400px;" on-change="{{certTypeSelect}}">
                             <option value="&type=USER&state=OK"> - <g:message code="certUserStateOKLbl"/> - </option>
                             <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - <g:message code="certAuthorityStateOKLbl"/> - </option>
                             <option value="&type=USER&state=CANCELLED"> - <g:message code="certUserStateCancelledLbl"/> - </option>

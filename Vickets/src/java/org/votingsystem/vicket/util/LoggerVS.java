@@ -57,7 +57,7 @@ public class LoggerVS {
         dataMap.put("currency", currency);
         dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
         if(tag != null) dataMap.put("tag", tag.getName());
-        dataMap.put("dateCreated", DateUtils.getDateStr(dateCreated));
+        dataMap.put("dateCreated", DateUtils.getDateWithoutYear(dateCreated));
         dataMap.put("isParent", isParent);
         transactionslog.info(JSONSerializer.toJSON(dataMap).toString() + ",");
     }

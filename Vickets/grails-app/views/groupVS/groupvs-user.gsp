@@ -10,7 +10,7 @@
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
             <div id="" style="width: 450px;margin:auto; padding: 15px;">
-                <div layout horizontal>
+                <div layout horizontal style="font-size: 0.8em;">
                     <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
                     <template if="{{subscriptionData.uservs.IBAN}}">
                         <div style="font-weight: bold;color:#888;">IBAN: {{subscriptionData.uservs.IBAN}}</div>

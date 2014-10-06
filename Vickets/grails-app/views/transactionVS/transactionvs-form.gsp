@@ -27,7 +27,7 @@
 
             <div layout horizontal center center-justified style="">
                 <template if="{{subpage}}">
-                    <div style="margin: 0 0 0 0;" title="<g:message code="backLbl"/>" >
+                    <div style="margin: 10px 0 0 0;" title="<g:message code="backLbl"/>" >
                         <paper-fab icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                     </div>
                 </template>
@@ -89,14 +89,19 @@
                         </div>
                     </div>
                 </div>
-                <div style="display:{{isWithUserSelector ? 'none':'block'}}">
-                    <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
-                        <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> {{selectReceptorMsg}}
-                    </votingsystem-button>
-                    <div style="margin:10px 0 0 0;">
-                        <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                <template if="{{isWithUserSelector}}">
+                    <div>
+                        <votingsystem-button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
+                            <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> {{selectReceptorMsg}}
+                        </votingsystem-button>
+                        <div style="margin:10px 0 0 0;">
+                            <votingsystem-user-box flex id="receptorBox" boxCaption="<g:message code="receptorLbl"/>"></votingsystem-user-box>
+                        </div>
                     </div>
-                </div>
+                </template>
+                <template if="{{!isWithUserSelector}}">
+                    <div style="margin:10px 0 0 0; text-align: center; font-weight: bold;">{{selectReceptorMsg}}</div>
+                </template>
                 <div flex>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
@@ -130,9 +135,11 @@
             console.log(this.tagName + " - " + this.id)
             this.isWithUserSelector = false
 
-            document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
-                this.$.receptorBox.addUser(e.detail)
-            }.bind(this));
+            if(document.querySelector("#coreSignals")) {
+                document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
+                    this.$.receptorBox.addUser(e.detail)
+                }.bind(this));
+            }
 
             this.$.tagDialog.addEventListener('tag-selected', function (e) {
                 console.log("tag-selected: " + JSON.stringify(e.detail))
@@ -244,7 +251,7 @@
         },
 
         toUserIBAN: function () {
-            var receptorList = this.$.receptorBox.getUserList()
+            var receptorList = this.$.receptorBox? this.$.receptorBox.getUserList():[]
             var result = []
             for(userIdx in receptorList) {
                 result.push(receptorList[userIdx].IBAN);

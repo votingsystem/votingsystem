@@ -144,6 +144,14 @@ class UrlMappings {
             action = "receipt"
         }
 
+        "/messageSMIME/transactionVS/$id" {
+            controller = "messageSMIME"
+            action = "transactionVS"
+            constraints {
+                id(matches:/\d*/)
+            }
+        }
+
         "/reports/week/$year/$month/$day" {
             controller = "reports"
             action = "week"

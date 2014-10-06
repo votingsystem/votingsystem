@@ -93,14 +93,14 @@
                 </div>
             </div>
         </div>
-
-        <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin: 15px auto;">
+        <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin: 45px auto; display: inline-block;">
             <balance-uservs-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"
-                title="<g:message code="userVSBalancesLbl"/>"
-                xAxisCategories="['<g:message code="incomesLbl"/> (<g:message code="totalLbl"/>)', '<g:message code="icomesTimeLimitedLbl"/>',
+                                  title="<g:message code="userVSBalancesLbl"/>"
+                                  xAxisCategories="['<g:message code="incomesLbl"/> (<g:message code="totalLbl"/>)', '<g:message code="icomesTimeLimitedLbl"/>',
                 '<g:message code="cashLbl"/>', '<g:message code="expensesLbl"/>']">
             </balance-uservs-chart>
         </div>
+
     </div>
 </template>
 <script>
