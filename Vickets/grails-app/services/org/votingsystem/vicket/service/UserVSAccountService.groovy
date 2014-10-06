@@ -44,10 +44,22 @@ class UserVSAccountService {
         userVSAccounts = UserVSAccount.findAllWhere(userVS:userVS, state:UserVSAccount.State.ACTIVE)
         Map result = [:]
         for(UserVSAccount account: userVSAccounts) {
-            if(result[(account.IBAN)]) result[(account.IBAN)].add([(account.tag.name):account.balance.toString()])
-            else result[(account.IBAN)] = [[(account.tag.name):account.balance.toString()]]
+            if(result[(account.IBAN)]) {
+                if(result[(account.IBAN)][(account.currencyCode)]) {
+                    result[(account.IBAN)][(account.currencyCode)][(account.tag.name)] = account.balance.toString()
+                } else {
+                    result[(account.IBAN)][(account.currencyCode)] = [(account.tag.name):account.balance.toString()]
+                }
+            } else  {
+                result[(account.IBAN)] = [(account.currencyCode):[(account.tag.name):account.balance.toString()]]
+            }
         }
         return result;
     }
+
+    public void checkBalanceMap(UserVS userVS, Map balancesMap) {
+
+    }
+
 }
 

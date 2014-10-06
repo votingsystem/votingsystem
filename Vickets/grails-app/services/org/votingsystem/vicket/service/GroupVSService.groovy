@@ -5,6 +5,7 @@ import grails.transaction.Transactional
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -25,6 +26,7 @@ class GroupVSService {
     def subscriptionVSService
     def transactionVSService
     def systemService
+    def userVSAccountService
 
 
 	public void init() { }
@@ -225,6 +227,13 @@ class GroupVSService {
 
         resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
 
+        Map accountsBalancesMap = userVSAccountService.getAccountsBalanceMap(groupVS)
+        if(accountsBalancesMap.keySet().size() > 1) throw new ExceptionVS("User '$groupVS.id' " +
+                "has '${accountsBalancesMap.keySet().size()}' accounts")
+        if(!resultMap.balancesCash.equals(accountsBalancesMap.values().iterator().next())) {
+            throw new ExceptionVS("balancesCash '${resultMap.balancesCash}' " +
+                    "accountsBalancesMap '${accountsBalancesMap.values().iterator().next()}'")
+        }
         return resultMap
     }
 

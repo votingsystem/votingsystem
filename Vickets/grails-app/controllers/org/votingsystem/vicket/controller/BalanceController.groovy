@@ -1,10 +1,13 @@
 package org.votingsystem.vicket.controller
 
 import grails.converters.JSON
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.groovy.util.RequestUtils
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.UserVSAccount
 
 class BalanceController {
@@ -63,4 +66,16 @@ class BalanceController {
         }
     }
 
+    /**
+     * If any method in this controller invokes code that will throw a Exception then this method is invoked.
+     */
+    def exceptionHandler(final Exception exception) {
+        Throwable rootCause = StackTraceUtils.extractRootCause(exception)
+        log.error "Exception occurred. ${rootCause.getMessage()}", exception
+        String metaInf = "EXCEPTION_${params.controller}Controller_${params.action}Action_${rootCause.getClass().getSimpleName()}"
+        if(exception instanceof ExceptionVS && ((ExceptionVS)exception).getMetInf() != null)
+            metaInf = ((ExceptionVS)exception).getMetInf()
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message: rootCause.getMessage(),
+                metaInf:metaInf, type:TypeVS.ERROR, reason:rootCause.getMessage())]
+    }
 }
