@@ -1,10 +1,9 @@
-package org.votingsystem.test
+package org.votingsystem.test.vicket
 
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
-import org.slf4j.*;
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
@@ -23,18 +22,12 @@ import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketRequestBatch
 
-import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 
 
 Logger logger = TestHelper.init(VicketRequest.class)
 
-String keyStorePath = ContextVS.getInstance().getConfig().userVSKeyStorePath
-String keyAlias = ContextVS.getInstance().config.userVSKeysAlias
-String password = ContextVS.getInstance().config.userVSKeysPassword
-
-
-SignatureVSService signatureVSService = new SignatureVSService(keyStorePath, keyAlias, password)
+SignatureVSService signatureVSService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_07553172H.jks")
 UserVS fromUserVS = signatureVSService.getUserVS()
 
 VicketServer vicketServer = TestHelper.loadVicketServer()

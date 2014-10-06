@@ -3,7 +3,6 @@ package org.votingsystem.vicket
 import org.apache.log4j.Logger
 import org.junit.Test
 import org.votingsystem.model.ContextVS
-import org.votingsystem.test.util.SignatureVSService
 
 /**
  * @author jgzornoza

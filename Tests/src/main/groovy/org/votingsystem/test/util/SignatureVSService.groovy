@@ -36,6 +36,19 @@ class SignatureVSService {
         init(keyStorePath, keyAlias, password)
     }
 
+    public static SignatureVSService getAuthoritySignatureVSService() {
+        String keyStorePath = ContextVS.getInstance().getConfig().authorityKeyStorePath
+        String keyAlias = ContextVS.getInstance().config.authorityKeysAlias
+        String password = ContextVS.getInstance().config.authorityKeysPassword
+        return new SignatureVSService(keyStorePath, keyAlias, password)
+    }
+
+    public static SignatureVSService getUserVSSignatureVSService(String keyStorePath) {
+        String keyAlias = ContextVS.getInstance().config.userVSKeysAlias
+        String password = ContextVS.getInstance().config.userVSKeysPassword
+        return new SignatureVSService(keyStorePath, keyAlias, password)
+    }
+
     public UserVS getUserVS() {
         return UserVS.getUserVS(certSigner)
     }

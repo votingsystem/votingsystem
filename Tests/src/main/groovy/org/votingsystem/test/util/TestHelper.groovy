@@ -3,6 +3,7 @@ package org.votingsystem.test.util
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.*
+import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 
 
@@ -33,5 +34,11 @@ class TestHelper {
             }
         }
         return vicketServer
+    }
+
+    public static File getFileFromResources(String resource) {
+        InputStream input =  Thread.currentThread().getContextClassLoader().getResourceAsStream(resource)
+        byte[] fileBytes = FileUtils.getBytesFromInputStream(input)
+        return FileUtils.getFileFromBytes(fileBytes)
     }
 }

@@ -245,6 +245,11 @@ public class ContextVS {
         INSTANCE = new ContextVS(logPropertiesFile, localizatedMessagesFileName, locale);
     }
 
+    public static void init () throws Exception {
+        INSTANCE = new ContextVS();
+        VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+    }
+
     public static void init (ApplicationVS applicationVS) throws Exception {
         INSTANCE = new ContextVS();
         INSTANCE.applicationVS = applicationVS;
