@@ -84,8 +84,8 @@
                         <div style="text-align: center;" groupvsId-data="{{groupvs.userVS.id}}">{{groupvs.userVS.name}}</div>
                     </div>
                     <div id="tagsDiv" style="padding:7px 0px 0px 7px; display:{{groupvs.userVS.tags.length > 0?'block':'none'}}">
-                        <div style="font-size: 0.9em; font-weight: bold;color:#888;"><g:message code='tagsLbl'/></div>
-                        <div layout horizontal>
+                        <div layout horizontal center center-justified>
+                            <i class="fa fa-tag" style="color:#888; margin: 0 10px 0 0;"></i>
                             <template repeat="{{tag in groupvs.userVS.tags}}">
                                 <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 0px 0px;padding:3px;">{{tag.name}}</a>
                             </template>

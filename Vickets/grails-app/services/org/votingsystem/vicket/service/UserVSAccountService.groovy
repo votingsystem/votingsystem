@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import org.votingsystem.model.UserVS
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.WalletVS
 
@@ -57,8 +58,33 @@ class UserVSAccountService {
         return result;
     }
 
-    public void checkBalanceMap(UserVS userVS, Map balancesMap) {
-
+    public void checkBalancesMap(UserVS userVS, Map<String, Map> balancesMap) {
+        Map<String, Map> accountsMap = getAccountsBalanceMap(userVS)
+        if(accountsMap.keySet().size() > 1) throw new ExceptionVS("User '$userVS.id' " +
+                "has '${accountsMap.keySet().size()}' accounts")
+        accountsMap = accountsMap.values().iterator().next()
+        for(String currency : accountsMap.keySet()) {
+            if(balancesMap[currency]) {
+                for(String tag: accountsMap[currency].keySet()) {
+                    BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
+                    if(balancesMap[currency][tag]) {
+                        BigDecimal balanceTagAmount = new BigDecimal(balancesMap[currency][tag])
+                        if(tagAmount.compareTo(balanceTagAmount) != 0) throw new ExceptionVS("Error with tag '$tag' '$currency'" +
+                                " - accounts: '$accountsMap' - balance '$balancesMap'")
+                    } else {
+                        if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with tag '$tag' '$currency'" +
+                                " - accounts: '$accountsMap' - balance '$balancesMap'")
+                    }
+                }
+            } else {
+                for(String tag: accountsMap[currency].keySet()) {
+                    log.debug("==============tag: $tag - " + accountsMap[currency][tag])
+                    BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])
+                    if(tagAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with tag '$tag' '$currency'" +
+                            " - accounts: '$accountsMap' - balance '$balancesMap'")
+                }
+            }
+        }
     }
 
 }

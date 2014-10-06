@@ -226,14 +226,7 @@ class GroupVSService {
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
 
         resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
-
-        Map accountsBalancesMap = userVSAccountService.getAccountsBalanceMap(groupVS)
-        if(accountsBalancesMap.keySet().size() > 1) throw new ExceptionVS("User '$groupVS.id' " +
-                "has '${accountsBalancesMap.keySet().size()}' accounts")
-        if(!resultMap.balancesCash.equals(accountsBalancesMap.values().iterator().next())) {
-            throw new ExceptionVS("balancesCash '${resultMap.balancesCash}' " +
-                    "accountsBalancesMap '${accountsBalancesMap.values().iterator().next()}'")
-        }
+        userVSAccountService.checkBalancesMap(groupVS, resultMap.balancesCash)
         return resultMap
     }
 

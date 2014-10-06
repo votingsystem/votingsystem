@@ -144,7 +144,8 @@ class TransactionVSService {
                         updateUserVSAccountTo(transactionVS)
                         systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
                         log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionVS.amount} ${transactionVS.currencyCode} " +
-                                " - fromIBAN '${transactionVS.fromUserIBAN}' toIBAN '${accountTo?.IBAN}' - tag '${transactionVS.tag?.name}'")
+                                " - fromIBAN '${transactionVS.fromUserIBAN}' toIBAN '${transactionVS.toUserVS?.IBAN}' - " +
+                                "tag '${transactionVS.tag?.name}'")
                     }
             }
             if(isLoggable)notifyListeners(transactionVS)
