@@ -8,20 +8,20 @@
         <g:include view="/include/styles.gsp"/>
         <style>
         .transactionvsRow { cursor: pointer;}
-        .dateCreated {font-size: 0.8em; color:#888; width: 100px; margin: 0 10px 0 0;}
+        .dateCreated {font-size: 0.8em; color:#888; width: 80px; margin: 0 10px 0 0;}
         .subjectColumn {
-            width:260px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.9em;
+            width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.9em;
         }
-        .amountColumn {width:140px;text-align: right; font-size: 0.9em;}
+        .amountColumn {width:110px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
         </style>
-        <div layout vertical>
+        <div layout vertical  style="display: inline-block;">
             <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
                 <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
                 <div flex></div>
                 <div style="font-size: 0.8em;color:#888; margin:0 0 0 10px;">{{numMovements}}</div>
             </div>
-            <div>
+            <div flex  style="display: inline-block;">
                 <template repeat="{{transaction in transactionList}}">
                     <div class="transactionvsRow" layout horizontal on-click="{{viewTransaction}}">
                         <div class="dateCreated" style="">{{transaction.dateCreated | formatDate}}</div>

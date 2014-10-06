@@ -119,26 +119,35 @@ class TransactionVSService {
     public void updateBalances(TransactionVS transactionVS) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         if(transactionVS.state == TransactionVS.State.OK) {
-            if(transactionVS.type == TransactionVS.Type.VICKET_INIT_PERIOD) {
-
-            } else if(transactionVS.type == TransactionVS.Type.VICKET_REQUEST) {
-                updateUserVSAccountFrom(transactionVS)
-                systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
-            } else if(transactionVS.type == TransactionVS.Type.VICKET_SEND) {
-                updateUserVSAccountTo(transactionVS)
-                systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
-            } else {
-                if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
-                    if(transactionVS.type != TransactionVS.Type.FROM_BANKVS) updateUserVSAccountFrom(transactionVS)
-                    systemService.updateTagBalance(transactionVS.amount,transactionVS.currencyCode, transactionVS.tag)
-                } else {
+            boolean isLoggable = true
+            switch(transactionVS.type) {
+                case TransactionVS.Type.VICKET_INIT_PERIOD:
+                    break;
+                case TransactionVS.Type.VICKET_INIT_PERIOD_TIME_LIMITED:
+                    updateUserVSAccountFrom(transactionVS)
+                    systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
+                    break;
+                case TransactionVS.Type.VICKET_REQUEST:
+                    updateUserVSAccountFrom(transactionVS)
+                    systemService.updateTagBalance(transactionVS.amount, transactionVS.currencyCode, transactionVS.tag)
+                    break;
+                case TransactionVS.Type.VICKET_SEND:
                     updateUserVSAccountTo(transactionVS)
                     systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
-                    notifyListeners(transactionVS)
-                    log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionVS.amount} ${transactionVS.currencyCode} " +
-                            " - fromIBAN '${transactionVS.fromUserIBAN}' toIBAN '${accountTo?.IBAN}' - tag '${transactionVS.tag?.name}'")
-                }
+                    break;
+                default:
+                    if(transactionVS.transactionParent == null) {//Parent transaction, to system before trigger to receptors
+                        if(transactionVS.type != TransactionVS.Type.FROM_BANKVS) updateUserVSAccountFrom(transactionVS)
+                        systemService.updateTagBalance(transactionVS.amount,transactionVS.currencyCode, transactionVS.tag)
+                        isLoggable = false
+                    } else {
+                        updateUserVSAccountTo(transactionVS)
+                        systemService.updateTagBalance(transactionVS.amount.negate(), transactionVS.currencyCode, transactionVS.tag)
+                        log.debug("${methodName} - ${transactionVS.type.toString()} - ${transactionVS.amount} ${transactionVS.currencyCode} " +
+                                " - fromIBAN '${transactionVS.fromUserIBAN}' toIBAN '${accountTo?.IBAN}' - tag '${transactionVS.tag?.name}'")
+                    }
             }
+            if(isLoggable)notifyListeners(transactionVS)
         } else log.error("TransactionVS '${transactionVS.id}' with state ${transactionVS.state}")
     }
 

@@ -37,7 +37,7 @@ class TestingController {
 
     def index() {
         balanceService.initWeekPeriod()
-        render "--- initWeekPeriod"
+        render "--- VICKET_INIT_PERIOD"
         return false
     }
 
@@ -54,14 +54,22 @@ class TestingController {
     }
 
     def newWeek() {
-        balanceService.initWeekPeriod()
-        /*List transactionList
+        //balanceService.initWeekPeriod()
+        List transactionList
         TransactionVS.withTransaction {
-            transactionList = TransactionVS.findAllWhere(type:TransactionVS.Type.VICKET_INIT_PERIOD)
+            //transactionList = TransactionVS.findAllWhere(type:[TransactionVS.Type.VICKET_INIT_PERIOD,
+            //       TransactionVS.Type.VICKET_INIT_PERIOD_TIME_LIMITED])
+            transactionList = TransactionVS.createCriteria().list(offset: 0) {
+                inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD,
+                                TransactionVS.Type.VICKET_INIT_PERIOD_TIME_LIMITED] )
+            }
+
             for(TransactionVS transaction : transactionList) {
                 transaction.delete()
             }
-        }*/
+
+
+        }
         render "OK"
         return false
     }
@@ -119,9 +127,7 @@ class TestingController {
         return false
     }
 
-    def highcharts() {
-        log.debug("====")
-    }
+    def highcharts() { }
 
     def accounts() { }
 

@@ -9,7 +9,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -26,7 +28,8 @@ public class TransactionVS  implements Serializable {
     public static final long serialVersionUID = 1L;
 
     public enum Type {FROM_BANKVS, FROM_USERVS, FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER,
-        FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD, VICKET_REQUEST, VICKET_SEND, VICKET_CANCELLATION, CANCELLATION;}
+        FROM_GROUP_TO_ALL_MEMBERS, VICKET_INIT_PERIOD, VICKET_INIT_PERIOD_TIME_LIMITED, VICKET_REQUEST,
+        VICKET_SEND, VICKET_CANCELLATION, CANCELLATION;}
 
     public enum State { OK, REPEATED, CANCELLED;}
 
@@ -267,6 +270,11 @@ public class TransactionVS  implements Serializable {
 
     public void setAccountFromMovements(Map<UserVSAccount, BigDecimal> accountFromMovements) {
         this.accountFromMovements = accountFromMovements;
+    }
+
+    public void addAccountFromMovement(UserVSAccount userVSAccount, BigDecimal amount) {
+        if(accountFromMovements == null)  accountFromMovements = new HashMap<UserVSAccount, BigDecimal>();
+        accountFromMovements.put(userVSAccount, amount);
     }
 
     public void afterInsert() {

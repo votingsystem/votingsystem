@@ -11,25 +11,17 @@ class BalanceController {
 
     def balanceService
     def filesService
+    def userVSAccountService
 
     def index() { }
 
     def db() {
-        UserVS uservs
-        UserVS.withTransaction { uservs = UserVS.findWhere(id:params.long('userId')) }
-        if(!uservs) {
+        UserVS userVS
+        UserVS.withTransaction { userVS = UserVS.findWhere(id:params.long('userId')) }
+        if(!userVS) {
             response.status = ResponseVS.SC_NOT_FOUND
             render(text: message(code:'userVSNotFoundById', args:[params.userId]), encoding: "UTF-8")
-        } else {
-            List<UserVSAccount> userVSAccounts
-            userVSAccounts = UserVSAccount.findAllWhere(userVS:uservs, state:UserVSAccount.State.ACTIVE)
-            Map result = [:]
-            for(UserVSAccount account: userVSAccounts) {
-                if(result[(account.IBAN)]) result[(account.IBAN)].add([(account.tag.name):account.balance.toString()])
-                else result[(account.IBAN)] = [[(account.tag.name):account.balance.toString()]]
-            }
-            render result as JSON
-        }
+        } else render userVSAccountService.getAccountsBalanceMap(userVS) as JSON
     }
 
     def userVS() {

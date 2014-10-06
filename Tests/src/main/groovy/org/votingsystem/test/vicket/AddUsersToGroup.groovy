@@ -139,13 +139,16 @@ class SimulationHelper {
                     ContextVS.getInstance().setTimeStampServerCert(timeStampServer.getCertChain().iterator().next());
                 }
             }
-        }
-        requestExecutor.execute(new Runnable() {@Override public void run() {getGroupData(simulationData.getGroupId());}});
+            requestExecutor.execute(new Runnable() {@Override public void run() {getGroupData(simulationData.getGroupId());}});
 
-        requestExecutor.execute(new Runnable() {@Override public void run() {
-            ResponseVS response = subscribeUsers();
-            finishSimulation(response)
-        }});
+            requestExecutor.execute(new Runnable() {@Override public void run() {
+                ResponseVS response = subscribeUsers();
+                finishSimulation(response)
+            }});
+        } else {
+            log.error("Problems initializing server: " + responseVS.getMessage())
+            System.exit(0);
+        }
     }
 }
 

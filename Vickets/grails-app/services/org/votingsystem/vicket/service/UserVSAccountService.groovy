@@ -39,5 +39,15 @@ class UserVSAccountService {
         return result
     }
 
+    Map getAccountsBalanceMap(UserVS userVS) {
+        List<UserVSAccount> userVSAccounts
+        userVSAccounts = UserVSAccount.findAllWhere(userVS:userVS, state:UserVSAccount.State.ACTIVE)
+        Map result = [:]
+        for(UserVSAccount account: userVSAccounts) {
+            if(result[(account.IBAN)]) result[(account.IBAN)].add([(account.tag.name):account.balance.toString()])
+            else result[(account.IBAN)] = [[(account.tag.name):account.balance.toString()]]
+        }
+        return result;
+    }
 }
 

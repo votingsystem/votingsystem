@@ -101,7 +101,8 @@ class SystemService {
                 Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
                 balancesMap[(transaction.currencyCode)] = currencyMap
             }
-            transactionFromList.add(transactionVSService.getTransactionMap(transaction))
+            transactionFromList.add(((TransactionVSService)grailsApplication.mainContext.getBean(
+                    "transactionVSService")).getTransactionMap(transaction))
         }
         resultMap.transactionFromList = transactionFromList
         resultMap.balancesFrom = balancesMap
@@ -111,7 +112,6 @@ class SystemService {
             between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
             //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD]) }
         }
-
 
         def transactionToList = []
         balancesMap = [:]
@@ -125,7 +125,8 @@ class SystemService {
                 Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
                 balancesMap[(transaction.currencyCode)] = currencyMap
             }
-            transactionToList.add(transactionVSService.getTransactionMap(transaction))
+            transactionToList.add(((TransactionVSService)grailsApplication.mainContext.getBean(
+                    "transactionVSService")).getTransactionMap(transaction))
         }
         resultMap.transactionToList = transactionToList
         resultMap.balancesTo = balancesMap

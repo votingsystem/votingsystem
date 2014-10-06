@@ -161,8 +161,9 @@
             if(this.balance != null) this.initBalance(this.balance)
         },
         initBalance:function(balance) {
-            console.log(this.tagName + " - initBalance")
-            this.balance = JSON.parse(balance)
+            console.log(this.tagName + " - initBalance typeof: " + typeof balance)
+            if('object' !== typeof balance) this.balance = JSON.parse(balance)
+            else this.balance = balance
             var caption = "<g:message code="balanceDetailCaption"/>"
             console.log(this.tagName + " - this.balance.userVS: " + this.balance)
             this.description = "NIF:" + this.balance.userVS.nif + " - IBAN: " + this.balance.userVS.IBAN

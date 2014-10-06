@@ -74,7 +74,7 @@ try {
         //we have al the Vickets initialized, now we can make de transactions
         List<String> vicketTransactionBatch = new ArrayList<String>();
         for(Vicket vicket:vicketBatch.vicketsMap.values()) {
-            JSONObject transactionRequest = vicket.getTransactionRequest("Blim Bllim Blim", "ES6778788989450000000012",
+            JSONObject transactionRequest = vicket.getTransactionRequest("toUserName", "ES6778788989450000000012",
                     "First Vicket Transaction", false)
 
             smimeMessage = vicket.getCertificationRequest().genMimeMessage(vicket.getHashCertVS(),

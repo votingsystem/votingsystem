@@ -7,6 +7,7 @@ import org.votingsystem.model.*
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.vicket.model.TransactionVS
+import org.votingsystem.vicket.model.UserVSAccount
 
 //@Transactional
 class BalanceService {
@@ -92,14 +93,16 @@ class BalanceService {
                     if(!transactionList.isEmpty()) throw new ExceptionVS("REPEATED VICKET_INIT_PERIOD TransactionVS for " +
                             "UserVS: '${userVS.id}' - tag: '${tagVSEntry.key}' - timePeriod: '${timePeriod}'")
                     //Send TimeLimited incomes not exepnded to system
+                    BigDecimal timeLimitedNotExpended = checkRemainingForTag(balanceMap.balancesFrom,
+                            balanceMap.balancesTo, currentTagVS.getName(), currency.getKey())
 
-
+                    BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended)
 
                     String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg',
                             [tagVSEntry.getKey()].toArray(), systemService.getDefaultLocale())
-                    Map transactionData = [operation:TypeVS.VICKET_INIT_PERIOD , amount:tagVSEntry.getValue(),
-                               tag:tagVSEntry.getKey(), toUserVS: userVS.name, toUserNIF:userVS.nif, toUserId:userVS.id,
-                               toUserIBAN:[userVS.IBAN], UUID:UUID.randomUUID()]
+                    Map transactionData = [operation:TypeVS.VICKET_INIT_PERIOD , amount:amountResult, tag:tagVSEntry.getKey(),
+                               timeLimitedNotExpended:timeLimitedNotExpended, toUserVS: userVS.name, toUserNIF:userVS.nif,
+                               toUserId:userVS.id, toUserIBAN:[userVS.IBAN], UUID:UUID.randomUUID()]
                     ResponseVS responseVS = signatureVSService.getTimestampedSignedMimeMessage (systemService.getSystemUser().name,
                             userVS.getNif(), new JSONObject(transactionData).toString(), "${transactionMsgSubject} - ${signedMessageSubject}")
 
@@ -112,12 +115,20 @@ class BalanceService {
                             base64ContentDigest:responseVS.getSmimeMessage().getContentDigestStr())
                     messageSMIME.save()
 
-                    TransactionVS transactionVS = new TransactionVS(amount: tagVSEntry.getValue(), fromUserVS:userVS,
-                            fromUserIBAN: userVS.IBAN, toUserIBAN: userVS.IBAN, messageSMIME:messageSMIME,
-                            toUserVS: userVS, state:TransactionVS.State.OK, subject: signedMessageSubject,
-                            type:TransactionVS.Type.VICKET_INIT_PERIOD, currencyCode: currency.getKey(),
-                            tag:getTag(tagVSEntry.getKey())).save()
-
+                   new TransactionVS(amount: amountResult, fromUserVS:userVS, fromUserIBAN: userVS.IBAN,
+                           toUserIBAN: userVS.IBAN, messageSMIME:messageSMIME, toUserVS: userVS,
+                           state:TransactionVS.State.OK, subject: signedMessageSubject, currencyCode: currency.getKey(),
+                           type:TransactionVS.Type.VICKET_INIT_PERIOD, tag:currentTagVS).save()
+                    if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
+                        TransactionVS transactionVS = new TransactionVS(amount: timeLimitedNotExpended,
+                                fromUserVS:userVS, fromUserIBAN: userVS.IBAN,
+                                toUserIBAN: systemService.getSystemUser().IBAN, messageSMIME:messageSMIME,
+                                toUserVS: systemService.getSystemUser(), state:TransactionVS.State.OK,
+                                subject: signedMessageSubject, type:TransactionVS.Type.VICKET_INIT_PERIOD_TIME_LIMITED,
+                                currencyCode: currency.getKey(), tag:currentTagVS).save()
+                        UserVSAccount account = UserVSAccount.findWhere(userVS:userVS, tag:currentTagVS)
+                        transactionVS.addAccountFromMovement(account, timeLimitedNotExpended)
+                    }
                     File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${tagVSEntry.getKey()}.p7s")
                     responseVS.getSmimeMessage().writeTo(new FileOutputStream(tagReceiptFile))
                 }
@@ -138,10 +149,14 @@ class BalanceService {
         calculatePeriod(timePeriod)
     }
 
-    private BigDecimal checkRemainingForTag(Map balanceFrom, Map balanceTo, String tagName, String currencyCode) {
+    private BigDecimal checkRemainingForTag(Map balancesFrom, Map balancesTo, String tagName, String currencyCode) {
         BigDecimal result = BigDecimal.ZERO;
-
-
+        if(balancesTo[currencyCode] && balancesTo[currencyCode][tagName]?.timeLimited)
+            result = result.add(new BigDecimal(balancesTo[currencyCode][tagName].timeLimited))
+        if(balancesFrom[currencyCode] && balancesFrom[currencyCode][tagName])
+            result = result.subtract(new BigDecimal(balancesFrom[currencyCode][tagName]))
+        if(result.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS("Negative period balance for tag '$tagName' " +
+                "'$currencyCode': ${result.toString()} ")
         return result;
     }
 
