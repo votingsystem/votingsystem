@@ -26,7 +26,7 @@ class ReportsController {
     private static Logger reportslog = Logger.getLogger("reportsLog");
     private static Logger transactionslog = Logger.getLogger("transactionsLog");
 
-
+    //main web page
     def index() {
         String weekReportsBaseDir = "${grailsApplication.config.VotingSystem.backupCopyPath}/weekReports"
         def dir = new File(weekReportsBaseDir)
@@ -47,7 +47,7 @@ class ReportsController {
 
     def logs() {
         if(request.contentType?.contains("json")) {
-            RollingFileAppender appender = reportslog.getAppender("VicketServerReports")
+            RollingFileAppender appender = reportslog.getAppender("VicketServerReports")//logs from ServerReports.log
             File reportsFile = new File(appender.file)
             def messageJSON = JSON.parse("{\"records\":[" + reportsFile.text + "]}")
             messageJSON.numTotalRecords = messageJSON.records.length()
@@ -62,7 +62,7 @@ class ReportsController {
         Calendar calendar = RequestUtils.getCalendar(params)
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
         Map<String, File> reportFiles
-        reportFiles = filesService.getWeekReportFiles(timePeriod)
+        reportFiles = filesService.getWeekReportFiles(timePeriod, null)
         if(request.contentType?.contains("json")) {
             if(reportFiles.reportsFile.exists()) {
                 render JSON.parse(reportFiles.reportsFile.text) as JSON
@@ -76,7 +76,7 @@ class ReportsController {
                 response.status = ResponseVS.SC_PRECONDITION_FAILED
                 render(view:'/error412',  model: [message:message(code:'reportsForPeriodMissingMsg',
                         args:[timePeriod.toString()])])
-            } else render(view:'week',  model: [date:params.date])
+            } else render(view:'week',  model: [reportsFile:reportFiles.reportsFile.text, timePeriod:timePeriod])
         }
     }
 

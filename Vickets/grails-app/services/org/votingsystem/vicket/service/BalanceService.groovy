@@ -61,12 +61,12 @@ class BalanceService {
         while (scrollableResults.next()) {
             UserVS userVS = (UserVS) scrollableResults.get(0);
             Map balanceMap
-            String userSubPath = "userSubPath"
+            String userSubPath
             if(userVS instanceof GroupVS) {
-                balanceMap = genBalanceForGroupVS(userVS, timePeriod)
+                balanceMap = groupVSService.getDataWithBalancesMap(userVS, timePeriod)
                 userSubPath = "GroupVS_${userVS.id}"
             } else if (userVS instanceof UserVS) {
-                balanceMap = genBalanceForUserVS(userVS, timePeriod)
+                balanceMap = userVSService.getDataWithBalancesMap(userVS, timePeriod)
                 //userSubPath = StringUtils.getUserDirPath(userVS.getNif());
                 userSubPath = userVS.getNif();
             } else {
@@ -82,7 +82,7 @@ class BalanceService {
                 Map<String, BigDecimal> tagVSMap = currency.getValue()
                 for(Map.Entry<String, BigDecimal> tagVSEntry: tagVSMap.entrySet()) {
                     VicketTagVS currentTagVS = getTag(tagVSEntry.key)
-                    List<TransactionVS> transactionList = TransactionVS.createCriteria().list(offset: 0,) {
+                    List<TransactionVS> transactionList = TransactionVS.createCriteria().list(offset: 0) {
                         ge("dateCreated", timePeriod.getDateFrom())
                         eq("type", TransactionVS.Type.VICKET_INIT_PERIOD)
                         eq("state", TransactionVS.State.OK)
@@ -91,6 +91,9 @@ class BalanceService {
                     }
                     if(!transactionList.isEmpty()) throw new ExceptionVS("REPEATED VICKET_INIT_PERIOD TransactionVS for " +
                             "UserVS: '${userVS.id}' - tag: '${tagVSEntry.key}' - timePeriod: '${timePeriod}'")
+                    //Send TimeLimited incomes not exepnded to system
+
+
 
                     String signedMessageSubject =  messageSource.getMessage('transactionvsForTagMsg',
                             [tagVSEntry.getKey()].toArray(), systemService.getDefaultLocale())
@@ -109,12 +112,11 @@ class BalanceService {
                             base64ContentDigest:responseVS.getSmimeMessage().getContentDigestStr())
                     messageSMIME.save()
 
-                    TransactionVS transactionParent = new TransactionVS(amount: tagVSEntry.getValue(), fromUserVS:userVS,
+                    TransactionVS transactionVS = new TransactionVS(amount: tagVSEntry.getValue(), fromUserVS:userVS,
                             fromUserIBAN: userVS.IBAN, toUserIBAN: userVS.IBAN, messageSMIME:messageSMIME,
                             toUserVS: userVS, state:TransactionVS.State.OK, subject: signedMessageSubject,
-                            type:TransactionVS.Type.VICKET_INIT_PERIOD, currencyCode: currency.getKey(), tag:getTag(it.getKey())).save()
-                    TransactionVS transactionTriggered = TransactionVS.generateTriggeredTransaction(
-                            transactionParent, tagVSEntry.getValue(), userVS, userVS.IBAN).save()
+                            type:TransactionVS.Type.VICKET_INIT_PERIOD, currencyCode: currency.getKey(),
+                            tag:getTag(tagVSEntry.getKey())).save()
 
                     File tagReceiptFile = new File("${((File)weekReportFiles.baseDir).getAbsolutePath()}/transaction_tag_${tagVSEntry.getKey()}.p7s")
                     responseVS.getSmimeMessage().writeTo(new FileOutputStream(tagReceiptFile))
@@ -134,6 +136,13 @@ class BalanceService {
             }
         }
         calculatePeriod(timePeriod)
+    }
+
+    private BigDecimal checkRemainingForTag(Map balanceFrom, Map balanceTo, String tagName, String currencyCode) {
+        BigDecimal result = BigDecimal.ZERO;
+
+
+        return result;
     }
 
     //@Transactional
@@ -163,9 +172,9 @@ class BalanceService {
         while (scrollableResults.next()) {
             UserVS userVS = (UserVS) scrollableResults.get(0);
 
-            if(userVS instanceof BankVS) bankVSBalanceList.add(genBalanceForBankVS(userVS, timePeriod))
-            else if(userVS instanceof GroupVS) groupBalanceList.add(genBalanceForGroupVS(userVS, timePeriod))
-            else userBalanceList.add(genBalanceForUserVS(userVS, timePeriod))
+            if(userVS instanceof BankVS) bankVSBalanceList.add(bankVSService.getDataWithBalancesMap(userVS, timePeriod))
+            else if(userVS instanceof GroupVS) groupBalanceList.add(groupVSService.getDataWithBalancesMap(userVS, timePeriod))
+            else userBalanceList.add(userVSService.getDataWithBalancesMap(userVS, timePeriod))
 
             if((scrollableResults.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
@@ -180,7 +189,7 @@ class BalanceService {
             }
         }
 
-        Map systemBalance = genBalanceForSystem(timePeriod)
+        Map systemBalance = systemService.genBalanceForSystem(timePeriod)
         Map userBalances = [systemBalance:systemBalance, groupBalanceList:groupBalanceList,
                         userBalanceList:userBalanceList, bankVSBalanceList:bankVSBalanceList]
         Map resultMap = [userBalances:userBalances]
@@ -201,87 +210,11 @@ class BalanceService {
     }
 
     public Map genBalance(UserVS uservs, DateUtils.TimePeriod timePeriod) {
-        if(UserVS.Type.SYSTEM == uservs.type) return genBalanceForSystem(timePeriod)
-        else if(uservs instanceof BankVS) return genBalanceForBankVS(uservs, timePeriod)
-        else if(uservs instanceof GroupVS) return genBalanceForGroupVS(uservs, timePeriod)
-        else return genBalanceForUserVS(uservs, timePeriod)
+        if(UserVS.Type.SYSTEM == uservs.type) return systemService.genBalanceForSystem(timePeriod)
+        else if(uservs instanceof BankVS) return bankVSService.getDataWithBalancesMap(uservs, timePeriod)
+        else if(uservs instanceof GroupVS) return groupVSService.getDataWithBalancesMap(uservs, timePeriod)
+        else return userVSService.getDataWithBalancesMap(uservs, timePeriod)
     }
 
-    private Map genBalanceForBankVS(BankVS bankVS, DateUtils.TimePeriod timePeriod) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("$methodName - id '${bankVS.id}'")
-        Map dataMap = bankVSService.getDataWithBalancesMap(bankVS, timePeriod)
-        if(bankVS.state == UserVS.State.ACTIVE) {
-
-        } else {}
-        return dataMap
-    }
-
-    private Map genBalanceForGroupVS(GroupVS groupvs, DateUtils.TimePeriod timePeriod) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("$methodName - id '${groupvs.id}' -  $timePeriod")
-        Map dataMap = groupVSService.getDataWithBalancesMap(groupvs, timePeriod)
-        return dataMap
-    }
-
-    private Map genBalanceForUserVS(UserVS uservs, DateUtils.TimePeriod timePeriod) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        log.debug("$methodName - id '${uservs.id}' - timePeriod: '$timePeriod'")
-        Map dataMap = userVSService.getDataWithBalancesMap(uservs, timePeriod)
-        return dataMap
-    }
-
-    private Map genBalanceForSystem(DateUtils.TimePeriod timePeriod) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod()?.getName();
-        log.debug("$methodName - timePeriod [${timePeriod.toString()}]")
-        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
-        resultMap.userVS = userVSService.getUserVSDataMap(systemService.getSystemUser(), false)
-        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            isNull('transactionParent')
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD])}
-        }
-        def transactionFromList = []
-        Map<String, Map> balancesMap = [:]
-        transactionList.each { transaction ->
-            if(balancesMap[transaction.currencyCode]) {
-                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
-                if(currencyMap[transaction.tag.name]) {
-                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
-                } else currencyMap[(transaction.tag.name)] = transaction.amount
-            } else {
-                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
-                balancesMap[(transaction.currencyCode)] = currencyMap
-            }
-            transactionFromList.add(transactionVSService.getTransactionMap(transaction))
-        }
-        resultMap.transactionFromList = transactionFromList
-        resultMap.balancesFrom = balancesMap
-
-        transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
-            isNotNull('transactionParent')
-            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD]) }
-        }
-
-
-        def transactionToList = []
-        balancesMap = [:]
-        transactionList.each { transaction ->
-            if(balancesMap[transaction.currencyCode]) {
-                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
-                if(currencyMap[transaction.tag.name]) {
-                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
-                } else currencyMap[(transaction.tag.name)] = transaction.amount
-            } else {
-                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
-                balancesMap[(transaction.currencyCode)] = currencyMap
-            }
-            transactionToList.add(transactionVSService.getTransactionMap(transaction))
-        }
-        resultMap.transactionToList = transactionToList
-        resultMap.balancesTo = balancesMap
-        return resultMap
-    }
 
 }

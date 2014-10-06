@@ -6,9 +6,11 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
+import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.IbanVSUtil
 
@@ -73,6 +75,61 @@ class SystemService {
         getSystemUser().save()
         log.debug("$methodName - adminsDNI: '${getSystemUser().getMetaInfJSON().adminsDNI}'")
         return systemUser.getMetaInfJSON().adminsDNI
+    }
+
+    private Map genBalanceForSystem(DateUtils.TimePeriod timePeriod) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod()?.getName();
+        log.debug("$methodName - timePeriod [${timePeriod.toString()}]")
+        Map resultMap = [timePeriod:[dateFrom:timePeriod.getDateFrom(), dateTo:timePeriod.getDateTo()]]
+        //to avoid circular references
+        resultMap.userVS = ((UserVSService)grailsApplication.mainContext.getBean("userVSService")).getUserVSDataMap(
+                getSystemUser(), false)
+        def transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            isNull('transactionParent')
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD])}
+        }
+        def transactionFromList = []
+        Map<String, Map> balancesMap = [:]
+        transactionList.each { transaction ->
+            if(balancesMap[transaction.currencyCode]) {
+                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
+                if(currencyMap[transaction.tag.name]) {
+                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
+                } else currencyMap[(transaction.tag.name)] = transaction.amount
+            } else {
+                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
+                balancesMap[(transaction.currencyCode)] = currencyMap
+            }
+            transactionFromList.add(transactionVSService.getTransactionMap(transaction))
+        }
+        resultMap.transactionFromList = transactionFromList
+        resultMap.balancesFrom = balancesMap
+
+        transactionList = TransactionVS.createCriteria().list(offset: 0, sort:'dateCreated', order:'desc') {
+            isNotNull('transactionParent')
+            between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+            //not{ inList("type", [TransactionVS.Type.VICKET_INIT_PERIOD]) }
+        }
+
+
+        def transactionToList = []
+        balancesMap = [:]
+        transactionList.each { transaction ->
+            if(balancesMap[transaction.currencyCode]) {
+                Map<String, BigDecimal> currencyMap = balancesMap[transaction.currencyCode]
+                if(currencyMap[transaction.tag.name]) {
+                    currencyMap[transaction.tag.name] = ((BigDecimal) currencyMap[transaction.tag.name]).add(transaction.amount)
+                } else currencyMap[(transaction.tag.name)] = transaction.amount
+            } else {
+                Map<String, BigDecimal> currencyMap = [(transaction.tag.name):transaction.amount]
+                balancesMap[(transaction.currencyCode)] = currencyMap
+            }
+            transactionToList.add(transactionVSService.getTransactionMap(transaction))
+        }
+        resultMap.transactionToList = transactionToList
+        resultMap.balancesTo = balancesMap
+        return resultMap
     }
 
     boolean isUserAdmin(String nif) {

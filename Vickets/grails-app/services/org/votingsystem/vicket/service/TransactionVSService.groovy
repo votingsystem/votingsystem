@@ -151,7 +151,8 @@ class TransactionVSService {
                         eq('fromUserVS', fromUserVS)
                         isNotNull("transactionParent")
                         between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
-                        not { inList("type", [TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS] ) }
+                        not { inList("type", [TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS,
+                                              TransactionVS.Type.VICKET_INIT_PERIOD] ) }
                     }
                     and {
                         eq('fromUserVS', fromUserVS)

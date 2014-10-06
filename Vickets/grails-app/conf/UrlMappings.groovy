@@ -37,7 +37,7 @@ class UrlMappings {
             }
         }
 
-        "/balance/weekReport/$requestFile/$year/$month/$day" {
+        "/balance/weekReport/$year/$month/$day" {
             controller = "balance"
             action = "weekReport"
             constraints {

@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.iban4j.CountryCode
 import org.iban4j.Iban
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.vicket.model.TransactionVS
@@ -35,8 +36,8 @@ class TestingController {
 
 
     def index() {
-        LoggerVS.logTransactionVS([hola:"prueba"])
-        render "Transaction logged"
+        balanceService.initWeekPeriod()
+        render "--- initWeekPeriod"
         return false
     }
 

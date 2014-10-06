@@ -14,7 +14,7 @@
     </ol>
 
     <div layout horizontal center center-justified>
-        <select id="transactionvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+        <select id="transactionvsTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
                  onchange="transactionvsTypeSelect(this)">
             <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
 

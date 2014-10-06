@@ -162,8 +162,9 @@
         },
         initBalance:function(balance) {
             console.log(this.tagName + " - initBalance")
-            this.balance = balance
+            this.balance = JSON.parse(balance)
             var caption = "<g:message code="balanceDetailCaption"/>"
+            console.log(this.tagName + " - this.balance.userVS: " + this.balance)
             this.description = "NIF:" + this.balance.userVS.nif + " - IBAN: " + this.balance.userVS.IBAN
             this.userVSName = this.balance.userVS.name
             if('SYSTEM' == this.balance.userVS.type) {
