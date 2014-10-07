@@ -96,6 +96,7 @@ class TransactionVSService {
     }
 
     private UserVSAccount updateUserVSAccountTo(TransactionVS transactionVS) {
+        if(!transactionVS.toUserIBAN) throw new ExceptionVS("transactionVS without toUserIBAN")
         UserVSAccount accountTo = UserVSAccount.findWhere(IBAN:transactionVS.toUserIBAN,
                 currencyCode:transactionVS.currencyCode, tag:transactionVS.tag)
         if(!accountTo) {//new user account for tag

@@ -12,11 +12,9 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 
-import java.security.KeyStore;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 

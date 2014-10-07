@@ -26,7 +26,10 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
 import org.votingsystem.client.pane.SignDocumentPane;
 import org.votingsystem.client.util.*;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.HttpHelper;
 

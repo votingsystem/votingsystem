@@ -205,7 +205,7 @@ public class Vicket extends ReceiptContainer {
         return new JSONObject(dataMap);
     }
 
-    public JSONObject getTransactionRequest(String toUserName,
+    public JSONObject getTransaction(String toUserName,
             String toUserIBAN, String tag, Boolean isTimeLimited) {
         Map dataMap = new HashMap();
         dataMap.put("operation", TypeVS.VICKET.toString());

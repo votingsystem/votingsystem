@@ -178,7 +178,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                         numRepresented++;
                         numRepresentations++;
                         byte[] fileBytes = FileUtils.getBytesFromFile(repDoc);
-                        SignedFile signedFile = new SignedFile(fileBytes, repDoc.getName());
+                        SignedFile signedFile = new SignedFile(fileBytes, repDoc.getName(), null);
                         if(repDoc.getAbsolutePath().contains("_WithRequest_RepDoc_")) {
                             List<File> result = FileUtils.findRecursively(
                                     accessRequestsDir, signedFile.getNifFromRepresented());
@@ -207,7 +207,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                     if(!result.isEmpty()) {
                         File voteFile = result.iterator().next();
                         byte[] fileBytes = FileUtils.getBytesFromFile(voteFile);
-                        SignedFile vote = new SignedFile(fileBytes, voteFile.getName());
+                        SignedFile vote = new SignedFile(fileBytes, voteFile.getName(), null);
                         ResponseVS representativeVoteResponse = DocumentVSValidator.validateVote(vote,
                                 trustAnchors, eventTrustedAnchors,  representativeDataMetaInf.
                                 getOptionSelectedId(), eventURL, metaInf.getDateInit(), metaInf.getDateFinish(),
@@ -271,7 +271,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                 for(File accessRequest : accessRequests) {
                     String errorMessage = null;
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(accessRequest);
-                    SignedFile signedFile = new SignedFile(accessRequestBytes, accessRequest.getName());
+                    SignedFile signedFile = new SignedFile(accessRequestBytes, accessRequest.getName(), null);
                     ResponseVS validationResponse = DocumentVSValidator.validateAccessRequest(signedFile,
                             trustAnchors, eventURL, metaInf.getDateInit(),
                             metaInf.getDateFinish(), timeStampServerCert);
@@ -327,7 +327,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                 File[] votes = batchDir.listFiles();
                 for(File vote : votes) {
                     byte[] voteBytes = FileUtils.getBytesFromFile(vote);
-                    SignedFile signedFile = new SignedFile(voteBytes, vote.getName());
+                    SignedFile signedFile = new SignedFile(voteBytes, vote.getName(), null);
                     ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(signedFile,
                             trustAnchors, eventTrustedAnchors, null, eventURL,
                             metaInf.getDateInit(), metaInf.getDateFinish(), timeStampServerCert);

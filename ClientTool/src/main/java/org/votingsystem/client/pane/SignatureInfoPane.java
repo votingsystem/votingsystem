@@ -79,9 +79,7 @@ public class SignatureInfoPane extends GridPane {
         setVgrow(webView, Priority.ALWAYS);
         webView.setStyle("-fx-word-wrap:break-word;");
         add(webView, 0, 2, 3, 1);
-
         getColumnConstraints().addAll(new ColumnConstraints(), new ColumnConstraints(500), new ColumnConstraints());
-
         final GridPane signatureInfoGridPane = new GridPane();
         CheckBox signatureInfoCheckBox = new CheckBox(ContextVS.getMessage("signatureInfoCheckBoxLbl"));
         signatureInfoCheckBox.setOnAction(new EventHandler<ActionEvent>() {
@@ -96,9 +94,7 @@ public class SignatureInfoPane extends GridPane {
         setMargin(signatureInfoCheckBox, new Insets(10, 0 , 10, 0));
 
         if(signedMessage != null) {
-
             signatureInfoGridPane.setMinWidth(1000);
-
             Label hashBase64Label = new Label(ContextVS.getMessage("hashBase64Lbl") + ": ");
             hashBase64Label.setStyle("-fx-font-weight: bold;");
             signatureInfoGridPane.setMargin(hashBase64Label, new Insets(10, 0 , 10, 0));

@@ -12,8 +12,6 @@ import org.votingsystem.util.FileUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -30,26 +28,12 @@ public class SignedFile {
     private TimeStampToken timeStampToken = null;
     private SMIMEMessage smimeMessage = null;
     private boolean signatureVerified = false;
-    private PDFDocumentVS pdfDocument = null;
 
 
-    public SignedFile(File signedFile, Map operationDocument) throws Exception {
-        byte[] signedFileBytes = FileUtils.getBytesFromFile(signedFile);
-        init(signedFileBytes, signedFile.getName());
-        this.operationDocument = operationDocument;
-    }
-
-    public SignedFile(byte[] signedFileBytes, String name) throws Exception {
-        init(signedFileBytes, name);
-    }
-
-    private void init(byte[] signedFileBytes, String name) throws Exception {
+    public SignedFile(byte[] signedFileBytes, String name, Map operationDocument) throws Exception {
         smimeMessage = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
         signatureVerified = smimeMessage.isValidSignature();
-    }
-
-    public PDFDocumentVS getPdfDocument() {
-        return pdfDocument;
+        this.operationDocument = operationDocument;
     }
     
     public boolean isValidSignature() {
@@ -107,8 +91,7 @@ public class SignedFile {
     }
     
     public String getSignerNif() {
-        if(isPDF()) return pdfDocument.getUserVS().getNif();
-        else return smimeMessage.getSigner().getNif();
+        return smimeMessage.getSigner().getNif();
     }
     
     public byte[] getFileBytes() {

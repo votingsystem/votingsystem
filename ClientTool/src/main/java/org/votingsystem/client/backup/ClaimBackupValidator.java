@@ -122,7 +122,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
                     if(!claim.getAbsolutePath().contains(claimFileName)) continue;
                     String errorMessage = null;
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(claim);
-                    SignedFile signedFile = new SignedFile(accessRequestBytes, claim.getName());
+                    SignedFile signedFile = new SignedFile(accessRequestBytes, claim.getName(), null);
                     ResponseVS validationResponse = DocumentVSValidator.validateClaim(signedFile, trustAnchors,
                             eventURL, metaInf.getDateInit(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();

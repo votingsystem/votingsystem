@@ -86,22 +86,26 @@ public class SignedMailGenerator {
     
     public SignedMailGenerator (PrivateKey key, Certificate[] chain, String signatureMechanism) 
             throws CertificateEncodingException, OperatorCreationException {
-        logger.debug("SignedMailGenerator");                                
+        this(key, Arrays.asList(chain), signatureMechanism);
+    }
+
+    public SignedMailGenerator (PrivateKey key, List<Certificate> chain, String signatureMechanism)
+            throws CertificateEncodingException, OperatorCreationException {
+        logger.debug("SignedMailGenerator");
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
-        //create some smime capabilities in case someone wants to respond        
+        //create some smime capabilities in case someone wants to respond
         caps.addCapability(SMIMECapability.dES_EDE3_CBC);
         caps.addCapability(SMIMECapability.rC2_CBC, 128);
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
-        List certList = Arrays.asList(chain);
-        Store certs = new JcaCertStore(certList);
+        Store certs = new JcaCertStore(chain);
         smimeSignedGenerator = new SMIMESignedGenerator();
         SimpleSignerInfoGeneratorBuilder signerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
         signerInfoGeneratorBuilder.setProvider(ContextVS.PROVIDER);
         signerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
-                signatureMechanism, key, (X509Certificate)chain[0]);
+                signatureMechanism, key, (X509Certificate)chain.iterator().next());
         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
         // add our pool of certs and cerls (if any) to go with the signature
         smimeSignedGenerator.addCertificates(certs);

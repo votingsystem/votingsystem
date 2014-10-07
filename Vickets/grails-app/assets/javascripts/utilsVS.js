@@ -360,9 +360,9 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
         window.alert(e)
         return
     }
-    var messageToSignatureClient = JSON.stringify(messageJSON)
-    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
-    clientTool.setJSONMessageToSignatureClient(messageToSignatureClient)
+    var messageToSignatureClient = JSON.stringify(messageJSON);
+//    console.log("setJSONMessageToSignatureClient - message: " + messageToSignatureClient);
+    clientTool.setJSONMessageToSignatureClient(window.btoa(messageToSignatureClient))
 }
 
 window['isClientToolConnected'] = false

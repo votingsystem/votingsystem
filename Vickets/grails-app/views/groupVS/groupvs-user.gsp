@@ -6,6 +6,7 @@
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
         <votingsystem-dialog id="xDialog" class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 540px;">
+            <g:include view="/include/styles.gsp"/>
         <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                    contentType="json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div layout vertical>
@@ -38,9 +39,13 @@
                 </div>
             </template>
 
-            <div id="receipt" style="display:none;">
-
+            <div layout horizontal center center-justified>
+                <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{goToUserVSPage}}"
+                                     style="margin:10px 20px 0px 0px;">
+                    <i class="fa fa-user" style="margin:0 5px 0 2px;"></i> <g:message code="userVSPageLbl"/>
+                </votingsystem-button>
             </div>
+            <div id="receipt" style="display:none;"> </div>
         </div>
         <div style="position: absolute; width: 100%; top:0px;left:0px;">
             <div layout horizontal center center-justified style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
@@ -80,6 +85,10 @@
             },
             onCoreOverlayOpen:function(e) {
                 this.opened = this.$.xDialog.opened
+            },
+            goToUserVSPage:function() {
+                document.querySelector('#navBar').loadURL("${createLink( controller:'userVS', action:"", absolute:true)}/" + this.userId)
+                this.$.xDialog.opened = false
             },
             openedChanged:function() {
                 this.async(function() { this.$.xDialog.opened = this.opened});

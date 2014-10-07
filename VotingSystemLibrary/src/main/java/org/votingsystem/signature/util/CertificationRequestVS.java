@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -122,7 +123,8 @@ public class CertificationRequestVS implements java.io.Serializable {
     
     public SMIMEMessage genMimeMessage(String fromUser, String toUser,
             String textToSign, String subject, Header header) throws Exception {
-        if (signedMailGenerator == null) throw new Exception (" --- SignedMailGenerator null --- ");
+        if (signedMailGenerator == null) signedMailGenerator = new SignedMailGenerator(
+                keyPair.getPrivate(), Arrays.asList(certificate), signatureMechanism);
         return signedMailGenerator.genMimeMessage(fromUser, toUser, textToSign, subject);
     }
 

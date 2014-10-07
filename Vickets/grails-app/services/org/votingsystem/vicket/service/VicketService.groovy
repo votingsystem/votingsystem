@@ -111,7 +111,7 @@ class VicketService {
         for(Vicket vicket : vicketBatch.getVicketList()) {
             try {
                 UserVS toUserVS = UserVS.findWhere(IBAN:vicket.getToUserIBAN())
-                if(!toUserVS) throw new ExceptionVS("Error - Vicket with id '${vicket?.id}' has wrong receptor IBAN '" +
+                if(!toUserVS) throw new ExceptionVS("Error - Vicket with hash '${vicket?.hashCertVS}' has wrong receptor IBAN '" +
                         vicket.getToUserIBAN() + "'", MetaInfMsg.getErrorMsg(methodName, 'toUserVSERROR'))
                 vicket.setToUserVS(toUserVS)
                 validatedVicketList.add(validateVicket(vicket));
@@ -124,12 +124,13 @@ class VicketService {
         }
         List responseList = []
         for(Vicket vicket: validatedVicketList) {
-            MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:vicket.getSMIMEMessage(), type:TypeVS.VICKET).save()
+            MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:vicket.getSMIMEMessage(), type:TypeVS.VICKET_SEND).save()
             Date validTo = null
             if(vicket.isTimeLimited == true) validTo = timePeriod.getDateTo()
             TransactionVS transactionVS = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIME,
-                    state:TransactionVS.State.OK, validTo: validTo, subject:vicket.getSubject(),
-                    type:TransactionVS.Type.VICKET_SEND, currencyCode: vicket.getCurrencyCode(), tag:vicket.getTag()).save()
+                    toUserIBAN:vicket.getToUserIBAN(), state:TransactionVS.State.OK, validTo: validTo,
+                    subject:vicket.getSubject(), toUserVS: vicket.getToUserVS(), type:TransactionVS.Type.VICKET_SEND,
+                    currencyCode: vicket.getCurrencyCode(), tag:vicket.getTag()).save()
             vicket.setState(Vicket.State.EXPENDED).setTransactionVS(transactionVS).save()
             SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(systemService.getSystemUser().getName(),
                     vicket.getHashCertVS(), vicket.getSMIMEMessage(), vicket.getSubject())
@@ -154,9 +155,6 @@ class VicketService {
                     [vicket.getHashCertVS()].toArray(), LocaleContextHolder.locale),
                     MetaInfMsg.getErrorMsg(methodName, 'vicketExpended'))
         } else if(vicket.state == Vicket.State.OK) {
-            Set<UserVS> signersVS = smimeMessage.getSigners();
-            if (signersVS.isEmpty()) throw new ExceptionVS(messageSource.getMessage('documentWithoutSignersErrorMsg',
-                    null, LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, 'vicketExpended'))
             UserVS userVS = smimeMessage.getSigner(); //anonymous signer
             CertExtensionCheckerVS extensionChecker
             if (userVS.getTimeStampToken() != null) {

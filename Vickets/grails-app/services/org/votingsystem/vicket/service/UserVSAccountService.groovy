@@ -60,6 +60,9 @@ class UserVSAccountService {
 
     public void checkBalancesMap(UserVS userVS, Map<String, Map> balancesMap) {
         Map<String, Map> accountsMap = getAccountsBalanceMap(userVS)
+
+        log.debug("========= accountsMap: $accountsMap -  balancesMap: $balancesMap")
+
         if(accountsMap.keySet().size() > 1) throw new ExceptionVS("User '$userVS.id' " +
                 "has '${accountsMap.keySet().size()}' accounts")
         accountsMap = accountsMap.values().iterator().next()

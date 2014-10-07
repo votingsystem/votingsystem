@@ -35,7 +35,7 @@ public class UserVSAccount implements Serializable {
     @Column(name="balance", nullable=false) private BigDecimal balance = null;
 
     @Column(name="currencyCode", nullable=false) private String currencyCode;
-    @Column(name="IBAN") private String IBAN;
+    @Column(name="IBAN", nullable=false) private String IBAN;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;

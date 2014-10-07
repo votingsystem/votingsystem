@@ -167,10 +167,10 @@ public class SignedDocumentsBrowser extends StackPane{
                 return;
             }
             fileList.add(file.getPath());
-            SignedFile signedFile = new SignedFile(file, operationDocument);
-            Tab newTab = new Tab();
             String fileName = file.getName().endsWith("temp") ? "":file.getName();
-            newTab.setText(file.getName());
+            SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName, operationDocument);
+            Tab newTab = new Tab();
+            newTab.setText(ContextVS.getMessage("signedDocumentLbl"));
             SignedFilePane signedFilePane = new SignedFilePane(signedFile);
             newTab.setContent(signedFilePane);
             tabPane.getTabs().add(newTab);

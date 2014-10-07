@@ -147,6 +147,7 @@ public class Vicket implements Serializable  {
         this.smimeMessage = vicketRequest.getSMIMEMessage();
         this.x509AnonymousCert = vicketRequest.getX509AnonymousCert();
         this.toUserVS = vicketRequest.getToUserVS();
+        this.toUserIBAN = vicketRequest.getToUserIBAN();
         return this;
     }
 
@@ -154,7 +155,8 @@ public class Vicket implements Serializable  {
         JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
         BigDecimal toUserVSAmount = new BigDecimal(messageJSON.getString("amount"));
         TypeVS operation = TypeVS.valueOf(messageJSON.getString("operation"));
-        if(TypeVS.VICKET != operation) throw new ExceptionVS("Error - Vicket with invalid operation '" + operation.toString() + "'");
+        if(TypeVS.VICKET_SEND != operation)
+            throw new ExceptionVS("Error - Vicket with invalid operation '" + operation.toString() + "'");
         if(amount.compareTo(toUserVSAmount) != 0) throw new ExceptionVS("Error - Vicket with value of '" + amount +
                 "' has signed amount  '" + toUserVSAmount + "'");
         if(!currencyCode.equals(messageJSON.getString("currencyCode"))) throw new ExceptionVS("Error - Vicket with currencyCode '" +
@@ -423,13 +425,13 @@ public class Vicket implements Serializable  {
     }
 
 
-    public JSONObject getTransactionRequest(String toUserName, String toUserIBAN, String subject, Boolean isTimeLimited) {
+    public JSONObject getTransaction(String toUserName, String toUserIBAN, String subject, Boolean isTimeLimited) {
         this.toUserName = toUserName;
         this.toUserIBAN = toUserIBAN;
         this.subject = subject;
         this.isTimeLimited = isTimeLimited;
         Map dataMap = new HashMap();
-        dataMap.put("operation", TypeVS.VICKET.toString());
+        dataMap.put("operation", TypeVS.VICKET_SEND.toString());
         dataMap.put("subject", subject);
         dataMap.put("toUserName", toUserName);
         dataMap.put("toUserIBAN", toUserIBAN);

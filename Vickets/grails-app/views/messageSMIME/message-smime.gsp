@@ -36,7 +36,7 @@
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
             <div style=""><b><g:message code="subjectLbl"/>: </b>{{signedDocument.subject}}</div>
             <div horizontal layout>
-                <div style=""><b><g:message code="amountLbl"/>: </b>{{signedDocument.amount}} {{signedDocument.currency}}</div>
+                <div style=""><b><g:message code="amountLbl"/>: </b>{{signedDocument.amount}} {{signedDocument.currencyCode}}</div>
                 <template if="{{signedDocument.isTimeLimited}}">
                     <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
                         ${message(code: 'timeLimitedLbl', null).toUpperCase()}</b>
@@ -45,7 +45,7 @@
             </div>
 
 
-            <div style="margin-left: 20px;">
+            <div id="fromUserDivContainer" style="margin-left: 20px;">
                 <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
                     <g:message code="senderLbl"/></div>
                 <div id="fromUserDiv">
@@ -64,6 +64,19 @@
                     </div>
                 </div>
             </div >
+
+
+            <template if="{{signedDocument.operation == 'VICKET'}}">
+                <div style="font-size: 1.em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
+                    {{receptorLbl}}</div>
+                <div><b>{{toUserName}}</b></div>
+                <div layout horizontal>
+                    <div><b><g:message code="IBANLbl"/>: </b>{{IBAN}}</div>
+                </div>
+            </template>
+
+
+
             <template if="{{signedDocument.tags.length > 0}}">
                 <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
                     <template repeat="{{tag in signedDocument.tags}}">
@@ -133,6 +146,15 @@
                         this.$.fromUserDiv.innerHTML = "<g:message code="systemLbl"/>"
                         this.$.fromUserDiv.classList.add("pageHeader");
                         break;
+                    case 'VICKET':
+                    case 'VICKET_SEND':
+                        this.caption = "<g:message code="anonymousTransactionVSLbl"/>"
+                        this.$.fromUserDivContainer.style.display = 'none'
+                        this.isReceptorVisible = false
+                        this.IBAN = this.signedDocument.toUserIBAN
+                        this.toUserName = this.signedDocument.toUserName
+                        this.receptorLbl = '<g:message code="receptorLbl"/>'
+                        break;
                     default:
                         this.caption = this.signedDocument.operation
 
@@ -157,6 +179,9 @@
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
+
+
+
                 webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);

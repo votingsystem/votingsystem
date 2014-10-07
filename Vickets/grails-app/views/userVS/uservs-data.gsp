@@ -55,13 +55,12 @@
                             </votingsystem-button>
                         </div>
 
-                        <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
-                            <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{goToWeekBalance}}"
+                        <div>
+                            <votingsystem-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}"
                                                  style="margin:10px 20px 0px 0px;">
                                 <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
                             </votingsystem-button>
                         </div>
-
 
                         <div style="display: {{'superadmin' == menuType ? 'block':'none'}}">
                             <votingsystem-button id="blockUserVSButton" type="submit"

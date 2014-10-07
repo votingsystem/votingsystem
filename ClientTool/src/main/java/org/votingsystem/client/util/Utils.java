@@ -11,8 +11,6 @@ import org.votingsystem.util.FileUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 

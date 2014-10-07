@@ -15,13 +15,13 @@
         .amountColumn {width:110px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
         </style>
-        <div layout vertical  style="">
+        <div layout vertical style="display: block;">
             <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
                 <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
                 <div flex></div>
                 <div style="font-size: 0.8em;color:#888; margin:0 0 0 10px;">{{numMovements}}</div>
             </div>
-            <div flex  style="">
+            <div>
                 <template repeat="{{transaction in transactionList}}">
                     <div class="transactionvsRow" layout horizontal on-click="{{viewTransaction}}">
                         <div class="dateCreated" style="">{{transaction.dateCreated | formatDate}}</div>

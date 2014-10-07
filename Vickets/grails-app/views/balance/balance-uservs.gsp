@@ -82,18 +82,19 @@
                     </template>
                 </div>
             </div>
-            <div layout horizontal center center-justified>
-                <div style="border-right: 2px solid  #6c0404; margin:0px 20px 0 0; padding:0 20px 0 20px;">
+            <div layout horizontal>
+                <div vertical layout style="border-right: 2px solid  #6c0404; margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance caption="<g:message code="incomesLbl"/>" transactionList="{{balance.transactionToList}}"
-                                  balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
+                                                balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
+                    <div flex></div>
                 </div>
                 <div>
                     <transactionvs-list-balance id="balanceFromItem"  transactionList="{{balance.transactionFromList}}"
-                          balances="{{balance.balancesFrom}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
+                                                balances="{{balance.balancesFrom}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                 </div>
             </div>
         </div>
-        <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin: 45px auto; display: inline-block;">
+        <div  id="userBalanceChartDiv" horizontal layout center center-justified style="margin:0 auto; display: inline-block;">
             <balance-uservs-chart id="balanceChart" chart="column" yAxisTitle="<g:message code="euroLbl"/>s"
                                   title="<g:message code="userVSBalancesLbl"/>"
                                   xAxisCategories="['<g:message code="incomesLbl"/> (<g:message code="totalLbl"/>)', '<g:message code="icomesTimeLimitedLbl"/>',

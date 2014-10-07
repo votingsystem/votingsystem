@@ -1,7 +1,6 @@
 package org.votingsystem.client.util;
 
 import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;

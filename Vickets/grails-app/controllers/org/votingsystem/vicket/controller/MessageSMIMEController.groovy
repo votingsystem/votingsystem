@@ -95,7 +95,7 @@ class MessageSMIMEController {
         boolean isAsciiDoc = false
         def signedContentJSON
         if(request.messageSMIME) {
-            smimeMessageStr = new String(request.messageSMIME.content, "UTF-8")
+            smimeMessageStr = Base64.getEncoder().encodeToString(request.messageSMIME.content)
             SMIMEMessage smimeMessage = request.messageSMIME.getSmimeMessage()
             if(smimeMessage.getTimeStampToken() != null) {
                 timeStampDate = DateUtils.getLongDate_Es(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
@@ -108,7 +108,10 @@ class MessageSMIMEController {
             } else {
                 signedContentJSON = JSON.parse(request.messageSMIME.getSmimeMessage()?.getSignedContent())
             }
-            if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS = userVSService.getUserVSBasicDataMap(request.messageSMIME.userVS)
+            if(TypeVS.VICKET_SEND != TypeVS.valueOf(signedContentJSON.operation)) {
+                if(!signedContentJSON.fromUserVS) signedContentJSON.fromUserVS =
+                        userVSService.getUserVSBasicDataMap(request.messageSMIME.userVS)
+            }
             params.operation = signedContentJSON.operation
         }
         /*if(params.operation) {

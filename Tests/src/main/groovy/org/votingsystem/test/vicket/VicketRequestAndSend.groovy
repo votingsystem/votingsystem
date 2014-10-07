@@ -25,7 +25,7 @@ import org.votingsystem.vicket.model.VicketRequestBatch
 import java.security.cert.X509Certificate
 
 
-Logger logger = TestHelper.init(VicketRequest.class)
+Logger logger = TestHelper.init(VicketRequestAndSend.class)
 
 SignatureVSService signatureVSService = SignatureVSService.getUserVSSignatureVSService("./certs/Cert_UserVS_07553172H.jks")
 UserVS fromUserVS = signatureVSService.getUserVS()
@@ -74,7 +74,7 @@ try {
         //we have al the Vickets initialized, now we can make de transactions
         List<String> vicketTransactionBatch = new ArrayList<String>();
         for(Vicket vicket:vicketBatch.vicketsMap.values()) {
-            JSONObject transactionRequest = vicket.getTransactionRequest("toUserName", "ES6778788989450000000012",
+            JSONObject transactionRequest = vicket.getTransaction("toUserName", "ES0878788989450000000007",
                     "First Vicket Transaction", false)
 
             smimeMessage = vicket.getCertificationRequest().genMimeMessage(vicket.getHashCertVS(),

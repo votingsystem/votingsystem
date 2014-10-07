@@ -209,7 +209,7 @@ public class VicketService extends IntentService {
             List<String> smimeVicketList = new ArrayList<String>();
 
             for(Vicket vicket : vicketsToSend) {
-                String textToSign = vicket.getTransactionRequest(toUserName, toUserIBAN, tagVS, null).toString();
+                String textToSign = vicket.getTransaction(toUserName, toUserIBAN, tagVS, null).toString();
                 SMIMEMessage smimeMessage = vicket.getCertificationRequest().genMimeMessage(
                         vicket.getHashCertVS(), StringUtils.getNormalized(toUserName),
                         textToSign, subject, null);

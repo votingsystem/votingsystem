@@ -125,8 +125,8 @@
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;
-                history.pushState(null, null, this.url);
-                console.log("========= pushState: " + urlToLoad + "---")
+                //history.pushState(null, null, this.url);
+                history.pushState(null, null, urlToLoad);
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
                 this.ajaxOptions.url = newURL
                 this.ajaxOptions.callback = this.ajaxResponse.bind(this)

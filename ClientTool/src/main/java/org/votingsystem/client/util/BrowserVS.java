@@ -66,6 +66,7 @@ public class BrowserVS extends Region {
     private MessageDialog messageDialog;
     private WebView webView;
     private VBox mainVBox;
+    private TextField locationField = new TextField("");
     private final BrowserVSPane browserHelper;
     private String caption;
 
@@ -171,7 +172,6 @@ public class BrowserVS extends Region {
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
 
-        final TextField locationField = new TextField("");
         locationField.setPrefWidth(400);
         HBox.setHgrow(locationField, Priority.ALWAYS);
         locationField.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -215,11 +215,18 @@ public class BrowserVS extends Region {
 
 
         history.getEntries().addListener(new ListChangeListener<WebHistory.Entry>(){
-            @Override
-        public void onChanged(Change<? extends WebHistory.Entry> c) {
+        @Override public void onChanged(Change<? extends WebHistory.Entry> c) {
                 c.next();
                 if(history.getCurrentIndex() > 0) prevButton.setDisable(false);
-                logger.debug("== currentIndex= " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
+                //logger.debug("==== currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
+                String params = "";
+                if(locationField.getText().contains("?")) {
+                    params = locationField.getText().substring(locationField.getText().indexOf("?"),
+                            locationField.getText().length());
+                }
+                String newURL = history.getEntries().get(history.getEntries().size() - 1).getUrl();
+                if(!newURL.contains("?")) newURL = newURL + params;
+                locationField.setText(newURL);
             }
         });
 
@@ -389,11 +396,12 @@ public class BrowserVS extends Region {
     public class JavafxClient {
 
         public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
-            String logMsg = messageToSignatureClient.length() > 350 ? messageToSignatureClient.substring(0, 350) +
-                    "..." : messageToSignatureClient;
-            logger.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
             try {
-                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(messageToSignatureClient);
+                String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()),"UTF-8");
+                String logMsg = messageToSignatureClient.length() > 350 ? messageToSignatureClient.substring(0, 350) +
+                        "..." : messageToSignatureClient;
+                logger.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
+                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
                 OperationVS operationVS = OperationVS.populate(jsonObject);
                 switch(operationVS.getType()) {
                     case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
@@ -418,14 +426,6 @@ public class BrowserVS extends Region {
                         JSONObject documentJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocument());
                         WebSocketService.getInstance().sendMessage(documentJSON.toString());
                         break;
-                    /*case BANKVS_NEW:
-                        PEMCertFormPane.showDialog();
-                        String pemCert = PEMCertFormPane.getCertChainPEM();
-                        if(pemCert != null) {
-                            operationVS.getDocumentToSignMap().put("certChainPEM", pemCert);
-                            browserHelper.processOperationVS(operationVS);
-                        }
-                        break;*/
                     default:
                         browserHelper.processOperationVS(operationVS);
                 }
@@ -477,7 +477,8 @@ public class BrowserVS extends Region {
 
     private void openReceipt(OperationVS operation) throws Exception{
         logger.debug("openReceipt");
-        SignedDocumentsBrowser.showDialog(operation.getMessage(), operation.getDocument());
+        String smimeMessageStr = new String(Base64.getDecoder().decode(operation.getMessage()), "UTF-8");
+        SignedDocumentsBrowser.showDialog(smimeMessageStr, operation.getDocument());
     }
 
     private void selectImage(final OperationVS operationVS) throws Exception {

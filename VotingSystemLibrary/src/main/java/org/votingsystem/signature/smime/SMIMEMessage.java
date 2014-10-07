@@ -37,9 +37,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -200,6 +198,7 @@ public class SMIMEMessage extends MimeMessage {
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER)
                     .getCertificate((X509CertificateHolder)certIt.next());
             logger.debug("checkSignature - cert: " + cert.getSubjectDN() + " --- " + certCollection.size() + " match");
+            writeTo(new FileOutputStream(new File("/home/jgzornoza/test1.p7s")));
             verifySignerCert(signer, cert);
             UserVS userVS = UserVS.getUserVS(cert);
             userVS.setSignerInformation(signer);
