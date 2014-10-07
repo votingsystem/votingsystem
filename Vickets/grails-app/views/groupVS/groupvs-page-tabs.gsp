@@ -40,7 +40,7 @@
                 <transactionvs-table id="transactionToTable"></transactionvs-table>
             </div>
             <div id="transactionsFrom" class="tabContent" style="display:{{selectedTab == 'transactionsFrom'?'block':'none'}}">
-                <transactionvs-table id="transactionFromTable"></transactionvs-table>
+                <transactionvs-table id="transactionFromTable" isUserVSTable="true"></transactionvs-table>
             </div>
             <div id="userList" class="tabContent" style="display:{{selectedTab == 'userList'?'block':'none'}}">
                 <uservs-list id="userList" menuType="${params.menu}"></uservs-list>

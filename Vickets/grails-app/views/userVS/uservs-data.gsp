@@ -54,6 +54,15 @@
                                 <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
                             </votingsystem-button>
                         </div>
+
+                        <div style="display: {{'BANKVS' == uservs.type ? 'none':'block'}}">
+                            <votingsystem-button id="makeTransactionVSButton" type="submit" on-click="{{goToWeekBalance}}"
+                                                 style="margin:10px 20px 0px 0px;">
+                                <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
+                            </votingsystem-button>
+                        </div>
+
+
                         <div style="display: {{'superadmin' == menuType ? 'block':'none'}}">
                             <votingsystem-button id="blockUserVSButton" type="submit"
                                                  style="margin:10px 20px 0px 0px;" on-click="{{blockUser}}">
@@ -78,25 +87,6 @@
                             <template repeat="{{subscriptionVS in uservs.subscriptionVSList}}">
                                 <a href="${createLink(controller: 'userVS')}/{{subscriptionVS.groupVS.id}}" style="margin: 0 10px 10px 0;">{{subscriptionVS.groupVS.name}}</a>
                             </template>
-                        </div>
-
-                    </template>
-
-                    <%  def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
-                    def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewShortDateFormat')
-                    def weekTo = formatDate(date:currentWeekPeriod.getDateTo(), formatName:'webViewDateFormat')
-                    %>
-
-                    <template if="{{uservs.transactionVSMap && uservs.transactionVSMap.queryRecordCount > 0}}">
-                        <div  style="text-align:center; font-size: 1.3em;font-weight: bold; color: #888; margin:25px 0 0 0;">
-                            <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom]}"/>
-                        </div>
-                        <transactionvs-table id="transactionvsTable" userNif="{{uservs.nif}}"
-                                             transactionList="{{uservs.transactionVSMap.transactionVSList}}"></transactionvs-table>
-                    </template>
-                    <template if="{{!uservs.transactionVSMap || uservs.transactionVSMap.queryRecordCount == 0}}">
-                        <div  style="text-align:center; font-size: 1.3em;font-weight: bold; color: #888; margin:15px 0 0 0;">
-                            <g:message code="transactionsEmptyCurrentWeekPeriodMsg" args="${[weekFrom]}"/>
                         </div>
                     </template>
 
@@ -138,6 +128,9 @@
         userVSDataChanged:function() {
             console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify(this.userVSData))
             this.uservs = this.userVSData.userVS
+        },
+        goToWeekBalance:function() {
+            document.querySelector('#navBar').loadURL("${createLink( controller:'balance', action:"userVS", absolute:true)}/" + this.uservs.id)
         },
         ajaxResponse:function() {
             console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))

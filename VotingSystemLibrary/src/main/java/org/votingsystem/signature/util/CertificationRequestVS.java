@@ -15,7 +15,10 @@ import org.votingsystem.signature.smime.SignedMailGenerator;
 
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -27,16 +30,17 @@ import java.util.Map;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CertificationRequestVS {
+public class CertificationRequestVS implements java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
     
     private static Logger logger = Logger.getLogger(CertificationRequestVS.class);
 
-    private PKCS10CertificationRequest csr;
+    private transient PKCS10CertificationRequest csr;
+    private transient SignedMailGenerator signedMailGenerator;
     private KeyPair keyPair;
     private String signatureMechanism;
-
     private X509Certificate certificate;
-    private SignedMailGenerator signedMailGenerator;
 
     private CertificationRequestVS(KeyPair keyPair, PKCS10CertificationRequest csr, String signatureMechanism) {
         this.keyPair = keyPair;
@@ -146,4 +150,26 @@ public class CertificationRequestVS {
         return CertUtil.getPEMEncoded(csr);
     }
 
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(certificate != null) s.writeObject(certificate.getEncoded());
+            else s.writeObject(null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        byte[] certificateBytes = (byte[]) s.readObject();
+        if(certificateBytes != null) {
+            try {
+                ByteArrayInputStream bais = new ByteArrayInputStream(certificateBytes);
+                certificate = CertUtil.loadCertificateFromStream (bais);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 }

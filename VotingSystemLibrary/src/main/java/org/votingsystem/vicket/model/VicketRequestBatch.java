@@ -215,7 +215,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         }
     }
 
-    public TransactionVS getTransactionVS(String subject) {
+    public TransactionVS getTransactionVS(String subject, Map<UserVSAccount, BigDecimal> accountFromMovements) {
         TransactionVS transaction = new TransactionVS();
         transaction.setAmount(requestAmount);
         transaction.setState(TransactionVS.State.OK);
@@ -225,6 +225,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         transaction.setMessageSMIME(messageSMIME);
         transaction.setType(TransactionVS.Type.VICKET_REQUEST);
         transaction.setFromUserVS(messageSMIME.getUserVS());
+        transaction.setAccountFromMovements(accountFromMovements);
         return transaction;
     }
 

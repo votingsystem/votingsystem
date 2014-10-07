@@ -389,7 +389,9 @@ public class BrowserVS extends Region {
     public class JavafxClient {
 
         public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
-            logger.debug("JavafxClient.setJSONMessageToSignatureClient: " + messageToSignatureClient);
+            String logMsg = messageToSignatureClient.length() > 350 ? messageToSignatureClient.substring(0, 350) +
+                    "..." : messageToSignatureClient;
+            logger.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
             try {
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(messageToSignatureClient);
                 OperationVS operationVS = OperationVS.populate(jsonObject);

@@ -8,6 +8,7 @@ import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.AlertVS
 import org.votingsystem.vicket.model.TransactionVS
@@ -84,8 +85,8 @@ class TransactionVSService {
         } else log.debug("${methodName} - NO websocket listeners")
         LoggerVS.logTransactionVS(transactionVS.id, transactionVS.state.toString(), transactionVS.type.toString(),
                 transactionVS.fromUserIBAN, transactionVS.toUserIBAN, transactionVS.getCurrencyCode(),
-                transactionVS.amount, transactionVS.tag, transactionVS.dateCreated, transactionVS.subject,
-                transactionVS.transactionParent?true:false)
+                transactionVS.amount, transactionVS.tag, transactionVS.dateCreated, transactionVS.validTo,
+                transactionVS.subject, transactionVS.transactionParent?true:false)
     }
 
     public void alert(AlertVS alertVS) {
@@ -110,6 +111,7 @@ class TransactionVSService {
     }
 
     private void updateUserVSAccountFrom(TransactionVS transactionVS) {
+        if(!transactionVS.accountFromMovements) throw new ExceptionVS("TransactionVS without accountFromMovements")
         transactionVS.accountFromMovements.each { userAccountFrom, amount->
             userAccountFrom.balance = userAccountFrom.balance.subtract(amount)
             userAccountFrom.save()
@@ -172,9 +174,20 @@ class TransactionVSService {
                     }
                 }
             } else {
-                eq('fromUserVS', fromUserVS)
-                isNotNull("transactionParent")
-                between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+                or {
+                    and {
+                        eq('fromUserVS', fromUserVS)
+                        isNotNull("transactionParent")
+                        between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+                    }
+                    and {
+                        eq('fromUserVS', fromUserVS)
+                        isNull("transactionParent")
+                        between("dateCreated", timePeriod.getDateFrom(), timePeriod.getDateTo())
+                        inList("type", [TransactionVS.Type.VICKET_REQUEST] )
+                    }
+                }
+
             }
         }
         return transactionList
@@ -264,22 +277,21 @@ class TransactionVSService {
         return result
     }
 
-    public Map<String, BigDecimal> balancesCash(Map<String, Map> balancesTo, Map<String, BigDecimal> balancesFrom) {
+    public Map<String, BigDecimal> balancesCash(Map<String, Map> balancesTo, Map<String, Map> balancesFrom) {
         Map<String, Map> balancesCash = filterBalanceTo(balancesTo);
-        for(Map.Entry<String, Map> currency : balancesFrom.entrySet()) {
-            if(balancesCash [currency.getKey()]) {
-                for(Map.Entry<String, BigDecimal> tagEntry : currency.getValue().entrySet()) {
-                    if(balancesCash[currency.getKey()][tagEntry.getKey()]) {
-                        BigDecimal balancesCashTagAmount = balancesCash[currency.getKey()][tagEntry.getKey()]
-                        balancesCash[currency.getKey()][tagEntry.getKey()] = balancesCashTagAmount.subtract(tagEntry.getValue())
-                    } else balancesCash[currency.getKey()][tagEntry.getKey()] = new BigDecimal(tagEntry.getValue()).negate()
+        for(String currency: balancesFrom.keySet()) {
+            if(balancesCash [currency]) {
+                for(String tag : balancesFrom[currency].keySet()) {
+                    if(balancesCash [currency][tag]) {
+                        balancesCash [currency][tag] =  balancesCash [currency][tag].subtract( balancesFrom[currency][tag])
+                    } else balancesCash [currency][VicketTagVS.WILDTAG] =
+                            balancesCash[currency][VicketTagVS.WILDTAG].subtract( balancesFrom[currency][tag])
                 }
             } else {
-                balancesCash[(currency.getKey())] = [:]
-                balancesCash[(currency.getKey())].putAll(currency.getValue())
-                Set<Map.Entry<String, BigDecimal>> tagEntries = balancesCash[(currency.getKey())].entrySet()
-                tagEntries.each { tagEntry ->
-                    tagEntry.setValue(tagEntry.getValue().negate())
+                balancesCash[(currency)] = [:]
+                balancesCash[(currency)].putAll(balancesFrom[currency])
+                for(String tag : balancesCash[(currency)].keySet()) {
+                    balancesCash[currency][tag] = balancesCash[currency][tag].negate()
                 }
             }
         }
@@ -302,6 +314,7 @@ class TransactionVSService {
                       IBAN:transaction.toUserVS.IBAN, type:transaction.toUserVS.type.toString()]
         }
         transactionMap.dateCreated = transaction.dateCreated
+        transactionMap.validTo = transaction.validTo
         if(transaction.validTo) transactionMap.validTo = transaction.validTo
         transactionMap.id = transaction.id
         transactionMap.description = getTransactionTypeDescription(transaction.getType().toString())

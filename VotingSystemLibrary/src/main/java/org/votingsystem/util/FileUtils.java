@@ -68,6 +68,20 @@ public class FileUtils {
         return outputFile;
     }
 
+    public static File copyStreamToFile(InputStream inputStream) throws Exception {
+        File outputFile = File.createTempFile("streamToFile", ".html");
+        outputFile.deleteOnExit();
+        OutputStream outputStream = new FileOutputStream(outputFile);
+        byte[] buf =new byte[BUFFER_SIZE];
+        int len;
+        while((len = inputStream.read(buf)) > 0){
+            outputStream.write(buf,0,len);
+        }
+        outputStream.close();
+        inputStream.close();
+        return outputFile;
+    }
+
     public static byte[] concat(byte[] first, byte[] second) {
         byte[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);

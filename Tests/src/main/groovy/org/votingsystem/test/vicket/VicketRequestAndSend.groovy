@@ -15,11 +15,8 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
-import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
-import org.votingsystem.util.ObjectUtils
 import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
@@ -67,22 +64,51 @@ try {
         JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
         logger.debug("VicketRequest - Num IssuedVickets: " + issuedVicketsArray.size());
         if(issuedVicketsArray.size() != vicketBatch.getVicketsMap().values().size()) {
-            logger.error("VicketRequest(...) - ERROR - Num vickets requested: " + vicketBatch.getVicketsMap().values().size() +
-                    " - num. vickets received: " + issuedVicketsArray.size());
+            logger.error("VicketRequest(...) - ERROR - Num vickets requested: " +
+                    vicketBatch.getVicketsMap().values().size() + " - num. vickets received: " +
+                    issuedVicketsArray.size());
         }
         for(int i = 0; i < issuedVicketsArray.size(); i++) {
-            Vicket vicket = vicketBatch.initVicket(issuedVicketsArray.getString(i));
-            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
-            Vicket vicketDeSerialized = ObjectUtils.deSerializeObject(vicketSerialized);
-            String dirPath =  "/home/jgzornoza/temp/vickets" + DateUtils.getDirPath(Calendar.getInstance().getTime())
-            new File(dirPath).mkdirs();
-            String vicketPath = dirPath + UUID.randomUUID().toString() + ".servs";
-            File vicketFileDeSerialized = FileUtils.copyStreamToFile(new ByteArrayInputStream(vicketSerialized), new File(vicketPath))
-            byte[] vicketDeSerializedBytes = FileUtils.getBytesFromFile(vicketFileDeSerialized)
-            Vicket vicketDeSerializedFromFile = ObjectUtils.deSerializeObject(vicketDeSerializedBytes);
-            logger.debug("vicketDeSerializedFromFile: " + vicketDeSerializedFromFile.certificationRequest)
+            vicketBatch.initVicket(issuedVicketsArray.getString(i));
         }
+        //we have al the Vickets initialized, now we can make de transactions
+        List<String> vicketTransactionBatch = new ArrayList<String>();
+        for(Vicket vicket:vicketBatch.vicketsMap.values()) {
+            JSONObject transactionRequest = vicket.getTransactionRequest("toUserName", "ES6778788989450000000012",
+                    "First Vicket Transaction", false)
 
+            smimeMessage = vicket.getCertificationRequest().genMimeMessage(vicket.getHashCertVS(),
+                    StringUtils.getNormalized(vicket.getToUserName()),
+                    transactionRequest.toString(), vicket.getSubject(), null);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, vicketServer.getTimeStampServiceURL())
+            responseVS = timeStamper.call();
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                logger.error(responseVS.getMessage());
+                System.exit(0)
+            }
+            smimeMessage = timeStamper.getSmimeMessage();
+            String smimeMessageStr = new String(org.bouncycastle.util.encoders.Base64.encode(smimeMessage.getBytes()), "UTF-8")
+            vicketTransactionBatch.add(smimeMessageStr)
+        }
+        JSONArray transactionBatchJSON = JSONSerializer.toJSON(vicketTransactionBatch)
+        responseVS = HttpHelper.getInstance().sendData(transactionBatchJSON.toString().getBytes(),
+                ContentTypeVS.JSON, vicketServer.getVicketTransactionServiceURL());
+        logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
+        JSONArray transactionBatchResponseJSON = JSONArray.fromObject(responseVS.getMessage())
+        for(int i = 0; i < transactionBatchResponseJSON.size(); i++) {
+            JSONObject receiptData = transactionBatchResponseJSON.get(i)
+            String hashCertVS = receiptData.keySet().iterator().next()
+            Vicket vicket = vicketBatch.getVicketsMap().get(hashCertVS)
+            String receiptStr = new String(Base64.getDecoder().decode(receiptData.getString(hashCertVS).getBytes()), "UTF-8")
+            SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(receiptStr.getBytes()))
+            for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
+                CertUtil.verifyCertificate(vicketServer.getTrustAnchors(), false, Arrays.asList(cert));
+                logger.debug("Cert validated: " + cert.getSubjectDN().toString());
+            }
+            String signatureHashCertVS = CertUtil.getHashCertVS(smimeMessage.getCertWithCertExtension(), ContextVS.VICKET_OID);
+            if(!signatureHashCertVS.equals(vicket.getHashCertVS())) throw new ExceptionVS ("signatureHashCertVS: " +
+                    signatureHashCertVS + " - vicket hashCertVS: " + vicket.getHashCertVS())
+        }
 
     } else {
         logger.error(" --- ERROR --- " + responseVS.getMessage())

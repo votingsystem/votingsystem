@@ -109,6 +109,13 @@
                 });
                 this.isClientToolConnected = window['isClientToolConnected']
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
+
+
+
+                window.addEventListener("popstate", function(e) {
+                    console.log("======= popstate: " + location.pathname)
+                });
+
             },
             innerPageSignal:function(e, detail, sender) {
                 this.url = detail;
@@ -119,6 +126,7 @@
             loadURL: function(urlToLoad) {
                 this.loading= true;
                 history.pushState(null, null, this.url);
+                console.log("========= pushState: " + urlToLoad + "---")
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
                 this.ajaxOptions.url = newURL
                 this.ajaxOptions.callback = this.ajaxResponse.bind(this)

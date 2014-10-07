@@ -17,6 +17,7 @@ import javafx.scene.web.WebView;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonNode;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.BrowserVS;
@@ -25,6 +26,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -32,6 +34,7 @@ import org.w3c.dom.events.Event;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -47,7 +50,7 @@ public class SignedFilePane extends GridPane {
 
     private SignedFile signedFile;
     private WebView signatureContentWebView;
-    private CheckBox contentFormattedCheckBox = null;
+    private CheckBox contentWithoutFormatCheckBox = null;
     private String receiptViewerURL;
 
     public SignedFilePane(final SignedFile signedFile) {
@@ -92,9 +95,9 @@ public class SignedFilePane extends GridPane {
         } else {
             signatureContentWebView = new WebView();
             signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
-            contentFormattedCheckBox = new CheckBox(ContextVS.getMessage("formattedCheckBoxLbl"));
-            contentFormattedCheckBox.setSelected(false);
-            contentFormattedCheckBox.setOnAction(new EventHandler<ActionEvent>() {
+            contentWithoutFormatCheckBox = new CheckBox(ContextVS.getMessage("formattedCheckBoxLbl"));
+            contentWithoutFormatCheckBox.setSelected(true);
+            contentWithoutFormatCheckBox.setOnAction(new EventHandler<ActionEvent>() {
                 @Override public void handle(ActionEvent actionEvent) {
                     changeContentFormat();
                 }});
@@ -121,7 +124,7 @@ public class SignedFilePane extends GridPane {
             add(openSignatureInfoButton, 1, 0);
             add(signatureContentWebView, 0, 1);
             setColumnSpan(signatureContentWebView, 2);
-            add(contentFormattedCheckBox, 0, 2);
+            //add(contentWithoutFormatCheckBox, 0, 2);
         }
         changeContentFormat();
     }
@@ -161,10 +164,9 @@ public class SignedFilePane extends GridPane {
                 timeStampDateStr = DateUtils.getLongDate_Es(signedFile.getSMIMEMessageWraper().
                         getTimeStampToken().getTimeStampInfo().getGenTime());
             }
-
             String messagebase64 = null;
             try {
-                messagebase64 = new String(Base64.getEncoder().encode(signedContentJSON.toString().getBytes("UTF8")), "UTF8");
+                messagebase64 = Base64.getEncoder().encodeToString(signedContentJSON.toString().getBytes("UTF8"));
             } catch (UnsupportedEncodingException ex) {
                 logger.error(ex.getMessage(), ex);
             }
@@ -191,14 +193,15 @@ public class SignedFilePane extends GridPane {
                         }
                     }
                 }
+
             };
         }
-        logger.debug("changeContentFormat - contentFormattedCheckBox.isSelected: " + contentFormattedCheckBox.isSelected());
-        if (contentFormattedCheckBox.isSelected()) {
+        logger.debug("changeContentFormat - contentWithoutFormatCheckBox.isSelected: " + contentWithoutFormatCheckBox.isSelected());
+        if (contentWithoutFormatCheckBox.isSelected()) {
             signatureContentWebView.getEngine().getLoadWorker().stateProperty().removeListener(changeListener);
             try {
-                //String formattedText = Formatter.format(signedFile.getSMIMEMessageWraper().getSignedContent());
-                signatureContentWebView.getEngine().loadContent(signedFile.getSMIMEMessageWraper().getSignedContent());
+                JSONObject signedContent = (JSONObject) JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
+                signatureContentWebView.getEngine().loadContent(signedContent.toString(3), "application/json");
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }

@@ -46,7 +46,7 @@ public class LoggerVS {
     }
 
     public static void logTransactionVS(long id, String state, String type, String fromUser, String toUser,
-         String currency, BigDecimal amount, VicketTagVS tag, Date dateCreated, String subject, boolean isParent) {
+         String currency, BigDecimal amount, VicketTagVS tag, Date dateCreated, Date validTo, String subject, boolean isParent) {
         Map<String,Object> dataMap = new HashMap();
         dataMap.put("id", id);
         dataMap.put("state", state);
@@ -58,6 +58,7 @@ public class LoggerVS {
         dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
         if(tag != null) dataMap.put("tag", tag.getName());
         dataMap.put("dateCreated", DateUtils.getDateWithoutYear(dateCreated));
+        dataMap.put("isTimeLimited", (validTo == null)?false:true);
         dataMap.put("isParent", isParent);
         transactionslog.info(JSONSerializer.toJSON(dataMap).toString() + ",");
     }

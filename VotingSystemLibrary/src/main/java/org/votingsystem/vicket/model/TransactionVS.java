@@ -1,5 +1,6 @@
 package org.votingsystem.vicket.model;
 
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.*;
@@ -237,7 +238,7 @@ public class TransactionVS  implements Serializable {
         transactionVS.setCurrencyCode(jsonData.getString("currency"));
         transactionVS.setDateCreated(DateUtils.getDateFromString(jsonData.getString("dateCreated"),
                 "dd MMM yyyy' 'HH:mm"));
-        if(jsonData.has("validTo")) transactionVS.setValidTo(
+        if(jsonData.has("validTo") && !JSONNull.getInstance().equals(jsonData.getString("validTo"))) transactionVS.setValidTo(
                 DateUtils.getDateFromString(jsonData.getString("validTo"), "dd MMM yyyy' 'HH:mm"));
         transactionVS.setType(Type.valueOf(jsonData.getString("type")));
         transactionVS.setAmount(new BigDecimal(jsonData.getString("amount")));

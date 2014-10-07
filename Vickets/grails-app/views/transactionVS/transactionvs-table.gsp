@@ -1,7 +1,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/messageSMIME/message-smime-dialog']"/>">
 
-<polymer-element name="transactionvs-table" attributes="url transactionList userNif">
+<polymer-element name="transactionvs-table" attributes="url transactionList userNif isUserVSTable">
 <template>
     <style>
     .tableHeadervs {
@@ -35,6 +35,7 @@
     <!--JavaFX Webkit gives problems with tables and templates -->
     <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
         <div layout horizontal center center-justified class="tableHeadervs">
+            <div style="width:80px;"></div>
             <div style="width:210px;"><g:message code="typeLbl"/></div>
             <div style="width:140px;"><g:message code="tagLbl"/></div>
             <div style="width:110px;"><g:message code="amountLbl"/></div>
@@ -44,10 +45,11 @@
         <div>
             <template repeat="{{transaction in transactionList}}">
                 <div layout horizontal center center justified on-click="{{showTransactionDetails}}" class="rowvs {{getClass(transaction)}}">
+                    <div style="width:80px;">{{transaction | timeLimitedDescription}}</div>
                     <div style="width: 210px;">
                         <a> {{transaction| transactionDescription}}</a>
                     </div>
-                    <div style="width:140px;">{{transaction.tags[0].name}}</div>
+                    <div style="width:140px;">{{transaction.tag}}</div>
                     <div style="width:110px;">{{amount(transaction)}}</div>
                     <div style="width:140px;">{{transaction.dateCreated}}</div>
                     <div flex style="width:240px;">{{transaction.subject}}</div>
@@ -61,13 +63,20 @@
     Polymer('transactionvs-table', {
         ready:function() { },
         userNif:null,
+        isUserVSTable:false,
         transactionListChanged:function() {
             console.log("transactionListChanged")
         },
         getClass: function(transactionvs) {
+            if(!this.isUserVSTable) return
             if(transactionvs.fromUserVS && transactionvs.fromUserVS.nif == this.userNif) {
                 return "expenseRow"
             } else return ""
+        },
+        timeLimitedDescription: function(transactionvs) {
+            if(transactionvs.isTimeLimited === true || transactionvs.validTo != null) return "<g:message code="timeLimitedLbl"/>"
+            else if  (transactionvs.isTimeLimited === false) return ""
+            else return transactionvs.isTimeLimited
         },
         transactionDescription: function(transactionvs) {
             var result = null

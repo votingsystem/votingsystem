@@ -5,6 +5,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
     <link rel="import" href="${resource(dir: '/bower_components/votingsystem-socket', file: 'votingsystem-socket.html')}">
 </head>
 <body>
@@ -15,13 +16,7 @@
     </ol>
 
     <div layout horizontal center center-justified>
-        <select id="transactionvsTypeSelect" style="margin:0px auto 10px auto;color:black; max-width: 400px;" class="form-control"
-                onchange="transactionvsTypeSelect(this)">
-            <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
-            <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
-            <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
-            <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
-        </select>
+        <transactionvs-selector id="transactionSelector"></transactionvs-selector>
     </div>
 
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
@@ -44,8 +39,8 @@
         sendSocketVSMessage({operation:Operation.LISTEN_TRANSACTIONS})
     } else console.log("listener.gsp - no socket service available")
 
-    function transactionvsTypeSelect(selected) {
-        var transactionvsType = selected.value
+    document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
+        var transactionvsType = e.detail
         console.log("transactionvsType: " + transactionvsType)
         targetURL = "${createLink(controller: 'transactionVS', action: 'index')}";
         if("" != transactionvsType) {
@@ -53,7 +48,7 @@
         }
         history.pushState(null, null, targetURL);
         document.querySelector("#vicketTransactionTable").url = targetURL
-    }
+    });
 
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"

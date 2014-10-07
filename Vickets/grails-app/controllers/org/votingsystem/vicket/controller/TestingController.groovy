@@ -36,9 +36,10 @@ class TestingController {
 
 
     def index() {
-        balanceService.initWeekPeriod()
-        render "--- VICKET_INIT_PERIOD"
-        return false
+        UserVS userVS = UserVS.get(2L)
+        def transactions = transactionVSService.getTransactionFromList(userVS, DateUtils.getCurrentWeekPeriod())
+        render transactions as JSON
+
     }
 
     def balance() {
@@ -99,7 +100,7 @@ class TestingController {
             TransactionVS.Type transactionType = transactionTypes[transactionvsItemId]
             LoggerVS.logTransactionVS(Long.valueOf(idx), ResponseVS.SC_OK, transactionType.toString(), "fromUser${randomInt}",
                     "toUser${randomInt}", Currency.getInstance("EUR").getCurrencyCode(), new BigDecimal(randomInt),
-                    Calendar.getInstance().getTime(), "Subject - ${randomInt}", true)
+                    Calendar.getInstance().getTime(), null, "Subject - ${randomInt}", true)
         }
         Long finish = System.currentTimeMillis()
         Long duration = finish - init;

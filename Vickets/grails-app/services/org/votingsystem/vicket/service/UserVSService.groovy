@@ -26,6 +26,7 @@ class UserVSService {
     def subscriptionVSService
     def transactionVSService
     def systemService
+    def userVSAccountService
 
     /*
      * Add users from PEM certs
@@ -162,6 +163,7 @@ class UserVSService {
         resultMap.transactionToList = transactionsToWithBalancesMap.transactionToList
         resultMap.balancesTo = transactionsToWithBalancesMap.balancesTo
         resultMap.balancesCash = transactionVSService.balancesCash(resultMap.balancesTo, resultMap.balancesFrom)
+        userVSAccountService.checkBalancesMap(userVS, resultMap.balancesCash)
         return resultMap
     }
 }

@@ -79,18 +79,25 @@
             case 'VICKET_INIT_PERIOD':
                 transactionDescription = "<g:message code="vicketInitPeriodLbl"/>"
                 break;
+            case 'VICKET_INIT_PERIOD_TIME_LIMITED':
+                transactionDescription = "<g:message code="vicketInitPeriodTimeLimitedLbl"/>"
+                break;
             case 'FROM_BANKVS':
                 transactionDescription = "<g:message code="bankVSInputLbl"/>"
                 break;
-            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER':
+            case 'FROM_USERVS':
+                transactionDescription = "<g:message code="transactionVSFromUserVS"/>"
+                break;
+            case 'FROM_GROUP_TO_MEMBER':
                 transactionDescription = "<g:message code="transactionVSFromGroupToMember"/>"
                 break;
-            case 'TRANSACTIONVS_FROM_GROUP_TO_MEMBER_GROUP':
+            case 'FROM_GROUP_TO_MEMBER_GROUP':
                 transactionDescription = "<g:message code="transactionVSFromGroupToMemberGroup"/>"
                 break;
-            case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
+            case 'FROM_GROUP_TO_ALL_MEMBERS':
                 transactionDescription = "<g:message code="transactionVSFromGroupToAllMembers"/>"
                 break;
+            default: transactionDescription = transactionType
         }
         return transactionDescription
     }

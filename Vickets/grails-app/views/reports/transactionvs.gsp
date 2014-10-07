@@ -5,6 +5,7 @@
     <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-table']"/>">
+    <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-selector']"/>">
 </head>
 <body>
 <div class="pageContentDiv">
@@ -14,14 +15,7 @@
     </ol>
 
     <div layout horizontal center center-justified>
-        <select id="transactionvsTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                 onchange="transactionvsTypeSelect(this)">
-            <option value="" style="color:black;"> - <g:message code="selectTransactionTypeLbl"/> - </option>
-
-            <option value="VICKET_REQUEST"> - <g:message code="selectVicketRequestLbl"/> - </option>
-            <option value="VICKET_SEND"> - <g:message code="selectVicketSendLbl"/> - </option>
-            <option value="VICKET_CANCELLATION"> - <g:message code="selectVicketCancellationLbl"/> - </option>
-        </select>
+        <transactionvs-selector id="transactionSelector"></transactionvs-selector>
     </div>
 
     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
@@ -34,16 +28,16 @@
 
 </html>
 <asset:script>
-    function transactionvsTypeSelect(selected) {
-        var transactionvsType = selected.value
+    document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
+        var transactionvsType = e.detail
         console.log("transactionvsType: " + transactionvsType)
+        targetURL = "${createLink(controller: 'reports', action: 'transactionvs')}";
         if("" != transactionvsType) {
-            targetURL = "${createLink(controller: 'reports', action: 'transactionvs')}";
-            history.pushState(null, null, targetURL);
             targetURL = targetURL + "?transactionvsType=" + transactionvsType
-            document.querySelector("#recordList").url = targetURL
         }
-    }
+        history.pushState(null, null, targetURL);
+        document.querySelector("#recordList").url = targetURL
+    });
 
     function processSearch(textToSearch) {
         document.querySelector("#pageInfoPanel").innerHTML = "<g:message code="searchResultLbl"/> '" + textToSearch + "'"

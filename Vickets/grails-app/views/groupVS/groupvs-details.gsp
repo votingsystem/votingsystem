@@ -92,18 +92,17 @@
                         </div>
                     </div>
                 </div>
-                <div layout horizontal>
-                    <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
-                        <b><g:message code="representativeLbl"/>: </b>{{groupvs.userVS.representative.firstName}} {{groupvs.userVS.representative.lastName}}
-                    </div>
-                    <div flex></div>
-                    <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
-                        <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
-                    </div>
-                </div>
             </div>
         </div>
-
+        <div layout horizontal>
+            <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
+                <b><g:message code="representativeLbl"/>: </b>{{groupvs.userVS.representative.firstName}} {{groupvs.userVS.representative.lastName}}
+            </div>
+            <div flex></div>
+            <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
+                <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
+            </div>
+        </div>
         <div class="eventContentDiv" style="">
             <votingsystem-html-echo html="{{groupvs.userVS.description}}"></votingsystem-html-echo>
         </div>
