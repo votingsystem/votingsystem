@@ -55,7 +55,7 @@
 
                 <div layout horizontal center center-justified>
                     <div style="margin: 0 10px 0 0;"><paper-checkbox id="timeLimitedCheckBox"></paper-checkbox></div>
-                    <div><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
+                    <div style="color:#6c0404;"><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
                 </div>
 
                 <div>
@@ -100,7 +100,7 @@
                     </div>
                 </template>
                 <template if="{{!isWithUserSelector}}">
-                    <div style="margin:10px 0 0 0; text-align: center; font-weight: bold;">{{selectReceptorMsg}}</div>
+                    <div style="margin:10px 0 0 0; text-align: center; font-weight: bold; color:#6c0404;">{{selectReceptorMsg}}</div>
                 </template>
                 <div flex>
                 </div>
@@ -227,16 +227,17 @@
             var tagList = []
             if(this.selectedTags.length > 0) {
                 for(tagIdx in this.selectedTags) {
-                    tagList.push({id:this.selectedTags[tagIdx].id, name:this.selectedTags[tagIdx].name});
+                    //tagList.push({id:this.selectedTags[tagIdx].id, name:this.selectedTags[tagIdx].name});
+                    tagList.push(this.selectedTags[tagIdx].name);
                 }
-            } else tagList.push({id:1, name:'WILDTAG'}); //No tags, receptor can expend money with any tag
+            } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, this.operation)
             webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:" ", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 isTimeLimited:this.$.timeLimitedCheckBox.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,
-                amount: this.$.amount.value, currency:"EUR", fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN,
+                amount: this.$.amount.value, currencyCode:"EUR", fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN,
                 toUser:this.toUserName}
             webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)

@@ -19,18 +19,15 @@
             padding:5px 0px 5px 0px;
             width: 100%;
         }
-
         .tableHeadervs div {
             text-align:center;
         }
-
         .rowvs {
             border-bottom: 1px solid #ccc;
             padding: 10px 0px 10px 0px;
             cursor: pointer;
             width: 100%;
         }
-
         .rowvs div {
             text-align:center;
         }

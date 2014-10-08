@@ -285,6 +285,11 @@ class TransactionVSService {
                 for(String tag : balancesFrom[currency].keySet()) {
                     if(balancesCash [currency][tag]) {
                         balancesCash [currency][tag] =  balancesCash [currency][tag].subtract( balancesFrom[currency][tag])
+                        if(balancesCash [currency][tag].compareTo(BigDecimal.ZERO) < 0) {
+                            balancesCash [currency][VicketTagVS.WILDTAG] =
+                                    balancesCash[currency][VicketTagVS.WILDTAG].add( balancesCash [currency][tag])
+                            balancesCash [currency][tag] = BigDecimal.ZERO
+                        }
                     } else balancesCash [currency][VicketTagVS.WILDTAG] =
                             balancesCash[currency][VicketTagVS.WILDTAG].subtract( balancesFrom[currency][tag])
                 }
@@ -315,8 +320,11 @@ class TransactionVSService {
                       IBAN:transaction.toUserVS.IBAN, type:transaction.toUserVS.type.toString()]
         }
         transactionMap.dateCreated = transaction.dateCreated
-        transactionMap.validTo = transaction.validTo
-        if(transaction.validTo) transactionMap.validTo = transaction.validTo
+        transactionMap.dateCreatedValue = DateUtils.getDateStr(transaction.dateCreated)
+        if(transaction.validTo) {
+            transactionMap.validTo =  transaction.validTo
+            transactionMap.validToValue =  DateUtils.getDateStr(transaction.validTo)
+        }
         transactionMap.id = transaction.id
         transactionMap.description = getTransactionTypeDescription(transaction.getType().toString())
         transactionMap.subject = transaction.subject
@@ -329,10 +337,10 @@ class TransactionVSService {
             transactionMap.messageSMIMEURL = messageSMIMEURL
         }
 
-        if(transaction.transactionParent == null) {
-            transactionMap.numChildTransactions = TransactionVS.countByTransactionParent(transaction)
+        if(transaction.type  == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+            TransactionVS transactionParent = (transaction.transactionParent == null)?transaction:transaction.transactionParent;
+            transactionMap.numChildTransactions = TransactionVS.countByTransactionParent(transactionParent)
         }
-
         if(transaction.tag) {
             transactionMap.tags = [[id:transaction.tag.id, name:transaction.tag.name]]
         } else transactionMap.tags = []

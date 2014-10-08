@@ -3,7 +3,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-data']"/>">
 
 <polymer-element name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
     <template>
@@ -46,8 +45,6 @@
                 </div>
             </div>
 
-
-
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
             <div style=""><b><g:message code="subjectLbl"/>: </b>{{transactionvs.subject}}</div>
 
@@ -62,18 +59,21 @@
 
 
             <div style="margin-left: 20px;">
-                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;">
+                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                     <g:message code="senderLbl"/></div>
                 <div id="fromUserDiv">
                     <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
-                    <div style=""><b><g:message code="IBANLbl"/>: </b>{{transactionvs | getFromUserIBAN}}</div>
+                    <div on-click="{{showFromUserIBAN}}"  class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs | getFromUserIBAN}}</div>
                 </div>
             </div>
-            <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible?'block':'none'}}">
-                <div style="font-size: 1.2em; text-decoration: underline;font-weight: bold;">{{receptorLbl}}</div>
+            <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible || receptorMsg ?'block':'none'}}">
+                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
                 <div>
-                    <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.toUserVS.name}}</div>
-                    <div on-click="{{showToUserIBAN}}" class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs.toUserVS.IBAN}}</div>
+                    <template if="{{!receptorMsg}}">
+                        <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs.toUserVS.name}}</div>
+                        <div on-click="{{showToUserIBAN}}" class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs.toUserVS.IBAN}}</div>
+                    </template>
+                    <template if="{{receptorMsg}}">{{receptorMsg}}</template>
                 </div>
             </div >
         </div>
@@ -87,10 +87,6 @@
                 </div>
             </div>
         </template>
-        <votingsystem-dialog style="position: absolute; width: 500px; height:800px; margin: 100px 200px;"
-                 id="uservsDataDialog" on-core-overlay-open="{{onCoreOverlayOpen}}"  title="<g:message code="transactionVSLbl"/>">
-            <uservs-data id="uservsData"></uservs-data>
-        </votingsystem-dialog>
     </template>
     <script>
         Polymer('transactionvs-data', {
@@ -103,6 +99,7 @@
             receptorLbl:null,
             caption:null,
             isReceptorVisible:true,
+            receptorMsg:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-clienttoolconnected', function() {
@@ -134,12 +131,14 @@
                 } else this.receptorLbl = '<g:message code="receptorLbl"/>'
                 //console.log(this.tagName + " - transactionvsChanged - transactionvs: " + JSON.stringify(this.transactionvs))
                 switch (this.transactionvs.type) {
-                    case 'TRANSACTIONVS_FROM_BANKVS':
+                    case 'FROM_BANKVS':
                         this.caption = "<g:message code="transactionVSFromBankVS"/>"
                         break;
-                    case 'TRANSACTIONVS_FROM_GROUP_TO_ALL_MEMBERS':
+                    case 'FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false
                         this.caption = "<g:message code="transactionVSFromGroupToAllMembers"/>"
+                        this.receptorMsg = "<g:message code="transactionVSGroupVSReceptorsMsg"/>".format(
+                                this.transactionvs.numChildTransactions)
                         break;
                     case 'FROM_GROUP_TO_MEMBER':
                         this.caption = "<g:message code="transactionVSFromGroupToMember"/>"
@@ -171,9 +170,9 @@
                 var groupURL = "${createLink(uri:'/groupVS')}/" +  e.target.templateInstance.model.transactionvs.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
-            showInfoIBAN:function(e) {
-                var fromUserIBANInfoURL = "${createLink(uri:'/IBAN')}/from/" + e.target.templateInstance.model.transactionvs.fromUserVS.sender.fromUserIBAN
-                console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
+            showFromUserIBAN:function(e) {
+                var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + this.getFromUserIBAN(e.target.templateInstance.model.transactionvs)
+                window.open(serviceURL, '_blank');
             },
             showToUserIBAN:function(e) {
                 var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + this.transactionvs.toUserVS.IBAN

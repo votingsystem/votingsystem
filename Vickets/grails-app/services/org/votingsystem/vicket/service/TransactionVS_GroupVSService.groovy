@@ -39,8 +39,8 @@ class TransactionVS_GroupVSService {
         }
         ResponseVS responseVS
         TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
-        Currency currency = Currency.getInstance(messageJSON.currency)
-        if (!messageJSON.amount || !messageJSON.currency  || !messageJSON.subject) {
+        Currency currency = Currency.getInstance(messageJSON.currencyCode)
+        if (!messageJSON.amount || !messageJSON.currencyCode  || !messageJSON.subject) {
             msg = messageSource.getMessage('paramsErrorMsg', null, locale)
             log.error "${methodName} - ${msg} - messageJSON: ${messageJSON}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR, reason:msg,
@@ -52,13 +52,13 @@ class TransactionVS_GroupVSService {
 
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
-            tag = VicketTagVS.findWhere(name:messageJSON.tags[0].name)
-            if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0].name}'")
+            tag = VicketTagVS.findWhere(name:messageJSON.tags[0])
+            if(!tag) throw new ExceptionVS("Unknown tag '${messageJSON.tags[0]}'")
         } else throw new ExceptionVS("Invalid number of tags: '${messageJSON.tags}'")
 
         BigDecimal amount = new BigDecimal(messageJSON.amount)
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
-                walletVSService.getAccountMovementsForTransaction(messageJSON.fromUserIBAN, tag, amount, messageJSON.currency)
+                walletVSService.getAccountMovementsForTransaction(messageJSON.fromUserIBAN, tag, amount, messageJSON.currencyCode)
         if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) {
             log.error "${methodName} - ${accountFromMovements.getMessage()}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
@@ -105,7 +105,7 @@ class TransactionVS_GroupVSService {
                 TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart,toUser, toUser.IBAN).save()
                 metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
-                log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
+                log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currencyCode} - from group '${groupVS.name}' to userVS '${toUser.id}' ")
             }
             metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${operationType.toString()}")
             return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:operationType)
@@ -165,7 +165,7 @@ class TransactionVS_GroupVSService {
                     transactionParent, userPart, it.userVS, it.userVS.IBAN).save()
 
             metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
-            log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currency} - from group '${groupVS.name}' to userVS '${it.userVS.id}' ")
+            log.debug("${metaInfMsg} - ${userPart} ${messageJSON.currencyCode} - from group '${groupVS.name}' to userVS '${it.userVS.id}' ")
         }
         metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${operationType.toString()}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:operationType)

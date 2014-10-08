@@ -1,6 +1,6 @@
 <link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/transactionVS/transactionvs-form']"/>">
-<link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-page-tabs']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-list']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-signals', file: 'core-signals.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-item', file: 'core-item.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-selector', file: 'core-selector.html')}">
@@ -9,10 +9,7 @@
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/groupVS/groupvs-user']"/>">
 <link rel="import" href="${resource(dir: '/bower_components/core-animated-pages', file: 'core-animated-pages.html')}">
 
-<%
-    def currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
-    def weekFrom =formatDate(date:currentWeekPeriod.getDateFrom(), formatName:'webViewDateFormat')
-%>
+
 <polymer-element name="groupvs-details" attributes="selectedItem subpage">
 <template>
     <style shim-shadowdom>
@@ -68,16 +65,16 @@
                     </div>
                 </div>
 
-                <div style="display:{{isUserView?'block':'none'}}">
+                <template if="{{isUserView}}">
                     <div layout horizontal center center-justified style="margin:10px 0px 0px 30px;">
                         <votingsystem-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                             <i class="fa fa-sign-in" style="margin:0 5px 0 2px;"></i> <g:message code="subscribeGroupVSLbl"/>
                         </votingsystem-button>
-                        <votingsystem-button on-click="{{subscribeToGroup}}">
+                        <votingsystem-button style="margin:0 20px 0 0;" on-click="{{subscribeToGroup}}">
                             <i class="fa fa-money" style="margin:0 5px 0 2px;"></i> <g:message code="makeTransactionVSLbl"/>
                         </votingsystem-button>
                     </div>
-                </div>
+                </template>
 
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
@@ -94,25 +91,37 @@
                 </div>
             </div>
         </div>
-        <div layout horizontal>
-            <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
-                <b><g:message code="representativeLbl"/>: </b>{{groupvs.userVS.representative.firstName}} {{groupvs.userVS.representative.lastName}}
-            </div>
-            <div flex></div>
-            <div id="" style="margin:0 0 0 0; font-size: 0.75em; color:#888;">
-                <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
-            </div>
-        </div>
+
         <div class="eventContentDiv" style="">
             <votingsystem-html-echo html="{{groupvs.userVS.description}}"></votingsystem-html-echo>
         </div>
 
-        <div style="margin: 25px 0 0 0; min-height: 300px;">
-            <div  style="text-align:center; font-size: 1.2em;font-weight: bold; color: #888;margin: 0 0 10px 0;">
-                <g:message code="transactionsCurrentWeekPeriodMsg" args="${[weekFrom]}"/>
+        <div layout horizontal>
+            <div style="margin: 5px 0 0 0;">
+                <votingsystem-button id="goToWeekBalanceButton" type="submit" on-click="{{goToWeekBalance}}">
+                    <i class="fa fa-bar-chart" style="margin:0 5px 0 2px;"></i> <g:message code="goToWeekBalanceLbl"/>
+                </votingsystem-button>
+            </div>
+            <div flex></div>
+            <div id="" style="margin:5px 0 0 0; font-size: 0.75em; color:#888;">
+                <b><g:message code="representativeLbl"/>: </b>{{groupvs.userVS.representative.firstName}} {{groupvs.userVS.representative.lastName}}
+            </div>
+            <div flex></div>
+            <div id="" style="margin:5px 0 0 0; font-size: 0.75em; color:#888;">
+                <b><g:message code="IBANLbl"/>: </b>{{groupvs.userVS.IBAN}}
+            </div>
+        </div>
+
+        <div style="min-height: 300px;">
+            <div  style="text-align:center; font-size: 1.2em;font-weight: bold; color: #888;margin: 0 0 10px 0;
+                text-decoration: underline;">
+                <g:message code="usersLbl"/>
             </div>
 
-            <group-page-tabs id="groupTabs" groupvs="{{groupvs}}" style=""></group-page-tabs>
+            <div id="userList">
+                <uservs-list id="userList" menuType="${params.menu}"></uservs-list>
+            </div>
+
         </div>
         <template if="{{!isClientToolConnected}}">
             <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
@@ -172,6 +181,10 @@
                 this.appMessageJSON = null
             }
         },
+        goToWeekBalance:function() {
+            document.querySelector('#navBar').loadURL("${createLink( controller:'balance', action:"userVS", absolute:true)}/" +
+                    this.groupvs.userVS.id)
+        },
         messagedialogClosed:function(e) {
             console.log("messagedialog signal - messagedialogClosed: " + e)
             if(this.tagName == e) {
@@ -207,7 +220,6 @@
                 if("user" == menuType && 'ACTIVE' == this.groupvs.userVS.state) this.isUserView = true
                 else this.isUserView = false
             }
-            this.$.groupTabs.groupvs = this.groupvs
             if('ACTIVE' == this.groupvs.userVS.state) {
 
             } else if('PENDING' == this.groupvs.userVS.state) {
@@ -222,6 +234,8 @@
                 this.$.messagePanel.style.display = 'block'
                 this.isAdminView = false
             }
+            this.$.userList.userURLPrefix = "${createLink(controller: 'groupVS')}/" + this.groupvs.userVS.id + "/user"
+            this.$.userList.url = "${createLink(controller: 'groupVS', action: 'listUsers')}/" + this.groupvs.userVS.id
         },
         configGroup:function(e) {
             //e.detail.isSelected = false

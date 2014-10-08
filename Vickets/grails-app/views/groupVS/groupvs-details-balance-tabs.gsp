@@ -5,7 +5,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-tabs', file: 'paper-tabs.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-ajax', file: 'core-ajax.html')}">
 
-<polymer-element name="group-page-tabs" attributes="groupvs">
+<polymer-element name="groupvs-details-balance-tabs" attributes="groupvs">
     <template>
         <g:include view="/include/styles.gsp"/>
         <style shim-shadowdom>
@@ -50,7 +50,7 @@
 
 
     <script>
-        Polymer('group-page-tabs', {
+        Polymer('groupvs-details-balance-tabs', {
             selectedTab:'balanceList',
             groupvs: null,
             ready:function() {

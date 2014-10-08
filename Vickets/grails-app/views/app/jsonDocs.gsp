@@ -40,9 +40,9 @@
     var jsonTransactionVSFromBankVS = {operation:"TRANSACTIONVS_FROM_BANKVS",
         signedMessageSubject:"TransactionVS from BankVS",
         signedContent:{operation:"TRANSACTIONVS_FROM_BANKVS", bankIBAN:"ES1877777777450000000050",
-            fromUser: "ClientBankVS App1 App2", currency: "EUR",
-            fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"],
-            amount:"30000", tags:[{name:"HIDROGENO"}], isTimeLimited:true, subject:"BankVS transactionvs" },
+            fromUser: "ClientBankVS App1 App2", currencyCode: "EUR",
+            fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"], toUserName:"toUserName",
+            amount:"30000", tags:["HIDROGENO"], isTimeLimited:true, subject:"BankVS transactionvs" },
         serviceURL:"${createLink( controller:'transactionVS', action:" ", absolute:true)}",
         serverURL:"${grailsApplication.config.grails.serverURL}",
         urlTimeStampServer:"${grailsApplication.config.VotingSystem.urlTimeStampServer}",
@@ -70,7 +70,7 @@
     var transactionvsEditor = new JSONEditor(document.querySelector("#transactionvsEditor"));
     var jsonTransactionVSEditor = {  "operation": "TRANSACTIONVS_FROM_GROUP_TO_MEMBER", "amount": "10", "fromUser":
         "Cheques comida &apos;proyecto Vickets&apos;", "subject": "Transacción 'sábado' \"21 junio\" a 20C",
-        "fromUserIBAN": "ES8978788989450000000004", "toUserIBAN":  [ "ES9478788989450000000011"], "currency": "EUR",
+        "fromUserIBAN": "ES8978788989450000000004", "toUserIBAN":  [ "ES9478788989450000000011"], "currencyCode": "EUR",
         "validTo": "2014/06/23 00:00:00"}
     transactionvsEditor.set(jsonTransactionVSEditor);
 

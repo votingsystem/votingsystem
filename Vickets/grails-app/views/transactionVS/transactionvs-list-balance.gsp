@@ -8,14 +8,14 @@
         <g:include view="/include/styles.gsp"/>
         <style>
         .transactionvsRow { cursor: pointer;}
-        .dateCreated {font-size: 0.8em; color:#888; width: 80px; margin: 0 10px 0 0;}
+        .dateCreated {font-size: 0.8em; color:#888; width: 110px; margin: 0 10px 0 0;}
         .subjectColumn {
             width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.9em;
         }
         .amountColumn {width:110px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
         </style>
-        <div layout vertical style="display: block;">
+        <div layout vertical justified style="display: block;">
             <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
                 <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
                 <div flex></div>
@@ -24,7 +24,7 @@
             <div>
                 <template repeat="{{transaction in transactionList}}">
                     <div class="transactionvsRow" layout horizontal on-click="{{viewTransaction}}">
-                        <div class="dateCreated" style="">{{transaction.dateCreated | formatDate}}</div>
+                        <div class="dateCreated" style="">{{transaction.dateCreated}}</div>
                         <div class="subjectColumn">{{transaction.subject}}</div>
                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                         <div layout horizontal center center-justified class="tagColumn">
@@ -51,6 +51,7 @@
                     </div>
                 </div>
             </div>
+            <div flex></div>
         </div>
     </template>
     <script>
@@ -69,9 +70,6 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready - transactionList: " + this.transactionList.length)
-            },
-            formatDate: function(dateStr) {
-                return DateUtils.trimYear(dateStr)
             },
             isTimeLimited: function(tranctionvs) {
                 return (tranctionvs.validTo != null)

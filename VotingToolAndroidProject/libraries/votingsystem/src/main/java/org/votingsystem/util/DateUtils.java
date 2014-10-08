@@ -41,23 +41,6 @@ public class DateUtils {
     }
 
     /**
-     * Método que devuelve una ruta del sistema de ficheros con formato
-     * /aaaa/mm/dd en función de la fecha que se le pase como argumento.
-     *
-     * @param Date
-     * @return String ruta del sitema de fichros
-     */
-    public static String getFilesystemPathFromDate(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        NumberFormat format = new DecimalFormat("00");
-        return File.separator + format.format(calendar.get(Calendar.YEAR)) +
-            File.separator + format.format((calendar.get(Calendar.MONTH) + 1)) +
-            File.separator + format.format(calendar.get(Calendar.DAY_OF_MONTH)) +
-            File.separator;
-    }
-
-    /**
      * Método que devuelve un Date a partir de un String con formato "yyyy/MM/dd'T'HH:mm:ss"
      *
      * @param dateString fecha en formato String

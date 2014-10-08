@@ -126,7 +126,6 @@
                 if(this.signedDocument.toUserIBAN != null && this.signedDocument.toUserIBAN.length > 1) {
                     this.receptorLbl = '<g:message code="receptorsLbl"/>'
                 } else this.receptorLbl = '<g:message code="receptorLbl"/>'
-
                 switch (this.signedDocument.operation) {
                     case 'TRANSACTIONVS_FROM_BANKVS':
                         this.caption = "<g:message code="transactionVSFromBankVS"/>"
@@ -174,8 +173,8 @@
             },
             showToUserIBAN:function(e) {
                 console.log(this.tagName + " - showToUserIBAN - " + e)
-                this.$.uservsData.showByIBAN(e.target.templateInstance.model.IBAN)
-                this.$.xDialog.opened = true
+                var serviceURL =  "${createLink( controller:'userVS')}/IBAN/" + e.target.templateInstance.model.IBAN
+                document.querySelector('#navBar').loadURL(serviceURL)
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)

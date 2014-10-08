@@ -26,7 +26,7 @@ class TransactionVS_BankVSService {
         if(messageJSON.toUserIBAN.length() != 1) throw new ExceptionVS(
                 "There can be only one receptor. request.toUserIBAN -> ${messageJSON.toUserIBAN} ")
         UserVS toUser = UserVS.findWhere(IBAN:messageJSON.toUserIBAN.get(0))
-        if (!messageJSON.amount || !messageJSON.currency || !toUser || ! messageJSON.fromUserIBAN ||
+        if (!messageJSON.amount || !messageJSON.currencyCode || !toUser || ! messageJSON.fromUserIBAN ||
                 !messageJSON.fromUser|| (TypeVS.TRANSACTIONVS_FROM_BANKVS != TypeVS.valueOf(messageJSON.operation))) {
             if(!toUser) msg = messageSource.getMessage('userNotFoundForIBANErrorMsg', [messageJSON.toUserIBAN].toArray(), locale)
             else msg = messageSource.getMessage('paramsErrorMsg', null, locale)
@@ -42,7 +42,7 @@ class TransactionVS_BankVSService {
                     type:TypeVS.ERROR,metaInf: MetaInfMsg.getErrorMsg(methodName, "bankVSPrivilegesError") )
         }
 
-        Currency currency = Currency.getInstance(messageJSON.currency)
+        Currency currency = Currency.getInstance(messageJSON.currencyCode)
         String subject = messageJSON.subject
         BigDecimal amount = new BigDecimal(messageJSON.amount)
 
@@ -51,8 +51,8 @@ class TransactionVS_BankVSService {
 
         VicketTagVS tag
         if(messageJSON.tags?.size() == 1) { //transactions can only have one tag associated
-            tag = VicketTagVS.findWhere(name:messageJSON.tags[0].name)
-            if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0].name}'")
+            tag = VicketTagVS.findWhere(name:messageJSON.tags[0])
+            if(!tag) throw new Exception("Unknown tag '${messageJSON.tags[0]}'")
         } else throw new Exception("Invalid number of tags: '${messageJSON.tags}'")
 
         TransactionVS transactionParent = new TransactionVS(amount: amount, messageSMIME:messageSMIMEReq,

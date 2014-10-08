@@ -34,10 +34,10 @@ class UserVSController {
             }
             String view = null
             if(uservs) {
-                if(uservs instanceof GroupVS) {
-                    resultMap = [groupvsMap:groupVSService.getDataMap(uservs, currentWeekPeriod)]
+                if(uservs.instanceOf(GroupVS)) {
+                    resultMap = [groupvsMap:groupVSService.getDataMap(GroupVS.get(uservs.id), currentWeekPeriod)]
                     view = '/groupVS/groupvs'
-                } else if(uservs instanceof BankVS) {
+                } else if(uservs.instanceOf(BankVS)) {
                     resultMap = [uservsMap:bankVSService.getDataWithBalancesMap(uservs, currentWeekPeriod)]
                     view = 'userVS'
                 } else {

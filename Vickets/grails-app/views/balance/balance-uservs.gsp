@@ -24,14 +24,16 @@
     }
     </style>
     <div layout vertical style="padding: 0 20px;">
-        <div layout horizontal center center-justified style="position: relative; display: block;" >
-            <div id="caption" flex style="color: #6c0404; font-weight: bold; font-size: 1.2em; text-align: center;
-                margin:10px 0 10px 0;">
+        <div layout horizontal center  style="" >
+            <div flex ></div>
+            <div id="caption"  style="color: #6c0404; font-weight: bold; font-size: 1.2em; text-align: center;
+                cursor: pointer;margin:10px 0 10px 0;" on-click="{{captionClick}}">
                 {{caption}} - {{userVSName}}
             </div>
-            <div style="font-size: 0.8em; color: #888; font-weight: normal; right:0px;top:0px; float: right; vertical-align: top;">
+            <div flex style="font-size: 0.8em; color: #888; font-weight: normal; text-align: center;">
                 {{description}}
             </div>
+
         </div>
         <div horizontal layout center style="position: relative; display: block;">
             <div flex style="text-align: center; font-weight: bold; color: #888; margin:0 0 8px 0;">
@@ -82,7 +84,7 @@
                     </template>
                 </div>
             </div>
-            <div layout horizontal>
+            <div layout horizontal center center-justified>
                 <div vertical layout style="border-right: 2px solid  #6c0404; margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance caption="<g:message code="incomesLbl"/>" transactionList="{{balance.transactionToList}}"
                                                 balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
@@ -115,6 +117,10 @@
         publish: {
             balance: {value: {}}
         },
+        captionClick: function(amount) {
+            document.querySelector('#navBar').loadURL("${createLink( controller:'userVS', action:"", absolute:true)}/" +
+                    this.balance.userVS.id)
+        },
         formatAmount: function(amount) {
             return amount.toFixed(2)
         },
@@ -132,7 +138,8 @@
             expendedFromTag = expendedFromTag == null? 0 : expendedFromTag
             var tagToExpend = this.balance.balancesTo[currency][tag].timeLimited
             var tagCash = tagToExpend - expendedFromTag
-            return "<g:message code="timeLimitedForTagMsg"/>".format(tagCash, currency,  this.tagDescription(tag))
+            if(tagCash < 0) return "<g:message code="timeLimitedForTagReachedMsg"/>".format(tagToExpend, currency,  this.tagDescription(tag))
+            else return "<g:message code="timeLimitedForTagMsg"/>".format(tagCash, currency,  this.tagDescription(tag))
         },
         getPercentageForTagMsg: function(currency, tag) {
             var expendedFromTag = 0

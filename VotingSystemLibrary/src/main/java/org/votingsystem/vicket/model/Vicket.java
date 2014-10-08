@@ -17,9 +17,11 @@ import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.MetaInfMsg;
 
 import javax.persistence.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -44,6 +46,14 @@ public class Vicket implements Serializable  {
 
     public void setIsTimeLimited(Boolean isTimeLimited) {
         this.isTimeLimited = isTimeLimited;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
@@ -89,6 +99,7 @@ public class Vicket implements Serializable  {
     @Transient private PKCS10CertificationRequest csr;
     @Transient private X509Certificate x509AnonymousCert;
     @Transient private SMIMEMessage smimeMessage;
+    @Transient private File file;
     @Transient private String signedTagVS;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
@@ -203,6 +214,10 @@ public class Vicket implements Serializable  {
 
     public SMIMEMessage getSMIMEMessage() {
         return smimeMessage;
+    }
+
+    public void setSMIMEMessage(SMIMEMessage smimeMessage) {
+        this.smimeMessage = smimeMessage;
     }
 
     public X509Certificate getX509AnonymousCert() {
@@ -424,6 +439,9 @@ public class Vicket implements Serializable  {
         return new CertSubject(subjectDN);
     }
 
+    public void validateReceipt(SMIMEMessage smimeReceipt) throws NoSuchAlgorithmException, ExceptionVS {
+        log.debug(" - TODO validateReceipt-");
+    }
 
     public JSONObject getTransaction(String toUserName, String toUserIBAN, String subject, Boolean isTimeLimited) {
         this.toUserName = toUserName;

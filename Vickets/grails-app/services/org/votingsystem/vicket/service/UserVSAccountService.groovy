@@ -60,13 +60,11 @@ class UserVSAccountService {
 
     public void checkBalancesMap(UserVS userVS, Map<String, Map> balancesMap) {
         Map<String, Map> accountsMap = getAccountsBalanceMap(userVS)
-
-        log.debug("========= accountsMap: $accountsMap -  balancesMap: $balancesMap")
-
         if(accountsMap.keySet().size() > 1) throw new ExceptionVS("User '$userVS.id' " +
                 "has '${accountsMap.keySet().size()}' accounts")
-        accountsMap = accountsMap.values().iterator().next()
-        for(String currency : accountsMap.keySet()) {
+        if(accountsMap?.values().isEmpty()) return
+        accountsMap = accountsMap?.values()?.iterator()?.next()
+        for(String currency : accountsMap?.keySet()) {
             if(balancesMap[currency]) {
                 for(String tag: accountsMap[currency].keySet()) {
                     BigDecimal tagAmount = new BigDecimal(accountsMap[currency][tag])

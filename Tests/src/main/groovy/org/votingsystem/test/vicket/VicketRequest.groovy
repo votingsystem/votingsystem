@@ -34,10 +34,7 @@ SignatureVSService signatureVSService = SignatureVSService.getUserVSSignatureVSS
 UserVS fromUserVS = signatureVSService.getUserVS()
 
 VicketServer vicketServer = TestHelper.loadVicketServer()
-if(vicketServer == null) {
-    logger.error("vicketServer not found. Program finished")
-    return
-}
+if(vicketServer == null) throw new ExceptionVS("vicketServer not found. Program finished")
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
 BigDecimal transactionAmount = new BigDecimal(10)
@@ -45,49 +42,39 @@ String curencyCode = "EUR"
 VicketTagVS tag = new VicketTagVS("HIDROGENO")
 VicketRequestBatch vicketBatch = new VicketRequestBatch(transactionAmount, transactionAmount, curencyCode, tag,
         ContextVS.getInstance().getVicketServer())
+String messageSubject = "TEST_VICKET_REQUEST_DATA_MSG_SUBJECT";
 
-ResponseVS responseVS = null;
-try {
-    String messageSubject = "TEST_VICKET_REQUEST_DATA_MSG_SUBJECT";
-
-    JSONArray vicketCSRRequest = (JSONArray) JSONSerializer.toJSON(vicketBatch.getVicketCSRList());
-    Map<String, Object> mapToSend = new HashMap<String, Object>();
-    mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(), vicketCSRRequest.toString().getBytes());
-    SMIMEMessage smimeMessage = signatureVSService.getTimestampedSignedMimeMessage(fromUserVS.nif,
-            vicketServer.getNameNormalized(), vicketBatch.getRequestDataToSignJSON().toString(), messageSubject)
-    mapToSend.put(ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
-            smimeMessage.getBytes());
-    responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, vicketServer.getVicketRequestServiceURL());
-    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-        JSONObject issuedVicketsJSON = JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"));
-        JSONArray transactionsArray = issuedVicketsJSON.getJSONArray("transactionList");
-        for(int i = 0; i < transactionsArray.size(); i++) {
-            TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
-        }
-        JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
-        logger.debug("VicketRequest - Num IssuedVickets: " + issuedVicketsArray.size());
-        if(issuedVicketsArray.size() != vicketBatch.getVicketsMap().values().size()) {
-            logger.error("VicketRequest(...) - ERROR - Num vickets requested: " + vicketBatch.getVicketsMap().values().size() +
-                    " - num. vickets received: " + issuedVicketsArray.size());
-        }
-        for(int i = 0; i < issuedVicketsArray.size(); i++) {
-            Vicket vicket = vicketBatch.initVicket(issuedVicketsArray.getString(i));
-            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
-            Vicket vicketDeSerialized = ObjectUtils.deSerializeObject(vicketSerialized);
-            String dirPath =  "/home/jgzornoza/temp/vickets" + DateUtils.getDirPath(Calendar.getInstance().getTime())
-            new File(dirPath).mkdirs();
-            String vicketPath = dirPath + UUID.randomUUID().toString() + ".servs";
-            File vicketFileDeSerialized = FileUtils.copyStreamToFile(new ByteArrayInputStream(vicketSerialized), new File(vicketPath))
-            byte[] vicketDeSerializedBytes = FileUtils.getBytesFromFile(vicketFileDeSerialized)
-            Vicket vicketDeSerializedFromFile = ObjectUtils.deSerializeObject(vicketDeSerializedBytes);
-            logger.debug("vicketDeSerializedFromFile: " + vicketDeSerializedFromFile.certificationRequest)
-        }
-
-
-    } else {
-        logger.error(" --- ERROR --- " + responseVS.getMessage())
+JSONArray vicketCSRRequest = (JSONArray) JSONSerializer.toJSON(vicketBatch.getVicketCSRList());
+Map<String, Object> mapToSend = new HashMap<String, Object>();
+mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(), vicketCSRRequest.toString().getBytes());
+SMIMEMessage smimeMessage = signatureVSService.getTimestampedSignedMimeMessage(fromUserVS.nif,
+        vicketServer.getNameNormalized(), vicketBatch.getRequestDataToSignJSON().toString(), messageSubject)
+mapToSend.put(ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
+        smimeMessage.getBytes());
+ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, vicketServer.getVicketRequestServiceURL());
+if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+    JSONObject issuedVicketsJSON = JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"));
+    JSONArray transactionsArray = issuedVicketsJSON.getJSONArray("transactionList");
+    for(int i = 0; i < transactionsArray.size(); i++) {
+        TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
     }
-} catch(Exception ex) {
-    ex.printStackTrace();
+    JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
+    logger.debug("VicketRequest - Num IssuedVickets: " + issuedVicketsArray.size());
+    if(issuedVicketsArray.size() != vicketBatch.getVicketsMap().values().size()) {
+        logger.error("VicketRequest(...) - ERROR - Num vickets requested: " + vicketBatch.getVicketsMap().values().size() +
+                " - num. vickets received: " + issuedVicketsArray.size());
+    }
+    for(int i = 0; i < issuedVicketsArray.size(); i++) {
+        Vicket vicket = vicketBatch.initVicket(issuedVicketsArray.getString(i));
+        byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
+        String walletDir =   ContextVS.getInstance().config.walletDir
+        new File(walletDir).mkdirs();
+        String vicketPath = walletDir + UUID.randomUUID().toString() + ".servs";
+        File vicketFile = FileUtils.copyStreamToFile(new ByteArrayInputStream(vicketSerialized), new File(vicketPath))
+        Vicket vicketDeSerializedFromFile = ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(vicketFile));
+        logger.debug("Stored vicket: " + vicketFile.getAbsolutePath())
+    }
+} else {
+    logger.error(" --- ERROR --- " + responseVS.getMessage())
 }
 System.exit(0)

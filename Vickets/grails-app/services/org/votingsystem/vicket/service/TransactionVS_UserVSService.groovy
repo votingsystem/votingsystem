@@ -34,7 +34,7 @@ class TransactionVS_UserVSService {
         if(!messageJSON.fromUserIBAN?.equals(fromUserVS.IBAN)) throw new ExceptionVS("User '${fromUserVS.nif}' doesn't" +
                 " have an account with IBAN '${messageJSON.fromUserIBAN}'")
         TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
-        Currency currency = Currency.getInstance(messageJSON.currency)
+        Currency currency = Currency.getInstance(messageJSON.currencyCode)
         BigDecimal transactionVSAmount = new BigDecimal(messageJSON.amount)
         if(messageJSON.toUserIBAN?.size() != 1) throw new ExceptionVS("'TRANSACTIONVS_FROM_USERVS' can only have one " +
                 "receptor and request has '${messageJSON.toUserIBAN}'")
@@ -57,7 +57,7 @@ class TransactionVS_UserVSService {
         //Check cash available for user
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
                 walletVSService.getAccountMovementsForTransaction(
-                messageJSON.fromUserIBAN, tag, transactionVSAmount, messageJSON.currency)
+                messageJSON.fromUserIBAN, tag, transactionVSAmount, messageJSON.currencyCode)
         if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) {
             log.error "${methodName} - ${accountFromMovements.getMessage()}"
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST , type:TypeVS.ERROR,
@@ -74,7 +74,7 @@ class TransactionVS_UserVSService {
         TransactionVS transaction = TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionVSAmount, toUserVS, toUserVS.IBAN).save()
         metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transaction.id}_${operationType.toString()}")
-        log.debug("${metaInfMsg} - ${transactionVSAmount} ${messageJSON.currency} - from group '${fromUserVS.id}' to userVS '${toUserVS.id}' ")
+        log.debug("${metaInfMsg} - ${transactionVSAmount} ${messageJSON.currencyCode} - from group '${fromUserVS.id}' to userVS '${toUserVS.id}' ")
         metaInfMsg = MetaInfMsg.getOKMsg(methodName, "transactionVS_${transactionParent.id}_${operationType.toString()}")
         return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, metaInf:metaInfMsg, type:operationType)
     }
