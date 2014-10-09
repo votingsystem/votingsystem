@@ -145,6 +145,9 @@
                         this.$.fromUserDiv.innerHTML = "<g:message code="systemLbl"/>"
                         this.$.fromUserDiv.classList.add("pageHeader");
                         break;
+                    case 'VICKET_REQUEST':
+                        this.caption = "<g:message code="vicketRequestLbl"/>"
+                        break;
                     case 'VICKET':
                     case 'VICKET_SEND':
                         this.caption = "<g:message code="anonymousTransactionVSLbl"/>"
@@ -157,6 +160,15 @@
                     default:
                         this.caption = this.signedDocument.operation
 
+                }
+
+                {
+                    "totalAmount": "10",
+                        "serverURL": "http://vickets:8086/Vickets",
+                        "tagVS": "HIDROGENO",
+                        "UUID": "e374eb77-aca2-461e-9127-440894f2a8ce",
+                        "operation": "VICKET_REQUEST",
+                        "currencyCode": "EUR"
                 }
             },
             showToUserInfo:function(e) {

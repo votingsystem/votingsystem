@@ -194,7 +194,7 @@ class VicketService {
         }
         vicketBatch = csrService.signVicketBatchRequest(vicketBatch)
         TransactionVS userTransaction = vicketBatch.getTransactionVS(messageSource.getMessage(
-                'vicketRequest', null, LocaleContextHolder.locale), accountFromMovements.data).save()
+                'vicketRequestLbl', null, LocaleContextHolder.locale), accountFromMovements.data).save()
         LoggerVS.logVicketRequest(userTransaction.id, fromUserVS.nif, userTransaction.currencyCode, userTransaction.amount,
                 userTransaction.tag, userTransaction.dateCreated)
         Map transactionMap = transactionVSService.getTransactionMap(userTransaction)

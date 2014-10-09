@@ -12,14 +12,10 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.ExceptionVS;
-import org.votingsystem.util.MetaInfMsg;
+import org.votingsystem.util.*;
 
 import javax.persistence.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -98,7 +94,7 @@ public class Vicket implements Serializable  {
     @Transient private CertificationRequestVS certificationRequest;
     @Transient private PKCS10CertificationRequest csr;
     @Transient private X509Certificate x509AnonymousCert;
-    @Transient private SMIMEMessage smimeMessage;
+    @Transient private transient SMIMEMessage smimeMessage;
     @Transient private File file;
     @Transient private String signedTagVS;
     @Transient private String toUserIBAN;
@@ -449,8 +445,10 @@ public class Vicket implements Serializable  {
             CertUtil.verifyCertificate(trustAnchor, false, Arrays.asList(cert));
             log.debug("validateReceipt - Cert validated: " + cert.getSubjectDN().toString());
         }
+        this.smimeMessage = smimeReceipt;
         if(file != null) {
-            file.renameTo(new File(file.getParent() + File.separator+  "EXPENDED_" + file.getName()));
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(ObjectUtils.serializeObject(this)), file);
+            file.renameTo(new File(file.getParent() + File.separator + "EXPENDED_" + file.getName()));
         }
     }
 
@@ -496,6 +494,24 @@ public class Vicket implements Serializable  {
         public BigDecimal getVicketValue() {return this.vicketValue;}
         public String getVicketServerURL() {return this.vicketServerURL;}
         public String gettagVS() {return this.tagVS;}
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(smimeMessage != null) s.writeObject(smimeMessage.getBytes());
+            else s.writeObject(null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream s) throws Exception {
+        s.defaultReadObject();
+        byte[] smimeMessageBytes = (byte[]) s.readObject();
+        if(smimeMessageBytes != null) {
+            smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+        }
     }
 
 }

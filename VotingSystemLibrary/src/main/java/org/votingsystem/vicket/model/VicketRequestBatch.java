@@ -13,9 +13,13 @@ import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 
 import javax.persistence.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -30,7 +34,7 @@ import java.util.*;
 @DiscriminatorValue("VicketRequestBatch")
 public class VicketRequestBatch extends BatchRequest implements Serializable  {
 
-    private static Logger logger = Logger.getLogger(VicketRequestBatch.class);
+    private static Logger log = Logger.getLogger(VicketRequestBatch.class);
 
     public static final long serialVersionUID = 1L;
 
@@ -88,7 +92,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     }
 
     public VicketRequestBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, VicketTagVS tag,
-                              VicketServer vicketServer) throws Exception {
+                      VicketServer vicketServer) throws Exception {
         this.setRequestAmount(requestAmount);
         this.setVicketServer(vicketServer);
         this.setCurrencyCode(currencyCode);
@@ -112,6 +116,23 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
             result.add(new String(vicket.getIssuedCertPEM(), "UTF-8"));
         }
         return result;
+    }
+
+    public void initVickets(JSONObject issuedVicketsJSON) throws Exception {
+        /*JSONArray transactionsArray = issuedVicketsJSON.getJSONArray("transactionList");
+        for(int i = 0; i < transactionsArray.size(); i++) {
+            TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
+        }*/
+        JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
+        log.debug("VicketRequest - Num IssuedVickets: " + issuedVicketsArray.size());
+        if(issuedVicketsArray.size() != vicketsMap.values().size()) {
+            log.error("VicketRequest(...) - ERROR - Num vickets requested: " + vicketsMap.values().size() +
+                    " - num. vickets received: " + issuedVicketsArray.size());
+        }
+        for(int i = 0; i < issuedVicketsArray.size(); i++) {
+            Vicket vicket = initVicket(issuedVicketsArray.getString(i));
+            vicketsMap.replace(vicket.getHashCertVS(), vicket);
+        }
     }
 
     public void setVicketsMap(Map<String, Vicket> vicketsMap) {
@@ -213,6 +234,10 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         for(Vicket vicket : vicketsMap.values()) {
             vicket.setTag(tag);
         }
+    }
+
+    public JSONArray getVicketCSRRequest() {
+        return (JSONArray) JSONSerializer.toJSON(getVicketCSRList());
     }
 
     public TransactionVS getTransactionVS(String subject, Map<UserVSAccount, BigDecimal> accountFromMovements) {

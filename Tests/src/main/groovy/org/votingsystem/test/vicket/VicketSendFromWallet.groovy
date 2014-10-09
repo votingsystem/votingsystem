@@ -31,6 +31,7 @@ responseVS = HttpHelper.getInstance().sendData(transactionBatch.getTransactionVS
 logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
 transactionBatch.validateTransactionVSResponse(responseVS.getMessage(), vicketServer.getTrustAnchors());
+System.exit(0);
 
 
 
