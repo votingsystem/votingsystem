@@ -12,7 +12,7 @@ import org.votingsystem.util.HttpHelper
 import org.votingsystem.vicket.model.VicketTransactionBatch
 
 
-Logger logger = TestHelper.init(VicketSendWallet.class)
+Logger logger = TestHelper.init(VicketSendFromWallet.class)
 VicketServer vicketServer = TestHelper.loadVicketServer()
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
