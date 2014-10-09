@@ -136,11 +136,11 @@ public class Vicket implements Serializable  {
         if(hashCertVS == null) throw new ExceptionVS("Vicket without hash");
         amount = new BigDecimal(certExtensionData.getString("vicketValue"));
         currencyCode = certExtensionData.getString("currencyCode");
-        signedTagVS = certExtensionData.getString("tagVS");
+        signedTagVS = certExtensionData.getString("tag");
         if(!certSubject.getVicketServerURL().equals(vicketServerURL) ||
                 certSubject.getVicketValue().compareTo(amount) != 0 ||
                 !certSubject.getCurrencyCode().equals(currencyCode) ||
-                !certSubject.gettagVS().equals(signedTagVS)) throw new ExceptionVS("Vicket with errors. SubjectDN: '" +
+                !certSubject.getTag().equals(signedTagVS)) throw new ExceptionVS("Vicket with errors. SubjectDN: '" +
                 subjectDN + "' - cert extension data: '" + certExtensionData.toString() + "'");
         return this;
     }
@@ -169,8 +169,8 @@ public class Vicket implements Serializable  {
                 "' has signed amount  '" + toUserVSAmount + "'");
         if(!currencyCode.equals(messageJSON.getString("currencyCode"))) throw new ExceptionVS("Error - Vicket with currencyCode '" +
                 currencyCode + "' has signed currencyCode  '" + messageJSON.getString("currencyCode"));
-        if(!signedTagVS.equals(messageJSON.getString("tagVS"))) throw new ExceptionVS("Error - Vicket with tag '" +
-                signedTagVS + "' has signed tag  '" + messageJSON.getString("tagVS"));
+        if(!signedTagVS.equals(messageJSON.getString("tag"))) throw new ExceptionVS("Error - Vicket with tag '" +
+                signedTagVS + "' has signed tag  '" + messageJSON.getString("tag"));
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS("Error - Vicket valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
@@ -462,7 +462,7 @@ public class Vicket implements Serializable  {
         dataMap.put("subject", subject);
         dataMap.put("toUserName", toUserName);
         dataMap.put("toUserIBAN", toUserIBAN);
-        dataMap.put("tagVS", tag.getName());
+        dataMap.put("tag", tag.getName());
         dataMap.put("amount", amount.toString());
         dataMap.put("currencyCode", currencyCode);
         if(isTimeLimited != null) dataMap.put("isTimeLimited", isTimeLimited.booleanValue());
@@ -473,7 +473,7 @@ public class Vicket implements Serializable  {
     public Map getCSRDataMap() throws Exception {
         Map<String, String> result = new HashMap<String, String>();
         result.put("currencyCode", currencyCode);
-        result.put("tagVS", tag.getName());
+        result.put("tag", tag.getName());
         result.put("vicketValue", amount.toString());
         result.put("csr", new String(certificationRequest.getCsrPEM(), "UTF-8"));
         return result;
@@ -483,17 +483,17 @@ public class Vicket implements Serializable  {
         String currencyCode;
         BigDecimal vicketValue;
         String vicketServerURL;
-        String tagVS;
+        String tag;
         public CertSubject(String subjectDN) {
             if (subjectDN.contains("CURRENCY_CODE:")) currencyCode = subjectDN.split("CURRENCY_CODE:")[1].split(",")[0];
             if (subjectDN.contains("VICKET_VALUE:")) vicketValue = new BigDecimal(subjectDN.split("VICKET_VALUE:")[1].split(",")[0]);
-            if (subjectDN.contains("TAGVS:")) tagVS = subjectDN.split("TAGVS:")[1].split(",")[0];
+            if (subjectDN.contains("TAG:")) tag = subjectDN.split("TAG:")[1].split(",")[0];
             if (subjectDN.contains("vicketServerURL:")) vicketServerURL = subjectDN.split("vicketServerURL:")[1].split(",")[0];
         }
         public String getCurrencyCode() {return this.currencyCode;}
         public BigDecimal getVicketValue() {return this.vicketValue;}
         public String getVicketServerURL() {return this.vicketServerURL;}
-        public String gettagVS() {return this.tagVS;}
+        public String getTag() {return this.tag;}
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

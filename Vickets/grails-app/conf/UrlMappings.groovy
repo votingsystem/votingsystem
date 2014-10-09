@@ -240,7 +240,7 @@ class UrlMappings {
 
         "/vicket/request" {
             controller = "vicket"
-            action = [POST:"processRequestFileMap"]
+            action = [POST:"processRequestFileMap", GET:"request"]
         }
 
     }

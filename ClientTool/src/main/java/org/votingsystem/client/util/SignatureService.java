@@ -16,9 +16,12 @@ import org.votingsystem.signature.util.*;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.WalletUtils;
+import org.votingsystem.vicket.model.VicketRequestBatch;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.math.BigDecimal;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -114,6 +117,9 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case OPEN_RECEIPT_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
+                            break;
+                        case VICKET_REQUEST:
+                            responseVS = sendVicketRequest(operationVS);
                             break;
                         default:
                             responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
@@ -249,6 +255,38 @@ public class SignatureService extends Service<ResponseVS> {
             }
         }
 
+        private ResponseVS sendVicketRequest(OperationVS operationVS) throws Exception {
+            logger.debug("sendVicketRequest");
+            BigDecimal totalAmount = new BigDecimal((Integer)operationVS.getDocumentToSignMap().get("totalAmount"));
+            String currencyCode = (String) operationVS.getDocumentToSignMap().get("currencyCode");
+            VicketTagVS tag = new VicketTagVS((String) operationVS.getDocumentToSignMap().get("tag"));
+            VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, currencyCode, tag,
+                    (VicketServer) operationVS.getTargetServer());
+            Map<String, Object> mapToSend = new HashMap<String, Object>();
+            mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
+                    vicketBatch.getVicketCSRRequest().toString().getBytes());
+            SMIMEMessage smimeMessage = ContentSignerHelper.genMimeMessage(null,
+                    operationVS.getNormalizedReceiverName(), vicketBatch.getRequestDataToSignJSON().toString(),
+                    password.toCharArray(), operationVS.getSignedMessageSubject(), null);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
+                    operationVS.getTargetServer().getTimeStampServiceURL());
+            ResponseVS responseVS = timeStamper.call();
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+            smimeMessage = timeStamper.getSmimeMessage();
+            mapToSend.put(ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED.getName(),
+                    smimeMessage.getBytes());
+            responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
+                    ((VicketServer)operationVS.getTargetServer()).getVicketRequestServiceURL());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                vicketBatch.initVickets((JSONObject) JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8")));
+                Map responseMap = new HashMap<>();
+                responseMap.put("statusCode", responseVS.getStatusCode());
+                responseMap.put("vicketList", WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
+                responseVS.setContentType(ContentTypeVS.JSON);
+                responseVS.setMessageJSON(JSONSerializer.toJSON(responseMap));
+            }
+            return responseVS;
+        }
 
         //we know this is done in a background thread
         private ResponseVS sendMessageVS(ActorVS targetServer, OperationVS operationVS) throws Exception {
@@ -484,7 +522,7 @@ public class SignatureService extends Service<ResponseVS> {
             String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
             ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ActorVS.parse(responseVS.getMessageJSON());
+                actorVS = ActorVS.parse((Map) responseVS.getMessageJSON());
                 responseVS.setData(actorVS);
                 logger.error("checkServer - adding " + serverURL.trim() + " to sever map");
                 serverMap.put(serverURL.trim(), actorVS);

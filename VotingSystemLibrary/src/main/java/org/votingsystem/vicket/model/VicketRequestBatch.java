@@ -40,7 +40,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
 
     @OneToOne private MessageSMIME messageSMIME;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="tag", nullable=false) private VicketTagVS tag;
+    @JoinColumn(name="tag", nullable=false) private VicketTagVS tagVS;
 
     @Transient private Map<String, Vicket> vicketsMap;
     @Transient private VicketServer vicketServer;
@@ -48,7 +48,8 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     @Transient private BigDecimal vicketsValue;
     @Transient private String currencyCode;
     @Transient private List<Map> vicketCSRList;
-    @Transient private String tagVS;
+    @Transient private String tag;
+    @Transient private String subject;
 
     public VicketRequestBatch() {}
 
@@ -60,7 +61,8 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
                 "Request operation '" + vicketRequest.getString("operation") + "' doesn't match VICKET_REQUEST");
         this.requestAmount = new BigDecimal(vicketRequest.getString("totalAmount"));
         this.currencyCode = vicketRequest.getString("currencyCode");
-        this.tagVS = vicketRequest.getString("tagVS");
+        this.subject = vicketRequest.getString("subject");
+        this.tag = vicketRequest.getString("tag");
         VicketServer vicketServer = new VicketServer();
         vicketServer.setServerURL(vicketRequest.getString("serverURL"));
         if(!localServer.equals(vicketServer.getServerURL())) throw new ExceptionVS("The server from request '" +
@@ -72,8 +74,8 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
             JSONObject vicketRequestJSON = (JSONObject) vicketCsrRequest.get(i);
             BigDecimal vicketValue = new BigDecimal(vicketRequestJSON.getString("vicketValue"));
             String currencyCode = vicketRequestJSON.getString("currencyCode");
-            String csrTagVS = vicketRequestJSON.getString("tagVS");
-            if(!this.tagVS.equals(csrTagVS)) throw new ExceptionVS("Request is for tag '" + this.tagVS +
+            String csrTagVS = vicketRequestJSON.getString("tag");
+            if(!this.tag.equals(csrTagVS)) throw new ExceptionVS("Request is for tag '" + this.tag +
                     "' and request number '" + i + "' is for tag '" + csrTagVS + "'");
             PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(
                     vicketRequestJSON.getString("csr").getBytes());
@@ -91,15 +93,15 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
             "Amount signed '" + requestAmount.toString() + "' - total amount in CSRs '" + csrRequestAmount.toString() + "'");
     }
 
-    public VicketRequestBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, VicketTagVS tag,
+    public VicketRequestBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, VicketTagVS tagVS,
                       VicketServer vicketServer) throws Exception {
         this.setRequestAmount(requestAmount);
         this.setVicketServer(vicketServer);
         this.setCurrencyCode(currencyCode);
-        this.tag = tag == null ? new VicketTagVS(VicketTagVS.WILDTAG):tag;
-        this.tagVS = this.tag.getName();
+        this.tagVS = tagVS == null ? new VicketTagVS(VicketTagVS.WILDTAG):tagVS;
+        this.tag = this.tagVS.getName();
         this.vicketsValue = vicketsValue;
-        this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, tag, vicketServer);
+        this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, tagVS, vicketServer);
         vicketCSRList = new ArrayList<Map>();
         for(Vicket vicket : vicketsMap.values()) {
             vicketCSRList.add(vicket.getCSRDataMap());
@@ -193,10 +195,11 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     public JSONObject getRequestDataToSignJSON() {
         Map smimeContentMap = new HashMap();
         smimeContentMap.put("operation", TypeVS.VICKET_REQUEST.toString());
+        smimeContentMap.put("subject", subject);
         smimeContentMap.put("serverURL", vicketServer.getServerURL());
         smimeContentMap.put("totalAmount", requestAmount.toString());
         smimeContentMap.put("currencyCode", currencyCode);
-        smimeContentMap.put("tagVS", tagVS);
+        smimeContentMap.put("tag", tag);
         smimeContentMap.put("UUID", UUID.randomUUID().toString());
         JSONObject requestJSON = (JSONObject) JSONSerializer.toJSON(smimeContentMap);
         return requestJSON;
@@ -217,22 +220,22 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         return vicket;
     }
 
-    public String getTagVS() {
-        return tagVS;
-    }
-
-    public void setTagVS(String tagVS) {
-        this.tagVS = tagVS;
-    }
-
-    public VicketTagVS getTag() {
+    public String getTag() {
         return tag;
     }
 
-    public void setTag(VicketTagVS tag) {
+    public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public VicketTagVS getTagVS() {
+        return tagVS;
+    }
+
+    public void setTagVS(VicketTagVS tagVS) {
+        this.tagVS = tagVS;
         for(Vicket vicket : vicketsMap.values()) {
-            vicket.setTag(tag);
+            vicket.setTag(tagVS);
         }
     }
 
@@ -245,7 +248,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         transaction.setAmount(requestAmount);
         transaction.setState(TransactionVS.State.OK);
         transaction.setCurrencyCode(currencyCode);
-        transaction.setTag(tag);
+        transaction.setTag(tagVS);
         transaction.setSubject(subject);
         transaction.setMessageSMIME(messageSMIME);
         transaction.setType(TransactionVS.Type.VICKET_REQUEST);

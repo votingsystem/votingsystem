@@ -55,7 +55,8 @@
       "core-signals":"Polymer/core-signals",
 
       "polymer-layout":"Polymer/polymer-layout",
-      "polymer-flex-layout":"Polymer/polymer-flex-layout"
+      "polymer-flex-layout":"Polymer/polymer-flex-layout",
+      "polymer-localstorage":"Polymer/polymer-localstorage"
 
   }
 

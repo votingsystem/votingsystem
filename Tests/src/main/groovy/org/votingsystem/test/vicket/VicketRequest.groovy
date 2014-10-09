@@ -24,13 +24,13 @@ SignatureVSService signatureVSService = SignatureVSService.getUserVSSignatureVSS
 UserVS fromUserVS = signatureVSService.getUserVS()
 
 VicketServer vicketServer = TestHelper.loadVicketServer()
-if(vicketServer == null) throw new ExceptionVS("vicketServer not found. Program finished")
+if(vicketServer == null) throw new ExceptionVS("Vicket server not found")
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
-BigDecimal transactionAmount = new BigDecimal(10)
+BigDecimal totalAmount = new BigDecimal(10)
 String curencyCode = "EUR"
 VicketTagVS tag = new VicketTagVS("HIDROGENO")
-VicketRequestBatch vicketBatch = new VicketRequestBatch(transactionAmount, transactionAmount, curencyCode, tag,
+VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, curencyCode, tag,
         ContextVS.getInstance().getVicketServer())
 String messageSubject = "TEST_VICKET_REQUEST_DATA_MSG_SUBJECT";
 Map<String, Object> mapToSend = new HashMap<String, Object>();

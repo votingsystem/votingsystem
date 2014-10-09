@@ -184,7 +184,7 @@ class VicketService {
         DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance())
         //Check cash available for user
         ResponseVS<Map<UserVSAccount, BigDecimal>> accountFromMovements =
-                walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatch.getTag(),
+                walletVSService.getAccountMovementsForTransaction( fromUserVS.IBAN, vicketBatch.getTagVS(),
                 vicketBatch.getRequestAmount(), vicketBatch.getCurrencyCode())
         if(ResponseVS.SC_OK != accountFromMovements.getStatusCode()) {
             log.error "${methodName} - ${accountFromMovements.getMessage()}"

@@ -38,14 +38,14 @@
                 </core-toolbar>
                 <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
                     <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
-                        <paper-item data-href="${createLink(controller: 'transactionVS', absolute: true)}">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
-                        </paper-item>
                         <paper-item data-href="${createLink(controller: 'groupVS', absolute: true)}">
-                            <i class="fa fa-list" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
+                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="selectGroupvsLbl"/>
                         </paper-item>
                         <paper-item data-href="${createLink(controller: 'userVS', action: 'search', absolute: true)}">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
+                            <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> <g:message code="locateUserVSLbl"/>
+                        </paper-item>
+                        <paper-item data-href="${createLink(controller: 'vicket', action:'request', absolute: true)}">
+                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> <g:message code="doVicketRequestLbl"/>
                         </paper-item>
                         <g:if test="${"admin".equals(params.menu)}">
                             <template if="{{isClientToolConnected}}">
@@ -77,7 +77,10 @@
                         <g:else>
                             {{ "<g:message code="usersPageTitle"/>" | setTitle}}
                         </g:else>
-                        <paper-item data-href="${createLink(controller: 'reports', action:'index', absolute: true)}"">
+                        <paper-item data-href="${createLink(controller: 'transactionVS', absolute: true)}">
+                            <i class="fa fa-line-chart" style="margin:0px 10px 0px 0px;"></i> <g:message code="transactionsLbl"/>
+                        </paper-item>
+                        <paper-item data-href="${createLink(controller: 'reports', action:'index', absolute: true)}">
                             <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> <g:message code="reportsPageTitle"/>
                         </paper-item>
                         <paper-item data-href="${createLink(controller: 'app', action: 'contact', absolute: true)}">
@@ -109,13 +112,7 @@
                 });
                 this.isClientToolConnected = window['isClientToolConnected']
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
-
-
-
-                window.addEventListener("popstate", function(e) {
-                    console.log("======= popstate: " + location.pathname)
-                });
-
+                //window.addEventListener("popstate", function(e) {  });
             },
             innerPageSignal:function(e, detail, sender) {
                 this.url = detail;

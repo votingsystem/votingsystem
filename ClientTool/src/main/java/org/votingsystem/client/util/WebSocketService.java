@@ -173,8 +173,8 @@ public class WebSocketService extends Service<ResponseVS> {
                 " - status: " + responseVS.getStatusCode());
         switch(responseVS.getType()) {
             case INIT_VALIDATED_SESSION:
-                if(responseVS.getMessageJSON().containsKey("messageVSList") &&
-                        responseVS.getMessageJSON().getJSONArray("messageVSList").size() > 0) {
+                if(((JSONObject)responseVS.getMessageJSON()).containsKey("messageVSList") &&
+                        ((JSONObject)responseVS.getMessageJSON()).getJSONArray("messageVSList").size() > 0) {
                     final String callbackMsg = responseVS.getMessageJSON().toString();
                     final String callback = "updateMessageVSList";
                     Platform.runLater(new Runnable() {
@@ -205,7 +205,7 @@ public class WebSocketService extends Service<ResponseVS> {
                 break;
         }
         for(WebSocketListener listener : listeners) {
-            if(listener != null) listener.consumeWebSocketMessage(responseVS.getMessageJSON());
+            if(listener != null) listener.consumeWebSocketMessage((JSONObject) responseVS.getMessageJSON());
             else listeners.remove(listener);
         }
     }

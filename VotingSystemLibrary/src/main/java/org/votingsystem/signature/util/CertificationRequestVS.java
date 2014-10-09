@@ -95,14 +95,14 @@ public class CertificationRequestVS implements java.io.Serializable {
         tagVS = (tagVS == null)? VicketTagVS.WILDTAG:tagVS;
         X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
                 ", OU=VICKET_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
-                ", OU=TAGVS:" + tagVS + ", OU=DigitalCurrency");
+                ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
         delegationDataMap.put("vicketServerURL", vicketServerURL);
         delegationDataMap.put("hashCertVS", hashCertVS);
         delegationDataMap.put("vicketValue", amount);
         delegationDataMap.put("currencyCode", currency);
-        delegationDataMap.put("tagVS", tagVS);
+        delegationDataMap.put("tag", tagVS);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.VICKET_TAG,
                 new DERUTF8String(jsonObject.toString())));

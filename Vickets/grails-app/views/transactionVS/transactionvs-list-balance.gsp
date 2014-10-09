@@ -15,7 +15,7 @@
         .amountColumn {width:110px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
         </style>
-        <div layout vertical justified style="display: block;">
+        <div layout vertical justified style="display: block; height: 100%;">
             <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
                 <div style="font-weight: bold;color:#6c0404;">{{caption}}</div>
                 <div flex></div>

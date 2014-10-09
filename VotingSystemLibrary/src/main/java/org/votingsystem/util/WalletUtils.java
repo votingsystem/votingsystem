@@ -6,9 +6,8 @@ import org.votingsystem.vicket.model.Vicket;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * @author jgzornoza
@@ -28,4 +27,14 @@ public class WalletUtils {
         }
 
     }
+
+    public static List<String> getSerializedVicketList(Collection<Vicket> vicketCollection) throws UnsupportedEncodingException {
+        List<String> result = new ArrayList<>();
+        for(Vicket vicket : vicketCollection) {
+            byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
+            result.add(new String(vicketSerialized, "UTF-8"));
+        }
+        return result;
+    }
+
 }

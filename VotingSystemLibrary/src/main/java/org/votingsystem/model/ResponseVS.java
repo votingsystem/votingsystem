@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -42,7 +43,7 @@ public class ResponseVS<T> implements Serializable {
     private Integer statusCode;
     private StatusVS<?> status;
     private String message;
-    private JSONObject messageJSON;
+    private JSON messageJSON;
     private String reason;
     private String metaInf;
     private String url;
@@ -118,21 +119,20 @@ public class ResponseVS<T> implements Serializable {
         return message;
     }
 
-    public JSONObject getMessageJSON() {
+    public JSON getMessageJSON() {
         if(messageJSON != null) return messageJSON;
-        JSONObject result = null;
         String message = getMessage();
-        if(message != null) result = (JSONObject)JSONSerializer.toJSON(message);
-        return result;
+        if(message != null) return JSONSerializer.toJSON(message);
+        return null;
     }
 
-    public void setMessageJSON(JSONObject jsonObject) {
+    public void setMessageJSON(JSON jsonObject) {
         this.messageJSON = jsonObject;
     }
 
-    public JSONObject getSignedJSON() {
+    public JSON getSignedJSON() {
         if(smimeMessage == null) return null;
-        else return (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
+        else return JSONSerializer.toJSON(smimeMessage.getSignedContent());
     }
 
     public void setMessage(String message) {

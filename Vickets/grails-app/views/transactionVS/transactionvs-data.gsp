@@ -17,7 +17,7 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
-        <div layout vertical style="margin: 0px auto; max-width:800px;">
+        <div layout vertical style="margin: 0px auto; max-width:800px; min-width: 300px; min-height: 200px;">
 
             <div class="pageHeader"  layout horizontal center center-justified
                  style="margin:0 0 10px 0;font-size: 1.2em;">{{caption}}
@@ -127,11 +127,13 @@
             },
             transactionvsChanged:function() {
                 this.messageToUser = null
+                this.receptorMsg = null
+                this.isReceptorVisible = true
                 this.isReceptorVisible = true
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
                     this.receptorLbl = '<g:message code="receptorsLbl"/>'
                 } else this.receptorLbl = '<g:message code="receptorLbl"/>'
-                //console.log(this.tagName + " - transactionvsChanged - transactionvs: " + JSON.stringify(this.transactionvs))
+                console.log(this.tagName + " - transactionvsChanged - transactionvs: " + JSON.stringify(this.transactionvs))
                 switch (this.transactionvs.type) {
                     case 'FROM_BANKVS':
                         this.caption = "<g:message code="transactionVSFromBankVS"/>"
@@ -155,6 +157,11 @@
                     case 'VICKET_SEND':
                         this.caption = "<g:message code="vicketSendLbl"/>"
                         this.isSenderVisible = false
+                        break;
+                    case 'VICKET_REQUEST':
+                        this.caption = "<g:message code="vicketRequestLbl"/>"
+                        this.isSenderVisible = false
+                        this.isReceptorVisible = false
                         break;
                     case 'FROM_BANKVS':
                         this.caption = "<g:message code="transactionVSFromBankVS"/>"

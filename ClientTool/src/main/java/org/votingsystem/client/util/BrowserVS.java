@@ -32,6 +32,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
@@ -291,7 +292,7 @@ public class BrowserVS extends Region {
     }
 
 
-    public void sendMessageToBrowserApp(JSONObject messageJSON, String callerCallback) {
+    public void sendMessageToBrowserApp(JSON messageJSON, String callerCallback) {
         logger.debug("sendMessageToBrowserApp - messageJSON: " + messageJSON.toString());
         try {
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +

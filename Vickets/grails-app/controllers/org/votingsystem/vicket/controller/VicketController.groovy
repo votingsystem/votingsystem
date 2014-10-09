@@ -22,6 +22,10 @@ class VicketController {
 
 
     def request() {
+        render(view:'request')
+    }
+
+    def requestLog() {
         if(request.contentType?.contains("json")) {
             RollingFileAppender appender = requestslog.getAppender("VicketsRequest")
             File reportsFile = new File(appender.file)
@@ -30,7 +34,7 @@ class VicketController {
             render messageJSON as JSON
             return false
         } else {
-            render(view:'request')
+            render(view:'requestLog')
         }
     }
 
@@ -69,7 +73,7 @@ class VicketController {
      * Servicio que valida las solicitudes de vickets de los usuarios.
      *
      * @httpMethod [POST]
-     * @serviceURL [/model/request]
+     * @serviceURL [/vicket/request]
      * @requestContentType [application/x-pkcs7-signature] La solicitud de certificado de delegación.
      * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
      * @return La solicitud de certificado de delegación anónima firmada.
@@ -83,10 +87,10 @@ class VicketController {
 
         VicketRequestBatch vicketBatch = new VicketRequestBatch(params[ContextVS.CSR_FILE_NAME], messageSMIMEReq,
                 grailsApplication.config.grails.serverURL)
-        if(!vicketBatch.tag) {
+        if(!vicketBatch.tagVS) {
             VicketTagVS.withTransaction {
-                VicketTagVS vicketTagVS = VicketTagVS.findWhere(name:vicketBatch.getTagVS())
-                vicketBatch.setTag(vicketTagVS)
+                VicketTagVS vicketTagVS = VicketTagVS.findWhere(name:vicketBatch.getTag())
+                vicketBatch.setTagVS(vicketTagVS)
             }
         }
         ResponseVS responseVS = vicketService.processVicketRequest(vicketBatch)

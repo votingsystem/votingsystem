@@ -9,7 +9,7 @@
 
 <polymer-element name="tagvs-select-dialog" attributes="caption serviceURL">
 <template>
-    <votingsystem-dialog id="xDialog" class="selectTagDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+    <votingsystem-dialog id="xDialog" title="{{caption}}" class="selectTagDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
         <style no-shim>
             .selectTagDialog {
                 box-sizing: border-box;
@@ -28,20 +28,7 @@
         </style>
         <g:include view="/include/styles.gsp"/>
         <votingsystem-i18n id="i18nVS"></votingsystem-i18n>
-        <div id="container" style="padding:10px;">
-            <div layout vertical>
-
-            <div>
-                <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
-                        <div style="text-align: center;">{{caption}}</div>
-                    </div>
-                    <div style="position: absolute; top: 0px; right: 0px;">
-                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
-                    </div>
-                </div>
-            </div>
-
+        <div layout vertical id="container" style="padding:10px;">
             <div>
                 <div layout vertical wrap style="border: 1px solid #ccc; padding:10px; margin:0px 0px 10px 0px;
                 display:{{(selectedTagList == null || selectedTagList.length == 0) ? 'none':'block'}}">
@@ -75,7 +62,7 @@
                 <div flex horizontal wrap layout style="">
                     <template repeat="{{tag in searchedTagList}}">
                         <a class="btn btn-default" on-click="{{selectTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                            {{tag.name}} <i class="fa fa-plus"></i></a>
+                            {{tag.name}} <i class="fa fa-plus" style="color: #6c0404;"></i></a>
                     </template>
                 </div>
             </div>
@@ -85,7 +72,6 @@
                 <votingsystem-button on-click="{{processTags}}">
                     <i class="fa fa-check" style="margin:0 5px 0 2px;"></i> {{messages.acceptLbl}}
                 </votingsystem-button>
-            </div>
             </div>
         </div>
         <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
@@ -171,6 +157,7 @@
             if(selectedTags == null) this.selectedTagList = []
             else this.selectedTagList = selectedTags
             this.isShowingTags = true
+            this.$.xDialog.title = this.caption
             this.$.xDialog.opened = true
         },
 

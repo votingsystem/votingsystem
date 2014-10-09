@@ -147,6 +147,7 @@
                         break;
                     case 'VICKET_REQUEST':
                         this.caption = "<g:message code="vicketRequestLbl"/>"
+                        this.signedDocument.amount = this.signedDocument.totalAmount
                         break;
                     case 'VICKET':
                     case 'VICKET_SEND':
@@ -161,15 +162,9 @@
                         this.caption = this.signedDocument.operation
 
                 }
-
-                {
-                    "totalAmount": "10",
-                        "serverURL": "http://vickets:8086/Vickets",
-                        "tagVS": "HIDROGENO",
-                        "UUID": "e374eb77-aca2-461e-9127-440894f2a8ce",
-                        "operation": "VICKET_REQUEST",
-                        "currencyCode": "EUR"
-                }
+                console.log("========= this.signedDocument: " + JSON.stringify(this.signedDocument))
+// {"totalAmount":"10","fromUserVS":{"nif":"07553172H","name":"Name7553172H"},"serverURL":"http://vickets:8086/Vickets",
+// "tagVS":"HIDROGENO","UUID":"de52635d-7357-49bc-b7d1-5ea58687fbef","operation":"VICKET_REQUEST","currencyCode":"EUR"}
             },
             showToUserInfo:function(e) {
                 var groupURL = "${createLink(uri:'/groupVS')}/" + e.target.templateInstance.model.signedDocument.toUserVS.id
