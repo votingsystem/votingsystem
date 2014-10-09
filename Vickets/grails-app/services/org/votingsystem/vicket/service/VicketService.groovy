@@ -124,18 +124,16 @@ class VicketService {
         }
         List responseList = []
         for(Vicket vicket: validatedVicketList) {
-            MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:vicket.getSMIMEMessage(), type:TypeVS.VICKET_SEND).save()
             Date validTo = null
             if(vicket.isTimeLimited == true) validTo = timePeriod.getDateTo()
+            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(systemService.getSystemUser().getName(),
+                    vicket.getHashCertVS(), vicket.getSMIMEMessage(), vicket.getSubject())
+            MessageSMIME messageSMIME = new MessageSMIME(smimeMessage:receipt, type:TypeVS.VICKET_SEND).save()
             TransactionVS transactionVS = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIME,
                     toUserIBAN:vicket.getToUserIBAN(), state:TransactionVS.State.OK, validTo: validTo,
                     subject:vicket.getSubject(), toUserVS: vicket.getToUserVS(), type:TransactionVS.Type.VICKET_SEND,
                     currencyCode: vicket.getCurrencyCode(), tag:vicket.getTag()).save()
             vicket.setState(Vicket.State.EXPENDED).setTransactionVS(transactionVS).save()
-            SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(systemService.getSystemUser().getName(),
-                    vicket.getHashCertVS(), vicket.getSMIMEMessage(), vicket.getSubject())
-            MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIME,
-                    smimeMessage:receipt).save()
             responseList.add([(vicket.getHashCertVS()):Base64.getEncoder().encodeToString(receipt.getBytes())])
         }
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: responseList)

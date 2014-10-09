@@ -4,7 +4,6 @@ import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
-import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
@@ -12,20 +11,16 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketServer
 import org.votingsystem.model.VicketTagVS
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.test.util.SignatureVSService
 import org.votingsystem.test.util.TestHelper
-import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ObjectUtils
-import org.votingsystem.util.StringUtils
 import org.votingsystem.vicket.model.TransactionVS
 import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketRequestBatch
 
-import java.security.cert.X509Certificate
 
 
 Logger logger = TestHelper.init(VicketRequest.class)

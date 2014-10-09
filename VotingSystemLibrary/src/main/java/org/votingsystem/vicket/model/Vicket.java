@@ -159,6 +159,7 @@ public class Vicket implements Serializable  {
         this.x509AnonymousCert = vicketRequest.getX509AnonymousCert();
         this.toUserVS = vicketRequest.getToUserVS();
         this.toUserIBAN = vicketRequest.getToUserIBAN();
+        this.subject = vicketRequest.getSubject();
         return this;
     }
 
@@ -439,8 +440,18 @@ public class Vicket implements Serializable  {
         return new CertSubject(subjectDN);
     }
 
-    public void validateReceipt(SMIMEMessage smimeReceipt) throws NoSuchAlgorithmException, ExceptionVS {
-        log.debug(" - TODO validateReceipt-");
+    public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor)
+            throws Exception {
+        if(!smimeMessage.getSigner().getContentDigestBase64().equals(smimeReceipt.getSigner().getContentDigestBase64())){
+            throw new ExceptionVS("Signer content digest mismatch");
+        }
+        for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
+            CertUtil.verifyCertificate(trustAnchor, false, Arrays.asList(cert));
+            log.debug("validateReceipt - Cert validated: " + cert.getSubjectDN().toString());
+        }
+        if(file != null) {
+            file.renameTo(new File(file.getParent() + File.separator+  "EXPENDED_" + file.getName()));
+        }
     }
 
     public JSONObject getTransaction(String toUserName, String toUserIBAN, String subject, Boolean isTimeLimited) {

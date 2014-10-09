@@ -8,13 +8,11 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.VicketServer
 import org.votingsystem.test.util.TestHelper
 import org.votingsystem.util.ExceptionVS
-import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
-import org.votingsystem.util.ObjectUtils
 import org.votingsystem.vicket.model.VicketTransactionBatch
 
 
-Logger logger = TestHelper.init(VicketSendFromDisk.class)
+Logger logger = TestHelper.init(VicketSendWallet.class)
 VicketServer vicketServer = TestHelper.loadVicketServer()
 ContextVS.getInstance().setDefaultServer(vicketServer)
 
@@ -34,13 +32,5 @@ logger.debug("Vicket Transaction result: " + responseVS.getStatusCode())
 if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage())
 transactionBatch.validateTransactionVSResponse(responseVS.getMessage(), vicketServer.getTrustAnchors());
 
-File file = new File("oldname");
-
-// File (or directory) with new name
-File file2 = new File("newname");
-if(file2.exists()) throw new java.io.IOException("file exists");
-
-// Rename file (or directory)
-boolean success = file.renameTo(file2);
 
 

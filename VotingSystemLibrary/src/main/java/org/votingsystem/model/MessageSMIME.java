@@ -72,8 +72,9 @@ public class MessageSMIME implements Serializable {
         return content;
     }
 
-    public void setContent(byte[] content) {
+    public MessageSMIME setContent(byte[] content) {
         this.content = content;
+        return this;
     }
 
     public UserVS getUserVS() {
@@ -225,8 +226,9 @@ public class MessageSMIME implements Serializable {
         return signedContent;
     }
 
-    public void setSignedContent(String signedContent) {
+    public MessageSMIME setSignedContent(String signedContent) {
         this.signedContent = signedContent;
+        return this;
     }
 
     public void beforeInsert() {

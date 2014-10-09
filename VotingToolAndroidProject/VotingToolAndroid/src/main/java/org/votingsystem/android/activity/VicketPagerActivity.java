@@ -134,8 +134,8 @@ public class VicketPagerActivity extends ActivityBase {
             switch(selectedChild) {
                 case VICKET_USER_INFO:
                     DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
-                    String periodLbl = context.getString(R.string.week_lapse_lbl, DateUtils.getDate_Es(
-                            timePeriod.getDateFrom()), DateUtils.getDate_Es(timePeriod.getDateTo()));
+                    String periodLbl = context.getString(R.string.week_lapse_lbl, DateUtils.getDateWithDayWeek(
+                            timePeriod.getDateFrom()), DateUtils.getDateWithDayWeek(timePeriod.getDateTo()));
                     return periodLbl;
                 case VICKET_LIST:
                     return context.getString(R.string.vickets_list_lbl);

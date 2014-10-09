@@ -13,13 +13,12 @@ class BootStrap {
     def grailsApplication
 
     def init = { servletContext ->
-        DateUtils.getDate_Es()
+        log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         JSON.registerObjectMarshaller(Date) {
             Date lastYear = DateUtils.addDays(Calendar.getInstance().getTime(), -365)
             if(it.before(lastYear)) return it?.format("dd MMM yyyy' 'HH:mm")
             else return it?.format("EEE dd MMM' 'HH:mm")
         }
-        log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init(ApplicationContextHolder.getInstance())
         signatureVSService.init();
         systemService.init()

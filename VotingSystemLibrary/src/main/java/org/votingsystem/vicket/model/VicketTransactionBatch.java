@@ -99,17 +99,9 @@ public class VicketTransactionBatch {
             String hashCertVS = (String) receiptData.keySet().iterator().next();
             SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(
                     java.util.Base64.getDecoder().decode(receiptData.getString(hashCertVS).getBytes())));
-            for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
-                CertUtil.verifyCertificate(trustAnchor, false, Arrays.asList(cert));
-                log.debug("Cert validated: " + cert.getSubjectDN().toString());
-            }
             String signatureHashCertVS = CertUtil.getHashCertVS(smimeReceipt.getCertWithCertExtension(), ContextVS.VICKET_OID);
             Vicket vicket = vicketMap.remove(signatureHashCertVS);
-            vicket.validateReceipt(smimeReceipt);
-            if(vicket.getFile() != null) {
-                vicket.getFile().renameTo(new File(vicket.getFile().getParent() + File.separator+  "EXPENDED_" +
-                        vicket.getFile().getName()));
-            }
+            vicket.validateReceipt(smimeReceipt, trustAnchor);
         }
         if(vicketMap.size() != 0) throw new ExceptionVS(vicketMap.size() + " Vicket transactions without receipt");
     }

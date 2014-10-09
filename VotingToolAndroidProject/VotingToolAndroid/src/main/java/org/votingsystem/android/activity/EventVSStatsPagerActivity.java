@@ -92,25 +92,25 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
                     case PENDING:
                         subtTitle = getString(R.string.manifest_pendind_lbl) + " - "+
                                 getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
+                                DateUtils.getDateWithDayWeek(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateFinish());
+                                DateUtils.getDateWithDayWeek(event.getDateFinish());
                         break;
                     case CANCELLED:
                         subtTitle = getString(R.string.manifest_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ") - " +
                                 getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
+                                DateUtils.getDateWithDayWeek(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateFinish()) +
+                                DateUtils.getDateWithDayWeek(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
                     case TERMINATED:
                         subtTitle = getString(R.string.manifest_closed_lbl) + " - " +
                                 getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
+                                DateUtils.getDateWithDayWeek(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateFinish());
+                                DateUtils.getDateWithDayWeek(event.getDateFinish());
                         break;
                     default:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
@@ -127,25 +127,25 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
                     case PENDING:
                         subtTitle = getString(R.string.claim_pending_lbl) +
                                 getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
+                                DateUtils.getDateWithDayWeek(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateFinish());
+                                DateUtils.getDateWithDayWeek(event.getDateFinish());
                         break;
                     case CANCELLED:
                         subtTitle = getString(R.string.claim_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ") " +
                                 getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
+                                DateUtils.getDateWithDayWeek(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateFinish()) +
+                                DateUtils.getDateWithDayWeek(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
                     case TERMINATED:
                         subtTitle = getString(R.string.claim_closed_lbl) + " - " +
                                 getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
+                                DateUtils.getDateWithDayWeek(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateFinish());
+                                DateUtils.getDateWithDayWeek(event.getDateFinish());
                     default:
                         subtTitle = getString(R.string.claim_closed_lbl);
                 }
@@ -161,9 +161,9 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
                     case PENDING:
                         subtTitle = getString(R.string.voting_pending_lbl) + " - " +
                                 getString(R.string.init_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateBegin()) + " - " +
+                                DateUtils.getDateWithDayWeek(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.finish_lbl) + ": " +
-                                DateUtils.getDate_Es(event.getDateFinish());
+                                DateUtils.getDateWithDayWeek(event.getDateFinish());
                         break;
                     default:
                         subtTitle = getString(R.string.voting_closed_lbl);

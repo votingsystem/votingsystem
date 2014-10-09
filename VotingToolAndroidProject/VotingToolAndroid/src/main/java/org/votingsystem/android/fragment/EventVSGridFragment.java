@@ -406,20 +406,20 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                             imgView.setImageResource(R.drawable.pending);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.init_lbl) + "</b>: " +
-                                    DateUtils.getDate_Es(eventVS.getDateBegin()) + " - " +
+                                    DateUtils.getDateWithDayWeek(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.finish_lbl) + "</b>: " +
-                                    DateUtils.getDate_Es(eventVS.getDateFinish());
+                                    DateUtils.getDateWithDayWeek(eventVS.getDateFinish());
                             break;
                         case CANCELLED:
                         case TERMINATED:
                             imgView.setImageResource(R.drawable.closed);
                             dateInfoStr = "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.init_lbl) + "</b>: " +
-                                    DateUtils.getDate_Es(eventVS.getDateBegin()) + " - " +
+                                    DateUtils.getDateWithDayWeek(eventVS.getDateBegin()) + " - " +
                                     "<b>" + getActivity().getApplicationContext().getString(
                                     R.string.finish_lbl) + "</b>: " +
-                                    DateUtils.getDate_Es(eventVS.getDateFinish());
+                                    DateUtils.getDateWithDayWeek(eventVS.getDateFinish());
                             break;
                         default:
                             Log.d(TAG +  ".bindView(...)", "unknown event state: " +

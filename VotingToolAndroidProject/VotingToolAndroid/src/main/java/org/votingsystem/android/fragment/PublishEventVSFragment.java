@@ -147,7 +147,7 @@ public class PublishEventVSFragment extends Fragment {
         @Override public void onDateSet(DatePicker view, int year, int monthOfYear,int dayOfMonth) {
             //Double triggering problem
             if (!view.isShown()) return;
-            Calendar todayCalendar = DateUtils.xDaysElapsed(1);
+            Calendar todayCalendar = DateUtils.addDays(1);
             Calendar newCalendar = Calendar.getInstance();
             newCalendar.set(Calendar.YEAR, year);
             newCalendar.set(Calendar.MONTH, monthOfYear);
@@ -166,7 +166,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                 }
                 dateFinishCalendar = newCalendar;
-                dateFinishEditText.setText(DateUtils.getDate_Es(dateFinishCalendar.getTime()));
+                dateFinishEditText.setText(DateUtils.getDateWithDayWeek(dateFinishCalendar.getTime()));
             }
         }
     };
@@ -176,7 +176,7 @@ public class PublishEventVSFragment extends Fragment {
         @Override public void onDateSet(DatePicker view, int year, int monthOfYear,int dayOfMonth) {
             //Double triggering problem
             if (!view.isShown()) return;
-            Calendar todayCalendar = DateUtils.xDaysElapsed(1);
+            Calendar todayCalendar = DateUtils.addDays(1);
             Calendar newCalendar = Calendar.getInstance();
             newCalendar.set(Calendar.YEAR, year);
             newCalendar.set(Calendar.MONTH, monthOfYear);
@@ -195,7 +195,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                 }
                 dateBeginCalendar = newCalendar;
-                dateBeginEditText.setText(DateUtils.getDate_Es(
+                dateBeginEditText.setText(DateUtils.getDateWithDayWeek(
                         dateBeginCalendar.getTime()));
             }
         }
@@ -285,7 +285,7 @@ public class PublishEventVSFragment extends Fragment {
                     @Override public void onClick(View v) {
                         Log.d(TAG + ".setOnClickListener(...)", "");
                         Calendar calendarToShow = null;
-                        if(dateBeginCalendar == null) calendarToShow = DateUtils.xDaysElapsed(1);
+                        if(dateBeginCalendar == null) calendarToShow = DateUtils.addDays(1);
                         else calendarToShow = dateBeginCalendar;
                         DatePickerDialog dialog = new DatePickerDialog(getActivity(), dateBeginListener,
                                 calendarToShow.get(Calendar.YEAR), calendarToShow.get(Calendar.MONTH),
@@ -303,7 +303,7 @@ public class PublishEventVSFragment extends Fragment {
             @Override public void onClick(View v) {
                 Log.d(TAG + ".setOnClickListener(...)", "");
                 Calendar calendarToShow = null;
-                if(dateFinishCalendar == null) calendarToShow = DateUtils.xDaysElapsed(1);
+                if(dateFinishCalendar == null) calendarToShow = DateUtils.addDays(1);
                 else calendarToShow = dateFinishCalendar;
                 DatePickerDialog dialog = new DatePickerDialog(getActivity(), dateFinishListener,
                         calendarToShow.get(Calendar.YEAR), calendarToShow.get(Calendar.MONTH),

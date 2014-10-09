@@ -57,13 +57,6 @@ public class DateUtils {
         return formatter.parse(dateString);
     }
 
-    /**
-     * Método que devuelve un String con formato "yyyy/MM/dd HH:mm:ss a partir de un Date"
-     *
-     * @param Date fecha en formato Date
-     * @return dateString fecha en formato String
-     * @throws import java.text.ParseException;
-     */
     public static String getDateStr (Date date) {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         return formatter.format(date);
@@ -101,10 +94,17 @@ public class DateUtils {
         return time;
     }
 
-    public static Calendar xDaysElapsed(int numDias) {
+    public static Calendar addDays(int numDias) {
         Calendar today = Calendar.getInstance();
         today.add(Calendar.DATE, numDias);
         return (today);
+    }
+
+    public static Date addDays(Date date, int days){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days); //minus number would decrement the days
+        return cal.getTime();
     }
     
     public static String getDayHourElapsedTime (Date date1, Date date2, Context context) {
@@ -115,8 +115,11 @@ public class DateUtils {
         return getDayHourElapsedTime(cal1, cal2, context);
     }
     
-    public static String getDate_Es (Date date) {
-    	SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy");
+    public static String getDateWithDayWeek (Date date) {
+        String format = "EEE dd MMM' 'HH:mm";
+        Date lastYear = DateUtils.addDays(Calendar.getInstance().getTime(), -365);
+        if(date.before(lastYear)) format = "dd MMM yyyy' 'HH:mm";
+    	SimpleDateFormat formatter = new SimpleDateFormat(format);
     	return formatter.format(date);
     }
 

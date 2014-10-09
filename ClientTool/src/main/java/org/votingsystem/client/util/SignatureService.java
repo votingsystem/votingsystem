@@ -114,6 +114,7 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case OPEN_RECEIPT_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
+                            break;
                         default:
                             responseVS = sendSMIME(operationVS.getTargetServer(), operationVS);
                     }

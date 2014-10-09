@@ -73,9 +73,9 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
                             certificate.getSubjectDN().toString(),
                             certificate.getIssuerDN().toString(),
                             certificate.getSerialNumber().toString(),
-                            DateUtils.getDate_Es(
+                            DateUtils.getDateWithDayWeek(
                                     certificate.getNotBefore()),
-                            DateUtils.getDate_Es(
+                            DateUtils.getDateWithDayWeek(
                                     certificate.getNotAfter()));
                 } catch (CertificateException ex) {
                     ex.printStackTrace();

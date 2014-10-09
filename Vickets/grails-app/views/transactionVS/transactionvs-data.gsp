@@ -57,15 +57,17 @@
                 </template>
             </div>
 
-
-            <div style="margin-left: 20px;">
-                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
-                    <g:message code="senderLbl"/></div>
-                <div id="fromUserDiv">
-                    <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
-                    <div on-click="{{showFromUserIBAN}}"  class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs | getFromUserIBAN}}</div>
+            <template if="{isSenderVisible}}">
+                <div style="margin-left: 20px;">
+                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
+                        <g:message code="senderLbl"/></div>
+                    <div id="fromUserDiv">
+                        <div style=""><b><g:message code="nameLbl"/>: </b>{{transactionvs | getFromUserName}}</div>
+                        <div on-click="{{showFromUserIBAN}}"  class="IBANLink"><b><g:message code="IBANLbl"/>: </b>{{transactionvs | getFromUserIBAN}}</div>
+                    </div>
                 </div>
-            </div>
+            </template>
+
             <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible || receptorMsg ?'block':'none'}}">
                 <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
                 <div>
@@ -78,7 +80,7 @@
             </div >
         </div>
         <template if="{{isClientToolConnected}}">
-            <div layout horizontal style="margin:0px 20px 0px 0px;">
+            <div layout horizontal style="margin:15px 20px 0px 0px;">
                 <div flex></div>
                 <div style="margin:10px 0px 10px 0px;">
                     <votingsystem-button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
@@ -99,6 +101,7 @@
             receptorLbl:null,
             caption:null,
             isReceptorVisible:true,
+            isSenderVisible:true,
             receptorMsg:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -123,7 +126,6 @@
                 return result
             },
             transactionvsChanged:function() {
-                this.$.fromUserDiv.classList.remove("pageHeader");
                 this.messageToUser = null
                 this.isReceptorVisible = true
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
@@ -149,7 +151,10 @@
                     case 'VICKET_INIT_PERIOD':
                         this.caption = "<g:message code="vicketInitPeriodLbl"/>"
                         this.$.fromUserDiv.innerHTML = "<g:message code="systemLbl"/>"
-                        this.$.fromUserDiv.classList.add("pageHeader");
+                        break;
+                    case 'VICKET_SEND':
+                        this.caption = "<g:message code="vicketSendLbl"/>"
+                        this.isSenderVisible = false
                         break;
                     case 'FROM_BANKVS':
                         this.caption = "<g:message code="transactionVSFromBankVS"/>"
