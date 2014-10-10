@@ -377,16 +377,8 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
 
 window['isClientToolConnected'] = false
 
-var clientToolListeners = []
-function addClientToolListener(listener) {
-    clientToolListeners.push(listener)
-}
-
 function notifiyClientToolConnection() {
     window['isClientToolConnected'] = true
-    for(var i = 0; i < clientToolListeners.length; i++) {
-        clientToolListeners[i]()
-    }
 }
 
 //Message -> base64 encoded JSON

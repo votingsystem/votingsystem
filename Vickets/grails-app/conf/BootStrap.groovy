@@ -15,9 +15,7 @@ class BootStrap {
     def init = { servletContext ->
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         JSON.registerObjectMarshaller(Date) {
-            Date lastYear = DateUtils.addDays(Calendar.getInstance().getTime(), -365)
-            if(it.before(lastYear)) return it?.format("dd MMM yyyy' 'HH:mm")
-            else return it?.format("EEE dd MMM' 'HH:mm")
+            return DateUtils.getDayWeekDateStr(it)
         }
         ContextVS.init(ApplicationContextHolder.getInstance())
         signatureVSService.init();

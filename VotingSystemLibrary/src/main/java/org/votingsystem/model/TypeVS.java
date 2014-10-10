@@ -13,6 +13,7 @@ public enum TypeVS {
     REQUEST_WITHOUT_FILE,
     EVENT_WITH_ERRORS,
     OK,
+    FORMAT_DATE,
     TEST,
     SIGNATURE_ERROR,
     ERROR,

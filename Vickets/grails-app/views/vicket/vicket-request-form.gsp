@@ -4,7 +4,13 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-checkbox', file: 'paper-checkbox.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicketTagVS/tagvs-select-dialog']"/>">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-tag-group']"/>">
+
+
+
+
 
 <polymer-element name="vicket-request-form"  on-core-select="{{selectAction}}">
     <template>
@@ -42,7 +48,7 @@
 
             <div layout horizontal center center-justified>
                 <div style="margin: 0 10px 0 0;"><paper-checkbox id="timeLimitedCheckBox"></paper-checkbox></div>
-                <div style="color:#6c0404; font-size: 1.2em; text-align: center;font-weight: bold;">
+                <div style="color:#6c0404; background: #fefefe;font-size: 1.2em; text-align: center;font-weight: bold;">
                     <core-tooltip large label="<g:message code="receptorTimeLimitedAdviceMsg"/>" position="bottom">
                         <g:message code="timeLimitedAdviceMsg"/>
                     </core-tooltip>
@@ -100,25 +106,51 @@
         <tagvs-select-dialog id="tagDialog" caption="<g:message code="addTagDialogCaption"/>"
                              serviceURL="<g:createLink controller="vicketTagVS" action="index" />"></tagvs-select-dialog>
 
-        <polymer-localstorage name="vicket-request-localstorage" value="{{value}}"></polymer-localstorage>
-        Num vickets: {{value.length}} -- {{value}}
+        <polymer-localstorage id="localstorage" name="vicket-request-localstorage" value="{{vicketsWallet}}"></polymer-localstorage>
+
+        <template repeat="{{tag in tagArray}}">
+            <vicket-tag-group tag={{tag}} vicketArray="{{tagGroups[tag]}}"></vicket-tag-group>
+        </template>
+
     </template>
     <script>
         Polymer('vicket-request-form', {
             selectedTags: [],
             currencyCode:null,
+            vicketsWalletArray:[],
+            tagGroups:{},
+            tagArray:[],
             currencyCodes: [
                 {name: 'Euro', code: 'EUR'},
                 {name: 'Dollar', code: 'USD'},
                 {name: 'Yuan', code: 'CNY'},
                 {name: 'Yen', code: 'JPY'}],
             messageToUser:null,
+
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.$.tagDialog.addEventListener('tag-selected', function (e) {
                     console.log("tag-selected: " + JSON.stringify(e.detail))
                     this.selectedTags = e.detail
                 }.bind(this))
+            },
+            getTags:function(tagGroups) {
+                console.log("getTags")
+                return Object.keys(this.tagGroups)
+            },
+            vicketsWalletChanged:function() {
+                console.log("vicketsWalletChanged")
+                this.tagGroups = {}
+                console.log("vicketsWalletChanged: " + this.vicketsWallet)
+                this.vicketsWalletArray = JSON.parse(this.vicketsWallet)
+                for(vicketIdx in this.vicketsWalletArray) {
+                    var vicket = this.vicketsWalletArray[vicketIdx]
+                    console.log("### vicketsWalletChanged - vicket.tag: " + vicket.tag)
+                    if(this.tagGroups[vicket.tag]) this.tagGroups[vicket.tag].push(vicket)
+                    else this.tagGroups[vicket.tag] = [vicket]
+                }
+                this.tagArray = Object.keys(this.tagGroups)
+                console.log("### vicketsWalletChanged - this.tagGroups: " + JSON.stringify(this.tagGroups))
             },
             currencyCodeSelect:function() {
                 this.fire("selected", this.$.currencyCodeSelect.value)
@@ -143,6 +175,17 @@
                         this.selectedTags.splice(tagIdx, 1)
                     }
                 }
+            },
+            updateLocalStorage:function(appMessageJSON) {
+                if(this.vicketsWallet) {
+                    console.log(" ====== vicketsWallet - isArray: " +  Array.isArray(this.vicketsWallet))
+                    var vicketsWalletJSON
+                    try {vicketsWalletJSON = JSON.parse(this.vicketsWallet)} catch(ex) {console.log(ex)}
+                    if(Array.isArray(vicketsWalletJSON)) vicketsWalletJSON = vicketsWalletJSON.concat(appMessageJSON.vicketList)
+                    else vicketsWalletJSON = appMessageJSON.vicketList
+                    this.vicketsWallet = JSON.stringify(vicketsWalletJSON)
+                } else this.vicketsWallet = JSON.stringify(appMessageJSON.vicketList)
+                console.log(" ====== this.vicketsWallet: " + this.vicketsWallet)
             },
             submit:function() {
                 console.log("submit")
@@ -171,8 +214,7 @@
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "<g:message code='vicketRequestOKCaption'/>"
-                        if(this.value && Array.isArray(this.value)) this.value = this.value.concat(appMessageJSON.vicketList)
-                        else this.value = appMessageJSON.vicketList
+                        this.updateLocalStorage(appMessageJSON)
                     } else caption = '<g:message code="vicketRequestERRORCaption"/>'
                     showMessageVS(appMessageJSON.message, caption)
                 }.bind(this))

@@ -33,6 +33,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import net.sf.json.JSON;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import netscape.javascript.JSObject;
@@ -43,16 +44,14 @@ import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author jgzornoza
@@ -426,6 +425,20 @@ public class BrowserVS extends Region {
                     case MESSAGEVS_GET:
                         JSONObject documentJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocument());
                         WebSocketService.getInstance().sendMessage(documentJSON.toString());
+                        break;
+                    case FORMAT_DATE:
+                        Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),
+                                (String) operationVS.getDocument().get("dateFormat"));
+                        String dateResultStr = null;
+                        String stringFormat = null;
+                        if( operationVS.getDocument().get("stringFormat") == null && !JSONNull.getInstance().equals(
+                                operationVS.getDocument().get("stringFormat"))) {
+                            stringFormat = (String)operationVS.getDocument().get("stringFormat");
+                        }
+                        if(stringFormat != null) dateResultStr = DateUtils.getDateStr(dateToFormat,
+                                (String) operationVS.getDocument().get("stringFormat"));
+                        else dateResultStr = DateUtils.getDayWeekDateStr(dateToFormat);
+                        sendMessageToBrowserApp(ResponseVS.SC_OK, dateResultStr, operationVS.getCallerCallback());
                         break;
                     default:
                         browserHelper.processOperationVS(operationVS);

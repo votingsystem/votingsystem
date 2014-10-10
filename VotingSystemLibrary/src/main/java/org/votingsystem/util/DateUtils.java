@@ -299,4 +299,12 @@ public class DateUtils {
             return "Period from [" + getDateStr(dateFrom) + " - " + getDateStr(dateTo) + "]";
         }
     }
+
+    public static String getDayWeekDateStr (Date date) {
+        Date lastYear = addDays(Calendar.getInstance().getTime(), -365);
+        if(date.before(lastYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
+        else return getDateStr(date, "EEE dd MMM' 'HH:mm");
+    }
+
+
 }

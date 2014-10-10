@@ -2,6 +2,9 @@
 <html>
 <head>
     <title>TestingTemplate</title>
+    <g:if test="${'simplePage'.equals(params.mode)}"><meta name="layout" content="simplePage" /></g:if>
+    <g:elseif test="${'innerPage'.equals(params.mode)}"></g:elseif>
+    <g:else><meta name="layout" content="main" /></g:else>
     <style>
     textarea { }
     input[id="subject"] { }
@@ -33,7 +36,12 @@
 </html>
 <asset:script>
 
-
-
+                getDateFormatted("2014/10/06 00:00:00","yyyy/MM/dd' 'HH:mm:ss", null,function(appMessage) {
+                    var appMessageJSON = JSON.parse(appMessage)
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        notAfter = appMessageJSON.message
+                        console.log("====== " + notAfter)
+                    }
+                })
 </asset:script>
 <asset:deferredScripts/>

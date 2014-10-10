@@ -67,7 +67,7 @@
 
 
             <template if="{{signedDocument.operation == 'VICKET'}}">
-                <div style="font-size: 1.em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
+                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
                     {{receptorLbl}}</div>
                 <div><b>{{toUserName}}</b></div>
                 <div layout horizontal>

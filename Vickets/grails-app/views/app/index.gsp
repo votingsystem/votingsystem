@@ -53,6 +53,21 @@
             </p>
         </div>
 
+        <div class="text-justify" style="margin: 20px auto ;font-size: 1.2em;">
+            <h3 class="pageHeader">Retirada de efectivo</h3>
+            La retirada de efectivo es una variedad del pago anónimo en la que el usuario se descarga la moneda, con las
+            mismas consecuencias que acarrea operar con una moneda física. Si la pierdes no hay forma de recuperarla.
+            <p><b>Retirada de efectivo con fecha de límite.</b> Cuando se retira efectivo con fecha límite, el usuario
+            se compromete a gastar ese efectivo antes del domingo a las 24:00 horas. El receptor de un pago anónimo
+            con un <b>Vicket</b> con fecha límite también debe gastar ese dinero antes del límite.
+            </p>
+            <p><b>Retirada de efectivo sin fecha de límite.</b> La duración máxima de un Vicket sin fecha límite es un año.
+            Si el usuario no desea consumir ese Vicket puede cangearlo sin problemas siempre antes de que supere su
+            fecha de caducidad.
+            </p>
+        </div>
+
+
         <div class="text-justify" style="margin: 20px auto 300px auto;font-size: 1.2em;">
             <h3 class="pageHeader">Alquimia digital. Estímulo de actividad mediante monedas electrónicas</h3>
             <p><b>La moneda electrónica sirve para poder añadir nuevas funcionalidades a la moneda tradicional</b></p>

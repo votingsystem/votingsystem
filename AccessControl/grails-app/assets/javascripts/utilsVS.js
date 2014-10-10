@@ -367,17 +367,9 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
 
 window['isClientToolConnected'] = false
 
-var clientToolListeners = []
-function addClientToolListener(listener) {
-    clientToolListeners.push(listener)
-}
-
 function notifiyClientToolConnection() {
     window['isClientToolConnected'] = true
     console.log("notifiyClientToolConnection")
-    for(var i = 0; i < clientToolListeners.length; i++) {
-        clientToolListeners[i]()
-    }
     if(document.querySelector("#voting_system_page")) {
         console.log("votingsystem-clienttoolconnected event dispatched")
         var event = document.createEvent("HTMLEvents");

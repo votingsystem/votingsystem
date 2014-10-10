@@ -38,14 +38,14 @@ class TestingController {
     def index() {
         /*UserVS userVS = UserVS.get(2L)
         def transactions = transactionVSService.getTransactionFromList(userVS, DateUtils.getCurrentWeekPeriod())
-        render transactions as JSON*/
+        render transactions as JSON
         String result
         Date dateToCheck = DateUtils.addDays(Calendar.getInstance().getTime(), -375)
         Date lastYear = DateUtils.addDays(Calendar.getInstance().getTime(), -365)
         if(dateToCheck.before(lastYear)) result = dateToCheck?.format("dd MMM yyyy' 'HH:mm")
         else result = dateToCheck?.format("dd MMM' 'HH:mm")
-        Map resultMap = [result:result]
-        render resultMap as JSON
+        Map resultMap = [result:result]*/
+
     }
 
     def balance() {

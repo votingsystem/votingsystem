@@ -4,6 +4,7 @@ var Operation = {
     CERT_CA_NEW:"CERT_CA_NEW",
     CERT_USER_NEW:"CERT_USER_NEW",
     CERT_EDIT:"CERT_EDIT",
+    FORMAT_DATE:"FORMAT_DATE",
     LISTEN_TRANSACTIONS : "LISTEN_TRANSACTIONS",
     MESSAGEVS:"MESSAGEVS",
     MESSAGEVS_GET: "MESSAGEVS_GET",
@@ -34,9 +35,11 @@ function httpGet(serviceURL){
 
 function DateUtils(){}
 
-//parse dates with format "2010-08-30 01:02:03"
+//parse dates with format "2010-08-30 01:02:03" or "2010/08/30 01:02:03"
 DateUtils.parse = function (dateStr) {
     var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+    try { (+dateArray[1]) } catch(ex) { reggie = /(\d{4})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2}):(\d{2})/; }
+
     var dateArray = reggie.exec(dateStr);
     var dateObject = new Date(
         (+dateArray[1]),
@@ -88,6 +91,10 @@ Date.prototype.format = function() {
     var curr_year = this.getFullYear();
     return curr_year + "/" + curr_month + "/" + curr_date
 };
+
+Date.prototype.daydiff = function (dateToCompare) {
+    return (this - dateToCompare)/(1000*60*60*24);
+}
 
 //parse dates with format "yyyy-mm-dd"
 DateUtils.parseInputType = function (dateStr) {
@@ -368,16 +375,8 @@ VotingSystemClient.setJSONMessageToSignatureClient = function (messageJSON) {
 
 window['isClientToolConnected'] = false
 
-var clientToolListeners = []
-function addClientToolListener(listener) {
-    clientToolListeners.push(listener)
-}
-
 function notifiyClientToolConnection() {
     window['isClientToolConnected'] = true
-    for(var i = 0; i < clientToolListeners.length; i++) {
-        clientToolListeners[i]()
-    }
 }
 
 //Message -> base64 encoded JSON

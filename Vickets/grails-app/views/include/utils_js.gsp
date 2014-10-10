@@ -116,4 +116,12 @@
     window.sendAndroidURIMessage = function(encodedData) {
         document.querySelector("#_votingsystemMessageDialog").sendAndroidURIMessage(encodedData)
     }
+
+    function getDateFormatted(dateToFormat, dateFormat, stringFormat, callback) {
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.FORMAT_DATE)
+        webAppMessage.document = {dateStr: dateToFormat, dateFormat:dateFormat, stringFormat:stringFormat}
+        webAppMessage.setCallback(callback)
+        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+    }
+ console.log("=========getDateFormatted ")
 </script>

@@ -28,11 +28,13 @@ public class WalletUtils {
 
     }
 
-    public static List<String> getSerializedVicketList(Collection<Vicket> vicketCollection) throws UnsupportedEncodingException {
-        List<String> result = new ArrayList<>();
+    public static List<Map> getSerializedVicketList(Collection<Vicket> vicketCollection) throws UnsupportedEncodingException {
+        List<Map> result = new ArrayList<>();
         for(Vicket vicket : vicketCollection) {
+            Map<String, String> vicketDataMap = vicket.getCertSubject().getDataMap();
             byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
-            result.add(new String(vicketSerialized, "UTF-8"));
+            vicketDataMap.put("object", new String(vicketSerialized, "UTF-8"));
+            result.add(vicketDataMap);
         }
         return result;
     }

@@ -36,22 +36,6 @@ public class Vicket implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public Boolean getIsTimeLimited() {
-        return isTimeLimited;
-    }
-
-    public void setIsTimeLimited(Boolean isTimeLimited) {
-        this.isTimeLimited = isTimeLimited;
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
-    }
-
     public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -99,6 +83,7 @@ public class Vicket implements Serializable  {
     @Transient private String signedTagVS;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
+    @Transient private Vicket.CertSubject certSubject;
 
     public Vicket() {}
 
@@ -130,10 +115,10 @@ public class Vicket implements Serializable  {
     public Vicket initCertData(JSONObject certExtensionData, String subjectDN) throws ExceptionVS {
         if(certExtensionData == null) throw new ExceptionVS("Vicket without cert extension data");
         if(!certExtensionData.has("hashCertVS"))  throw new ExceptionVS("Vicket without cert hash");
-        Vicket.CertSubject certSubject = Vicket.getCertSubject(subjectDN);
         vicketServerURL = certExtensionData.getString("vicketServerURL");
         hashCertVS = certExtensionData.getString("hashCertVS");
         if(hashCertVS == null) throw new ExceptionVS("Vicket without hash");
+        certSubject = new Vicket.CertSubject(subjectDN, hashCertVS);
         amount = new BigDecimal(certExtensionData.getString("vicketValue"));
         currencyCode = certExtensionData.getString("currencyCode");
         signedTagVS = certExtensionData.getString("tag");
@@ -144,6 +129,8 @@ public class Vicket implements Serializable  {
                 subjectDN + "' - cert extension data: '" + certExtensionData.toString() + "'");
         return this;
     }
+
+    public Vicket.CertSubject getCertSubject() {return certSubject;}
 
     public Vicket checkRequestWithDB(Vicket vicketRequest) throws ExceptionVS {
         if(!vicketRequest.getVicketServerURL().equals(vicketServerURL))  throw new ExceptionVS("checkRequestWithDB_vicketServerURL");
@@ -183,6 +170,25 @@ public class Vicket implements Serializable  {
     public void initSigner(byte[] csrBytes) throws Exception {
         certificationRequest.initSigner(csrBytes);
         x509AnonymousCert = certificationRequest.getCertificate();
+        JSONObject certExtensionData = CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
+        initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
+        certSubject.addDateInfo(x509AnonymousCert);
+    }
+
+    public Boolean getIsTimeLimited() {
+        return isTimeLimited;
+    }
+
+    public void setIsTimeLimited(Boolean isTimeLimited) {
+        this.isTimeLimited = isTimeLimited;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public String getToUserIBAN() {
@@ -432,10 +438,6 @@ public class Vicket implements Serializable  {
         this.tag = tag;
     }
 
-    public static CertSubject getCertSubject(String subjectDN) {
-        return new CertSubject(subjectDN);
-    }
-
     public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor)
             throws Exception {
         if(!smimeMessage.getSigner().getContentDigestBase64().equals(smimeReceipt.getSigner().getContentDigestBase64())){
@@ -479,21 +481,41 @@ public class Vicket implements Serializable  {
         return result;
     }
 
-    public static class CertSubject {
+    public static class CertSubject implements Serializable {
+
+        public static final long serialVersionUID = 1L;
+
         String currencyCode;
         BigDecimal vicketValue;
         String vicketServerURL;
         String tag;
-        public CertSubject(String subjectDN) {
+        String hashCertVS;
+        Map<String, String> dataMap;
+
+        public CertSubject(String subjectDN, String hashCertVS) {
+            this.hashCertVS = hashCertVS;
             if (subjectDN.contains("CURRENCY_CODE:")) currencyCode = subjectDN.split("CURRENCY_CODE:")[1].split(",")[0];
             if (subjectDN.contains("VICKET_VALUE:")) vicketValue = new BigDecimal(subjectDN.split("VICKET_VALUE:")[1].split(",")[0]);
             if (subjectDN.contains("TAG:")) tag = subjectDN.split("TAG:")[1].split(",")[0];
             if (subjectDN.contains("vicketServerURL:")) vicketServerURL = subjectDN.split("vicketServerURL:")[1].split(",")[0];
+            dataMap = new HashMap<>();
+            dataMap.put("vicketServerURL", vicketServerURL);
+            dataMap.put("currencyCode", currencyCode);
+            dataMap.put("vicketValue", vicketValue.toString());
+            dataMap.put("tag", tag);
+            dataMap.put("hashCertVS", hashCertVS);
         }
+
+        public void addDateInfo(X509Certificate x509AnonymousCert) {
+            dataMap.put("notBefore", DateUtils.getDateStr(x509AnonymousCert.getNotBefore()));
+            dataMap.put("notAfter", DateUtils.getDateStr(x509AnonymousCert.getNotAfter()));
+        }
+
         public String getCurrencyCode() {return this.currencyCode;}
         public BigDecimal getVicketValue() {return this.vicketValue;}
         public String getVicketServerURL() {return this.vicketServerURL;}
         public String getTag() {return this.tag;}
+        public Map<String, String> getDataMap() {return dataMap;}
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
