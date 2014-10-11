@@ -61,23 +61,9 @@
                 else return tag
             },
             dateInfo:function(vicket) {
-                var notBefore
-                var notAfter
-                getDateFormatted(vicket.notBefore,"yyyy/MM/dd' 'HH:mm:ss", null,function(appMessage) {
-                        var appMessageJSON = JSON.parse(appMessage)
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            notBefore = appMessageJSON.message
-                        }
-                    }.bind(this))
-
-                getDateFormatted(vicket.notAfter,"yyyy/MM/dd' 'HH:mm:ss", null,function(appMessage) {
-                    var appMessageJSON = JSON.parse(appMessage)
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        notAfter = appMessageJSON.message
-                        this.$[vicket.hashCertVS].innerHTML = "<g:message code="dateRangeMsg"/>".format(notBefore, notAfter)
-                    }
-                }.bind(this))
-
+                var notBefore = getDateFormatted(vicket.notBefore,"yyyy/MM/dd' 'HH:mm:ss", null, null)
+                var notAfter = getDateFormatted(vicket.notAfter,"yyyy/MM/dd' 'HH:mm:ss", null, null)
+                return "<g:message code="dateRangeMsg"/>".format(notBefore, notAfter)
             },
             isTimeLimited:function(vicket) {
                 var notBefore = DateUtils.parse(vicket.notBefore)

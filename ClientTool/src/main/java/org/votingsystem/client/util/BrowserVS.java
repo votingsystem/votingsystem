@@ -51,6 +51,7 @@ import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -397,13 +398,13 @@ public class BrowserVS extends Region {
 
         public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
             try {
-                String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()),"UTF-8");
+                String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()), "UTF-8");
                 String logMsg = messageToSignatureClient.length() > 350 ? messageToSignatureClient.substring(0, 350) +
                         "..." : messageToSignatureClient;
                 logger.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
-                OperationVS operationVS = OperationVS.populate(jsonObject);
-                switch(operationVS.getType()) {
+                OperationVS operationVS = OperationVS.parse(jsonObject);
+                switch (operationVS.getType()) {
                     case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
                         receiptCancellation(operationVS);
                         break;
@@ -423,32 +424,47 @@ public class BrowserVS extends Region {
                         saveReceiptAnonymousDelegation(operationVS);
                         break;
                     case MESSAGEVS_GET:
-                        JSONObject documentJSON = (JSONObject)JSONSerializer.toJSON(operationVS.getDocument());
+                        JSONObject documentJSON = (JSONObject) JSONSerializer.toJSON(operationVS.getDocument());
                         WebSocketService.getInstance().sendMessage(documentJSON.toString());
-                        break;
-                    case FORMAT_DATE:
-                        Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),
-                                (String) operationVS.getDocument().get("dateFormat"));
-                        String dateResultStr = null;
-                        String stringFormat = null;
-                        if( operationVS.getDocument().get("stringFormat") == null && !JSONNull.getInstance().equals(
-                                operationVS.getDocument().get("stringFormat"))) {
-                            stringFormat = (String)operationVS.getDocument().get("stringFormat");
-                        }
-                        if(stringFormat != null) dateResultStr = DateUtils.getDateStr(dateToFormat,
-                                (String) operationVS.getDocument().get("stringFormat"));
-                        else dateResultStr = DateUtils.getDayWeekDateStr(dateToFormat);
-                        sendMessageToBrowserApp(ResponseVS.SC_OK, dateResultStr, operationVS.getCallerCallback());
                         break;
                     default:
                         browserHelper.processOperationVS(operationVS);
                 }
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
-                showMessage( ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
+                showMessage(ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
             }
         }
 
+        public String call(String messageToSignatureClient) {
+            String result = null;
+            try {
+                String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()), "UTF-8");
+                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
+                OperationVS operationVS = OperationVS.parse(jsonObject);
+                switch (operationVS.getType()) {
+                    case FORMAT_DATE:
+                        Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),
+                                (String) operationVS.getDocument().get("dateFormat"));
+                        String stringFormat = null;
+                        if (operationVS.getDocument().get("stringFormat") == null && !JSONNull.getInstance().equals(
+                                operationVS.getDocument().get("stringFormat"))) {
+                            stringFormat = (String) operationVS.getDocument().get("stringFormat");
+                        }
+                        if (stringFormat != null) result = DateUtils.getDateStr(dateToFormat,
+                                (String) operationVS.getDocument().get("stringFormat"));
+                        else result = DateUtils.getDayWeekDateStr(dateToFormat);
+                        return result;
+                    default:
+                        return "Unknown operation: '" + operationVS.getType() + "'";
+                }
+            } catch (UnsupportedEncodingException ex) {
+                logger.error(ex.getMessage(), ex);
+                result = ex.getMessage();
+            } finally {
+                return result;
+            }
+        }
     }
 
     private void saveReceiptAnonymousDelegation(OperationVS operation) throws Exception{

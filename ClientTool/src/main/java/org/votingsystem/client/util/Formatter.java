@@ -43,7 +43,7 @@ public class Formatter {
     public static String format(JSONObject jsonObject) {
         String result = null;
         try {
-            OperationVS operation = OperationVS.populate(jsonObject);
+            OperationVS operation = OperationVS.parse(jsonObject);
             switch(operation.getType()) {
                 case SEND_SMIME_VOTE:
                     result = formatVote(jsonObject);

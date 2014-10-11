@@ -121,7 +121,7 @@
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.FORMAT_DATE)
         webAppMessage.document = {dateStr: dateToFormat, dateFormat:dateFormat, stringFormat:stringFormat}
         webAppMessage.setCallback(callback)
-        VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
+        return VotingSystemClient.call(webAppMessage);
     }
- console.log("=========getDateFormatted ")
+
 </script>

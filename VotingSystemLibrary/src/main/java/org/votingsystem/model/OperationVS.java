@@ -209,7 +209,7 @@ public class OperationVS {
         }
     }
 
-    public static OperationVS populate (Map dataMap) {
+    public static OperationVS parse (Map dataMap) {
         logger.debug("populate");
         if(dataMap == null) return null;
         OperationVS operationVS = new OperationVS();
