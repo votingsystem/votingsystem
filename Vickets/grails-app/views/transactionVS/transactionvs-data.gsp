@@ -191,10 +191,10 @@
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
                 if(this.smimeMessage == null) {
                     webAppMessage.serviceURL = this.transactionvs.messageSMIMEURL
-                    webAppMessage.operation = Operation.OPEN_RECEIPT_FROM_URL
+                    webAppMessage.operation = Operation.OPEN_SMIME_FROM_URL
                 } else webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);

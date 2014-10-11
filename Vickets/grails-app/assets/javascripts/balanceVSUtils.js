@@ -71,11 +71,6 @@ function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanc
     return seriesData
 }
 
-
-function addNumbers(num1, num2) {
-    return (new Number(num1) + new Number(num2)).toFixed(2)
-}
-
 function checkBalanceMap(calculatedBalanceMap, serverBalanceMap) {
     console.log("checkBalanceMap")
     Object.keys(calculatedBalanceMap).forEach(function(entry) {

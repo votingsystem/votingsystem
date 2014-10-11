@@ -12,7 +12,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class FieldEventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private static Logger logger = Logger.getLogger(VoteVS.class);
+    private static Logger log = Logger.getLogger(VoteVS.class);
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -114,7 +114,7 @@ public class FieldEventVS implements Serializable {
                 fieldEvent.setValue((String) fieldMap.get("value"));
             }
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return fieldEvent;
     }

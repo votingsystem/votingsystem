@@ -33,7 +33,7 @@ import java.util.Collection;
  */
 public class TimeStampCertValidationPane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(TimeStampCertValidationPane.class);
+    private static Logger log = Logger.getLogger(TimeStampCertValidationPane.class);
 
     private TimeStampToken timeStampToken;
     private TextArea textArea;
@@ -80,27 +80,27 @@ public class TimeStampCertValidationPane extends GridPane {
     }
 
     private void validateTimeStamp() {
-        logger.debug("validateTimeStamp");
+        log.debug("validateTimeStamp");
         Collection<X509Certificate> certs = null;
         try {
             String pemCert = textArea.getText();
             certs = CertUtil.fromPEMToX509CertCollection(pemCert.getBytes());
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             showMessage(ContextVS.getInstance().getMessage("pemCertsErrorMsg"));
         }
         if(certs.isEmpty()) {
             showMessage("ERROR - " + ContextVS.getMessage("certNotFoundErrorMsg"));
         } else {
             for(X509Certificate cert:certs) {
-                logger.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
+                log.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
                 try {
                     timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                             ContextVS.PROVIDER).build(cert));
                     showMessage(ContextVS.getMessage("timeStampCertsValidationOKMsg",
                             cert.getSubjectDN().toString()));
                 } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
+                    log.error(ex.getMessage(), ex);
                     showMessage("ERROR - " + ex.getMessage());
                 }
             }
@@ -109,7 +109,7 @@ public class TimeStampCertValidationPane extends GridPane {
     }
 
     public static void showDialog(final TimeStampToken timeStampToken) {
-        logger.debug("showDialog");
+        log.debug("showDialog");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 Stage stage = new Stage();

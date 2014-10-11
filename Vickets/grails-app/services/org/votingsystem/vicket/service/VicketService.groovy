@@ -195,10 +195,9 @@ class VicketService {
         vicketBatch = csrService.signVicketBatchRequest(vicketBatch)
         TransactionVS userTransaction = vicketBatch.getTransactionVS(messageSource.getMessage(
                 'vicketRequestLbl', null, LocaleContextHolder.locale), accountFromMovements.data).save()
-        LoggerVS.logVicketRequest(userTransaction.id, fromUserVS.nif, userTransaction.currencyCode, userTransaction.amount,
-                userTransaction.tag, userTransaction.dateCreated)
-        Map transactionMap = transactionVSService.getTransactionMap(userTransaction)
-        Map resultMap = [transactionList:[transactionMap], issuedVickets:vicketBatch.getIssuedVicketListPEM()]
+        String message = messageSource.getMessage('withdrawalMsg', [vicketBatch.getRequestAmount().toString(),
+                vicketBatch.getCurrencyCode()].toArray(), LocaleContextHolder.locale) + " " + systemService.getTagMessage(vicketBatch.getTag())
+        Map resultMap = [statusCode: ResponseVS.SC_OK, message:message, issuedVickets:vicketBatch.getIssuedVicketListPEM()]
         return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data:resultMap,
                 type:TypeVS.VICKET_REQUEST);
     }

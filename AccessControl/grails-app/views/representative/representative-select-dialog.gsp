@@ -164,7 +164,7 @@
             },
             saveAnonymousDelegation: function() {
                 console.log(this.tagName + " - saveAnonymousDelegation - hashCertVSBase64: " + this.hashCertVSBase64)
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_RECEIPT_ANONYMOUS_DELEGATION)
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.SAVE_SMIME_ANONYMOUS_DELEGATION)
                 webAppMessage.message = this.hashCertVSBase64
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveAnonymousDelegation callback")

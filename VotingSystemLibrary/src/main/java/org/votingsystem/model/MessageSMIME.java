@@ -19,7 +19,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity @Table(name="MessageSMIME")
 public class MessageSMIME implements Serializable {
 
-    private static Logger logger = Logger.getLogger(MessageSMIME.class);
+    private static Logger log = Logger.getLogger(MessageSMIME.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -238,7 +238,7 @@ public class MessageSMIME implements Serializable {
             setContent(getSmimeMessage().getBytes());
             if(TypeVS.RECEIPT != type) setBase64ContentDigest(getSmimeMessage().getContentDigestStr());
         }catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 }

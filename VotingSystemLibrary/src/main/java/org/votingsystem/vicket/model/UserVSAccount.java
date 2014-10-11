@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VicketTagVS;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;

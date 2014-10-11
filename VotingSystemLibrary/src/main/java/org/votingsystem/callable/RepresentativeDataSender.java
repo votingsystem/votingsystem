@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 */
 public class RepresentativeDataSender implements Callable<ResponseVS>{
     
-    private static Logger logger = Logger.getLogger(
+    private static Logger log = Logger.getLogger(
             RepresentativeDataSender.class);
     
     private SMIMEMessage representativeDataSmimeMessage;
@@ -38,7 +38,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
     }
 
     @Override public ResponseVS call() throws Exception {
-        logger.debug("doInBackground - RepresentativeRequest service: " + urlToSendDocument);
+        log.debug("doInBackground - RepresentativeRequest service: " + urlToSendDocument);
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         try {
             MessageTimeStamper timeStamper = new MessageTimeStamper(representativeDataSmimeMessage,
@@ -55,7 +55,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
             fileMap.put(ContextVS.IMAGE_FILE_NAME, selectedImage);
             responseVS = HttpHelper.getInstance().sendObjectMap(fileMap, urlToSendDocument);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             responseVS.appendMessage(ex.getMessage());
         }
         return responseVS;

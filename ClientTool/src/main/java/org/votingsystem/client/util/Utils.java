@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class Utils {
 
-    private static Logger logger = Logger.getLogger(Utils.class);
+    private static Logger log = Logger.getLogger(Utils.class);
 
     public static Image getImage(Object baseObject, String key) {
         String iconPath = null;
@@ -37,7 +37,7 @@ public class Utils {
         try {
             image = new Image(baseObject.getClass().getResourceAsStream(iconPath));
         } catch(Exception ex) {
-            logger.error(" ### iconPath: " + iconPath + " not found");
+            log.error(" ### iconPath: " + iconPath + " not found");
             image = new Image(baseObject.getClass().getResourceAsStream(
                     "/resources/icon_32/button_default.png"));
         }

@@ -28,7 +28,7 @@ import org.votingsystem.model.ResponseVS;
  */
 public class MessageDialog {
 
-    private static Logger logger = Logger.getLogger(MessageDialog.class);
+    private static Logger log = Logger.getLogger(MessageDialog.class);
 
     private final Stage stage;
     private HBox messageBox;

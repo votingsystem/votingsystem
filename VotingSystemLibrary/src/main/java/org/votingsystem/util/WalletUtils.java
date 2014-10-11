@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.vicket.model.Vicket;
 
 import java.io.ByteArrayInputStream;
@@ -15,7 +14,7 @@ import java.util.*;
  */
 public class WalletUtils {
 
-    private static Logger logger = Logger.getLogger(StringUtils.class);
+    private static Logger log = Logger.getLogger(StringUtils.class);
 
     public static void saveVicketsToWallet(Collection<Vicket> vicketCollection, String walletPath) throws Exception {
         for(Vicket vicket : vicketCollection) {
@@ -23,7 +22,7 @@ public class WalletUtils {
             new File(walletPath).mkdirs();
             String vicketPath = walletPath + UUID.randomUUID().toString() + ".servs";
             File vicketFile = FileUtils.copyStreamToFile(new ByteArrayInputStream(vicketSerialized), new File(vicketPath));
-            logger.debug("Stored vicket: " + vicketFile.getAbsolutePath());
+            log.debug("Stored vicket: " + vicketFile.getAbsolutePath());
         }
 
     }
@@ -31,7 +30,8 @@ public class WalletUtils {
     public static List<Map> getSerializedVicketList(Collection<Vicket> vicketCollection) throws UnsupportedEncodingException {
         List<Map> result = new ArrayList<>();
         for(Vicket vicket : vicketCollection) {
-            Map<String, String> vicketDataMap = vicket.getCertSubject().getDataMap();
+            Map vicketDataMap = vicket.getCertSubject().getDataMap();
+            vicketDataMap.put("isTimeLimited", vicket.getIsTimeLimited());
             byte[] vicketSerialized =  ObjectUtils.serializeObject(vicket);
             vicketDataMap.put("object", new String(vicketSerialized, "UTF-8"));
             result.add(vicketDataMap);

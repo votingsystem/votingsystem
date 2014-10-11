@@ -46,6 +46,8 @@ import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.vicket.model.Vicket;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -60,7 +62,7 @@ import java.util.*;
  */
 public class BrowserVS extends Region {
 
-    private static Logger logger = Logger.getLogger(BrowserVS.class);
+    private static Logger log = Logger.getLogger(BrowserVS.class);
 
     private Stage browserStage;
     private HBox toolBar;
@@ -82,12 +84,12 @@ public class BrowserVS extends Region {
         Platform.setImplicitExit(false);
         browserHelper.getSignatureService().setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
-                logger.debug("signatureService - OnSucceeded");
+                log.debug("signatureService - OnSucceeded");
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
                         ResponseVS responseVS = browserHelper.getSignatureService().getValue();
                         if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
-                            logger.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
+                            log.debug("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
                         } else if(ContentTypeVS.JSON == responseVS.getContentType()) {
                             sendMessageToBrowserApp(responseVS.getMessageJSON(),
                                     browserHelper.getSignatureService().getOperationVS().getCallerCallback());
@@ -100,13 +102,13 @@ public class BrowserVS extends Region {
 
         browserHelper.getSignatureService().setOnRunning(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
-                logger.debug("signatureService - OnRunning");
+                log.debug("signatureService - OnRunning");
             }
         });
 
         browserHelper.getSignatureService().setOnFailed(new EventHandler<WorkerStateEvent>() {
             @Override public void handle(WorkerStateEvent t) {
-                logger.debug("signatureService - OnFailed");
+                log.debug("signatureService - OnFailed");
             }
         });
         PlatformImpl.startup(new Runnable() {
@@ -128,7 +130,7 @@ public class BrowserVS extends Region {
             public void handle(WindowEvent event) {
                 event.consume();
                 browserStage.hide();
-                logger.debug("browserStage.setOnCloseRequest");
+                log.debug("browserStage.setOnCloseRequest");
             }
         });
 
@@ -219,7 +221,7 @@ public class BrowserVS extends Region {
         @Override public void onChanged(Change<? extends WebHistory.Entry> c) {
                 c.next();
                 if(history.getCurrentIndex() > 0) prevButton.setDisable(false);
-                //logger.debug("==== currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
+                //log.debug("==== currentIndex: " + history.getCurrentIndex() + " - num. entries: " + history.getEntries().size());
                 String params = "";
                 if(locationField.getText().contains("?")) {
                     params = locationField.getText().substring(locationField.getText().indexOf("?"),
@@ -238,7 +240,7 @@ public class BrowserVS extends Region {
                     @Override
                     public void changed(ObservableValue<? extends Worker.State> ov,
                                         Worker.State oldState, Worker.State newState) {
-                        //logger.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
+                        //log.debug("newState: " + newState + " - " + webView.getEngine().getLocation());
                         if (newState == Worker.State.SUCCEEDED) {
                             Document doc = webView.getEngine().getDocument();
                             Element element = doc.getElementById("voting_system_page");
@@ -272,7 +274,8 @@ public class BrowserVS extends Region {
     }
 
     public void sendMessageToBrowserApp(int statusCode, String message, String callerCallback) {
-        logger.debug("sendMessageToBrowserApp - statusCode: " + statusCode + " - message: " + message);
+        String logMsg = message.length() > 300 ? message.substring(0, 300) + "..." : message;
+        log.debug("sendMessageToBrowserApp - statusCode: " + statusCode + " - message: " + logMsg);
         Map resultMap = new HashMap();
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
@@ -280,31 +283,33 @@ public class BrowserVS extends Region {
             JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(resultMap);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     new String(Base64.getEncoder().encode(messageJSON.toString().getBytes("UTF8")), "UTF8") + "')";
-            logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
+            log.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
                     webView.getEngine().executeScript(jsCommand);
                 }
             });
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
 
     public void sendMessageToBrowserApp(JSON messageJSON, String callerCallback) {
-        logger.debug("sendMessageToBrowserApp - messageJSON: " + messageJSON.toString());
+        String message = messageJSON.toString();
+        String logMsg = message.length() > 300 ? message.substring(0, 300) + "..." : message;
+        log.debug("sendMessageToBrowserApp - messageJSON: " + logMsg);
         try {
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
-                    new String(Base64.getEncoder().encode(messageJSON.toString().getBytes("UTF8")), "UTF8") + "')";
-            logger.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
+                    new String(Base64.getEncoder().encode(message.getBytes("UTF8")), "UTF8") + "')";
+            log.debug("sendMessageToBrowserApp - jsCommand: " + jsCommand);
             PlatformImpl.runLater(new Runnable() {
                 @Override public void run() {
                     webView.getEngine().executeScript(jsCommand);
                 }
             });
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -340,18 +345,18 @@ public class BrowserVS extends Region {
 
     public void loadURL(final String urlToLoad, String callback, String callbackMsg, final String caption,
             final boolean isToolbarVisible) {
-        logger.debug("loadURL: " + urlToLoad);
+        log.debug("loadURL: " + urlToLoad);
         final StringBuilder jsCommand = new StringBuilder();
         if(callback != null && callbackMsg != null) jsCommand.append(callback + "(" + callbackMsg + ")");
         else if(callback != null) jsCommand.append(callback + "()");;
-        logger.debug("jsCommand: " + jsCommand.toString());
+        log.debug("jsCommand: " + jsCommand.toString());
         if(!"".equals(jsCommand.toString())) {
             webView.getEngine().getLoadWorker().stateProperty().addListener(
                     new ChangeListener<Worker.State>() {
                         @Override
                         public void changed(ObservableValue<? extends Worker.State> ov,
                                             Worker.State oldState, Worker.State newState) {
-                            //logger.debug("newState: " + newState);
+                            //log.debug("newState: " + newState);
                             if (newState == Worker.State.SUCCEEDED) {
                                 webView.getEngine().executeScript(jsCommand.toString());
                             }
@@ -374,7 +379,7 @@ public class BrowserVS extends Region {
     }
 
     public void loadBackgroundURL(final String urlToLoad) {
-        logger.debug("loadBackgroundURL: " + urlToLoad);
+        log.debug("loadBackgroundURL: " + urlToLoad);
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 webView.getEngine().load(urlToLoad);
@@ -399,9 +404,9 @@ public class BrowserVS extends Region {
         public void setJSONMessageToSignatureClient(String messageToSignatureClient) {
             try {
                 String jsonStr = new String(Base64.getDecoder().decode(messageToSignatureClient.getBytes()), "UTF-8");
-                String logMsg = messageToSignatureClient.length() > 350 ? messageToSignatureClient.substring(0, 350) +
+                String logMsg = messageToSignatureClient.length() > 300 ? messageToSignatureClient.substring(0, 300) +
                         "..." : messageToSignatureClient;
-                logger.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
+                log.debug("JavafxClient.setJSONMessageToSignatureClient: " + logMsg);
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonStr);
                 OperationVS operationVS = OperationVS.parse(jsonObject);
                 switch (operationVS.getType()) {
@@ -411,16 +416,20 @@ public class BrowserVS extends Region {
                     case SELECT_IMAGE:
                         selectImage(operationVS);
                         break;
-                    case OPEN_RECEIPT:
+                    case OPEN_SMIME:
                         openReceipt(operationVS);
                         break;
-                    case OPEN_RECEIPT_FROM_URL:
+                    case OPEN_VICKET:
+                        Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(((String)operationVS.getDocument().get("object")).getBytes());
+                        SignedDocumentsBrowser.showDialog(vicket);
+                        break;
+                    case OPEN_SMIME_FROM_URL:
                         browserHelper.processOperationVS(null, operationVS);
                         break;
-                    case SAVE_RECEIPT:
+                    case SAVE_SMIME:
                         saveReceipt(operationVS);
                         break;
-                    case SAVE_RECEIPT_ANONYMOUS_DELEGATION:
+                    case SAVE_SMIME_ANONYMOUS_DELEGATION:
                         saveReceiptAnonymousDelegation(operationVS);
                         break;
                     case MESSAGEVS_GET:
@@ -431,7 +440,7 @@ public class BrowserVS extends Region {
                         browserHelper.processOperationVS(operationVS);
                 }
             } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 showMessage(ContextVS.getMessage("errorLbl") + " - " + ex.getMessage());
             }
         }
@@ -459,7 +468,7 @@ public class BrowserVS extends Region {
                         return "Unknown operation: '" + operationVS.getType() + "'";
                 }
             } catch (UnsupportedEncodingException ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 result = ex.getMessage();
             } finally {
                 return result;
@@ -468,11 +477,11 @@ public class BrowserVS extends Region {
     }
 
     private void saveReceiptAnonymousDelegation(OperationVS operation) throws Exception{
-        logger.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
+        log.debug("saveReceiptAnonymousDelegation - hashCertVSBase64: " + operation.getMessage() +
                 " - callbackId: " + operation.getCallerCallback());
         ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(operation.getMessage());
         if(responseVS == null) {
-            logger.error("Missing receipt data for hash: " + operation.getMessage());
+            log.error("Missing receipt data for hash: " + operation.getMessage());
             sendMessageToBrowserApp(ResponseVS.SC_ERROR, null, operation.getCallerCallback());
         } else {
             File fileToSave = Utils.getReceiptBundle(responseVS);
@@ -491,7 +500,7 @@ public class BrowserVS extends Region {
     }
 
     private void saveReceipt(OperationVS operation) throws Exception{
-        logger.debug("saveReceipt");
+        log.debug("saveReceipt");
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
                 ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
@@ -506,7 +515,7 @@ public class BrowserVS extends Region {
     }
 
     private void openReceipt(OperationVS operation) throws Exception{
-        logger.debug("openReceipt");
+        log.debug("openReceipt");
         String smimeMessageStr = new String(Base64.getDecoder().decode(operation.getMessage()), "UTF-8");
         SignedDocumentsBrowser.showDialog(smimeMessageStr, operation.getDocument());
     }
@@ -525,9 +534,9 @@ public class BrowserVS extends Region {
                     File selectedImage = fileChooser.showOpenDialog(null);
                     if(selectedImage != null){
                         byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
-                        logger.debug(" - imageFileBytes.length: " + imageFileBytes.length);
+                        log.debug(" - imageFileBytes.length: " + imageFileBytes.length);
                         if(imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
-                            logger.debug(" - MAX_FILE_SIZE exceeded ");
+                            log.debug(" - MAX_FILE_SIZE exceeded ");
                             sendMessageToBrowserApp(ResponseVS.SC_ERROR,
                                     ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB),
                                     operationVS.getCallerCallback());
@@ -542,7 +551,7 @@ public class BrowserVS extends Region {
     }
 
     private void receiptCancellation(final OperationVS operationVS) throws Exception {
-        logger.debug("receiptCancellation");
+        log.debug("receiptCancellation");
         switch(operationVS.getType()) {
             case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
                 PlatformImpl.runLater(new Runnable() {
@@ -561,7 +570,7 @@ public class BrowserVS extends Region {
                 });
                 break;
             default:
-                logger.debug("receiptCancellation - unknown receipt type: " + operationVS.getType());
+                log.debug("receiptCancellation - unknown receipt type: " + operationVS.getType());
         }
     }
 

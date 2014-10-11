@@ -26,7 +26,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 	tokenizer =  @TokenizerDef(factory = StandardTokenizerFactory.class))*/
 public class EventVS implements Serializable {
 
-    private static Logger logger = Logger.getLogger(EventVS.class);
+    private static Logger log = Logger.getLogger(EventVS.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -356,7 +356,7 @@ public class EventVS implements Serializable {
     }
 
     public Map getDataMap() {
-        logger.debug("getDataMap");
+        log.debug("getDataMap");
         Map map = new HashMap();
         map.put("subject", subject);
         map.put("content", content);
@@ -416,7 +416,7 @@ public class EventVS implements Serializable {
     }
 
     public HashMap getChangeEventDataMap(String serverURL, State state) {
-        logger.debug("getCancelEventDataMap");
+        log.debug("getCancelEventDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.EVENT_CANCELLATION.toString());
         map.put("accessControlURL", serverURL);
@@ -489,7 +489,7 @@ public class EventVS implements Serializable {
                 eventVS.setTags(labelList.toArray(new String[labelList.size()]));
             }
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return eventVS;
     }

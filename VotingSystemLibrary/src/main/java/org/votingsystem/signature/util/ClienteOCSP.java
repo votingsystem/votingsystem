@@ -21,7 +21,7 @@ import java.util.Date;
 */
 public class ClienteOCSP {
 
-    private static Logger logger = Logger.getLogger(ClienteOCSP.class);
+    private static Logger log = Logger.getLogger(ClienteOCSP.class);
 
     public static CertificateVS.State validateCert(X509Certificate intermediateCert, BigInteger serialNumber,
                     Date dateCheck) throws Exception {
@@ -66,10 +66,10 @@ public class ClienteOCSP {
             X509Certificate caCert = readCert("./test/ca.pem");
             X509Certificate interCert = readCert("./test/inter.pem");
             X509Certificate clientCert = readCert("./test/client.pem");
-            logger.info("Cert state: " + validateCert(interCert, clientCert.getSerialNumber(),
+            log.info("Cert state: " + validateCert(interCert, clientCert.getSerialNumber(),
                     new Date(System.currentTimeMillis())).toString());
         } catch (Exception ex){
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 

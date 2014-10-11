@@ -12,16 +12,19 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.ObjectUtils;
 
 import javax.persistence.*;
 import java.io.*;
 import java.math.BigDecimal;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.*;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -36,7 +39,7 @@ public class Vicket implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public enum State { OK, PROJECTED, REJECTED, CANCELLED, EXPENDED, LAPSED;}
+    public enum State { OK, CANCELLED, EXPENDED, LAPSED;} //Lapsed -> for not expended time limited vickets
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -49,6 +52,7 @@ public class Vicket implements Serializable  {
     @Column(name="originHashCertVS") private String originHashCertVS;
     @Column(name="vicketServerURL") private String vicketServerURL;
     @Column(name="reason") private String reason;
+    @Column(name="metaInf") private String metaInf;
 
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
     @Column(name="content", nullable=false) @Lob private byte[] content;
@@ -263,6 +267,15 @@ public class Vicket implements Serializable  {
         return this;
     }
 
+
+    public String getMetaInf() {
+        return metaInf;
+    }
+
+    public void setMetaInf(String metaInf) {
+        this.metaInf = metaInf;
+    }
+
     public byte[] getIssuedCertPEM() throws IOException {
         return CertUtil.getPEMEncoded(x509AnonymousCert);
     }
@@ -387,7 +400,6 @@ public class Vicket implements Serializable  {
         this.state = state;
         return this;
     }
-
 
     public String getReason() {
         return reason;

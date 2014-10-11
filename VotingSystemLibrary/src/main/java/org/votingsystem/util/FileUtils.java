@@ -21,7 +21,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class FileUtils {
 
-    private static Logger logger = Logger.getLogger(FileUtils.class);
+    private static Logger log = Logger.getLogger(FileUtils.class);
 
     private static final int  BUFFER_SIZE = 4096;
 
@@ -137,7 +137,7 @@ public class FileUtils {
             out.write(content);
             out.close();
         } catch (IOException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return tempFile;
     }
@@ -149,14 +149,14 @@ public class FileUtils {
             tempFile.deleteOnExit();
             copyStreamToFile(new ByteArrayInputStream(bytes),tempFile);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return tempFile;
     }
 
 
     public static void deleteDir(File dir) throws IOException {
-        logger.info("deleteDir: " + dir.getAbsolutePath());
+        log.info("deleteDir: " + dir.getAbsolutePath());
         if (dir.isDirectory()) {
             for (File file : dir.listFiles()) {
                 deleteDir(file);
@@ -173,7 +173,7 @@ public class FileUtils {
             //directory is empty, then delete it
             if(file.list().length==0){
                 file.delete();
-                logger.debug("Directory is deleted : "
+                log.debug("Directory is deleted : "
                         + file.getAbsolutePath());
             }else{
                 //list all the directory contents
@@ -187,7 +187,7 @@ public class FileUtils {
                 //check the directory again, if empty then delete it
                 if(file.list().length==0){
                     file.delete();
-                    logger.debug("Directory is deleted : "
+                    log.debug("Directory is deleted : "
                             + file.getAbsolutePath());
                 }
             }
@@ -241,25 +241,25 @@ public class FileUtils {
 
     private static void zipDir(ZipOutputStream zos, String path, File dir) throws IOException {
         if (!dir.canRead()) {
-           logger.debug("Cannot read " + dir.getCanonicalPath() + " (maybe because of permissions)");
+           log.debug("Cannot read " + dir.getCanonicalPath() + " (maybe because of permissions)");
             return;
         }
         File[] files = dir.listFiles();
         path = buildPath(path, dir.getName());
-        logger.debug("Adding Directory " + path);
+        log.debug("Adding Directory " + path);
         for (File source : files) {
             if (source.isDirectory()) zipDir(zos, path, source);
             else zipFile(zos, path, source);
         }
-        logger.debug("Leaving Directory " + path);
+        log.debug("Leaving Directory " + path);
     }
 
     private static void zipFile(ZipOutputStream zos, String path, File file) throws IOException {
         if (!file.canRead()) {
-            logger.debug("Cannot read " + file.getCanonicalPath() + " (maybe because of permissions)");
+            log.debug("Cannot read " + file.getCanonicalPath() + " (maybe because of permissions)");
             return;
         }
-        logger.debug("Compressing " + file.getName());
+        log.debug("Compressing " + file.getName());
         zos.putNextEntry(new ZipEntry(buildPath(path, file.getName())));
         FileInputStream fis = new FileInputStream(file);
         byte[] buffer = new byte[4092];
@@ -275,7 +275,7 @@ public class FileUtils {
      * From -> http://stackoverflow.com/questions/10103861/adding-files-to-zip-file
      */
     public static void packZip(File output, List<File> sources) throws IOException {
-        logger.debug("Packaging to " + output.getName());
+        log.debug("Packaging to " + output.getName());
         ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(output));
         zipOut.setLevel(Deflater.DEFAULT_COMPRESSION);
         for (File source : sources)  {

@@ -243,5 +243,10 @@ class UrlMappings {
             action = [POST:"processRequestFileMap", GET:"request"]
         }
 
+        "/vicket/status/$hashCertVSHex" {
+            controller = "vicket"
+            action = "status"
+        }
+
     }
 }

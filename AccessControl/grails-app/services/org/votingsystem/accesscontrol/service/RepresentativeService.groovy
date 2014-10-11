@@ -384,7 +384,7 @@ class RepresentativeService {
 				}
 			}
 		}
-		def selectedDateStr = DateUtils.getShortStringFromDate(selectedDate)
+		def selectedDateStr = DateUtils.getDateStr(selectedDate,"yyyy/MM/dd")
 		String serviceURLPart = messageSource.getMessage('representativeAcreditationsBackupPath',
                 [representative.nif].toArray(), locale)
 		def basedir = "${grailsApplication.config.VotingSystem.backupCopyPath}" +
@@ -519,8 +519,8 @@ class RepresentativeService {
 		log.debug("getVotingHistoryBackup - representative: ${representative.nif}" + 
 			" - dateFrom: ${dateFrom} - dateTo: ${dateTo}")
 		
-		def dateFromStr = DateUtils.getShortStringFromDate(dateFrom)
-		def dateToStr = DateUtils.getShortStringFromDate(dateTo)
+		def dateFromStr = DateUtils.getDateStr(dateFrom, "yyyy/MM/dd")
+		def dateToStr = DateUtils.getDateStr(dateTo,"yyyy/MM/dd")
 		
 		String serviceURLPart = messageSource.getMessage(
 			'representativeVotingHistoryBackupPartPath', [representative.nif].toArray(), locale)
@@ -529,7 +529,7 @@ class RepresentativeService {
 		log.debug("getVotingHistoryBackup - basedir: ${basedir}")
 		File zipResult = new File("${basedir}.zip")
 
-		String datePathPart = DateUtils.getShortStringFromDate(Calendar.getInstance().getTime())
+		String datePathPart = DateUtils.getDateStr(Calendar.getInstance().getTime(), "yyyy/MM/dd")
 		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 		

@@ -25,11 +25,13 @@ import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.pane.BackupValidatorPane;
 import org.votingsystem.client.pane.EventVSInfoPane;
 import org.votingsystem.client.pane.SignedFilePane;
+import org.votingsystem.client.pane.VicketPane;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.vicket.model.Vicket;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,7 +46,7 @@ import java.util.Map;
  */
 public class SignedDocumentsBrowser extends StackPane{
 
-    private static Logger logger = Logger.getLogger(SignedDocumentsBrowser.class);
+    private static Logger log = Logger.getLogger(SignedDocumentsBrowser.class);
 
     private TabPane tabPane;
     private String fileDir = null;
@@ -148,7 +150,7 @@ public class SignedDocumentsBrowser extends StackPane{
     }
 
     private void showSignedFile(String signedFile) {
-        logger.debug("TODO - showSignedFile: " + signedFile);
+        log.debug("TODO - showSignedFile: " + signedFile);
     }
 
     private void setProgressVisible(boolean isVisible, String message) {
@@ -158,7 +160,7 @@ public class SignedDocumentsBrowser extends StackPane{
     }
 
     private void openFile (File file, Map operationDocument) {
-        logger.debug("openFile - file: " + file.getAbsolutePath());
+        log.debug("openFile - file: " + file.getAbsolutePath());
         fileDir = file.getParent();
         try {
             int fileIndex = fileList.indexOf(file.getPath());
@@ -177,9 +179,19 @@ public class SignedDocumentsBrowser extends StackPane{
             tabPane.getSelectionModel().select(newTab);
         } catch (Exception ex) {
             showMessage(ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
+
+    private void openVicket(Vicket vicket) {
+        Tab newTab = new Tab();
+        newTab.setText(ContextVS.getMessage("vicketLbl"));
+        VicketPane vicketPane = new VicketPane(vicket);
+        newTab.setContent(vicketPane);
+        tabPane.getTabs().add(newTab);
+        tabPane.getSelectionModel().select(newTab);
+    }
+
 
     public void showMessage(final String message) {
         PlatformImpl.runLater(new Runnable() {
@@ -213,7 +225,23 @@ public class SignedDocumentsBrowser extends StackPane{
                     signedDocumentsBrowser.openFile(file, operationDocument);
                     primaryStage.centerOnScreen();
                     primaryStage.show();
-                } else logger.debug("File null dialog will not be opened");
+                } else log.debug("File null dialog will not be opened");
+            }
+        });
+    }
+
+    public static void showDialog(final Vicket vicket) {
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                SignedDocumentsBrowser signedDocumentsBrowser = new SignedDocumentsBrowser();
+                Stage primaryStage = new Stage();
+                primaryStage.setScene(new Scene(signedDocumentsBrowser));
+                primaryStage.initModality(Modality.WINDOW_MODAL);
+                primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
+                primaryStage.setResizable(true);
+                signedDocumentsBrowser.openVicket(vicket);
+                primaryStage.centerOnScreen();
+                primaryStage.show();
             }
         });
     }
@@ -228,12 +256,12 @@ public class SignedDocumentsBrowser extends StackPane{
             fos.write(selectedSignedFilePane.getSignedFile().getSMIMEMessageWraper().getBytes());
             fos.close();
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
     private String checkFileSize (File file) {
-        logger.debug("checkFileSize");
+        log.debug("checkFileSize");
         String result = null;
         if (file.length() > ContextVS.SIGNED_MAX_FILE_SIZE) {
             result = ContextVS.getInstance().getMessage("fileSizeExceededMsg", file.length(),
@@ -259,16 +287,16 @@ public class SignedDocumentsBrowser extends StackPane{
 
     public String getSignatureMessage (Date date) {
         return "<html><b>" + ContextVS.getMessage("signatureDateLbl") +
-                DateUtils.getLongDate_Es(date) + "</html>";
+                DateUtils.getDateStr(date) + "</html>";
     }
 
     public void setVisible(String decompressedBackupBaseDir) {
-        logger.debug("setVisible - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
+        log.debug("setVisible - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
         this.decompressedBackupBaseDir = decompressedBackupBaseDir;
         File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
             String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
-            logger.error(message);
+            log.error(message);
             showMessage("Error - " + message);
             return;
         }
@@ -293,7 +321,7 @@ public class SignedDocumentsBrowser extends StackPane{
                 validateBackupButton.setVisible(true);
             }
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
 
         /*try {
@@ -329,12 +357,12 @@ public class SignedDocumentsBrowser extends StackPane{
                             showProgress(false);
                         }
                     } else {
-                        logger.error("ERROR ZipEntry '" + entry.getName() + "'  -> " + msg);
+                        log.error("ERROR ZipEntry '" + entry.getName() + "'  -> " + msg);
                     }
                 }
             }
             backupZip.close();
-            logger.debug("Numero archivos en lista: " + signedFileList.size());
+            log.debug("Numero archivos en lista: " + signedFileList.size());
             selectedFileIndex = 0;
             SignedFile primerArchivo = signedFileList.get(selectedFileIndex++);
             SignedFilePanel signedFilePanel =
@@ -354,7 +382,7 @@ public class SignedDocumentsBrowser extends StackPane{
             openFile(archivo);
             showProgress(false);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             showProgress(false);
         } */
     }

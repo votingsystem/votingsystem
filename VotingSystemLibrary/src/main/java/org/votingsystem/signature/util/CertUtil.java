@@ -1,5 +1,6 @@
 package org.votingsystem.signature.util;
 
+import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.*;
@@ -20,7 +21,6 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import net.sf.json.JSONObject;
 import org.votingsystem.util.ExceptionVS;
 
 import javax.security.auth.x500.X500Principal;
@@ -39,7 +39,7 @@ import java.util.*;
 */
 public class CertUtil {
     
-    private static Logger logger = Logger.getLogger(CertUtil.class);
+    private static Logger log = Logger.getLogger(CertUtil.class);
 
     /**
      * Generate V3 certificate for users
@@ -68,14 +68,14 @@ public class CertUtil {
     public static X509Certificate generateV3RootCert(KeyPair pair, Date dateBegin, Date dateFinish,
              String strSubjectDN) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
-        logger.debug("strSubjectDN: " + strSubjectDN);
+        log.debug("strSubjectDN: " + strSubjectDN);
         X509Principal x509Principal = new X509Principal(strSubjectDN);
         certGen.setSerialNumber(VotingSystemKeyGenerator.INSTANCE.getSerno());
         
         certGen.setIssuerDN(x509Principal);
         certGen.setNotBefore(dateBegin);
         certGen.setNotAfter(dateFinish);
-        logger.debug("dateBegin: " + dateBegin.toString() + " - dateFinish: " + dateFinish.toString());
+        log.debug("dateBegin: " + dateBegin.toString() + " - dateFinish: " + dateFinish.toString());
         certGen.setSubjectDN(x509Principal);
         certGen.setPublicKey(pair.getPublic());
         certGen.setSignatureAlgorithm(ContextVS.CERT_GENERATION_SIG_ALGORITHM);
@@ -98,7 +98,7 @@ public class CertUtil {
         PublicKey requestPublicKey = csr.getPublicKey();
         X509Principal x509Principal = new X509Principal(strSubjectDN);
         certGen.setSerialNumber(VotingSystemKeyGenerator.INSTANCE.getSerno());
-//        logger.debug("generateV3EndEntityCertFromCsr - SubjectX500Principal(): " + caCert.getSubjectX500Principal());
+//        log.debug("generateV3EndEntityCertFromCsr - SubjectX500Principal(): " + caCert.getSubjectX500Principal());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(dateBegin);
         certGen.setNotAfter(dateFinish);
@@ -198,7 +198,7 @@ public class CertUtil {
         PublicKey requestPublicKey = csr.getPublicKey();
         X509Principal x509Principal = new X509Principal(strSubjectDN);
         certGen.setSerialNumber(VotingSystemKeyGenerator.INSTANCE.getSerno());
-        logger.debug("generateV3EndEntityCertFromCsr - SubjectX500Principal(): " + caCert.getSubjectX500Principal());
+        log.debug("generateV3EndEntityCertFromCsr - SubjectX500Principal(): " + caCert.getSubjectX500Principal());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(dateBegin);
         certGen.setNotAfter(dateFinish);
@@ -341,7 +341,7 @@ public class CertUtil {
             //PKIXCertPathValidatorResult pkixResult = (PKIXCertPathValidatorResult)result;
             //TrustAnchor ta = pkixResult.getTrustAnchor();
             //X509Certificate certCaResult = ta.getTrustedCert();
-            //logger.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
+            //log.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
             //        "- serialNumber: " + certCaResult.getSerialNumber().longValue());
             Map resultMap = new HashMap();
             resultMap.put("extensionChecker", checker);

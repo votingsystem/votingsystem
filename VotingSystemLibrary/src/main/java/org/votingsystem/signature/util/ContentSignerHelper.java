@@ -20,14 +20,14 @@ import static org.votingsystem.model.ContextVS.*;
  */
 public class ContentSignerHelper {
 
-    private static Logger logger = Logger.getLogger(ContentSignerHelper.class);
+    private static Logger log = Logger.getLogger(ContentSignerHelper.class);
 
     public enum CryptoToken {DNIe, JKS_KEYSTORE}
 
     public static SMIMEMessage genMimeMessage(String fromUser, String toUser, String textToSign,
              char[] password, String subject, Header... headers) throws Exception {
         String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
-        logger.debug("genMimeMessage - CryptoToken: " + cryptoTokenStr);
+        log.debug("genMimeMessage - CryptoToken: " + cryptoTokenStr);
         CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
         switch(cryptoToken) {
             case JKS_KEYSTORE:
@@ -46,7 +46,7 @@ public class ContentSignerHelper {
 
     public static ContentSignerVS getContentSignerPDF(char[] password, Mechanism signatureMechanism) throws Exception {
         String  cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoToken.DNIe.toString());
-        logger.debug("signPDF - CryptoToken: " + cryptoTokenStr);
+        log.debug("signPDF - CryptoToken: " + cryptoTokenStr);
         CryptoToken cryptoToken = CryptoToken.valueOf(cryptoTokenStr);
         switch(cryptoToken) {
             case JKS_KEYSTORE:

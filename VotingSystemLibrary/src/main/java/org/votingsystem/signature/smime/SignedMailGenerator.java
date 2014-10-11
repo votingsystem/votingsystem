@@ -34,7 +34,7 @@ import java.util.List;
 */
 public class SignedMailGenerator {
 
-    private static Logger logger = Logger.getLogger(SignedMailGenerator.class);
+    private static Logger log = Logger.getLogger(SignedMailGenerator.class);
     
     private SMIMESignedGenerator smimeSignedGenerator = null;
     private PrivateKey key;
@@ -55,7 +55,7 @@ public class SignedMailGenerator {
     
     private void init(KeyStore keyStore, String keyAlias, 
     		char[] password, String signMechanism) throws Exception {
-    	logger.debug("init");                                
+    	log.debug("init");
         key = (PrivateKey)keyStore.getKey(keyAlias, password);
         chain = keyStore.getCertificateChain(keyAlias);
         jcaCertStore = new JcaCertStore( Arrays.asList(chain));
@@ -91,7 +91,7 @@ public class SignedMailGenerator {
 
     public SignedMailGenerator (PrivateKey key, List<Certificate> chain, String signatureMechanism)
             throws CertificateEncodingException, OperatorCreationException {
-        logger.debug("SignedMailGenerator");
+        log.debug("SignedMailGenerator");
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond

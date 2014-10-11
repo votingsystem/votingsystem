@@ -2,6 +2,7 @@ package org.votingsystem.vicket.service
 
 import grails.transaction.Transactional
 import net.sf.json.JSONArray
+import org.springframework.context.i18n.LocaleContextHolder
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VicketTagVS
@@ -27,6 +28,7 @@ class SystemService {
     def grailsApplication
     def subscriptionVSService
     def signatureVSService
+    def messageSource
 
     @Transactional
     public synchronized Map init() throws Exception {
@@ -131,6 +133,12 @@ class SystemService {
         resultMap.transactionToList = transactionToList
         resultMap.balancesTo = balancesMap
         return resultMap
+    }
+
+    public String getTagMessage(String tag) {
+        if(VicketTagVS.WILDTAG.equals(tag)) {
+            return  messageSource.getMessage('wildTagMsg', null, LocaleContextHolder.locale)
+        } else return  messageSource.getMessage('tagMsg', [tag].toArray(), LocaleContextHolder.locale)
     }
 
     boolean isUserAdmin(String nif) {

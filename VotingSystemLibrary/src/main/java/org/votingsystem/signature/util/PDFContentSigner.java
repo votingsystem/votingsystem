@@ -27,7 +27,7 @@ import java.util.*;
 */
 public class PDFContentSigner extends CMSSignedGenerator implements ContentSignerVS {
    
-    private static Logger logger = Logger.getLogger(PDFContentSigner.class);
+    private static Logger log = Logger.getLogger(PDFContentSigner.class);
 
     public static String CERT_STORE_TYPE = "Collection";
             
@@ -142,7 +142,7 @@ public class PDFContentSigner extends CMSSignedGenerator implements ContentSigne
         SignerInfo signerInfo = signerInfoGenerator.generate(contentTypeOID);
         List<SignerInfo> signerInfoList = new ArrayList<SignerInfo>();
         signerInfoList.add(signerInfo);
-        logger.debug(" -- userCert: " + userCert.getSubjectDN().getName());
+        log.debug(" -- userCert: " + userCert.getSubjectDN().getName());
         CMSSignedData signedData = getCMSSignedData(CMSSignedGenerator.DATA, content, true,
                 CMSUtils.getProvider("BC"), true, signerInfoList);
         return signedData;

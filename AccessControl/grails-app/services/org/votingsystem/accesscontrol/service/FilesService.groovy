@@ -26,7 +26,7 @@ class FilesService {
  	public Map<String, File> getBackupFiles(EventVS event, TypeVS type, Locale locale){
 		 String servicePathPart = null
 		 Map<String, File> result = new HashMap<String, File>()
-		 String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+		 String datePathPart = DateUtils.getDateStr(event.getDateFinish(), "yyyy/MM/dd")
 		 String baseDirPath ="${grailsApplication.config.VotingSystem.backupCopyPath}/${datePathPart}/Event_${event.id}"
 		 String filesDirPath = null
 		 String zipFilesDirPath = "${baseDirPath}/zip"

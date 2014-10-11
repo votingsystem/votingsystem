@@ -36,9 +36,9 @@ import java.io.FileOutputStream;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SignDocumentPane extends GridPane implements SignDocumentStackPane.OperationListener {
+public class DocumentSignerPane extends GridPane implements DocumentSignerStackPane.OperationListener {
 
-    private static Logger logger = Logger.getLogger(SignDocumentPane.class);
+    private static Logger log = Logger.getLogger(DocumentSignerPane.class);
 
     private Stage stage;
     private TextArea textArea;
@@ -48,9 +48,9 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
     private TextField serviceURLTextField;
     private TextField messageSubjectTextField;
     private TextField toUserTextField;
-    private SignDocumentStackPane documentSignerHelper;
+    private DocumentSignerStackPane documentSignerHelper;
 
-    public SignDocumentPane() {
+    public DocumentSignerPane() {
         setPadding(new Insets(10, 10 , 10, 10));
         Label messageLbl = new Label(ContextVS.getMessage("enterSignatureContentMsg") + ":");
         messageLbl.setStyle("");
@@ -68,7 +68,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
         signButton.setGraphic((new ImageView(Utils.getImage(this, "pencil"))));
         signButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                documentSignerHelper.processOperation(SignDocumentStackPane.Operation.SIGN_SMIME, toUserTextField.getText(),
+                documentSignerHelper.processOperation(DocumentSignerStackPane.Operation.SIGN_SMIME, toUserTextField.getText(),
                         textArea.getText(), messageSubjectTextField.getText(), smimeMessage, null);
             }
         });
@@ -131,7 +131,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
         cancelButton.setGraphic((new ImageView(Utils.getImage(this, "cancel"))));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                SignDocumentPane.this.getScene().getWindow().hide();
+                DocumentSignerPane.this.getScene().getWindow().hide();
             }
         });
 
@@ -150,7 +150,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
             @Override public void handle(WindowEvent window) {
             }
         });
-        documentSignerHelper = new SignDocumentStackPane(this);
+        documentSignerHelper = new DocumentSignerStackPane(this);
         documentSignerHelper.getChildren().add(0, this);
         stage.setScene(new Scene(documentSignerHelper, javafx.scene.paint.Color.TRANSPARENT));
         stage.setTitle(ContextVS.getMessage("documentSignerDialogCaption"));
@@ -178,7 +178,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
             if(serviceURLTextField.getText().startsWith("http://") || serviceURLTextField.getText().startsWith("https://")) {
                 targetURL = serviceURLTextField.getText().trim();
             } else targetURL = "http://" + serviceURLTextField.getText().trim();
-            documentSignerHelper.processOperation(SignDocumentStackPane.Operation.SEND_SMIME, null, null,
+            documentSignerHelper.processOperation(DocumentSignerStackPane.Operation.SEND_SMIME, null, null,
                     messageSubjectTextField.getText(), smimeMessage, targetURL);
         }
     }
@@ -193,7 +193,7 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
             fos.write(smimeMessage.getBytes());
             fos.close();
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -203,18 +203,18 @@ public class SignDocumentPane extends GridPane implements SignDocumentStackPane.
     }
 
     public static void showDialog() {
-        logger.debug("showDialog");
+        log.debug("showDialog");
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                SignDocumentPane signDocumentPane = new SignDocumentPane();
-                signDocumentPane.show();
+                DocumentSignerPane documentSignerPane = new DocumentSignerPane();
+                documentSignerPane.show();
             }
         });
     }
 
 
-    @Override public void processResult(SignDocumentStackPane.Operation operation, ResponseVS responseVS) {
-        logger.debug("processResult - operation: " + operation + " - result: " + responseVS.getStatusCode());
+    @Override public void processResult(DocumentSignerStackPane.Operation operation, ResponseVS responseVS) {
+        log.debug("processResult - operation: " + operation + " - result: " + responseVS.getStatusCode());
         switch(operation) {
             case SIGN_SMIME:
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

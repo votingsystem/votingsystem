@@ -8,7 +8,10 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.votingsystem.model.*
 import org.votingsystem.util.ExceptionVS
+import org.votingsystem.vicket.model.Vicket
 import org.votingsystem.vicket.model.VicketRequestBatch
+
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 class VicketController {
 
@@ -25,20 +28,7 @@ class VicketController {
         render(view:'request')
     }
 
-    def requestLog() {
-        if(request.contentType?.contains("json")) {
-            RollingFileAppender appender = requestslog.getAppender("VicketsRequest")
-            File reportsFile = new File(appender.file)
-            //testfile.eachLine{ line ->}
-            def messageJSON = JSON.parse("{" + reportsFile.text + "}")
-            render messageJSON as JSON
-            return false
-        } else {
-            render(view:'requestLog')
-        }
-    }
-
-    def issued() {
+    def issuedLog() {
         if(request.contentType?.contains("json")) {
             RollingFileAppender appender = vicketsIssuedlog.getAppender("VicketsIssued")
             File reportsFile = new File(appender.file)
@@ -95,6 +85,40 @@ class VicketController {
         }
         ResponseVS responseVS = vicketService.processVicketRequest(vicketBatch)
         return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+    }
+
+    def wallet() {}
+
+    def status() {
+        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        String hashCertVSBase64 = new String(hexConverter.unmarshal(params.hashCertVSHex))
+        Vicket vicket
+        Vicket.withTransaction {
+            vicket = Vicket.findWhere(hashCertVS:hashCertVSBase64)
+        }
+        int statusCode = ResponseVS.SC_MESSAGE_FROM_VS
+        String message = null
+        if(!vicket) message = message(code:'vicketNotFoundErrorMsg')
+        else {
+            switch(vicket.state) {
+                case Vicket.State.OK:
+                    statusCode = ResponseVS.SC_OK
+                    message = "OK"
+                    break;
+                case Vicket.State.EXPENDED:
+                    message = message(code:'vicketExpendedShortErrorMsg')
+                    break;
+                case Vicket.State.CANCELLED:
+                    message = message(code:'vicketCancelledErrorMsg')
+                    break;
+                case Vicket.State.LAPSED:
+                    message = message(code:'vicketLapsedShortErrorMsg')
+                    break;
+            }
+        }
+        response.status = statusCode
+        render message
+        return false
     }
 
     /**

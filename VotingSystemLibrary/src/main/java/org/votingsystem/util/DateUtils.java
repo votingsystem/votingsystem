@@ -4,9 +4,12 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.text.*;
-import java.util.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
 * @author jgzornoza
@@ -14,7 +17,7 @@ import java.util.*;
 */
 public class DateUtils {
 
-    private static Logger logger = Logger.getLogger(DateUtils.class);
+    private static Logger log = Logger.getLogger(DateUtils.class);
 
     public static Date addDays(Date date, int days){
         Calendar cal = Calendar.getInstance();
@@ -40,61 +43,25 @@ public class DateUtils {
         calendar.setTime(date);
         return calendar.get(Calendar.YEAR);
     }
-    
-    public static Date getDatePlus (int numDays) {
-    	Calendar cal = new GregorianCalendar(); 
-    	int todayDay = cal.get(Calendar.DAY_OF_YEAR);
-    	cal.set(Calendar.DAY_OF_YEAR, todayDay + numDays);
-        return cal.getTime();
-    }
 
-    /**
-     * Método que devuelve un Date a partir de un String con formato "yyyy/MM/dd'T'HH:mm:ss"
-     *
-     * @param dateString fecha en formato String
-     * @return Date fecha en formato Date
-     * @throws import java.text.ParseException;
-     */
     public static Date getDateFromString (String dateString) throws ParseException {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    	return formatter.parse(dateString);
-    }
-    
-    public static Date getDateFromShortString (String yyyy_MM_dd) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-    	return formatter.parse(yyyy_MM_dd);
+        return formatter.parse(dateString);
     }
 
-    /**
-     * Método que devuelve un String con formato "yyyy/MM/dd'T'HH:mm:ss a partir de un Date"
-     *
-     * @param Date fecha en formato Date
-     * @return dateString fecha en formato String
-     * @throws import java.text.ParseException;
-     */
+    public static Date getDateFromString (String dateString, String format) throws ParseException {
+        DateFormat formatter = new SimpleDateFormat(format);
+        return formatter.parse(dateString);
+    }
+
     public static String getDateStr (Date date) {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
-    	return formatter.format(date);
-    }
-
-    public static String getDateWithoutYear (Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM HH:mm");
         return formatter.format(date);
     }
 
-    public static String getLongDate_Es (Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
+    public static String getDateStr (Date date, String format) {
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
         return formatter.format(date);
-    }
-
-    public static Date getDateFromLongDateStr_Es (String dateStr) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
-        return formatter.parse(dateStr);
-    }
-    
-    public static String getShortStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-    	return formatter.format(date);
     }
 
     public static String getDirPath (Date date) {
@@ -252,16 +219,6 @@ public class DateUtils {
         throw new ExceptionVS("Unsupported Lapse period: '" + timePeriodLapse + "'");
     }
 
-    public static Date getDateFromString (String dateString, String format) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat(format);
-        return formatter.parse(dateString);
-    }
-
-    public static String getDateStr (Date date, String format) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        return formatter.format(date);
-    }
-
     public static class TimePeriod {
 
         public enum Lapse {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}
@@ -301,10 +258,10 @@ public class DateUtils {
     }
 
     public static String getDayWeekDateStr (Date date) {
-        Date lastYear = addDays(Calendar.getInstance().getTime(), -365);
-        if(date.before(lastYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
+        Date lastYear = addDays(Calendar.getInstance().getTime(), -364);
+        Date nextYear = addDays(Calendar.getInstance().getTime(), 364);
+        if(date.before(lastYear) || date.after(nextYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
         else return getDateStr(date, "EEE dd MMM' 'HH:mm");
     }
-
 
 }

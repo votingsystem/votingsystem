@@ -24,7 +24,7 @@ class ReceiptController {
             smimeMessageStr = new String(params.messageSMIME.content, "UTF-8")
             SMIMEMessage smimeMessage = params.messageSMIME.getSmimeMessage()
             if(smimeMessage.getTimeStampToken() != null) {
-                timeStampDate = DateUtils.getLongDate_Es(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
+                timeStampDate = DateUtils.getDateStr(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
             }
             signedContentJSON = JSON.parse(params.messageSMIME.getSmimeMessage()?.getSignedContent())
             params.operation = signedContentJSON.operation

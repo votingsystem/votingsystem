@@ -30,7 +30,7 @@ import java.util.concurrent.Callable;
 */
 public class MessageTimeStamper implements Callable<ResponseVS> {
     
-    private static Logger logger = Logger.getLogger(MessageTimeStamper.class);
+    private static Logger log = Logger.getLogger(MessageTimeStamper.class);
     
     private SMIMEMessage smimeMessage;
     private TimeStampToken timeStampToken;
@@ -59,7 +59,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
                 SignerInformationVerifier timeStampSignerInfoVerifier = new
                         JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert);
                 timeStampToken.validate(timeStampSignerInfoVerifier);
-            } else logger.debug("TIMESTAMP RESPONSE NOT VALIDATED");
+            } else log.debug("TIMESTAMP RESPONSE NOT VALIDATED");
             if(smimeMessage != null) smimeMessage.setTimeStampToken(timeStampToken);
             responseVS.setSmimeMessage(smimeMessage);
         }
@@ -83,7 +83,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;			
         byte[] digestToken = signedMessageDigest.getOctets();  
         //String digestTokenStr = new String(Base64.encode(digestToken));
-        //logger.debug(" digestTokenStr: " + digestTokenStr);
+        //log.debug(" digestTokenStr: " + digestTokenStr);
         return digestToken;
     }
     

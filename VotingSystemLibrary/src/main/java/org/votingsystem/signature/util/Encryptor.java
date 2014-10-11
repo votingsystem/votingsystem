@@ -38,7 +38,7 @@ import java.util.Iterator;
  */
 public class Encryptor {
  
-    private static Logger logger = Logger.getLogger(Encryptor.class);
+    private static Logger log = Logger.getLogger(Encryptor.class);
 
     private Recipient recipient;
     private RecipientId recipientId;
@@ -69,7 +69,7 @@ public class Encryptor {
 
     public static byte[] encryptMessage(byte[] text, X509Certificate receiverCert,
                                         Header... headers) throws Exception {
-        logger.debug(" - encryptMessage(...) - ");
+        log.debug(" - encryptMessage(...) - ");
         MimeMessage mimeMessage = new MimeMessage(ContextVS.MAIL_SESSION);
         mimeMessage.setText(new String(text));
         // set the Date: header
@@ -104,9 +104,9 @@ public class Encryptor {
         RecipientId messageRecipientId = null;
         if(recipientInfo != null && recipientInfo.getRID() != null) {
             messageRecipientId = recipientInfo.getRID();
-            logger.debug("messageRecipientId.getSerialNumber(): " + messageRecipientId.getSerialNumber());
+            log.debug("messageRecipientId.getSerialNumber(): " + messageRecipientId.getSerialNumber());
         } else {
-            logger.error("No message found for recipientId: " + recipientId.getSerialNumber());
+            log.error("No message found for recipientId: " + recipientId.getSerialNumber());
             return new ResponseVS(ResponseVS.SC_ERROR, "No message found for recipientId: " +
                     recipientId.getSerialNumber());
         }
@@ -139,7 +139,7 @@ public class Encryptor {
             if(encodedContentType != null) {
                 if(ContextVS.BASE64_ENCODED_CONTENT_TYPE.equals(encodedContentType)) {
                     messageContentBytes = Base64.decode((String)messageContent);
-                } else logger.error("### unknown  votingSystemMessageType: " + encodedContentType);
+                } else log.error("### unknown  votingSystemMessageType: " + encodedContentType);
             } else messageContentBytes = messageContent.toString().getBytes();
         }
         return new ResponseVS(ResponseVS.SC_OK, messageContentBytes);
@@ -161,7 +161,7 @@ public class Encryptor {
         Enumeration headers = msgToEncrypt.getAllHeaderLines();
         while (headers.hasMoreElements()) {
             String headerLine = (String)headers.nextElement();
-            //logger.debug(" - headerLine: ${headerLine}");
+            //log.debug(" - headerLine: ${headerLine}");
 				/*
 				* Make sure not to override any content-* headers from the
 				* original message
@@ -186,33 +186,33 @@ public class Encryptor {
         SMIMEMessage smimeMessageReq = null;
         MimeMessage msg = new MimeMessage(ContextVS.MAIL_SESSION, new ByteArrayInputStream(encryptedMessageBytes));
         //String encryptedMessageBytesStr = new String(encryptedMessageBytes);
-        //logger.debug("- decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
+        //log.debug("- decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
         RecipientInformation recipientInfo = recipients.get(recipientId);
 			/*RecipientId recipientRID = null;
 			if(recipient.getRID() != null) {
 				recipientRID = recipient.getRID();
-				logger.debug(" -- recipientRID.getSerialNumber(): " + recipientRID.getSerialNumber());
+				log.debug(" -- recipientRID.getSerialNumber(): " + recipientRID.getSerialNumber());
 				if(recipient.getRID().getCertificate() != null) {
-					logger.debug(" -- recipient: " + recipient.getRID().getCertificate().getSubjectDN().toString());
-				} else logger.debug(" -- recipient.getRID().getCertificate() NULL");
-			} else logger.debug(" -- getRID NULL");
+					log.debug(" -- recipient: " + recipient.getRID().getCertificate().getSubjectDN().toString());
+				} else log.debug(" -- recipient.getRID().getCertificate() NULL");
+			} else log.debug(" -- getRID NULL");
 			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
 				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
         if(recipientInfo == null) {
             String msgStr = ContextVS.getMessage("encryptionRecipientErrorMsg");
-            logger.error(msgStr);
-            logger.error("Expected recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
+            log.error(msgStr);
+            log.error("Expected recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
             Collection<RecipientInformation> recipientCollection = recipients.getRecipients();
             for(RecipientInformation recipientInf : recipientCollection) {
-                logger.error("Encrypted document recipientId.getSerialNumber(): " +
+                log.error("Encrypted document recipientId.getSerialNumber(): " +
                         recipientInf.getRID().getSerialNumber());
             }
             return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, msgStr);
         }
         byte[] messageContentBytes =  recipientInfo.getContent(recipient);
-        //logger.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
+        //log.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
         smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(messageContentBytes));
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
         responseVS.setSmimeMessage(smimeMessageReq);
@@ -275,7 +275,7 @@ public class Encryptor {
     }
 
     public static ResponseVS decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) {
-        logger.debug("decryptCMS");
+        log.debug("decryptCMS");
         try {
             byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
             CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
@@ -320,7 +320,7 @@ public class Encryptor {
         Enumeration headers = msgToEncrypt.getAllHeaderLines();
         while (headers.hasMoreElements()) {
             String headerLine = (String)headers.nextElement();
-            logger.debug("headerLine: " + headerLine);
+            log.debug("headerLine: " + headerLine);
             /* 
              * Make sure not to override any content-* headers from the
              * original message
@@ -346,7 +346,7 @@ public class Encryptor {
    public static SMIMEMessage decryptSMIMEMessage(
            byte[] encryptedMessageBytes, PublicKey  publicKey, 
             PrivateKey receiverPrivateKey) throws Exception {
-        logger.debug("decryptSMIMEMessage(...) ");
+        log.debug("decryptSMIMEMessage(...) ");
         InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, publicKey, receiverPrivateKey));
         return new SMIMEMessage(inputStream);
@@ -357,7 +357,7 @@ public class Encryptor {
      */
     public static byte[] decryptMessage(byte[] encryptedMessageBytes,
                                         PublicKey receiverPublicKey, PrivateKey receiverPrivateKey) throws Exception {
-        logger.debug("decryptMessage(...) ");
+        log.debug("decryptMessage(...) ");
         RecipientId recId = null;
         /*if(receiverCert != null)
             recId = new JceKeyTransRecipientId(receiverCert);*/
@@ -380,7 +380,7 @@ public class Encryptor {
     }
     
     public static byte[] encryptFile(File fileToEncrypt, X509Certificate receiverCert) throws Exception {
-        logger.debug("encryptFile(...)");
+        log.debug("encryptFile(...)");
         MimeMessage mimeMessage = new MimeMessage(ContextVS.MAIL_SESSION);
         MimeBodyPart mimeBodyPart = new MimeBodyPart();
         FileDataSource fds = new FileDataSource(fileToEncrypt);

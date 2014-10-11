@@ -3,7 +3,10 @@ package org.votingsystem.vicket.model;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.VicketTagVS;
 import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
@@ -12,7 +15,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static javax.persistence.GenerationType.IDENTITY;
 

@@ -3,9 +3,8 @@ package org.votingsystem.model;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.io.Serializable;
-
+import javax.xml.bind.DatatypeConverter;
 /**
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -41,6 +40,10 @@ public class VicketServer extends ActorVS implements Serializable {
 
     public String getVicketRequestServiceURL() {
         return getServerURL() + "/vicket/request";
+    }
+
+    public String getVicketStatusServiceURL(String hashCertVS) {
+        return getServerURL() + "/vicket/status/" +DatatypeConverter.printHexBinary(hashCertVS.getBytes());
     }
 
     public String getVicketTransactionServiceURL() {

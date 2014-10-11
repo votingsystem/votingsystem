@@ -1,6 +1,5 @@
 package org.votingsystem.model;
 
-import net.sf.json.JSONArray;
 import org.apache.log4j.Logger;
 import org.votingsystem.util.StringUtils;
 
@@ -16,7 +15,7 @@ import java.util.UUID;
  */
 public class OperationVS {
     
-    private static Logger logger = Logger.getLogger(OperationVS.class);
+    private static Logger log = Logger.getLogger(OperationVS.class);
 
     private TypeVS typeVS;
     private Integer statusCode;
@@ -37,7 +36,6 @@ public class OperationVS {
     private Map documentToEncrypt;
     private Map documentToDecrypt;
     private Map document;
-
     private String contentType;
     private EventVS eventVS;
     private String[] args;
@@ -210,7 +208,6 @@ public class OperationVS {
     }
 
     public static OperationVS parse (Map dataMap) {
-        logger.debug("populate");
         if(dataMap == null) return null;
         OperationVS operationVS = new OperationVS();
         if (dataMap.containsKey("operation")) operationVS.setType(TypeVS.valueOf((String) dataMap.get("operation")));
@@ -279,7 +276,7 @@ public class OperationVS {
     }
 
     public Map getDataMap () {
-        logger.debug("getDataMap");
+        log.debug("getDataMap");
         Map dataMap = new HashMap();
         if(statusCode != null) dataMap.put("statusCode", statusCode);
         if(message != null) dataMap.put("message", message);
@@ -317,7 +314,6 @@ public class OperationVS {
     public void setDocumentToEncrypt(Map documentToEncrypt) {
         this.documentToEncrypt = documentToEncrypt;
     }
-
 
     public Map getDocumentToDecrypt() {
         return documentToDecrypt;

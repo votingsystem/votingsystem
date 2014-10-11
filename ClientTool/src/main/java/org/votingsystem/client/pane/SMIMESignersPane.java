@@ -26,12 +26,12 @@ import java.util.Set;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class DocumentSignersPane extends GridPane {
+public class SMIMESignersPane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(DocumentSignersPane.class);
+    private static Logger log = Logger.getLogger(SMIMESignersPane.class);
     private TabPane tabPane;
 
-    public DocumentSignersPane(SignedFile signedFile) {
+    public SMIMESignersPane(SignedFile signedFile) {
         tabPane = new TabPane();
         tabPane.setRotateGraphic(false);
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
@@ -42,14 +42,14 @@ public class DocumentSignersPane extends GridPane {
         closeButton.setGraphic((new ImageView(Utils.getImage(this, "save_data"))));
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                DocumentSignersPane.this.setVisible(false);
+                SMIMESignersPane.this.setVisible(false);
             }
         });
 
         Tab newTab = null;
         try {
             Set<UserVS> signersVS = signedFile.getSMIMEMessageWraper().getSigners();
-            logger.debug("Num. signers: " + signersVS.size());
+            log.debug("Num. signers: " + signersVS.size());
             for (UserVS signerVS:signersVS) {
                 SignatureInfoPane signerVSPanel = new SignatureInfoPane(signerVS, signedFile.getSMIMEMessageWraper());
                 String tabName = ContextVS.getMessage("signerLbl");
@@ -63,7 +63,7 @@ public class DocumentSignersPane extends GridPane {
             setHgrow(tabPane, Priority.ALWAYS);
             setVgrow(tabPane, Priority.ALWAYS);
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -78,8 +78,8 @@ public class DocumentSignersPane extends GridPane {
                 stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
                     @Override public void handle(WindowEvent window) { }
                 });
-                DocumentSignersPane documentSignersPane = new DocumentSignersPane(signedFile);
-                stage.setScene(new Scene(documentSignersPane));
+                SMIMESignersPane SMIMESignersPane = new SMIMESignersPane(signedFile);
+                stage.setScene(new Scene(SMIMESignersPane));
                 stage.setTitle(ContextVS.getMessage("signersLbl"));
                 stage.centerOnScreen();
                 stage.show();

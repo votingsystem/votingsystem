@@ -30,7 +30,8 @@ ContextVS.getInstance().setDefaultServer(vicketServer)
 BigDecimal totalAmount = new BigDecimal(10)
 String curencyCode = "EUR"
 VicketTagVS tag = new VicketTagVS("HIDROGENO")
-VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, curencyCode, tag,
+Boolean isTimeLimited = true
+VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, curencyCode, tag, isTimeLimited,
         ContextVS.getInstance().getVicketServer())
 String messageSubject = "TEST_VICKET_REQUEST_DATA_MSG_SUBJECT";
 Map<String, Object> mapToSend = new HashMap<String, Object>();

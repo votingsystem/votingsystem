@@ -23,7 +23,7 @@ import java.security.cert.X509Certificate;
  */
 public class TimeStampCertPane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(TimeStampCertPane.class);
+    private static Logger log = Logger.getLogger(TimeStampCertPane.class);
 
     private X509Certificate certificate;
 
@@ -55,15 +55,15 @@ public class TimeStampCertPane extends GridPane {
             MessageDialog messageDialog = new MessageDialog();
             messageDialog.showMessage(certificate.getSubjectDN().toString() + " - " + message);
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
     public static String getCertInfo (X509Certificate certificate) {
         return ContextVS.getInstance().getMessage("certInfoFormattedMsg",certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),certificate.getSerialNumber().toString(),
-                DateUtils.getLongDate_Es(certificate.getNotBefore()),
-                DateUtils.getLongDate_Es(certificate.getNotAfter()));
+                DateUtils.getDateStr(certificate.getNotBefore(),"dd/MMM/yyyy HH:mm"),
+                DateUtils.getDateStr(certificate.getNotAfter(), "dd/MMM/yyyy HH:mm"));
     }
 
 }

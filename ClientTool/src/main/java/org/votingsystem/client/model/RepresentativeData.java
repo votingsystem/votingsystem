@@ -11,7 +11,7 @@ import java.util.List;
 */
 public class RepresentativeData {
     
-    private static Logger logger = Logger.getLogger(
+    private static Logger log = Logger.getLogger(
             RepresentativeData.class);
     
     private String nif;
@@ -34,7 +34,7 @@ public class RepresentativeData {
     
     public void addRepresentationDoc(SignedFile repDoc) {
         if(repDoc == null) {
-            logger.debug("repDoc null");
+            log.debug("repDoc null");
             return;
         } 
         representationDocumentList.add(repDoc);

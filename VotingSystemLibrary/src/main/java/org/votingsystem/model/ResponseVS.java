@@ -18,7 +18,7 @@ public class ResponseVS<T> implements Serializable {
 
     public static final long serialVersionUID = 1L;
     
-	private static Logger logger = Logger.getLogger(ResponseVS.class);
+	private static Logger log = Logger.getLogger(ResponseVS.class);
     
     public static final int SC_OK                       = 200;
     public static final int SC_OK_WITHOUT_BODY          = 204;
@@ -113,7 +113,7 @@ public class ResponseVS<T> implements Serializable {
             try {
                 message = new String(messageBytes, "UTF-8");
             } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
             }
         }
         return message;

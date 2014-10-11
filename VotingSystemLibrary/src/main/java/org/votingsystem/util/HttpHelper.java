@@ -37,7 +37,6 @@ import java.security.KeyStore;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 */
 public class HttpHelper {
     
-    private static Logger logger = Logger.getLogger(HttpHelper.class);
+    private static Logger log = Logger.getLogger(HttpHelper.class);
     
     private HttpClient httpclient;
     private PoolingClientConnectionManager cm;
@@ -71,7 +70,7 @@ public class HttpHelper {
     }
 
     public void initVotingSystemSSLMode() {
-        logger.debug("initVotingSystemSSLMode");
+        log.debug("initVotingSystemSSLMode");
         try {
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
@@ -79,13 +78,13 @@ public class HttpHelper {
             trustStore.setCertificateEntry(sslServerCert.getSubjectDN().toString(), sslServerCert);
             SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
             Scheme sch = new Scheme("https", 8443, socketFactory);
-            logger.debug("Added Scheme https with port 8443 to Apache httpclient");
+            log.debug("Added Scheme https with port 8443 to Apache httpclient");
             final HttpParams httpParams = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
             httpclient = new DefaultHttpClient(cm, httpParams);
             httpclient.getConnectionManager().getSchemeRegistry().register(sch);
         }catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -95,7 +94,7 @@ public class HttpHelper {
 
     
     public synchronized void initMultiThreadedMode() {
-        logger.debug("initMultiThreadedMode");
+        log.debug("initMultiThreadedMode");
         if(cm != null) cm.shutdown();
         cm = new PoolingClientConnectionManager();
         cm.setMaxTotal(200);
@@ -116,12 +115,12 @@ public class HttpHelper {
             }
         } 
         catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
     
     public ResponseVS getData (String serverURL, ContentTypeVS contentType) {
-        logger.debug("getData - contentType: "  + contentType + " - serverURL: " + serverURL);
+        log.debug("getData - contentType: "  + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpResponse response = null;
         HttpGet httpget = null;
@@ -130,13 +129,13 @@ public class HttpHelper {
             httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
             response = httpclient.execute(httpget);
-            logger.debug("----------------------------------------");
+            log.debug("----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) {
             System.out.println(headers[i]);
             }*/
-            logger.debug(response.getStatusLine().toString());
-            logger.debug("----------------------------------------");
+            log.debug(response.getStatusLine().toString());
+            log.debug("----------------------------------------");
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
@@ -148,7 +147,7 @@ public class HttpHelper {
             }
             if(response != null) EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "hostConnectionErrorMsg", serverURL));
             if(httpget != null) httpget.abort();
@@ -158,13 +157,13 @@ public class HttpHelper {
     }
     
     public X509Certificate getCertFromServer (String serverURL) throws Exception {
-        logger.debug("getCertFromServer - serverURL: " + serverURL);
+        log.debug("getCertFromServer - serverURL: " + serverURL);
         HttpGet httpget = new HttpGet(serverURL);
         X509Certificate certificate = null;
         HttpResponse response = httpclient.execute(httpget);
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
+        log.debug("----------------------------------------");
+        log.debug(response.getStatusLine().toString());
+        log.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
             certificate = CertUtil.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
@@ -174,13 +173,13 @@ public class HttpHelper {
     }
     
     public Collection<X509Certificate> getCertChainHTTP (String serverURL) throws Exception {
-        logger.debug("getCertChainHTTP - serverURL: " + serverURL);
+        log.debug("getCertChainHTTP - serverURL: " + serverURL);
         HttpGet httpget = new HttpGet(serverURL);
         Collection<X509Certificate> certificates = null;
         HttpResponse response = httpclient.execute(httpget);
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
+        log.debug("----------------------------------------");
+        log.debug(response.getStatusLine().toString());
+        log.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
             certificates = CertUtil.fromPEMToX509CertCollection(EntityUtils.toByteArray(entity));
@@ -190,7 +189,7 @@ public class HttpHelper {
     }
    
     public PKIXParameters getPKIXParametersHTTP (String certChainURL) throws Exception {
-        logger.debug("getPKIXParametersHTTP - certChainURL: " + certChainURL);
+        log.debug("getPKIXParametersHTTP - certChainURL: " + certChainURL);
         Set<TrustAnchor> anchors = getTrustAnchorHTTP(certChainURL);
         PKIXParameters params = new PKIXParameters(anchors);
         params.setRevocationEnabled(false); // tell system do not check CRL's
@@ -198,7 +197,7 @@ public class HttpHelper {
     }   
     
     public Set<TrustAnchor> getTrustAnchorHTTP (String certChainURL) throws Exception {
-        logger.debug("getTrustAnchorHTTP - certChainURL: " + certChainURL);
+        log.debug("getTrustAnchorHTTP - certChainURL: " + certChainURL);
         Collection<X509Certificate> certificates = getCertChainHTTP(certChainURL);
         Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
         for (X509Certificate certificate:certificates) {
@@ -209,7 +208,7 @@ public class HttpHelper {
     }
     
     public ResponseVS sendFile (File file, ContentTypeVS contentTypeVS, String serverURL,  String... headerNames) {
-        logger.debug("sendFile - contentType: " + contentTypeVS +  " - serverURL: " + serverURL);
+        log.debug("sendFile - contentType: " + contentTypeVS +  " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         ContentTypeVS responseContentType = null;
@@ -220,9 +219,9 @@ public class HttpHelper {
             FileEntity entity = new FileEntity(file, contentType);
             httpPost.setEntity(entity);
             HttpResponse response = httpclient.execute(httpPost);
-            logger.debug("----------------------------------------");
-            logger.debug(response.getStatusLine().toString());
-            logger.debug("----------------------------------------");
+            log.debug("----------------------------------------");
+            log.debug(response.getStatusLine().toString());
+            log.debug("----------------------------------------");
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
@@ -237,7 +236,7 @@ public class HttpHelper {
             }
             EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
         }
@@ -246,7 +245,7 @@ public class HttpHelper {
     
     public ResponseVS sendData(byte[] byteArray, ContentTypeVS contentType,
             String serverURL, String... headerNames) throws IOException {
-        logger.debug("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
+        log.debug("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         HttpResponse response = null;
@@ -260,9 +259,9 @@ public class HttpHelper {
             ContentTypeVS responseContentType = null;
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
-            logger.debug("------------------------------------------------");
-            logger.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
-            logger.debug("------------------------------------------------");
+            log.debug("------------------------------------------------");
+            log.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
+            log.debug("------------------------------------------------");
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
             if(headerNames != null && headerNames.length > 0) {
@@ -275,12 +274,12 @@ public class HttpHelper {
             }
             EntityUtils.consume(response.getEntity());
         } catch(HttpHostConnectException ex){
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
                     getMessage("hostConnectionErrorMsg", serverURL));
             if(httpPost != null) httpPost.abort();
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
         }  finally {
@@ -291,7 +290,7 @@ public class HttpHelper {
     
     
     public ResponseVS sendObjectMap(Map<String, Object> fileMap, String serverURL) throws Exception {
-        logger.debug("sendObjectMap - serverURL: " + serverURL); 
+        log.debug("sendObjectMap - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         if(fileMap == null || fileMap.isEmpty()) throw new Exception(
                 ContextVS.getInstance().getMessage("requestWithoutFileMapErrorMsg"));
@@ -306,7 +305,7 @@ public class HttpHelper {
                 Object objectToSend = fileMap.get(objectName);
                 if(objectToSend instanceof File) {
                     File file = (File)objectToSend;
-                    logger.debug("sendObjectMap - fileName: " + objectName + " - filePath: " + file.getAbsolutePath());
+                    log.debug("sendObjectMap - fileName: " + objectName + " - filePath: " + file.getAbsolutePath());
                     FileBody  fileBody = new FileBody(file);
                     reqEntity.addPart(objectName, fileBody);
                 } else if (objectToSend instanceof byte[]) {
@@ -318,9 +317,9 @@ public class HttpHelper {
             response = httpclient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
-            logger.debug("----------------------------------------");
-            logger.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
-            logger.debug("----------------------------------------");
+            log.debug("----------------------------------------");
+            log.debug(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType);
+            log.debug("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
             //EntityUtils.consume(response.getEntity());
@@ -329,7 +328,7 @@ public class HttpHelper {
             if(response != null) {
                 statusLine = response.getStatusLine().toString();
             }
-            logger.error(ex.getMessage() + " - StatusLine: " + statusLine, ex);
+            log.error(ex.getMessage() + " - StatusLine: " + statusLine, ex);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             if(httpPost != null) httpPost.abort();
         }
@@ -361,7 +360,7 @@ public class HttpHelper {
                     }
                 }
             } catch (InterruptedException ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
             }
         }
 

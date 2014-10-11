@@ -37,9 +37,9 @@ import java.util.UUID;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SignDocumentStackPane extends StackPane {
+public class DocumentSignerStackPane extends StackPane {
 
-    private static Logger logger = Logger.getLogger(SignDocumentStackPane.class);
+    private static Logger log = Logger.getLogger(DocumentSignerStackPane.class);
 
     public enum Operation {SEND_SMIME, SIGN_SMIME}
 
@@ -68,7 +68,7 @@ public class SignDocumentStackPane extends StackPane {
     private OperationListener operationListener;
     private Text progressMessageText;
 
-    public SignDocumentStackPane(OperationListener operationListener) {
+    public DocumentSignerStackPane(OperationListener operationListener) {
         this.operationListener = operationListener;
         progressRegion = new Region();
         progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
@@ -191,7 +191,7 @@ public class SignDocumentStackPane extends StackPane {
     }
 
     private void initBackgroundTask() {
-        logger.debug("processOperation");
+        log.debug("processOperation");
         Task<ResponseVS> operationHandlerTask = new OperationHandlerTask();
         progressMessageText.textProperty().bind(operationHandlerTask.messageProperty());
         progressBar.progressProperty().bind(operationHandlerTask.progressProperty());
@@ -224,7 +224,7 @@ public class SignDocumentStackPane extends StackPane {
     }
 
     private void checkPasswords() {
-        logger.debug("checkPasswords");
+        log.debug("checkPasswords");
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 String password1 = new String(password1Field.getText());
@@ -271,7 +271,7 @@ public class SignDocumentStackPane extends StackPane {
                                 serviceURL);
                         updateProgress(80, 100);
                     } catch(Exception ex) {
-                        logger.error(ex.getMessage(), ex);
+                        log.error(ex.getMessage(), ex);
                         responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;
@@ -281,7 +281,7 @@ public class SignDocumentStackPane extends StackPane {
                         textToSignJSON.put("UUID", UUID.randomUUID().toString());
                         toUser = StringUtils.getNormalized(toUser);
                         String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));
-                        logger.debug("toUser: " + toUser + " - timeStampService: " + timeStampService);
+                        log.debug("toUser: " + toUser + " - timeStampService: " + timeStampService);
                         smimeMessage = ContentSignerHelper.genMimeMessage(null, toUser,
                                 textToSignJSON.toString(), password.toCharArray(), messageSubject, null);
                         updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
@@ -289,7 +289,7 @@ public class SignDocumentStackPane extends StackPane {
                         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);
                         responseVS = timeStamper.call();
                     } catch(Exception ex) {
-                        logger.error(ex.getMessage() + " - " + textToSign.replaceAll("(\\r|\\n)", "\\\\n"), ex);
+                        log.error(ex.getMessage() + " - " + textToSign.replaceAll("(\\r|\\n)", "\\\\n"), ex);
                         responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;

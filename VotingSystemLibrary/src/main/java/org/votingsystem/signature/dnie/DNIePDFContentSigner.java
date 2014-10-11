@@ -37,7 +37,7 @@ import static org.votingsystem.model.ContextVS.*;
 */
 public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentSignerVS {
 
-    private static Logger logger = Logger.getLogger(DNIePDFContentSigner.class);
+    private static Logger log = Logger.getLogger(DNIePDFContentSigner.class);
 
     private static final int  BUFFER_SIZE = 4096;
 
@@ -217,7 +217,7 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
         it = signerInfs.iterator();
         while (it.hasNext()) {
             SignerInf signer = (SignerInf)it.next();
-            logger.info("signer.signerIdentifier: " + signer.signerIdentifier.toASN1Object().toString());
+            log.info("signer.signerIdentifier: " + signer.signerIdentifier.toASN1Object().toString());
             digestAlgs.add(signer.getDigestAlgorithmID());
             signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, null, addDefaultAttributes, isCounterSignature));
         }
@@ -240,7 +240,7 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
 
 
     public static DNIePDFContentSigner getInstance(char[] password, Mechanism signatureMechanism) throws Exception {
-        logger.debug("getInstance");
+        log.debug("getInstance");
         DNIePDFContentSigner instance = null;
         instanceSignatureMechanism = signatureMechanism;
         Session pkcs11Session;
@@ -295,7 +295,7 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
             //X509CRLSelector selector = new X509CRLSelector();
             //selector.setIssuers(collection);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             if (ex instanceof ArrayIndexOutOfBoundsException) {
                 throw new VotingSystemException(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
             }
@@ -324,7 +324,7 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
     }
 
     public void closeSession () {
-        logger.debug("closeSession");
+        log.debug("closeSession");
         try {
             if (token != null && token.getTokenInfo() != null && token.getTokenInfo().isTokenInitialized()) {
                 token.closeAllSessions();
@@ -339,7 +339,7 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
             }
             System.gc();
         } catch (TokenException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 

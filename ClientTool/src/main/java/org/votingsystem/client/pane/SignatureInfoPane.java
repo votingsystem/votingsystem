@@ -29,7 +29,7 @@ import java.io.File;
  */
 public class SignatureInfoPane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(SignatureInfoPane.class);
+    private static Logger log = Logger.getLogger(SignatureInfoPane.class);
 
     private UserVS signer;
     private SMIMEMessage signedMessage;
@@ -54,7 +54,7 @@ public class SignatureInfoPane extends GridPane {
             Label signatureDateLabel = new Label(ContextVS.getMessage("signatureDateLbl") + ": ");
             signatureDateLabel.setStyle("-fx-font-weight: bold;");
             add(signatureDateLabel, 0, 1);
-            Label signatureDateValueLabel = new Label(DateUtils.getLongDate_Es(signer.getSignatureDate()));
+            Label signatureDateValueLabel = new Label(DateUtils.getDateStr(signer.getSignatureDate(), "dd/MMM/yyyy HH:mm"));
 
             add(signatureDateValueLabel, 1, 1);
             Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));

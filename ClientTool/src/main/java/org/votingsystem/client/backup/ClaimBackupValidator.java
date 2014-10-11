@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 */
 public class ClaimBackupValidator implements Callable<ResponseVS> {
     
-    private static Logger logger = Logger.getLogger(ClaimBackupValidator.class);
+    private static Logger log = Logger.getLogger(ClaimBackupValidator.class);
 
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
@@ -43,7 +43,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
     }
    
     private String checkByteArraySize (byte[] signedFileBytes) {
-        //logger.debug("checkByteArraySize");
+        //log.debug("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > ContextVS.SIGNED_MAX_FILE_SIZE) {
             result = ContextVS.getInstance().getMessage("fileSizeExceededMsg", ContextVS.SIGNED_MAX_FILE_SIZE_KB,
@@ -73,7 +73,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
             
         File metaInfFile = new File(backupPath + File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
-            logger.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
+            log.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
             metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
             eventURL= EventVS.getURL(null, metaInf.getServerURL(), metaInf.getId());
@@ -84,15 +84,15 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         responseVS.setErrorList(errorList);
         responseVS.setStatusCode(statusCode);
         if(!errorList.isEmpty()) {
-            logger.error(" ------- " + errorList.size() + " errors: ");
+            log.error(" ------- " + errorList.size() + " errors: ");
             for(String error : errorList) {
-                logger.error(error);
+                log.error(error);
             }
-        } else logger.debug("Backup without errors");
+        } else log.debug("Backup without errors");
         long finish = System.currentTimeMillis();
         long duration = finish - begin;
         String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
-        logger.debug("duration: " + durationStr);
+        log.debug("duration: " + durationStr);
         notifyValidationListener(responseVS.getStatusCode(), durationStr, ValidationEvent.CLAIM_FINISH);
         responseVS.setMessage(durationStr);
         responseVS.setData(metaInf);
@@ -109,7 +109,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
     }
     
     private ResponseVS validateClaims() throws Exception {
-        logger.debug("validateClaims");
+        log.debug("validateClaims");
         File[] batchDirs = backupDir.listFiles();
         int statusCode = ResponseVS.SC_OK;
         int numClaimsOK = 0;
@@ -144,7 +144,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
                     }
                     if(errorMessage != null) {
                         statusCode = ResponseVS.SC_ERROR;
-                        logger.error(errorMessage);
+                        log.error(errorMessage);
                         errorList.add(errorMessage);
                     } 
                     notifyValidationListener(statusCode, validationResponse.getMessage(), ValidationEvent.CLAIM);
@@ -152,7 +152,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
             }
         }
         statusCode = ResponseVS.SC_OK;
-        logger.debug("numClaimsOK: " + numClaimsOK + 
+        log.debug("numClaimsOK: " + numClaimsOK +
                 " - numClaimsERROR: " + numClaimsERROR);
         String message = null;
         if(metaInf.getNumSignatures() != numClaimsOK) {

@@ -34,9 +34,7 @@ import java.util.*;
  */
 public class SignatureService extends Service<ResponseVS> {
 
-    private static Logger logger = Logger.getLogger(SignatureService.class);
-
-    private static final Map<String, ActorVS> serverMap = new HashMap<String, ActorVS>();
+    private static Logger log = Logger.getLogger(SignatureService.class);
 
     private OperationVS operationVS = null;
     private String password = null;
@@ -58,7 +56,7 @@ public class SignatureService extends Service<ResponseVS> {
     class SignatureTask extends Task<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
-            logger.debug("SignatureService.SignatureTask - call:" + operationVS.getType());
+            log.debug("SignatureService.SignatureTask - call:" + operationVS.getType());
             ResponseVS responseVS = null;
             updateProgress(5, 100);
             try {
@@ -115,7 +113,7 @@ public class SignatureService extends Service<ResponseVS> {
                         case MESSAGEVS_DECRYPT:
                             responseVS = decryptMessageVS(operationVS);
                             break;
-                        case OPEN_RECEIPT_FROM_URL:
+                        case OPEN_SMIME_FROM_URL:
                             responseVS = openReceiptFromURL(operationVS);
                             break;
                         case VICKET_REQUEST:
@@ -128,7 +126,7 @@ public class SignatureService extends Service<ResponseVS> {
                     return responseVS;
                 } else return responseVS;
             } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
@@ -159,7 +157,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS sendVote(OperationVS operationVS) throws Exception {
-            logger.debug("sendVote");
+            log.debug("sendVote");
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
             EventVS eventVS = operationVS.getEventVS();
             eventVS.getVoteVS().genVote();
@@ -215,7 +213,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS cancelVote(ActorVS targetServer, OperationVS operationVS) throws Exception {
-            logger.debug("cancelVote");
+            log.debug("cancelVote");
             Map documentToSignMap = new HashMap<String, String>();
             documentToSignMap.put("operation", TypeVS.CANCEL_VOTE.toString());
             ResponseVS voteResponse = ContextVS.getInstance().getHashCertVSData(operationVS.getMessage());
@@ -232,9 +230,9 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS processNewRepresentative(OperationVS operationVS) throws Exception {
             byte[] imageFileBytes = FileUtils.getBytesFromFile(operationVS.getFile());
-            logger.debug(" - imageFileBytes.length: " + imageFileBytes.length);
+            log.debug(" - imageFileBytes.length: " + imageFileBytes.length);
             if(imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
-                logger.debug(" - MAX_FILE_SIZE exceeded ");
+                log.debug(" - MAX_FILE_SIZE exceeded ");
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("fileSizeExceeded",
                         ContextVS.IMAGE_MAX_FILE_SIZE_KB));
             } else {
@@ -256,12 +254,13 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         private ResponseVS sendVicketRequest(OperationVS operationVS) throws Exception {
-            logger.debug("sendVicketRequest");
+            log.debug("sendVicketRequest");
             BigDecimal totalAmount = new BigDecimal((Integer)operationVS.getDocumentToSignMap().get("totalAmount"));
             String currencyCode = (String) operationVS.getDocumentToSignMap().get("currencyCode");
             VicketTagVS tag = new VicketTagVS((String) operationVS.getDocumentToSignMap().get("tag"));
+            Boolean isTimeLimited = (Boolean) operationVS.getDocumentToSignMap().get("isTimeLimited");
             VicketRequestBatch vicketBatch = new VicketRequestBatch(totalAmount, totalAmount, currencyCode, tag,
-                    (VicketServer) operationVS.getTargetServer());
+                    isTimeLimited, (VicketServer) operationVS.getTargetServer());
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.JSON.getName(),
                     vicketBatch.getVicketCSRRequest().toString().getBytes());
@@ -278,9 +277,11 @@ public class SignatureService extends Service<ResponseVS> {
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ((VicketServer)operationVS.getTargetServer()).getVicketRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                vicketBatch.initVickets((JSONObject) JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8")));
+                JSONObject responseJSON = (JSONObject) JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"));
+                vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
+                responseMap.put("message", responseJSON.getString("message"));
                 responseMap.put("vicketList", WalletUtils.getSerializedVicketList(vicketBatch.getVicketsMap().values()));
                 responseVS.setContentType(ContentTypeVS.JSON);
                 responseVS.setMessageJSON(JSONSerializer.toJSON(responseMap));
@@ -290,7 +291,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS sendMessageVS(ActorVS targetServer, OperationVS operationVS) throws Exception {
-            logger.debug("sendMessageVS");
+            log.debug("sendMessageVS");
             //operationVS.getContentType(); -> MessageVS
             List signedDataList = new ArrayList<>();
             List encryptedDataList = new ArrayList<>();
@@ -326,7 +327,7 @@ public class SignatureService extends Service<ResponseVS> {
                 responseVS = HttpHelper.getInstance().sendData(documentToSendJSON.toString().getBytes(),
                         ContentTypeVS.MESSAGEVS, operationVS.getServiceURL());
             } catch (Exception ex) {
-                logger.debug(ex.getMessage(), ex);
+                log.debug(ex.getMessage(), ex);
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             } finally {
                 return responseVS;
@@ -334,7 +335,7 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         private ResponseVS decryptMessageVS(OperationVS operationVS) throws Exception {
-            logger.debug("decryptMessageVS");
+            log.debug("decryptMessageVS");
             Map documentToDecrypt = operationVS.getDocumentToDecrypt();
             List<Map> encryptedDataList = (List) documentToDecrypt.get("encryptedDataList");
             X509Certificate cryptoTokenCert = null;
@@ -345,14 +346,14 @@ public class SignatureService extends Service<ResponseVS> {
                 java.security.cert.Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
                 cryptoTokenCert = (X509Certificate) chain[0];
             } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
             }
             String encryptedData = null;
             for(Map encryptedDataMap : encryptedDataList) {
                 Long serialNumber = Long.valueOf((String) encryptedDataMap.get("serialNumber"));
                 if(serialNumber == cryptoTokenCert.getSerialNumber().longValue()) {
-                    logger.debug("Cert matched - serialNumber: " + serialNumber);
+                    log.debug("Cert matched - serialNumber: " + serialNumber);
                     encryptedData = (String) encryptedDataMap.get("encryptedData");
                 }
             }
@@ -369,7 +370,7 @@ public class SignatureService extends Service<ResponseVS> {
                 WebSocketService.getInstance().sendMessage(jsonObject.toString());
             }
             else {
-                logger.error("Unable to decrypt from this device");
+                log.error("Unable to decrypt from this device");
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR);
             }
             //[id:messageVS.fromUserVS.id, name:messageVS.fromUserVS.name]
@@ -472,14 +473,14 @@ public class SignatureService extends Service<ResponseVS> {
                 }
                 return responseVS;
             } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
 
         //we know this is done in a background thread
         private ResponseVS sendSMIME(ActorVS targetServer, OperationVS operationVS, String... header) throws Exception {
-            logger.debug("sendSMIME");
+            log.debug("sendSMIME");
             String documentToSignStr = null;
             if(operationVS.getAsciiDoc() != null) {
                 documentToSignStr = operationVS.getAsciiDoc();
@@ -502,7 +503,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS<ActorVS> publishSMIME(ActorVS targetServer, OperationVS operationVS) throws Exception {
-            logger.debug("publishPoll");
+            log.debug("publishPoll");
             ResponseVS responseVS = sendSMIME(targetServer, operationVS, "eventURL");
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String eventURL = ((List<String>)responseVS.getData()).iterator().next() +"?menu=admin";
@@ -516,16 +517,15 @@ public class SignatureService extends Service<ResponseVS> {
 
     //we know this is done in a background thread
     public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
-        logger.debug(" - checkServer: " + serverURL);
-        ActorVS actorVS = serverMap.get(serverURL.trim());
+        log.debug(" - checkServer: " + serverURL);
+        ActorVS actorVS = ContextVS.getInstance().checkServer(serverURL.trim());
         if (actorVS == null) {
             String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
             ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 actorVS = ActorVS.parse((Map) responseVS.getMessageJSON());
                 responseVS.setData(actorVS);
-                logger.error("checkServer - adding " + serverURL.trim() + " to sever map");
-                serverMap.put(serverURL.trim(), actorVS);
+                log.error("checkServer - adding " + serverURL.trim() + " to sever map");
                 switch (actorVS.getType()) {
                     case ACCESS_CONTROL:
                         ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
@@ -538,7 +538,7 @@ public class SignatureService extends Service<ResponseVS> {
                         ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
                         break;
                     default:
-                        logger.debug("Unprocessed actor:" + actorVS.getType());
+                        log.debug("Unprocessed actor:" + actorVS.getType());
                 }
             } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));

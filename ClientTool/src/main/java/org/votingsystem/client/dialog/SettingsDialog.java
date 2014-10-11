@@ -28,7 +28,7 @@ import java.security.cert.X509Certificate;
  */
 public class SettingsDialog {
 
-    private static Logger logger = Logger.getLogger(SettingsDialog.class);
+    private static Logger log = Logger.getLogger(SettingsDialog.class);
 
     private Stage stage;
     private KeyStore userKeyStore;
@@ -124,7 +124,7 @@ public class SettingsDialog {
     }
 
     private void changeSignatureMode(ActionEvent evt) {
-        logger.debug("changeSignatureMode");
+        log.debug("changeSignatureMode");
         gridPane.getChildren().remove(keyStoreVBox);
         if(evt.getSource() == signWithKeystoreRb) {
             gridPane.add(keyStoreVBox, 0, 5);
@@ -133,7 +133,7 @@ public class SettingsDialog {
     }
 
     public void show() {
-        logger.debug("show");
+        log.debug("show");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
                 ContentSignerHelper.CryptoToken.DNIe.toString());
         ContentSignerHelper.CryptoToken cryptoToken = ContentSignerHelper.CryptoToken.valueOf(cryptoTokenStr);
@@ -152,7 +152,7 @@ public class SettingsDialog {
     }
 
     private void selectKeystoreFile() {
-        logger.debug("selectKeystoreFile");
+        log.debug("selectKeystoreFile");
         try {
             final FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showOpenDialog(stage);
@@ -174,12 +174,12 @@ public class SettingsDialog {
             }
 
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
     private void validateForm() {
-        logger.debug("validateForm");
+        log.debug("validateForm");
         String cryptoTokenStr = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN,
                 ContentSignerHelper.CryptoToken.DNIe.toString());
         ContentSignerHelper.CryptoToken cryptoToken = ContentSignerHelper.CryptoToken.valueOf(cryptoTokenStr);

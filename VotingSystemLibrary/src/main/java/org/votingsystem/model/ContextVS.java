@@ -1,9 +1,8 @@
 package org.votingsystem.model;
 
+import com.itextpdf.text.pdf.PdfName;
 import groovy.util.ConfigObject;
 import groovy.util.ConfigSlurper;
-
-import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -44,7 +43,7 @@ import java.util.logging.Level;
  */
 public class ContextVS {
 
-    private static Logger logger = Logger.getLogger(ContextVS.class);
+    private static Logger log = Logger.getLogger(ContextVS.class);
 
     public static Session MAIL_SESSION = Session.getDefaultInstance(System.getProperties(), null);
 
@@ -182,7 +181,7 @@ public class ContextVS {
                     "votingSystemLibraryMessages" + "_" + locale +  ".properties"));
             Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdown(); } });
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -203,7 +202,7 @@ public class ContextVS {
             appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(messagesFileName));
             if(localizatedMessagesFileName != null) {
                 String providedProperties = localizatedMessagesFileName.split("\\.")[0] + "_" + locale + ".properties";
-                logger.debug("provided localizatedMessagesFileName: " + providedProperties);
+                log.debug("provided localizatedMessagesFileName: " + providedProperties);
                 appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
                         providedProperties));
             }
@@ -217,8 +216,8 @@ public class ContextVS {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            logger.error("localizatedMessagesFileName: " + localizatedMessagesFileName);
-            logger.error(ex.getMessage(), ex);
+            log.error("localizatedMessagesFileName: " + localizatedMessagesFileName);
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -259,7 +258,7 @@ public class ContextVS {
     public static void initSignatureClient (String logPropertiesFile,
             String localizatedMessagesFileName, String locale){
         try {
-            logger.debug("------------- initSignatureClient ----------------- ");
+            log.debug("------------- initSignatureClient ----------------- ");
             init(logPropertiesFile,localizatedMessagesFileName, locale);
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + CERT_RAIZ_PATH));
@@ -281,10 +280,10 @@ public class ContextVS {
     
     public void shutdown() {
         try {
-            logger.debug("------------- shutdown ----------------- ");
+            log.debug("------------- shutdown ----------------- ");
             FileUtils.deleteRecursively(new File(APPTEMPDIR));
         } catch (IOException ex) {
-           logger.error(ex.getMessage(), ex);
+           log.error(ex.getMessage(), ex);
         }
     }
 
@@ -309,7 +308,7 @@ public class ContextVS {
     }
 
     public void initTestEnvironment(String appDir) throws Exception {
-        logger.debug("--------  initTestEnvironment - appDir: " + appDir + "-------- ");
+        log.debug("--------  initTestEnvironment - appDir: " + appDir + "-------- ");
         if(appDir != null) initDirs(appDir);
         try {
             DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
@@ -330,7 +329,7 @@ public class ContextVS {
                     PASSWORD.toCharArray(), END_ENTITY_ALIAS, rootCAPrivateCredential, testUserDN);
             userTest.setKeyStore(userKeySTore);
         } catch (Exception ex) {
-            logger.error (ex.getMessage(), ex);
+            log.error (ex.getMessage(), ex);
         }
     }
 
@@ -364,7 +363,7 @@ public class ContextVS {
     }
 
     public void setSessionUser(UserVS userVS) {
-        logger.debug("setSessionUser - nif: " + userVS.getNif());
+        log.debug("setSessionUser - nif: " + userVS.getNif());
         this.userVS = userVS;
     }
 
@@ -381,14 +380,14 @@ public class ContextVS {
                 settings.load(input);
             }
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             ex.printStackTrace();
         } finally {
             if (input != null) {
                 try {
                     input.close();
                 } catch (IOException ex) {
-                    logger.error(ex.getMessage(), ex);
+                    log.error(ex.getMessage(), ex);
                 }
             }
             return settings;
@@ -400,7 +399,7 @@ public class ContextVS {
         try {
             result = getSettings().getProperty(propertyName);
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         } finally {
             if(result == null) return defaultValue;
             else return result;
@@ -415,7 +414,7 @@ public class ContextVS {
                 result = Boolean.valueOf(propertyStr);
             }
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         } finally {
             if(result == null) return defaultValue;
             else return result;
@@ -430,13 +429,13 @@ public class ContextVS {
             settings.setProperty(propertyName, propertyValue);
             settings.store(output, null);
         } catch (IOException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         } finally {
             if (output != null) {
                 try {
                     output.close();
                 } catch (IOException ex) {
-                    logger.error(ex.getMessage(), ex);
+                    log.error(ex.getMessage(), ex);
                 }
             }
         }
@@ -475,7 +474,7 @@ public class ContextVS {
     public X509Certificate getTimeStampServerCert() throws ExceptionVS {
         if(timeStampCACert != null) return timeStampCACert;
         if(defaultServer != null) {
-            logger.debug("Fetching TimeStampServerCert from default server");
+            log.debug("Fetching TimeStampServerCert from default server");
             return defaultServer.getTimeStampCert();
         } else throw new ExceptionVS("TimeStampServerCert not initialized");
     }
@@ -485,9 +484,9 @@ public class ContextVS {
     }
     
     public ResponseVS getHashCertVSData(String hashCertVSBase64) {
-        logger.debug("getHashCertVSData");
+        log.debug("getHashCertVSData");
         if(hashCertVSDataMap == null || hashCertVSBase64 == null) {
-            logger.debug("getHashCertVSData - hashCertVSDataMap: " + hashCertVSDataMap +
+            log.debug("getHashCertVSData - hashCertVSDataMap: " + hashCertVSDataMap +
                     " - hashCertVSBase64: " + hashCertVSBase64);
             return null;
         }
@@ -503,7 +502,7 @@ public class ContextVS {
         File newFileDir = new File(APPDIR + subPath);
         newFileDir.mkdirs();
         File newFile = new File(newFileDir.getAbsolutePath() + "/" + fileName);
-        logger.debug("newFile.path: " + newFile.getAbsolutePath());
+        log.debug("newFile.path: " + newFile.getAbsolutePath());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(fileToCopy), newFile);
     }
 
@@ -515,7 +514,7 @@ public class ContextVS {
     }
 
     public PKIXParameters getSessionPKIXParameters() throws InvalidAlgorithmParameterException, Exception {
-        logger.debug("getSessionPKIXParameters");
+        log.debug("getSessionPKIXParameters");
         Set<TrustAnchor> anchors = accessControl.getTrustAnchors();
         TrustAnchor rootCACertSessionAnchor = new TrustAnchor(rootCACert, null);
         anchors.add(rootCACertSessionAnchor);
@@ -534,7 +533,7 @@ public class ContextVS {
             if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
             else return pattern;
         } catch(Exception ex) {
-            logger.error("### Value not found for key: " + key);
+            log.error("### Value not found for key: " + key);
             return "---" + key + "---";
         }
     }
@@ -555,7 +554,7 @@ public class ContextVS {
         try {
             icon = new ImageIcon(baseObject.getClass().getResource(iconPath));
         } catch(Exception ex) {
-            logger.error(" ### iconPath: " + iconPath + " not found");
+            log.error(" ### iconPath: " + iconPath + " not found");
             icon = new ImageIcon(baseObject.getClass().getResource("/resources/icon_32/button_default.png"));
         }
         return icon;
@@ -574,11 +573,19 @@ public class ContextVS {
         if(server instanceof VicketServer) setVicketServer((VicketServer) server);
         else if(server instanceof AccessControlVS) setAccessControl((AccessControlVS) server);
         else if(server instanceof ControlCenterVS) setControlCenter((ControlCenterVS) server);
-        else logger.error("setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
+        else log.error("setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
+    }
+
+    public ActorVS checkServer(String serverURL) {
+        if(vicketServer != null && vicketServer.getServerURL().equals(serverURL)) return vicketServer;
+        if(accessControl != null && accessControl.getServerURL().equals(serverURL)) return accessControl;
+        if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) return controlCenter;
+        log.debug("checkServer - serverURL: '" + serverURL + "' not found");
+        return null;
     }
 
     public void setDefaultServer(ActorVS server) {
-        logger.debug("setDefaultServer - serverURL: " + server.getServerURL());
+        log.debug("setDefaultServer - serverURL: " + server.getServerURL());
         this.defaultServer = server;
     }
 

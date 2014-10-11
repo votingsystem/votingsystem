@@ -22,7 +22,7 @@ import java.io.File;
  */
 public class EventVSInfoPane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(EventVSInfoPane.class);
+    private static Logger log = Logger.getLogger(EventVSInfoPane.class);
 
     private MetaInf metaInf = null;
 
@@ -38,13 +38,13 @@ public class EventVSInfoPane extends GridPane {
         Label dateInitLabel = new Label(ContextVS.getMessage("dateInitLbl") + ": ");
         dateInitLabel.setStyle("-fx-font-weight: bold;");
         add(dateInitLabel, 0 , 1);
-        Label dateInitValueLabel = new Label(DateUtils.getShortStringFromDate(metaInf.getDateInit()));
+        Label dateInitValueLabel = new Label(DateUtils.getDateStr(metaInf.getDateInit(), "yyyy/MM/dd"));
         add(dateInitValueLabel, 1, 1);
 
         Label dateFinishLabel = new Label(ContextVS.getMessage("dateFinishLbl") + ": ");
         dateFinishLabel.setStyle("-fx-font-weight: bold;");
         add(dateFinishLabel, 0, 2);
-        Label dateFinishValueLabel = new Label(DateUtils.getShortStringFromDate(metaInf.getDateFinish()));
+        Label dateFinishValueLabel = new Label(DateUtils.getDateStr(metaInf.getDateFinish(), "yyyy/MM/dd"));
         add(dateFinishValueLabel, 1, 2);
 
         WebView webView = new WebView();

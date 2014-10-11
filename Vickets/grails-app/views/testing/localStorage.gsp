@@ -5,6 +5,7 @@
     <meta name="layout" content="simplePage" />
     <link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
     <link rel="import" href="${resource(dir: '/bower_components/polymer-ui-toggle-button', file: 'polymer-ui-toggle-button.html')}">
+    <link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
 
 </head>
 <body id="voting_system_page">
@@ -26,6 +27,11 @@
         <template>
             <polymer-ui-toggle-button value="{{mode}}"></polymer-ui-toggle-button>
             <polymer-localstorage name="polymer-localstorage-x-test2" value="{{mode}}"></polymer-localstorage>
+
+
+
+            <paper-radio-button toggles></paper-radio-button>
+
         </template>
         <script>
             Polymer('x-test2', {

@@ -35,7 +35,7 @@ import java.awt.*;
  */
 public class PasswordDialog {
 
-    private static Logger logger = Logger.getLogger(PasswordDialog.class);
+    private static Logger log = Logger.getLogger(PasswordDialog.class);
 
     private Stage stage;
     private VBox dialogVBox;
@@ -158,7 +158,7 @@ public class PasswordDialog {
     }
 
     private void checkPasswords() {
-        logger.debug("checkPasswords");
+        log.debug("checkPasswords");
         String password1 = new String(password1Field.getText());
         String password2 = new String(password2Field.getText());
         if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));

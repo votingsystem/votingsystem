@@ -184,7 +184,7 @@
                 document.querySelector('#navBar').loadURL(serviceURL)
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
 
 
 

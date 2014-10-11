@@ -4,7 +4,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-button', file: 'votingsystem-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/paper-shadow', file: 'paper-shadow.html')}">
-<link rel="import" href="${resource(dir: '/bower_components/paper-checkbox', file: 'paper-checkbox.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-radio-button', file: 'paper-radio-button.html')}">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicketTagVS/tagvs-select-dialog']"/>">
 <link rel="import" href="<g:createLink  controller="element" params="[element: '/userVS/uservs-selector-dialog']"/>">
 
@@ -54,7 +54,7 @@
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
 
                 <div layout horizontal center center-justified>
-                    <div style="margin: 0 10px 0 0;"><paper-checkbox id="timeLimitedCheckBox"></paper-checkbox></div>
+                    <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedRButton"></paper-radio-button></div>
                     <div style="color:#6c0404;"><h4><g:message code="timeLimitedAdviceMsg"/></h4></div>
                 </div>
 
@@ -236,7 +236,7 @@
             webAppMessage.serviceURL = "${createLink( controller:'transactionVS', action:" ", absolute:true)}"
             webAppMessage.signedMessageSubject = "<g:message code='transactionvsFromGroupMsgSubject'/>"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
-                isTimeLimited:this.$.timeLimitedCheckBox.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,
+                isTimeLimited:this.$.timeLimitedRButton.checked, toUserIBAN:this.toUserIBAN(), tags:tagList,
                 amount: this.$.amount.value, currencyCode:"EUR", fromUser:this.fromUserName, fromUserIBAN:this.fromUserIBAN,
                 toUser:this.toUserName}
             webAppMessage.setCallback(function(appMessage) {
@@ -275,7 +275,7 @@
             this.groupId = targetGroupId
             this.isWithUserSelector = true
             this.toUserName = null
-            this.$.timeLimitedCheckBox.checked = false
+            this.$.timeLimitedRButton.checked = false
             switch(operation) {
                 case Operation.TRANSACTIONVS_FROM_GROUP_TO_MEMBER:
                     this.operationMsg = "<g:message code='transactionVSFromGroupToMember'/>"

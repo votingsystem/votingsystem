@@ -27,7 +27,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name="VoteVS")
 public class VoteVS implements Serializable {
 
-    private static Logger logger = Logger.getLogger(VoteVS.class);
+    private static Logger log = Logger.getLogger(VoteVS.class);
 
     public enum State{OK, CANCELLED, ERROR}
 
@@ -222,7 +222,7 @@ public class VoteVS implements Serializable {
     }
 
     public void genVote() throws NoSuchAlgorithmException {
-        logger.debug(" --- genVote ---");
+        log.debug(" --- genVote ---");
         originHashAccessRequest = UUID.randomUUID().toString();
         hashAccessRequestBase64 = CMSUtils.getHashBase64(originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
         originHashCertVote = UUID.randomUUID().toString();
@@ -268,7 +268,7 @@ public class VoteVS implements Serializable {
     }
 
     public HashMap getVoteDataMap() {
-        logger.debug("getVoteDataMap");
+        log.debug("getVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
         map.put("eventURL", eventVS.getUrl());
@@ -281,7 +281,7 @@ public class VoteVS implements Serializable {
     }
 
     public HashMap getAccessRequestDataMap() {
-        logger.debug("getAccessRequestDataMap");
+        log.debug("getAccessRequestDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.ACCESS_REQUEST.toString());
         map.put("eventId", eventVS.getId());
@@ -292,7 +292,7 @@ public class VoteVS implements Serializable {
     }
 
     public HashMap getCancelVoteDataMap() {
-        logger.debug("getCancelVoteDataMap");
+        log.debug("getCancelVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.CANCEL_VOTE.toString());
         map.put("originHashCertVote", originHashCertVote);
@@ -305,7 +305,7 @@ public class VoteVS implements Serializable {
     }
 
     public Map getDataMap() {
-        logger.debug("getDataMap");
+        log.debug("getDataMap");
         Map resultMap = new HashMap();
         if(optionSelected != null) {
             HashMap opcionHashMap = new HashMap();
@@ -355,7 +355,7 @@ public class VoteVS implements Serializable {
             }
             voteVS.setEventVS(eventVS);
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return voteVS;
     }

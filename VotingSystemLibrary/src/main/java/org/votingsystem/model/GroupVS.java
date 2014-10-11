@@ -1,6 +1,8 @@
 package org.votingsystem.model;
 
-import javax.persistence.*;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * @author jgzornoza

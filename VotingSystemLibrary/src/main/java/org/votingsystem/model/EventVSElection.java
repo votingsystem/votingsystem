@@ -1,11 +1,9 @@
 package org.votingsystem.model;
 
-import org.votingsystem.signature.util.CertUtil;
-
-import javax.persistence.*;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
 
 /**
 * @author jgzornoza

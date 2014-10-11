@@ -20,7 +20,7 @@ import java.util.*;
 */
 public class MetaInf {
     
-    private static Logger logger = Logger.getLogger(MetaInf.class);
+    private static Logger log = Logger.getLogger(MetaInf.class);
 
     private Long id;
     private Date dateFinish;
@@ -93,7 +93,7 @@ public class MetaInf {
 			
 
     public static MetaInf parse(String metaInfo) throws ParseException {
-        logger.debug("parse");
+        log.debug("parse");
         JSONObject metaInfoJSON = (JSONObject)JSONSerializer.toJSON(metaInfo);
         MetaInf metaInf = new MetaInf();
         if (metaInfoJSON.containsKey("id")) 
@@ -219,7 +219,7 @@ public class MetaInf {
         } else if (TypeVS.MANIFEST_EVENT == type) {
             return serverURL + "/eventVSManifest/" + id;
         } else {
-            logger.error("Unknown server type: " + type);
+            log.error("Unknown server type: " + type);
             return null;
         }
     }

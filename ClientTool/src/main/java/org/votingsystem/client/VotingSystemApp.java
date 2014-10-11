@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DecompressBackupPane;
-import org.votingsystem.client.pane.SignDocumentPane;
+import org.votingsystem.client.pane.DocumentSignerPane;
 import org.votingsystem.client.util.*;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class VotingSystemApp extends Application implements DecompressBackupPane.Listener, WebSocketListener {
 
-    private static Logger logger = Logger.getLogger(VotingSystemApp.class);
+    private static Logger log = Logger.getLogger(VotingSystemApp.class);
 
     private BrowserVS browserVS;
     private VBox mainBox;
@@ -103,10 +103,10 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                 return ContextVS.getInstance().getVotingSystemSSLCerts().toArray(new X509Certificate[]{});
             }
             public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                logger.debug("trustAllCerts - checkClientTrusted");
+                log.debug("trustAllCerts - checkClientTrusted");
             }
             public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType ) throws CertificateException {
-                logger.debug("trustAllCerts - checkServerTrusted");
+                log.debug("trustAllCerts - checkServerTrusted");
                 try {
                     CertUtil.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
                             Arrays.asList(certs));
@@ -131,7 +131,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     @Override public void stop() {
-        logger.debug("stop");
+        log.debug("stop");
         //Platform.exit();
         System.exit(0);
     }
@@ -152,13 +152,13 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                         ".class").toString().contains("jar:file")) {
                     loadedFromJar = true;
                 }
-                logger.debug("ServerLoaderTask - loadedFromJar: " + loadedFromJar);
+                log.debug("ServerLoaderTask - loadedFromJar: " + loadedFromJar);
                 try {
                     SSLContext sslContext = SSLContext.getInstance("SSL");
                     sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
                     HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
                 } catch (GeneralSecurityException ex) {
-                    logger.error(ex.getMessage(), ex);
+                    log.error(ex.getMessage(), ex);
                 }
 
                 String accessControlServerURL = null;
@@ -179,7 +179,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                         ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
                     }
                 }
-                catch(Exception ex) {logger.error(ex.getMessage(), ex);}
+                catch(Exception ex) {log.error(ex.getMessage(), ex);}
                 try {
                     responseVS = SignatureService.checkServer(vicketsServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -187,7 +187,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
                         ContextVS.getInstance().setDefaultServer((ActorVS) responseVS.getData());
                     }
                 }
-                catch(Exception ex) {logger.error(ex.getMessage(), ex);}
+                catch(Exception ex) {log.error(ex.getMessage(), ex);}
             }
         }).start();
 
@@ -259,7 +259,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
         signDocumentButton.setGraphic(new ImageView(Utils.getImage(this, "pencil")));
         signDocumentButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                SignDocumentPane.showDialog();
+                DocumentSignerPane.showDialog();
 
             }});
         signDocumentButton.setPrefWidth(500);
@@ -390,7 +390,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     private void openVotingSystemProceduresPage() {
-        logger.debug("openVotingSystemProceduresPage");
+        log.debug("openVotingSystemProceduresPage");
         if(ContextVS.getInstance().getAccessControl() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
@@ -404,7 +404,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     private void openVotingPage() {
-        logger.debug("openVotingPage");
+        log.debug("openVotingPage");
         if(ContextVS.getInstance().getAccessControl() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
@@ -418,7 +418,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     private void openSelectRepresentativePage() {
-        logger.debug("openSelectRepresentativePage");
+        log.debug("openSelectRepresentativePage");
         if(ContextVS.getInstance().getAccessControl() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
@@ -432,7 +432,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     private void openVicketUserProcedures() {
-        logger.debug("openVicketUserProcedures");
+        log.debug("openVicketUserProcedures");
         if(ContextVS.getInstance().getVicketServer() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
             return;
@@ -446,7 +446,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     private void openVicketAdminProcedures() {
-        logger.debug("openVicketAdminProcedures");
+        log.debug("openVicketAdminProcedures");
 
         if(ContextVS.getInstance().getVicketServer() == null) {
             showMessage(ContextVS.getMessage("connectionErrorMsg"));
@@ -463,7 +463,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     private void openSettings() {
-        logger.debug("openSettings");
+        log.debug("openSettings");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 if (settingsDialog == null) settingsDialog = new SettingsDialog();
@@ -501,7 +501,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     }
 
     @Override public void setConnectionStatus(ConnectionStatus status) {
-        logger.debug("setConnectionStatus - status: " + status.toString());
+        log.debug("setConnectionStatus - status: " + status.toString());
         switch (status) {
             case CLOSED:
                 wsConnected.set(false);
@@ -533,7 +533,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
     class Delta { double x, y; }
 
     @Override public void processDecompressedFile(ResponseVS response) {
-        logger.debug("processDecompressedFile - statusCode:" + response.getStatusCode());
+        log.debug("processDecompressedFile - statusCode:" + response.getStatusCode());
         if(ResponseVS.SC_OK == response.getStatusCode()) {
             SignedDocumentsBrowser documentBrowser = new SignedDocumentsBrowser();
             documentBrowser.setVisible((String) response.getData());

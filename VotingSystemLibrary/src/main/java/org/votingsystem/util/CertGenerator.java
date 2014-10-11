@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class CertGenerator {
 	
-    private static Logger logger = Logger.getLogger(CertGenerator.class);
+    private static Logger log = Logger.getLogger(CertGenerator.class);
 
     public static String ROOT_ALIAS = "rootAlias";//
     public static String END_ENTITY_ALIAS = "endEntityAlias";//
@@ -41,7 +41,7 @@ public class CertGenerator {
             certMap.put("password", "password");      
             generate(certMap);
         } else {
-            //logger.debug("args[0]: " + args[0]);
+            //log.debug("args[0]: " + args[0]);
             JSONObject jsonData = (JSONObject) JSONSerializer.toJSON(args[0]);
             generate(jsonData);
             /*File rootCertFile = new File(jsonData.getString("rootCertFile"));
@@ -55,7 +55,7 @@ public class CertGenerator {
     public CertGenerator(File rootCertFile, String rootSubjectDN, String password) throws Exception {
         if(ContextVS.getInstance() == null)
             ContextVS.init("votingSystemLibraryLog4j.properties","votingSystemLibraryMessages.properties", "es");
-        logger.debug(" - rootSubjectDN: " + rootSubjectDN + " - password: " + password + 
+        log.debug(" - rootSubjectDN: " + rootSubjectDN + " - password: " + password +
                 " - rootCertFile.getAbsolutePath(): " + rootCertFile.getAbsolutePath()); 
         this.password = password;
         KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(DATE_BEGIN_CERT, DURATION_ROOT_KEYSTORE,
@@ -67,7 +67,7 @@ public class CertGenerator {
     }
 
     public void genUserKeyStore(String subjectDN, File file, String alias) throws Exception {
-        logger.debug("--- genUserKeyStore - subjectDN: " + subjectDN + 
+        log.debug("--- genUserKeyStore - subjectDN: " + subjectDN +
                         " - file: " + file.getAbsolutePath() + " - alias: " + alias);
         KeyStore keyStore = KeyStoreUtil.createUserKeyStore(DATE_BEGIN_CERT,
                         DURATION_CERT, password.toCharArray(), alias, rootPrivateCredential, subjectDN);
@@ -77,7 +77,7 @@ public class CertGenerator {
 
     public void genTimeStampingKeyStore(
         String subjectDN, File file, String alias) throws Exception {
-        logger.debug("--- genTimeStampingKeyStore - subjectDN: " + subjectDN + 
+        log.debug("--- genTimeStampingKeyStore - subjectDN: " + subjectDN +
                 " - file: " + file.getAbsolutePath() + " - alias: " + alias);
         KeyStore keyStore = KeyStoreUtil.createTimeStampingKeyStore(
                 DATE_BEGIN_CERT, DURATION_CERT, password.toCharArray(), alias, rootPrivateCredential, subjectDN);
@@ -88,9 +88,9 @@ public class CertGenerator {
     }
 	
     public static void generate (Map certsMap) throws Exception {
-        logger.debug("- generate -");
+        log.debug("- generate -");
         if(certsMap == null) {
-            logger.error("NULL Map");
+            log.error("NULL Map");
             return;
         } 
         File rootCertFile = null;

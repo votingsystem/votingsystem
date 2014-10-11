@@ -39,7 +39,7 @@ class BalanceService {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long beginCalc = System.currentTimeMillis()
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
-        Date oneDayLastWeek = org.votingsystem.util.DateUtils.getDatePlus(-3)
+        Date oneDayLastWeek = org.votingsystem.util.DateUtils.addDays(Calendar.getInstance().getTime(), -3)
         DateUtils.TimePeriod timePeriod = org.votingsystem.util.DateUtils.getWeekPeriod(oneDayLastWeek)
         DateUtils.TimePeriod currentWeekPeriod = org.votingsystem.util.DateUtils.getCurrentWeekPeriod()
         String currentWeekStr = DateUtils.getDateStr(currentWeekPeriod.getDateFrom(), "dd MMM yyyy")

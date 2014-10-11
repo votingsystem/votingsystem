@@ -118,10 +118,15 @@
     }
 
     function getDateFormatted(dateToFormat, dateFormat, stringFormat, callback) {
+        var result
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.FORMAT_DATE)
         webAppMessage.document = {dateStr: dateToFormat, dateFormat:dateFormat, stringFormat:stringFormat}
         webAppMessage.setCallback(callback)
-        return VotingSystemClient.call(webAppMessage);
+        try {
+            result = VotingSystemClient.call(webAppMessage);
+        } catch(ex) { } finally {
+            return result || dateToFormat
+        }
     }
 
 </script>

@@ -47,7 +47,7 @@ import static org.votingsystem.model.ContextVS.*;
 */
 public class PDFSignedSender implements Callable<ResponseVS> {
     
-    private static Logger logger = Logger.getLogger(PDFSignedSender.class);
+    private static Logger log = Logger.getLogger(PDFSignedSender.class);
 
     private String urlToSendDocument;
     private String timeStampServerURL;
@@ -78,11 +78,11 @@ public class PDFSignedSender implements Callable<ResponseVS> {
 
     @Override public ResponseVS call() throws Exception {
         if(signerPrivatekey != null && signerCertChain != null) {
-            logger.debug("Generating PrivateKey VotingSystemSignedGenerator");
+            log.debug("Generating PrivateKey VotingSystemSignedGenerator");
             pdfSigner = new PDFContentSigner( signerPrivatekey, signerCertChain,
                     PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
         } else {
-            logger.debug("Generating System VotingSystemSignedGenerator");
+            log.debug("Generating System VotingSystemSignedGenerator");
             pdfSigner = ContentSignerHelper.getContentSignerPDF(password, ContextVS.DNIe_SESSION_MECHANISM);
             signerCertChain = pdfSigner.getCertificateChain();
         }
@@ -103,7 +103,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE,  ContextVS.PDF_SIGNATURE_NAME);
         //dic.setDate(new PdfDate(sap.getSignDate()));
         dic.setName(PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).getField("CN"));
-        logger.debug("signAndTimestamp - Firmante: " + PdfPKCS7.getSubjectFields(
+        log.debug("signAndTimestamp - Firmante: " + PdfPKCS7.getSubjectFields(
                 (X509Certificate)signerCertChain[0]).getField("CN"));
         sap.setCryptoDictionary(dic);
         int csize = 10000;
@@ -137,13 +137,13 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     MessageTimeStamper messageTimeStamper= new MessageTimeStamper(timeStampRequest, timeStampServerURL);
                     ResponseVS responseVS = messageTimeStamper.call();
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                        logger.error("Error timestamping: " + responseVS.getMessage());
+                        log.error("Error timestamping: " + responseVS.getMessage());
                         return null;
                     }
                     TimeStampToken timeStampToken = messageTimeStamper.getTimeStampToken();
                     final Calendar cal = new GregorianCalendar();
                     cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                    logger.debug("*** TimeStamp: " + DateUtils.getDateStr(cal.getTime()));
+                    log.debug("*** TimeStamp: " + DateUtils.getDateStr(cal.getTime()));
 
                     obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
                     // Creates the signatureTimestampToken attribute
@@ -156,7 +156,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     attributeTable = new AttributeTable(oh);
 
                 } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
+                    log.error(ex.getMessage(), ex);
                     responseVS.appendMessage(ex.getMessage());
                 }
                 return attributeTable;
@@ -171,7 +171,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
 
         CMSSignedData signedData = pdfSigner.genSignedData(signatureHash, unsAttr);
         //ValidadoraCMS validadora = new ValidadoraCMS(certCA);
-        //logger.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
+        //log.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
 
         byte[] pk = signedData.getEncoded();
         byte[] outc = new byte[csize];
@@ -182,7 +182,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         ContentTypeVS contentType = null;
         byte[] bytesToSend = null;
         if(destinationCert != null) {
-            logger.debug("---- with destinationCert -> encrypting response");
+            log.debug("---- with destinationCert -> encrypting response");
             bytesToSend = Encryptor.encryptFile(fileToSend,destinationCert);
             contentType = ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED;
         } else {

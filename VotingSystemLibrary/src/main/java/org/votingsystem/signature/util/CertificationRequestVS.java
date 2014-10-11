@@ -35,7 +35,7 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private static Logger logger = Logger.getLogger(CertificationRequestVS.class);
+    private static Logger log = Logger.getLogger(CertificationRequestVS.class);
 
     private transient PKCS10CertificationRequest csr;
     private transient SignedMailGenerator signedMailGenerator;
@@ -113,7 +113,7 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public void initSigner (byte[] signedCsr) throws Exception {
         Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
-        logger.debug("initSigner - Num certs: " + certificates.size());
+        log.debug("initSigner - Num certs: " + certificates.size());
         if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
         certificate = certificates.iterator().next();
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];

@@ -27,7 +27,7 @@ import org.votingsystem.model.OperationVS;
  */
 public class BrowserVSPane extends StackPane {
 
-    private static Logger logger = Logger.getLogger(BrowserVSPane.class);
+    private static Logger log = Logger.getLogger(BrowserVSPane.class);
 
     private Text messageText;
     private boolean isCapsLockPressed = false;
@@ -177,7 +177,7 @@ public class BrowserVSPane extends StackPane {
     }
 
     private void checkPasswords() {
-        logger.debug("checkPasswords");
+        log.debug("checkPasswords");
         PlatformImpl.runLater(new Runnable(){
             @Override public void run() {
                 String password1 = new String(password1Field.getText());

@@ -24,7 +24,7 @@ import static org.votingsystem.model.ContextVS.*;
 */
 public class AccessRequestDataSender implements Callable<ResponseVS> {
 
-    private static Logger logger = Logger.getLogger(AccessRequestDataSender.class);
+    private static Logger log = Logger.getLogger(AccessRequestDataSender.class);
 
     private VoteVS voteVS;
     private SMIMEMessage smimeMessage;
@@ -41,7 +41,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() throws Exception {
-        logger.debug("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
+        log.debug("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL());

@@ -21,7 +21,6 @@ public class LoggerVS {
 
     private static Logger reportslog = Logger.getLogger("reportsLog");
     private static Logger transactionslog = Logger.getLogger("transactionsLog");
-    private static Logger vicketRequestslog = Logger.getLogger("vicketsRequestLog");
     private static Logger vicketsIssuedlog = Logger.getLogger("vicketsIssuedLog");
 
 
@@ -57,34 +56,22 @@ public class LoggerVS {
         dataMap.put("currency", currency);
         dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
         if(tag != null) dataMap.put("tag", tag.getName());
-        dataMap.put("dateCreated", DateUtils.getDateWithoutYear(dateCreated));
+        dataMap.put("dateCreated", DateUtils.getDayWeekDateStr(dateCreated));
         dataMap.put("isTimeLimited", (validTo == null)?false:true);
         dataMap.put("isParent", isParent);
         transactionslog.info(JSONSerializer.toJSON(dataMap).toString() + ",");
     }
 
-    public static void logVicketRequest(long id, String fromUser, String currency, BigDecimal amount,
-            VicketTagVS tag, Date dateCreated) {
-        Map<String,Object> dataMap = new HashMap();
-        dataMap.put("id", id);
-        dataMap.put("fromUser", fromUser);
-        dataMap.put("currency", currency);
-        dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
-        dataMap.put("tag", tag.getName());
-        dataMap.put("dateCreated", DateUtils.getDateStr(dateCreated));
-        vicketRequestslog.info(JSONSerializer.toJSON(dataMap).toString() + ",");
-
-    }
-
     public static void logVicketIssued(long id, String currency, BigDecimal amount,
-                VicketTagVS tag, Date dateCreated, Date validTo) {
+                VicketTagVS tag, boolean isTimeLimited, Date dateCreated, Date validTo) {
         Map<String,Object> dataMap = new HashMap();
         dataMap.put("id", id);
         dataMap.put("currency", currency);
         dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
         dataMap.put("tag", tag.getName());
-        dataMap.put("dateCreated", dateCreated);
-        dataMap.put("validTo", validTo);
+        dataMap.put("isTimeLimited", isTimeLimited);
+        dataMap.put("dateCreated", DateUtils.getDayWeekDateStr(dateCreated));
+        dataMap.put("validTo", DateUtils.getDayWeekDateStr(validTo));
         vicketsIssuedlog.info(JSONSerializer.toJSON(dataMap).toString() + ",");
     }
 

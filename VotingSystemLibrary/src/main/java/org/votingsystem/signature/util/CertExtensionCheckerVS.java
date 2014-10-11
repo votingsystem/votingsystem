@@ -85,7 +85,7 @@ public class CertExtensionCheckerVS extends PKIXCertPathChecker {
         while(unresolvedCritExts.iterator().hasNext()) {
             String ext = unresolvedCritExts.iterator().next();
             if(supportedExtensions.contains(ext)) {
-                //logger.debug("------------- ExtendedKeyUsage removed from validation");
+                //log.debug("------------- ExtendedKeyUsage removed from validation");
                 unresolvedCritExts.remove(ext);
                 ExtensionVS extensionVS = ExtensionVS.getExtensionVS(ext);
                 if(extensionVS != null) addExtensionVS(extensionVS);

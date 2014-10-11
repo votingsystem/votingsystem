@@ -1,0 +1,83 @@
+<link rel="import" href="${resource(dir: '/bower_components/polymer', file: 'polymer.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-dropdown-menu', file: 'paper-dropdown-menu.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/paper-fab', file: 'paper-fab.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/core-tooltip', file: 'core-tooltip.html')}">
+<link rel="import" href="${resource(dir: '/bower_components/polymer-localstorage', file: 'polymer-localstorage.html')}">
+<link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-tag-group']"/>">
+
+
+<polymer-element name="vicket-wallet"  on-core-select="{{selectAction}}">
+    <template>
+        <g:include view="/include/styles.gsp"/>
+        <style>
+            body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
+            .green-slider paper-slider::shadow #sliderKnobInner,
+            .green-slider paper-slider::shadow #sliderKnobInner::before,
+            .green-slider paper-slider::shadow #sliderBar::shadow #activeProgress {
+                background-color: #0f9d58;
+            }
+            .messageToUser {
+                font-weight: bold;
+                margin:10px auto 30px auto;
+                background: #f9f9f9;
+                padding:10px 20px 10px 20px;
+                max-width:400px;
+            }
+            paper-fab.green {
+                background: #259b24;
+                color: #f0f0f0;            }
+        </style>
+        <div vertical layout>
+            <template if="{{messageToUser}}">
+                <div style="color: {{status == 200?'#388746':'#ba0011'}};">
+                    <div class="messageToUser">
+                        <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                            <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                            <div id="messageToUser">{{messageToUser}}</div>
+                        </div>
+                        <paper-shadow z="1"></paper-shadow>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <polymer-localstorage id="localstorage" name="vicket-request-localstorage" value="{{vicketsWallet}}"></polymer-localstorage>
+
+        <template repeat="{{tag in tagArray}}">
+            <vicket-tag-group tag={{tag}} vicketArray="{{tagGroups[tag]}}"></vicket-tag-group>
+        </template>
+
+    </template>
+    <script>
+        Polymer('vicket-wallet', {
+            selectedTags: [],
+            currencyCode:null,
+            vicketsWalletArray:[],
+            tagGroups:{},
+            tagArray:[],
+            messageToUser:null,
+
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            },
+            vicketsWalletChanged:function() {
+                console.log(this.tagName + " - vicketsWalletChanged")
+                this.tagGroups = {}
+                console.log(this.tagName + "vicketsWalletChanged: " + this.vicketsWallet + "'")
+
+                this.vicketsWalletArray = JSON.parse(this.vicketsWallet)
+                for(vicketIdx in this.vicketsWalletArray) {
+                    var vicket = this.vicketsWalletArray[vicketIdx]
+                    console.log("### vicketsWalletChanged - vicket.tag: " + vicket.tag)
+                    if(this.tagGroups[vicket.tag]) this.tagGroups[vicket.tag].push(vicket)
+                    else this.tagGroups[vicket.tag] = [vicket]
+                }
+                this.tagArray = Object.keys(this.tagGroups)
+                console.log("### vicketsWalletChanged - this.tagGroups: " + JSON.stringify(this.tagGroups))
+            },
+            valueChanged:function() {
+                this.amountValue = this.value * 10;
+            }
+        });
+    </script>
+</polymer-element>

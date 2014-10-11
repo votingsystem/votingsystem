@@ -23,7 +23,7 @@ import java.io.File;
  */
 public class HTMLMessageDialog {
 
-    private static Logger logger = Logger.getLogger(HTMLMessageDialog.class);
+    private static Logger log = Logger.getLogger(HTMLMessageDialog.class);
 
     private final Stage stage;
     private WebView webView;

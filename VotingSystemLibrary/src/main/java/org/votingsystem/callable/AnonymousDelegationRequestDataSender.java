@@ -27,7 +27,7 @@ import static org.votingsystem.model.ContextVS.*;
 */
 public class AnonymousDelegationRequestDataSender implements Callable<ResponseVS> {
 
-    private static Logger logger = Logger.getLogger(AnonymousDelegationRequestDataSender.class);
+    private static Logger log = Logger.getLogger(AnonymousDelegationRequestDataSender.class);
 
     private SMIMEMessage smimeMessage;
     private CertificationRequestVS certificationRequest;
@@ -43,7 +43,7 @@ public class AnonymousDelegationRequestDataSender implements Callable<ResponseVS
     }
 
     @Override public ResponseVS call() throws Exception {
-        logger.debug("doInBackground - accessServiceURL: " +
+        log.debug("doInBackground - accessServiceURL: " +
                 ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),

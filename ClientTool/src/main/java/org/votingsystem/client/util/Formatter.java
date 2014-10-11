@@ -15,7 +15,7 @@ import java.security.cert.X509Certificate;
 */
 public class Formatter {
     
-    private static Logger logger = Logger.getLogger(Formatter.class);
+    private static Logger log = Logger.getLogger(Formatter.class);
 
     private static final int INDENT_FACTOR = 7;
 
@@ -34,10 +34,8 @@ public class Formatter {
                 certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),
                 certificate.getSerialNumber().toString(),
-                DateUtils.getLongDate_Es(
-                        certificate.getNotBefore()),
-                DateUtils.getLongDate_Es(
-                        certificate.getNotAfter()));
+                DateUtils.getDateStr(certificate.getNotBefore()),
+                DateUtils.getDateStr(certificate.getNotAfter()));
     }
 
     public static String format(JSONObject jsonObject) {
@@ -52,12 +50,12 @@ public class Formatter {
                     result = formatTransactionVSFromGroupToAllMembers(jsonObject);
                     break;
                 default:
-                    logger.debug("Formatter not found for "  + operation.getType());
+                    log.debug("Formatter not found for "  + operation.getType());
                     result = jsonObject.toString(INDENT_FACTOR);
             }
 
         } catch(Exception ex) {
-            logger.error("format - jsonObject: " + jsonObject + " - " + ex.getMessage(), ex);
+            log.error("format - jsonObject: " + jsonObject + " - " + ex.getMessage(), ex);
         }
         return result;
     }
@@ -81,7 +79,7 @@ public class Formatter {
 
 
     public static String getEvent (EventVS evento) {
-        logger.debug("getEvento - evento: " + evento.getId());
+        log.debug("getEvento - evento: " + evento.getId());
         if (evento == null) return null;
         StringBuilder result = new StringBuilder("<html>");
         if(evento.getAccessControlVS() != null) {

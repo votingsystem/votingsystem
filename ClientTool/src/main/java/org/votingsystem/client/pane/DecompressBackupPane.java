@@ -39,7 +39,7 @@ import java.util.zip.ZipInputStream;
  */
 public class DecompressBackupPane extends StackPane {
 
-    private static Logger logger = Logger.getLogger(DecompressBackupPane.class);
+    private static Logger log = Logger.getLogger(DecompressBackupPane.class);
 
     public interface Listener {
         public void processDecompressedFile(ResponseVS response);
@@ -92,7 +92,7 @@ public class DecompressBackupPane extends StackPane {
 
     public static void showDialog(final Listener listener) {
         final String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
-        logger.debug("showDialog - outputFolder: " + outputFolder);
+        log.debug("showDialog - outputFolder: " + outputFolder);
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 Stage stage = new Stage();
@@ -109,7 +109,7 @@ public class DecompressBackupPane extends StackPane {
                 //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
                 File file = fileChooser.showOpenDialog(stage);
                 if(file != null){
-                    logger.debug("showDialog - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
+                    log.debug("showDialog - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
                     DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
                             file.getAbsolutePath(), outputFolder);
                     decompressBackupPane.init();
@@ -158,7 +158,7 @@ public class DecompressBackupPane extends StackPane {
                     File newFile = new File(outputFolder + File.separator + fileName);
                     if(zipEntry.isDirectory()) {
                         newFile.mkdirs();
-                        logger.debug("mkdirs : "+ newFile.getAbsoluteFile());
+                        log.debug("mkdirs : "+ newFile.getAbsoluteFile());
                     } else {
                         new File(newFile.getParent()).mkdirs();
                         FileOutputStream fos = new FileOutputStream(newFile);
@@ -173,7 +173,7 @@ public class DecompressBackupPane extends StackPane {
                 zis.closeEntry();
                 zis.close();
             } catch(IOException ex){
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 setVisible(false);
                 return new ResponseVS(ResponseVS.SC_ERROR);
             }

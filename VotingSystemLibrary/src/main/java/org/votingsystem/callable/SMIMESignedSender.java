@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 */
 public class SMIMESignedSender implements Callable<ResponseVS> {
     
-    private static Logger logger = Logger.getLogger(SMIMESignedSender.class);
+    private static Logger log = Logger.getLogger(SMIMESignedSender.class);
 
     private String urlToSendDocument;
     private String timeStampServerURL;
@@ -40,7 +40,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() throws Exception {
-        logger.debug("doInBackground - urlToSendDocument: " + urlToSendDocument);
+        log.debug("doInBackground - urlToSendDocument: " + urlToSendDocument);
         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServerURL);
         ResponseVS responseVS = timeStamper.call();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
@@ -65,7 +65,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 responseVS.setSmimeMessage(new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes())));
             }
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             responseVS.setStatusCode(ResponseVS.SC_ERROR);
             responseVS.appendMessage(ex.getMessage());
         }

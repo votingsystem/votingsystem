@@ -14,7 +14,7 @@ public enum VotingSystemKeyGenerator {
     
     INSTANCE;   
     
-    private static Logger logger = Logger.getLogger(VotingSystemKeyGenerator.class);
+    private static Logger log = Logger.getLogger(VotingSystemKeyGenerator.class);
     
     private KeyPairGenerator keyPairGenerator;
     private SecureRandom random;

@@ -98,7 +98,7 @@ class MessageSMIMEController {
             smimeMessageStr = Base64.getEncoder().encodeToString(request.messageSMIME.content)
             SMIMEMessage smimeMessage = request.messageSMIME.getSmimeMessage()
             if(smimeMessage.getTimeStampToken() != null) {
-                timeStampDate = DateUtils.getLongDate_Es(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
+                timeStampDate = DateUtils.getDateStr(smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
             }
             if(smimeMessage.getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
                 signedContentJSON = JSON.parse(AsciiDocUtil.getMetaInfVS(

@@ -8,7 +8,6 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertExtensionCheckerVS;
 import org.votingsystem.signature.util.CertUtil;
 
 import javax.persistence.*;

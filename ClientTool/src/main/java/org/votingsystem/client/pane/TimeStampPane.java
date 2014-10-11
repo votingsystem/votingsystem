@@ -37,7 +37,7 @@ import java.util.Collection;
  */
 public class TimeStampPane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(TimeStampPane.class);
+    private static Logger log = Logger.getLogger(TimeStampPane.class);
 
     private TimeStampToken timeStampToken;
     private Label timeStampDateLabel;
@@ -47,11 +47,11 @@ public class TimeStampPane extends GridPane {
         setPadding(new Insets(10, 10 , 10, 10));
 
         TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
-        logger.debug ("timeStampToken.getAttributeCertificates().toString(): " +
+        log.debug ("timeStampToken.getAttributeCertificates().toString(): " +
                 timeStampToken.getAttributeCertificates().getMatches(null).size());
 
         SignerId signerId = timeStampToken.getSID();
-        logger.debug ("signerId.toString(): " + signerId.toString());
+        log.debug ("signerId.toString(): " + signerId.toString());
         BigInteger cert_serial_number = signerId.getSerialNumber();
 
         Label timeStampDateLabel = new Label(ContextVS.getMessage("dateGeneratedLbl") + ":");
@@ -60,7 +60,7 @@ public class TimeStampPane extends GridPane {
         setMargin(timeStampDateLabel, new Insets(10, 0 , 10, 0));
 
 
-        TextField timeStampText =new TextField(DateUtils.getLongDate_Es(tsInfo.getGenTime()));
+        TextField timeStampText =new TextField(DateUtils.getDateStr(tsInfo.getGenTime(),"dd/MMM/yyyy HH:mm"));
         timeStampText.setEditable(false);
         add(timeStampText, 1, 0);
 
@@ -94,27 +94,27 @@ public class TimeStampPane extends GridPane {
 
         CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
         Collection<X509CertificateHolder> matches = store.getMatches(null);
-        logger.debug ("matches.size(): " + matches.size());
+        log.debug ("matches.size(): " + matches.size());
 
         if(matches.size() > 0) {
             boolean validationOk = false;
             for(X509CertificateHolder certificateHolder : matches) {
                 boolean isSigner = false;
-                logger.debug ("cert_serial_number: '" + cert_serial_number +
+                log.debug ("cert_serial_number: '" + cert_serial_number +
                         "' - serial number: '" + certificateHolder.getSerialNumber() + "'");
                 VBox certsVBox = new VBox();
                 if(certificateHolder.getSerialNumber().compareTo(cert_serial_number) == 0) {
                     try {
-                        logger.debug ("certificateHolder.getSubject(): "
+                        log.debug ("certificateHolder.getSubject(): "
                                 + certificateHolder.getSubject() +
                                 " - serial number" + certificateHolder.getSerialNumber());
                         timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().
                                 setProvider(ContextVS.PROVIDER).build(certificateHolder));
-                        logger.debug ("Validation OK");
+                        log.debug ("Validation OK");
                         validationOk = true;
                         isSigner = true;
                     } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
+                        log.error(ex.getMessage(), ex);
                     }
                 }
                 try {
@@ -122,7 +122,7 @@ public class TimeStampPane extends GridPane {
                     TimeStampCertPane timeStampCertPanel = new TimeStampCertPane(certificate, isSigner);
                     certsVBox.getChildren().add(timeStampCertPanel);
                 } catch (CertificateException ex) {
-                    logger.error(ex.getMessage(), ex);
+                    log.error(ex.getMessage(), ex);
                 }
                 if(!validationOk) {
                     showMessage(ContextVS.getInstance().getMessage("timeStampWithoutCertErrorMsg"));
@@ -170,7 +170,7 @@ public class TimeStampPane extends GridPane {
     }
 
     public static void showDialog(final TimeStampToken timeStampToken) {
-        logger.debug("showDialog");
+        log.debug("showDialog");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 Stage stage = new Stage();

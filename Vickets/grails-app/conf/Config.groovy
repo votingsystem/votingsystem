@@ -146,17 +146,10 @@ log4j = {
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
                 file:"./Vickets/TransactionsVS.log", datePattern: '\'_\'yyyy-MM-dd'
 
-        rollingFile name:"VicketsRequest", threshold:org.apache.log4j.Level.INFO,
-                layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
-                file:"./Vickets/VicketsRequest.log", datePattern: '\'_\'yyyy-MM-dd'
-
         rollingFile name:"VicketsIssued", threshold:org.apache.log4j.Level.INFO,
                 layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
                 file:"./Vickets/VicketsIssued.log", datePattern: '\'_\'yyyy-MM-dd'
 
-        rollingFile name:"VicketsIssued", threshold:org.apache.log4j.Level.INFO,
-                layout:pattern(conversionPattern: '%m%n'), maxFileSize:"1024MB", maxBackupIndex: 100,
-                file:"./Vickets/VicketsIssued.log", datePattern: '\'_\'yyyy-MM-dd'
 
         /*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
             subject: mail.error.subject, threshold: Level.ERROR,
@@ -180,10 +173,9 @@ log4j = {
             //debug   'org.hibernate'
             //debug   'org.apache'
 
-            info  additivity: false, VicketServerReports: 'reportsLog'
-            info  additivity: false, VicketTransactionsReports: 'transactionsLog'
-            info  additivity: false, VicketsRequest: 'vicketsRequestLog'
-            info  additivity: false, VicketsIssued: 'vicketsIssuedLog'
+            info  additivity: true, VicketServerReports: 'reportsLog'
+            info  additivity: true, VicketTransactionsReports: 'transactionsLog'
+            info  additivity: true, VicketsIssued: 'vicketsIssuedLog'
 
 
             error   'org.codehaus.groovy.grails.web.servlet',  //  controllers

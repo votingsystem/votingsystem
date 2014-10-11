@@ -95,7 +95,7 @@ class EventVSClaimService {
 		
 		String serviceURLPart = messageSource.getMessage(
 			'claimsBackupPartPath', [event.id].toArray(), locale)
-		String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+		String datePathPart = DateUtils.getDateStr(event.getDateFinish(),"yyyy/MM/dd")
 		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 		

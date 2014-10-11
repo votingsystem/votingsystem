@@ -41,8 +41,7 @@ class AuditingService {
                     break;
                 case Vicket.State.OK:
                     break;
-                case Vicket.State.REJECTED:
-                    break;
+
             }
             amountIssued = amountIssued.add(vicket.amount)
         }

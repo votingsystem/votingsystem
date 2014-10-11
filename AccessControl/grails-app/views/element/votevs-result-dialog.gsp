@@ -137,7 +137,7 @@
                 this.statusCode = null
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
                 if(this.messageType == 'VOTE_RESULT') webAppMessage.message = this.votevsReceipt
                 else if(this.messageType == 'VOTE_CANCELLATION_RESULT') webAppMessage.message = this.voteVSCancellationReceipt
                 webAppMessage.setCallback(function(appMessage) {

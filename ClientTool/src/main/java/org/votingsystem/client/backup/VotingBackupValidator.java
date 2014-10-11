@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 */
 public class VotingBackupValidator implements Callable<ResponseVS> {
     
-    private static Logger logger = Logger.getLogger(VotingBackupValidator.class);
+    private static Logger log = Logger.getLogger(VotingBackupValidator.class);
 
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
@@ -52,7 +52,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
     }
    
     private String checkByteArraySize (byte[] signedFileBytes) {
-        //logger.debug("checkByteArraySize");
+        //log.debug("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > ContextVS.SIGNED_MAX_FILE_SIZE) {
             result = ContextVS.getInstance().getMessage("fileSizeExceededMsg",
@@ -91,7 +91,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             
         File metaInfFile = new File(backupPath + File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
-            logger.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
+            log.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
             metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
             eventURL= EventVS.getURL(TypeVS.VOTING_EVENT, metaInf.getServerURL(), metaInf.getId());
@@ -115,23 +115,23 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                 getElapsedTimeHoursMinutesFromMilliseconds(System.currentTimeMillis() - begin);
         notifyValidationListener(responseVS.getStatusCode(),votesValidationDurationStr, ValidationEvent.VOTE_FINISH);
         
-        logger.debug("representativeValidation duration: " + representativeValidationDurationStr);
-        logger.debug("accessrequestValidation duration: " + accessRequestValidationDurationStr);
-        logger.debug("votesValidationDurationStr duration: " + votesValidationDurationStr);
+        log.debug("representativeValidation duration: " + representativeValidationDurationStr);
+        log.debug("accessrequestValidation duration: " + accessRequestValidationDurationStr);
+        log.debug("votesValidationDurationStr duration: " + votesValidationDurationStr);
 
         Integer statusCode = errorList.size() > 0? ResponseVS.SC_ERROR:ResponseVS.SC_OK;
         responseVS.setErrorList(errorList);
         responseVS.setStatusCode(statusCode);
         if(!errorList.isEmpty()) {
-            logger.error(" ------- " + errorList.size() + " errors: ");
+            log.error(" ------- " + errorList.size() + " errors: ");
             for(String error : errorList) {
-                logger.error(error);
+                log.error(error);
             }
-        } else logger.debug("Backup without errors");
+        } else log.debug("Backup without errors");
         long finish = System.currentTimeMillis();
         long duration = finish - begin;
         String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
-        logger.debug("duration: " + durationStr);
+        log.debug("duration: " + durationStr);
         responseVS.setMessage(durationStr);
         responseVS.setData(metaInf);
         return responseVS;
@@ -147,7 +147,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
     }
     
     private ResponseVS validateRepresentativeData() throws Exception {
-        logger.debug("validateRepresentativeData");
+        log.debug("validateRepresentativeData");
         long numRepresentatives = 0;
         long numRepresented = 0;
         long numRepresentativesWithVote = 0;
@@ -160,7 +160,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
         File[] representativesDirs = representativesDir.listFiles();
         RepresentativesData representativesData = metaInf.getRepresentativesData();
         for(File file:representativesDirs) {
-            logger.debug("checking representative dir.:" + file.getAbsolutePath());
+            log.debug("checking representative dir.:" + file.getAbsolutePath());
             numRepresentatives++;
             long numRepresentedWithVote = 0;
             long numRepresentations = 1;//the representative itself
@@ -169,10 +169,10 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                 File[] representativesBatchDirs = file.listFiles();
                 String representativeNif = file.getAbsolutePath().split("_representative_")[1];
                 RepresentativeData representativeDataMetaInf = metaInf.getRepresentativeData(representativeNif);
-                logger.debug("representativeNif: " + representativeNif + 
+                log.debug("representativeNif: " + representativeNif +
                         " - vote: " + representativeDataMetaInf.getOptionSelectedId());
                 for(File batchDir : representativesBatchDirs) {
-                    logger.debug("checking dir: " + batchDir.getAbsolutePath());
+                    log.debug("checking dir: " + batchDir.getAbsolutePath());
                     File[] repDocs = batchDir.listFiles();
                     for(File repDoc: repDocs) {
                         numRepresented++;
@@ -194,7 +194,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                         }
                         ResponseVS responseVS = DocumentVSValidator.validateRepresentationDocument(signedFile,
                                 trustAnchors, metaInf.getDateFinish(), representativeNif, timeStampServerCert);
-                        logger.debug("responseVS.getStatusCode(): " +  responseVS.getStatusCode());
+                        log.debug("responseVS.getStatusCode(): " +  responseVS.getStatusCode());
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                             errorList.add(responseVS.getMessage());
                         }
@@ -228,7 +228,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                 String msg = "NIF: " + representativeNif + " - numRepresentations: " + numRepresentations +
                         " - numRepresentedWithVote: " + numRepresentedWithVote +
                         " - numVotesRepresented: " + numVotesRepresented;
-                logger.debug(msg);
+                log.debug(msg);
                 if(representativeDataMetaInf.getNumRepresentations() != numRepresentations ||
                     representativeDataMetaInf.getNumVotesRepresented() != numVotesRepresented ||
                     representativeDataMetaInf.getNumRepresentedWithVote() != numRepresentedWithVote) {           
@@ -254,12 +254,12 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             message = ContextVS.getMessage("representativesDataErrorMsg", representativesData.getString(), message);
             errorList.add(message);
         }
-        logger.debug(message);
+        log.debug(message);
         return new ResponseVS(statusCode, message);
     }
     
     private ResponseVS validateAccessRequests() throws Exception {
-        logger.debug("validateAccessRequests");
+        log.debug("validateAccessRequests");
         File[] batchDirs = accessRequestsDir.listFiles();
         int statusCode = ResponseVS.SC_OK;
         int numAccessRequestOK = 0;
@@ -294,7 +294,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                     }
                     if(errorMessage != null) {
                         statusCode = ResponseVS.SC_ERROR;
-                        logger.error(errorMessage);
+                        log.error(errorMessage);
                         errorList.add(errorMessage);
                     } 
                     notifyValidationListener(statusCode, validationResponse.getMessage(),
@@ -303,7 +303,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             }
         }
         statusCode = ResponseVS.SC_OK;
-        logger.debug("numAccessRequestOK: " + numAccessRequestOK + " - numAccessRequestERROR: " +numAccessRequestERROR);
+        log.debug("numAccessRequestOK: " + numAccessRequestOK + " - numAccessRequestERROR: " +numAccessRequestERROR);
         String message = null;
         if(metaInf.getNumAccessRequest() != numAccessRequestOK) {
             statusCode = ResponseVS.SC_ERROR;
@@ -315,7 +315,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
     }
     
     private ResponseVS validateVotes() throws Exception {
-        logger.debug("validateVotes");
+        log.debug("validateVotes");
         int statusCode = ResponseVS.SC_OK;
         File[] batchDirs = votesDir.listFiles();
         int numVotesOK = 0;
@@ -357,7 +357,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
                         numVotesERROR++;
                         String msg = "ERROR ACCES REQUEST - File: " + vote.getAbsolutePath() + " - msg: " +
                                 validationResponse.getMessage();
-                        logger.error(msg);
+                        log.error(msg);
                         errorList.add(msg);
                     }
                     notifyValidationListener(statusCode, validationResponse.getMessage(), ValidationEvent.VOTE);
@@ -365,7 +365,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             }
         }
         statusCode = ResponseVS.SC_OK;
-        logger.debug("numVotesOK: " + numVotesOK +  " - numVotesERROR: " + numVotesERROR);
+        log.debug("numVotesOK: " + numVotesOK +  " - numVotesERROR: " + numVotesERROR);
         if(numVotesERROR > 0) statusCode = ResponseVS.SC_ERROR;
         if(numVotesOK != metaInf.getNumVotes()) {
             statusCode = ResponseVS.SC_ERROR;

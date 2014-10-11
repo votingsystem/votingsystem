@@ -70,7 +70,7 @@
                     this.messageToUser = '<g:message code="receiptTypeErrorMsg"/>' + " - " + this.receipt.operation
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_RECEIPT)
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_SMIME)
                 webAppMessage.message = this.smimeMessage
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage)

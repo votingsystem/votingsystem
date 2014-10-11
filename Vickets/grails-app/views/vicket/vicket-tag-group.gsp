@@ -2,7 +2,7 @@
 <link rel="import" href="${resource(dir: '/bower_components/core-icon-button', file: 'core-icon-button.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-html-echo', file: 'votingsystem-html-echo.html')}">
 <link rel="import" href="${resource(dir: '/bower_components/votingsystem-dialog', file: 'votingsystem-dialog.html')}">
-
+<link rel="import" href="${resource(dir: '/bower_components/paper-progress', file: 'paper-progress.html')}">
 
 <polymer-element name="vicket-tag-group" attributes="tag, vicketArray">
     <template>
@@ -25,9 +25,13 @@
         <g:include view="/include/styles.gsp"/>
         <div style="max-width: 700px;">
             <div class="tagHeader">{{tag | tagDescription}}</div>
+            <template repeat="{{currencyMsg in currencyMsgs}}">
+                <div style="margin: 5px 0 0 20px;color: #888;">{{currencyMsg}}</div>
+            </template>
+
             <template repeat="{{vicket in vicketArray}}">
                 <core-tooltip position="right" noarrow="false">
-                    <div horizontal layout center center-justified class="vicket">
+                    <div horizontal layout center center-justified class="vicket" on-click="{{showVicket}}">
                         <i class="fa {{vicket.currencyCode | currencyIcon}}" style=""></i>
                         {{vicket.vicketValue}} {{vicket.currencyCode}}
                         <template if="{{vicket | isTimeLimited}}">
@@ -40,21 +44,23 @@
                         <template if="{{vicket | isTimeLimited}}">
                             <div style="font-size: 2em; margin: 10px 10px 20px 10px;"><g:message code="expendBeforeMonday"/></div>
                         </template>
-                        <div id="{{vicket.hashCertVS}}" style="font-size: 1.4em; margin: 10px 10px 15px 10px;">{{vicket | dateInfo}}</div>
-                        <div style="font-size: 1.2em; margin: 10px;"><g:message code="serverLbl"/>: {{vicket.vicketServerURL}}</div>
-                        <div style="font-size: 1.2em; margin: 10px;">hashCertVS: {{vicket.hashCertVS}}</div>
+                        <div style="font-size: 1.4em; margin: 10px 10px 15px 10px;">{{vicket | dateInfo}}</div>
+                        <div style="font-size: 1em; margin: 10px;">{{vicket.vicketServerURL}}</div>
                     </div>
                 </core-tooltip>
             </template>
         </div>
 
-
     </template>
     <script>
         Polymer('vicket-tag-group', {
             //Info inside vicket: vicketServerURL, vicketValue, currencyCode, tag, notBefore, notAfter, hashCertVS
+            currencyMsgs:[],
             publish: {
                 vicketArray: {value: {}}
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready")
             },
             tagDescription:function(tag) {
                 if("WILDTAG" === tag) return "<g:message code="wildTagLbl"/>".toUpperCase()
@@ -80,11 +86,45 @@
                     default: return "fa-money"
                 }
             },
-            ready: function() {
-                console.log(this.tagName + " - ready")
-            },
             vicketArrayChanged:function() {
-                console.log(this.tagName + " - vicketArrayChanged: " + JSON.stringify(this.vicketArray))
+                console.log(this.tagName + " - vicketArrayChanged")
+                var tagGroupMap = {}
+
+                this.currencyMsgs = []
+                for(vicketIdx in this.vicketArray) {
+                    var vicket = this.vicketArray[vicketIdx]
+                    try {
+                        //{{vicket.vicketValue}} {{vicket.currencyCode}} {{vicket.isTimeLimited}}
+                        if(tagGroupMap[vicket.currencyCode]) {
+                            if(vicket.isTimeLimited === true) {
+                                tagGroupMap[vicket.currencyCode].isTimeLimited = addNumbers(
+                                                tagGroupMap[vicket.currencyCode].isTimeLimited, vicket.vicketValue)
+                            }
+                            tagGroupMap[vicket.currencyCode].total = addNumbers(tagGroupMap[vicket.currencyCode].total, vicket.vicketValue)
+                        } else {
+                            var timeLimited = (vicket.isTimeLimited === true)?vicket.vicketValue:0
+                            tagGroupMap[vicket.currencyCode] = {isTimeLimited: timeLimited, total:vicket.vicketValue}
+                        }
+                    } catch(ex) {console.log(Ex)}
+
+                }
+                var currencies = Object.keys(tagGroupMap)
+                console.log("currencies: " + currencies)
+                for(currencyIdx in currencies) {
+                    var currency = currencies[currencyIdx]
+                    var msg = currency + ". <g:message code="totalLbl"/>: " + tagGroupMap[currency].total
+                    if(tagGroupMap[currency].isTimeLimited > 0) msg = msg +
+                            " (<g:message code="timeLimitedForTagShortMsg"/>)".format(tagGroupMap[currency].isTimeLimited)
+                    this.currencyMsgs.push(msg)
+                }
+            },
+            showVicket: function(e) {
+                var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.OPEN_VICKET)
+                webAppMessage.document = e.target.templateInstance.model.vicket
+                webAppMessage.setCallback(function(appMessage) {
+                    console.log("showVicket - message: " + appMessage);
+                }.bind(this))
+                VotingSystemClient.setJSONMessageToSignatureClient(webAppMessage);
             }
         });
     </script>

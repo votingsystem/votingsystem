@@ -33,7 +33,7 @@ import java.io.File;
  */
 public class BackupValidatorPane extends StackPane implements ValidatorListener<ValidationEvent> {
 
-    private static Logger logger = Logger.getLogger(BackupValidatorPane.class);
+    private static Logger log = Logger.getLogger(BackupValidatorPane.class);
 
     private java.util.List<String> errorList;
     private MetaInf metaInf;
@@ -226,7 +226,7 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
     }
 
     public static void showDialog(String decompressedBackupBaseDir, MetaInf metaInf) {
-        logger.debug("showDialog - zipFilePath");
+        log.debug("showDialog - zipFilePath");
         final BackupValidatorPane decompressBackupPane = new BackupValidatorPane(decompressedBackupBaseDir, metaInf);
         decompressBackupPane.init();
         Platform.runLater(new Runnable() {
@@ -254,7 +254,7 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
         }
 
         @Override protected ResponseVS call() throws Exception {
-            logger.debug("worker.doInBackground: ");
+            log.debug("worker.doInBackground: ");
             try {
                 switch(metaInf.getType()) {
                     case VOTING_EVENT:
@@ -267,7 +267,7 @@ public class BackupValidatorPane extends StackPane implements ValidatorListener<
                         return claimBackupValidator.call();
                 }
             } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
             }
             return new ResponseVS(ResponseVS.SC_ERROR, "Unknown event type: " + metaInf.getType());
         }

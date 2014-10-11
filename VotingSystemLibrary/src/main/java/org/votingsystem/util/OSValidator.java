@@ -14,7 +14,7 @@ import java.util.UUID;
 */
 public class OSValidator {
 
-    private static Logger logger = Logger.getLogger(OSValidator.class);
+    private static Logger log = Logger.getLogger(OSValidator.class);
 
     public static String LIB_PATH_BASE_DIR =  "lib";
     public static String LINUX_LIB         =  "libpkcs11wrapper.so";

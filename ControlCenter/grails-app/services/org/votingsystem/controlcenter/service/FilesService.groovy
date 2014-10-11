@@ -23,7 +23,7 @@ class FilesService {
 	}	 
 
 	 public File getEventMetaInf(EventVS event) {
-		 String datePathPart = DateUtils.getShortStringFromDate(event.dateBegin)
+		 String datePathPart = DateUtils.getDateStr(event.dateBegin, "yyyy/MM/dd")
 		 String eventsMetaInfBaseDirPath = "${grailsApplication.config.VotingSystem.eventsMetaInfBaseDir}" +
 			 "/${datePathPart}"
 		 File metaInfFile = new File("${eventsMetaInfBaseDirPath}/meta_event_${event.id}.inf")

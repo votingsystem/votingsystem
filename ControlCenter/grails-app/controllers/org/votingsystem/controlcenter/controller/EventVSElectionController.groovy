@@ -300,7 +300,7 @@ class EventVSElectionController {
             return [responseVS : new ResponseVS(ResponseVS.SC_OK,message(code: 'votingWithoutErrorsMsg',
                     args:[event.id, event.subject]))]
 		} else {
-			String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+			String datePathPart = DateUtils.getDateStr(event.getDateFinish(), "yyyy/MM/dd")
 			String baseDirPath = "${grailsApplication.config.VotingSystem.errorsBaseDir}" +
 				"/${datePathPart}/Event_${event.id}"
 			errors.each { messageSMIME ->

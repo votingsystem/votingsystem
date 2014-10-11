@@ -4,22 +4,13 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.ExceptionVS;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.StringUtils;
 
 import javax.persistence.*;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -41,6 +32,8 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     @OneToOne private MessageSMIME messageSMIME;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="tag", nullable=false) private VicketTagVS tagVS;
+    @Column(name="isTimeLimited") private Boolean isTimeLimited;
+
 
     @Transient private Map<String, Vicket> vicketsMap;
     @Transient private VicketServer vicketServer;
@@ -62,6 +55,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         this.requestAmount = new BigDecimal(vicketRequest.getString("totalAmount"));
         this.currencyCode = vicketRequest.getString("currencyCode");
         this.subject = vicketRequest.getString("subject");
+        this.isTimeLimited = vicketRequest.getBoolean("isTimeLimited");
         this.tag = vicketRequest.getString("tag");
         VicketServer vicketServer = new VicketServer();
         vicketServer.setServerURL(vicketRequest.getString("serverURL"));
@@ -94,14 +88,15 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     }
 
     public VicketRequestBatch(BigDecimal requestAmount, BigDecimal vicketsValue, String currencyCode, VicketTagVS tagVS,
-                      VicketServer vicketServer) throws Exception {
+              Boolean isTimeLimited, VicketServer vicketServer) throws Exception {
         this.setRequestAmount(requestAmount);
         this.setVicketServer(vicketServer);
         this.setCurrencyCode(currencyCode);
+        this.isTimeLimited = isTimeLimited;
         this.tagVS = tagVS == null ? new VicketTagVS(VicketTagVS.WILDTAG):tagVS;
         this.tag = this.tagVS.getName();
         this.vicketsValue = vicketsValue;
-        this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, tagVS, vicketServer);
+        this.vicketsMap = getVicketBatch(requestAmount,vicketsValue, currencyCode, tagVS, isTimeLimited, vicketServer);
         vicketCSRList = new ArrayList<Map>();
         for(Vicket vicket : vicketsMap.values()) {
             vicketCSRList.add(vicket.getCSRDataMap());
@@ -120,12 +115,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         return result;
     }
 
-    public void initVickets(JSONObject issuedVicketsJSON) throws Exception {
-        /*JSONArray transactionsArray = issuedVicketsJSON.getJSONArray("transactionList");
-        for(int i = 0; i < transactionsArray.size(); i++) {
-            TransactionVS transaction = TransactionVS.parse(transactionsArray.getJSONObject(i));
-        }*/
-        JSONArray issuedVicketsArray = issuedVicketsJSON.getJSONArray("issuedVickets");
+    public void initVickets(JSONArray issuedVicketsArray) throws Exception {
         log.debug("VicketRequest - Num IssuedVickets: " + issuedVicketsArray.size());
         if(issuedVicketsArray.size() != vicketsMap.values().size()) {
             log.error("VicketRequest(...) - ERROR - Num vickets requested: " + vicketsMap.values().size() +
@@ -181,12 +171,13 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         this.vicketsValue = vicketsValue;
     }
 
-    public static Map<String, Vicket> getVicketBatch(BigDecimal requestAmount,
-                 BigDecimal vicketsValue, String currencyCode, VicketTagVS tag, VicketServer vicketServer) {
+    public static Map<String, Vicket> getVicketBatch(BigDecimal requestAmount, BigDecimal vicketsValue,
+                 String currencyCode, VicketTagVS tag, Boolean isTimeLimited,  VicketServer vicketServer) {
         Map<String, Vicket> vicketsMap = new HashMap<String, Vicket>();
         BigDecimal numVickets = requestAmount.divide(vicketsValue);
         for(int i = 0; i < numVickets.intValue(); i++) {
             Vicket vicket = new Vicket(vicketServer.getServerURL(), vicketsValue, currencyCode, tag);
+            vicket.setIsTimeLimited(isTimeLimited);
             vicketsMap.put(vicket.getHashCertVS(), vicket);
         }
         return vicketsMap;
@@ -199,6 +190,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         smimeContentMap.put("serverURL", vicketServer.getServerURL());
         smimeContentMap.put("totalAmount", requestAmount.toString());
         smimeContentMap.put("currencyCode", currencyCode);
+        smimeContentMap.put("isTimeLimited", isTimeLimited);
         smimeContentMap.put("tag", tag);
         smimeContentMap.put("UUID", UUID.randomUUID().toString());
         JSONObject requestJSON = (JSONObject) JSONSerializer.toJSON(smimeContentMap);
@@ -257,4 +249,11 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
         return transaction;
     }
 
+    public Boolean getIsTimeLimited() {
+        return isTimeLimited;
+    }
+
+    public void setIsTimeLimited(Boolean isTimeLimited) {
+        this.isTimeLimited = isTimeLimited;
+    }
 }

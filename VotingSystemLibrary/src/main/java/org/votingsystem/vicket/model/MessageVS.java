@@ -1,7 +1,9 @@
 package org.votingsystem.vicket.model;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.model.*;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.UserVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -17,7 +19,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity @Table(name="MessageVS")
 public class MessageVS implements Serializable {
 
-    private static Logger logger = Logger.getLogger(MessageVS.class);
+    private static Logger log = Logger.getLogger(MessageVS.class);
 
     private static final long serialVersionUID = 1L;
 

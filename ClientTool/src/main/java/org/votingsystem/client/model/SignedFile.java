@@ -20,7 +20,7 @@ import java.util.Map;
 */
 public class SignedFile {
         
-    private static Logger logger = Logger.getLogger(SignedFile.class);
+    private static Logger log = Logger.getLogger(SignedFile.class);
     
     private byte[] signedFileBytes = null;
     private String name = null;
@@ -120,7 +120,7 @@ public class SignedFile {
                 return contentJSON.getLong("optionSelectedId");
             }
         } else {
-            logger.error(" File '" + name + "' content is instance of " + content.getClass());
+            log.error(" File '" + name + "' content is instance of " + content.getClass());
         }
         return null;
     }

@@ -114,7 +114,7 @@ class UserVSService {
                 uservs:[id:subscriptionVS.userVS.id, NIF:subscriptionVS.userVS.nif, IBAN:subscriptionVS.userVS.IBAN,
                       name:"${subscriptionVS.userVS.firstName} ${subscriptionVS.userVS.lastName}"],
                 groupvs:[name:subscriptionVS.groupVS.name, id:subscriptionVS.groupVS.id],
-                state:subscriptionVS.state.toString(), dateCreated:DateUtils.getDateWithoutYear(subscriptionVS.dateCreated)]
+                state:subscriptionVS.state.toString(), dateCreated:DateUtils.getDayWeekDateStr(subscriptionVS.dateCreated)]
         return resultMap
     }
 

@@ -6,7 +6,6 @@ import org.w3c.dom.Document;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -23,7 +22,7 @@ import java.util.Random;
 */
 public class StringUtils {
 	
-    private static Logger logger = Logger.getLogger(StringUtils.class);
+    private static Logger log = Logger.getLogger(StringUtils.class);
 
     private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -38,7 +37,7 @@ public class StringUtils {
                 stringClob = clob.getSubString(i, clobLength);
             }
             catch (Exception e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
             }
             return stringClob;
     }	
@@ -62,9 +61,9 @@ public class StringUtils {
         try {
             clob = new SerialClob(string.toCharArray());
         } catch (SerialException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         } catch (SQLException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return clob;
     }

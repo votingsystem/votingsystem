@@ -1,15 +1,10 @@
 package org.votingsystem.client.pane;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
@@ -17,9 +12,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.model.SignedFile;
-import org.votingsystem.client.util.BrowserVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
@@ -27,9 +20,6 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -37,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SignedFilePane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(SignedFilePane.class);
+    private static Logger log = Logger.getLogger(SignedFilePane.class);
 
     private SignedFile signedFile;
     private WebView signatureContentWebView;
@@ -52,7 +42,7 @@ public class SignedFilePane extends GridPane {
         Button openSignatureInfoButton = new Button(ContextVS.getMessage("openSignedFileButtonLbl"));
         openSignatureInfoButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                DocumentSignersPane.showDialog(signedFile);
+                SMIMESignersPane.showDialog(signedFile);
             }});
         openSignatureInfoButton.setPrefWidth(200);
 
@@ -106,20 +96,20 @@ public class SignedFilePane extends GridPane {
         } else signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
         String timeStampDateStr = "";
         if(signedFile.getSMIMEMessageWraper().getTimeStampToken() != null) {
-            timeStampDateStr = DateUtils.getLongDate_Es(signedFile.getSMIMEMessageWraper().
-                    getTimeStampToken().getTimeStampInfo().getGenTime());
+            timeStampDateStr = DateUtils.getDateStr(signedFile.getSMIMEMessageWraper().
+                    getTimeStampToken().getTimeStampInfo().getGenTime(),"dd/MMM/yyyy HH:mm");
         }
         try {
             JSONObject signedContent = (JSONObject) JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
             signatureContentWebView.getEngine().loadContent(signedContent.toString(3), "application/json");
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
     private void initComponents() {
         if(signedFile == null) {
-            logger.debug("### NULL signedFile");
+            log.debug("### NULL signedFile");
             return;
         }
     }

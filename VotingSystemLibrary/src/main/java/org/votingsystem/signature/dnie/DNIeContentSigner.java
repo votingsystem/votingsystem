@@ -51,7 +51,7 @@ import static org.votingsystem.model.ContextVS.PROVIDER;
 */
 public class DNIeContentSigner implements ContentSigner {
     
-    private static Logger logger = Logger.getLogger(DNIeContentSigner.class);
+    private static Logger log = Logger.getLogger(DNIeContentSigner.class);
 
 
     public static final String CERT_AUTENTICATION = "CertAutenticacion";
@@ -153,7 +153,7 @@ public class DNIeContentSigner implements ContentSigner {
             if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) ||
                     "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage()) ||
                     "CKR_USER_ALREADY_LOGGED_IN".equals(ex.getMessage())) {
-                logger.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 if (token != null && token.getTokenInfo() != null && token.getTokenInfo().isTokenInitialized()) {
                     token.closeAllSessions();
                 }
@@ -237,7 +237,7 @@ public class DNIeContentSigner implements ContentSigner {
     }
 
     public void closeSession () {
-        logger.debug("closeSession");
+        log.debug("closeSession");
         try {
             if (pkcs11Token != null && pkcs11Token.getTokenInfo() != null
                     && pkcs11Token.getTokenInfo().isTokenInitialized()) {
@@ -254,7 +254,7 @@ public class DNIeContentSigner implements ContentSigner {
             }
             System.gc();
         } catch (TokenException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -285,13 +285,13 @@ public class DNIeContentSigner implements ContentSigner {
             try {
                byte[] hashValue = bOut.toByteArray();
                //String hashValueStr = new String(Base64.encode(hashValue));
-               //logger.debug(" ------- hashValueStr: " + hashValueStr);               
+               //log.debug(" ------- hashValueStr: " + hashValueStr);
                 sigBytes = pkcs11Session.sign(bOut.toByteArray());
                 //String sigBytesStr = new String(Base64.encode(sigBytes));
-                //logger.debug(" ------- sigBytesStr: " + sigBytesStr);
+                //log.debug(" ------- sigBytesStr: " + sigBytesStr);
                 closeSession();
             } catch (Exception ex) {       
-                logger.error(ex.getMessage(), ex);            
+                log.error(ex.getMessage(), ex);
             }
             return sigBytes;
         }

@@ -31,7 +31,7 @@ import java.util.Collection;
  */
 public class PEMCertFormPane extends GridPane {
 
-    private static Logger logger = Logger.getLogger(PEMCertFormPane.class);
+    private static Logger log = Logger.getLogger(PEMCertFormPane.class);
 
     private TextArea textArea;
     private Button acceptButton;
@@ -79,24 +79,24 @@ public class PEMCertFormPane extends GridPane {
     }
 
     private void validatePublicKey() {
-        logger.debug("validatePublicKey");
+        log.debug("validatePublicKey");
         Collection<X509Certificate> certs = null;
         try {
             certChainPEM = textArea.getText();
             certs = CertUtil.fromPEMToX509CertCollection(certChainPEM.getBytes());
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             showMessage(ContextVS.getInstance().getMessage("pemCertsErrorMsg"));
         }
         if(certs.isEmpty()) {
             showMessage("ERROR - " + ContextVS.getMessage("certNotFoundErrorMsg"));
         } else {
             for(X509Certificate cert:certs) {
-                logger.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
+                log.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
                 try {
 
                 } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
+                    log.error(ex.getMessage(), ex);
                     showMessage("ERROR - " + ex.getMessage());
                 }
             }
@@ -109,7 +109,7 @@ public class PEMCertFormPane extends GridPane {
     }
 
     public static void showDialog() {
-        logger.debug("showDialog");
+        log.debug("showDialog");
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 Stage stage = new Stage();

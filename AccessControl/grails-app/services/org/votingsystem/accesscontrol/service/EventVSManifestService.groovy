@@ -61,7 +61,7 @@ class EventVSManifestService {
 		File zipResult   = mapFiles.zipResult
 		
 		String serviceURLPart = messageSource.getMessage('manifestsBackupPartPath', [eventVS.id].toArray(), locale)
-		String datePathPart = DateUtils.getShortStringFromDate(eventVS.getDateFinish())
+		String datePathPart = DateUtils.getDateStr(eventVS.getDateFinish(), "yyyy/MM/dd")
 		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 		

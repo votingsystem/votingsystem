@@ -22,7 +22,13 @@ class CsrService {
 
     public synchronized VicketRequestBatch signVicketBatchRequest (VicketRequestBatch vicketBatchRequest){
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        DateUtils.TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod()
+        DateUtils.TimePeriod timePeriod = null
+        if(vicketBatchRequest.isTimeLimited) timePeriod = DateUtils.getCurrentWeekPeriod()
+        else {
+            Date dateFrom = Calendar.getInstance().getTime()
+            Date dateTo = DateUtils.addDays(dateFrom, 365) //one year
+            timePeriod = new DateUtils.TimePeriod(dateFrom, dateTo)
+        }
         Collection<Vicket> vicketCollection = vicketBatchRequest.getVicketsMap().values()
         CertificateVS authorityCertificateVS = signatureVSService.getServerCertificateVS()
         try {
@@ -31,7 +37,7 @@ class CsrService {
                         vicket.getCsr(), null, timePeriod.getDateFrom(), timePeriod.getDateTo())
                 vicket.loadCertData(x509AnonymousCert, timePeriod, authorityCertificateVS).save()
                 LoggerVS.logVicketIssued(vicket.id, vicket.currencyCode, vicket.amount, vicket.tag,
-                        timePeriod.getDateFrom(), timePeriod.getDateTo())
+                        vicketBatchRequest.isTimeLimited, timePeriod.getDateFrom(), timePeriod.getDateTo())
             }
             return vicketBatchRequest;
         } catch(Exception ex) {
