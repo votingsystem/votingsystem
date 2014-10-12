@@ -5,7 +5,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertExtensionCheckerVS
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
@@ -53,8 +53,8 @@ class SignatureVSService {
         byte[] pemCertsArray
         for (int i = 0; i < chain.length; i++) {
             checkAuthorityCertDB(chain[i])
-            if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
-            else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
+            if(!pemCertsArray) pemCertsArray = CertUtils.getPEMEncoded (chain[i])
+            else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (chain[i]))
         }
         serverCertChainFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath)?.getFile();
@@ -74,7 +74,7 @@ class SignatureVSService {
         CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
                 type:CertificateVS.Type.CERTIFICATE_AUTHORITY)
         if(!certificateVS) {
-            certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509AuthorityCert),
+            certificateVS = new CertificateVS(isRoot:CertUtils.isSelfSigned(x509AuthorityCert),
                     type:CertificateVS.Type.CERTIFICATE_AUTHORITY, state:CertificateVS.State.OK,
                     content:x509AuthorityCert.getEncoded(),
                     serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
@@ -105,7 +105,7 @@ class SignatureVSService {
             }
         });
         for(File caFile:acFiles) {
-            X509Certificate fileSystemX509TrustedCert = CertUtil.fromPEMToX509Cert(FileUtils.getBytesFromFile(caFile))
+            X509Certificate fileSystemX509TrustedCert = CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromFile(caFile))
             checkAuthorityCertDB(fileSystemX509TrustedCert)
         }
         List<CertificateVS> trustedCertsList = CertificateVS.createCriteria().list(offset: 0) {
@@ -115,7 +115,7 @@ class SignatureVSService {
         trustedCerts = new HashSet<X509Certificate>()
         trustedCertsHashMap = new HashMap<Long, CertificateVS>();
         for(CertificateVS certificateVS : trustedCertsList) {
-            X509Certificate x509Cert = CertUtil.loadCertificateFromStream (new ByteArrayInputStream(certificateVS.content))
+            X509Certificate x509Cert = CertUtils.loadCertificate(certificateVS.content)
             trustedCerts.add(x509Cert)
             trustedCertsHashMap.put(x509Cert?.getSerialNumber()?.longValue(), certificateVS)
             String certData = "${x509Cert?.getSubjectDN()} - numSerie:${x509Cert?.getSerialNumber()?.longValue()}"
@@ -177,8 +177,9 @@ class SignatureVSService {
         }
         X509Certificate checkedCert = voteVS.getX509Certificate()
         try {
-            ResponseVS validationResponse = CertUtil.verifyCertificate(eventTrustedAnchors, false, [checkedCert])
-            X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+            CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
+                    eventTrustedAnchors, false, [checkedCert])
+            X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex)
             throw new ExceptionVS(messageSource.getMessage('certValidationErrorMsg',
@@ -233,8 +234,9 @@ class SignatureVSService {
         for(UserVS userVS: signersVS) {
             log.debug("$methodName - validating signer: ${userVS.getCertificate().getSubjectDN()}")
             try {
-                ResponseVS validationResponse = CertUtil.verifyCertificate(eventTrustedAnchors, false, [userVS.getCertificate()])
-                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+                CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
+                        eventTrustedAnchors, false, [userVS.getCertificate()])
+                X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
                 log.debug("$methodName - certCaResult: " + certCaResult?.getSubjectDN()?.toString()+
                         "- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
             } catch (Exception ex) {
@@ -268,7 +270,7 @@ class SignatureVSService {
         Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
         UserVS anonymousSigner = null
-        CertExtensionCheckerVS extensionChecker
+        CertUtils.CertValidatorResultVS validatorResult
         String signerNIF = smimeMessage.getSigner().getNif()
         for(UserVS userVS: signersVS) {
             try {
@@ -286,14 +288,13 @@ class SignatureVSService {
                     log.error("ERROR - $methodName - ${msg}")
                     return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
-                ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
-                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+                validatorResult = CertUtils.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
+                X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
                 userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
                 log.debug("$methodName - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
-                extensionChecker = validationResponse.data.extensionChecker
                 ResponseVS responseVS = null
-                if(extensionChecker.isAnonymousSigner()) {
+                if(validatorResult.getChecker().isAnonymousSigner()) {
                     log.debug("$methodName - anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
@@ -315,7 +316,7 @@ class SignatureVSService {
         }
         return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessage,
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
-                      extensionChecker:extensionChecker])
+                      extensionChecker:validatorResult.getChecker()])
     }
 
     public File getSignedFile (String fromUser, String toUser, String textToSign, String subject, Header header) {

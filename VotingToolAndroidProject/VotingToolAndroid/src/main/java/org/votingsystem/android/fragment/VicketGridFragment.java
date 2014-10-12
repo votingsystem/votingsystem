@@ -170,7 +170,7 @@ public class VicketGridFragment extends Fragment
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.d(TAG + ".onCreateLoader(...)", "");
-        String weekLapse = DateUtils.getDirPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
+        String weekLapse = DateUtils.getPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
         String selection = VicketContentProvider.WEEK_LAPSE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(), VicketContentProvider.CONTENT_URI,
                 null, selection, new String[]{weekLapse}, null);
@@ -231,16 +231,16 @@ public class VicketGridFragment extends Fragment
                         deSerializeObject(serializedVicket);
                 String weekLapseStr = cursor.getString(cursor.getColumnIndex(
                         VicketContentProvider.WEEK_LAPSE_COL));
-                Date weekLapse = DateUtils.getDateFromDirPath(weekLapseStr);
+                Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
                 Calendar weekLapseCalendar = Calendar.getInstance();
                 weekLapseCalendar.setTime(weekLapse);
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView date_data = (TextView)view.findViewById(R.id.date_data);
                 String dateData = getString(R.string.vicket_data_info_lbl,
-                        DateUtils.getLongDate_Es(vicket.getValidFrom()),
-                        DateUtils.getLongDate_Es(vicket.getValidTo()));
-                date_data.setText(DateUtils.getLongDate_Es(vicket.getValidFrom()));
+                        DateUtils.getDayWeekDateStr(vicket.getValidFrom()),
+                        DateUtils.getDayWeekDateStr(vicket.getValidTo()));
+                date_data.setText(DateUtils.getDayWeekDateStr(vicket.getValidFrom()));
 
                 TextView vicket_state = (TextView) view.findViewById(R.id.vicket_state);
                 vicket_state.setText(vicket.getState().toString() + " - ID: " + vicketId);

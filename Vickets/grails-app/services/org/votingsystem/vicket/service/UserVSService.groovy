@@ -3,7 +3,7 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.NifUtils
@@ -59,11 +59,10 @@ class UserVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName, "params"),
                     reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
+        Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
         UserVS newUser = UserVS.getUserVS(certChain.iterator().next())
 
-        responseVS = signatureVSService.verifyUserCertificate(newUser)
-        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        signatureVSService.verifyUserCertificate(newUser)
         responseVS = subscriptionVSService.checkUser(newUser, locale)
         if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
         String userURL = "${grailsLinkGenerator.link(controller:"userVS", absolute:true)}/${responseVS.getUserVS().id}"
@@ -141,7 +140,7 @@ class UserVSService {
             certificates.each {certItem ->
                 X509Certificate x509Cert = certItem.getX509Cert()
                 certificateList.add([serialNumber:"${certItem.serialNumber}",
-                                     pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8")])
+                                     pemCert:new String(CertUtils.getPEMEncoded (x509Cert), "UTF-8")])
             }
         }
 

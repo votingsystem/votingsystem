@@ -45,8 +45,8 @@ public class KeyStoreUtil {
               String rootAlias, String strSubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        KeyPair rootPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate rootCert = CertUtil.generateV3RootCert(rootPair, dateBegin, dateFinish, strSubjectDN);
+        KeyPair rootPair = KeyGeneratorVS.INSTANCE.genKeyPair();
+        X509Certificate rootCert = CertUtils.generateV3RootCert(rootPair, dateBegin, dateFinish, strSubjectDN);
         X500PrivateCredential rootCredential = new X500PrivateCredential(rootCert, rootPair.getPrivate(), rootAlias);
         store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
         store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password,
@@ -62,11 +62,11 @@ public class KeyStoreUtil {
             String endEntitySubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        KeyPair endPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        KeyPair endPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         Date dateBegin = new Date(begin);
         Date dateFinish = new Date(begin + period);
-        X509Certificate endCert = CertUtil.generateEndEntityCert(endPair.getPublic(), 
-                rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
+        X509Certificate endCert = CertUtils.generateEndEntityCert(endPair.getPublic(),
+                rootCredential.getPrivateKey(), rootCredential.getCertificate(),
                 dateBegin, dateFinish, endEntitySubjectDN);
         X500PrivateCredential endCredential = new X500PrivateCredential(
                 endCert, endPair.getPrivate(), endEntityAlias);
@@ -84,10 +84,10 @@ public class KeyStoreUtil {
             String endEntitySubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        KeyPair endPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate endCert = CertUtil.generateTimeStampingCert(endPair.getPublic(), 
-                    rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
-                    begin, period, endEntitySubjectDN);
+        KeyPair endPair = KeyGeneratorVS.INSTANCE.genKeyPair();
+        X509Certificate endCert = CertUtils.generateTimeStampingCert(endPair.getPublic(),
+                rootCredential.getPrivateKey(), rootCredential.getCertificate(),
+                begin, period, endEntitySubjectDN);
         X500PrivateCredential endCredential = new X500PrivateCredential(
                 endCert, endPair.getPrivate(), endEntityAlias);
         store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());

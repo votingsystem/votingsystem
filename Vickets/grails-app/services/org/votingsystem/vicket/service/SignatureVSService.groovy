@@ -14,7 +14,7 @@ import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertExtensionCheckerVS
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
@@ -70,8 +70,8 @@ class  SignatureVSService {
         vicketAnchors.add(new TrustAnchor(localServerCertSigner, null));
 		for (int i = 0; i < chain.length; i++) {
             checkAuthorityCertDB(chain[i])
-			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
-			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
+			if(!pemCertsArray) pemCertsArray = CertUtils.getPEMEncoded (chain[i])
+			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (chain[i]))
 		}
         serverCertificateVS = CertificateVS.findBySerialNumber(localServerCertSigner.getSerialNumber().longValue())
         serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
@@ -93,7 +93,7 @@ class  SignatureVSService {
         CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
                 type:CertificateVS.Type.CERTIFICATE_AUTHORITY)
         if(!certificateVS) {
-            certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509AuthorityCert),
+            certificateVS = new CertificateVS(isRoot:CertUtils.isSelfSigned(x509AuthorityCert),
                     type:CertificateVS.Type.CERTIFICATE_AUTHORITY, state:CertificateVS.State.OK,
                     content:x509AuthorityCert.getEncoded(),
                     serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
@@ -149,7 +149,7 @@ class  SignatureVSService {
      */
     public X509Certificate signCSR(PKCS10CertificationRequest csr, String organizationalUnit, Date dateBegin,
            Date dateFinish, DERTaggedObject... certExtensions) throws Exception {
-        X509Certificate issuedCert = CertUtil.signCSR(csr, organizationalUnit, getServerPrivateKey(),
+        X509Certificate issuedCert = CertUtils.signCSR(csr, organizationalUnit, getServerPrivateKey(),
                 getServerCert(), dateBegin, dateFinish, certExtensions)
         return issuedCert
     }
@@ -166,7 +166,7 @@ class  SignatureVSService {
             }
         });
         for(File caFile:acFiles) {
-            X509Certificate fileSystemX509TrustedCert = CertUtil.fromPEMToX509Cert(FileUtils.getBytesFromFile(caFile))
+            X509Certificate fileSystemX509TrustedCert = CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromFile(caFile))
             checkAuthorityCertDB(fileSystemX509TrustedCert)
         }
         List<CertificateVS>  trustedCertsList = CertificateVS.createCriteria().list(offset: 0) {
@@ -251,19 +251,20 @@ class  SignatureVSService {
 		return validateSignersCerts(smimeMessage, locale)
 	}
 
-    public ResponseVS verifyUserCertificate(UserVS userVS) {
-        ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
-        X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+    public CertUtils.CertValidatorResultVS verifyUserCertificate(UserVS userVS) throws Exception {
+        CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
+                getTrustAnchors(), false, [userVS.getCertificate()])
+        X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
         userVS.setCertificateCA(getTrustedCertsHashMap().get(certCaResult?.getSerialNumber()?.longValue()))
         log.debug("verifyCertificate - user '${userVS.nif}' cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                 " - CA certificateVS.id : " + userVS.getCertificateCA().getId());
-        return validationResponse
+        return validatorResult
     }
 
 
     public ResponseVS validateCertificates(List<X509Certificate> certificateList) {
         log.debug("validateCertificates")
-        ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, certificateList)
+        ResponseVS validationResponse = CertUtils.verifyCertificate(getTrustAnchors(), false, certificateList)
         //X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
         return validationResponse
     }
@@ -276,7 +277,7 @@ class  SignatureVSService {
 		Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
         UserVS anonymousSigner = null
-        CertExtensionCheckerVS extensionChecker
+        CertUtils.CertValidatorResultVS validatorResult
         String signerNIF = org.votingsystem.util.NifUtils.validate(smimeMessage.getSigner().getNif())
 		for(UserVS userVS: signersVS) {
 			try {
@@ -295,10 +296,9 @@ class  SignatureVSService {
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST, reason:msg,
                             metaInf: MetaInfMsg.getErrorMsg(methodName, "timestampMissing"))
                 }
-				ResponseVS validationResponse = verifyUserCertificate(userVS)
-                extensionChecker = validationResponse.data.extensionChecker
+                validatorResult = verifyUserCertificate(userVS)
                 ResponseVS responseVS = null
-                if(extensionChecker.isAnonymousSigner()) {
+                if(validatorResult.getChecker().isAnonymousSigner()) {
                     log.debug("validateSignersCerts - is anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK).setUserVS(anonymousSigner)
@@ -325,7 +325,7 @@ class  SignatureVSService {
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessage,
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
-                extensionChecker:extensionChecker])
+                extensionChecker:validatorResult.getChecker()])
 	}
 
     @Transactional

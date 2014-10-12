@@ -36,7 +36,7 @@ import org.votingsystem.model.VicketServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 
@@ -100,7 +100,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
                 LOGD(TAG, "Subject DN: " + cert.getSubjectX500Principal().toString());
                 LOGD(TAG, "Issuer DN: " + cert.getIssuerDN().getName());
             }*/
-            VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+            KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             PrefUtils.init(this);
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
@@ -213,7 +213,7 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
 
     public String getCurrentWeekLapseId() {
         Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
-        return DateUtils.getDirPath(currentLapseCalendar.getTime());
+        return DateUtils.getPath(currentLapseCalendar.getTime());
     }
 
     public KeyStore.PrivateKeyEntry getUserPrivateKey() throws KeyStoreException, CertificateException,

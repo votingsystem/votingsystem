@@ -9,13 +9,11 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.VotingSystemKeyStoreException;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
-
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
-
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
@@ -84,7 +82,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                     responseVS = new ResponseVS(ResponseVS.SC_OK, decryptedMessageBytes);
                 }
             }
-        } catch(VotingSystemKeyStoreException ex) {
+        } catch(ExceptionVS ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR,
                     contextVS.getString(R.string.pin_error_msg));

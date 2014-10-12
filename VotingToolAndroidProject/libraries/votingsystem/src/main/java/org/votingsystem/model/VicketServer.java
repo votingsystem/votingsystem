@@ -42,6 +42,6 @@ public class VicketServer extends ActorVS implements Serializable {
 
 
     public String getDateUserInfoServiceURL(Date date) {
-        return getServerURL() + "/userVS" + DateUtils.getURLPath(date);
+        return getServerURL() + "/userVS" + DateUtils.getPath(date);
     }
 }

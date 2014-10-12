@@ -4,15 +4,13 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
 * @author jgzornoza
@@ -182,7 +180,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
             actorVS.setName(actorVSJSON.getString("name"));
         if (actorVSJSON.has("certChainPEM")) {
             Collection<X509Certificate> certChain =
-                    CertUtil.fromPEMToX509CertCollection(actorVSJSON.
+                    CertUtils.fromPEMToX509CertCollection(actorVSJSON.
                             getString("certChainPEM").getBytes());
             actorVS.setCertChain(certChain);
             X509Certificate serverCert = certChain.iterator().next();

@@ -150,7 +150,7 @@ public class ReceiptGridFragment extends Fragment implements
                         ReceiptContentProvider.TIMESTAMP_UPDATED_COL));
                 Date lastUpdated = new Date(lastUpdatedMillis);
                 String dateInfoStr = context.getString(R.string.last_updated_msg,
-                        DateUtils.getLongDate_Es(lastUpdated));
+                        DateUtils.getDayWeekDateStr(lastUpdated));
 
                 ReceiptContainer.State state =  ReceiptContainer.State.valueOf(stateStr);
 

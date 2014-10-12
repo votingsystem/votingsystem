@@ -14,7 +14,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.util.DeviceUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -63,7 +62,7 @@ public class CertificationRequestVS implements java.io.Serializable {
             String signatureMechanism, String provider, String accessControlURL, String eventId,
             String getHashCertVSBase64) throws NoSuchAlgorithmException, NoSuchProviderException,
             InvalidKeyException, SignatureException, IOException {
-        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +", OU=eventId:" + eventId);
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         Map delegationDataMap = new HashMap<String, String>();
@@ -81,7 +80,7 @@ public class CertificationRequestVS implements java.io.Serializable {
            String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
            String weeksOperationActive) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
-        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
                 ", OU=AnonymousRepresentativeDelegation");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
@@ -101,7 +100,7 @@ public class CertificationRequestVS implements java.io.Serializable {
               String signatureMechanism, String provider, String vicketServerURL, String hashCertVS,
               String amount, String currency, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
-        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
         X500Principal subject = new X500Principal("CN=vicketServerURL:" + vicketServerURL +
                 ", OU=VICKET_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
@@ -126,7 +125,7 @@ public class CertificationRequestVS implements java.io.Serializable {
                String phone, String deviceId, String givenName, String surName) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
 
-        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
 
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
@@ -156,7 +155,7 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     private SignedMailGenerator getSignedMailGenerator() throws Exception {
         if (signedMailGenerator == null) {
-            Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
+            Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(signedCsr);
             Log.d(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
             if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
             certificate = certificates.iterator().next();
@@ -173,7 +172,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     public X509Certificate getCertificate() {
         if(certificate == null && signedCsr != null) {
             try {
-                Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
+                Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(signedCsr);
                 Log.d(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
                 if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
                 certificate = certificates.iterator().next();
@@ -204,7 +203,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     }
 
     public byte[] getCsrPEM() throws Exception {
-        return CertUtil.getPEMEncoded(getCsr());
+        return CertUtils.getPEMEncoded(getCsr());
     }
 
     public byte[] getSignedCsr() {
@@ -226,8 +225,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         byte[] certificateBytes = (byte[]) s.readObject();
         if(certificateBytes != null) {
             try {
-                ByteArrayInputStream bais = new ByteArrayInputStream(certificateBytes);
-                certificate = CertUtil.loadCertificateFromStream (bais);
+                certificate = CertUtils.loadCertificate(certificateBytes);
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

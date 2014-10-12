@@ -19,9 +19,9 @@ import java.util.Date;
 * @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class ClienteOCSP {
+public class OCSPUtils {
 
-    private static Logger log = Logger.getLogger(ClienteOCSP.class);
+    private static Logger log = Logger.getLogger(OCSPUtils.class);
 
     public static CertificateVS.State validateCert(X509Certificate intermediateCert, BigInteger serialNumber,
                     Date dateCheck) throws Exception {

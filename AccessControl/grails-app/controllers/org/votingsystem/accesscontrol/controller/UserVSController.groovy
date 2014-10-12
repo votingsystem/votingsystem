@@ -4,8 +4,7 @@ import org.votingsystem.model.RepresentationDocumentVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.signature.util.CertUtils
 
 import java.security.cert.X509Certificate
 
@@ -33,7 +32,7 @@ class UserVSController {
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		String pemCert = "${request.getInputStream()}"
-		Collection<X509Certificate> userCertCollection = CertUtil.fromPEMToX509CertCollection(pemCert.getBytes())
+		Collection<X509Certificate> userCertCollection = CertUtils.fromPEMToX509CertCollection(pemCert.getBytes())
 		X509Certificate userCert = userCertCollection?.toArray()[0]
 		if(userCert) {
 			UserVS userVS = UserVS.getUserVS(userCert);

@@ -22,7 +22,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -84,7 +84,7 @@ public class TimeStampCertValidationPane extends GridPane {
         Collection<X509Certificate> certs = null;
         try {
             String pemCert = textArea.getText();
-            certs = CertUtil.fromPEMToX509CertCollection(pemCert.getBytes());
+            certs = CertUtils.fromPEMToX509CertCollection(pemCert.getBytes());
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             showMessage(ContextVS.getInstance().getMessage("pemCertsErrorMsg"));

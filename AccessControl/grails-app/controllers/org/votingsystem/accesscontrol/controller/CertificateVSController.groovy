@@ -3,11 +3,9 @@ package org.votingsystem.accesscontrol.controller
 import grails.converters.JSON
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
-import org.votingsystem.util.HttpHelper
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
@@ -53,10 +51,9 @@ class CertificateVSController {
 			CertificateVS certificate;
 			CertificateVS.withTransaction{certificate = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64)}
 			if (certificate) {
-				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
-				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+				X509Certificate certX509 = CertUtils.loadCertificate(certificate.content)
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                    messageBytes: CertUtil.getPEMEncoded (certX509))]
+                    messageBytes: CertUtils.getPEMEncoded (certX509))]
 			}
 		}
         return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
@@ -81,10 +78,9 @@ class CertificateVSController {
             CertificateVS.withTransaction{certificate = CertificateVS.findWhere(
                     userVS:userVS, state:CertificateVS.State.OK)}
             if (certificate) {
-                ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
-                X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+                X509Certificate certX509 = CertUtils.loadCertificate(certificate.content)
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                        messageBytes: CertUtil.getPEMEncoded (certX509))]
+                        messageBytes: CertUtils.getPEMEncoded (certX509))]
             } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code:'userWithoutCert',args:[params.userId]))]
         }
@@ -110,10 +106,9 @@ class CertificateVSController {
 				certificateCA = CertificateVS.findWhere(eventVSElection:eventVSElection,
                         type:CertificateVS.Type.VOTEVS_ROOT)
 			}
-			ByteArrayInputStream bais = new ByteArrayInputStream(certificateCA.content)
-			X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+			X509Certificate certX509 = CertUtils.loadCertificate(certificateCA.content)
             return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                    messageBytes: CertUtil.getPEMEncoded (certX509))]
+                    messageBytes: CertUtils.getPEMEncoded (certX509))]
 		} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                 message(code: 'eventVSNotFound', args:[params.eventVS_Id]))]
 	}
@@ -127,7 +122,7 @@ class CertificateVSController {
 	def trustedCerts () {
 		Set<X509Certificate> trustedCerts = signatureVSService.getTrustedCerts()
         return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                messageBytes: CertUtil.getPEMEncoded (trustedCerts))]
+                messageBytes: CertUtils.getPEMEncoded (trustedCerts))]
 	}
 
     /**
@@ -198,7 +193,7 @@ class CertificateVSController {
                     resultList.add(certItem.getX509Cert())
                 }
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                        messageBytes: CertUtil.getPEMEncoded (resultList))]
+                        messageBytes: CertUtils.getPEMEncoded (resultList))]
             } else {
                 certList.each {certItem ->
                     resultList.add(certificateVSService.getCertificateVSDataMap(certItem))
@@ -230,7 +225,7 @@ class CertificateVSController {
                 if(request.contentType?.contains("pem") || 'pem'.equals(params.format)) {
                     response.setHeader("Content-Disposition", "inline; filename='trustedCert_${params.serialNumber}'")
                     if(x509Cert) return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                            messageBytes: CertUtil.getPEMEncoded (x509Cert))]
+                            messageBytes: CertUtils.getPEMEncoded (x509Cert))]
                 } else {
                     def certMap = certificateVSService.getCertificateVSDataMap(certificate)
                     if(request.contentType?.contains("json")) {

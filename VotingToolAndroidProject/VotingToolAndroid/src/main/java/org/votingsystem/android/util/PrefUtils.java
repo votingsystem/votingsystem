@@ -9,8 +9,8 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSTransactionVSListInfo;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.ObjectUtils;
 
 import java.security.NoSuchAlgorithmException;
@@ -100,7 +100,7 @@ public class PrefUtils {
     public static UserVSTransactionVSListInfo getUserVSTransactionVSListInfo(
             final Context context) throws Exception {
         Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
-        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getDirPath(currentMonday.getTime());
+        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(currentMonday.getTime());
         SharedPreferences pref = context.getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         String userInfoStr = pref.getString(editorKey, null);
@@ -113,7 +113,7 @@ public class PrefUtils {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getDirPath(timePeriod.getDateFrom());
+        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(timePeriod.getDateFrom());
         editor.putString(editorKey, userInfo.toJSON().toString());
         editor.commit();
     }
@@ -130,7 +130,7 @@ public class PrefUtils {
     }
 
     public static String getStoredPasswordHash(final Context context) throws NoSuchAlgorithmException,
-            VotingSystemKeyStoreException {
+            ExceptionVS {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return settings.getString(ContextVS.PIN_KEY, null);

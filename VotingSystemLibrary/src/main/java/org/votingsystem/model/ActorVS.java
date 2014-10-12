@@ -1,7 +1,7 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.StringUtils;
 
 import javax.persistence.*;
@@ -202,7 +202,7 @@ public class ActorVS implements Serializable {
     }
 
     public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
-        timeStampCert = CertUtil.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
+        timeStampCert = CertUtils.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
     }
 
     public String getWebSocketURL() {
@@ -214,7 +214,7 @@ public class ActorVS implements Serializable {
     }
 
     public void setCertChainPEM(String certChainPEM) throws Exception {
-        certChain = CertUtil.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         x509Certificate = certChain.iterator().next();
         trustAnchors = new HashSet<TrustAnchor>();
         for (X509Certificate cert:certChain) {

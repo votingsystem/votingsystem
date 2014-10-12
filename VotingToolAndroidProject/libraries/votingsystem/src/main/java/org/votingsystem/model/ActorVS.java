@@ -4,7 +4,7 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.StringUtils;
 
 import java.security.cert.X509Certificate;
@@ -172,7 +172,7 @@ public class ActorVS implements java.io.Serializable {
 	}
 	
     public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
-        timeStampCert = CertUtil.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
+        timeStampCert = CertUtils.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
     }
 
     public String getTimeStampServiceURL() {
@@ -223,7 +223,7 @@ public class ActorVS implements java.io.Serializable {
         if (actorVSJSON.has("environmentMode")) actorVS.setEnvironment(EnvironmentVS.valueOf(
                 actorVSJSON.getString("environmentMode")));
         if (actorVSJSON.has("certChainPEM")) {
-            Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
+            Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
                     actorVSJSON.getString("certChainPEM").getBytes());
             actorVS.setCertChain(certChain);
             X509Certificate serverCert = certChain.iterator().next();

@@ -10,7 +10,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ExceptionVS;
@@ -94,7 +94,7 @@ public class Vicket implements Serializable  {
     public Vicket(SMIMEMessage smimeMessage) throws ExceptionVS, IOException {
         this.smimeMessage = smimeMessage;
         x509AnonymousCert = smimeMessage.getCertWithCertExtension();
-        JSONObject certExtensionData = CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
+        JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
         initCertData(certExtensionData, smimeMessage.getCertWithCertExtension().getSubjectDN().toString());
         validateSignedData();
     }
@@ -174,7 +174,7 @@ public class Vicket implements Serializable  {
     public void initSigner(byte[] csrBytes) throws Exception {
         certificationRequest.initSigner(csrBytes);
         x509AnonymousCert = certificationRequest.getCertificate();
-        JSONObject certExtensionData = CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
+        JSONObject certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
         initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
         certSubject.addDateInfo(x509AnonymousCert);
     }
@@ -216,7 +216,7 @@ public class Vicket implements Serializable  {
     }
 
     public JSONObject getCertExtensionData() throws IOException {
-        return CertUtil.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
+        return CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VICKET_OID);
     }
 
     public SMIMEMessage getSMIMEMessage() {
@@ -277,7 +277,7 @@ public class Vicket implements Serializable  {
     }
 
     public byte[] getIssuedCertPEM() throws IOException {
-        return CertUtil.getPEMEncoded(x509AnonymousCert);
+        return CertUtils.getPEMEncoded(x509AnonymousCert);
     }
 
     public Long getId() {
@@ -456,7 +456,7 @@ public class Vicket implements Serializable  {
             throw new ExceptionVS("Signer content digest mismatch");
         }
         for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
-            CertUtil.verifyCertificate(trustAnchor, false, Arrays.asList(cert));
+            CertUtils.verifyCertificate(trustAnchor, false, Arrays.asList(cert));
             log.debug("validateReceipt - Cert validated: " + cert.getSubjectDN().toString());
         }
         this.smimeMessage = smimeReceipt;

@@ -8,7 +8,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
@@ -450,7 +450,7 @@ public class UserVS implements Serializable {
             JSONArray jsonArrayData = new JSONArray();
             JSONObject jsonCertData = new JSONObject();
             jsonCertData.put("serialNumber", certificate.getSerialNumber());
-            jsonCertData.put("pemCert", new String(CertUtil.getPEMEncoded(certificate), "UTF-8"));
+            jsonCertData.put("pemCert", new String(CertUtils.getPEMEncoded(certificate), "UTF-8"));
             jsonArrayData.add(jsonCertData);
             jsonData.put("certificateList", jsonArrayData);
         }

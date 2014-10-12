@@ -241,8 +241,8 @@ public class TransactionVSContentProvider extends ContentProvider {
         Calendar iteratorCalendar = (Calendar) lastTransactionCalendar.clone();
         while(iteratorCalendar.before(lastTransactionCalendar)) {
             DateUtils.TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
-            String periodLbl = contextVS.getString(R.string.week_lapse_lbl, DateUtils.getDateWithDayWeek(
-                    timePeriod.getDateFrom()), DateUtils.getDateWithDayWeek(timePeriod.getDateTo()));
+            String periodLbl = contextVS.getString(R.string.week_lapse_lbl, DateUtils.getDayWeekDateStr(
+                    timePeriod.getDateFrom()), DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
             result.add(periodLbl);
             Log.d(TAG + ".getTransactionWeekList() ", "periodLbl: " + periodLbl);
         }
@@ -254,7 +254,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         UserVSTransactionVSListInfo userInfo) {
         for(TransactionVS transactionVS : userInfo.getTransactionList()) {
             addTransaction(contextVS, transactionVS,
-                    DateUtils.getDirPath(userInfo.getTimePeriod().getDateFrom()));
+                    DateUtils.getPath(userInfo.getTimePeriod().getDateFrom()));
         }
         PrefUtils.putLastVicketAccountCheckTime(contextVS);
     }

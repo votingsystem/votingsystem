@@ -21,20 +21,17 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGenerator;
 import org.votingsystem.signature.smime.SimpleSignerInfoGeneratorBuilder;
-import org.votingsystem.signature.util.CertUtil;
-import org.votingsystem.signature.util.VotingSystemException;
+import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
-
 import javax.mail.Address;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -108,10 +105,10 @@ public class DNIeContentSigner implements ContentSigner {
             pkcs11Module.initialize(null);
             final SlotReader slotReader = new SlotReader(pkcs11Module.getSlotList(Module.SlotRequirement.TOKEN_PRESENT));
             Slot slot = slotReader.getSelected();
-            if(slot == null) throw new VotingSystemException(
+            if(slot == null) throw new ExceptionVS(
                     ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
             token = slot.getToken();
-            if(token == null) throw new VotingSystemException (
+            if(token == null) throw new ExceptionVS (
                     ContextVS.getInstance().getMessage("missingPKCS11ErrorMsg"));
             pkcs11Session = token.openSession(Token.SessionType.SERIAL_SESSION,
                     Token.SessionReadWriteBehavior.RO_SESSION, null, null);
@@ -131,8 +128,8 @@ public class DNIeContentSigner implements ContentSigner {
             X509PublicKeyCertificate certificateTemplate = new X509PublicKeyCertificate();
             pkcs11Session.findObjectsInit(certificateTemplate);
             Object[] tokenCertificateObjects;
-            FileInputStream fis =  new FileInputStream(ContextVS.APPDIR + ContextVS.CERT_RAIZ_PATH);
-            certCA = CertUtil.loadCertificateFromStream(fis);
+            certCA = CertUtils.loadCertificate(FileUtils.getBytesFromFile(
+                    new File(ContextVS.APPDIR + ContextVS.CERT_RAIZ_PATH)));
             while ((tokenCertificateObjects = pkcs11Session.findObjects(1)).length > 0) {
                 iaik.pkcs.pkcs11.objects.Object object = (Object) tokenCertificateObjects[0];
                 Hashtable attributes = object.getAttributeTable();
@@ -140,15 +137,15 @@ public class DNIeContentSigner implements ContentSigner {
                 byte[] value = valueAttribute.getByteArrayValue();
                 X509PublicKeyCertificate cert = (X509PublicKeyCertificate)tokenCertificateObjects[0];
                 if (CERT_SIGN.equals(cert.getLabel().toString())) {
-                    certUser = (X509Certificate)CertUtil.loadCertificate(value);
+                    certUser = (X509Certificate) CertUtils.loadCertificate(value);
                     ContextVS.getInstance().setSessionUser(UserVS.getUserVS(certUser));
                 } else if (CERT_CA.equals(cert.getLabel().toString())) {
-                    certIntermediate = (X509Certificate)CertUtil.loadCertificate(value);
+                    certIntermediate = (X509Certificate) CertUtils.loadCertificate(value);
                 }
             }
             pkcs11Session.findObjectsFinal();
         } catch (ArrayIndexOutOfBoundsException ex) {
-            throw new VotingSystemException(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
+            throw new ExceptionVS(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
         } catch (PKCS11Exception ex) {
             if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) ||
                     "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage()) ||
@@ -169,10 +166,10 @@ public class DNIeContentSigner implements ContentSigner {
                 System.gc();
             }
             if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                throw new VotingSystemException(ContextVS.getInstance().getMessage("passwordErrorMsg"));
+                throw new ExceptionVS(ContextVS.getInstance().getMessage("passwordErrorMsg"));
             }
             if ("CKR_HOST_MEMORY".equals(ex.getMessage())) {
-                throw new VotingSystemException(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
+                throw new ExceptionVS(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
             }
             throw ex;
         }

@@ -1,13 +1,8 @@
 package org.votingsystem.timestamp.controller
 
-import grails.converters.JSON
-import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.signature.util.KeyStoreUtil
-import org.votingsystem.util.FileUtils
+import org.votingsystem.signature.util.CertUtils
 
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
 
 /**
@@ -44,7 +39,7 @@ class CertificateVSController {
                 render ("Needed type 'CERT_CA_NEW'  found '${messageJSON.operation}'")
                 return false
             }
-            Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes())
+            Collection<X509Certificate> certX509CertCollection = CertUtils.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes())
             if(certX509CertCollection.isEmpty()) {
                 log.error("Cert not found")
                 response.status = ResponseVS.SC_ERROR

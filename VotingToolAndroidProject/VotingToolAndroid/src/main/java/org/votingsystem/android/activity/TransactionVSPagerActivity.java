@@ -44,7 +44,7 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         TransactionVSPagerAdapter pagerAdapter = new TransactionVSPagerAdapter(
                 getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        String weekLapse = DateUtils.getDirPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
+        String weekLapse = DateUtils.getPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
         cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI, null, selection,
                 new String[]{weekLapse}, null);
@@ -83,7 +83,7 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
 
         public TransactionVSPagerAdapter(FragmentManager fm) {
             super(fm);
-            String weekLapse = DateUtils.getDirPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
+            String weekLapse = DateUtils.getPath(DateUtils.getMonday(Calendar.getInstance()).getTime());
             String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
             cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI, null, selection,
                     new String[]{weekLapse}, null);

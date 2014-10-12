@@ -9,7 +9,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 
 import java.security.cert.TrustAnchor;
@@ -41,10 +41,9 @@ public class DocumentVSValidator {
         for(UserVS signerVS:signersVS) {
             try {
                 if(signerVS.getTimeStampToken() != null) {//user signature
-                    ResponseVS validationResponse = CertUtil.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(
-                            signerVS.getCertificate()));
+                    CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getCertificate()));
                 } else {//server signature
-                    ResponseVS validationResponse = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(signerVS.getCertificate()));
+                    CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signerVS.getCertificate()));
                 }
             } catch(Exception ex) {
                 log.error(ex.getMessage(), ex);
@@ -114,7 +113,7 @@ public class DocumentVSValidator {
                 ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("badRequestMsg") +
                 " - " + ContextVS.getInstance().getMessage("missingRepresentativeNifErrorMsg"));
         try {
-            ResponseVS validationResult = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(userVS.getCertificate()));
+            CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(userVS.getCertificate()));
             //log.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -169,7 +168,7 @@ public class DocumentVSValidator {
         }
         UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
         try {
-            ResponseVS validationResponse = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
+            CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ContextVS.getInstance().getMessage(
@@ -221,7 +220,7 @@ public class DocumentVSValidator {
         }
         UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
         try {
-            ResponseVS validationResult = CertUtil.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
+            CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(

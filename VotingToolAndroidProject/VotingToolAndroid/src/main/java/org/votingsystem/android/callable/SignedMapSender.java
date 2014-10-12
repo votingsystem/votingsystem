@@ -7,15 +7,12 @@ import org.votingsystem.android.R;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.votingsystem.signature.util.VotingSystemKeyStoreException;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
-
 import java.security.KeyStore;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import javax.mail.Header;
-
 import static org.votingsystem.model.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
@@ -68,7 +65,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
             }
             mapToSend.put(signedFileName, timeStamper.getSmimeMessage().getBytes());
             responseVS = HttpHelper.sendObjectMap(mapToSend, serviceURL);
-        } catch(VotingSystemKeyStoreException ex) {
+        } catch(ExceptionVS ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     contextVS.getString(R.string.pin_error_msg));

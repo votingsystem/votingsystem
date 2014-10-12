@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
@@ -57,9 +57,9 @@ class EventVSElectionService {
         if (!controlCenterURL.equals(requestServerURL)) {
             log.debug("$methodName - WARNING - serverURL: ${controlCenterURL} - messageJSON.controlCenterURL: ${messageJSON.controlCenterURL}")
         }
-        X509Certificate certCAVotacion = CertUtil.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
+        X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
 
-        X509Certificate userCert = CertUtil.fromPEMToX509Cert(messageJSON.userVS?.bytes)
+        X509Certificate userCert = CertUtils.fromPEMToX509Cert(messageJSON.userVS?.bytes)
 
         UserVS user = UserVS.getUserVS(userCert);
         //Publish request comes with Access Control cert
@@ -87,7 +87,7 @@ class EventVSElectionService {
                 content:controlCenterX509Cert.getEncoded(), serialNumber:controlCenterX509Cert.getSerialNumber().longValue(),
                 validFrom:controlCenterX509Cert?.getNotBefore(), validTo:controlCenterX509Cert?.getNotAfter()).save()
 
-        Collection<X509Certificate> accessControlCerts = CertUtil.fromPEMToX509CertCollection (messageJSON.certChain?.getBytes())
+        Collection<X509Certificate> accessControlCerts = CertUtils.fromPEMToX509CertCollection (messageJSON.certChain?.getBytes())
         X509Certificate accessControlX509Cert = accessControlCerts.iterator().next()
         CertificateVS eventVSAccessControlCertificate = new CertificateVS(actorVS:accessControl,
                 state:CertificateVS.State.OK, type:CertificateVS.Type.ACTOR_VS, eventVSElection:eventVS,

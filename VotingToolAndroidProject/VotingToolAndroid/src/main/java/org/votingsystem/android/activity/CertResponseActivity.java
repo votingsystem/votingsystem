@@ -30,7 +30,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.CMSUtils;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
@@ -98,7 +98,7 @@ public class CertResponseActivity extends ActionBarActivity {
                     return;
                 }
                 PrivateKey privateKey = certificationRequest.getPrivateKey();
-                Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
+                Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
                         csrSigned.getBytes());
                 X509Certificate userCert = certificates.iterator().next();
                 UserVS user = UserVS.getUserVS(userCert);

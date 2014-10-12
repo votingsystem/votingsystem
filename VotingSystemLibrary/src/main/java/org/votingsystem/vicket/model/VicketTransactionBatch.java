@@ -9,7 +9,7 @@ import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -95,7 +95,7 @@ public class VicketTransactionBatch {
             String hashCertVS = (String) receiptData.keySet().iterator().next();
             SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(
                     java.util.Base64.getDecoder().decode(receiptData.getString(hashCertVS).getBytes())));
-            String signatureHashCertVS = CertUtil.getHashCertVS(smimeReceipt.getCertWithCertExtension(), ContextVS.VICKET_OID);
+            String signatureHashCertVS = CertUtils.getHashCertVS(smimeReceipt.getCertWithCertExtension(), ContextVS.VICKET_OID);
             Vicket vicket = vicketMap.remove(signatureHashCertVS);
             vicket.validateReceipt(smimeReceipt, trustAnchor);
         }

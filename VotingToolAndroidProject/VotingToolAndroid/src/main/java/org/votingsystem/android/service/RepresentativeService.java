@@ -210,8 +210,8 @@ public class RepresentativeService extends IntentService {
             String fromUser = contextVS.getUserVS().getNif();
             Map smimeContentMap = new HashMap();
             smimeContentMap.put("weeksOperationActive", weeksOperationActive);
-            smimeContentMap.put("dateFrom", DateUtils.getLongDate_Es(anonymousDelegationFromDate));
-            smimeContentMap.put("dateTo", DateUtils.getLongDate_Es(anonymousDelegationToDate));
+            smimeContentMap.put("dateFrom", DateUtils.getDayWeekDateStr(anonymousDelegationFromDate));
+            smimeContentMap.put("dateTo", DateUtils.getDayWeekDateStr(anonymousDelegationToDate));
             smimeContentMap.put("UUID", UUID.randomUUID().toString());
             smimeContentMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
             smimeContentMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());

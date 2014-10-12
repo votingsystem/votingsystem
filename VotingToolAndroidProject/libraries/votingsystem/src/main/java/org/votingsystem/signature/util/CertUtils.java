@@ -70,7 +70,7 @@ import javax.security.auth.x500.X500Principal;
 * Casi todo el código sacado de:
 * http://www.amazon.com/exec/obidos/redirect?path=ASIN/0764596330&link_code=as2&camp=1789&tag=bouncycastleo-20&creative=9325
 */
-public class CertUtil {
+public class CertUtils {
     
     public static String ROOT_ALIAS = "root";
     public static String END_ENTITY_ALIAS = "end";
@@ -152,51 +152,6 @@ public class CertUtil {
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
         return certGen.generate(caKey, "BC");
-    }
-    
-    /**
-     * Genera un certificado V3 para usarlo como certificado de usuario final a partir
-     * de una 'certificate signing request'
-     */
-    public static X509Certificate generateV3EndEntityCertFromCsr(PKCS10CertificationRequest csr, 
-            PrivateKey caKey, X509Certificate caCert, long comienzo, int periodoValidez,
-            String strSubjectDN) throws Exception {
-        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
-        PublicKey requestPublicKey = csr.getPublicKey();
-        X509Principal x509Principal = new X509Principal(strSubjectDN);  
-        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-        Log.i("generateV3EndEntityCertFromCsr::caCert.getSubjectX500Principal(): ", 
-        		caCert.getSubjectX500Principal().toString());
-        certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
-        certGen.setNotBefore(new Date(comienzo));
-        certGen.setNotAfter(new Date(comienzo + periodoValidez));
-        certGen.setSubjectDN(x509Principal);
-        certGen.setPublicKey(requestPublicKey);
-        certGen.setSignatureAlgorithm(SIG_ALGORITHM);
-        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(requestPublicKey));
-        certGen.addExtension(X509Extensions.BasicConstraints, true, 
-                new BasicConstraints(false));//Certificado final
-        certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
-        ASN1Set attributes = csr.getCertificationRequestInfo().getAttributes();
-        if (attributes != null) {
-            for (int i = 0; i != attributes.size(); i++) {
-                Attribute attr = Attribute.getInstance(attributes.getObjectAt(i));
-                if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
-                    X509Extensions extensions = X509Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
-                    Enumeration e = extensions.oids();
-                    while (e.hasMoreElements()) {
-                        DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
-                        X509Extension ext = extensions.getExtension(oid);
-                        certGen.addExtension(oid, ext.isCritical(), ext.getValue().getOctets());
-                    }
-                }
-            }
-        }
-        X509Certificate cert = certGen.generate(caKey, "BC");
-        cert.verify(caCert.getPublicKey());
-        Log.i("CertUtil.generateV3EndEntityCertFromCsr", "Verificacion OK");
-        return cert;
     }
 
    public static CertPath verifyCertificate(X509Certificate cert, CertStore store, KeyStore trustedStore) 
@@ -331,13 +286,15 @@ public class CertUtil {
                 (Collection<X509Certificate>)fact.generateCertificates(in);
         return x509Certs;
     }
-    	
-    public static X509Certificate loadCertificateFromStream (InputStream inputStream) throws Exception {
+
+    public static X509Certificate loadCertificate (byte[] certBytes) throws Exception {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(certBytes);
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
         Collection<X509Certificate> certificateChain =
                 (Collection<X509Certificate>) certificateFactory.generateCertificates(inputStream);
-        X509Certificate cert = certificateChain.iterator().next();
-        return cert;
+        X509Certificate x509Cert = certificateChain.iterator().next();
+        inputStream.close();
+        return x509Cert;
     }
 
     public static JSONObject getCertExtensionData(X509Certificate x509Certificate,

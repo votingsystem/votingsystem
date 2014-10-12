@@ -2,7 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 
 import java.security.cert.X509Certificate
@@ -71,7 +71,7 @@ class EventVSManifestService {
 		}
 		
 		Set<X509Certificate> systemTrustedCerts = signatureVSService.getTrustedCerts()
-		byte[] systemTrustedCertsPEMBytes = CertUtil.getPEMEncoded(systemTrustedCerts)
+		byte[] systemTrustedCertsPEMBytes = CertUtils.getPEMEncoded(systemTrustedCerts)
 		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
 		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 		

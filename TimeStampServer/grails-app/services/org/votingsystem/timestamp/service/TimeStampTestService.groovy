@@ -5,7 +5,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CertExtensionCheckerVS
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 
 import java.security.cert.CertPathValidatorException
 import java.security.cert.TrustAnchor
@@ -69,8 +69,9 @@ class TimeStampTestService {
                     log.error("ERROR - validateMessage - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
-                ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
-                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+                CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
+                        getTrustAnchors(), false, [userVS.getCertificate()])
+                X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
 
                 log.debug("validateMessage - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());

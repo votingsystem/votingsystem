@@ -20,7 +20,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 
@@ -172,7 +172,7 @@ public class SignAndSendService extends IntentService {
             JSONArray targetCertArray = operationVS.getTargetCertArray();
             for(int i = 0; i < targetCertArray.length(); i++) {
                 JSONObject targetCertItem = targetCertArray.getJSONObject(i);
-                X509Certificate receiverCert = CertUtil.fromPEMToX509Cert((targetCertItem.getString("pemCert")).getBytes());
+                X509Certificate receiverCert = CertUtils.fromPEMToX509Cert((targetCertItem.getString("pemCert")).getBytes());
                 JSONObject documentToEncrypt = operationVS.getDocumentToEncrypt();
                 responseVS = Encryptor.encryptToCMS(documentToEncrypt.toString().getBytes(), receiverCert);
                 String encryptedMessageStr = new String(responseVS.getMessageBytes(), "UTF-8");

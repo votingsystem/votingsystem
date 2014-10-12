@@ -16,7 +16,7 @@ import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.StringUtils
@@ -49,8 +49,8 @@ class TimeStampService {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,
                         type:CertificateVS.Type.TIMESTAMP_SERVER)
                 if(timeStampServerCert) {
-                    x509TimeStampServerCert = CertUtil.loadCertificate(timeStampServerCert.content)
-                    signingCertPEMBytes = CertUtil.getPEMEncoded(x509TimeStampServerCert)
+                    x509TimeStampServerCert = CertUtils.loadCertificate(timeStampServerCert.content)
+                    signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
                 } else {
                     fetchTimeStampServerInfo(timeStampServer);
                     return null
@@ -83,7 +83,7 @@ class TimeStampService {
                             newTimeStampServer.save();
                             timeStampServer = newTimeStampServer;
                         } else timeStampServer.setCertChainPEM(newTimeStampServer.getCertChainPEM())
-                        x509TimeStampServerCert = CertUtil.fromPEMToX509CertCollection(
+                        x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
                                 timeStampServer.certChainPEM.getBytes()).iterator().next()
                         log.debug("Added TimeStampServer - ActorVS id: ${timeStampServer.id}")
                     } else {
@@ -111,9 +111,9 @@ class TimeStampService {
     }
 
     private Map saveTimeStampServerCert(ActorVS timeStampServer)  {
-        X509Certificate x509TimeStampServerCert = CertUtil.fromPEMToX509CertCollection(
+        X509Certificate x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
                 timeStampServer.certChainPEM.getBytes()).iterator().next()
-        byte[] signingCertPEMBytes = CertUtil.getPEMEncoded(x509TimeStampServerCert)
+        byte[] signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
         CertificateVS timeStampServerCert = new CertificateVS(actorVS:timeStampServer,
                 certChainPEM:timeStampServer.certChainPEM.getBytes(),
                 content:x509TimeStampServerCert?.getEncoded(),state:CertificateVS.State.OK,

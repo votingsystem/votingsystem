@@ -3,7 +3,7 @@ package org.votingsystem.accesscontrol.controller
 import grails.converters.JSON
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
@@ -40,8 +40,7 @@ class CsrController {
 			def certificate = CertificateVS.findWhere(userRequestCsrVS:csrRequest)
 			if (certificate) {
 				response.status = ResponseVS.SC_OK
-				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
-				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+				X509Certificate certX509 = CertUtils.loadCertificate(certificate.content)
 				File keyStoreFile = grailsApplication.mainContext.getResource(
 					grailsApplication.config.VotingSystem.keyStorePath).getFile()
 				
@@ -56,7 +55,7 @@ class CsrController {
                 certs.addAll(Arrays.asList(certsServer))
 
                 return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                        messageBytes: CertUtil.getPEMEncoded (certs))]
+                        messageBytes: CertUtils.getPEMEncoded (certs))]
 			} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrGenerationErrorMsg"))]
 		} else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrRequestNotValidated"))]
 	}

@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 
 import java.io.File;
@@ -51,7 +51,7 @@ public class TimeStampCertPane extends GridPane {
 
     private void showPEMCert() {
         try {
-            String message = new String(CertUtil.getPEMEncoded(certificate));
+            String message = new String(CertUtils.getPEMEncoded(certificate));
             MessageDialog messageDialog = new MessageDialog();
             messageDialog.showMessage(certificate.getSubjectDN().toString() + " - " + message);
         } catch(Exception ex) {

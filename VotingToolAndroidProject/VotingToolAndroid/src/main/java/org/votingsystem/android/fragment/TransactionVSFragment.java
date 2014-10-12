@@ -132,7 +132,7 @@ public class TransactionVSFragment extends Fragment {
             to_user.setVisibility(View.VISIBLE);
         }
         String transactionHtml = getString(R.string.transactionvs_formatted,
-                DateUtils.getLongDate_Es(transactionvs.getDateCreated()),
+                DateUtils.getDayWeekDateStr(transactionvs.getDateCreated()),
                 transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyCode());
         messageSMIME = transactionvs.getMessageSMIME();
         transactionvsSubject.setText(getString(R.string.smime_subject_msg, selectedTransactionVS.getSubject()));

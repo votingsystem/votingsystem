@@ -1,14 +1,13 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
-import net.sf.json.JSONObject
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
@@ -41,14 +40,14 @@ class CsrService {
 			grailsApplication.config.VotingSystem.signKeysPassword.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyStoreVS.keyAlias);
         DERTaggedObject representativeExtension = null
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		if(userVS?.type == UserVS.Type.REPRESENTATIVE) {
             String representativeURL = "${grailsLinkGenerator.link(controller:"representative", absolute:true)}/${userVS?.id}"
             representativeExtension = new DERTaggedObject(ContextVS.REPRESENTATIVE_VOTE_TAG,
                     new DERUTF8String(representativeURL))
         }
 
-		X509Certificate issuedCert = CertUtil.signCSR(csr, null, privateKeySigner, certSigner, eventVS.dateBegin,
+		X509Certificate issuedCert = CertUtils.signCSR(csr, null, privateKeySigner, certSigner, eventVS.dateBegin,
                 eventVS.dateFinish, representativeExtension)
 		if (!issuedCert) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
@@ -61,7 +60,7 @@ class CsrService {
 				    hashCertVSBase64:responseVS.data.hashCertVSBase64)
             if(userVS?.type == UserVS.Type.REPRESENTATIVE) certificate.setUserVS(userVS)
 			certificate.save()
-			byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
+			byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(issuedCert);
 			return new ResponseVS(statusCode:ResponseVS.SC_OK,
                     data:[requestPublicKey:requestPublicKey, issuedCert:issuedCertPEMBytes])
 		}
@@ -70,7 +69,7 @@ class CsrService {
     private ResponseVS validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS, Locale locale) {
         PKCS10CertificationRequest csr
         try {
-            csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+            csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         } catch(ex) {
             log.error(ex.getMessage(), ex)
             throw new ExceptionVS(messageSource.getMessage('csrRequestErrorMsg', null, locale))
@@ -106,7 +105,7 @@ class CsrService {
     }
 
     public synchronized ResponseVS signAnonymousDelegationCert (byte[] csrPEMBytes, Locale locale) {
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         if(!csr) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
             log.error("signAnonymousDelegationCert - msg:  ${msg}")
@@ -154,7 +153,7 @@ class CsrService {
                     validTo: calendarValidTo.getTime())
             certificate.save()
             log.debug("signAnonymousDelegationCert - expended CertificateVS '${certificate.id}'")
-            byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
+            byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(issuedCert);
             Map data = [requestPublicKey:csr.getPublicKey()]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
                     data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
@@ -162,7 +161,7 @@ class CsrService {
     }
 
 	public X509Certificate getVoteCert(byte[] pemCertCollection) throws Exception {
-		Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(pemCertCollection);
+		Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(pemCertCollection);
 		for (X509Certificate certificate : certificates) {
 			if (certificate.subjectDN.toString().contains("SERIALNUMBER=hashCertVoteHex:")) {
 				return certificate
@@ -174,7 +173,7 @@ class CsrService {
     /*  C=ES, ST=State or Province, L=locality name, O=organization name, OU=org unit, CN=common name,
         emailAddress=user@votingsystem.org, SERIALNUMBER=1234, SN=surname, GN=given name, GN=name given */
 	public ResponseVS saveUserCSR(byte[] csrPEMBytes, Locale locale) {
-		PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+		PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		CertificationRequestInfo info = csr.getCertificationRequestInfo();
         String givenname;
         String surname;
@@ -237,8 +236,8 @@ class CsrService {
         today_plus_year.set(Calendar.HOUR_OF_DAY, 0);
         today_plus_year.set(Calendar.MINUTE, 0);
         today_plus_year.set(Calendar.SECOND, 0);
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(requestCSR.content);
-        X509Certificate issuedCert = CertUtil.signCSR(csr, null, privateKeySigner,
+        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(requestCSR.content);
+        X509Certificate issuedCert = CertUtils.signCSR(csr, null, privateKeySigner,
                 certSigner, today, today_plus_year.getTime())
 
 		if (!issuedCert) {

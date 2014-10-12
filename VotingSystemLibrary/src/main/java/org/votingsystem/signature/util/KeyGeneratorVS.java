@@ -10,18 +10,18 @@ import java.util.Date;
  *
  * @author jgzornoza
  */
-public enum VotingSystemKeyGenerator {
+public enum KeyGeneratorVS {
     
     INSTANCE;   
     
-    private static Logger log = Logger.getLogger(VotingSystemKeyGenerator.class);
+    private static Logger log = Logger.getLogger(KeyGeneratorVS.class);
     
     private KeyPairGenerator keyPairGenerator;
     private SecureRandom random;
     /** number of bytes serial number to generate, default 8 */
     private int noOctets = 8;
     
-    private VotingSystemKeyGenerator() { }
+    private KeyGeneratorVS() { }
     
     public void init(String signName, String provider, int keySize, String algorithmRNG) throws
     		NoSuchAlgorithmException, NoSuchProviderException {

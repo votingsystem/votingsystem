@@ -3,7 +3,7 @@ package org.votingsystem.simulation
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.simulation.callable.TimeStamperTestSender
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.util.DateUtils
@@ -115,7 +115,7 @@ class TimeStampSimulationService {
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             String serviceURL = "${simulationData.getServerURL()}/certificateVS/addCertificateAuthority"
             X509Certificate serverCert = signatureVSService.getServerCert()
-            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (serverCert);
+            byte[] rootCACertPEMBytes = CertUtils.getPEMEncoded (serverCert);
             Map requestMap = [operation: TypeVS.CERT_CA_NEW.toString(), certChainPEM: new String(rootCACertPEMBytes, "UTF-8"),
                               info: "Autority from Test Web App '${Calendar.getInstance().getTime()}'"]
             String requestStr = "${requestMap as JSON}".toString();

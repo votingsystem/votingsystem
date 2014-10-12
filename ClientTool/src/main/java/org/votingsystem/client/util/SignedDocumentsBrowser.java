@@ -24,7 +24,7 @@ import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.pane.BackupValidatorPane;
 import org.votingsystem.client.pane.EventVSInfoPane;
-import org.votingsystem.client.pane.SignedFilePane;
+import org.votingsystem.client.pane.SMIMEPane;
 import org.votingsystem.client.pane.VicketPane;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -173,8 +173,8 @@ public class SignedDocumentsBrowser extends StackPane{
             SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName, operationDocument);
             Tab newTab = new Tab();
             newTab.setText(ContextVS.getMessage("signedDocumentLbl"));
-            SignedFilePane signedFilePane = new SignedFilePane(signedFile);
-            newTab.setContent(signedFilePane);
+            SMIMEPane SMIMEPane = new SMIMEPane(signedFile);
+            newTab.setContent(SMIMEPane);
             tabPane.getTabs().add(newTab);
             tabPane.getSelectionModel().select(newTab);
         } catch (Exception ex) {
@@ -252,8 +252,8 @@ public class SignedDocumentsBrowser extends StackPane{
             File file = fileChooser.showSaveDialog(getScene().getWindow());
             String fileName = file.getAbsolutePath() + ContentTypeVS.SIGNED.getExtension();
             FileOutputStream fos = new FileOutputStream(new File(fileName));
-            SignedFilePane selectedSignedFilePane = ((SignedFilePane)tabPane.getSelectionModel().getSelectedItem().getContent());
-            fos.write(selectedSignedFilePane.getSignedFile().getSMIMEMessageWraper().getBytes());
+            SMIMEPane selectedSMIMEPane = ((SMIMEPane)tabPane.getSelectionModel().getSelectedItem().getContent());
+            fos.write(selectedSMIMEPane.getSignedFile().getSMIMEMessageWraper().getBytes());
             fos.close();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);

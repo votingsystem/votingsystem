@@ -40,13 +40,6 @@ public class DateUtils {
         return calendar.get(Calendar.YEAR);
     }
 
-    /**
-     * Método que devuelve un Date a partir de un String con formato "yyyy/MM/dd'T'HH:mm:ss"
-     *
-     * @param dateString fecha en formato String
-     * @return Date fecha en formato Date
-     * @throws import java.text.ParseException;
-     */
     public static Date getDateFromString (String dateString) throws ParseException {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
         return formatter.parse(dateString);
@@ -67,10 +60,6 @@ public class DateUtils {
         return formatter.format(date);
     }
 
-    /**
-     *  elapsed time in hours/minutes
-     * @return String
-     */
     public static String getElapsedTimeHoursMinutesFromMilliseconds(long milliseconds) {
         String format = String.format("%%0%dd", 2);
         long elapsedTime = milliseconds / 1000;
@@ -80,10 +69,6 @@ public class DateUtils {
         return time;
     }
 
-    /**
-     *  elapsed time in hours/minutes/seconds
-     * @return String
-     */
     public static String getElapsedTimeHoursMinutesSecondsFromMilliseconds(long milliseconds) {
         String format = String.format("%%0%dd", 2);
         long elapsedTime = milliseconds / 1000;
@@ -114,45 +99,27 @@ public class DateUtils {
         cal2.setTime(date2);
         return getDayHourElapsedTime(cal1, cal2, context);
     }
-    
-    public static String getDateWithDayWeek (Date date) {
-        String format = "EEE dd MMM' 'HH:mm";
-        Date lastYear = DateUtils.addDays(Calendar.getInstance().getTime(), -365);
-        if(date.before(lastYear)) format = "dd MMM yyyy' 'HH:mm";
-    	SimpleDateFormat formatter = new SimpleDateFormat(format);
-    	return formatter.format(date);
+
+    public static String getDayWeekDateStr (Date date) {
+        Date lastYear = addDays(Calendar.getInstance().getTime(), -364);
+        Date nextYear = addDays(Calendar.getInstance().getTime(), 364);
+        if(date.before(lastYear) || date.after(nextYear)) return getDateStr(date, "dd MMM yyyy' 'HH:mm");
+        else return getDateStr(date, "EEE dd MMM' 'HH:mm");
     }
 
-    public static String getDirPath (Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
+    public static String getPath (Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
         return formatter.format(date);
     }
 
-    public static Date getDateFromDirPath (String dateStr) {
-        Date result = null;
+    public static Date getDateFromPath (String dateStr) {
+        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
         try {
-            SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MMM/dd/");
-            result = formatter.parse(dateStr);
-        } catch(Exception ex) {
-            ex.printStackTrace();
+            return formatter.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();e.printStackTrace();
         }
-        return result;
-    }
-
-    public static String getURLPath (Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
-        return formatter.format(date);
-    }
-
-    public static Date getDateFromURLPath (String dateStr) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
-        return formatter.parse(dateStr);
-    }
-
-
-    public static String getLongDate_Es (Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("EEEE dd/MMM/yyyy HH:mm");
-        return formatter.format(date);
+        return null;
     }
 
     public static String getElapsedTimeStr(Date end) {

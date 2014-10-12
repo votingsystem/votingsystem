@@ -4,7 +4,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import net.sf.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.UserVSAccount
 import org.votingsystem.vicket.util.IbanVSUtil
@@ -45,7 +45,7 @@ class SubscriptionVSService {
 		}
 		String validatedNIF = org.votingsystem.util.NifUtils.validate(userVS.getNif())
 		UserVS userVSDB = UserVS.findByNif(validatedNIF.toUpperCase())
-        JSONObject deviceData = CertUtil.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
+        JSONObject deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID)
         boolean isNewUser = false
 		if (!userVSDB) {
             userVSDB = userVS.save()

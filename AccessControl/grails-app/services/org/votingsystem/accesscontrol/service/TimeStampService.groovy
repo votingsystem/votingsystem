@@ -15,7 +15,7 @@ import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 
@@ -52,9 +52,8 @@ class TimeStampService {
                 timeStampServerCert = CertificateVS.findWhere(actorVS:timeStampServer, state:CertificateVS.State.OK,
                         type:CertificateVS.Type.TIMESTAMP_SERVER)
                 if(timeStampServerCert) {
-                    x509TimeStampServerCert = CertUtil.loadCertificateFromStream (
-                            new ByteArrayInputStream(timeStampServerCert.content))
-                    signingCertPEMBytes = CertUtil.getPEMEncoded(x509TimeStampServerCert)
+                    x509TimeStampServerCert = CertUtils.loadCertificate(timeStampServerCert.content)
+                    signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
                 } else {
                     ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
                             ContentTypeVS.JSON);
@@ -78,9 +77,9 @@ class TimeStampService {
 	}
 
     private Map saveTimeStampServerCert(ActorVS timeStampServer)  {
-        X509Certificate x509TimeStampServerCert = CertUtil.fromPEMToX509CertCollection(
+        X509Certificate x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
                 timeStampServer.certChainPEM.getBytes()).iterator().next()
-        byte[] signingCertPEMBytes = CertUtil.getPEMEncoded(x509TimeStampServerCert)
+        byte[] signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert)
         CertificateVS timeStampServerCert = new CertificateVS(actorVS:timeStampServer,
                 certChainPEM:timeStampServer.certChainPEM.getBytes(),
                 content:x509TimeStampServerCert?.getEncoded(),state:CertificateVS.State.OK,

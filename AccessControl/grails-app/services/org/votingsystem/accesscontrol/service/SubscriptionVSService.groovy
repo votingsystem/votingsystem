@@ -3,7 +3,7 @@ package org.votingsystem.accesscontrol.service
 import grails.converters.JSON
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.util.StringUtils
@@ -133,7 +133,7 @@ class SubscriptionVSService {
             }
             // _ TODO _ validate control center cert
             controlCenterDB.certChainPEM = actorVS.certChainPEM
-            X509Certificate x509controlCenterCert = CertUtil.fromPEMToX509CertCollection(
+            X509Certificate x509controlCenterCert = CertUtils.fromPEMToX509CertCollection(
                     actorVS.certChainPEM.getBytes()).iterator().next()
             controlCenterCert = new CertificateVS(actorVS:controlCenterDB, certChainPEM:actorVS.certChainPEM.getBytes(),
                     content:x509controlCenterCert?.getEncoded(),state:CertificateVS.State.OK,

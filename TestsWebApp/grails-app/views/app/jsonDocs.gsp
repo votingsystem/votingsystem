@@ -1,4 +1,4 @@
-<%@ page import="org.votingsystem.signature.util.CertUtil; java.security.cert.X509Certificate" %>
+<%@ page import="org.votingsystem.signature.util.CertUtils; org.votingsystem.signature.util.CertUtil; java.security.cert.X509Certificate" %>
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -26,7 +26,7 @@
 <g:set var="signatureVSService" bean="signatureVSService"/>
 <%
     X509Certificate serverCert  = signatureVSService.getServerCert()
-    byte[] serverCertPEMEncoded = CertUtil.getPEMEncoded (serverCert)
+    byte[] serverCertPEMEncoded = CertUtils.getPEMEncoded (serverCert)
     def serverCertPEM = new String(serverCertPEMEncoded, 'UTF-8')
 %>
 <textarea id="pemCert" style="display:none;">${serverCertPEM}</textarea>

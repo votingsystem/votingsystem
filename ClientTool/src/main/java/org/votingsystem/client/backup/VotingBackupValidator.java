@@ -7,7 +7,7 @@ import org.votingsystem.client.model.RepresentativesData;
 import org.votingsystem.client.model.SignedFile;
 import org.votingsystem.client.util.DocumentVSValidator;
 import org.votingsystem.model.*;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
@@ -69,7 +69,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
 
         String backupPath = backupDir.getAbsolutePath();
         File trustedCertsFile = new File(backupPath + File.separator + "systemTrustedCerts.pem");
-        Collection<X509Certificate> trustedCerts = CertUtil.fromPEMToX509CertCollection(
+        Collection<X509Certificate> trustedCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
         trustAnchors = new HashSet<TrustAnchor>();
         for(X509Certificate certificate: trustedCerts) {
@@ -77,7 +77,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             trustAnchors.add(anchor);
         }
         File eventTrustedCertsFile = new File(backupPath + File.separator + "eventTrustedCerts.pem");
-        Collection<X509Certificate> eventTrustedCerts = CertUtil.fromPEMToX509CertCollection(
+        Collection<X509Certificate> eventTrustedCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(eventTrustedCertsFile));
         eventTrustedAnchors = new HashSet<TrustAnchor>();
         for(X509Certificate certificate: eventTrustedCerts) {
@@ -85,7 +85,7 @@ public class VotingBackupValidator implements Callable<ResponseVS> {
             eventTrustedAnchors.add(anchor);
         }
         File timeStampCertFile = new File(backupPath + File.separator + "timeStampCert.pem");
-        Collection<X509Certificate> timeStampCerts = CertUtil.fromPEMToX509CertCollection(
+        Collection<X509Certificate> timeStampCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));   
         timeStampServerCert = timeStampCerts.iterator().next();
             

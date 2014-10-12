@@ -42,7 +42,7 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
         String certificateInfo = null;
         SignerId signerId = timeStampToken.getSID();
         BigInteger cert_serial_number = signerId.getSerialNumber();
-        String dateInfoStr = DateUtils.getLongDate_Es(tsInfo.getGenTime());
+        String dateInfoStr = DateUtils.getDayWeekDateStr(tsInfo.getGenTime());
         CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
         Collection<X509CertificateHolder> matches = store.getMatches(null);
 
@@ -73,9 +73,9 @@ public class TimeStampInfoDialogFragment extends DialogFragment {
                             certificate.getSubjectDN().toString(),
                             certificate.getIssuerDN().toString(),
                             certificate.getSerialNumber().toString(),
-                            DateUtils.getDateWithDayWeek(
+                            DateUtils.getDayWeekDateStr(
                                     certificate.getNotBefore()),
-                            DateUtils.getDateWithDayWeek(
+                            DateUtils.getDayWeekDateStr(
                                     certificate.getNotAfter()));
                 } catch (CertificateException ex) {
                     ex.printStackTrace();

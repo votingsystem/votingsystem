@@ -4,13 +4,11 @@ import org.apache.log4j.Logger
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
-import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.Encryptor
-import org.votingsystem.signature.util.VotingSystemKeyGenerator
+import org.votingsystem.signature.util.KeyGeneratorVS
 
 import org.votingsystem.util.HttpHelper
-import org.votingsystem.util.ApplicationContextHolder
 
 import java.security.KeyPair
 import java.security.PrivateKey
@@ -35,7 +33,7 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
     public EncryptionTestSender(String requestNIF, String serverURL, X509Certificate serverCert)  throws Exception {
         this.requestNIF = requestNIF;
         this.serverURL = serverURL;
-        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         this.privateKey = keyPair.getPrivate();
         this.publicKey = keyPair.getPublic();
         this.serverCert = serverCert;

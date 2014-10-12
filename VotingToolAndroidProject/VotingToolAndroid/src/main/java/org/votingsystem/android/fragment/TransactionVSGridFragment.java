@@ -272,7 +272,7 @@ public class TransactionVSGridFragment extends Fragment
                             deSerializeObject(serializedTransactionVS);
                     String weekLapseStr = cursor.getString(cursor.getColumnIndex(
                             TransactionVSContentProvider.WEEK_LAPSE_COL));
-                    Date weekLapse = DateUtils.getDateFromDirPath(weekLapseStr);
+                    Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
                     Calendar weekLapseCalendar = Calendar.getInstance();
                     weekLapseCalendar.setTime(weekLapse);
                     LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
@@ -280,7 +280,7 @@ public class TransactionVSGridFragment extends Fragment
                     TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
                     transaction_type.setText(transactionVS.getDescription(getActivity().getApplicationContext()));
                     TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
-                    week_lapse.setText(DateUtils.getLongDate_Es(transactionVS.getDateCreated()));
+                    week_lapse.setText(DateUtils.getDayWeekDateStr(transactionVS.getDateCreated()));
 
                     TextView amount = (TextView) view.findViewById(R.id.amount);
                     amount.setText(transactionVS.getAmount().toPlainString());

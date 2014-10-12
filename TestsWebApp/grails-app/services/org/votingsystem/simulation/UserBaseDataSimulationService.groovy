@@ -5,11 +5,10 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.StatusVS
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.simulation.callable.RepresentativeDelegatorDataSender
 import org.votingsystem.simulation.callable.RepresentativeTestDataSender
 import org.votingsystem.simulation.model.UserBaseSimulationData
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -104,7 +103,7 @@ class UserBaseDataSimulationService {
                 userWithoutRepresentativeList.add(userNif);
                 Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
                 X509Certificate usertCert = (X509Certificate) chain[0];
-                byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
+                byte[] usertCertPEMBytes = CertUtils.getPEMEncoded(usertCert);
                 String certServiceURL = ContextVS.getInstance().getAccessControl().getUserCertServiceURL();
                 responseVS =HttpHelper.getInstance().sendData(usertCertPEMBytes,ContentTypeVS.X509_USER,certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

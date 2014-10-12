@@ -213,9 +213,9 @@ public class UserVSAccountsFragment extends Fragment {
         }
         try {
             last_request_date.setText(Html.fromHtml(getString(R.string.vicket_last_request_info_lbl,
-                    DateUtils.getLongDate_Es(lastCheckedTime))));
+                    DateUtils.getDayWeekDateStr(lastCheckedTime))));
             time_remaining_info.setText(Html.fromHtml(getString(R.string.time_remaining_info_lbl,
-                    DateUtils.getLongDate_Es(timePeriod.getDateTo()))));
+                    DateUtils.getDayWeekDateStr(timePeriod.getDateTo()))));
             UserVSTransactionVSListInfo userInfo = PrefUtils.getUserVSTransactionVSListInfo(contextVS);
             if(userInfo != null) {
                 Map<String, TagVS> tagVSBalancesMap = userInfo.getTagVSBalancesMap(

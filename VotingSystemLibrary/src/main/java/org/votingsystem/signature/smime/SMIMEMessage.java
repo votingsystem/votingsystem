@@ -23,7 +23,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
-import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
@@ -377,7 +377,7 @@ public class SMIMEMessage extends MimeMessage {
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         //reqgen.setReqPolicy(m_sPolicyOID);
         return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets(),
-                BigInteger.valueOf(VotingSystemKeyGenerator.INSTANCE.getNextRandomInt()));
+                BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
     }
 
     public byte[] getBytes () throws Exception {

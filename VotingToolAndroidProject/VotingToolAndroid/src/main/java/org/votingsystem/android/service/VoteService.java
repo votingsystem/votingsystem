@@ -24,7 +24,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
@@ -68,7 +68,7 @@ public class VoteService extends IntentService {
                     caption = getString(R.string.operation_error_msg);
                     message = getString(R.string.get_cert_error_msg, controlCenter.getName());
                 } else {
-                    Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
+                    Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
                             responseVS.getMessageBytes());
                     controlCenterCert = certChain.iterator().next();
                     contextVS.putCert(controlCenter.getServerURL(), controlCenterCert);

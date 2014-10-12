@@ -5,9 +5,8 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.vickets.simulation.model.SimulationData
 import org.vickets.simulation.model.UserBaseSimulationData
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.simulation.callable.ServerInitializer
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.NifUtils
@@ -124,7 +123,7 @@ class VicketUserBaseDataSimulationService {
                 userList.add(userNif);
                 Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
                 X509Certificate usertCert = (X509Certificate) chain[0];
-                byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
+                byte[] usertCertPEMBytes = CertUtils.getPEMEncoded(usertCert);
                 String certServiceURL = vicketServer.getUserCertServiceURL();
                 responseVS =HttpHelper.getInstance().sendData(usertCertPEMBytes,ContentTypeVS.X509_USER,certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

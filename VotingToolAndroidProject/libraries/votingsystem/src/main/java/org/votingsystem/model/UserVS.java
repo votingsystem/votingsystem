@@ -4,7 +4,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 
 import java.io.Serializable;
 import java.security.cert.CertPath;
@@ -74,7 +74,7 @@ public class UserVS implements Serializable {
             userVS.setCn(subjectDN.split("CN=")[1]);
 
         try {
-            JSONObject deviceData = CertUtil.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
+            JSONObject deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
             if(deviceData != null) {
                 if(deviceData.has("email")) userVS.setEmail(deviceData.getString("email"));
                 if(deviceData.has("mobilePhone")) userVS.setPhone(deviceData.getString("mobilePhone"));
@@ -328,7 +328,7 @@ public class UserVS implements Serializable {
                 JSONObject certInfo = (JSONObject) jsonArrayData.get(i);
                 String serialNumber = certInfo.getString("serialNumber");
                 String pemCert = certInfo.getString("pemCert");
-                X509Certificate x509Cert = CertUtil.fromPEMToX509Cert(pemCert.getBytes("UTF-8"));
+                X509Certificate x509Cert = CertUtils.fromPEMToX509Cert(pemCert.getBytes("UTF-8"));
                 certificateMap.put(pemCert, x509Cert);
             }
             userVS.setCertificateMap(certificateMap);
@@ -358,7 +358,7 @@ public class UserVS implements Serializable {
                 X509Certificate x509Cert = certificateMap.get(certId);
                 JSONObject jsonCertData = new JSONObject();
                 jsonCertData.put("serialNumber", certId);
-                jsonCertData.put("pemCert", new String(CertUtil.getPEMEncoded(x509Cert), "UTF-8"));
+                jsonCertData.put("pemCert", new String(CertUtils.getPEMEncoded(x509Cert), "UTF-8"));
                 jsonArrayData.put(jsonCertData);
             }
             jsonData.put("certificateList", jsonArrayData);

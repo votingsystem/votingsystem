@@ -8,7 +8,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertExtensionCheckerVS
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
@@ -56,8 +56,8 @@ class SignatureVSService {
         byte[] pemCertsArray
         for (int i = 0; i < localServerCertChain.length; i++) {
             checkAuthorityCertDB(localServerCertChain[i])
-            if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (localServerCertChain[i])
-            else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (localServerCertChain[i]))
+            if(!pemCertsArray) pemCertsArray = CertUtils.getPEMEncoded (localServerCertChain[i])
+            else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (localServerCertChain[i]))
         }
         localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())
@@ -103,8 +103,7 @@ class SignatureVSService {
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,
                     type:TypeVS.VOTE_ERROR, eventVS:event)
         }
-        X509Certificate certCAEventVS = CertUtil.loadCertificateFromStream (
-                new ByteArrayInputStream(eventVSCertificateVS.content))
+        X509Certificate certCAEventVS = CertUtils.loadCertificate(eventVSCertificateVS.content)
         Set<X509Certificate> eventTrustedCerts = new HashSet<X509Certificate>()
         eventTrustedCerts.add(certCAEventVS)
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:eventTrustedCerts)
@@ -115,7 +114,7 @@ class SignatureVSService {
      */
     public X509Certificate signCSR(PKCS10CertificationRequest csr, String organizationalUnit, Date dateBegin,
                                    Date dateFinish, DERTaggedObject... certExtensions) throws Exception {
-        X509Certificate issuedCert = CertUtil.signCSR(csr, organizationalUnit, getServerPrivateKey(),
+        X509Certificate issuedCert = CertUtils.signCSR(csr, organizationalUnit, getServerPrivateKey(),
                 getServerCert(), dateBegin, dateFinish, certExtensions)
         return issuedCert
     }
@@ -154,7 +153,7 @@ class SignatureVSService {
         CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
                 type:CertificateVS.Type.CERTIFICATE_AUTHORITY)
         if(!certificateVS) {
-            certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509AuthorityCert),
+            certificateVS = new CertificateVS(isRoot:CertUtils.isSelfSigned(x509AuthorityCert),
                     type:CertificateVS.Type.CERTIFICATE_AUTHORITY, state:CertificateVS.State.OK,
                     content:x509AuthorityCert.getEncoded(),
                     serialNumber:x509AuthorityCert.getSerialNumber().longValue(),
@@ -184,7 +183,7 @@ class SignatureVSService {
             }
         });
         for(File caFile:acFiles) {
-            X509Certificate fileSystemX509TrustedCert = CertUtil.fromPEMToX509Cert(FileUtils.getBytesFromFile(caFile))
+            X509Certificate fileSystemX509TrustedCert = CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromFile(caFile))
             checkAuthorityCertDB(fileSystemX509TrustedCert)
         }
         List<CertificateVS>  trustedCertsList = CertificateVS.createCriteria().list(offset: 0) {
@@ -308,7 +307,7 @@ class SignatureVSService {
         Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
         UserVS anonymousSigner = null
-        CertExtensionCheckerVS extensionChecker
+        CertUtils.CertValidatorResultVS validatorResult
         String signerNIF = smimeMessage.getSigner().getNif()
         for(UserVS userVS: signersVS) {
             try {
@@ -326,14 +325,13 @@ class SignatureVSService {
                     log.error("ERROR - validateSignersCerts - ${msg}")
                     return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
                 }
-                ResponseVS validationResponse = CertUtil.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
-                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+                validatorResult = CertUtils.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
+                X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
                 userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
                 log.debug("validateSignersCerts - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
-                extensionChecker = validationResponse.data.extensionChecker
                 ResponseVS responseVS = null
-                if(extensionChecker.isAnonymousSigner()) {
+                if(validatorResult.getChecker().isAnonymousSigner()) {
                     log.debug("validateSignersCerts - anonymous signer")
                     anonymousSigner = userVS
                     responseVS = new ResponseVS(ResponseVS.SC_OK)
@@ -355,7 +353,7 @@ class SignatureVSService {
         }
         return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:smimeMessage,
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
-                      extensionChecker:extensionChecker])
+                      extensionChecker:validatorResult.getChecker()])
     }
 
     public ResponseVS validateSMIMEVote(SMIMEMessage smimeMessageReq, Locale locale) {
@@ -408,12 +406,12 @@ class SignatureVSService {
         }
         smimeMessageReq.voteVS.setCertificateVS(certificate)
         Set<TrustAnchor> trustedAnchors = getEventTrustedAnchors(eventVS, locale)
-        ResponseVS validationResponse;
+        CertUtils.CertValidatorResultVS validatorResult;
         X509Certificate certCaResult;
         X509Certificate checkedCert = voteVS.getX509Certificate()
         try {
-            validationResponse = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
-            certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+            validatorResult = CertUtils.verifyCertificate(trustedAnchors, false, [checkedCert])
+            certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
             log.debug("$methodName - vote cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString()+
                     "- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
         } catch (Exception ex) {
@@ -440,8 +438,8 @@ class SignatureVSService {
         }
         checkedCert = voteVS.getServerCerts()?.iterator()?.next()
         try {
-            validationResponse = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
-            certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
+            validatorResult = CertUtils.verifyCertificate(trustedAnchors, false, [checkedCert])
+            certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
             log.debug("$methodName - Control Center cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString() +
                     "- numserie: " + certCaResult?.getSerialNumber()?.longValue());
         } catch (Exception ex) {
@@ -460,7 +458,6 @@ class SignatureVSService {
         log.debug("encryptToCMS ${new String(dataToEncrypt)}")
         return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
     }
-
 
     public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
         log.debug("encryptMessage(...) - ");

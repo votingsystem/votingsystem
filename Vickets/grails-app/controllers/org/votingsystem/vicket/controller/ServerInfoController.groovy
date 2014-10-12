@@ -5,8 +5,7 @@ import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.signature.util.CertUtil
-
+import org.votingsystem.signature.util.CertUtils
 import java.security.cert.X509Certificate
 
 /**
@@ -51,8 +50,7 @@ class ServerInfoController {
      * @return La cadena de certificación en formato PEM del servidor
      */
     def certChain () {
-        X509Certificate serverCert = signatureVSService.getServerCert()
-        byte[] serverCertPEMBytes = CertUtil.getPEMEncoded (serverCert)
+        byte[] serverCertPEMBytes = CertUtils.getPEMEncoded (signatureVSService.getServerCert())
         return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT,
                 messageBytes:serverCertPEMBytes)]
     }

@@ -30,7 +30,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.HttpHelper;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -108,7 +108,7 @@ public class VotingSystemApp extends Application implements DecompressBackupPane
             public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType ) throws CertificateException {
                 log.debug("trustAllCerts - checkServerTrusted");
                 try {
-                    CertUtil.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
+                    CertUtils.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
                             Arrays.asList(certs));
                 } catch(Exception ex) {
                     throw new CertificateException(ex.getMessage());

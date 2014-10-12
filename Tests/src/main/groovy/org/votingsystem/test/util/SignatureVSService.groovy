@@ -7,7 +7,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.FileUtils
@@ -64,8 +64,8 @@ class SignatureVSService {
 		byte[] pemCertsArray
 		for (int i = 0; i < chain.length; i++) {
 			logger.debug "Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
-			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
-			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
+			if(!pemCertsArray) pemCertsArray = CertUtils.getPEMEncoded (chain[i])
+			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (chain[i]))
 		}
 		certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray())

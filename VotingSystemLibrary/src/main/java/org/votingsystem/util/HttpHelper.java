@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -166,7 +166,7 @@ public class HttpHelper {
         log.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            certificate = CertUtil.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
+            certificate = CertUtils.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
         }
         EntityUtils.consume(response.getEntity());
         return certificate;
@@ -182,7 +182,7 @@ public class HttpHelper {
         log.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            certificates = CertUtil.fromPEMToX509CertCollection(EntityUtils.toByteArray(entity));
+            certificates = CertUtils.fromPEMToX509CertCollection(EntityUtils.toByteArray(entity));
         }
         EntityUtils.consume(response.getEntity());
         return certificates;

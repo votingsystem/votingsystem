@@ -25,15 +25,15 @@ import java.io.File;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SignedFilePane extends GridPane {
+public class SMIMEPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(SignedFilePane.class);
+    private static Logger log = Logger.getLogger(SMIMEPane.class);
 
     private SignedFile signedFile;
     private WebView signatureContentWebView;
     private String receiptViewerURL;
 
-    public SignedFilePane(final SignedFile signedFile) {
+    public SMIMEPane(final SignedFile signedFile) {
         super();
         this.signedFile = signedFile;
         setHgap(10);

@@ -3,7 +3,7 @@ package org.votingsystem.controlcenter.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
 
@@ -49,7 +49,7 @@ class CertificateVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName, "params"),
                     reason: msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
-        Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes())
+        Collection<X509Certificate> certX509CertCollection = CertUtils.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes())
         if(certX509CertCollection.isEmpty()) {
             msg = messageSource.getMessage('nullCertificateErrorMsg', null, locale)
             return new ResponseVS(type:TypeVS.ERROR, message:msg, metaInf:MetaInfMsg.getErrorMsg(methodName, "nullCertificate"),
@@ -59,7 +59,7 @@ class CertificateVSService {
         CertificateVS certificateVS = CertificateVS.findWhere(state: CertificateVS.State.OK,
                 serialNumber:x509NewCACert?.getSerialNumber()?.longValue())
         if(!certificateVS) {
-            certificateVS = new CertificateVS(isRoot:CertUtil.isSelfSigned(x509NewCACert),
+            certificateVS = new CertificateVS(isRoot:CertUtils.isSelfSigned(x509NewCACert),
                     type:CertificateVS.Type.CERTIFICATE_AUTHORITY,
                     state:CertificateVS.State.OK,
                     description:messageJSON.info,
@@ -148,11 +148,11 @@ class CertificateVSService {
 
     @Transactional
     public Map getCertificateVSDataMap(CertificateVS certificate) {
-        X509Certificate x509Cert = CertUtil.loadCertificate (certificate.content)
+        X509Certificate x509Cert = CertUtils.loadCertificate (certificate.content)
         //SerialNumber as String to avoid Javascript problem handling such big numbers
         def certMap = [serialNumber:"${certificate.serialNumber}",
-               isRoot:CertUtil.isSelfSigned(x509Cert), description:certificate.description,
-               pemCert:new String(CertUtil.getPEMEncoded (x509Cert), "UTF-8"),
+               isRoot:CertUtils.isSelfSigned(x509Cert), description:certificate.description,
+               pemCert:new String(CertUtils.getPEMEncoded (x509Cert), "UTF-8"),
                type:certificate.type.toString(), state:certificate.state.toString(),
                subjectDN:x509Cert.getSubjectDN().toString(),
                issuerDN: x509Cert.getIssuerDN().toString(), sigAlgName:x509Cert.getSigAlgName(),

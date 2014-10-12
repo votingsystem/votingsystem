@@ -6,7 +6,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.simulation.SignatureVSService
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.HttpHelper
@@ -97,7 +97,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
         logger.debug("addCertificateAuthority");
         SignatureVSService signatureVSService = (SignatureVSService)ApplicationContextHolder.getBean("signatureVSService")
         X509Certificate serverCert = signatureVSService.getServerCert()
-        byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (serverCert);
+        byte[] rootCACertPEMBytes = CertUtils.getPEMEncoded (serverCert);
         //byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
         Map requestMap = [operation: TypeVS.CERT_CA_NEW.toString(), certChainPEM: new String(rootCACertPEMBytes, "UTF-8"),
                           info: "Autority from Test Web App '${Calendar.getInstance().getTime()}'"]

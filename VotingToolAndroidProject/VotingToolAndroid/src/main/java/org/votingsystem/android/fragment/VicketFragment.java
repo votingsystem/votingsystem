@@ -149,8 +149,8 @@ public class VicketFragment extends Fragment {
                     certificate.getSubjectDN().toString(),
                     certificate.getIssuerDN().toString(),
                     certificate.getSerialNumber().toString(),
-                    DateUtils.getLongDate_Es(certificate.getNotBefore()),
-                    DateUtils.getLongDate_Es(certificate.getNotAfter()));
+                    DateUtils.getDayWeekDateStr(certificate.getNotBefore()),
+                    DateUtils.getDayWeekDateStr(certificate.getNotAfter()));
             if(selectedVicket != null) {
                 vicketSubject.setText("ID: " + selectedVicket.getLocalId() +
                         " - State: " + selectedVicket.getState());
@@ -168,7 +168,7 @@ public class VicketFragment extends Fragment {
                 cancel_button.setVisibility(View.VISIBLE);
             } else if(Vicket.State.CANCELLED == selectedVicket.getState()) {
                 vicket_cancellation_date.setText(getString(R.string.cancellation_date_lbl,
-                        DateUtils.getLongDate_Es(selectedVicket.getCancellationDate())));
+                        DateUtils.getDayWeekDateStr(selectedVicket.getCancellationDate())));
                 vicket_cancellation_date.setVisibility(View.VISIBLE);
             }
         } catch(Exception ex) {

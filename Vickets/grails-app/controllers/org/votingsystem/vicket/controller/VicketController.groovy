@@ -90,8 +90,7 @@ class VicketController {
     def wallet() {}
 
     def status() {
-        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        String hashCertVSBase64 = new String(hexConverter.unmarshal(params.hashCertVSHex))
+        String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(params.hashCertVSHex))
         Vicket vicket
         Vicket.withTransaction {
             vicket = Vicket.findWhere(hashCertVS:hashCertVSBase64)

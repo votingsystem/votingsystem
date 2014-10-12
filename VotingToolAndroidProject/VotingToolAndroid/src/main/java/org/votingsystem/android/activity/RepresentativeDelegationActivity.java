@@ -232,8 +232,8 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                     anonymousDelegationToDate = calendar.getTime();
                     confirmDialogMsg = getString(R.string.anonymous_delegation_confirm_msg,
                             representative.getFullName(),  weeks_delegation.getText().toString(),
-                            DateUtils.getLongDate_Es(anonymousDelegationFromDate),
-                            DateUtils.getLongDate_Es(anonymousDelegationToDate));
+                            DateUtils.getDayWeekDateStr(anonymousDelegationFromDate),
+                            DateUtils.getDayWeekDateStr(anonymousDelegationToDate));
                     operationType = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
                 }  else {
                     confirmDialogMsg = getString(R.string.public_delegation_confirm_msg,

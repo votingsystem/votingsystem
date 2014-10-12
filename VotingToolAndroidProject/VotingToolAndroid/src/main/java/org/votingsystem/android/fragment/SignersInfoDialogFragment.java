@@ -58,9 +58,9 @@ public class SignersInfoDialogFragment extends DialogFragment {
                     certificate.getSubjectDN().toString(),
                     certificate.getIssuerDN().toString(),
                     certificate.getSerialNumber().toString(),
-                    DateUtils.getDateWithDayWeek(
+                    DateUtils.getDayWeekDateStr(
                             certificate.getNotBefore()),
-                    DateUtils.getDateWithDayWeek(
+                    DateUtils.getDayWeekDateStr(
                             certificate.getNotAfter()));
             View signerView = inflater.inflate(R.layout.signer, null);
             TextView signerInfo = (TextView) signerView.findViewById(R.id.signer_info);

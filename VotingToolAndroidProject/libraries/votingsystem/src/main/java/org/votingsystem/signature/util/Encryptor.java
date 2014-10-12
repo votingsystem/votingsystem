@@ -391,7 +391,7 @@ public class Encryptor {
             BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException {
         //Security.addProvider(new BouncyCastleProvider());
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        //byte[] salt = VotingSystemKeyGenerator.INSTANCE.getEncryptionSalt();
+        //byte[] salt = KeyGeneratorVS.INSTANCE.getEncryptionSalt();
         KeySpec spec = new PBEKeySpec(password, salt, ContextVS.SYMETRIC_ENCRYPTION_ITERATION_COUNT,
                 ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
         SecretKey tmp = factory.generateSecret(spec);
@@ -416,7 +416,7 @@ public class Encryptor {
             InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
             BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException,
             JSONException {
-        //byte[] salt = VotingSystemKeyGenerator.INSTANCE.getEncryptionSalt();
+        //byte[] salt = KeyGeneratorVS.INSTANCE.getEncryptionSalt();
         Map encryptedDataMap = encrypt(textToEncrypt, password, salt);
         byte[] iv = (byte[]) encryptedDataMap.get("iv");
         String ivBase64 = android.util.Base64.encodeToString(iv, android.util.Base64.DEFAULT);

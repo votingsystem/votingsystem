@@ -11,9 +11,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.*;
 import org.votingsystem.vicket.model.AlertVS;
 import org.votingsystem.vicket.model.TransactionVS;
@@ -206,9 +206,9 @@ public class ContextVS {
                 appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
                         providedProperties));
             }
-            votingSystemSSLCerts =  CertUtil.fromPEMToX509CertCollection(
+            votingSystemSSLCerts =  CertUtils.fromPEMToX509CertCollection(
                     FileUtils.getBytesFromInputStream(Thread.currentThread().
-                    getContextClassLoader().getResourceAsStream("VotingSystemSSLCert.pem")));
+                            getContextClassLoader().getResourceAsStream("VotingSystemSSLCert.pem")));
             votingSystemSSLTrustAnchors = new HashSet<TrustAnchor>();
             for(X509Certificate certificate: votingSystemSSLCerts) {
                 TrustAnchor anchor = new TrustAnchor(certificate, null);
@@ -240,19 +240,19 @@ public class ContextVS {
     }
 
     public static void init (String logPropertiesFile, String localizatedMessagesFileName, String locale) throws Exception {
-        VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+        KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
         INSTANCE = new ContextVS(logPropertiesFile, localizatedMessagesFileName, locale);
     }
 
     public static void init () throws Exception {
         INSTANCE = new ContextVS();
-        VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+        KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
 
     public static void init (ApplicationVS applicationVS) throws Exception {
         INSTANCE = new ContextVS();
         INSTANCE.applicationVS = applicationVS;
-        VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+        KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
 
     public static void initSignatureClient (String logPropertiesFile,
@@ -295,7 +295,7 @@ public class ContextVS {
             props.load(configPropertiesStream);
             ConfigSlurper configSlurper = new ConfigSlurper();
             this.config = configSlurper.parse(props);
-            VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+            KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -23,11 +23,10 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.signature.util.TimeStampResponseGenerator
-import org.votingsystem.signature.util.VotingSystemKeyGenerator
-import org.votingsystem.util.DateUtils
+import org.votingsystem.signature.util.KeyGeneratorVS
 import org.votingsystem.util.FileUtils
 import javax.security.auth.x500.X500PrivateCredential
 import java.security.*
@@ -83,13 +82,13 @@ class TimeStampService {
                     FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
             PrivateKey signingKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
             signingCert = keyStore.getCertificate(keyAlias)
-            signingCertPEMBytes = CertUtil.getPEMEncoded (signingCert)
+            signingCertPEMBytes = CertUtils.getPEMEncoded (signingCert)
             timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                     ContextVS.PROVIDER).build(signingCert);
             X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
             TSPUtil.validateCertificate(certHolder);
             Certificate[] chain = keyStore.getCertificateChain(keyAlias);
-            signingCertChainPEMBytes = CertUtil.getPEMEncoded (Arrays.asList(chain))
+            signingCertChainPEMBytes = CertUtils.getPEMEncoded (Arrays.asList(chain))
             Store certs = new JcaCertStore(Arrays.asList(chain));
             JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
                     new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build());
@@ -175,7 +174,7 @@ class TimeStampService {
 			return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
 		}
 		TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
-		final BigInteger serialNumber = VotingSystemKeyGenerator.INSTANCE.getSerno()
+		final BigInteger serialNumber = KeyGeneratorVS.INSTANCE.getSerno()
 		log.debug("processRequest - serialNumber: '${serialNumber}' - CertReq: ${timeStampRequest.getCertReq()}");
 		final TimeStampToken token = null;
 		synchronized(this) {

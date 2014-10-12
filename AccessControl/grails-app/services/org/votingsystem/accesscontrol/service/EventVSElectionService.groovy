@@ -4,7 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.HttpHelper
@@ -84,12 +84,12 @@ class EventVSElectionService {
             log.error "$methodName - ERROR GENERATING EVENT KEYSTRORE- ${responseVS.message}"
             throw new ExceptionVS(responseVS.message)
         }
-        messageJSON.certCAVotacion = new String(CertUtil.getPEMEncoded (responseVS.data))
+        messageJSON.certCAVotacion = new String(CertUtils.getPEMEncoded (responseVS.data))
         File certChain = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();
         messageJSON.certChain = new String(certChain.getBytes())
         X509Certificate certUsuX509 = userSigner.getCertificate()
-        messageJSON.userVS = new String(CertUtil.getPEMEncoded (certUsuX509))
+        messageJSON.userVS = new String(CertUtils.getPEMEncoded (certUsuX509))
 
         Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
         String fromUser = grailsApplication.config.VotingSystem.serverName
@@ -172,12 +172,12 @@ class EventVSElectionService {
 			}
 			
 			Set<X509Certificate> systemTrustedCerts = signatureVSService.getTrustedCerts()
-			byte[] systemTrustedCertsPEMBytes = CertUtil.getPEMEncoded(systemTrustedCerts)
+			byte[] systemTrustedCertsPEMBytes = CertUtils.getPEMEncoded(systemTrustedCerts)
 			File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
 			systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 			
 			Set<X509Certificate> eventTrustedCerts = (Set<X509Certificate>) responseVS.data
-			byte[] eventTrustedCertsPEMBytes = CertUtil.getPEMEncoded(eventTrustedCerts)
+			byte[] eventTrustedCertsPEMBytes = CertUtils.getPEMEncoded(eventTrustedCerts)
 			File eventTrustedCertsFile = new File("${filesDir.absolutePath}/eventTrustedCerts.pem")
 			eventTrustedCertsFile.setBytes(eventTrustedCertsPEMBytes)
 

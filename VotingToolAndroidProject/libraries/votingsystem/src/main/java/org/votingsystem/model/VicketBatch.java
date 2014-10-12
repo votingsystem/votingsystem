@@ -4,7 +4,7 @@ import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.json.JSONObject;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ExceptionVS;
 
 import java.math.BigDecimal;
@@ -118,7 +118,7 @@ public class VicketBatch {
     }
 
     public Vicket initVicket(String signedCsr) throws Exception {
-        Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
+        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
                 signedCsr.getBytes());
         if(certificates.isEmpty()) throw new ExceptionVS(
                 "Unable to init Vicket. Certs not found on signed CSR");

@@ -7,7 +7,7 @@ import org.votingsystem.client.util.DocumentVSValidator;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
@@ -58,7 +58,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
 
         String backupPath = backupDir.getAbsolutePath();
         File trustedCertsFile = new File(backupPath + File.separator + "systemTrustedCerts.pem");
-        Collection<X509Certificate> trustedCerts = CertUtil.fromPEMToX509CertCollection(
+        Collection<X509Certificate> trustedCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
         trustAnchors = new HashSet<TrustAnchor>();
         for(X509Certificate certificate: trustedCerts) {
@@ -67,7 +67,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         }
 
         File timeStampCertFile = new File(backupPath + File.separator +"timeStampCert.pem");
-        Collection<X509Certificate> timeStampCerts = CertUtil.fromPEMToX509CertCollection(
+        Collection<X509Certificate> timeStampCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));   
         timeStampServerCert = timeStampCerts.iterator().next();
             

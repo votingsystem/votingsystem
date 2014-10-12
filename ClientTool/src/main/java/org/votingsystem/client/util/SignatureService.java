@@ -297,7 +297,7 @@ public class SignatureService extends Service<ResponseVS> {
             List encryptedDataList = new ArrayList<>();
             List<Map> targetCertList = operationVS.getTargetCertList();
             for(Map receiverCertDataMap : targetCertList) {
-                X509Certificate receiverCert = CertUtil.fromPEMToX509Cert(((String) receiverCertDataMap.get("pemCert")).getBytes());
+                X509Certificate receiverCert = CertUtils.fromPEMToX509Cert(((String) receiverCertDataMap.get("pemCert")).getBytes());
                 JSONObject documentToEncrypt = (JSONObject) JSONSerializer.toJSON(operationVS.getDocumentToEncrypt());
                 ResponseVS responseVS = Encryptor.encryptToCMS(documentToEncrypt.toString().getBytes(), receiverCert);
                 String encryptedMessageStr = new String(responseVS.getMessageBytes(), "UTF-8");

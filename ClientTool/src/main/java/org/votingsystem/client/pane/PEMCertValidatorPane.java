@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -29,15 +29,15 @@ import java.util.Collection;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class PEMCertFormPane extends GridPane {
+public class PEMCertValidatorPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(PEMCertFormPane.class);
+    private static Logger log = Logger.getLogger(PEMCertValidatorPane.class);
 
     private TextArea textArea;
     private Button acceptButton;
     private static String certChainPEM;
 
-    public PEMCertFormPane() {
+    public PEMCertValidatorPane() {
         setPadding(new Insets(10, 10 , 10, 10));
         certChainPEM = null;
         Label messageLbl = new Label(ContextVS.getMessage("certPublicKeyPEMForm") + ":");
@@ -62,7 +62,7 @@ public class PEMCertFormPane extends GridPane {
         cancelButton.setGraphic((new ImageView(Utils.getImage(this, "cancel"))));
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent actionEvent) {
-                PEMCertFormPane.this.getScene().getWindow().hide();
+                PEMCertValidatorPane.this.getScene().getWindow().hide();
             }
         });
 
@@ -83,7 +83,7 @@ public class PEMCertFormPane extends GridPane {
         Collection<X509Certificate> certs = null;
         try {
             certChainPEM = textArea.getText();
-            certs = CertUtil.fromPEMToX509CertCollection(certChainPEM.getBytes());
+            certs = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             showMessage(ContextVS.getInstance().getMessage("pemCertsErrorMsg"));
@@ -121,8 +121,8 @@ public class PEMCertFormPane extends GridPane {
                     @Override public void handle(WindowEvent window) {
                     }
                 });
-                PEMCertFormPane timeStampCertValidationPane = new PEMCertFormPane();
-                stage.setScene(new Scene(timeStampCertValidationPane, javafx.scene.paint.Color.TRANSPARENT));
+                PEMCertValidatorPane validatorPane = new PEMCertValidatorPane();
+                stage.setScene(new Scene(validatorPane, javafx.scene.paint.Color.TRANSPARENT));
                 stage.setTitle(ContextVS.getMessage("validateTimeStampDialogCaption"));
                 stage.showAndWait();
             }

@@ -166,7 +166,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                 }
                 dateFinishCalendar = newCalendar;
-                dateFinishEditText.setText(DateUtils.getDateWithDayWeek(dateFinishCalendar.getTime()));
+                dateFinishEditText.setText(DateUtils.getDayWeekDateStr(dateFinishCalendar.getTime()));
             }
         }
     };
@@ -195,7 +195,7 @@ public class PublishEventVSFragment extends Fragment {
                     }
                 }
                 dateBeginCalendar = newCalendar;
-                dateBeginEditText.setText(DateUtils.getDateWithDayWeek(
+                dateBeginEditText.setText(DateUtils.getDayWeekDateStr(
                         dateBeginCalendar.getTime()));
             }
         }

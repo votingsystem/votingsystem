@@ -6,12 +6,12 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessage
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertExtensionCheckerVS
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.*
-import org.votingsystem.vicket.util.LoggerVS
+
 import java.security.cert.X509Certificate
 
 /**
@@ -166,7 +166,7 @@ class VicketService {
                 }
             } else throw new ExceptionVS(messageSource.getMessage('documentWithoutTimeStampErrorMsg', null,
                     LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
-            ResponseVS validationResponse = CertUtil.verifyCertificate(signatureVSService.getVicketAnchors(),
+            ResponseVS validationResponse = CertUtils.verifyCertificate(signatureVSService.getVicketAnchors(),
                     false, [userVS.getCertificate()])
             X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
             extensionChecker = validationResponse.data.extensionChecker

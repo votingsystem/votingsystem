@@ -1,7 +1,7 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -278,7 +278,7 @@ public class CertificateVS implements Serializable {
     }
 
     public X509Certificate getX509Cert() throws Exception {
-        X509Certificate x509Cert = CertUtil.loadCertificate(content);
+        X509Certificate x509Cert = CertUtils.loadCertificate(content);
         return x509Cert;
     }
 

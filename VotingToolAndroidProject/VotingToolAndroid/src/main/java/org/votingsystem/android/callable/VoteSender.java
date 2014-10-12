@@ -13,7 +13,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.VotingSystemKeyStoreException;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.KeyStore;
@@ -117,7 +117,7 @@ public class VoteSender implements Callable<ResponseVS> {
             byte[] contentDigestBytes = (byte[])gen.getGeneratedDigests().get(SMIMESignedGenerator.DIGEST_SHA1);
             String contentDigest = Base64.encodeToString(contentDigestBytes, Base64.DEFAULT);
             Log.d(TAG + ".getSolicitudAcceso(...)", " - contentDigest: " + contentDigest);*/
-        } catch(VotingSystemKeyStoreException ex) {
+        } catch(ExceptionVS ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.getExceptionResponse(contextVS.getString(R.string.exception_lbl),
                     contextVS.getString(R.string.pin_error_msg));

@@ -3,7 +3,7 @@ package org.votingsystem.vicket.service
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.votingsystem.model.*
-import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.CertUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.MetaInfMsg
 import org.votingsystem.vicket.model.UserVSAccount
@@ -45,11 +45,10 @@ class BankVSService {
             return new ResponseVS(type:TypeVS.ERROR, message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     metaInf:MetaInfMsg.getErrorMsg(methodName, "userWithoutPrivileges"))
         }
-        Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
+        Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(messageJSON.certChainPEM.getBytes());
         X509Certificate x509Certificate = certChain.iterator().next();
         BankVS bankVS = BankVS.getUserVS(x509Certificate)
-        ResponseVS responseVS = signatureVSService.verifyUserCertificate(bankVS)
-        if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+        signatureVSService.verifyUserCertificate(bankVS)
         String validatedNIF = org.votingsystem.util.NifUtils.validate(bankVS.getNif())
         def bankVSDB = UserVS.findWhere(nif:validatedNIF)
         if(!bankVSDB || (bankVSDB instanceof UserVS)) {

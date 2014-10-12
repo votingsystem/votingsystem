@@ -12,7 +12,7 @@ import java.util.Date;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public enum VotingSystemKeyGenerator {
+public enum KeyGeneratorVS {
     
     INSTANCE;
     
@@ -21,7 +21,7 @@ public enum VotingSystemKeyGenerator {
     /** number of bytes serial number to generate, default 8 */
     private int noOctets = 8;
     
-    private VotingSystemKeyGenerator() { }
+    private KeyGeneratorVS() { }
     
     public void init(String signName, String provider, int keySize, String algorithmRNG) throws
     		NoSuchAlgorithmException, NoSuchProviderException {

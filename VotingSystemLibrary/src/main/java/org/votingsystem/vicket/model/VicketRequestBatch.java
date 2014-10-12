@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ExceptionVS;
 
 import javax.persistence.*;
@@ -71,7 +71,7 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
             String csrTagVS = vicketRequestJSON.getString("tag");
             if(!this.tag.equals(csrTagVS)) throw new ExceptionVS("Request is for tag '" + this.tag +
                     "' and request number '" + i + "' is for tag '" + csrTagVS + "'");
-            PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(
+            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(
                     vicketRequestJSON.getString("csr").getBytes());
             Vicket vicket = new Vicket(csr);
             if(vicketValue.compareTo(vicket.getAmount()) != 0 || !currencyCode.equals(vicket.getCurrencyCode()) ||
@@ -202,11 +202,11 @@ public class VicketRequestBatch extends BatchRequest implements Serializable  {
     }
 
     public Vicket initVicket(String signedCsr) throws Exception {
-        Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
+        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
                 signedCsr.getBytes());
         if(certificates.isEmpty()) throw new ExceptionVS("Unable to init Vicket. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
-        JSONObject certExtensionData = CertUtil.getCertExtensionData(x509Certificate, ContextVS.VICKET_OID);
+        JSONObject certExtensionData = CertUtils.getCertExtensionData(x509Certificate, ContextVS.VICKET_OID);
         Vicket vicket = vicketsMap.get(certExtensionData.getString("hashCertVS")).setState(Vicket.State.OK);
         vicket.initSigner(signedCsr.getBytes());
         return vicket;

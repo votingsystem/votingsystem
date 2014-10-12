@@ -12,14 +12,14 @@ import org.bouncycastle.cms.*;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.ContentSignerVS;
-import org.votingsystem.signature.util.VotingSystemException;
+import org.votingsystem.util.ExceptionVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OSValidator;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
+import java.io.File;
 import java.security.MessageDigest;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -273,8 +273,8 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
             X509PublicKeyCertificate certificateTemplate = new X509PublicKeyCertificate();
             pkcs11Session.findObjectsInit(certificateTemplate);
             Object[] tokenCertificateObjects;
-            FileInputStream fis =  new FileInputStream(ContextVS.APPDIR + ContextVS.CERT_RAIZ_PATH);
-            certCA = CertUtil.loadCertificateFromStream(fis);
+            certCA = CertUtils.loadCertificate(FileUtils.getBytesFromFile(
+                    new File(ContextVS.APPDIR + ContextVS.CERT_RAIZ_PATH)));
             while ((tokenCertificateObjects = pkcs11Session.findObjects(1)).length > 0) {
                 iaik.pkcs.pkcs11.objects.Object object = (Object) tokenCertificateObjects[0];
                 Hashtable attributes = object.getAttributeTable();
@@ -283,10 +283,10 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
                 X509PublicKeyCertificate cert =
                         (X509PublicKeyCertificate)tokenCertificateObjects[0];
                 if (CERT_SIGN.equals(cert.getLabel().toString())) {
-                    certUser = (X509Certificate)CertUtil.loadCertificate(value);
+                    certUser = (X509Certificate) CertUtils.loadCertificate(value);
                     ContextVS.getInstance().setSessionUser(UserVS.getUserVS(certUser));
                 } else if (CERT_CA.equals(cert.getLabel().toString())) {
-                    certIntermediate = (X509Certificate)CertUtil.loadCertificate(value);
+                    certIntermediate = (X509Certificate) CertUtils.loadCertificate(value);
                 }
             }
             pkcs11Session.findObjectsFinal();
@@ -297,13 +297,13 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             if (ex instanceof ArrayIndexOutOfBoundsException) {
-                throw new VotingSystemException(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
+                throw new ExceptionVS(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
             }
             if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                throw new VotingSystemException(ContextVS.getInstance().getMessage("passwordErrorMsg"));
+                throw new ExceptionVS(ContextVS.getInstance().getMessage("passwordErrorMsg"));
             }
             if ("CKR_HOST_MEMORY".equals(ex.getMessage())) {
-                throw new VotingSystemException(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
+                throw new ExceptionVS(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
             }
             throw ex;
         }
