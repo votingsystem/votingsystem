@@ -1,4 +1,4 @@
-package org.votingsystem.client.util;
+package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
@@ -7,6 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
@@ -19,22 +20,24 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.model.SignedFile;
-import org.votingsystem.client.pane.BackupValidatorPane;
-import org.votingsystem.client.pane.EventVSInfoPane;
-import org.votingsystem.client.pane.SMIMEPane;
-import org.votingsystem.client.pane.VicketPane;
+import org.votingsystem.client.util.DocumentVS;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.ExceptionVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.vicket.model.Vicket;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,9 +47,9 @@ import java.util.Map;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SignedDocumentsBrowser extends StackPane{
+public class DocumentVSBrowserStackPane extends StackPane{
 
-    private static Logger log = Logger.getLogger(SignedDocumentsBrowser.class);
+    private static Logger log = Logger.getLogger(DocumentVSBrowserStackPane.class);
 
     private TabPane tabPane;
     private String fileDir = null;
@@ -60,7 +63,7 @@ public class SignedDocumentsBrowser extends StackPane{
     private VBox progressBox;
     private List<String> fileList = new ArrayList<String>();
 
-    public SignedDocumentsBrowser() {
+    public DocumentVSBrowserStackPane() {
         Region progressRegion = new Region();
         progressRegion.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
         progressRegion.setPrefSize(240, 160);
@@ -186,10 +189,14 @@ public class SignedDocumentsBrowser extends StackPane{
     private void openVicket(Vicket vicket) {
         Tab newTab = new Tab();
         newTab.setText(ContextVS.getMessage("vicketLbl"));
-        VicketPane vicketPane = new VicketPane(vicket);
-        newTab.setContent(vicketPane);
-        tabPane.getTabs().add(newTab);
-        tabPane.getSelectionModel().select(newTab);
+        try {
+            VicketPane vicketPane = new VicketPane(vicket);
+            newTab.setContent(vicketPane);
+            tabPane.getTabs().add(newTab);
+            tabPane.getSelectionModel().select(newTab);
+        } catch(ExceptionVS ex) {
+            showMessage(ex.getMessage());
+        }
     }
 
 
@@ -205,24 +212,37 @@ public class SignedDocumentsBrowser extends StackPane{
     public static void showDialog(final String signedDocumentStr, Map operationDocument) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                SignedDocumentsBrowser signedDocumentsBrowser = new SignedDocumentsBrowser();
+                DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
                 Stage primaryStage = new Stage();
-                primaryStage.setScene(new Scene(signedDocumentsBrowser));
+                primaryStage.setScene(new Scene(documentVSBrowserStackPane));
+                primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
+                        "/resources/css/vicket-pane.css").toExternalForm());
                 primaryStage.initModality(Modality.WINDOW_MODAL);
                 primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
                 primaryStage.setResizable(true);
                 File file = null;
                 if(signedDocumentStr == null) {
                     FileChooser fileChooser = new FileChooser();
-                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                    /*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
                             ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
-                    fileChooser.getExtensionFilters().add(extFilter);
+                    fileChooser.getExtensionFilters().add(extFilter);*/
                     fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                     //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
                     file = fileChooser.showOpenDialog(primaryStage);
                 } else file = FileUtils.getFileFromString(signedDocumentStr);
                 if(file != null){
-                    signedDocumentsBrowser.openFile(file, operationDocument);
+                    try {
+                        if(FileUtils.isZipFile(file)){
+                            DecompressBackupPane.showDialog(VotingSystemApp.getInstance(), file);
+                            return;
+                        }
+                        if(file.getName().endsWith(ContentTypeVS.VICKET.getExtension())) {
+                            Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file));
+                            documentVSBrowserStackPane.openVicket(vicket);
+                        } else documentVSBrowserStackPane.openFile(file, operationDocument);
+                    } catch (IOException ex) {
+                        log.error(ex.getMessage(), ex);
+                    }
                     primaryStage.centerOnScreen();
                     primaryStage.show();
                 } else log.debug("File null dialog will not be opened");
@@ -233,13 +253,13 @@ public class SignedDocumentsBrowser extends StackPane{
     public static void showDialog(final Vicket vicket) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                SignedDocumentsBrowser signedDocumentsBrowser = new SignedDocumentsBrowser();
+                DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
                 Stage primaryStage = new Stage();
-                primaryStage.setScene(new Scene(signedDocumentsBrowser));
+                primaryStage.setScene(new Scene(documentVSBrowserStackPane));
                 primaryStage.initModality(Modality.WINDOW_MODAL);
                 primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
                 primaryStage.setResizable(true);
-                signedDocumentsBrowser.openVicket(vicket);
+                documentVSBrowserStackPane.openVicket(vicket);
                 primaryStage.centerOnScreen();
                 primaryStage.show();
             }
@@ -250,10 +270,11 @@ public class SignedDocumentsBrowser extends StackPane{
         try {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showSaveDialog(getScene().getWindow());
-            String fileName = file.getAbsolutePath() + ContentTypeVS.SIGNED.getExtension();
+            DocumentVS selectedDocumentVS = ((DocumentVS)tabPane.getSelectionModel().getSelectedItem().getContent());
+            String fileName = file.getAbsolutePath();
+            if(!fileName.contains(".")) fileName = fileName + selectedDocumentVS.getContentTypeVS().getExtension();
             FileOutputStream fos = new FileOutputStream(new File(fileName));
-            SMIMEPane selectedSMIMEPane = ((SMIMEPane)tabPane.getSelectionModel().getSelectedItem().getContent());
-            fos.write(selectedSMIMEPane.getSignedFile().getSMIMEMessageWraper().getBytes());
+            fos.write(selectedDocumentVS.getDocumentBytes());
             fos.close();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);

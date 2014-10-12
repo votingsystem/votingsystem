@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.VicketTagVS;
 import org.votingsystem.util.FileUtils;
 
 import java.io.ByteArrayInputStream;
@@ -60,6 +61,11 @@ public class Utils {
         outputZip.deleteOnExit();
         FileUtils.packZip(outputZip, fileList);
         return outputZip;
+    }
+
+    public static String getTagDescription(String tagName) {
+        if(VicketTagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl");
+        else return tagName;
     }
 
 }

@@ -94,29 +94,32 @@ class VicketController {
         Vicket vicket
         Vicket.withTransaction {
             vicket = Vicket.findWhere(hashCertVS:hashCertVSBase64)
+
+
+            vicket.state = Vicket.State.EXPENDED
         }
         int statusCode = ResponseVS.SC_MESSAGE_FROM_VS
-        String message = null
-        if(!vicket) message = message(code:'vicketNotFoundErrorMsg')
+        String msg = null
+        if(!vicket) msg = message(code:'vicketNotFoundErrorMsg')
         else {
             switch(vicket.state) {
                 case Vicket.State.OK:
                     statusCode = ResponseVS.SC_OK
-                    message = "OK"
+                    msg = message(code:'vicketOKMsg')
                     break;
                 case Vicket.State.EXPENDED:
-                    message = message(code:'vicketExpendedShortErrorMsg')
+                    msg = message(code:'vicketExpendedShortErrorMsg')
                     break;
                 case Vicket.State.CANCELLED:
-                    message = message(code:'vicketCancelledErrorMsg')
+                    msg = message(code:'vicketCancelledErrorMsg')
                     break;
                 case Vicket.State.LAPSED:
-                    message = message(code:'vicketLapsedShortErrorMsg')
+                    msg = message(code:'vicketLapsedShortErrorMsg')
                     break;
             }
         }
         response.status = statusCode
-        render message
+        render msg
         return false
     }
 

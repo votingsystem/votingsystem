@@ -13,6 +13,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.client.model.SignedFile;
+import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ContentTypeVS;
@@ -25,7 +26,7 @@ import java.io.File;
  * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SMIMEPane extends GridPane {
+public class SMIMEPane extends GridPane implements DocumentVS {
 
     private static Logger log = Logger.getLogger(SMIMEPane.class);
 
@@ -63,15 +64,15 @@ public class SMIMEPane extends GridPane {
         String contentStr = null;
         try {
             JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(
-                    signedFile.getSMIMEMessageWraper().getSignedContent());
+                    signedFile.getSMIMEMessage().getSignedContent());
             contentStr = Formatter.format(contentJSON);
         }  catch(Exception ex) {
-            contentStr = signedFile.getSMIMEMessageWraper().getSignedContent();
+            contentStr = signedFile.getSMIMEMessage().getSignedContent();
         }
         signatureContentWebView.getEngine().loadContent(contentStr);
         signatureContentWebView.setPrefHeight(600);
 
-        TimeStampToken timeStampToken = signedFile.getSMIMEMessageWraper().getTimeStampToken();
+        TimeStampToken timeStampToken = signedFile.getSMIMEMessage().getTimeStampToken();
 
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
         timeStampButton.setGraphic((new ImageView(Utils.getImage(this, "clock"))));
@@ -91,16 +92,16 @@ public class SMIMEPane extends GridPane {
         setColumnSpan(signatureContentWebView, 2);
         //add(contentWithoutFormatCheckBox, 0, 2);
         JSONObject signedContentJSON = null;
-        if(signedFile.getSMIMEMessageWraper().getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
+        if(signedFile.getSMIMEMessage().getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
             signedContentJSON =  (JSONObject) JSONSerializer.toJSON(signedFile.getOperationDocument());
-        } else signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
+        } else signedContentJSON =  (JSONObject)JSONSerializer.toJSON(signedFile.getSMIMEMessage().getSignedContent());
         String timeStampDateStr = "";
-        if(signedFile.getSMIMEMessageWraper().getTimeStampToken() != null) {
-            timeStampDateStr = DateUtils.getDateStr(signedFile.getSMIMEMessageWraper().
+        if(signedFile.getSMIMEMessage().getTimeStampToken() != null) {
+            timeStampDateStr = DateUtils.getDateStr(signedFile.getSMIMEMessage().
                     getTimeStampToken().getTimeStampInfo().getGenTime(),"dd/MMM/yyyy HH:mm");
         }
         try {
-            JSONObject signedContent = (JSONObject) JSONSerializer.toJSON(signedFile.getSMIMEMessageWraper().getSignedContent());
+            JSONObject signedContent = (JSONObject) JSONSerializer.toJSON(signedFile.getSMIMEMessage().getSignedContent());
             signatureContentWebView.getEngine().loadContent(signedContent.toString(3), "application/json");
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -118,5 +119,11 @@ public class SMIMEPane extends GridPane {
         return signedFile;
     }
 
+    @Override public byte[] getDocumentBytes() throws Exception {
+        return signedFile.getSMIMEMessage().getBytes();
+    }
 
+    @Override public ContentTypeVS getContentTypeVS() {
+        return ContentTypeVS.SIGNED;
+    }
 }

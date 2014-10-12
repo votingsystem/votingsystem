@@ -6,6 +6,7 @@
     <g:else><meta name="layout" content="main" /></g:else>
     <link rel="import" href="${resource(dir: '/bower_components/paper-slider', file: 'paper-slider.html')}">
     <link rel="import" href="<g:createLink  controller="element" params="[element: '/vicket/vicket-wallet']"/>">
+
 </head>
 <body>
 <div class="pageContentDiv">

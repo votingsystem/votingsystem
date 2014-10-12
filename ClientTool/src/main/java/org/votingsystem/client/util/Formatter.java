@@ -34,8 +34,8 @@ public class Formatter {
                 certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),
                 certificate.getSerialNumber().toString(),
-                DateUtils.getDateStr(certificate.getNotBefore()),
-                DateUtils.getDateStr(certificate.getNotAfter()));
+                DateUtils.getDayWeekDateStr(certificate.getNotBefore()),
+                DateUtils.getDayWeekDateStr(certificate.getNotAfter()));
     }
 
     public static String format(JSONObject jsonObject) {

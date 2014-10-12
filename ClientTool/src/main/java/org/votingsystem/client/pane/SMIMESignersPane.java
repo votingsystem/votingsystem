@@ -48,10 +48,10 @@ public class SMIMESignersPane extends GridPane {
 
         Tab newTab = null;
         try {
-            Set<UserVS> signersVS = signedFile.getSMIMEMessageWraper().getSigners();
+            Set<UserVS> signersVS = signedFile.getSMIMEMessage().getSigners();
             log.debug("Num. signers: " + signersVS.size());
             for (UserVS signerVS:signersVS) {
-                SignatureInfoPane signerVSPanel = new SignatureInfoPane(signerVS, signedFile.getSMIMEMessageWraper());
+                SignatureInfoPane signerVSPanel = new SignatureInfoPane(signerVS, signedFile.getSMIMEMessage());
                 String tabName = ContextVS.getMessage("signerLbl");
                 if(signerVS.getNif() != null) tabName = signerVS.getNif();
                 newTab = new Tab();

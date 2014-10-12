@@ -37,7 +37,7 @@ public class DocumentVSValidator {
                     signedFile.getName()));
 
         }
-        Set<UserVS> signersVS = signedFile.getSMIMEMessageWraper().getSigners();
+        Set<UserVS> signersVS = signedFile.getSMIMEMessage().getSigners();
         for(UserVS signerVS:signersVS) {
             try {
                 if(signerVS.getTimeStampToken() != null) {//user signature
@@ -54,13 +54,13 @@ public class DocumentVSValidator {
         try {
             SignerInformationVerifier timeStampSignerInfoVerifier = new
                     JcaSimpleSignerInfoVerifierBuilder().build(timeStampServerCert);
-            signedFile.getSMIMEMessageWraper().getSigner().getTimeStampToken().validate(timeStampSignerInfoVerifier);
+            signedFile.getSMIMEMessage().getSigner().getTimeStampToken().validate(timeStampSignerInfoVerifier);
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
                     getMessage("timestampValidationErrorMsg", signedFile.getName()));
         }
-        Date tokenDate = signedFile.getSMIMEMessageWraper().getSigner().getTimeStampToken().
+        Date tokenDate = signedFile.getSMIMEMessage().getSigner().getTimeStampToken().
                 getTimeStampInfo().getGenTime();
         if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
@@ -108,7 +108,7 @@ public class DocumentVSValidator {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     signedFile.getName()));
         }
-        UserVS userVS = signedFile.getSMIMEMessageWraper().getSigner();
+        UserVS userVS = signedFile.getSMIMEMessage().getSigner();
         if(representativeNif == null) return new ResponseVS(
                 ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("badRequestMsg") +
                 " - " + ContextVS.getInstance().getMessage("missingRepresentativeNifErrorMsg"));
@@ -166,7 +166,7 @@ public class DocumentVSValidator {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "signatureErrorMsg", signedFile.getName()));
         }
-        UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
+        UserVS signer = signedFile.getSMIMEMessage().getSigner();
         try {
             CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
         } catch(Exception ex) {
@@ -218,7 +218,7 @@ public class DocumentVSValidator {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     signedFile.getName()));
         }
-        UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
+        UserVS signer = signedFile.getSMIMEMessage().getSigner();
         try {
             CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
         } catch(Exception ex) {

@@ -1,4 +1,4 @@
-package org.votingsystem.client.util;
+package org.votingsystem.client.service;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
@@ -10,6 +10,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.*;
 import org.votingsystem.client.VotingSystemApp;
+import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
@@ -148,7 +149,7 @@ public class SignatureService extends Service<ResponseVS> {
                 operationVS.setMessage(responseVS.getMessage());
                 PlatformImpl.runLater(new Runnable() {
                     @Override public void run() {
-                        SignedDocumentsBrowser.showDialog(operationVS.getMessage(), operationVS.getDocument());
+                        DocumentVSBrowserStackPane.showDialog(operationVS.getMessage(), operationVS.getDocument());
                     }
                 });
             }

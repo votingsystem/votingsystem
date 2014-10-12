@@ -497,12 +497,14 @@ public class Vicket implements Serializable  {
 
         public static final long serialVersionUID = 1L;
 
-        String currencyCode;
-        BigDecimal vicketValue;
-        String vicketServerURL;
-        String tag;
-        String hashCertVS;
-        Map<String, String> dataMap;
+        private String currencyCode;
+        private BigDecimal vicketValue;
+        private String vicketServerURL;
+        private String tag;
+        private String hashCertVS;
+        private Map<String, String> dataMap;
+        private Date notBefore;
+        private Date notAfter;
 
         public CertSubject(String subjectDN, String hashCertVS) {
             this.hashCertVS = hashCertVS;
@@ -519,6 +521,8 @@ public class Vicket implements Serializable  {
         }
 
         public void addDateInfo(X509Certificate x509AnonymousCert) {
+            this.notBefore = x509AnonymousCert.getNotBefore();
+            this.notAfter = x509AnonymousCert.getNotAfter();
             dataMap.put("notBefore", DateUtils.getDateStr(x509AnonymousCert.getNotBefore()));
             dataMap.put("notAfter", DateUtils.getDateStr(x509AnonymousCert.getNotAfter()));
         }
@@ -528,6 +532,9 @@ public class Vicket implements Serializable  {
         public String getVicketServerURL() {return this.vicketServerURL;}
         public String getTag() {return this.tag;}
         public Map<String, String> getDataMap() {return dataMap;}
+        public Date getNotBefore() { return notBefore; }
+        public Date getNotAfter() { return notAfter; }
+
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

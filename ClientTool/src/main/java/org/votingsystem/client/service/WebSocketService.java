@@ -1,4 +1,4 @@
-package org.votingsystem.client.util;
+package org.votingsystem.client.service;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
@@ -12,8 +12,10 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.client.BrowserVS;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
+import org.votingsystem.client.util.WebSocketListener;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.ContentSignerHelper;

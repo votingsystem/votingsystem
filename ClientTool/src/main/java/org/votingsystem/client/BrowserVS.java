@@ -1,4 +1,4 @@
-package org.votingsystem.client.util;
+package org.votingsystem.client;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
@@ -40,6 +40,9 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
+import org.votingsystem.client.pane.DocumentVSBrowserStackPane;
+import org.votingsystem.client.util.Utils;
+import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -421,7 +424,7 @@ public class BrowserVS extends Region {
                         break;
                     case OPEN_VICKET:
                         Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(((String)operationVS.getDocument().get("object")).getBytes());
-                        SignedDocumentsBrowser.showDialog(vicket);
+                        DocumentVSBrowserStackPane.showDialog(vicket);
                         break;
                     case OPEN_SMIME_FROM_URL:
                         browserHelper.processOperationVS(null, operationVS);
@@ -517,7 +520,7 @@ public class BrowserVS extends Region {
     private void openReceipt(OperationVS operation) throws Exception{
         log.debug("openReceipt");
         String smimeMessageStr = new String(Base64.getDecoder().decode(operation.getMessage()), "UTF-8");
-        SignedDocumentsBrowser.showDialog(smimeMessageStr, operation.getDocument());
+        DocumentVSBrowserStackPane.showDialog(smimeMessageStr, operation.getDocument());
     }
 
     private void selectImage(final OperationVS operationVS) throws Exception {

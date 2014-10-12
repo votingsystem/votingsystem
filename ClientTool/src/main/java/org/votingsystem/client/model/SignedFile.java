@@ -61,7 +61,7 @@ public class SignedFile {
         return name;
     }
 
-    public SMIMEMessage getSMIMEMessageWraper() {
+    public SMIMEMessage getSMIMEMessage() {
         return smimeMessage;
     }
     

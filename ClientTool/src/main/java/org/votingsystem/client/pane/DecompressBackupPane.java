@@ -90,7 +90,7 @@ public class DecompressBackupPane extends StackPane {
         new Thread(runningTask).start();
     }
 
-    public static void showDialog(final Listener listener) {
+    public static void showDialog(final Listener listener, final File fileToOpen) {
         final String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
         log.debug("showDialog - outputFolder: " + outputFolder);
         Platform.runLater(new Runnable() {
@@ -101,13 +101,16 @@ public class DecompressBackupPane extends StackPane {
                 stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
                     @Override public void handle(WindowEvent window) { }
                 });
-                FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                        ContextVS.getMessage("backupFileFilterMsg"), "*" + ContentTypeVS.ZIP.getExtension());
-                fileChooser.getExtensionFilters().add(extFilter);
-                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                File file = fileChooser.showOpenDialog(stage);
+                File file = fileToOpen;
+                if(file == null) {
+                    FileChooser fileChooser = new FileChooser();
+                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                            ContextVS.getMessage("backupFileFilterMsg"), "*" + ContentTypeVS.ZIP.getExtension());
+                    fileChooser.getExtensionFilters().add(extFilter);
+                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                    //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
+                    file = fileChooser.showOpenDialog(stage);
+                }
                 if(file != null){
                     log.debug("showDialog - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
                     DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
