@@ -115,6 +115,7 @@ public class VicketTransactionBatch {
         return vicketList;
     }
 
+
     public void setVicketList(List<Vicket> vicketList) {
         this.vicketList = vicketList;
     }

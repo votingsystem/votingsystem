@@ -46,8 +46,7 @@ class VicketController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = vicketService.cancelVicket(messageSMIMEReq, request.getLocale())
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+        return [responseVS:vicketService.cancelVicket(messageSMIMEReq)]
     }
 
 
@@ -83,8 +82,7 @@ class VicketController {
                 vicketBatch.setTagVS(vicketTagVS)
             }
         }
-        ResponseVS responseVS = vicketService.processVicketRequest(vicketBatch)
-        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
+        return [responseVS:vicketService.processVicketRequest(vicketBatch)]
     }
 
     def wallet() {}
@@ -94,25 +92,27 @@ class VicketController {
         Vicket vicket
         Vicket.withTransaction {
             vicket = Vicket.findWhere(hashCertVS:hashCertVSBase64)
-
-
-            vicket.state = Vicket.State.EXPENDED
         }
         int statusCode = ResponseVS.SC_MESSAGE_FROM_VS
         String msg = null
         if(!vicket) msg = message(code:'vicketNotFoundErrorMsg')
         else {
             switch(vicket.state) {
-                case Vicket.State.OK:
-                    statusCode = ResponseVS.SC_OK
-                    msg = message(code:'vicketOKMsg')
-                    break;
                 case Vicket.State.EXPENDED:
                     msg = message(code:'vicketExpendedShortErrorMsg')
                     break;
                 case Vicket.State.CANCELLED:
                     msg = message(code:'vicketCancelledErrorMsg')
                     break;
+                case Vicket.State.OK:
+                    if(vicket.validTo.after(Calendar.getInstance().getTime())) {
+                        statusCode = ResponseVS.SC_OK
+                        msg = message(code:'vicketOKMsg')
+                        break;
+                    } else {
+                        vicket.state = Vicket.State.LAPSED
+                        Vicket.withTransaction { vicket.save()}
+                    }
                 case Vicket.State.LAPSED:
                     msg = message(code:'vicketLapsedShortErrorMsg')
                     break;

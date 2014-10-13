@@ -32,23 +32,23 @@ class VicketService {
     def timeStampService
     def systemService
 
-    public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS cancelVicket(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         UserVS signer = messageSMIMEReq.userVS
         def requestJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if(TypeVS.VICKET_CANCEL != TypeVS.valueOf(requestJSON.operation))
                 throw new ExceptionVS(messageSource.getMessage("operationMismatchErrorMsg",
-                [TypeVS.VICKET_CANCEL.toString(),requestJSON.operation ].toArray(), locale))
+                [TypeVS.VICKET_CANCEL.toString(),requestJSON.operation ].toArray(), LocaleContextHolder.locale))
         def hashCertVSBase64 = CMSUtils.getHashBase64(requestJSON.originHashCertVS, ContextVS.VOTING_DATA_DIGEST)
         if(!hashCertVSBase64.equals(requestJSON.hashCertVSBase64))
-            throw new ExceptionVS(messageSource.getMessage("originHashErrorMsg", null, locale))
+            throw new ExceptionVS(messageSource.getMessage("originHashErrorMsg", null, LocaleContextHolder.locale))
         Vicket vicket = Vicket.findWhere(hashCertVS: requestJSON.hashCertVSBase64,
                 serialNumber:Long.valueOf(requestJSON.vicketCertSerialNumber))
         if(Vicket.State.OK == vicket.getState()) {
             String fromUser = grailsApplication.config.VotingSystem.serverName
             String toUser = smimeMessageReq.getFrom().toString()
-            String subject = messageSource.getMessage('cancelVicketReceiptSubject', null, locale)
+            String subject = messageSource.getMessage('cancelVicketReceiptSubject', null, LocaleContextHolder.locale)
             vicket.setState(Vicket.State.CANCELLED)
             SMIMEMessage receipt = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                     smimeMessageReq, subject)
@@ -57,7 +57,7 @@ class VicketService {
             vicket.cancelMessage = messageSMIMEReq
             vicket.save()
             TransactionVS transaction = new TransactionVS(amount: vicket.amount, messageSMIME:messageSMIMEReq,
-                    subject:messageSource.getMessage('cancelVicketTransactionSubject', null, locale),
+                    subject:messageSource.getMessage('cancelVicketTransactionSubject', null, LocaleContextHolder.locale),
                     fromUserVS:signer, toUserVS:signer, state:TransactionVS.State.OK,
                     currency:vicket.currency, type:TransactionVS.Type.VICKET_CANCELLATION, validTo:vicket.validTo).save()
             log.debug("cancelVicket - model: ${vicket.id} - transactionVS: ${transaction.id}");
@@ -78,7 +78,7 @@ class VicketService {
             if(Vicket.State.LAPSED == vicket.getState()) {
                 contentType = ContentTypeVS.TEXT
                 messageBytes = messageSource.getMessage("vicketLapsedErrorMsg",
-                        [vicket.serialNumber].toArray(), locale).getBytes()
+                        [vicket.serialNumber].toArray(), LocaleContextHolder.locale).getBytes()
             }
             return new ResponseVS(statusCode:statusCode, messageBytes: messageBytes, contentType: contentType,
                     type:TypeVS.ERROR)
@@ -88,14 +88,14 @@ class VicketService {
         }
     }
 
-    public ResponseVS cancelTransactionVS(MessageSMIME messageSMIMEReq, Locale locale) {
+    public ResponseVS cancelTransactionVS(MessageSMIME messageSMIMEReq) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         SMIMEMessage smimeMessageReq = messageSMIMEReq.getSmimeMessage()
         //messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate
         log.debug(smimeMessageReq.getSignedContent())
         String fromUser = grailsApplication.config.VotingSystem.serverName
         String toUser = smimeMessageReq.getFrom().toString()
-        String subject = messageSource.getMessage('vicketReceiptSubject', null, locale)
+        String subject = messageSource.getMessage('vicketReceiptSubject', null, LocaleContextHolder.locale)
         SMIMEMessage smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(fromUser, toUser,
                 smimeMessageReq, subject)
         MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT, smimeParent:messageSMIMEReq,
@@ -123,6 +123,7 @@ class VicketService {
             }
         }
         List responseList = []
+
         for(Vicket vicket: validatedVicketList) {
             Date validTo = null
             if(vicket.isTimeLimited == true) validTo = timePeriod.getDateTo()
@@ -136,6 +137,7 @@ class VicketService {
             vicket.setState(Vicket.State.EXPENDED).setTransactionVS(transactionVS).save()
             responseList.add([(vicket.getHashCertVS()):Base64.getEncoder().encodeToString(receipt.getBytes())])
         }
+
         return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: responseList)
     }
 
@@ -155,21 +157,11 @@ class VicketService {
         } else if(vicket.state == Vicket.State.OK) {
             UserVS userVS = smimeMessage.getSigner(); //anonymous signer
             CertExtensionCheckerVS extensionChecker
-            if (userVS.getTimeStampToken() != null) {
-                ResponseVS timestampValidationResp = timeStampService.validateToken(
-                        userVS.getTimeStampToken(), LocaleContextHolder.locale)
-                log.debug("$methodName - timestampValidationResp - " +
-                        "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
-                if (ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                    throw new ExceptionVS(timestampValidationResp.getMessage(),
-                            MetaInfMsg.getErrorMsg(methodName, 'timestampError'))
-                }
-            } else throw new ExceptionVS(messageSource.getMessage('documentWithoutTimeStampErrorMsg', null,
-                    LocaleContextHolder.locale), MetaInfMsg.getErrorMsg(methodName, 'timestampMissing'))
-            ResponseVS validationResponse = CertUtils.verifyCertificate(signatureVSService.getVicketAnchors(),
+            timeStampService.validateToken(userVS.getTimeStampToken())
+            CertUtils.CertValidatorResultVS certValidatorResult = CertUtils.verifyCertificate(signatureVSService.getVicketAnchors(),
                     false, [userVS.getCertificate()])
-            X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
-            extensionChecker = validationResponse.data.extensionChecker
+            X509Certificate certCaResult = certValidatorResult.result.trustAnchor.trustedCert;
+            extensionChecker = certValidatorResult.checker
             //if (extensionChecker.isAnonymousSigner()) { }
         } else  throw new ExceptionVS(messageSource.getMessage('vicketStateErrorMsg',
                 [vicket.id, vicket.state.toString()].toArray(), LocaleContextHolder.locale),
@@ -197,6 +189,7 @@ class VicketService {
                 'vicketRequestLbl', null, LocaleContextHolder.locale), accountFromMovements.data).save()
         String message = messageSource.getMessage('withdrawalMsg', [vicketBatch.getRequestAmount().toString(),
                 vicketBatch.getCurrencyCode()].toArray(), LocaleContextHolder.locale) + " " + systemService.getTagMessage(vicketBatch.getTag())
+
         Map resultMap = [statusCode: ResponseVS.SC_OK, message:message, issuedVickets:vicketBatch.getIssuedVicketListPEM()]
         return new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data:resultMap,
                 type:TypeVS.VICKET_REQUEST);

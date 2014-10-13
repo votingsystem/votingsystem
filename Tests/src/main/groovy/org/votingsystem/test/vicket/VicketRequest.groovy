@@ -1,6 +1,6 @@
 package org.votingsystem.test.vicket
 
-
+import net.sf.json.JSONObject
 import net.sf.json.JSONSerializer
 import org.apache.log4j.Logger
 import org.votingsystem.model.ContentTypeVS
@@ -42,7 +42,8 @@ mapToSend.put(ContextVS.VICKET_REQUEST_DATA_FILE_NAME + ":" + ContentTypeVS.JSON
         smimeMessage.getBytes());
 ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, vicketServer.getVicketRequestServiceURL());
 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-    vicketBatch.initVickets(JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8")));
+    JSONObject responseJSON = JSONSerializer.toJSON(new String(responseVS.getMessageBytes(), "UTF-8"))
+    vicketBatch.initVickets(responseJSON.getJSONArray("issuedVickets"));
     WalletUtils.saveVicketsToWallet(vicketBatch.getVicketsMap().values(), ContextVS.getInstance().config.walletDir)
 } else {
     logger.error(" --- ERROR --- " + responseVS.getMessage())

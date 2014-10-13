@@ -66,6 +66,10 @@ public class Utils {
     public static String getTagDescription(String tagName) {
         if(VicketTagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl");
         else return tagName;
+
     }
 
+    public static String getTagForDescription(String tagName) {
+        return ContextVS.getMessage("forLbl") + " " + getTagDescription(tagName);
+    }
 }

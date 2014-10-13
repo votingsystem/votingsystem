@@ -140,6 +140,11 @@ public class DocumentVSBrowserStackPane extends StackPane{
         getChildren().add(0, mainVBox);
     }
 
+    public void init() {
+        getScene().getStylesheets().add(((Object)this).getClass().getResource(
+                "/resources/css/vicket-pane.css").toExternalForm());
+    }
+
     private void goNext() {
         if (selectedFileIndex == fileList.size() -1)  selectedFileIndex = 0;
         else ++selectedFileIndex;
@@ -181,7 +186,8 @@ public class DocumentVSBrowserStackPane extends StackPane{
             tabPane.getTabs().add(newTab);
             tabPane.getSelectionModel().select(newTab);
         } catch (Exception ex) {
-            showMessage(ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));
+            showMessage(ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()), null);
+            getScene().getWindow().hide();
             log.error(ex.getMessage(), ex);
         }
     }
@@ -195,16 +201,18 @@ public class DocumentVSBrowserStackPane extends StackPane{
             tabPane.getTabs().add(newTab);
             tabPane.getSelectionModel().select(newTab);
         } catch(ExceptionVS ex) {
-            showMessage(ex.getMessage());
+            log.error(ex.getMessage(), ex);
+            showMessage(ex.getMessage(), Boolean.TRUE);
         }
     }
 
 
-    public void showMessage(final String message) {
+    public void showMessage(final String message, Boolean isHtml) {
         PlatformImpl.runLater(new Runnable() {
             @Override public void run() {
                 if (messageDialog == null) messageDialog = new MessageDialog();
-                messageDialog.showMessage(message);
+                if(isHtml != null && isHtml == Boolean.TRUE) messageDialog.showHtmlMessage(message);
+                else messageDialog.showMessage(message);
             }
         });
     }
@@ -215,8 +223,7 @@ public class DocumentVSBrowserStackPane extends StackPane{
                 DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
                 Stage primaryStage = new Stage();
                 primaryStage.setScene(new Scene(documentVSBrowserStackPane));
-                primaryStage.getScene().getStylesheets().add(((Object)this).getClass().getResource(
-                        "/resources/css/vicket-pane.css").toExternalForm());
+                documentVSBrowserStackPane.init();
                 primaryStage.initModality(Modality.WINDOW_MODAL);
                 primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
                 primaryStage.setResizable(true);
@@ -240,11 +247,11 @@ public class DocumentVSBrowserStackPane extends StackPane{
                             Vicket vicket = (Vicket) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(file));
                             documentVSBrowserStackPane.openVicket(vicket);
                         } else documentVSBrowserStackPane.openFile(file, operationDocument);
+                        primaryStage.centerOnScreen();
+                        primaryStage.show();
                     } catch (IOException ex) {
                         log.error(ex.getMessage(), ex);
                     }
-                    primaryStage.centerOnScreen();
-                    primaryStage.show();
                 } else log.debug("File null dialog will not be opened");
             }
         });
@@ -256,6 +263,7 @@ public class DocumentVSBrowserStackPane extends StackPane{
                 DocumentVSBrowserStackPane documentVSBrowserStackPane = new DocumentVSBrowserStackPane();
                 Stage primaryStage = new Stage();
                 primaryStage.setScene(new Scene(documentVSBrowserStackPane));
+                documentVSBrowserStackPane.init();
                 primaryStage.initModality(Modality.WINDOW_MODAL);
                 primaryStage.setTitle(ContextVS.getMessage("signedDocumentBrowserCaption"));
                 primaryStage.setResizable(true);
@@ -318,7 +326,7 @@ public class DocumentVSBrowserStackPane extends StackPane{
         if(!metaInfFile.exists()) {
             String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
             log.error(message);
-            showMessage("Error - " + message);
+            showMessage("Error - " + message, null);
             return;
         }
         try {

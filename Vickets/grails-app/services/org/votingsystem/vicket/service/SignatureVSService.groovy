@@ -7,6 +7,7 @@ import net.sf.json.JSONSerializer
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.util.encoders.Base64
+import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.dao.DataAccessException
 import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.*
@@ -281,21 +282,7 @@ class  SignatureVSService {
         String signerNIF = org.votingsystem.util.NifUtils.validate(smimeMessage.getSigner().getNif())
 		for(UserVS userVS: signersVS) {
 			try {
-                if(userVS.getTimeStampToken() != null) {
-                    ResponseVS timestampValidationResp = timeStampService.validateToken(
-                            userVS.getTimeStampToken(), locale)
-                    log.debug("validateSignersCerts - timestampValidationResp - " +
-                            "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
-                    if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                        log.error("validateSignersCerts - TIMESTAMP ERROR - ${timestampValidationResp.message}")
-                        return timestampValidationResp
-                    }
-                } else {
-                    String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-                    log.error("ERROR - validateSignersCerts - ${msg}")
-                    return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST, reason:msg,
-                            metaInf: MetaInfMsg.getErrorMsg(methodName, "timestampMissing"))
-                }
+                timeStampService.validateToken(userVS.getTimeStampToken())
                 validatorResult = verifyUserCertificate(userVS)
                 ResponseVS responseVS = null
                 if(validatorResult.getChecker().isAnonymousSigner()) {

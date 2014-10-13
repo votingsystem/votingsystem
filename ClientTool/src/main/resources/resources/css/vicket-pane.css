@@ -1,6 +1,6 @@
 .vicketValue {
     -fx-text-fill: #61a753;
-    -fx-font: bold italic 25pt "LucidaBrightDemiBold";
+    -fx-font: bold 25pt "LucidaBrightDemiBold";
 }
 
 .tag {
@@ -11,4 +11,15 @@
 .server {
     -fx-text-fill: #61a753;
     -fx-font-size: 8pt;
+}
+
+.statusLbl {
+    -fx-font: bold 20pt "LucidaBrightDemiBold";
+    -fx-font-weight: bold;
+    -fx-text-fill: #6c0404;
+}
+
+.dateInfo {
+    -fx-text-fill: #61a753;
+    -fx-font-size: 12pt;
 }

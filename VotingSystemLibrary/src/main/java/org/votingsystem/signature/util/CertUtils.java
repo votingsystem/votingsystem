@@ -292,7 +292,7 @@ public class CertUtils {
             return new CertValidatorResultVS(checker, (PKIXCertPathValidatorResult)result);
         } catch(Exception ex) {
             String msg = "Empty cert list";
-            if(certs != null && !certs.isEmpty()) msg = "Certificate validation failed - cert: " +
+            if(certs != null && !certs.isEmpty()) msg = ex.getMessage() + " - cert: " +
                     certs.iterator().next().getSubjectDN();
             throw new ExceptionVS(msg, ex);
         }

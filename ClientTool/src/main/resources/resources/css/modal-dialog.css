@@ -3,7 +3,7 @@
 }
 
 .modal-dialog {
-    -fx-max-width: 500px;
+    -fx-max-width: 600px;
     -fx-padding: 20;
     -fx-spacing: 10;
     -fx-alignment: center-left;
@@ -15,7 +15,7 @@
     -fx-border-insets: 10;
     -fx-border-radius: 4;
     -fx-background-radius: 6;
-    -fx-color: #f9f9f9;
+    -fx-color: #f3f3f3;
 }
 
 .settings-vbox {

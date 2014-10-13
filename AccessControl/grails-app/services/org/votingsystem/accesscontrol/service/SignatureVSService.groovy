@@ -311,20 +311,7 @@ class SignatureVSService {
         String signerNIF = smimeMessage.getSigner().getNif()
         for(UserVS userVS: signersVS) {
             try {
-                if(userVS.getTimeStampToken() != null) {
-                    ResponseVS timestampValidationResp = timeStampService.validateToken(
-                            userVS.getTimeStampToken(), locale)
-                    log.debug("validateSignersCerts - timestampValidationResp - " +
-                            "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
-                    if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                        log.error("validateSignersCerts - TIMESTAMP ERROR - ${timestampValidationResp.message}")
-                        return timestampValidationResp
-                    }
-                } else if(smimeMessage.getTimeStampToken() == null) {
-                    String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-                    log.error("ERROR - validateSignersCerts - ${msg}")
-                    return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
-                }
+                timeStampService.validateToken(userVS.getTimeStampToken())
                 validatorResult = CertUtils.verifyCertificate(getTrustAnchors(), false, [userVS.getCertificate()])
                 X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
                 userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))

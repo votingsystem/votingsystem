@@ -405,8 +405,9 @@ public class Vicket implements Serializable  {
         return reason;
     }
 
-    public void setReason(String reason) {
+    public Vicket setReason(String reason) {
         this.reason = reason;
+        return this;
     }
 
     public String getCurrencyCode() {
@@ -493,6 +494,42 @@ public class Vicket implements Serializable  {
         return result;
     }
 
+    public static class TransactionVSData {
+
+        private String subject, toUserName, toUserIBAN;
+        private Boolean isTimeLimited;
+
+        public String getSubject(){return subject;}
+        public String getToUserName(){return toUserName;}
+        public String getToUserIBAN(){return toUserIBAN;}
+        public Boolean getIsTimeLimited(){return isTimeLimited;}
+
+        public TransactionVSData() {}
+
+        public TransactionVSData(String subject, String toUserName, String toUserIBAN, Boolean isTimeLimited) {
+            this.subject = subject;
+            this.toUserName = toUserName;
+            this.toUserIBAN = toUserIBAN;
+            this.isTimeLimited = isTimeLimited;
+        }
+
+        public TransactionVSData(JSONObject formData) {
+            this.subject = formData.getString("subject");
+            this.toUserName = formData.getString("toUserName");
+            this.toUserIBAN = formData.getString("toUserIBAN");
+            this.isTimeLimited = formData.getBoolean("isTimeLimited");
+        }
+
+        public JSONObject getJSON() {
+            JSONObject formData = new JSONObject();
+            formData.put("subject", subject);
+            formData.put("toUserName", toUserName);
+            formData.put("toUserIBAN", toUserIBAN);
+            formData.put("isTimeLimited", isTimeLimited);
+            return formData;
+        }
+    }
+
     public static class CertSubject implements Serializable {
 
         public static final long serialVersionUID = 1L;
@@ -553,6 +590,11 @@ public class Vicket implements Serializable  {
         if(smimeMessageBytes != null) {
             smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
         }
+        if(x509AnonymousCert != null) {
+            validFrom = x509AnonymousCert.getNotBefore();
+            validTo = x509AnonymousCert.getNotAfter();
+        }
+
     }
 
 }

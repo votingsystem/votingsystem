@@ -50,9 +50,7 @@ class CsrService {
     private void cancelVickets(Collection<Vicket> issuedVicketList, String reason) {
         for(Vicket vicket : issuedVicketList) {
             if(vicket.getId() != null) {
-                vicket.state = Vicket.State.CANCELLED
-                vicket.reason = reason
-                vicket.save()
+                vicket.setState(Vicket.State.CANCELLED).setReason(reason).save()
             }
         }
     }

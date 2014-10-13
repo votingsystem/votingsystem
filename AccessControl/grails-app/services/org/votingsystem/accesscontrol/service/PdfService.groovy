@@ -9,6 +9,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.ExceptionVS
 import org.votingsystem.util.FileUtils
 
 import java.security.KeyStore
@@ -65,19 +66,7 @@ class PdfService {
 			//Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken timeStampToken = pk.getTimeStampToken();
-            if(timeStampToken != null) {
-                ResponseVS timestampValidationResp = timeStampService.validateToken(timeStampToken, locale)
-                log.debug("checkSignature - timestampValidationResp - " +
-                        "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
-                if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-                    log.error("checkSignature - TIMESTAMP ERROR - ${timestampValidationResp.message}")
-                    return timestampValidationResp
-                }
-            } else {
-                msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-                log.error("ERROR - checkSignature - ${msg}")
-                return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
-            }
+            timeStampService.validateToken(timeStampToken)
             Calendar signDate = Calendar.getInstance();
             signDate.setTime(timeStampToken.getTimeStampInfo().getGenTime())
 			KeyStore keyStore = signatureVSService.getTrustedCertsKeyStore()
